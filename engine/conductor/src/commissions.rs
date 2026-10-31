@@ -56,12 +56,21 @@ fn offset(x: &Ratio, c: &Ratio, span: &Ratio) -> i64 {
 
 /// Read `members` of a galaxy centred at `centre` onto its disc plane. `None`
 /// with fewer than three distinct cells (no centre to find).
-pub fn plane(worlds: &[Polity], members: &[usize], centre: &(Ratio, Ratio, Ratio), span: &Ratio) -> Option<Plane> {
+pub fn plane(
+    worlds: &[Polity],
+    members: &[usize],
+    centre: &(Ratio, Ratio, Ratio),
+    span: &Ratio,
+) -> Option<Plane> {
     let at: Vec<(usize, i64, i64)> = members
         .iter()
         .map(|&i| {
             let p = &worlds[i].spec.position;
-            (i, offset(&p.0, &centre.0, span), offset(&p.1, &centre.1, span))
+            (
+                i,
+                offset(&p.0, &centre.0, span),
+                offset(&p.1, &centre.1, span),
+            )
         })
         .collect();
     let (min_r, max_r) = (at.iter().map(|a| a.1).min()?, at.iter().map(|a| a.1).max()?);
@@ -80,17 +89,27 @@ pub fn plane(worlds: &[Polity], members: &[usize], centre: &(Ratio, Ratio, Ratio
         cells[r * cols + c] = 1;
         placed.push((i, (r, c)));
     }
-    let distinct: std::collections::BTreeSet<(usize, usize)> = placed.iter().map(|(_, rc)| *rc).collect();
+    let distinct: std::collections::BTreeSet<(usize, usize)> =
+        placed.iter().map(|(_, rc)| *rc).collect();
     if distinct.len() < 3 {
         return None;
     }
-    Some(Plane { grid: Grid::new(rows, cols, cells)?, cells: placed })
+    Some(Plane {
+        grid: Grid::new(rows, cols, cells)?,
+        cells: placed,
+    })
 }
 
 /// The judge: the central bodies marked in hue 2.
 pub fn judged(g: &Grid) -> Grid {
     use solver_verify::project::{apply, Act, ObjectRule, Select};
-    apply(&ObjectRule { select: Select::Central, act: Act::Recolor(2) }, g)
+    apply(
+        &ObjectRule {
+            select: Select::Central,
+            act: Act::Recolor(2),
+        },
+        g,
+    )
 }
 
 /// The book: per galaxy, the closer's sigil and its word.
@@ -108,7 +127,9 @@ fn read_book(var_root: &Path) -> BTreeMap<String, (String, Program)> {
             Some(s)
         };
         let mut at = 0;
-        let (Some(galaxy), Some(sigil)) = (text(&mut at), text(&mut at)) else { continue };
+        let (Some(galaxy), Some(sigil)) = (text(&mut at), text(&mut at)) else {
+            continue;
+        };
         if let Some(program) = value.get(at..).and_then(solver_verify::program_from_bytes) {
             book.insert(galaxy, (sigil, program));
         }
@@ -119,7 +140,9 @@ fn read_book(var_root: &Path) -> BTreeMap<String, (String, Program)> {
 fn write_book(var_root: &Path, book: &BTreeMap<String, (String, Program)>) -> std::io::Result<()> {
     let mut out = Vec::new();
     for (galaxy, (sigil, program)) in book {
-        let Some(bytes) = solver_verify::program_bytes(program) else { continue };
+        let Some(bytes) = solver_verify::program_bytes(program) else {
+            continue;
+        };
         let mut value = Vec::new();
         for t in [galaxy, sigil] {
             value.extend_from_slice(&(t.len() as u16).to_le_bytes());
@@ -152,9 +175,19 @@ fn galaxies(worlds: &[Polity], book: &Ledger) -> BTreeMap<String, Vec<usize>> {
 /// commission word marks, while that word still closes the commission on this
 /// plane and is held by a line of the galaxy. `None` hands the hub back to the
 /// medoid.
-pub fn hub_of(worlds: &[Polity], var_root: &Path, core: &str, members: &[usize], centre: &(Ratio, Ratio, Ratio), span: &Ratio) -> Option<usize> {
+pub fn hub_of(
+    worlds: &[Polity],
+    var_root: &Path,
+    core: &str,
+    members: &[usize],
+    centre: &(Ratio, Ratio, Ratio),
+    span: &Ratio,
+) -> Option<usize> {
     let (sigil, program) = read_book(var_root).remove(core)?;
-    if !members.iter().any(|&i| worlds[i].spec.civilization.sigil == sigil) {
+    if !members
+        .iter()
+        .any(|&i| worlds[i].spec.civilization.sigil == sigil)
+    {
         return None;
     }
     let plane = plane(worlds, members, centre, span)?;
@@ -185,15 +218,22 @@ pub struct Commissioned {
 pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) -> Commissioned {
     let mut done = Commissioned::default();
     let span = ledger.universe_span();
-    let centres: BTreeMap<String, (Ratio, Ratio, Ratio)> = ledger.galaxies().into_iter().map(|g| (g.name, g.center)).collect();
-    let planes: Vec<(String, Vec<usize>, Plane)> = crate::profile::timed("commission:planes", || galaxies(worlds, ledger)
+    let centres: BTreeMap<String, (Ratio, Ratio, Ratio)> = ledger
+        .galaxies()
         .into_iter()
-        .filter_map(|(core, members)| {
-            let centre = centres.get(&core)?;
-            let plane = plane(worlds, &members, centre, &span)?;
-            Some((core, members, plane))
-        })
-        .collect());
+        .map(|g| (g.name, g.center))
+        .collect();
+    let planes: Vec<(String, Vec<usize>, Plane)> =
+        crate::profile::timed("commission:planes", || {
+            galaxies(worlds, ledger)
+                .into_iter()
+                .filter_map(|(core, members)| {
+                    let centre = centres.get(&core)?;
+                    let plane = plane(worlds, &members, centre, &span)?;
+                    Some((core, members, plane))
+                })
+                .collect()
+        });
     if planes.len() < 3 {
         return done; // two train pairs and a test, or no commission
     }
@@ -202,7 +242,9 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
     let expected = judged(&plane.grid);
     let mut book = read_book(var_root);
     if let Some((_, program)) = book.get(core) {
-        if solver_verify::grid::run(program, &plane.grid) == expected && hub_of(worlds, var_root, core, members, &centres[core], &span).is_some() {
+        if solver_verify::grid::run(program, &plane.grid) == expected
+            && hub_of(worlds, var_root, core, members, &centres[core], &span).is_some()
+        {
             return done; // closed, and its word still holds here
         }
     }
@@ -210,22 +252,35 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
     // pairs as the universe shows, so the order is determined, not chosen).
     let train: Vec<TaskPair> = (1..planes.len())
         .map(|k| &planes[(turn + k) % planes.len()].2)
-        .map(|p| TaskPair { input: p.grid.clone(), output: judged(&p.grid) })
+        .map(|p| TaskPair {
+            input: p.grid.clone(),
+            output: judged(&p.grid),
+        })
         .collect();
-    let task = Task { name: format!("commission:hub:{core}"), train, test_in: plane.grid.clone(), test_expected: Some(expected.clone()) };
+    let task = Task {
+        name: format!("commission:hub:{core}"),
+        train,
+        test_in: plane.grid.clone(),
+        test_expected: Some(expected.clone()),
+    };
     let mut sorted = members.clone();
     sorted.sort_by(|a, b| worlds[*a].spec.world_name.cmp(&worlds[*b].spec.world_name));
     let at = sorted[(beat as usize / planes.len()) % sorted.len()];
-    let program = crate::profile::timed("commission:think", || worlds[at].try_words(&task).or_else(|| {
-        let (mut basin, mut held) = (Vec::new(), Vec::new());
-        match solver::think_task_sensing(&task, &mut basin, &mut held, worlds[at].senses()) {
-            SolveRead::Solved { program, .. } => Some(program),
-            _ => None,
-        }
-    }));
+    let program = crate::profile::timed("commission:think", || {
+        worlds[at].try_words(&task).or_else(|| {
+            let (mut basin, mut held) = (Vec::new(), Vec::new());
+            match solver::think_task_sensing(&task, &mut basin, &mut held, worlds[at].senses()) {
+                SolveRead::Solved { program, .. } => Some(program),
+                _ => None,
+            }
+        })
+    });
     // The judge: the word must reproduce the exact answer on every pair.
     let Some(program) = program else { return done };
-    let holds = task.train.iter().all(|p| solver_verify::grid::run(&program, &p.input) == p.output)
+    let holds = task
+        .train
+        .iter()
+        .all(|p| solver_verify::grid::run(&program, &p.input) == p.output)
         && solver_verify::grid::run(&program, &plane.grid) == expected;
     if !holds {
         return done;
@@ -234,43 +289,91 @@ pub fn step(worlds: &mut [Polity], ledger: &Ledger, var_root: &Path, beat: u64) 
     // when exactly one (cut, extreme) survives the pairs; while several do, the
     // learner's first-admitted rule would be the developer's tie-break, not
     // the minds' deduction, and the commission stays open.
-    let pairs: Vec<(Grid, Grid)> = task.train.iter().map(|p| (p.input.clone(), p.output.clone())).collect();
+    let pairs: Vec<(Grid, Grid)> = task
+        .train
+        .iter()
+        .map(|p| (p.input.clone(), p.output.clone()))
+        .collect();
     let admitted = solver::percept::orders_admitted(&pairs).unwrap_or(0);
     let ordered = matches!(program.as_slice(), [solver_verify::grid::Op::Project(r)] if matches!(r.select, solver_verify::project::Select::Ordered { .. }));
     if ordered && admitted != 1 {
         done.ambiguous = Some((core.clone(), admitted));
         return done;
     }
-    worlds[at].adopt_word(solver::mint::MintedWord { orbit: solver::mint::word_orbit(&program), expansion: program.clone(), cited: Vec::new() });
-    book.insert(core.clone(), (worlds[at].spec.civilization.sigil.clone(), program.clone()));
+    worlds[at].adopt_word(solver::mint::MintedWord {
+        orbit: solver::mint::word_orbit(&program),
+        expansion: program.clone(),
+        cited: Vec::new(),
+    });
+    book.insert(
+        core.clone(),
+        (worlds[at].spec.civilization.sigil.clone(), program.clone()),
+    );
     let _ = write_book(var_root, &book);
     // The bounty: the closer's rung, shared by the galaxy's other open lines.
     // A commission is not on the forge's ladder: it pays the ladder's dearest
     // closure (the greatest `mint_bound`, read off the table).
-    let bounty = (0..=Difficulty::top()).map(|r| kernel::mint_bound(Some(r))).max().unwrap_or_else(|| ratio(0, 1));
+    let bounty = (0..=Difficulty::top())
+        .map(|r| kernel::mint_bound(Some(r)))
+        .max()
+        .unwrap_or_else(|| ratio(0, 1));
     let payers: Vec<usize> = members.iter().copied().filter(|&i| i != at).collect();
     let share = bounty / ratio(payers.len().max(1) as i64, 1);
     let mut arrived = ratio(0, 1);
     for (k, &i) in payers.iter().enumerate() {
-        let have = worlds[i].world.orb().map(|o| o.stamp_amount()).unwrap_or_else(|| ratio(0, 1));
+        let have = worlds[i]
+            .world
+            .orb()
+            .map(|o| o.stamp_amount())
+            .unwrap_or_else(|| ratio(0, 1));
         let pay = cfe::world::smelt_resource(&share.clone().min(have));
-        let Some(pay) = cfe::dop::Positive::new(pay) else { continue };
-        let distance = crate::spatial_l1(&worlds[i].spec.position, &worlds[at].spec.position, &span);
+        let Some(pay) = cfe::dop::Positive::new(pay) else {
+            continue;
+        };
+        let distance =
+            crate::spatial_l1(&worlds[i].spec.position, &worlds[at].spec.position, &span);
         let melt = cfe::world::route_melt(&worlds[i].world, &worlds[at].world, &distance);
         if melt >= ratio(1, 1) {
             continue;
         }
-        let deal = beat.saturating_mul(100_000).saturating_add(90_000 + k as u64);
-        let before = worlds[at].world.orb().map(|o| o.stamp_amount()).unwrap_or_else(|| ratio(0, 1));
+        let deal = beat
+            .saturating_mul(100_000)
+            .saturating_add(90_000 + k as u64);
+        let before = worlds[at]
+            .world
+            .orb()
+            .map(|o| o.stamp_amount())
+            .unwrap_or_else(|| ratio(0, 1));
         let (from, to) = crate::two_mut(worlds, i, at);
-        if cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, pay, deal, &melt).is_ok() {
-            arrived += worlds[at].world.orb().map(|o| o.stamp_amount()).unwrap_or_else(|| ratio(0, 1)) - before;
+        if cfe::world::stamp_aperture_transfer(
+            &mut from.world,
+            cfe::world::FIRST_ORB,
+            &mut to.world,
+            cfe::world::FIRST_ORB,
+            pay,
+            deal,
+            &melt,
+        )
+        .is_ok()
+        {
+            arrived += worlds[at]
+                .world
+                .orb()
+                .map(|o| o.stamp_amount())
+                .unwrap_or_else(|| ratio(0, 1))
+                - before;
         }
     }
     let by = match program.as_slice() {
         [solver_verify::grid::Op::Project(rule)] => format!("{:?}", rule.select),
         other => format!("a word of {} steps", other.len()),
     };
-    done.closed = Some((core.clone(), worlds[at].spec.world_name.clone(), arrived, by, admitted));
+    done.closed = Some((
+        core.clone(),
+        worlds[at].spec.world_name.clone(),
+        arrived,
+        by,
+        admitted,
+    ));
     done
 }

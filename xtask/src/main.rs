@@ -68,8 +68,14 @@ fn main() {
     failed.dedup();
 
     let known: Vec<&str> = reds::KNOWN_REDS.iter().map(|(s, _)| *s).collect();
-    let new_reds: Vec<&String> = failed.iter().filter(|s| !known.contains(&s.as_str())).collect();
-    let cured: Vec<&&str> = known.iter().filter(|s| !failed.iter().any(|f| f == **s)).collect();
+    let new_reds: Vec<&String> = failed
+        .iter()
+        .filter(|s| !known.contains(&s.as_str()))
+        .collect();
+    let cured: Vec<&&str> = known
+        .iter()
+        .filter(|s| !failed.iter().any(|f| f == **s))
+        .collect();
 
     println!("board: {ok} suites ok · {} failing", failed.len());
     for suite in &failed {
@@ -88,7 +94,10 @@ fn main() {
     if new_reds.is_empty() {
         println!("board: no new reds");
     } else {
-        println!("board: {} NEW red(s) — fix them or ledger them in review", new_reds.len());
+        println!(
+            "board: {} NEW red(s) — fix them or ledger them in review",
+            new_reds.len()
+        );
         std::process::exit(1);
     }
 }

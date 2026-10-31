@@ -67,13 +67,22 @@ impl Smith {
             .filter(|d| !d.is_zero())
             .collect()
     }
-
 }
 
 /// Identity matrix of order `n`.
 fn identity(n: usize) -> Mat {
     (0..n)
-        .map(|i| (0..n).map(|j| if i == j { BigInt::one() } else { BigInt::zero() }).collect())
+        .map(|i| {
+            (0..n)
+                .map(|j| {
+                    if i == j {
+                        BigInt::one()
+                    } else {
+                        BigInt::zero()
+                    }
+                })
+                .collect()
+        })
         .collect()
 }
 
@@ -231,7 +240,15 @@ pub fn smith_normal_form(a: &[Vec<BigInt>]) -> Smith {
         }
     }
 
-    Smith { rows, cols, d, u, u_inv, v, v_inv }
+    Smith {
+        rows,
+        cols,
+        d,
+        u,
+        u_inv,
+        v,
+        v_inv,
+    }
 }
 
 #[cfg(test)]

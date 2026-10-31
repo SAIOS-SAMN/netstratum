@@ -131,8 +131,16 @@ pub fn sigil_of(orb: &ColonyOrb, star: Option<StarClass>) -> Sigil {
         .collect();
     let g_resources = banked.iter().map(|(code, _)| *code).collect();
     Sigil {
-        address: Address { s_canonical, g_resources, thermal },
-        joint: Joint { zones, banked, thermal },
+        address: Address {
+            s_canonical,
+            g_resources,
+            thermal,
+        },
+        joint: Joint {
+            zones,
+            banked,
+            thermal,
+        },
     }
 }
 
@@ -165,7 +173,11 @@ fn thermal_class(orb: &ColonyOrb, star: Option<StarClass>) -> u8 {
     let (Some(site), Some(class)) = (&orb.thermal, star) else {
         return 0;
     };
-    match band_of(&t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value())) {
+    match band_of(&t_eq4(
+        &class.luminosity(),
+        site.albedo.value(),
+        site.orbit_r.value(),
+    )) {
         Some(SubstrateBand::Cryogenic) => 1,
         Some(SubstrateBand::Mesic) => 2,
         Some(SubstrateBand::HyperThermal) => 3,
@@ -185,7 +197,10 @@ impl SigilIndex {
         let mut buckets: BTreeMap<Address, Vec<(u64, Joint)>> = BTreeMap::new();
         for orb in orbs {
             let sigil = sigil_of(orb, star);
-            buckets.entry(sigil.address).or_default().push((orb.orb_id, sigil.joint));
+            buckets
+                .entry(sigil.address)
+                .or_default()
+                .push((orb.orb_id, sigil.joint));
         }
         SigilIndex { buckets }
     }
@@ -321,4 +336,3 @@ fn near_miss(orb: u64, probe: &Joint, candidate: &Joint) -> NearMiss {
 fn tile_of(row: u8, col: u8) -> u16 {
     row as u16 * GRID as u16 + col as u16
 }
-

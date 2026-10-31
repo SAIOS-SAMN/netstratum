@@ -44,12 +44,18 @@ impl Turning {
 
 /// A body's turning about its centre (none for a core: cores do not orbit).
 pub fn turning(b: &Body) -> Option<Turning> {
-    (b.period > ratio(0, 1)).then(|| Turning { period: b.period.clone(), phase0: ratio(0, 1) })
+    (b.period > ratio(0, 1)).then(|| Turning {
+        period: b.period.clone(),
+        phase0: ratio(0, 1),
+    })
 }
 
 /// The galaxy's year: the turning of the orbit at its half-mass radius.
 pub fn galactic_year(core: &Body) -> Option<(usize, Turning)> {
-    let bound = core.satellites.iter().fold(mass(&core.kept), |s, sys| s + mass(&sys.total()));
+    let bound = core
+        .satellites
+        .iter()
+        .fold(mass(&core.kept), |s, sys| s + mass(&sys.total()));
     let mut enclosed = mass(&core.kept);
     for (k, sys) in core.satellites.iter().enumerate() {
         enclosed += mass(&sys.total());
@@ -66,7 +72,9 @@ pub fn years_closing(u: &Universe, n: u64) -> Vec<u32> {
     u.cores
         .iter()
         .filter_map(|c| galactic_year(c).map(|(_, t)| (c.path[0] as u32, t)))
-        .filter(|(_, t)| n > 0 && matches!((t.turns(n), t.turns(n - 1)), (Some(a), Some(b)) if a > b))
+        .filter(|(_, t)| {
+            n > 0 && matches!((t.turns(n), t.turns(n - 1)), (Some(a), Some(b)) if a > b)
+        })
         .map(|(p, _)| p)
         .collect()
 }
@@ -77,10 +85,17 @@ mod tests {
 
     #[test]
     fn a_turning_counts_its_turns_exactly() {
-        let t = Turning { period: ratio(7, 2), phase0: ratio(0, 1) };
+        let t = Turning {
+            period: ratio(7, 2),
+            phase0: ratio(0, 1),
+        };
         assert_eq!(t.turns(3), Some(0));
         assert_eq!(t.turns(4), Some(1));
         assert_eq!(t.bell_of_turn(2), Some(7));
-        assert_eq!(t.phase(1_000_000_000).denom(), &num_bigint::BigInt::from(7), "the denominator never grows");
+        assert_eq!(
+            t.phase(1_000_000_000).denom(),
+            &num_bigint::BigInt::from(7),
+            "the denominator never grows"
+        );
     }
 }

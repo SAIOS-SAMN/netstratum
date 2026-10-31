@@ -59,7 +59,14 @@ fn within(a: &Ratio, b: &Ratio) -> Ratio {
 
 /// The distinct Zs of a composition.
 fn kinds(composition: Option<&Vec<(u16, Ratio)>>) -> BTreeSet<u16> {
-    composition.map(|c| c.iter().filter(|(_, a)| *a > ratio(0, 1)).map(|(z, _)| *z).collect()).unwrap_or_default()
+    composition
+        .map(|c| {
+            c.iter()
+                .filter(|(_, a)| *a > ratio(0, 1))
+                .map(|(z, _)| *z)
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 /// Read a line's gauges: `partners`, the era-1 world paths of the lines it
@@ -90,24 +97,45 @@ pub fn read(p: &Polity, partners: &[Vec<u64>]) -> Gauges {
             let mut reached: BTreeSet<Vec<u64>> = BTreeSet::new();
             reached.insert(here.to_vec());
             let mut known = kinds(p.spec.composition.as_ref());
-            for other in partners.iter().filter(|o| o.len() > 2 && o.first() == Some(&g)) {
+            for other in partners
+                .iter()
+                .filter(|o| o.len() > 2 && o.first() == Some(&g))
+            {
                 reached.insert(other.clone());
                 if other[1] != s {
                     reached.insert(other[..2].to_vec());
                 }
-                known.extend(kinds(crate::places::site(other).and_then(|site| site.composition).as_ref()));
+                known.extend(kinds(
+                    crate::places::site(other)
+                        .and_then(|site| site.composition)
+                        .as_ref(),
+                ));
             }
             let horizon = ratio(i64::try_from(reached.len()).unwrap_or(i64::MAX), 1);
-            (within(&horizon, &ratio(i64::try_from(sky).unwrap_or(i64::MAX), 1)), known.len())
+            (
+                within(&horizon, &ratio(i64::try_from(sky).unwrap_or(i64::MAX), 1)),
+                known.len(),
+            )
         }
         _ => (ratio(0, 1), kinds(p.spec.composition.as_ref()).len()),
     };
-    let record = w.orb().map_or(0, |o| o.elements.iter().filter(|(_, a)| *a > ratio(0, 1)).count());
+    let record = w.orb().map_or(0, |o| {
+        o.elements.iter().filter(|(_, a)| *a > ratio(0, 1)).count()
+    });
     let intelligence = within(&ratio(record as i64, 1), &ratio(knowable as i64, 1));
     let one = ratio(1, 1);
-    let product = (one.clone() + instinct.clone()) * (one.clone() + intelligence.clone()) * (one.clone() + sentience.clone()) * (one.clone() + consciousness.clone());
+    let product = (one.clone() + instinct.clone())
+        * (one.clone() + intelligence.clone())
+        * (one.clone() + sentience.clone())
+        * (one.clone() + consciousness.clone());
     let gamma = (product - one) / ratio(15, 1);
-    Gauges { instinct, intelligence, sentience, consciousness, gamma }
+    Gauges {
+        instinct,
+        intelligence,
+        sentience,
+        consciousness,
+        gamma,
+    }
 }
 
 #[cfg(test)]

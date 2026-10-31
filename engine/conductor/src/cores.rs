@@ -43,11 +43,15 @@ pub fn holdings(state: &Committed) -> BTreeMap<Holding, Ratio> {
 }
 
 /// Every holding's change from `before` to `after`, zero changes omitted.
-pub fn change(before: &BTreeMap<Holding, Ratio>, after: &BTreeMap<Holding, Ratio>) -> BTreeMap<Holding, Ratio> {
+pub fn change(
+    before: &BTreeMap<Holding, Ratio>,
+    after: &BTreeMap<Holding, Ratio>,
+) -> BTreeMap<Holding, Ratio> {
     let zero = ratio(0, 1);
     let mut d = BTreeMap::new();
     for key in before.keys().chain(after.keys()) {
-        let delta = after.get(key).unwrap_or(&zero).clone() - before.get(key).unwrap_or(&zero).clone();
+        let delta =
+            after.get(key).unwrap_or(&zero).clone() - before.get(key).unwrap_or(&zero).clone();
         if delta != zero {
             d.insert(*key, delta);
         }
@@ -74,14 +78,22 @@ pub enum Sunk {
     Lost(Vec<(Holding, Ratio)>),
     /// One leg of an aperture deal (signed: a sent leg negative), held until
     /// its other leg pairs with it.
-    Leg { deal: u64, holding: Holding, amount: Ratio },
+    Leg {
+        deal: u64,
+        holding: Holding,
+        amount: Ratio,
+    },
     /// Nothing reaches the core.
     None,
 }
 
 fn kind(event: &ClosureEvent) -> String {
     let debug = format!("{event:?}");
-    debug.split(|c: char| !c.is_ascii_alphanumeric()).next().unwrap_or("").to_string()
+    debug
+        .split(|c: char| !c.is_ascii_alphanumeric())
+        .next()
+        .unwrap_or("")
+        .to_string()
 }
 
 /// Does this deed's kind ever reach the core? (So the judge reads holdings
@@ -90,29 +102,48 @@ pub fn reaches(event: &ClosureEvent) -> bool {
     use ClosureEvent as E;
     matches!(
         event,
-        E::ApertureSent { .. } | E::ApertureReceived { .. } | E::StampApertureSent { .. } | E::StampApertureReceived { .. } | E::ZoneRazed { .. }
+        E::ApertureSent { .. }
+            | E::ApertureReceived { .. }
+            | E::StampApertureSent { .. }
+            | E::StampApertureReceived { .. }
+            | E::ZoneRazed { .. }
     ) || LOSS_KINDS.contains(&kind(event).as_str())
 }
 
 /// What one judged deed sinks, from the world's holdings `before` and `after`.
-pub fn sunk(event: &ClosureEvent, before: &BTreeMap<Holding, Ratio>, after: &BTreeMap<Holding, Ratio>) -> Sunk {
+pub fn sunk(
+    event: &ClosureEvent,
+    before: &BTreeMap<Holding, Ratio>,
+    after: &BTreeMap<Holding, Ratio>,
+) -> Sunk {
     use ClosureEvent as E;
     let zero = ratio(0, 1);
     let d = change(before, after);
     match event {
         E::ApertureSent { deal, resource, .. } | E::ApertureReceived { deal, resource, .. } => {
             let amount = d.get(&Some(*resource)).cloned().unwrap_or(zero);
-            Sunk::Leg { deal: *deal, holding: Some(*resource), amount }
+            Sunk::Leg {
+                deal: *deal,
+                holding: Some(*resource),
+                amount,
+            }
         }
         E::StampApertureSent { deal, .. } | E::StampApertureReceived { deal, .. } => {
             let amount = d.get(&None).cloned().unwrap_or(zero);
-            Sunk::Leg { deal: *deal, holding: None, amount }
+            Sunk::Leg {
+                deal: *deal,
+                holding: None,
+                amount,
+            }
         }
         // The raze returns half; the half it keeps is equal to it.
         E::ZoneRazed { .. } => Sunk::Lost(d.into_iter().filter(|(_, v)| *v > zero).collect()),
-        _ if LOSS_KINDS.contains(&kind(event).as_str()) => {
-            Sunk::Lost(d.into_iter().filter(|(_, v)| *v < zero).map(|(h, v)| (h, -v)).collect())
-        }
+        _ if LOSS_KINDS.contains(&kind(event).as_str()) => Sunk::Lost(
+            d.into_iter()
+                .filter(|(_, v)| *v < zero)
+                .map(|(h, v)| (h, -v))
+                .collect(),
+        ),
         _ => Sunk::None,
     }
 }
@@ -145,7 +176,11 @@ impl Pending {
             // without bound, 9.7M of 9.7M+2,968 legs (optimization sweep,
             // 2026-10-13), rewritten every beat.
             Sunk::Leg { amount, .. } if amount == ratio(0, 1) => false,
-            Sunk::Leg { deal, holding, amount } => {
+            Sunk::Leg {
+                deal,
+                holding,
+                amount,
+            } => {
                 self.legs.push((deal, holding, amount));
                 true
             }
@@ -173,7 +208,11 @@ impl Pending {
             out.push_str(&format!("L {} {}\n", code(h), cfe::ratio::ratio_str(v)));
         }
         for (deal, h, v) in &self.legs {
-            out.push_str(&format!("A {deal} {} {}\n", code(h), cfe::ratio::ratio_str(v)));
+            out.push_str(&format!(
+                "A {deal} {} {}\n",
+                code(h),
+                cfe::ratio::ratio_str(v)
+            ));
         }
         out
     }
@@ -207,7 +246,10 @@ impl Pending {
     }
 
     pub fn read(dir: &Path) -> Pending {
-        std::fs::read_to_string(dir.join("core.pending")).ok().and_then(|t| Pending::from_text(&t)).unwrap_or_default()
+        std::fs::read_to_string(dir.join("core.pending"))
+            .ok()
+            .and_then(|t| Pending::from_text(&t))
+            .unwrap_or_default()
     }
 
     pub fn write(&self, dir: &Path) -> std::io::Result<()> {
@@ -227,7 +269,9 @@ pub fn pair_legs(pending: &mut [&mut Pending]) -> Vec<(usize, Holding, Ratio)> {
     let mut deals: BTreeMap<(u64, Holding), (Ratio, Option<usize>, bool, bool)> = BTreeMap::new();
     for (i, p) in pending.iter().enumerate() {
         for (deal, h, v) in &p.legs {
-            let e = deals.entry((*deal, *h)).or_insert_with(|| (zero.clone(), None, false, false));
+            let e = deals
+                .entry((*deal, *h))
+                .or_insert_with(|| (zero.clone(), None, false, false));
             e.0 += v.clone();
             if *v < zero {
                 e.1 = Some(i);
@@ -271,21 +315,39 @@ mod tests {
     #[test]
     fn a_loss_sinks_what_fell_a_raze_sinks_the_half_it_keeps_a_build_sinks_nothing() {
         let iron = Some(Resource::Iron);
-        let upkeep = ClosureEvent::UpkeepSettled { orb_id: 1, resource: Resource::Iron, amount: ratio(3, 1) };
+        let upkeep = ClosureEvent::UpkeepSettled {
+            orb_id: 1,
+            resource: Resource::Iron,
+            amount: ratio(3, 1),
+        };
         assert!(reaches(&upkeep));
-        let Sunk::Lost(lost) = sunk(&upkeep, &held(&[(iron, 10)]), &held(&[(iron, 7)])) else { panic!("a loss") };
+        let Sunk::Lost(lost) = sunk(&upkeep, &held(&[(iron, 10)]), &held(&[(iron, 7)])) else {
+            panic!("a loss")
+        };
         assert_eq!(lost, vec![(iron, ratio(3, 1))]);
         // a loss kind that gained nothing sinks nothing on the gain
-        let Sunk::Lost(lost) = sunk(&upkeep, &held(&[(iron, 7)]), &held(&[(iron, 9)])) else { panic!("a loss") };
+        let Sunk::Lost(lost) = sunk(&upkeep, &held(&[(iron, 7)]), &held(&[(iron, 9)])) else {
+            panic!("a loss")
+        };
         assert!(lost.is_empty());
 
         let raze = ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 };
-        let Sunk::Lost(lost) = sunk(&raze, &held(&[(iron, 0)]), &held(&[(iron, 5)])) else { panic!("a raze") };
+        let Sunk::Lost(lost) = sunk(&raze, &held(&[(iron, 0)]), &held(&[(iron, 5)])) else {
+            panic!("a raze")
+        };
         assert_eq!(lost, vec![(iron, ratio(5, 1))], "the refund's twin");
 
-        let build = ClosureEvent::ZoneBuilt { orb_id: 1, tile: 4, kind: cfe::dop::ZoneKind::Extractor, base: None };
+        let build = ClosureEvent::ZoneBuilt {
+            orb_id: 1,
+            tile: 4,
+            kind: cfe::dop::ZoneKind::Extractor,
+            base: None,
+        };
         assert!(!reaches(&build), "a build's cost is embodied, not unmade");
-        assert!(matches!(sunk(&build, &held(&[(iron, 10)]), &held(&[(iron, 0)])), Sunk::None));
+        assert!(matches!(
+            sunk(&build, &held(&[(iron, 10)]), &held(&[(iron, 0)])),
+            Sunk::None
+        ));
     }
 
     #[test]
@@ -309,12 +371,25 @@ mod tests {
 
     #[test]
     fn the_pending_record_reads_back_whole() {
-        let mut p = Pending { through: 41, ..Pending::default() };
-        p.take(Sunk::Lost(vec![(Some(Resource::Biomass), ratio(7, 3)), (None, ratio(1, 2))]));
-        p.take(Sunk::Leg { deal: 900_017, holding: Some(Resource::Alloy), amount: ratio(-9, 4) });
+        let mut p = Pending {
+            through: 41,
+            ..Pending::default()
+        };
+        p.take(Sunk::Lost(vec![
+            (Some(Resource::Biomass), ratio(7, 3)),
+            (None, ratio(1, 2)),
+        ]));
+        p.take(Sunk::Leg {
+            deal: 900_017,
+            holding: Some(Resource::Alloy),
+            amount: ratio(-9, 4),
+        });
         assert_eq!(Pending::from_text(&p.to_text()), Some(p.clone()));
         p.deposited();
-        assert!(p.lost.is_empty() && p.legs.len() == 1, "a deposit clears the amounts, never the waiting legs");
+        assert!(
+            p.lost.is_empty() && p.legs.len() == 1,
+            "a deposit clears the amounts, never the waiting legs"
+        );
     }
 
     #[test]
@@ -324,15 +399,24 @@ mod tests {
         world.found("meridian").expect("founds");
         for resource in [Some(Resource::Iron), None] {
             let prior = world.committed();
-            world.receive_from_core("the-founding", resource, cfe::dop::positive(7, 4)).expect("arrives");
+            world
+                .receive_from_core("the-founding", resource, cfe::dop::positive(7, 4))
+                .expect("arrives");
             let receipt = world.chronicle().receipts().last().unwrap().clone();
             // the replay of the receipt is the live credit
             let mut stepper = Replayer::from_state(prior.clone());
             stepper.apply(&receipt);
             assert_eq!(stepper.state(), &world.committed());
-            assert_eq!(change(&holdings(&prior), &holdings(&world.committed())), [(resource, ratio(7, 4))].into_iter().collect());
+            assert_eq!(
+                change(&holdings(&prior), &holdings(&world.committed())),
+                [(resource, ratio(7, 4))].into_iter().collect()
+            );
             // the kernel admits it as a declared source
-            let step = kernel::Step { event: receipt.event().clone(), actor: cfe::world::SOVEREIGN, stamp: receipt.stamp() };
+            let step = kernel::Step {
+                event: receipt.event().clone(),
+                actor: cfe::world::SOVEREIGN,
+                stamp: receipt.stamp(),
+            };
             assert_eq!(kernel::admits(&prior, stepper.state(), &step), Ok(()));
             // a credit larger than it declares is refused
             let mut forged = stepper.state().clone();
@@ -346,14 +430,37 @@ mod tests {
 
     #[test]
     fn a_core_deposit_crosses_the_wire_whole() {
-        let events = [None, Some(Resource::Crystal)].into_iter().flat_map(|resource| {
-            [
-                ClosureEvent::CoreDeposited { core: "the-founding".into(), world: "forge-reach".into(), resource, amount: ratio(3535, 1024) },
-                ClosureEvent::CoreEmitted { core: "the-founding".into(), world: "forge-reach".into(), resource, amount: ratio(3, 1024) },
-                ClosureEvent::CoreReturned { orb_id: 1, core: "corebound-sky-1".into(), resource, amount: ratio(9, 2) },
-                ClosureEvent::CoreWordDeposited { core: "the-founding".into(), world: "tun-reach".into(), orbit: [4; 32], expansion: vec![2, 0, 1, 4], cited: vec![[5; 32], [6; 32]] },
-            ]
-        });
+        let events = [None, Some(Resource::Crystal)]
+            .into_iter()
+            .flat_map(|resource| {
+                [
+                    ClosureEvent::CoreDeposited {
+                        core: "the-founding".into(),
+                        world: "forge-reach".into(),
+                        resource,
+                        amount: ratio(3535, 1024),
+                    },
+                    ClosureEvent::CoreEmitted {
+                        core: "the-founding".into(),
+                        world: "forge-reach".into(),
+                        resource,
+                        amount: ratio(3, 1024),
+                    },
+                    ClosureEvent::CoreReturned {
+                        orb_id: 1,
+                        core: "corebound-sky-1".into(),
+                        resource,
+                        amount: ratio(9, 2),
+                    },
+                    ClosureEvent::CoreWordDeposited {
+                        core: "the-founding".into(),
+                        world: "tun-reach".into(),
+                        orbit: [4; 32],
+                        expansion: vec![2, 0, 1, 4],
+                        cited: vec![[5; 32], [6; 32]],
+                    },
+                ]
+            });
         for event in events {
             let mut c = cfe::vrp::Chronicle::new();
             c.append(event.clone(), 1, vec![]);

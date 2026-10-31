@@ -13,8 +13,8 @@
 //! the receipt that consumed the draw. No game system rolls its own
 //! randomness.
 
-use ratio::Ratio;
 use num_bigint::BigInt;
+use ratio::Ratio;
 
 /// A beacon anchored to one chronicle digest (the previous tick's
 /// receipt digest). All draws from the same digest and domain are

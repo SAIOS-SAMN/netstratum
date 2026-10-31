@@ -31,7 +31,11 @@ fn a_carried_world_boots_from_its_tail_alone() {
     sync_from(world.chronicle(), &carrier, &mut cursor).unwrap();
     let total = world.chronicle().total();
     world.drain_chronicle_to(total - 1);
-    assert_eq!(world.chronicle().receipts().len(), 1, "only the head stays held");
+    assert_eq!(
+        world.chronicle().receipts().len(),
+        1,
+        "only the head stays held"
+    );
     snapshot::write(&dir, &mut world, cursor.bytes()).unwrap();
 
     // The world plays on past its snapshot; the tail reaches the file.
@@ -40,11 +44,22 @@ fn a_carried_world_boots_from_its_tail_alone() {
 
     let (back, resumed, mut sync) = snapshot::boot(&dir).expect("boots");
     assert_eq!(resumed, Resumed::Carried { tail: 1 });
-    assert_eq!(back.chronicle().base(), total - 1, "the drained prefix stays on disk");
+    assert_eq!(
+        back.chronicle().base(),
+        total - 1,
+        "the drained prefix stays on disk"
+    );
     assert_eq!(back.chronicle().total(), world.chronicle().total());
     assert_eq!(back.chronicle().receipts(), world.chronicle().receipts());
-    assert!(back.chronicle().history().eq(world.chronicle().history()), "the same history");
-    assert_eq!(back.committed(), world.committed(), "the same carried state");
+    assert!(
+        back.chronicle().history().eq(world.chronicle().history()),
+        "the same history"
+    );
+    assert_eq!(
+        back.committed(),
+        world.committed(),
+        "the same carried state"
+    );
     assert_eq!(sync.receipts() as u64, world.chronicle().total());
 
     // Synced on from the boot's cursor, the file continues whole.
@@ -53,7 +68,10 @@ fn a_carried_world_boots_from_its_tail_alone() {
     assert_eq!(sync_from(back.chronicle(), &carrier, &mut sync).unwrap(), 1);
     let on_disk = load(&carrier).unwrap();
     assert_eq!(on_disk.total(), back.chronicle().total());
-    assert_eq!(on_disk.receipts().last(), back.chronicle().receipts().last());
+    assert_eq!(
+        on_disk.receipts().last(),
+        back.chronicle().receipts().last()
+    );
 }
 
 #[test]
@@ -70,8 +88,14 @@ fn the_digests_append_and_are_never_rewritten() {
     world.drain_chronicle_to(world.chronicle().total() - 1);
     snapshot::write(&dir, &mut world, cursor.bytes()).unwrap();
     let first = std::fs::read(&digests).unwrap();
-    assert_eq!(first.len() as u64, world.chronicle().annals().digest_count() * 32);
-    assert!(world.chronicle().annals().unfiled().is_empty(), "filed digests leave memory");
+    assert_eq!(
+        first.len() as u64,
+        world.chronicle().annals().digest_count() * 32
+    );
+    assert!(
+        world.chronicle().annals().unfiled().is_empty(),
+        "filed digests leave memory"
+    );
 
     // A second carry appends only the newly drained hashes.
     world.zone(9, ZoneKind::Habitat).expect("affordable");
@@ -80,8 +104,15 @@ fn the_digests_append_and_are_never_rewritten() {
     world.drain_chronicle_to(world.chronicle().total() - 1);
     snapshot::write(&dir, &mut world, cursor.bytes()).unwrap();
     let second = std::fs::read(&digests).unwrap();
-    assert_eq!(&second[..first.len()], &first[..], "nothing already written moves");
-    assert_eq!(second.len() as u64, world.chronicle().annals().digest_count() * 32);
+    assert_eq!(
+        &second[..first.len()],
+        &first[..],
+        "nothing already written moves"
+    );
+    assert_eq!(
+        second.len() as u64,
+        world.chronicle().annals().digest_count() * 32
+    );
 
     // A file left longer than its snapshot (a crash before the snapshot
     // landed) still boots: the snapshot takes only its own count.
@@ -90,8 +121,15 @@ fn the_digests_append_and_are_never_rewritten() {
     std::fs::write(&digests, &longer).unwrap();
     let (back, _, _) = snapshot::boot(&dir).expect("boots");
     assert_eq!(back.chronicle().annals(), world.chronicle().annals());
-    let cited = world.chronicle().annals().first_digest().expect("a filed digest");
-    assert!(back.chronicle().sealed(&cited), "a filed digest is still citable, read from the file");
+    let cited = world
+        .chronicle()
+        .annals()
+        .first_digest()
+        .expect("a filed digest");
+    assert!(
+        back.chronicle().sealed(&cited),
+        "a filed digest is still citable, read from the file"
+    );
     assert!(!back.chronicle().sealed(&[7u8; 32]));
     // and the next carry cuts it back before appending
     snapshot::write(&dir, &mut world, cursor.bytes()).unwrap();

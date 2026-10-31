@@ -7,7 +7,11 @@ impl World {
     pub fn new() -> Self {
         Self {
             clock: WorldClock::new(),
-            keepers: [Timekeeper { id: 0 }, Timekeeper { id: 1 }, Timekeeper { id: 2 }],
+            keepers: [
+                Timekeeper { id: 0 },
+                Timekeeper { id: 1 },
+                Timekeeper { id: 2 },
+            ],
             chronicle: Chronicle::new(),
             orbs: Vec::new(),
             entities: Vec::new(),
@@ -96,7 +100,11 @@ impl World {
             .unwrap_or(0);
         let mut world = World {
             clock: WorldClock::resume(stamp),
-            keepers: [Timekeeper { id: 0 }, Timekeeper { id: 1 }, Timekeeper { id: 2 }],
+            keepers: [
+                Timekeeper { id: 0 },
+                Timekeeper { id: 1 },
+                Timekeeper { id: 2 },
+            ],
             chronicle,
             orbs: committed.orbs,
             entities: committed.entities,
@@ -198,9 +206,15 @@ impl World {
         let settled = self.orbs.iter().all(|held| {
             held.famine.is_empty()
                 && !held.overheat
-                && demurrage_due(held, self.star, stamp, &ease_of(&self.techs, held.orb_id, stamp), &standing_supply(&self.orbs))
-                    .iter()
-                    .all(|(_, due)| *due == ratio(0, 1))
+                && demurrage_due(
+                    held,
+                    self.star,
+                    stamp,
+                    &ease_of(&self.techs, held.orb_id, stamp),
+                    &standing_supply(&self.orbs),
+                )
+                .iter()
+                .all(|(_, due)| *due == ratio(0, 1))
         }) && self
             .vent_pending
             .iter()
@@ -228,7 +242,12 @@ impl World {
                 .unwrap_or(true),
         };
         if !(settled && coherent && crossed && aligned) {
-            return Err(ActionRefused::ElevationBarred { settled, coherent, crossed, aligned });
+            return Err(ActionRefused::ElevationBarred {
+                settled,
+                coherent,
+                crossed,
+                aligned,
+            });
         }
         let gauge = wrap_gauge(self.gauge[0].clone() + delta);
         self.gauge[0] = gauge.clone();
@@ -357,7 +376,11 @@ impl World {
             .orbs
             .iter()
             .find(|orb| orb.orb_id == FIRST_ORB)
-            .map(|orb| crate::dop::metabolic_harvest(metabolism).1.min(orb.banked_amount(resource)))
+            .map(|orb| {
+                crate::dop::metabolic_harvest(metabolism)
+                    .1
+                    .min(orb.banked_amount(resource))
+            })
             .unwrap_or_else(|| crate::dop::metabolic_harvest(metabolism).1);
         if let Some(held) = self.orbs.iter_mut().find(|orb| orb.orb_id == FIRST_ORB) {
             held.bank(resource, -amount.clone());
@@ -401,7 +424,12 @@ impl World {
         if depth < ceiling {
             return Err(ActionRefused::DepthBelowCeiling { depth, ceiling });
         }
-        self.close(ClosureEvent::WardLifted { claimer: claimer.into() }, SOVEREIGN);
+        self.close(
+            ClosureEvent::WardLifted {
+                claimer: claimer.into(),
+            },
+            SOVEREIGN,
+        );
         self.warded = Some(true);
         Ok(())
     }
@@ -431,12 +459,8 @@ impl World {
         // Clade: open u16 table — not the fold (fold seed is legacy 0..=20
         // for display only; expansion lives in taxon_table, open-ended).
         use crate::vocabulary::{ceiling, Axis};
-        let class_max = ceiling(self.chronicle(), Axis::Class)
-            .max(crate::dop::class_ceiling());
-        if class == 0
-            || class > class_max
-            || !crate::almanac::taxon_table::is_lawful_clade(clade)
-        {
+        let class_max = ceiling(self.chronicle(), Axis::Class).max(crate::dop::class_ceiling());
+        if class == 0 || class > class_max || !crate::almanac::taxon_table::is_lawful_clade(clade) {
             return Err(ActionRefused::TaxonUnknown { class, clade });
         }
         self.close(ClosureEvent::TaxonSealed { class, clade }, actor);
@@ -466,11 +490,7 @@ impl World {
     pub fn chart_region(&mut self, seed: [u8; 32]) -> Result<(), ActionRefused> {
         self.chart_region_as(SOVEREIGN, seed)
     }
-    pub fn chart_region_as(
-        &mut self,
-        actor: u64,
-        seed: [u8; 32],
-    ) -> Result<(), ActionRefused> {
+    pub fn chart_region_as(&mut self, actor: u64, seed: [u8; 32]) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         if self.region_seed.is_some() {
             return Err(ActionRefused::RegionAlreadyCharted);
@@ -522,7 +542,10 @@ impl World {
         let line = line.as_str();
         let station = station.as_wire();
         self.close(
-            ClosureEvent::StationSeated { line: line.to_string(), station },
+            ClosureEvent::StationSeated {
+                line: line.to_string(),
+                station,
+            },
             actor,
         );
         match self.stations.iter_mut().find(|(held, _)| held == line) {
@@ -653,7 +676,9 @@ impl World {
         // Gate 1 — standing. Tier 0 only. `station_of` reads the chain,
         // so this cannot be granted by editing anything.
         if self.station_of(line) != Some(1) {
-            return Err(ActionRefused::MintWithoutStanding { line: line.to_string() });
+            return Err(ActionRefused::MintWithoutStanding {
+                line: line.to_string(),
+            });
         }
 
         // The trade law (§4a) died at the `TradingBinding` door — a
@@ -671,10 +696,13 @@ impl World {
         // The empty word died at the `Name` door; only the collision
         // fact remains — a mark that names two things defines neither.
         let word = word.as_str();
-        if standing.iter().any(|entry| {
-            entry.word == word || (!sigil.is_empty() && entry.sigil == sigil)
-        }) {
-            return Err(ActionRefused::MintNameTaken { word: word.to_string() });
+        if standing
+            .iter()
+            .any(|entry| entry.word == word || (!sigil.is_empty() && entry.sigil == sigil))
+        {
+            return Err(ActionRefused::MintNameTaken {
+                word: word.to_string(),
+            });
         }
 
         let code = standing.iter().map(|entry| entry.code).max().unwrap_or(0) + 1;
@@ -718,7 +746,9 @@ impl World {
     ) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         if self.station_of(line) != Some(1) {
-            return Err(ActionRefused::MintWithoutStanding { line: line.to_string() });
+            return Err(ActionRefused::MintWithoutStanding {
+                line: line.to_string(),
+            });
         }
         self.close(
             ClosureEvent::ParameterChartered {
@@ -739,6 +769,9 @@ impl World {
 
     /// The vertical axis: the seat a line holds, from the chain.
     pub fn station_of(&self, line: &str) -> Option<u8> {
-        self.stations.iter().find(|(held, _)| held == line).map(|(_, seat)| *seat)
+        self.stations
+            .iter()
+            .find(|(held, _)| held == line)
+            .map(|(_, seat)| *seat)
     }
 }

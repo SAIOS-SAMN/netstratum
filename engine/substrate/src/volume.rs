@@ -4,9 +4,9 @@
 //!
 //! One `VectorModule<F>` per sovereign manifold:
 //!
-//!   spatial:  VectorModule<Space>    polynomial over exact-rational_Space
-//!   temporal: VectorModule<Temporal> polynomial over exact-rational_Time
-//!   gauge:    VectorModule<Gauge>    polynomial over exact-rational_Gauge
+//!   spatial:  `VectorModule<Space>`    polynomial over exact-rational_Space
+//!   temporal: `VectorModule<Temporal>` polynomial over exact-rational_Time
+//!   gauge:    `VectorModule<Gauge>`    polynomial over exact-rational_Gauge
 //!
 //! Cross-field arithmetic is impossible at the type system. There is no
 //! flattening method — the algebra has no homomorphism from `Volume` to a
@@ -146,7 +146,6 @@ impl Volume {
         write_vector_module(&mut buf, &self.gauge);
         buf
     }
-
 }
 
 impl Default for Volume {

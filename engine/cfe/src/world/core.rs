@@ -10,15 +10,15 @@ impl World {
     /// (12_UNION §5a); the reading gates licensing and the shield,
     /// never the world's own life.
     pub fn knows_its_star(&self) -> bool {
-        self.techs.iter().any(|(_, condition, _, _)| *condition == 0)
+        self.techs
+            .iter()
+            .any(|(_, condition, _, _)| *condition == 0)
     }
     /// WORLDSHAPE-1: is the BASE-7 stack complete — the stellar leap plus
     /// all five crystallized conditions? Six earned nodes; the gifted
     /// seventh (worldshaping) completes base-7. Derived, never stored.
     pub fn base_seven_complete(&self) -> bool {
-        (0u8..=5).all(|condition| {
-            self.techs.iter().any(|(_, held, _, _)| *held == condition)
-        })
+        (0u8..=5).all(|condition| self.techs.iter().any(|(_, held, _, _)| *held == condition))
     }
     /// WANT-1: the struck cognitive wants — (orb, kind).
     pub fn wants(&self) -> &[(u64, u8)] {
@@ -50,11 +50,16 @@ impl World {
         use std::io::Write;
         let annals = self.chronicle.annals_mut();
         let (_, filed) = annals.filed();
-        let file = std::fs::OpenOptions::new().create(true).append(true).open(path)?;
+        let file = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(path)?;
         let len = file.metadata()?.len();
         if len != filed * 32 {
             if len < filed * 32 {
-                return Err(std::io::Error::other("the digest file is shorter than what it has filed"));
+                return Err(std::io::Error::other(
+                    "the digest file is shorter than what it has filed",
+                ));
             }
             file.set_len(filed * 32)?;
         }
@@ -83,7 +88,10 @@ impl World {
     /// names its partner by this, so the pair is identified by the same
     /// string on both books.
     pub fn name(&self) -> &str {
-        self.orbs.first().map(|held| held.name.as_str()).unwrap_or("")
+        self.orbs
+            .first()
+            .map(|held| held.name.as_str())
+            .unwrap_or("")
     }
     /// The genesis orb (convenience for the single-planet reads).
     pub fn orb(&self) -> Option<&ColonyOrb> {
@@ -117,7 +125,11 @@ impl World {
     /// Register an agent contained by `principal`, the sovereign or another
     /// agent. A contained agent acts only within its own grants and within
     /// every principal's above it (`ipsal::permits_in`).
-    pub fn register_agent_under(&mut self, principal: u64, handle: &str) -> Result<u64, ActionRefused> {
+    pub fn register_agent_under(
+        &mut self,
+        principal: u64,
+        handle: &str,
+    ) -> Result<u64, ActionRefused> {
         if self.entities.is_empty() {
             return Err(ActionRefused::NoSuchEntity { entity: SOVEREIGN });
         }
@@ -129,7 +141,13 @@ impl World {
                 handle: handle.to_string(),
             });
         }
-        let entity_id = self.entities.iter().map(|held| held.entity_id).max().unwrap_or(0) + 1;
+        let entity_id = self
+            .entities
+            .iter()
+            .map(|held| held.entity_id)
+            .max()
+            .unwrap_or(0)
+            + 1;
         self.entities.push(Entity {
             entity_id,
             handle: handle.to_string(),
@@ -190,7 +208,10 @@ impl World {
             .ok_or(ActionRefused::NoSuchEntity { entity: actor })?;
         match crate::ipsal::permits_in(&self.entities, actor, scope) {
             true => Ok(()),
-            false => Err(ActionRefused::NotPermitted { entity: actor, scope }),
+            false => Err(ActionRefused::NotPermitted {
+                entity: actor,
+                scope,
+            }),
         }
     }
     /// Raze on the genesis orb as the sovereign.
@@ -204,8 +225,7 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        let held = peel(&mut self.orbs, orb)
-            .ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         let at = held
             .zones
             .iter()
@@ -286,8 +306,12 @@ impl World {
         // met these deeds afterwards, and a 60-beat era banked mints it
         // then refused — the drift the escrow makes unreachable rather
         // than merely visible.
-        let event =
-            ClosureEvent::DiscoveryMinted { orb_id: orb, resource, amount: amount.clone(), work };
+        let event = ClosureEvent::DiscoveryMinted {
+            orb_id: orb,
+            resource,
+            amount: amount.clone(),
+            work,
+        };
         let prior = self.committed();
         let mut candidate = prior.clone();
         if let Some(held) = candidate.orbs.iter_mut().find(|held| held.orb_id == orb) {
@@ -531,7 +555,11 @@ impl World {
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
         }
-        let famished = self.orbs.iter().filter(|held| !held.famine.is_empty()).count();
+        let famished = self
+            .orbs
+            .iter()
+            .filter(|held| !held.famine.is_empty())
+            .count();
         if famished < self.orbs.len() {
             return Err(ActionRefused::LineStillLiving {
                 orbs: self.orbs.len(),
@@ -545,7 +573,9 @@ impl World {
         // chronicle forever.
         self.genesis = None;
         self.close(
-            ClosureEvent::LineSucceeded { successor: successor.to_string() },
+            ClosureEvent::LineSucceeded {
+                successor: successor.to_string(),
+            },
             actor,
         );
         Ok(())
@@ -600,7 +630,12 @@ impl World {
             None => held.bank_stamp(amount.clone()),
         }
         self.close(
-            ClosureEvent::CoreReturned { orb_id, core: core.to_string(), resource, amount },
+            ClosureEvent::CoreReturned {
+                orb_id,
+                core: core.to_string(),
+                resource,
+                amount,
+            },
             super::SOVEREIGN,
         );
         Ok(())

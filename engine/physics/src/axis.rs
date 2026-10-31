@@ -5,8 +5,8 @@
 //! coefficient is ever truncated. Canonical form: no trailing zeros, so
 //! equal values compare equal byte-for-byte (the CFE canonicality law).
 
-use ratio::Ratio;
 use num_traits::Zero;
+use ratio::Ratio;
 
 /// The three sovereign axes of a flow state. Cross-axis leakage is
 /// impossible at the type level: every operation is per-axis.

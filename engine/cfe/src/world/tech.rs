@@ -13,8 +13,7 @@ impl World {
     /// mutates once minted, so today's fold carries the binding any
     /// adoption stamp saw — the ordering law holds for free.
     pub(super) fn adopted_practice_bindings(&self) -> Vec<Vec<(u8, Ratio)>> {
-        let standing =
-            crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Practice);
+        let standing = crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Practice);
         self.practices
             .iter()
             .map(|code| {
@@ -76,7 +75,10 @@ impl World {
         // (`node_kind`), so a sixth condition landing moves this gate
         // by itself.
         use crate::world::survey::{node_kind, NodeKind};
-        if !matches!(node_kind(condition), NodeKind::Crystallized | NodeKind::Crown) {
+        if !matches!(
+            node_kind(condition),
+            NodeKind::Crystallized | NodeKind::Crown
+        ) {
             return Err(ActionRefused::NodeUnlicensable { condition });
         }
         if condition == 6 && !self.base_seven_complete() {
@@ -85,7 +87,11 @@ impl World {
         if peek(&self.orbs, orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
-        if self.techs.iter().any(|(o, c, _, _)| *o == orb && *c == condition) {
+        if self
+            .techs
+            .iter()
+            .any(|(o, c, _, _)| *o == orb && *c == condition)
+        {
             return Err(ActionRefused::NodeAlreadyHeld { condition });
         }
         let mut seed = b"tech.granted".to_vec();
@@ -171,7 +177,11 @@ impl World {
         }
         self.instruments.push((orb, tech_hash, condition));
         self.close(
-            ClosureEvent::InstrumentForged { orb_id: orb, tech_hash, grade: condition },
+            ClosureEvent::InstrumentForged {
+                orb_id: orb,
+                tech_hash,
+                grade: condition,
+            },
             SOVEREIGN,
         );
         Ok(())
@@ -183,7 +193,13 @@ impl World {
     /// TECH-1b (10 §3): does a condition hold, read from the deposit
     /// sheet + committed state? Thresholds stay the table's
     /// placeholder parameters.
-    pub(super) fn condition_holds(&self, orb: u64, condition: u8, now: u64, sheet: &CrystalDeposit) -> bool {
+    pub(super) fn condition_holds(
+        &self,
+        orb: u64,
+        condition: u8,
+        now: u64,
+        sheet: &CrystalDeposit,
+    ) -> bool {
         let Some(held) = peek(&self.orbs, orb) else {
             return false;
         };
@@ -200,9 +216,15 @@ impl World {
                 .is_some_and(|struck| now.saturating_sub(struck) >= 240),
             3 => {
                 held.banked_amount(Resource::Sink) >= ratio(100, 1)
-                    && demurrage_due(held, self.star, now, &ease_of(&self.techs, orb, now), &standing_supply(&self.orbs))
-                        .iter()
-                        .all(|(_, due)| *due == ratio(0, 1))
+                    && demurrage_due(
+                        held,
+                        self.star,
+                        now,
+                        &ease_of(&self.techs, orb, now),
+                        &standing_supply(&self.orbs),
+                    )
+                    .iter()
+                    .all(|(_, due)| *due == ratio(0, 1))
             }
             4 => {
                 let floor = now.saturating_sub(self.deposit_window());
@@ -229,10 +251,11 @@ impl World {
                 if active == 0 {
                     return false;
                 }
-                let bill_year =
-                    crate::parameter::of(self.chronicle(), crate::parameter::Parameter::HeatingPerZone)
-                        * ratio(active, 1)
-                        * ratio(60, 1);
+                let bill_year = crate::parameter::of(
+                    self.chronicle(),
+                    crate::parameter::Parameter::HeatingPerZone,
+                ) * ratio(active, 1)
+                    * ratio(60, 1);
                 let cold = match (self.star, &held.thermal) {
                     (Some(class), Some(site)) => {
                         let t4 = crate::thermal::t_eq4(
@@ -280,14 +303,20 @@ impl World {
         // of congruence — the degree of agreement thresholded to a mint; the graded
         // residual measure is the evolution once its live behaviour is observed.)
         if cited.len() < 2 {
-            return Err(ActionRefused::SolverWordUnconfirmed { confirms: cited.len() as u8 });
+            return Err(ActionRefused::SolverWordUnconfirmed {
+                confirms: cited.len() as u8,
+            });
         }
         let known = self.chronicle.minted_word(&orbit);
         if known {
             return Err(ActionRefused::SolverWordKnown { orbit });
         }
         self.close(
-            ClosureEvent::SolverWordMinted { orbit, expansion, cited },
+            ClosureEvent::SolverWordMinted {
+                orbit,
+                expansion,
+                cited,
+            },
             actor,
         );
         Ok(())
@@ -348,7 +377,12 @@ impl World {
             return Err(ActionRefused::RecipeAlreadyBuilt { orb_id });
         }
         self.close(
-            ClosureEvent::RecipeBuilt { orb_id, inputs, role, yield_of_role },
+            ClosureEvent::RecipeBuilt {
+                orb_id,
+                inputs,
+                role,
+                yield_of_role,
+            },
             actor,
         );
         Ok(())
@@ -378,7 +412,11 @@ impl World {
             return Err(ActionRefused::KnowledgeKnown { signature });
         }
         self.close(
-            ClosureEvent::KnowledgeConverged { signature, mass, hardness },
+            ClosureEvent::KnowledgeConverged {
+                signature,
+                mass,
+                hardness,
+            },
             actor,
         );
         Ok(())
@@ -409,7 +447,11 @@ impl World {
             return Err(ActionRefused::SolverWordKnown { orbit });
         }
         self.close(
-            ClosureEvent::KnowledgeLicensed { orbit, expansion, cited },
+            ClosureEvent::KnowledgeLicensed {
+                orbit,
+                expansion,
+                cited,
+            },
             actor,
         );
         Ok(())
@@ -430,14 +472,11 @@ impl World {
         // chain, never a compiled range. The 1..=5 guard died here;
         // the arm survives because what the fold holds is not
         // decidable from the code alone (the UnknownAxisValue family).
-        let binding = crate::vocabulary::fold(
-            self.chronicle(),
-            crate::vocabulary::Axis::Practice,
-        )
-        .into_iter()
-        .find(|entry| entry.code == practice)
-        .map(|entry| entry.binding)
-        .ok_or(ActionRefused::PracticeUnknown { practice })?;
+        let binding = crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Practice)
+            .into_iter()
+            .find(|entry| entry.code == practice)
+            .map(|entry| entry.binding)
+            .ok_or(ActionRefused::PracticeUnknown { practice })?;
         if self.practices.contains(&practice) {
             return Err(ActionRefused::PracticeAlreadyAdopted { practice });
         }

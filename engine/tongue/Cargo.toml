@@ -16,3 +16,6 @@ num-rational.workspace = true
 [dev-dependencies]
 cfe = { path = "../cfe" }
 solver-verify = { path = "../solver-verify" }
+
+[lints]
+workspace = true

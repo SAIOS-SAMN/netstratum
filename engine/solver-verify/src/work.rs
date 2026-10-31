@@ -25,7 +25,7 @@
 //!
 //! The op-code vocabulary below is wire law — append-only, one code
 //! one meaning forever: 1 Rotate90 · 2 Rotate180 · 3 Rotate270 ·
-//! 4 FlipH · 5 FlipV · 6 Transpose · 7 Recolor+map[10] ·
+//! 4 FlipH · 5 FlipV · 6 Transpose · 7 Recolor+map\[10\] ·
 //! 8 Object+objop (1 KeepLargest · 2 KeepSmallest · 3 DeleteLargest ·
 //! 4 CropLargest · 5 CropContent · 6 PaintAllLikeLargest ·
 //! 7 PaintAllMajority · 8 GravityDown) · 9 Tile+down,across,odd_row,
@@ -153,9 +153,14 @@ impl CarriedProof {
     /// Seal a solve of the task forged from `digest` at `difficulty`: the
     /// forge's samples, both words and both derivations. `None` when the
     /// program does not close the task or a dimension exceeds the wire.
-    pub fn seal(forge_digest: [u8; 32], difficulty: Difficulty, program: &Program) -> Option<CarriedProof> {
-        let inputs: Vec<Grid> =
-            (0..=difficulty.train_pairs).map(|pair| forge_input(forge_digest, difficulty, pair)).collect();
+    pub fn seal(
+        forge_digest: [u8; 32],
+        difficulty: Difficulty,
+        program: &Program,
+    ) -> Option<CarriedProof> {
+        let inputs: Vec<Grid> = (0..=difficulty.train_pairs)
+            .map(|pair| forge_input(forge_digest, difficulty, pair))
+            .collect();
         let forge_word = forge_word(forge_digest, difficulty);
         let (forge_derivation, outputs) = derive(&forge_word, &inputs)?;
         let (derivation, closed) = derive(program, &inputs)?;
@@ -347,7 +352,12 @@ fn put_op(op: &Op, out: &mut Vec<u8>) -> Option<()> {
             out.push(8);
             out.push(objop_code(obj));
         }
-        Op::Tile { down, across, odd_row, odd_col } => {
+        Op::Tile {
+            down,
+            across,
+            odd_row,
+            odd_col,
+        } => {
             out.push(9);
             out.push(u8::try_from(*down).ok()?);
             out.push(u8::try_from(*across).ok()?);
@@ -578,7 +588,10 @@ impl<'a> Reader<'a> {
                 odd_row: mirror_from(self.byte()?)?,
                 odd_col: mirror_from(self.byte()?)?,
             },
-            10 => Op::Shift { dr: i8::from_le_bytes([self.byte()?]), dc: i8::from_le_bytes([self.byte()?]) },
+            10 => Op::Shift {
+                dr: i8::from_le_bytes([self.byte()?]),
+                dc: i8::from_le_bytes([self.byte()?]),
+            },
             11 => {
                 let (up, down) = (self.byte()?, self.byte()?);
                 // One of the two is 1, and neither is 0: a dilator is one scale.
@@ -622,7 +635,10 @@ impl<'a> Reader<'a> {
                 Select::Shape(cells)
             }
             7 => Select::Not(Box::new(self.select(depth + 1)?)),
-            8 => Select::And(Box::new(self.select(depth + 1)?), Box::new(self.select(depth + 1)?)),
+            8 => Select::And(
+                Box::new(self.select(depth + 1)?),
+                Box::new(self.select(depth + 1)?),
+            ),
             9 => Select::Central,
             10 => {
                 use crate::project::{Cut, Extreme};
@@ -688,7 +704,11 @@ impl<'a> Reader<'a> {
         for _ in 0..step_count {
             steps.push(self.digest()?);
         }
-        Some(SolveCertificate { genesis, steps, output: self.digest()? })
+        Some(SolveCertificate {
+            genesis,
+            steps,
+            output: self.digest()?,
+        })
     }
 }
 
@@ -799,7 +819,16 @@ pub fn decode_carried_work(bytes: &[u8]) -> Option<CarriedProof> {
     if r.at != bytes.len() {
         return None;
     }
-    Some(CarriedProof { forge_digest, difficulty, inputs, forge_word, forge_derivation, outputs, program, derivation })
+    Some(CarriedProof {
+        forge_digest,
+        difficulty,
+        inputs,
+        forge_word,
+        forge_derivation,
+        outputs,
+        program,
+        derivation,
+    })
 }
 
 /// **The CARRIED-DERIVATION judge** (schema v4, Concordance 4.4 annex). Every
@@ -833,7 +862,9 @@ pub fn verify_carried_work(bytes: &[u8]) -> Result<Difficulty, WorkBroken> {
     let forged = walk(&proof.forge_derivation, &proof.forge_word, &proof.inputs)
         .map_err(|at_step| WorkBroken::ForgeDiverged { at_step })?;
     if forged != proof.outputs {
-        return Err(WorkBroken::ForgeDiverged { at_step: proof.forge_word.len() + 1 });
+        return Err(WorkBroken::ForgeDiverged {
+            at_step: proof.forge_word.len() + 1,
+        });
     }
     // 3. The solve: its derivation, walked to the same outputs.
     let closed = walk(&proof.derivation, &proof.program, &proof.inputs)
@@ -908,7 +939,11 @@ pub fn decode_volume_work(bytes: &[u8]) -> Option<VolumeProof> {
         difficulty,
         program,
         output,
-        certificate: VolumeCertificate { genesis, steps, output: cert_output },
+        certificate: VolumeCertificate {
+            genesis,
+            steps,
+            output: cert_output,
+        },
     })
 }
 
@@ -952,9 +987,7 @@ pub fn verify_volume_work(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
     // 3. Re-chain.
     match verify_volume_certificate(&proof.certificate, &task, &proof.program, &proof.output) {
         VolumeCertificateRead::Intact => Ok(WorkClass::Volumetric(proof.difficulty)),
-        VolumeCertificateRead::Diverged { at_step } => {
-            Err(WorkBroken::ChainDiverged { at_step })
-        }
+        VolumeCertificateRead::Diverged { at_step } => Err(WorkBroken::ChainDiverged { at_step }),
     }
 }
 
@@ -1080,7 +1113,9 @@ pub fn verify_corpus_work(bytes: &[u8]) -> Result<WorkClass, WorkBroken> {
     }
     // 3. Re-chain.
     match verify_certificate(&proof.certificate, &task, &proof.program, &proof.output) {
-        CertificateRead::Intact => Ok(WorkClass::Corpus { task_id: proof.task_id }),
+        CertificateRead::Intact => Ok(WorkClass::Corpus {
+            task_id: proof.task_id,
+        }),
         CertificateRead::Diverged { at_step } => Err(WorkBroken::ChainDiverged { at_step }),
     }
 }

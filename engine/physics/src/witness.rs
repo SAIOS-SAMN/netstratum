@@ -73,9 +73,7 @@ pub fn step_witness(origin: &FlowState, event: &FlowEvent, k_step: u64) -> StepW
             let origin_psi = origin.psi();
             let failed = [Axis::Spatial, Axis::Temporal, Axis::Gauge]
                 .into_iter()
-                .find(|&axis| {
-                    !axis_returned(origin_psi.map(|p| p.axis(axis)), after.axis(axis))
-                });
+                .find(|&axis| !axis_returned(origin_psi.map(|p| p.axis(axis)), after.axis(axis)));
             match failed {
                 None => InverseStanding::Verified,
                 Some(axis) => InverseStanding::Violated { axis },

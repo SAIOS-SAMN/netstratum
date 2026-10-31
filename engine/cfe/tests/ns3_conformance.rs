@@ -37,10 +37,8 @@ fn the_ns3_vectors_reproduce_from_the_stated_layout() {
         1,
         0,
         &receipt_0,
-        format!(
-            "Crystal {{ rule: {RULE}, vantage_provenance: [Provenance(\"arc_3c9b0459\")] }}"
-        )
-        .as_bytes(),
+        format!("Crystal {{ rule: {RULE}, vantage_provenance: [Provenance(\"arc_3c9b0459\")] }}")
+            .as_bytes(),
         &[11],
     );
     assert_eq!(
@@ -179,7 +177,8 @@ fn the_chain_links_and_names_its_first_break() {
         "sequence 0 carries the genesis parent"
     );
     assert_eq!(
-        chronicle.receipts()[1].parent(), chronicle.receipts()[0].own(),
+        chronicle.receipts()[1].parent(),
+        chronicle.receipts()[0].own(),
         "the chain is parent-linked"
     );
 

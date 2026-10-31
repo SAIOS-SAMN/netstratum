@@ -105,18 +105,36 @@ pub fn identity(kind: &str, name: &str) -> [u8; 32] {
 /// head is `prefix` ([`crate::line`]), signed by `key`. Both lists are
 /// sorted by identity, as continuity requires; the caller hands each
 /// identity once.
-pub fn fold(key: &ed25519_dalek::SigningKey, prefix: [u8; 32], mut rows: Vec<Net>, mut declared: Vec<Net>) -> SignedFold {
+pub fn fold(
+    key: &ed25519_dalek::SigningKey,
+    prefix: [u8; 32],
+    mut rows: Vec<Net>,
+    mut declared: Vec<Net>,
+) -> SignedFold {
     rows.sort_by_key(|(who, _)| *who);
     declared.sort_by_key(|(who, _)| *who);
-    TierFold { tier: key.verifying_key().to_bytes(), prefix, rows, declared, children: Vec::new(), handoffs: Vec::new() }.sign(key)
+    TierFold {
+        tier: key.verifying_key().to_bytes(),
+        prefix,
+        rows,
+        declared,
+        children: Vec::new(),
+        handoffs: Vec::new(),
+    }
+    .sign(key)
 }
 
 impl Uplink {
     /// 78.125 — a fold's finality at the court's head, by its receipt's
     /// stamp, and (78.129) whether its tier was bonded. A reading: nothing is
     /// sealed by it.
-    pub fn finality(&self, at: mycelium::chronometry::Stamp) -> io::Result<(mycelium::anastome::dialogue::challenge::Finality, bool)> {
-        self.session.finality(FoldAt::sealed(at)).map(|r| (r.finality, r.bonded))
+    pub fn finality(
+        &self,
+        at: mycelium::chronometry::Stamp,
+    ) -> io::Result<(mycelium::anastome::dialogue::challenge::Finality, bool)> {
+        self.session
+            .finality(FoldAt::sealed(at))
+            .map(|r| (r.finality, r.bonded))
     }
 
     /// 78.125 — the tier's LINE head on the court: where its next fold's span
@@ -129,12 +147,21 @@ impl Uplink {
     /// The startup check (coordinator 2026-10-07): the local line's head must
     /// equal the court's for this tier before any fold is sent. `Err` names
     /// both heads when they disagree; nothing is sent on a disagreement.
-    pub fn check_line_head(&self, key: &ed25519_dalek::SigningKey, local: [u8; 32]) -> io::Result<()> {
+    pub fn check_line_head(
+        &self,
+        key: &ed25519_dalek::SigningKey,
+        local: [u8; 32],
+    ) -> io::Result<()> {
         let court = self.line_head(key.verifying_key().to_bytes())?;
         if court == local {
             return Ok(());
         }
-        let hex = |h: &[u8; 32]| h.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>();
+        let hex = |h: &[u8; 32]| {
+            h.iter()
+                .take(8)
+                .map(|b| format!("{b:02x}"))
+                .collect::<String>()
+        };
         Err(io::Error::new(
             io::ErrorKind::InvalidData,
             format!("the court's line head {}… is not this line's {}…; refusing to fold until they agree", hex(&court), hex(&local)),
@@ -154,7 +181,15 @@ impl Uplink {
     ) -> io::Result<mycelium::anastome::dialogue::challenge::Challenged> {
         use mycelium::anastome::dialogue::challenge::{Challenge, Challenged};
         let (rows, declared) = crate::line::fold_of(&entries);
-        let opened = self.session.challenge(&Challenge::Open { fold: FoldAt::sealed(at), rows, declared, children: Vec::new() }.sign(key))?;
+        let opened = self.session.challenge(
+            &Challenge::Open {
+                fold: FoldAt::sealed(at),
+                rows,
+                declared,
+                children: Vec::new(),
+            }
+            .sign(key),
+        )?;
         if !matches!(opened, Challenged::Streaming { .. }) {
             return Ok(opened);
         }
@@ -175,8 +210,17 @@ impl Uplink {
             parts.push(part);
         }
         for entries in parts {
-            last = self.session.challenge(&Challenge::Part { fold: FoldAt::sealed(at), entries }.sign(key))?;
-            if !matches!(last, Challenged::Streaming { .. } | Challenged::Upheld { .. }) {
+            last = self.session.challenge(
+                &Challenge::Part {
+                    fold: FoldAt::sealed(at),
+                    entries,
+                }
+                .sign(key),
+            )?;
+            if !matches!(
+                last,
+                Challenged::Streaming { .. } | Challenged::Upheld { .. }
+            ) {
                 break;
             }
         }
@@ -200,7 +244,11 @@ impl Uplink {
             .collect::<io::Result<Vec<_>>>()?;
         tiers.sort_unstable();
         tiers.dedup();
-        let signed = DomainGenesis { domain: domain.verifying_key().to_bytes(), tiers }.sign(&domain);
+        let signed = DomainGenesis {
+            domain: domain.verifying_key().to_bytes(),
+            tiers,
+        }
+        .sign(&domain);
         self.session.found_domain(&signed)
     }
 
@@ -211,7 +259,12 @@ impl Uplink {
     /// misstated the universe; the era-0 L1 torus is retired) of radius `radius`
     /// (`universe_radius`). The commitment is the universe's Big Bang: the
     /// own-hash of its `UniverseFounded` receipt (its seed). Never edited.
-    pub fn originate(&self, home: &Path, seed: [u8; 32], radius: (u64, u64)) -> io::Result<Founded> {
+    pub fn originate(
+        &self,
+        home: &Path,
+        seed: [u8; 32],
+        radius: (u64, u64),
+    ) -> io::Result<Founded> {
         use mycelium::anastome::dialogue::domain::Origin;
         use mycelium::anastome::dialogue::universe::{Genesis, Geometry, Parent};
         let domain = tier_key(home, "domain")?;
@@ -220,7 +273,10 @@ impl Uplink {
             kind: ORIGIN_KIND,
             version: 2,
             commitment: seed,
-            universe: Some(Genesis { geometry: Geometry::Sphere(radius), parent: Parent::Unwitnessed }),
+            universe: Some(Genesis {
+                geometry: Geometry::Sphere(radius),
+                parent: Parent::Unwitnessed,
+            }),
         };
         self.session.originate(&origin.sign(&domain))
     }
@@ -231,13 +287,21 @@ impl Uplink {
     /// own act, once the ancients take it up.
     pub fn designate_reserve(&self, home: &Path, tier: &str) -> io::Result<Founded> {
         if !TIERS.contains(&tier) {
-            return Err(io::Error::new(io::ErrorKind::InvalidInput, format!("{tier} is not one of the domain's tiers {TIERS:?}")));
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!("{tier} is not one of the domain's tiers {TIERS:?}"),
+            ));
         }
         let domain = tier_key(home, "domain")?;
         let tier = tier_key(home, tier)?.verifying_key().to_bytes();
         let mut nonce = [0u8; 32];
         std::fs::File::open("/dev/urandom")?.read_exact(&mut nonce)?;
-        let signed = Reservation { domain: domain.verifying_key().to_bytes(), tier, nonce }.sign(&domain);
+        let signed = Reservation {
+            domain: domain.verifying_key().to_bytes(),
+            tier,
+            nonce,
+        }
+        .sign(&domain);
         self.session.reserve(&signed)
     }
 }

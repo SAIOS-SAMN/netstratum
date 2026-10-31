@@ -75,9 +75,10 @@ pub struct Pressure {
 impl Pressure {
     /// Read the pressure between two directions of a connection.
     pub fn between(a: &MatrixFiber2x2, b: &MatrixFiber2x2) -> Self {
-        Pressure { curvature: plaquette_curvature(a, b) }
+        Pressure {
+            curvature: plaquette_curvature(a, b),
+        }
     }
-
 }
 
 /// The phase lock — what a closed walk is holding.
@@ -98,7 +99,9 @@ impl PhaseLock {
     /// An empty walk holds the identity, lawfully — nowhere to go,
     /// nothing acquired.
     pub fn around(walk: &[MatrixFiber2x2]) -> Self {
-        PhaseLock { holonomy: loop_holonomy(walk) }
+        PhaseLock {
+            holonomy: loop_holonomy(walk),
+        }
     }
 
     /// **Did the walk close?** The loop returned exactly where it began
@@ -106,7 +109,6 @@ impl PhaseLock {
     pub fn closed(&self) -> bool {
         self.holonomy.is_identity()
     }
-
 }
 
 /// The drift — how a reading moved between two points on the chain.
@@ -129,7 +131,9 @@ impl Drift {
     /// that kept its own timeline would be a second record (§1a). The
     /// caller supplies both readings; this holds neither.
     pub fn between(earlier: &MatrixFiber2x2, later: &MatrixFiber2x2) -> Self {
-        Drift { delta: later.minus(earlier) }
+        Drift {
+            delta: later.minus(earlier),
+        }
     }
 
     /// One component of the movement, exact. `(row, col)` outside the

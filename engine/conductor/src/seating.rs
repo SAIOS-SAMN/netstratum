@@ -31,7 +31,11 @@ fn galaxy_place(k: usize) -> Place {
 /// most 3 + 3 + 3 cells, inside the reach.
 fn system_place(centre: &Place, j: usize) -> Place {
     let off = |n: usize| ratio((n % 7) as i64 - 3, 1);
-    (centre.0.clone() + off(j), centre.1.clone() + off(j / 7), centre.2.clone() + ratio(((j / 49) % 7) as i64 - 3, 1))
+    (
+        centre.0.clone() + off(j),
+        centre.1.clone() + off(j / 7),
+        centre.2.clone() + ratio(((j / 49) % 7) as i64 - 3, 1),
+    )
 }
 
 /// The galaxies by distance from the universal core (core indices).
@@ -44,18 +48,39 @@ fn by_distance(u: &Universe) -> Vec<usize> {
 /// The stand-in place of the system at `path` ([core, system, ...]).
 pub fn place_of(u: &Universe, path: &[u64]) -> Option<Place> {
     let order = by_distance(u);
-    let i = u.cores.iter().position(|c| c.path.first() == path.first())?;
+    let i = u
+        .cores
+        .iter()
+        .position(|c| c.path.first() == path.first())?;
     let k = order.iter().position(|&o| o == i)?;
-    let j = u.cores[i].satellites.iter().position(|s| s.path.get(1) == path.get(1))?;
+    let j = u.cores[i]
+        .satellites
+        .iter()
+        .position(|s| s.path.get(1) == path.get(1))?;
     Some(system_place(&galaxy_place(k), j))
 }
 
 /// A world's composition, its grains by Z (the pulse's `Z###` keys).
 pub fn composition_of(u: &Universe, path: &[u64]) -> Option<Vec<(u16, cfe::ratio::Ratio)>> {
     let core = u.cores.iter().find(|c| c.path.first() == path.first())?;
-    let sys = core.satellites.iter().find(|s| s.path.get(1) == path.get(1))?;
-    let orb = sys.satellites.iter().find(|o| o.path.get(2) == path.get(2))?;
-    Some(orb.kept.iter().filter_map(|(k, a)| crate::chem::atom_w(k).and_then(|z| u16::try_from(z).ok()).map(|z| (z, a.clone()))).collect())
+    let sys = core
+        .satellites
+        .iter()
+        .find(|s| s.path.get(1) == path.get(1))?;
+    let orb = sys
+        .satellites
+        .iter()
+        .find(|o| o.path.get(2) == path.get(2))?;
+    Some(
+        orb.kept
+            .iter()
+            .filter_map(|(k, a)| {
+                crate::chem::atom_w(k)
+                    .and_then(|z| u16::try_from(z).ok())
+                    .map(|z| (z, a.clone()))
+            })
+            .collect(),
+    )
 }
 
 /// Each system's stand-in place and its galactic period (bells a turn about
@@ -97,13 +122,37 @@ pub fn chart(u: &Universe, book: &Ledger, stamp: u64) -> std::io::Result<usize> 
 /// 0, and the orbit at which cfe's linear law gives the world's own heat,
 /// `r = K · L / T` (K the home-equilibrium anchor, 279°: an import, owed its
 /// derivation, docs/108 O3): exact, no root.
-pub fn site_of(heat: &cfe::ratio::Ratio, burn: &cfe::ratio::Ratio) -> Option<(cfe::thermal::StarClass, cfe::ratio::Ratio, cfe::ratio::Ratio)> {
+pub fn site_of(
+    heat: &cfe::ratio::Ratio,
+    burn: &cfe::ratio::Ratio,
+) -> Option<(
+    cfe::thermal::StarClass,
+    cfe::ratio::Ratio,
+    cfe::ratio::Ratio,
+)> {
     use cfe::thermal::StarClass as C;
     if *heat <= ratio(0, 1) {
         return None;
     }
-    let distance = |c: &C| { let d = c.luminosity() - burn.clone(); if d < ratio(0, 1) { -d } else { d } };
-    let class = [C::Blue, C::BlueWhite, C::White, C::YellowWhite, C::Yellow, C::Orange, C::Red].into_iter().min_by(|a, b| distance(a).cmp(&distance(b)))?;
+    let distance = |c: &C| {
+        let d = c.luminosity() - burn.clone();
+        if d < ratio(0, 1) {
+            -d
+        } else {
+            d
+        }
+    };
+    let class = [
+        C::Blue,
+        C::BlueWhite,
+        C::White,
+        C::YellowWhite,
+        C::Yellow,
+        C::Orange,
+        C::Red,
+    ]
+    .into_iter()
+    .min_by(|a, b| distance(a).cmp(&distance(b)))?;
     // Six sexagesimal places of its own size (design law 8): the era-0
     // thermal machinery reads this orbit every tick, and the exact quotient
     // carried the heat's eighty-digit terms into every product; a fixed grain
@@ -143,12 +192,18 @@ impl Site {
     /// The heads its land feeds wild for a people of `metabolism`: its
     /// medium's (none where the world does not carry it).
     pub fn wild_for(&self, metabolism: &str) -> Ratio {
-        crate::life::medium_of(metabolism).and_then(|m| self.wild.get(m)).cloned().unwrap_or_else(|| ratio(0, 1))
+        crate::life::medium_of(metabolism)
+            .and_then(|m| self.wild.get(m))
+            .cloned()
+            .unwrap_or_else(|| ratio(0, 1))
     }
 }
 
 /// Every era-1 world a line can stand on, by path, with its land.
-pub fn sites(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::life::World>) -> std::collections::BTreeMap<Vec<u64>, Site> {
+pub fn sites(
+    u: &Universe,
+    worlds: &std::collections::BTreeMap<Vec<u64>, crate::life::World>,
+) -> std::collections::BTreeMap<Vec<u64>, Site> {
     let all: Vec<crate::life::World> = worlds.values().cloned().collect();
     let reference = crate::life::reference_pressure(&all);
     let home = crate::life::home_heat(u).unwrap_or_else(|| ratio(0, 1));
@@ -158,8 +213,22 @@ pub fn sites(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::
             let (star, albedo, orbit) = site_of(&w.heat, &w.burn)?;
             let position = place_of(u, &w.path)?;
             let compression = w.pressure.clone() / reference.clone();
-            let wild = ["chemical", "lithic", "plasmic"].into_iter().map(|m| (m, crate::life::wild(w, &compression, m, &home))).collect();
-            Some((w.path.clone(), Site { path: w.path.clone(), position, star, albedo, orbit, composition: composition_of(u, &w.path), wild }))
+            let wild = ["chemical", "lithic", "plasmic"]
+                .into_iter()
+                .map(|m| (m, crate::life::wild(w, &compression, m, &home)))
+                .collect();
+            Some((
+                w.path.clone(),
+                Site {
+                    path: w.path.clone(),
+                    position,
+                    star,
+                    albedo,
+                    orbit,
+                    composition: composition_of(u, &w.path),
+                    wild,
+                },
+            ))
         })
         .collect()
 }
@@ -168,7 +237,11 @@ pub fn sites(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::
 pub fn reaches(u: &Universe) -> std::collections::BTreeMap<(u64, u64), Ratio> {
     u.cores
         .iter()
-        .flat_map(|c| c.satellites.iter().filter_map(|s| Some(((*s.path.first()?, *s.path.get(1)?), s.radius.clone()))))
+        .flat_map(|c| {
+            c.satellites
+                .iter()
+                .filter_map(|s| Some(((*s.path.first()?, *s.path.get(1)?), s.radius.clone())))
+        })
         .collect()
 }
 
@@ -190,37 +263,58 @@ pub fn apply(spec: &mut PolitySpec, site: &Site) {
 /// parent's galaxy by reach), so a lineage spreads
 /// through its own system before beyond it. A line whose parent is unseated
 /// is seated as a head.
-pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::life::World>, specs: &mut [PolitySpec]) {
+pub fn seat(
+    u: &Universe,
+    worlds: &std::collections::BTreeMap<Vec<u64>, crate::life::World>,
+    specs: &mut [PolitySpec],
+) {
     let sites = sites(u, worlds);
     let reach = reaches(u);
     let mut claimed: std::collections::BTreeSet<Vec<u64>> = std::collections::BTreeSet::new();
     let mut per_galaxy: std::collections::BTreeMap<u64, usize> = std::collections::BTreeMap::new();
-    let mut per_system: std::collections::BTreeMap<(u64, u64), usize> = std::collections::BTreeMap::new();
+    let mut per_system: std::collections::BTreeMap<(u64, u64), usize> =
+        std::collections::BTreeMap::new();
     let sited: Vec<&Site> = sites.values().collect();
     // A head's viability on a world is its land: the heads its own medium
     // feeds wild there (docs/86).
-    let mut viability: std::collections::BTreeMap<String, Vec<cfe::ratio::Ratio>> = std::collections::BTreeMap::new();
+    let mut viability: std::collections::BTreeMap<String, Vec<cfe::ratio::Ratio>> =
+        std::collections::BTreeMap::new();
     let parent_of = |spec: &PolitySpec| spec.civilization.lineage.first().cloned();
-    let sigils: std::collections::BTreeSet<String> = specs.iter().map(|s| s.civilization.sigil.clone()).collect();
-    let mut placed: std::collections::BTreeMap<String, Vec<u64>> = std::collections::BTreeMap::new();
+    let sigils: std::collections::BTreeSet<String> =
+        specs.iter().map(|s| s.civilization.sigil.clone()).collect();
+    let mut placed: std::collections::BTreeMap<String, Vec<u64>> =
+        std::collections::BTreeMap::new();
     // The heads (no seated parent among the specs), by viability.
     for spec in specs.iter_mut() {
         if parent_of(spec).is_some_and(|p| sigils.contains(&p)) {
             continue;
         }
         let metabolism = spec.civilization.metabolism.clone();
-        let v = viability.entry(metabolism.clone()).or_insert_with(|| sited.iter().map(|s| s.wild_for(&metabolism)).collect());
+        let v = viability
+            .entry(metabolism.clone())
+            .or_insert_with(|| sited.iter().map(|s| s.wild_for(&metabolism)).collect());
         let best = sited
             .iter()
             .enumerate()
             .filter(|(_, s)| !claimed.contains(&s.path))
             .max_by(|(ia, a), (ib, b)| {
                 let zero = ratio(0, 1);
-                let sa = per_system.get(&(a.path[0], a.path[1])).copied().unwrap_or(0);
-                let sb = per_system.get(&(b.path[0], b.path[1])).copied().unwrap_or(0);
+                let sa = per_system
+                    .get(&(a.path[0], a.path[1]))
+                    .copied()
+                    .unwrap_or(0);
+                let sb = per_system
+                    .get(&(b.path[0], b.path[1]))
+                    .copied()
+                    .unwrap_or(0);
                 let ga = per_galaxy.get(&a.path[0]).copied().unwrap_or(0);
                 let gb = per_galaxy.get(&b.path[0]).copied().unwrap_or(0);
-                (v[*ia] > zero).cmp(&(v[*ib] > zero)).then(sb.cmp(&sa)).then(v[*ia].cmp(&v[*ib])).then(gb.cmp(&ga)).then(b.path.cmp(&a.path))
+                (v[*ia] > zero)
+                    .cmp(&(v[*ib] > zero))
+                    .then(sb.cmp(&sa))
+                    .then(v[*ia].cmp(&v[*ib]))
+                    .then(gb.cmp(&ga))
+                    .then(b.path.cmp(&a.path))
             })
             .map(|(_, s)| *s);
         let Some(site) = best else { continue };
@@ -238,17 +332,30 @@ pub fn seat(u: &Universe, worlds: &std::collections::BTreeMap<Vec<u64>, crate::l
             if placed.contains_key(&spec.civilization.sigil) {
                 continue;
             }
-            let Some(parent) = parent_of(spec).and_then(|p| placed.get(&p).cloned()) else { continue };
+            let Some(parent) = parent_of(spec).and_then(|p| placed.get(&p).cloned()) else {
+                continue;
+            };
             // A settler takes the nearest free world its land feeds, else the
             // nearest free world.
             let metabolism = spec.civilization.metabolism.clone();
             let found = {
                 let (taken, metabolism) = (&claimed, &metabolism);
-                let free = |livable: bool| sites.iter().filter(move |(p, s)| !taken.contains(*p) && (!livable || s.wild_for(metabolism) > ratio(0, 1))).map(|(p, _)| p);
-                crate::places::nearest(&parent, free(true), &reach).or_else(|| crate::places::nearest(&parent, free(false), &reach))
+                let free = |livable: bool| {
+                    sites
+                        .iter()
+                        .filter(move |(p, s)| {
+                            !taken.contains(*p)
+                                && (!livable || s.wild_for(metabolism) > ratio(0, 1))
+                        })
+                        .map(|(p, _)| p)
+                };
+                crate::places::nearest(&parent, free(true), &reach)
+                    .or_else(|| crate::places::nearest(&parent, free(false), &reach))
             };
             let Some(path) = found else { continue };
-            let Some(site) = sites.get(&path) else { continue };
+            let Some(site) = sites.get(&path) else {
+                continue;
+            };
             apply(spec, site);
             claimed.insert(path.clone());
             placed.insert(spec.civilization.sigil.clone(), path);
@@ -267,7 +374,11 @@ mod tests {
 
     #[test]
     fn galaxies_stand_beyond_each_others_reach_and_systems_within_their_own() {
-        let l1 = |a: &Place, b: &Place| (a.0.clone() - b.0.clone()).abs() + (a.1.clone() - b.1.clone()).abs() + (a.2.clone() - b.2.clone()).abs();
+        let l1 = |a: &Place, b: &Place| {
+            (a.0.clone() - b.0.clone()).abs()
+                + (a.1.clone() - b.1.clone()).abs()
+                + (a.2.clone() - b.2.clone()).abs()
+        };
         for a in 0..13 {
             for b in (a + 1)..13 {
                 assert!(l1(&galaxy_place(a), &galaxy_place(b)) > ratio(16, 1));

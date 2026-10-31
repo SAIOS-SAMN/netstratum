@@ -14,12 +14,21 @@ use conductor::civic;
 
 fn main() {
     let price = conductor::Polity::observe_price();
-    println!("observe_price (flat, all civs) = {}/{}", price.numer(), price.denom());
+    println!(
+        "observe_price (flat, all civs) = {}/{}",
+        price.numer(),
+        price.denom()
+    );
     println!();
 
     let root = std::path::Path::new("var/worlds");
-    let mut rows: Vec<(String, cfe::ratio::Ratio, cfe::ratio::Ratio, cfe::ratio::Ratio, u64)> =
-        Vec::new();
+    let mut rows: Vec<(
+        String,
+        cfe::ratio::Ratio,
+        cfe::ratio::Ratio,
+        cfe::ratio::Ratio,
+        u64,
+    )> = Vec::new();
     let mut no_orb = 0usize;
     let mut load_failed = 0usize;
 
@@ -80,8 +89,8 @@ fn main() {
             use num_traits::ToPrimitive;
             let r_n = remaining.numer().to_f64().unwrap_or(f64::NAN)
                 / remaining.denom().to_f64().unwrap_or(f64::NAN);
-            let n_n = net.numer().to_f64().unwrap_or(f64::NAN)
-                / net.denom().to_f64().unwrap_or(f64::NAN);
+            let n_n =
+                net.numer().to_f64().unwrap_or(f64::NAN) / net.denom().to_f64().unwrap_or(f64::NAN);
             let beats = r_n / n_n;
             beats_list.push(beats);
             format!("{beats:.1}")
@@ -89,9 +98,12 @@ fn main() {
         println!(
             "{:<24} {:>7}/{:<10} {:>7}/{:<10} {:>7}/{:<10} {:>8} beats-to-afford={}",
             name,
-            bank.numer(), bank.denom(),
-            cascade_leisure.numer(), cascade_leisure.denom(),
-            net.numer(), net.denom(),
+            bank.numer(),
+            bank.denom(),
+            cascade_leisure.numer(),
+            cascade_leisure.denom(),
+            net.numer(),
+            net.denom(),
             pop,
             beats_str,
         );
@@ -101,7 +113,10 @@ fn main() {
     println!("worlds with an orb: {}", rows.len());
     println!("worlds with no orb (pre-material, skipped): {no_orb}");
     println!("worlds that failed to load: {load_failed}");
-    println!("cannot afford observe_price RIGHT NOW: {cannot_afford_now}/{}", rows.len());
+    println!(
+        "cannot afford observe_price RIGHT NOW: {cannot_afford_now}/{}",
+        rows.len()
+    );
     println!("of those, net per-beat delta <= 0 (will NEVER afford it without an external change): {negative_or_zero}");
     if !beats_list.is_empty() {
         beats_list.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -109,7 +124,9 @@ fn main() {
         let max = beats_list[beats_list.len() - 1];
         println!(
             "of the rest ({} civs with net > 0), median beats-to-afford = {:.1}, worst = {:.1}",
-            beats_list.len(), median, max
+            beats_list.len(),
+            median,
+            max
         );
     }
 }

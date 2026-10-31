@@ -13,3 +13,6 @@ physics = { path = "../physics" }
 # `ratio` — below every crate — so the solver and the world read one
 # turn law rather than two copies.
 ratio = { path = "../ratio" }
+
+[lints]
+workspace = true

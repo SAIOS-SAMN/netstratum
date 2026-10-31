@@ -18,8 +18,8 @@
 //! the court only through its rule language (the translator, once 78.143's
 //! steps land); until then a closed object rule is counted, never sent.
 
-pub use solver_verify::project::{apply, perceive, Act, Body, ObjectRule, Percept, Select};
 use crate::grid::Grid;
+pub use solver_verify::project::{apply, perceive, Act, Body, ObjectRule, Percept, Select};
 
 /// What became of one body between a pair's input and output.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -39,7 +39,11 @@ fn fates(input: &Grid, output: &Grid, p: &Percept) -> Option<Vec<Fate>> {
     let mut owned = vec![false; input.cells.len()];
     let mut out = Vec::with_capacity(p.bodies.len());
     for b in &p.bodies {
-        let now: Vec<u8> = b.cells.iter().map(|&(r, c)| output.cells[r * input.cols + c]).collect();
+        let now: Vec<u8> = b
+            .cells
+            .iter()
+            .map(|&(r, c)| output.cells[r * input.cols + c])
+            .collect();
         for &(r, c) in &b.cells {
             owned[r * input.cols + c] = true;
         }
@@ -56,7 +60,11 @@ fn fates(input: &Grid, output: &Grid, p: &Percept) -> Option<Vec<Fate>> {
         });
     }
     // Every cell outside the bodies stands still.
-    if owned.iter().enumerate().any(|(i, &own)| !own && input.cells[i] != output.cells[i]) {
+    if owned
+        .iter()
+        .enumerate()
+        .any(|(i, &own)| !own && input.cells[i] != output.cells[i])
+    {
         return None;
     }
     Some(out)
@@ -64,7 +72,13 @@ fn fates(input: &Grid, output: &Grid, p: &Percept) -> Option<Vec<Fate>> {
 
 /// The predicates a mind tries, in order, built from what the pairs show.
 fn candidates(seen: &[(Percept, Vec<Fate>)]) -> Vec<Select> {
-    let mut base = vec![Select::Largest, Select::Smallest, Select::Border(true), Select::Border(false), Select::TwinOfOtherHue];
+    let mut base = vec![
+        Select::Largest,
+        Select::Smallest,
+        Select::Border(true),
+        Select::Border(false),
+        Select::TwinOfOtherHue,
+    ];
     for h in 0..10u8 {
         base.push(Select::Hue(h));
     }
@@ -85,7 +99,11 @@ fn candidates(seen: &[(Percept, Vec<Fate>)]) -> Vec<Select> {
     sizes.sort_unstable();
     base.extend(sizes.into_iter().map(Select::Size));
     base.extend(shapes.into_iter().map(Select::Shape));
-    let negated: Vec<Select> = base.iter().cloned().map(|s| Select::Not(Box::new(s))).collect();
+    let negated: Vec<Select> = base
+        .iter()
+        .cloned()
+        .map(|s| Select::Not(Box::new(s)))
+        .collect();
     let singles: Vec<Select> = base.iter().cloned().chain(negated).collect();
     // Then every pair of them, conjoined — tried after every single one.
     let mut all = singles.clone();
@@ -128,7 +146,10 @@ pub fn learn(train: &[(Grid, Grid)]) -> Option<ObjectRule> {
             (0..p.bodies.len()).all(|i| select.picks(p, i) == (fate[i] != Fate::Kept))
         });
         if holds {
-            let rule = ObjectRule { select, act: act.clone() };
+            let rule = ObjectRule {
+                select,
+                act: act.clone(),
+            };
             // Pin A: the rule closes every pair exactly.
             if train.iter().all(|(i, o)| apply(&rule, i) == *o) {
                 return Some(rule);
@@ -168,9 +189,15 @@ pub fn orders_admitted(train: &[(Grid, Grid)]) -> Option<usize> {
     Some(orders_admitted_seen(&seen).map_or(0, |a| a.len()))
 }
 
-fn orders_admitted_seen(seen: &[(Percept, Vec<Fate>)]) -> Option<Vec<(solver_verify::project::Cut, solver_verify::project::Extreme)>> {
+fn orders_admitted_seen(
+    seen: &[(Percept, Vec<Fate>)],
+) -> Option<Vec<(solver_verify::project::Cut, solver_verify::project::Extreme)>> {
     use solver_verify::project::{integral, relations, Cut, Extreme};
-    let reach = seen.iter().map(|(p, _)| p.bodies.len()).max()?.saturating_sub(1);
+    let reach = seen
+        .iter()
+        .map(|(p, _)| p.bodies.len())
+        .max()?
+        .saturating_sub(1);
     let reach = u16::try_from(reach).ok()?;
     let mut admitted: Option<Vec<(Cut, Extreme)>> = None;
     for (p, fate) in seen {
@@ -181,11 +208,16 @@ fn orders_admitted_seen(seen: &[(Percept, Vec<Fate>)]) -> Option<Vec<(solver_ver
         let rel = relations(p);
         // A cut of `reach` or more reads the whole relation in every pair: it is
         // `All` under another name, so the cuts stop short of it.
-        let cuts = std::iter::once(Cut::All).chain((1..reach).map(Cut::Nearest)).chain((1..reach).map(Cut::Farthest));
+        let cuts = std::iter::once(Cut::All)
+            .chain((1..reach).map(Cut::Nearest))
+            .chain((1..reach).map(Cut::Farthest));
         let mut here = Vec::new();
         for cut in cuts {
             let values: Vec<usize> = rel.iter().map(|r| integral(r, cut)).collect();
-            for (extreme, end) in [(Extreme::Least, values.iter().min()), (Extreme::Most, values.iter().max())] {
+            for (extreme, end) in [
+                (Extreme::Least, values.iter().min()),
+                (Extreme::Most, values.iter().max()),
+            ] {
                 let end = *end?;
                 if values.iter().zip(&treated).all(|(v, t)| (*v == end) == *t) {
                     here.push((cut, extreme));
@@ -211,10 +243,30 @@ mod tests {
     #[test]
     fn the_largest_body_is_recoloured_and_the_rule_states_its_ties() {
         // the largest body (4 cells) turns 2; the smaller ones stay
-        let a = g(4, 5, &[1, 1, 0, 3, 0, 1, 1, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0]);
-        let a2 = apply(&ObjectRule { select: Select::Largest, act: Act::Recolor(2) }, &a);
-        let b = g(4, 5, &[0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 5, 0, 0, 6, 0, 0, 0, 0]);
-        let b2 = apply(&ObjectRule { select: Select::Largest, act: Act::Recolor(2) }, &b);
+        let a = g(
+            4,
+            5,
+            &[1, 1, 0, 3, 0, 1, 1, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0],
+        );
+        let a2 = apply(
+            &ObjectRule {
+                select: Select::Largest,
+                act: Act::Recolor(2),
+            },
+            &a,
+        );
+        let b = g(
+            4,
+            5,
+            &[0, 0, 0, 0, 0, 0, 5, 5, 5, 0, 0, 0, 5, 0, 0, 6, 0, 0, 0, 0],
+        );
+        let b2 = apply(
+            &ObjectRule {
+                select: Select::Largest,
+                act: Act::Recolor(2),
+            },
+            &b,
+        );
         let rule = learn(&[(a, a2), (b, b2)]).expect("learned");
         assert_eq!(rule.act, Act::Recolor(2));
         assert_eq!(rule.select, Select::Largest);
@@ -225,14 +277,41 @@ mod tests {
         // docs/66 Y2: lone hue-1 cells spaced apart; the judge marks the one
         // whose L1 distance to the others is least. Learned, and it crosses
         // the wire whole.
-        let mark = |x: &Grid| apply(&ObjectRule { select: Select::Central, act: Act::Recolor(2) }, x);
-        let a = g(5, 5, &[1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]);
-        let b = g(5, 7, &[0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]);
+        let mark = |x: &Grid| {
+            apply(
+                &ObjectRule {
+                    select: Select::Central,
+                    act: Act::Recolor(2),
+                },
+                x,
+            )
+        };
+        let a = g(
+            5,
+            5,
+            &[
+                1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+            ],
+        );
+        let b = g(
+            5,
+            7,
+            &[
+                0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 1,
+            ],
+        );
         let (a2, b2) = (mark(&a), mark(&b));
         assert_eq!(a2.at(2, 2), 2);
         let rule = learn(&[(a, a2), (b, b2)]).expect("learned");
         // Deduced, not supplied: the order the relations show.
-        assert_eq!(rule.select, Select::Ordered { cut: solver_verify::project::Cut::All, extreme: solver_verify::project::Extreme::Least });
+        assert_eq!(
+            rule.select,
+            Select::Ordered {
+                cut: solver_verify::project::Cut::All,
+                extreme: solver_verify::project::Extreme::Least
+            }
+        );
         let program = vec![solver_verify::grid::Op::Project(rule)];
         let bytes = solver_verify::program_bytes(&program).expect("encodes");
         assert_eq!(solver_verify::program_from_bytes(&bytes), Some(program));
@@ -241,8 +320,20 @@ mod tests {
     #[test]
     fn a_shape_matching_its_template_is_selected() {
         // a 1-hue template and a same-shape 5-hue copy: the copy turns 2
-        let a = g(4, 6, &[1, 1, 0, 5, 5, 0, 1, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5]);
-        let a2 = g(4, 6, &[1, 1, 0, 2, 2, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5]);
+        let a = g(
+            4,
+            6,
+            &[
+                1, 1, 0, 5, 5, 0, 1, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5,
+            ],
+        );
+        let a2 = g(
+            4,
+            6,
+            &[
+                1, 1, 0, 2, 2, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5,
+            ],
+        );
         let rule = learn(&[(a.clone(), a2.clone()), (a, a2)]).expect("learned");
         assert_eq!(rule.act, Act::Recolor(2));
     }

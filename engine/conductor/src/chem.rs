@@ -31,7 +31,9 @@ impl Kind {
     /// The nuclide of weight `w` (refused for w = 0 or past the read).
     pub fn atom(w: u32) -> Option<Kind> {
         atom_of(w)?;
-        Some(Kind { parts: vec![(1, w)] })
+        Some(Kind {
+            parts: vec![(1, w)],
+        })
     }
 
     /// The element of charge `q`: its lightest nuclide.
@@ -44,7 +46,7 @@ impl Kind {
     pub fn cluster(parts: &[(u32, u32)]) -> Option<Kind> {
         let mut merged: Vec<(u32, u32)> = Vec::new();
         let mut sorted: Vec<(u32, u32)> = parts.to_vec();
-        sorted.sort_by(|a, b| b.1.cmp(&a.1));
+        sorted.sort_by_key(|b| std::cmp::Reverse(b.1));
         for (n, z) in sorted {
             atom_of(z)?;
             if n == 0 {
@@ -81,13 +83,25 @@ impl Kind {
 
     /// Its atoms, each part's atom once with its count.
     fn atoms(&self) -> impl Iterator<Item = (u32, Atom)> + '_ {
-        self.parts.iter().filter_map(|&(n, w)| atom_of(w).map(|a| (n, a)))
+        self.parts
+            .iter()
+            .filter_map(|&(n, w)| atom_of(w).map(|a| (n, a)))
     }
 }
 
 impl std::fmt::Display for Kind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let names: Vec<String> = self.parts.iter().map(|(n, w)| if *n == 1 { format!("W{w:04}") } else { format!("{n}W{w:04}") }).collect();
+        let names: Vec<String> = self
+            .parts
+            .iter()
+            .map(|(n, w)| {
+                if *n == 1 {
+                    format!("W{w:04}")
+                } else {
+                    format!("{n}W{w:04}")
+                }
+            })
+            .collect();
         write!(f, "{}", names.join("·"))
     }
 }
@@ -104,7 +118,9 @@ pub fn protons(w: u32) -> u32 {
 
 /// Hydrogen, the first kind.
 pub fn hydrogen() -> Kind {
-    Kind { parts: vec![(1, 1)] }
+    Kind {
+        parts: vec![(1, 1)],
+    }
 }
 
 /// A kind's parts, `(count, w)`, heaviest first.
@@ -121,7 +137,6 @@ pub fn parts(kind: &Kind) -> Option<(u32, u32)> {
         _ => None,
     }
 }
-
 
 /// A plain atom's weight (None for a cluster): the nuclide that may burn,
 /// ionize or be cut by its windings.
@@ -142,7 +157,10 @@ pub fn charge(kind: &Kind) -> u32 {
 pub fn unpaired(kind: &Kind) -> u32 {
     match kind.parts() {
         [(1, z)] => atom_of(*z).map_or(0, |a| a.unpaired),
-        [(1, z), (k, 1)] if *z != 1 => atom_of(*z).map_or(0, |a| a.unpaired).checked_sub(*k).map_or(0, |u| u),
+        [(1, z), (k, 1)] if *z != 1 => atom_of(*z)
+            .map_or(0, |a| a.unpaired)
+            .checked_sub(*k)
+            .map_or(0, |u| u),
         _ => 0,
     }
 }
@@ -168,7 +186,10 @@ pub fn closed(kind: &Kind) -> bool {
 /// A kind's bond grip, the tightness of its loosest winding in hydrogen's own
 /// unit (an atom's outer winding; a cluster's loosest part's).
 pub fn tightness(kind: &Kind) -> Ratio {
-    kind.atoms().map(|(_, a)| a.tightness).min().map_or_else(|| ratio(0, 1), |t| t)
+    kind.atoms()
+        .map(|(_, a)| a.tightness)
+        .min()
+        .unwrap_or_else(|| ratio(0, 1))
 }
 
 /// A cluster's permanent dipole (with Xylarium, atoms::hold's form): what its
@@ -181,8 +202,14 @@ pub fn tightness(kind: &Kind) -> Ratio {
 /// a centre with no lone pairs and like arms, has none. Water on S^11: 2/15.
 pub fn dipole(kind: &Kind) -> Ratio {
     let zero = ratio(0, 1);
-    let atoms: Vec<Atom> = kind.atoms().flat_map(|(n, a)| std::iter::repeat(a).take(n as usize)).collect();
-    let (Some(lo), Some(hi)) = (atoms.iter().map(|a| a.tightness.clone()).min(), atoms.iter().map(|a| a.tightness.clone()).max()) else {
+    let atoms: Vec<Atom> = kind
+        .atoms()
+        .flat_map(|(n, a)| std::iter::repeat_n(a, n as usize))
+        .collect();
+    let (Some(lo), Some(hi)) = (
+        atoms.iter().map(|a| a.tightness.clone()).min(),
+        atoms.iter().map(|a| a.tightness.clone()).max(),
+    ) else {
         return zero;
     };
     if hi == zero {
@@ -190,7 +217,11 @@ pub fn dipole(kind: &Kind) -> Ratio {
     }
     let asymmetry = ratio(1, 1) - lo / hi;
     let mixture = |of: &[Atom]| {
-        let most = of.iter().map(|a| of.iter().filter(|b| b.z == a.z).count()).max().map_or(0, |m| m);
+        let most = of
+            .iter()
+            .map(|a| of.iter().filter(|b| b.z == a.z).count())
+            .max()
+            .map_or(0, |m| m);
         let n = i64::try_from(of.len().max(1)).map_or(1, |n| n);
         let unlike = i64::try_from(of.len() - most).map_or(0, |u| u);
         ratio(2 * unlike, n).min(ratio(1, 1))
@@ -217,7 +248,13 @@ pub fn closing(a: u32, ua: u32, b: u32, ub: u32) -> Option<(u32, u32, Kind)> {
     if ua == 0 || ub == 0 {
         return None;
     }
-    fn gcd(x: u32, y: u32) -> u32 { if y == 0 { x } else { gcd(y, x % y) } }
+    fn gcd(x: u32, y: u32) -> u32 {
+        if y == 0 {
+            x
+        } else {
+            gcd(y, x % y)
+        }
+    }
     let g = gcd(ua, ub);
     let (na, nb) = (ub / g, ua / g);
     Some((na, nb, Kind::cluster(&[(na, a), (nb, b)])?))
@@ -236,7 +273,10 @@ mod tests {
         let (o, h) = (el(8), el(1));
         let water = Kind::cluster(&[(4, h), (1, o)]).expect("water");
         assert_eq!(Kind::parse(&water.to_string()), Some(water.clone()));
-        assert_eq!(Kind::cluster(&[(2, 1), (2, 1)]).map(|k| k.to_string()), Some("4W0001".into()));
+        assert_eq!(
+            Kind::cluster(&[(2, 1), (2, 1)]).map(|k| k.to_string()),
+            Some("4W0001".into())
+        );
         assert!(Kind::parse("4W0001·W0009").is_none(), "not heaviest first");
         assert!(Kind::parse("W0000").is_none(), "no nuclide");
         assert!(Kind::parse("resource:Iron").is_none(), "no kind");

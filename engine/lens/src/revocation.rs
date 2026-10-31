@@ -110,11 +110,7 @@ impl Revocation {
     /// ground — never on the full `Degree`, which includes the floor.
     /// A comparison against the floor would be vacuous in exactly the
     /// way the struck `D > 0` gate was: a floor decides nothing.
-    pub fn over(
-        deeds: usize,
-        open: (&Delta, &Support),
-        close: (&Delta, &Support),
-    ) -> Revocation {
+    pub fn over(deeds: usize, open: (&Delta, &Support), close: (&Delta, &Support)) -> Revocation {
         let circulation_before = holonomies(open.0, open.1).len();
         let circulation_after = holonomies(close.0, close.1).len();
         Revocation::from_counts(deeds, circulation_before, circulation_after)
@@ -137,12 +133,18 @@ impl Revocation {
             (true, true) => Claim::Stood,
             (true, false) => Claim::Vacated,
         };
-        Revocation { claim, deeds, circulation_before, circulation_after }
+        Revocation {
+            claim,
+            deeds,
+            circulation_before,
+            circulation_after,
+        }
     }
 
     /// The growth the window actually showed. Zero is a lawful and
     /// meaningful answer here — it is precisely what vacates a claim.
     pub fn growth(&self) -> usize {
-        self.circulation_after.saturating_sub(self.circulation_before)
+        self.circulation_after
+            .saturating_sub(self.circulation_before)
     }
 }

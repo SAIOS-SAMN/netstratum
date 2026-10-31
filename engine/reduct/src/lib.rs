@@ -42,10 +42,10 @@ pub use think::{think, PairClosure, TaskThought};
 // IAE-2 — the stratified carrier: a cellular sheaf with heterogeneous stalks
 // and exact restriction morphisms, and the commutation-gated transduction
 // between complexes. The reduction (cohomology by exact SNF) lands next.
-mod mat;
 pub mod atlas;
 pub mod bridge;
 pub mod cohomology;
+mod mat;
 pub mod mind;
 pub mod proposer;
 pub mod resolve;

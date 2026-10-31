@@ -92,7 +92,6 @@ impl BoundaryForm {
     pub fn rank(&self) -> usize {
         self.flows.len()
     }
-
 }
 
 /// Derive `∂Δ` from a state and its support — the divergence at every
@@ -119,10 +118,13 @@ pub fn boundary_form(delta: &Delta, support: &Support) -> BoundaryForm {
                 }
             }
             if !net.is_zero() {
-                flows.push(Flow { at: i, l, value: net });
+                flows.push(Flow {
+                    at: i,
+                    l,
+                    value: net,
+                });
             }
         }
     }
     BoundaryForm { flows }
 }
-

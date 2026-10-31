@@ -96,9 +96,7 @@ pub fn verify_certificate(
             return CertificateRead::Diverged { at_step: i + 1 };
         }
     }
-    if expected.steps.len() != certificate.steps.len()
-        || expected.output != certificate.output
-    {
+    if expected.steps.len() != certificate.steps.len() || expected.output != certificate.output {
         return CertificateRead::Diverged {
             at_step: expected.steps.len().min(certificate.steps.len()) + 1,
         };
@@ -162,7 +160,11 @@ pub fn derive(program: &Program, start: &[Grid]) -> Option<(Derivation, Vec<Grid
 /// to the carried digest after it. The final state, or the first diverged
 /// step (`0` = the start state, `k` = the k-th op; a derivation whose length
 /// does not match the word diverges at the first step it lacks or exceeds).
-pub fn walk(derivation: &Derivation, program: &Program, start: &[Grid]) -> Result<Vec<Grid>, usize> {
+pub fn walk(
+    derivation: &Derivation,
+    program: &Program,
+    start: &[Grid],
+) -> Result<Vec<Grid>, usize> {
     match (derivation.states.first(), state_digest(start)) {
         (Some(carried), Some(start)) if *carried == start => {}
         _ => return Err(0),

@@ -65,16 +65,29 @@ pub enum SheafError {
 impl CellSheaf {
     /// Build and gate a sheaf: validate every restriction shape, then verify
     /// `δ ∘ δ = 0`. Refuses typed on the first violation.
-    pub fn new(stalk_dims: Vec<Vec<usize>>, incidences: Vec<Incidence>) -> Result<Self, SheafError> {
-        let sheaf = CellSheaf { stalk_dims, incidences };
+    pub fn new(
+        stalk_dims: Vec<Vec<usize>>,
+        incidences: Vec<Incidence>,
+    ) -> Result<Self, SheafError> {
+        let sheaf = CellSheaf {
+            stalk_dims,
+            incidences,
+        };
         for inc in &sheaf.incidences {
             let fg = inc.face_grade;
             let face_dim = sheaf
                 .stalk_dim(fg, inc.face_idx)
-                .ok_or(SheafError::CellOutOfRange { grade: fg, idx: inc.face_idx })?;
-            let coface_dim = sheaf
-                .stalk_dim(fg + 1, inc.coface_idx)
-                .ok_or(SheafError::CellOutOfRange { grade: fg + 1, idx: inc.coface_idx })?;
+                .ok_or(SheafError::CellOutOfRange {
+                    grade: fg,
+                    idx: inc.face_idx,
+                })?;
+            let coface_dim =
+                sheaf
+                    .stalk_dim(fg + 1, inc.coface_idx)
+                    .ok_or(SheafError::CellOutOfRange {
+                        grade: fg + 1,
+                        idx: inc.coface_idx,
+                    })?;
             let got = shape(&inc.restriction);
             if got != (coface_dim, face_dim) {
                 return Err(SheafError::RestrictionShape {
@@ -107,7 +120,10 @@ impl CellSheaf {
 
     /// Offset of the `idx`-th `k`-cell's stalk block inside `Cᵏ`.
     fn offset(&self, k: usize, idx: usize) -> usize {
-        self.stalk_dims.get(k).map(|g| g[..idx].iter().sum()).unwrap_or(0)
+        self.stalk_dims
+            .get(k)
+            .map(|g| g[..idx].iter().sum())
+            .unwrap_or(0)
     }
 
     /// The coboundary `δᵏ : Cᵏ → Cᵏ⁺¹` as an exact integer matrix
@@ -138,7 +154,10 @@ impl CellSheaf {
             let d_k1 = self.coboundary(k + 1);
             let comp = matmul(&d_k1, &d_k);
             if !is_zero(&comp) {
-                return Err(SheafError::NotAComplex { grade: k, remainder: comp });
+                return Err(SheafError::NotAComplex {
+                    grade: k,
+                    remainder: comp,
+                });
             }
         }
         Ok(())

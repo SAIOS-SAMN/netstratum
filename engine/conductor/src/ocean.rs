@@ -50,13 +50,17 @@ pub fn universe_hold(u: &crate::pulse::Universe) -> Ratio {
     // bounce, never drained). The current total holding rises as burning
     // transduces magnetism into holding, so it would drift the strength the
     // span (3Z, conserved) already holds (read 2026-10-17: 3.162 -> 3.060).
-    let whole = u.cores.iter().fold(Ratio::from_integer(0.into()), |s, c| s + crate::pulse::core_state(c));
+    let whole = u.cores.iter().fold(Ratio::from_integer(0.into()), |s, c| {
+        s + crate::pulse::core_state(c)
+    });
     if whole.is_zero() {
         return ratio(2, 1);
     }
     u.cores.iter().fold(ratio(1, 1), |s, c| {
         let all = c.total();
-        s + crate::ring::grain(&((crate::pulse::core_state(c) + crate::pulse::mass(&all)) / whole.clone()))
+        s + crate::ring::grain(
+            &((crate::pulse::core_state(c) + crate::pulse::mass(&all)) / whole.clone()),
+        )
     })
 }
 
@@ -69,9 +73,11 @@ pub fn swing(r: &Ratio, h_g: &Ratio, h_u: &Ratio) -> (Ratio, Ratio) {
         return (r.clone(), r.clone());
     }
     let e = tau.clone() / (tau + h_g.clone());
-    (r.clone() * (ratio(1, 1) - e.clone()), r.clone() * (ratio(1, 1) + e))
+    (
+        r.clone() * (ratio(1, 1) - e.clone()),
+        r.clone() * (ratio(1, 1) + e),
+    )
 }
-
 
 /// The swing's radial share at a crossing of the crest at `at` (proposed; a
 /// reading, never a trajectory): the crossing's place along the swing as a
@@ -89,7 +95,6 @@ pub fn radial_share(r: &Ratio, h_g: &Ratio, at: &Ratio, h_u: &Ratio) -> Ratio {
     let off = if off < ratio(0, 1) { -off } else { off };
     e * (ratio(1, 1) - off).max(ratio(0, 1))
 }
-
 
 /// The pump (convection, with Xylarium; docs/83): the universal tide a
 /// swinging galaxy feels differs between its turnings,

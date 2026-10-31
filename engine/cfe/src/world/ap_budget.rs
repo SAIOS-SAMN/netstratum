@@ -148,7 +148,9 @@ impl World {
                 "AP exhausted ({spent}/{capacity}) — wait year voice t{window_end} or raise habitats"
             )
         } else if spent * 2 >= capacity {
-            format!("AP tight ({available} left of {capacity}) — choose build|prospect|research|quote")
+            format!(
+                "AP tight ({available} left of {capacity}) — choose build|prospect|research|quote"
+            )
         } else {
             format!("AP {available}/{capacity} this year-voice — shared across build·prospect·research·quote")
         };

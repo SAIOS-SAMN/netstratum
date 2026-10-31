@@ -57,7 +57,10 @@ pub fn bulk(event: &ClosureEvent) -> bool {
 /// The annals keep them only within [`WINDOW`] stamps of the newest drained
 /// receipt; older ones are on disk.
 pub fn windowed(event: &ClosureEvent) -> bool {
-    matches!(event, ClosureEvent::YieldCollected { .. } | ClosureEvent::VentSettled { .. })
+    matches!(
+        event,
+        ClosureEvent::YieldCollected { .. } | ClosureEvent::VentSettled { .. }
+    )
 }
 
 /// The longest window any reader of a windowed kind takes: the crystal sheet's
@@ -102,7 +105,10 @@ impl Annals {
         let mut at = Vec::with_capacity(self.kept_at.len());
         for i in 0..self.kept_at.len() {
             let start = self.kept_at[i] as usize;
-            let end = self.kept_at.get(i + 1).map_or(self.kept_wire.len(), |n| *n as usize);
+            let end = self
+                .kept_at
+                .get(i + 1)
+                .map_or(self.kept_wire.len(), |n| *n as usize);
             let keep = match self.kept_receipt(i) {
                 // A kind now bulk leaves the kept frames (older snapshots
                 // carried it); a windowed kind leaves once outside the window.
@@ -124,8 +130,12 @@ impl Annals {
             match r.event() {
                 ClosureEvent::ApertureSent { from_orb: orb, .. }
                 | ClosureEvent::ApertureReceived { to_orb: orb, .. }
-                | ClosureEvent::BondSealed { source_orb: orb, .. }
-                | ClosureEvent::BondSettled { source_orb: orb, .. } => {
+                | ClosureEvent::BondSealed {
+                    source_orb: orb, ..
+                }
+                | ClosureEvent::BondSettled {
+                    source_orb: orb, ..
+                } => {
                     self.last_link.insert(*orb, r.stamp());
                 }
                 ClosureEvent::AssayStruck { .. } => self.assays += 1,
@@ -173,7 +183,9 @@ impl Annals {
             return true;
         }
         let Some(path) = &self.file else { return false };
-        let Ok(file) = std::fs::File::open(path) else { return false };
+        let Ok(file) = std::fs::File::open(path) else {
+            return false;
+        };
         use std::io::Read;
         let mut reader = std::io::BufReader::new(file).take(self.filed * 32);
         let mut one = [0u8; 32];
@@ -252,7 +264,16 @@ impl Annals {
             return None;
         }
         let (last_link, assays) = Self::read_tail(b, &mut p)?;
-        (p == b.len()).then_some(Annals { kept_wire, kept_at, last_seal, digests: Vec::new(), last_link, assays, filed: count, file: Some(file) })
+        (p == b.len()).then_some(Annals {
+            kept_wire,
+            kept_at,
+            last_seal,
+            digests: Vec::new(),
+            last_link,
+            assays,
+            filed: count,
+            file: Some(file),
+        })
     }
 
     fn put_tail(&self, out: &mut Vec<u8>) {
@@ -345,6 +366,15 @@ impl Annals {
             last_link.insert(orb, u64_at(&mut p)?);
         }
         let assays = u64_at(&mut p)?;
-        (p == b.len()).then_some(Annals { kept_wire, kept_at, last_seal, digests, last_link, assays, filed: 0, file: None })
+        (p == b.len()).then_some(Annals {
+            kept_wire,
+            kept_at,
+            last_seal,
+            digests,
+            last_link,
+            assays,
+            filed: 0,
+            file: None,
+        })
     }
 }

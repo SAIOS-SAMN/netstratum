@@ -101,7 +101,11 @@ impl Annal {
                 }
             }
         }
-        Self { path, last_beat, last_year }
+        Self {
+            path,
+            last_beat,
+            last_year,
+        }
     }
 
     /// The last beat this journal keeps a beat frame for.
@@ -110,7 +114,11 @@ impl Annal {
     }
 
     fn append(&mut self, kind: u64, beat: u64, body: Vec<u8>) -> std::io::Result<bool> {
-        let last = if kind == YEAR_FRAME { self.last_year } else { self.last_beat };
+        let last = if kind == YEAR_FRAME {
+            self.last_year
+        } else {
+            self.last_beat
+        };
         if last.is_some_and(|l| beat <= l) {
             return Ok(false);
         }
@@ -119,13 +127,26 @@ impl Annal {
         card::put_u64(tag::KIND, kind, &mut out);
         out.extend(body);
         card::append_frame(&self.path, &out)?;
-        if kind == YEAR_FRAME { self.last_year = Some(beat) } else { self.last_beat = Some(beat) }
+        if kind == YEAR_FRAME {
+            self.last_year = Some(beat)
+        } else {
+            self.last_beat = Some(beat)
+        }
         Ok(true)
     }
 
     /// A beat's readings.
     #[allow(clippy::too_many_arguments)]
-    pub fn beat(&mut self, beat: u64, hubs: &crate::HubCensus, cleared: usize, road: &cfe::ratio::Ratio, gate: &cfe::ratio::Ratio, released: usize, breath: &BreathReading) -> std::io::Result<bool> {
+    pub fn beat(
+        &mut self,
+        beat: u64,
+        hubs: &crate::HubCensus,
+        cleared: usize,
+        road: &cfe::ratio::Ratio,
+        gate: &cfe::ratio::Ratio,
+        released: usize,
+        breath: &BreathReading,
+    ) -> std::io::Result<bool> {
         let mut b = Vec::new();
         card::put_u64(tag::ECHOES, breath.echoes, &mut b);
         card::put_u64(tag::BIRTHS, breath.births, &mut b);
@@ -180,13 +201,19 @@ mod tests {
         let census = crate::HubCensus::default();
         let zero = cfe::ratio::ratio(0, 1);
         let mut a = Annal::open(&dir);
-        assert!(a.beat(5, &census, 0, &zero, &zero, 0, &BreathReading::default()).unwrap());
+        assert!(a
+            .beat(5, &census, 0, &zero, &zero, 0, &BreathReading::default())
+            .unwrap());
         assert!(a.year(5, &["a line".into()]).unwrap());
         // A resumed witness keeps nothing twice and carries on.
         let mut b = Annal::open(&dir);
         assert_eq!(b.last_beat(), Some(5));
-        assert!(!b.beat(5, &census, 0, &zero, &zero, 0, &BreathReading::default()).unwrap());
-        assert!(b.beat(6, &census, 0, &zero, &zero, 0, &BreathReading::default()).unwrap());
+        assert!(!b
+            .beat(5, &census, 0, &zero, &zero, 0, &BreathReading::default())
+            .unwrap());
+        assert!(b
+            .beat(6, &census, 0, &zero, &zero, 0, &BreathReading::default())
+            .unwrap());
         let _ = std::fs::remove_dir_all(dir);
     }
 }

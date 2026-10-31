@@ -131,7 +131,14 @@ pub fn cocycle_holds(g_ij: &Mat, g_jk: &Mat, g_ik: &Mat) -> bool {
 /// `H^k(V)` rep, reduce each image to its harmonic class in `H^k(W)`, and take the
 /// exact rank of the spanned subspace. (The sign on the V side does not change a
 /// rank, so it is dropped.)
-fn rank_j(u: &CellSheaf, v: &CellSheaf, w: &CellSheaf, r_u: &[Mat], r_v: &[Mat], k: usize) -> usize {
+fn rank_j(
+    u: &CellSheaf,
+    v: &CellSheaf,
+    w: &CellSheaf,
+    r_u: &[Mat],
+    r_v: &[Mat],
+    k: usize,
+) -> usize {
     let mut images: Vec<Vec<BigInt>> = Vec::new();
     let apply = |restr: Option<&Mat>, rep: &[BigInt]| -> Vec<BigInt> {
         match restr {
@@ -191,4 +198,3 @@ pub fn holonomy(loop_transitions: &[Mat]) -> Mat {
 pub fn curvature(loop_transitions: &[Mat], fiber_dim: usize) -> Mat {
     sub(&holonomy(loop_transitions), &identity(fiber_dim))
 }
-

@@ -99,7 +99,11 @@ pub struct Ledger {
 impl Ledger {
     /// The ledger rooted at `<root>/` (conventionally `var/worlds`).
     pub fn at(root: impl Into<PathBuf>) -> Self {
-        Self { root: root.into(), cache: Default::default(), span: std::sync::OnceLock::new() }
+        Self {
+            root: root.into(),
+            cache: Default::default(),
+            span: std::sync::OnceLock::new(),
+        }
     }
 
     /// The directory for one world (created on first touch).
@@ -139,12 +143,20 @@ impl Ledger {
 
     /// Archive a processed directive under `inbox/applied/` or
     /// `inbox/refused/` — dispositions are permanent, never deleted.
-    pub fn archive(&self, pending: &PendingDirective, disposition: Disposition) -> std::io::Result<()> {
+    pub fn archive(
+        &self,
+        pending: &PendingDirective,
+        disposition: Disposition,
+    ) -> std::io::Result<()> {
         let sub = match disposition {
             Disposition::Applied => "applied",
             Disposition::Refused => "refused",
         };
-        let dir = pending.path.parent().expect("inbox file has a parent").join(sub);
+        let dir = pending
+            .path
+            .parent()
+            .expect("inbox file has a parent")
+            .join(sub);
         fs::create_dir_all(&dir)?;
         let name = pending.path.file_name().expect("inbox file has a name");
         fs::rename(&pending.path, dir.join(name))
@@ -264,10 +276,7 @@ impl Ledger {
         }
     }
 
-    fn write_starchart_entries(
-        &self,
-        entries: &[(String, [String; 4])],
-    ) -> std::io::Result<()> {
+    fn write_starchart_entries(&self, entries: &[(String, [String; 4])]) -> std::io::Result<()> {
         let mut out = Vec::new();
         for (name, [px, py, pz, pg]) in entries {
             card::put_str(card::chart::WORLD, name, &mut out);
@@ -286,18 +295,13 @@ impl Ledger {
         for (name, [px, py, pz, pg]) in self.load_starchart_entries() {
             if name == slug {
                 return Some((
-                    (
-                        parse_ratio(&px)?,
-                        parse_ratio(&py)?,
-                        parse_ratio(&pz)?,
-                    ),
+                    (parse_ratio(&px)?, parse_ratio(&py)?, parse_ratio(&pz)?),
                     parse_ratio(&pg)?,
                 ));
             }
         }
         None
     }
-
 }
 
 /// Filesystem-safe names (worlds, planets, civilizations, tasks):
@@ -457,18 +461,33 @@ mod torus_tests {
         let span = ratio(64, 1);
         let p = |x, y, z| (ratio(x, 1), ratio(y, 1), ratio(z, 1));
         // opposite faces are neighbours
-        assert_eq!(torus_distance(&p(1, 0, 0), &p(63, 0, 0), &span), ratio(2, 1));
+        assert_eq!(
+            torus_distance(&p(1, 0, 0), &p(63, 0, 0), &span),
+            ratio(2, 1)
+        );
         // a coordinate outside [0, span) wraps first
-        assert_eq!(torus_distance(&p(-1, 0, 0), &p(1, 0, 0), &span), ratio(2, 1));
-        assert_eq!(torus_distance(&p(65, 0, 0), &p(0, 0, 0), &span), ratio(1, 1));
+        assert_eq!(
+            torus_distance(&p(-1, 0, 0), &p(1, 0, 0), &span),
+            ratio(2, 1)
+        );
+        assert_eq!(
+            torus_distance(&p(65, 0, 0), &p(0, 0, 0), &span),
+            ratio(1, 1)
+        );
         // the long way is never taken: at most half the span per axis
-        assert_eq!(torus_distance(&p(0, 0, 0), &p(32, 40, 10), &span), ratio(32 + 24 + 10, 1));
+        assert_eq!(
+            torus_distance(&p(0, 0, 0), &p(32, 40, 10), &span),
+            ratio(32 + 24 + 10, 1)
+        );
         // symmetric, zero on itself, exact on rationals
         let a = (ratio(1, 3), ratio(127, 2), ratio(0, 1));
         let b = (ratio(63, 1), ratio(1, 2), ratio(5, 7));
         assert_eq!(torus_distance(&a, &b, &span), torus_distance(&b, &a, &span));
         assert_eq!(torus_distance(&a, &a, &span), ratio(0, 1));
-        assert_eq!(torus_distance(&a, &b, &span), ratio(4, 3) + ratio(1, 1) + ratio(5, 7));
+        assert_eq!(
+            torus_distance(&a, &b, &span),
+            ratio(4, 3) + ratio(1, 1) + ratio(5, 7)
+        );
     }
 }
 
@@ -483,27 +502,50 @@ mod core_tests {
         let _ = std::fs::remove_dir_all(&root);
         let book = Ledger::at(&root);
         let p = |x: i64, y: i64, z: i64| (ratio(x, 1), ratio(y, 1), ratio(z, 1));
-        assert_eq!(book.core_of(&p(0, 0, 0)), None, "no core before any galaxy is charted");
+        assert_eq!(
+            book.core_of(&p(0, 0, 0)),
+            None,
+            "no core before any galaxy is charted"
+        );
         // the founding galaxy at the origin, then a far one at (32, 0, 0)
-        book.observe_galaxy("a", "seat", (&ratio(0, 1), &ratio(0, 1), &ratio(0, 1)), 1).unwrap();
-        book.observe_galaxy("b", "seat", (&ratio(32, 1), &ratio(0, 1), &ratio(0, 1)), 2).unwrap();
+        book.observe_galaxy("a", "seat", (&ratio(0, 1), &ratio(0, 1), &ratio(0, 1)), 1)
+            .unwrap();
+        book.observe_galaxy("b", "seat", (&ratio(32, 1), &ratio(0, 1), &ratio(0, 1)), 2)
+            .unwrap();
         assert_eq!(book.core_of(&p(30, 0, 0)).as_deref(), Some("b-sky-1"));
         // across the torus's edge, the origin's core is the near one
         assert_eq!(book.core_of(&p(62, 0, 0)).as_deref(), Some("the-founding"));
         // outside every reach (16), still the nearest core: nothing lands nowhere
         assert_eq!(book.core_of(&p(14, 30, 0)).as_deref(), Some("the-founding"));
         book.append_universe(
-            vec![cfe::dop::ClosureEvent::CoreDeposited { core: "b-sky-1".into(), world: "w".into(), resource: None, amount: ratio(3, 2) }],
+            vec![cfe::dop::ClosureEvent::CoreDeposited {
+                core: "b-sky-1".into(),
+                world: "w".into(),
+                resource: None,
+                amount: ratio(3, 2),
+            }],
             3,
         )
         .unwrap();
-        assert_eq!(book.core_holdings().get(&("b-sky-1".to_string(), None)), Some(&ratio(3, 2)));
+        assert_eq!(
+            book.core_holdings().get(&("b-sky-1".to_string(), None)),
+            Some(&ratio(3, 2))
+        );
         book.append_universe(
-            vec![cfe::dop::ClosureEvent::CoreEmitted { core: "b-sky-1".into(), world: "w".into(), resource: None, amount: ratio(1, 2) }],
+            vec![cfe::dop::ClosureEvent::CoreEmitted {
+                core: "b-sky-1".into(),
+                world: "w".into(),
+                resource: None,
+                amount: ratio(1, 2),
+            }],
             4,
         )
         .unwrap();
-        assert_eq!(book.core_holdings().get(&("b-sky-1".to_string(), None)), Some(&ratio(1, 1)), "deposits less emissions");
+        assert_eq!(
+            book.core_holdings().get(&("b-sky-1".to_string(), None)),
+            Some(&ratio(1, 1)),
+            "deposits less emissions"
+        );
         // the dead's library: each line's word its own claim, conflicts kept
         let word = |world: &str, orbit: u8| cfe::dop::ClosureEvent::CoreWordDeposited {
             core: "b-sky-1".into(),
@@ -512,7 +554,11 @@ mod core_tests {
             expansion: vec![1, 2],
             cited: vec![[orbit; 32]],
         };
-        book.append_universe(vec![word("dead-a", 7), word("dead-b", 7), word("dead-b", 8)], 5).unwrap();
+        book.append_universe(
+            vec![word("dead-a", 7), word("dead-b", 7), word("dead-b", 8)],
+            5,
+        )
+        .unwrap();
         let library = &book.core_libraries()["b-sky-1"];
         assert_eq!(library.len(), 3, "two lines' same word stays two claims");
         assert_eq!(library[0].world, "dead-a");

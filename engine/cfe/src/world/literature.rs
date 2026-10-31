@@ -49,9 +49,8 @@ impl World {
             .iter()
             .map(|name| {
                 let work = work_of(name);
-                let standing = held.and_then(|orb| {
-                    orb.aspirations.iter().find(|held| held.work == work)
-                });
+                let standing =
+                    held.and_then(|orb| orb.aspirations.iter().find(|held| held.work == work));
                 WorkView {
                     work,
                     name: (*name).to_string(),
@@ -72,12 +71,7 @@ impl World {
     }
 
     /// The contained form. Build scope: aspiring adds standing state.
-    pub fn aspire_as(
-        &mut self,
-        actor: u64,
-        orb: u64,
-        name: &str,
-    ) -> Result<WorkId, ActionRefused> {
+    pub fn aspire_as(&mut self, actor: u64, orb: u64, name: &str) -> Result<WorkId, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         if self.orb_by_id(orb).is_none() {
             return Err(ActionRefused::NoSuchOrb { orb });
@@ -85,7 +79,9 @@ impl World {
         // The works are chartered. A line invents accounts (BOOK-1); it
         // does not invent the literature it reaches for.
         if !is_work(name) {
-            return Err(ActionRefused::NoSuchWork { name: name.to_string() });
+            return Err(ActionRefused::NoSuchWork {
+                name: name.to_string(),
+            });
         }
         if !self.literate(orb) {
             return Err(ActionRefused::NotLiterate);
@@ -95,7 +91,9 @@ impl World {
             .orb_by_id(orb)
             .is_some_and(|held| held.aspirations.iter().any(|held| held.work == work))
         {
-            return Err(ActionRefused::WorkAlreadyAspired { name: name.to_string() });
+            return Err(ActionRefused::WorkAlreadyAspired {
+                name: name.to_string(),
+            });
         }
         let declared = work_named(work).unwrap_or(name).to_string();
         let held = peel(&mut self.orbs, orb).expect("judged above");
@@ -105,7 +103,14 @@ impl World {
             witnesses: Vec::new(),
         });
         held.aspirations.sort_by_key(|held| held.work);
-        self.close(ClosureEvent::WorkAspired { orb_id: orb, work, name: declared }, actor);
+        self.close(
+            ClosureEvent::WorkAspired {
+                orb_id: orb,
+                work,
+                name: declared,
+            },
+            actor,
+        );
         Ok(work)
     }
 
@@ -137,10 +142,14 @@ impl World {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
         if !is_work(name) {
-            return Err(ActionRefused::NoSuchWork { name: name.to_string() });
+            return Err(ActionRefused::NoSuchWork {
+                name: name.to_string(),
+            });
         }
         if witnesses.is_empty() {
-            return Err(ActionRefused::ClaimWithoutWitness { name: name.to_string() });
+            return Err(ActionRefused::ClaimWithoutWitness {
+                name: name.to_string(),
+            });
         }
         let work = work_of(name);
         match self
@@ -149,9 +158,15 @@ impl World {
         {
             // A work is reached for before it is claimed. Skipping that
             // would let a line claim what it never set out to do.
-            None => return Err(ActionRefused::WorkNotAspired { name: name.to_string() }),
+            None => {
+                return Err(ActionRefused::WorkNotAspired {
+                    name: name.to_string(),
+                })
+            }
             Some(held) if held.claimed() => {
-                return Err(ActionRefused::WorkAlreadyClaimed { name: name.to_string() })
+                return Err(ActionRefused::WorkAlreadyClaimed {
+                    name: name.to_string(),
+                })
             }
             Some(_) => {}
         }
@@ -173,7 +188,11 @@ impl World {
             .expect("judged above")
             .witnesses = cited.clone();
         self.close(
-            ClosureEvent::WorkClaimed { orb_id: orb, work, witnesses: cited },
+            ClosureEvent::WorkClaimed {
+                orb_id: orb,
+                work,
+                witnesses: cited,
+            },
             actor,
         );
         Ok(())

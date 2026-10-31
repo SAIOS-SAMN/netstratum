@@ -27,7 +27,7 @@
 //! sealed on the wire at orb entry tag 41 (IDEO-1). **Rewriting landed
 //! committed state to make a uniform container would break every
 //! existing chronicle for a tidiness that buys nothing.** Instead
-//! [`ColonyOrb::books`] presents charter and minted books through one
+//! `ColonyOrb::books` presents charter and minted books through one
 //! read view, so a reader never learns which storage a book came from.
 //!
 //! # IDENTITY is the novelty gate, and it is exact
@@ -116,7 +116,9 @@ impl BookName {
             return Err(BookNameFault::NormalizesToNothing);
         }
         if let Some(held) = CHARTER_BOOKS.iter().find(|held| normalize(held) == normal) {
-            return Err(BookNameFault::Charter { name: (*held).to_string() });
+            return Err(BookNameFault::Charter {
+                name: (*held).to_string(),
+            });
         }
         Ok(BookName(text.to_string()))
     }

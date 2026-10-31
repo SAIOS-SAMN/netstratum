@@ -71,10 +71,7 @@ pub fn segment(g: &Grid, bg: u8, same_hue_only: bool) -> Vec<Object> {
             cells.push((r, c, g.cells[at]));
             let mut push = |nr: usize, nc: usize| {
                 let n = nr * g.cols + nc;
-                if !seen[n]
-                    && g.cells[n] != bg
-                    && (!same_hue_only || g.cells[n] == g.cells[at])
-                {
+                if !seen[n] && g.cells[n] != bg && (!same_hue_only || g.cells[n] == g.cells[at]) {
                     seen[n] = true;
                     stack.push(n);
                 }

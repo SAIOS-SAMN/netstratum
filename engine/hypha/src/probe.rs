@@ -15,7 +15,11 @@ fn body(centre: [i64; 3]) -> Body {
     Body {
         centre: centre.iter().map(|&c| q(c)).collect(),
         mass: q(1),
-        moments: vec![vec![q(1), q(0), q(0)], vec![q(0), q(0), q(0)], vec![q(0), q(0), q(0)]],
+        moments: vec![
+            vec![q(1), q(0), q(0)],
+            vec![q(0), q(0), q(0)],
+            vec![q(0), q(0), q(0)],
+        ],
     }
 }
 
@@ -32,7 +36,10 @@ pub fn carried(motion: &Mv) -> Option<Vec<(BodyState, BodyState)>> {
         .map(|&c| {
             let b = body(c);
             let nucleus = sphere_at(&b.centre, &q(1));
-            let after = BodyState { nucleus: motion.sandwich(&nucleus), body: carried_body(&b, motion)? };
+            let after = BodyState {
+                nucleus: motion.sandwich(&nucleus),
+                body: carried_body(&b, motion)?,
+            };
             Some((BodyState { nucleus, body: b }, after))
         })
         .collect()
@@ -41,12 +48,24 @@ pub fn carried(motion: &Mv) -> Option<Vec<(BodyState, BodyState)>> {
 /// A lawful step: two bodies turned together, the height advancing.
 pub fn lawful(h: u64) -> Option<Transition> {
     let m = turn();
-    Some(Transition { motion: m.clone(), heights: (h, h + 1), bodies: carried(&m)?, hues: Vec::new(), fluxes: Vec::new() })
+    Some(Transition {
+        motion: m.clone(),
+        heights: (h, h + 1),
+        bodies: carried(&m)?,
+        hues: Vec::new(),
+        fluxes: Vec::new(),
+    })
 }
 
 /// The same step with the height standing still: temporal monotonicity
 /// breached, and only it.
 pub fn timeless(h: u64) -> Option<Transition> {
     let m = turn();
-    Some(Transition { motion: m.clone(), heights: (h, h), bodies: carried(&m)?, hues: Vec::new(), fluxes: Vec::new() })
+    Some(Transition {
+        motion: m.clone(),
+        heights: (h, h),
+        bodies: carried(&m)?,
+        hues: Vec::new(),
+        fluxes: Vec::new(),
+    })
 }

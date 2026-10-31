@@ -175,10 +175,7 @@ impl Lens {
         let numerator = Ratio::from(value.numer().clone());
         let denominator = Ratio::from(value.denom().clone());
         Lens {
-            cell: [
-                [numerator, zero.clone()],
-                [zero, denominator],
-            ],
+            cell: [[numerator, zero.clone()], [zero, denominator]],
         }
     }
 
@@ -223,8 +220,14 @@ impl std::ops::Add for Lens {
 
     /// Combine two caged readings. Stays caged, forever.
     fn add(self, other: Lens) -> Lens {
-        let left = Ratio::new(self.cell[0][0].numer().clone(), self.cell[1][1].numer().clone());
-        let right = Ratio::new(other.cell[0][0].numer().clone(), other.cell[1][1].numer().clone());
+        let left = Ratio::new(
+            self.cell[0][0].numer().clone(),
+            self.cell[1][1].numer().clone(),
+        );
+        let right = Ratio::new(
+            other.cell[0][0].numer().clone(),
+            other.cell[1][1].numer().clone(),
+        );
         Lens::of(left + right)
     }
 }
@@ -234,7 +237,10 @@ impl std::iter::Sum for Lens {
     /// space. Note what this cannot feed: no engine path accepts a
     /// `Lens`, so an accumulated C has nowhere to go but a rendering.
     fn sum<I: Iterator<Item = Lens>>(iter: I) -> Lens {
-        iter.fold(Lens::of(Ratio::from(num_bigint::BigInt::from(0))), |a, b| a + b)
+        iter.fold(
+            Lens::of(Ratio::from(num_bigint::BigInt::from(0))),
+            |a, b| a + b,
+        )
     }
 }
 

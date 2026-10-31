@@ -61,8 +61,11 @@ fn main() {
     // itself is the pulse's, deployed beforehand (the `pulse` binary).
     let mut specs = roster(&registry);
     let book = Ledger::at(format!("{var_root}/worlds"));
-    let Some((pulse_seed, mut universe)) = conductor::pulse::read(std::path::Path::new(&var_root)) else {
-        eprintln!("conductor: no universe at {var_root}/pulse.bin — deploy it first (the pulse binary)");
+    let Some((pulse_seed, mut universe)) = conductor::pulse::read(std::path::Path::new(&var_root))
+    else {
+        eprintln!(
+            "conductor: no universe at {var_root}/pulse.bin — deploy it first (the pulse binary)"
+        );
         std::process::exit(1);
     };
     // The universal pulse: the bell's period derived at the founding (the
@@ -76,7 +79,10 @@ fn main() {
         Err(e) => eprintln!("conductor: the galaxies were not charted: {e}"),
     }
     let era1_worlds: std::collections::BTreeMap<Vec<u64>, conductor::life::World> =
-        conductor::life::worlds(&universe).into_iter().map(|w| (w.path.clone(), w)).collect();
+        conductor::life::worlds(&universe)
+            .into_iter()
+            .map(|w| (w.path.clone(), w))
+            .collect();
     conductor::seating::seat(&universe, &era1_worlds, &mut specs);
     // Motion (era 1): each system's galactic period, which its lines' orbits
     // read; refreshed when the breath changes the universe.
@@ -90,7 +96,11 @@ fn main() {
             println!(
                 "conductor: {} stands on world {path:?}{}",
                 spec.civilization.sigil,
-                spec.civilization.lineage.first().map(|p| format!(" (of the line of {p})")).unwrap_or_default()
+                spec.civilization
+                    .lineage
+                    .first()
+                    .map(|p| format!(" (of the line of {p})"))
+                    .unwrap_or_default()
             );
         }
     }
@@ -107,7 +117,15 @@ fn main() {
         life_readings.values().filter(|r| r.climb.is_some()).count(),
         climbs.values().filter(|c| c.woken).count()
     );
-    println!("conductor: the pulse universe — {} cores, {} systems; T_u {t_u_bells} bells", universe.cores.len(), universe.cores.iter().map(|c| c.satellites.len()).sum::<usize>());
+    println!(
+        "conductor: the pulse universe — {} cores, {} systems; T_u {t_u_bells} bells",
+        universe.cores.len(),
+        universe
+            .cores
+            .iter()
+            .map(|c| c.satellites.len())
+            .sum::<usize>()
+    );
 
     // CONVERGE-1 (07 §1.6): converge the archived eras before genesis —
     // boot adopts the past instead of founding blind beside it.
@@ -121,7 +139,10 @@ fn main() {
         converged.epoch_base,
     );
     for q in &converged.quarantined {
-        println!("conductor: QUARANTINED {}/{} (break at {})", q.era, q.world, q.at);
+        println!(
+            "conductor: QUARANTINED {}/{} (break at {})",
+            q.era, q.world, q.at
+        );
     }
     let epoch_base = converged.epoch_base;
 
@@ -134,29 +155,39 @@ fn main() {
     // docs/58 §3 — the big bang, recorded once on this universe's ledger
     // before any world is founded (or, for a universe that predates the law,
     // once and late as its re-founding).
-    match book.found_universe(conductor::roster_digest(), cfe::almanac::matter_law_digest(), epoch_base) {
+    match book.found_universe(
+        conductor::roster_digest(),
+        cfe::almanac::matter_law_digest(),
+        epoch_base,
+    ) {
         Ok((seed, true)) => println!(
             "conductor: THE BIG BANG — this universe is {} (recorded now)",
-            seed.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>()
+            seed.iter()
+                .take(8)
+                .map(|b| format!("{b:02x}"))
+                .collect::<String>()
         ),
         Ok((seed, false)) => println!(
             "conductor: the universe is {}",
-            seed.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>()
+            seed.iter()
+                .take(8)
+                .map(|b| format!("{b:02x}"))
+                .collect::<String>()
         ),
         Err(e) => eprintln!("conductor: the Big Bang was not recorded: {e}"),
     }
     // docs/63 — observation: only the observed lines are unrolled; the rest
     // stay compact (their snapshots on disk, their specs here) until an
     // observer arrives.
-    let takes = PathBuf::from(std::env::var("NETSTRATUM_HOUSE").unwrap_or_else(|_| "var/uplink/house".into())).join("takes");
+    let takes = PathBuf::from(
+        std::env::var("NETSTRATUM_HOUSE").unwrap_or_else(|_| "var/uplink/house".into()),
+    )
+    .join("takes");
     let watch = PathBuf::from(&var_root).join("watch");
     let specs: Vec<conductor::PolitySpec> = specs
         .into_iter()
         .map(|mut spec| {
-            let opening = spec
-                .gauge
-                .take()
-                .unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+            let opening = spec.gauge.take().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
             spec.gauge = Some(cfe::world::wrap_gauge(opening + live_base.clone()));
             spec
         })
@@ -166,10 +197,18 @@ fn main() {
         let refs: Vec<&conductor::PolitySpec> = specs.iter().collect();
         conductor::observe::observed(&refs, &registry, &takes, &watch, &book.universe_span())
     };
-    let (awake, mut dormant): (Vec<conductor::PolitySpec>, Vec<conductor::PolitySpec>) =
-        specs.into_iter().partition(|spec| observed.contains(&spec.world_name));
-    println!("conductor: {} lines observed and unrolled, {} compact", awake.len(), dormant.len());
-    let mut worlds: Vec<Polity> = awake.into_iter().map(|spec| Polity::genesis(spec, &registry, &book)).collect();
+    let (awake, mut dormant): (Vec<conductor::PolitySpec>, Vec<conductor::PolitySpec>) = specs
+        .into_iter()
+        .partition(|spec| observed.contains(&spec.world_name));
+    println!(
+        "conductor: {} lines observed and unrolled, {} compact",
+        awake.len(),
+        dormant.len()
+    );
+    let mut worlds: Vec<Polity> = awake
+        .into_iter()
+        .map(|spec| Polity::genesis(spec, &registry, &book))
+        .collect();
     // A line resumed already collapsed never re-enters the beat.
     for name in conductor::retire_collapsed(&mut worlds, &book, epoch_base) {
         println!("conductor: {name} resumed collapsed; it stays out of the roster");
@@ -249,7 +288,10 @@ fn main() {
         .and_then(|s| s.trim().parse().ok())
         .unwrap_or(0);
     if beat > 0 {
-        println!("conductor: resumed beat {beat} from {}", beat_path.display());
+        println!(
+            "conductor: resumed beat {beat} from {}",
+            beat_path.display()
+        );
     }
     let mut total_cleaves: u64 = 0;
     let mut ancient: Option<(String, u64)> = None;
@@ -263,7 +305,8 @@ fn main() {
     let mut contacts = conductor::realms::Contacts::default();
     let mut passages = conductor::realms::Passages::default();
     // docs/77: the road tolls each gate earned this term.
-    let mut gate_tolls: std::collections::BTreeMap<(String, String), cfe::ratio::Ratio> = std::collections::BTreeMap::new();
+    let mut gate_tolls: std::collections::BTreeMap<(String, String), cfe::ratio::Ratio> =
+        std::collections::BTreeMap::new();
     // The universe journal: the readings below kept in `universe.jrn`, the
     // relay handed off by the file (a resumed conductor writes after the
     // last beat kept).
@@ -293,7 +336,10 @@ fn main() {
         };
         if paused {
             if !announced_pause {
-                println!("conductor: PAUSED — npcs resume (or edit {}) to continue", control_path.display());
+                println!(
+                    "conductor: PAUSED — npcs resume (or edit {}) to continue",
+                    control_path.display()
+                );
                 announced_pause = true;
             }
             std::thread::sleep(std::time::Duration::from_secs(1));
@@ -307,11 +353,15 @@ fn main() {
         let _ = book.set_universal_clock(epoch_base + beat);
         // The breath (docs/78): the echoes arriving this bell compress the
         // media; stars shed by their phase; the clocks say what comes due.
-        let events = conductor::profile::timed("breath", || conductor::breath::breathe(&mut universe, &pulse_seed, t_u_bells, beat - 1, beat));
+        let events = conductor::profile::timed("breath", || {
+            conductor::breath::breathe(&mut universe, &pulse_seed, t_u_bells, beat - 1, beat)
+        });
         let mut breath_reading = conductor::annal::BreathReading {
             echoes: events.len() as u64,
             births: events.iter().map(|e| e.stars as u64).sum(),
-            returned: events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone()),
+            returned: events
+                .iter()
+                .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone()),
             dissolved: events.iter().map(|e| e.dissolved as u64).sum(),
             ..Default::default()
         };
@@ -326,13 +376,19 @@ fn main() {
             // The poles (docs/78 law 11): the universal core's strength, the
             // span between its ℤ pole (holding) and ℚ pole (magnetism), and
             // its balance, the share at the ℤ pole (1: hardened).
-            let held = universe.cores.iter().fold(conductor::pulse::Manifest::new(), |mut m, c| {
-                for (k, a) in c.total() {
-                    *m.entry(k).or_insert_with(|| cfe::ratio::ratio(0, 1)) += a;
-                }
-                m
-            });
-            let (_, balance) = cfe::ratio::poles(&conductor::pulse::held(&held), &conductor::pulse::magnetism(&held));
+            let held = universe
+                .cores
+                .iter()
+                .fold(conductor::pulse::Manifest::new(), |mut m, c| {
+                    for (k, a) in c.total() {
+                        *m.entry(k).or_insert_with(|| cfe::ratio::ratio(0, 1)) += a;
+                    }
+                    m
+                });
+            let (_, balance) = cfe::ratio::poles(
+                &conductor::pulse::held(&held),
+                &conductor::pulse::magnetism(&held),
+            );
             let f = conductor::reading::sector;
             println!("beat {beat}: POLES — universal core strength H_u {}, balance {} (the share at the ℤ pole)", f(&conductor::ocean::universe_hold(&universe)), f(&balance));
             // The enclosures (docs/78): each galaxy its own S^360, each star
@@ -349,7 +405,12 @@ fn main() {
                 }
             };
             let (gs, ss) = (span(&gal), span(&sys));
-            let sample = universe.cores.iter().find_map(|c| c.satellites.iter().find(|s| !s.satellites.is_empty()).map(|s| (c, s, &s.satellites[0])));
+            let sample = universe.cores.iter().find_map(|c| {
+                c.satellites
+                    .iter()
+                    .find(|s| !s.satellites.is_empty())
+                    .map(|s| (c, s, &s.satellites[0]))
+            });
             let inversion = sample.and_then(|(c, s, w)| {
                 let ge = gal.iter().find(|e| e.path == c.path)?;
                 let se = sys.iter().find(|e| e.path == s.path)?;
@@ -357,15 +418,44 @@ fn main() {
             }).unwrap_or_default();
             // The formation observer (docs/83): what the gas has become.
             let stars: usize = universe.cores.iter().map(|c| c.satellites.len()).sum();
-            let worlds: usize = universe.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len()).sum();
-            let lit = universe.cores.iter().filter(|c| !c.satellites.is_empty()).count();
-            let gas_share = universe.cores.iter().map(|c| conductor::pulse::mass(&c.medium)).fold(cfe::ratio::ratio(0, 1), |a, b| a + b) / conductor::pulse::mass(&universe.total());
-            let discs = universe.cores.iter().map(|c| conductor::pulse::mass(&c.kept)).fold(cfe::ratio::ratio(0, 1), |a, b| a + b) / conductor::pulse::mass(&universe.total());
+            let worlds: usize = universe
+                .cores
+                .iter()
+                .flat_map(|c| &c.satellites)
+                .map(|s| s.satellites.len())
+                .sum();
+            let lit = universe
+                .cores
+                .iter()
+                .filter(|c| !c.satellites.is_empty())
+                .count();
+            let gas_share = universe
+                .cores
+                .iter()
+                .map(|c| conductor::pulse::mass(&c.medium))
+                .fold(cfe::ratio::ratio(0, 1), |a, b| a + b)
+                / conductor::pulse::mass(&universe.total());
+            let discs = universe
+                .cores
+                .iter()
+                .map(|c| conductor::pulse::mass(&c.kept))
+                .fold(cfe::ratio::ratio(0, 1), |a, b| a + b)
+                / conductor::pulse::mass(&universe.total());
             let motes: usize = universe.cores.iter().map(|c| c.gas.len()).sum();
-            let metal_stars = universe.cores.iter().flat_map(|c| &c.satellites).filter(|s| s.kept.keys().any(|k| conductor::chem::charge(k) > 2)).count();
+            let metal_stars = universe
+                .cores
+                .iter()
+                .flat_map(|c| &c.satellites)
+                .filter(|s| s.kept.keys().any(|k| conductor::chem::charge(k) > 2))
+                .count();
             // The coupling at each star's interface (`formation::coupling`).
             let universe_hold = conductor::pulse::mass(&universe.total());
-            let kappas: Vec<cfe::ratio::Ratio> = universe.cores.iter().flat_map(|c| &c.satellites).filter_map(|s| conductor::formation::coupling(&s.kept, &universe_hold)).collect();
+            let kappas: Vec<cfe::ratio::Ratio> = universe
+                .cores
+                .iter()
+                .flat_map(|c| &c.satellites)
+                .filter_map(|s| conductor::formation::coupling(&s.kept, &universe_hold))
+                .collect();
             let kappa = match (kappas.iter().min(), kappas.iter().max()) {
                 (Some(a), Some(b)) => format!("{}..{}", f(a), f(b)),
                 _ => "none".to_string(),
@@ -379,16 +469,43 @@ fn main() {
             for (i, core) in universe.cores.iter().enumerate() {
                 for (s, sys) in core.satellites.iter().enumerate() {
                     let rate = conductor::breath::system_clock(&universe, i, s, &unit);
-                    let received = (rate.clone() * cfe::ratio::ratio(beat.saturating_sub(sys.born) as i64, 1)).floor().to_integer().try_into().unwrap_or(0u64);
-                    if let Some((feed, _)) = conductor::formation::burn(&sys.kept, &(conductor::pulse::mass(&sys.kept) / conductor::pulse::mass(&sys.total())), 1, &cfe::ratio::ratio(1, 1)) {
+                    let received = (rate.clone()
+                        * cfe::ratio::ratio(beat.saturating_sub(sys.born) as i64, 1))
+                    .floor()
+                    .to_integer()
+                    .try_into()
+                    .unwrap_or(0u64);
+                    if let Some((feed, _)) = conductor::formation::burn(
+                        &sys.kept,
+                        &(conductor::pulse::mass(&sys.kept) / conductor::pulse::mass(&sys.total())),
+                        1,
+                        &cfe::ratio::ratio(1, 1),
+                    ) {
                         // A life: the rings until less than a grain of fuel
                         // in 2^30 is left, compounding, read in bells on its
                         // clock.
                         let below = cfe::ratio::ratio(1, 1 << 30);
-                        if let (false, Some(n)) = (num_traits::Zero::is_zero(&rate), conductor::compound::rings_until(&feed, &below)) {
-                            lives.push(cfe::ratio::Ratio::from_integer(num_bigint::BigInt::from(n)) / rate.clone());
+                        if let (false, Some(n)) = (
+                            num_traits::Zero::is_zero(&rate),
+                            conductor::compound::rings_until(&feed, &below),
+                        ) {
+                            lives.push(
+                                cfe::ratio::Ratio::from_integer(num_bigint::BigInt::from(n))
+                                    / rate.clone(),
+                            );
                         }
-                        if conductor::compound::after(&feed, received).and_then(|remaining| conductor::compound::read(&cfe::ratio::ratio(1, 1), &remaining, |left| *left < below)) == Some(true) { spent += 1 } else { burning += 1 }
+                        if conductor::compound::after(&feed, received).and_then(|remaining| {
+                            conductor::compound::read(
+                                &cfe::ratio::ratio(1, 1),
+                                &remaining,
+                                |left| *left < below,
+                            )
+                        }) == Some(true)
+                        {
+                            spent += 1
+                        } else {
+                            burning += 1
+                        }
                     }
                 }
             }
@@ -399,7 +516,8 @@ fn main() {
             println!("beat {beat}: ENCLOSURES — {} galaxies on S^360 (own rings {gs}), {} systems on S^60 (own rings {ss}); {inversion}", gal.len(), sys.len());
         }
         if !events.is_empty() {
-            let _ = conductor::pulse::write(std::path::Path::new(&var_root), &pulse_seed, &universe);
+            let _ =
+                conductor::pulse::write(std::path::Path::new(&var_root), &pulse_seed, &universe);
             println!(
                 "beat {beat}: BREATH — {} echoes, {} systems born, {} returned to the media (units of the deepest hole), {} stars dissolved",
                 breath_reading.echoes, breath_reading.births, conductor::reading::sector(&breath_reading.returned), breath_reading.dissolved
@@ -408,12 +526,16 @@ fn main() {
         // The readings follow the universe: refreshed when the breath changed
         // it, at most once a pulse.
         if !events.is_empty() && beat >= readings_at + t_u_bells {
-            life_readings = conductor::profile::timed("life:read", || conductor::life::readings(&universe, &pulse_seed));
+            life_readings = conductor::profile::timed("life:read", || {
+                conductor::life::readings(&universe, &pulse_seed)
+            });
             system_periods = conductor::seating::periods(&universe);
             conductor::places::set(&universe, &book);
             readings_at = beat;
         }
-        let (woke, measured) = conductor::profile::timed("life:climb", || conductor::life::advance(&life_readings, &mut climbs, t_u_bells, beat));
+        let (woke, measured) = conductor::profile::timed("life:climb", || {
+            conductor::life::advance(&life_readings, &mut climbs, t_u_bells, beat)
+        });
         breath_reading.measurements += measured;
         if beat.is_multiple_of(10) || !woke.is_empty() {
             conductor::life::write_climbs(std::path::Path::new(&var_root), &climbs);
@@ -424,13 +546,12 @@ fn main() {
                 continue;
             }
             let world = life_readings.get(&w.path).map(|r| &r.world);
-            if let Some(spec) = conductor::waking::found(&universe, &pulse_seed, &w, &registry, world) {
+            if let Some(spec) =
+                conductor::waking::found(&universe, &pulse_seed, &w, &registry, world)
+            {
                 println!(
                     "beat {beat}: A MIND WAKES — {} ({}, {} medium) on world {:?}",
-                    spec.civilization.name,
-                    spec.civilization.species,
-                    w.medium,
-                    w.path
+                    spec.civilization.name, spec.civilization.species, w.medium, w.path
                 );
                 breath_reading.wakings += 1;
                 conductor::places::claim(&w.path);
@@ -442,7 +563,14 @@ fn main() {
         // admission published for the house.
         {
             let attached = conductor::profile::timed("attachment", || {
-                conductor::attachment::read(&mut universe, &mut worlds, &registry, &book, std::path::Path::new(&var_root), epoch_base + beat)
+                conductor::attachment::read(
+                    &mut universe,
+                    &mut worlds,
+                    &registry,
+                    &book,
+                    std::path::Path::new(&var_root),
+                    epoch_base + beat,
+                )
             });
             for (mind, path) in &attached.coupled {
                 println!("beat {beat}: A MIND COUPLES — {mind} to the forming world {path:?}");
@@ -454,15 +582,34 @@ fn main() {
                 println!("beat {beat}: A MIND DETACHES — {sigil} goes on as the universe's own");
             }
             for (mind, opened) in &attached.sandboxes {
-                println!("beat {beat}: A SANDBOX {} — {mind}", if *opened { "OPENS" } else { "IS REFUSED (its leisure does not cover it)" });
+                println!(
+                    "beat {beat}: A SANDBOX {} — {mind}",
+                    if *opened {
+                        "OPENS"
+                    } else {
+                        "IS REFUSED (its leisure does not cover it)"
+                    }
+                );
             }
         }
         conductor::profile::timed("clocks", || {
             for i in 0..universe.cores.len() {
                 // Counted where read; a galaxy whose clock is not read adds
                 // nothing.
-                breath_reading.terms += conductor::clocks::galaxy_terms(&universe, i, t_u_bells, beat - 1, beat).into_iter().sum::<u64>();
-                breath_reading.epochs += conductor::clocks::galaxy_epochs(&universe, i, &unit, t_u_bells, beat - 1, beat).into_iter().sum::<u64>();
+                breath_reading.terms +=
+                    conductor::clocks::galaxy_terms(&universe, i, t_u_bells, beat - 1, beat)
+                        .into_iter()
+                        .sum::<u64>();
+                breath_reading.epochs += conductor::clocks::galaxy_epochs(
+                    &universe,
+                    i,
+                    &unit,
+                    t_u_bells,
+                    beat - 1,
+                    beat,
+                )
+                .into_iter()
+                .sum::<u64>();
             }
             breath_reading.local_years = universe
                 .cores
@@ -476,8 +623,18 @@ fn main() {
         // compacted (carried and unloaded), an observed compact line unrolled.
         if beat.is_multiple_of(10) {
             let observed = {
-                let refs: Vec<&conductor::PolitySpec> = worlds.iter().map(|p| &p.spec).chain(dormant.iter()).collect();
-                conductor::observe::observed(&refs, &registry, &takes, &watch, &book.universe_span())
+                let refs: Vec<&conductor::PolitySpec> = worlds
+                    .iter()
+                    .map(|p| &p.spec)
+                    .chain(dormant.iter())
+                    .collect();
+                conductor::observe::observed(
+                    &refs,
+                    &registry,
+                    &takes,
+                    &watch,
+                    &book.universe_span(),
+                )
             };
             let mut at = 0;
             while at < worlds.len() {
@@ -489,10 +646,15 @@ fn main() {
                     at += 1;
                 }
             }
-            let (wake, still): (Vec<_>, Vec<_>) = dormant.into_iter().partition(|spec| observed.contains(&spec.world_name));
+            let (wake, still): (Vec<_>, Vec<_>) = dormant
+                .into_iter()
+                .partition(|spec| observed.contains(&spec.world_name));
             dormant = still;
             for spec in wake {
-                println!("beat {beat}: UNROLLED — {} is observed; its world runs", spec.world_name);
+                println!(
+                    "beat {beat}: UNROLLED — {} is observed; its world runs",
+                    spec.world_name
+                );
                 worlds.push(Polity::genesis(spec, &registry, &book));
             }
         }
@@ -501,9 +663,15 @@ fn main() {
         // MESH-1b (#2): the pen door — yields seal at the beat
         // boundary; penned worlds wait, and the file poll notices
         // the pen coming home.
-        for line in conductor::profile::timed("pen_service", || conductor::pen_service(
-            &mut worlds, &registry, &book, &control_path, epoch_base + beat,
-        )) {
+        for line in conductor::profile::timed("pen_service", || {
+            conductor::pen_service(
+                &mut worlds,
+                &registry,
+                &book,
+                &control_path,
+                epoch_base + beat,
+            )
+        }) {
             println!("beat {beat}: {line}");
         }
         // COG-DIRECTION Slice 3b: the population cohesion census before the cycle
@@ -619,11 +787,17 @@ fn main() {
         }
         // The largest living LINEAGE, read live and announced when it
         // changes: the progenitor candidate (an ancient arises only at a core).
-        let living: std::collections::BTreeSet<String> =
-            worlds.iter().map(|p| p.spec.civilization.sigil.clone()).collect();
+        let living: std::collections::BTreeSet<String> = worlds
+            .iter()
+            .map(|p| p.spec.civilization.sigil.clone())
+            .collect();
         // The lineage reads the whole registry from disk: only when the
         // living set changed (a birth or a death), never on a quiet beat.
-        let now_ancient = if living == last_living { ancient.clone() } else { conductor::largest_lineage(&registry, &living) };
+        let now_ancient = if living == last_living {
+            ancient.clone()
+        } else {
+            conductor::largest_lineage(&registry, &living)
+        };
         last_living = living.clone();
         if now_ancient.as_ref().map(|(s, _)| s) != ancient.as_ref().map(|(s, _)| s) {
             match &now_ancient {
@@ -640,29 +814,59 @@ fn main() {
             // The settling (`places`, operator 2026-10-21), in world order: a
             // branch of a line on an era-1 world settles the free world
             // nearest its parent's.
-            let parent = spec.civilization.lineage.first().cloned().unwrap_or_default();
-            let near = worlds.iter().find(|p| p.spec.civilization.sigil == parent).and_then(|p| p.spec.place.clone());
-            match near.as_deref().map(|p| (p, conductor::places::settle(p, &spec.civilization.metabolism))) {
+            let parent = spec
+                .civilization
+                .lineage
+                .first()
+                .cloned()
+                .unwrap_or_default();
+            let near = worlds
+                .iter()
+                .find(|p| p.spec.civilization.sigil == parent)
+                .and_then(|p| p.spec.place.clone());
+            match near.as_deref().map(|p| {
+                (
+                    p,
+                    conductor::places::settle(p, &spec.civilization.metabolism),
+                )
+            }) {
                 Some((_, Some(site))) => conductor::seating::apply(&mut spec, &site),
-                Some((p, None)) => println!("beat {beat}: UNSETTLED — {} finds no world near {p:?}: {}", spec.civilization.sigil, conductor::places::unsettled(p)),
-                None => println!("beat {beat}: UNSETTLED — {}: its parent {parent} stands on no era-1 world", spec.civilization.sigil),
+                Some((p, None)) => println!(
+                    "beat {beat}: UNSETTLED — {} finds no world near {p:?}: {}",
+                    spec.civilization.sigil,
+                    conductor::places::unsettled(p)
+                ),
+                None => println!(
+                    "beat {beat}: UNSETTLED — {}: its parent {parent} stands on no era-1 world",
+                    spec.civilization.sigil
+                ),
             }
             println!(
                 "beat {beat}: DIVERGENCE — {} ({}) cleaves from the line of {}, settling {}/{}{}",
                 spec.civilization.name,
                 spec.civilization.species,
-                spec.civilization.lineage.first().map(String::as_str).unwrap_or("?"),
+                spec.civilization
+                    .lineage
+                    .first()
+                    .map(String::as_str)
+                    .unwrap_or("?"),
                 spec.world_name,
                 spec.planet,
-                spec.place.as_ref().map(|p| format!(" on world {p:?}")).unwrap_or_default(),
+                spec.place
+                    .as_ref()
+                    .map(|p| format!(" on world {p:?}"))
+                    .unwrap_or_default(),
             );
             worlds.push(Polity::genesis(spec, &registry, &book));
         }
         // FLEET-1: salvage/mint/assign before hauls need capacity. (The
         // economy, paused 2026-10-16, runs again: operator 2026-10-21.)
-        let (built, released) = conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
+        let (built, released) =
+            conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
         if released > 0 {
-            println!("beat {beat}: FLEET — {released} hulls return to the idle pool from lapsed routes");
+            println!(
+                "beat {beat}: FLEET — {released} hulls return to the idle pool from lapsed routes"
+            );
         }
         // Cores slice 3: the core's bell delivers the dead's words that are due.
         let heard = conductor::inheritance_step(&mut worlds, epoch_base + beat);
@@ -673,26 +877,26 @@ fn main() {
         let span = book.universe_span();
         // OFFER-1a: the market beat — intents post, crossings clear
         // (one aperture pair each way, receipted both sides).
-        for (seller, buyer) in conductor::profile::timed("market_step", || conductor::market_step(&mut worlds, beat, &span)) {
+        for (seller, buyer) in conductor::profile::timed("market_step", || {
+            conductor::market_step(&mut worlds, beat, &span)
+        }) {
             contacts.add(&seller, &buyer);
-            println!(
-                "beat {beat}: THE CROSSING CLEARS — {seller} ⇌ {buyer}; the autarkies trade"
-            );
+            println!("beat {beat}: THE CROSSING CLEARS — {seller} ⇌ {buyer}; the autarkies trade");
         }
         // MERCHANT-1: the caravan bridges what the void walled.
-        for (m, a, b) in conductor::profile::timed("merchant_step", || conductor::merchant_step(&mut worlds, beat, &span)) {
+        for (m, a, b) in conductor::profile::timed("merchant_step", || {
+            conductor::merchant_step(&mut worlds, beat, &span)
+        }) {
             contacts.add(&m, &a);
             contacts.add(&m, &b);
-            println!(
-                "beat {beat}: THE CARAVAN — {m} bridges {a} ⇌ {b}; the walled trade flows"
-            );
+            println!("beat {beat}: THE CARAVAN — {m} bridges {a} ⇌ {b}; the walled trade flows");
         }
         // E3.3: pure NPC element aperture hauls (Wave-2).
-        for (from, to) in conductor::profile::timed("element_trade_step", || conductor::element_trade_step(&mut worlds, beat, &span)) {
+        for (from, to) in conductor::profile::timed("element_trade_step", || {
+            conductor::element_trade_step(&mut worlds, beat, &span)
+        }) {
             contacts.add(&from, &to);
-            println!(
-                "beat {beat}: ELEMENT CROSSING — {from} → {to}; open matter rides the void"
-            );
+            println!("beat {beat}: ELEMENT CROSSING — {from} → {to}; open matter rides the void");
         }
         // STAMP MM-1: mint + spot clear (Wave-4).
         // One line per beat, not one per clear (it was ~90 lines a second).
@@ -701,18 +905,32 @@ fn main() {
         // entries. The hubs clear once a beat of u. The final point the seat
         // relays is read for what is bound to the fleet (substratum origins,
         // percepts) and for the dilation reading, du/dh, never a fault.
-        let point = std::fs::read_to_string(format!("{var_root}/tuniversal")).ok().map(|p| p.trim().to_string());
+        let point = std::fs::read_to_string(format!("{var_root}/tuniversal"))
+            .ok()
+            .map(|p| p.trim().to_string());
         if beat.is_multiple_of(t_u_bells) {
-            let heard = point.as_deref().and_then(|p| p.split('/').nth(1)).and_then(|l| l.split(':').next()).and_then(|h| u64::from_str_radix(h, 16).ok());
-            match conductor::profile::timed("chronometry", || chain.commit(&universe, beat, heard)) {
+            let heard = point
+                .as_deref()
+                .and_then(|p| p.split('/').nth(1))
+                .and_then(|l| l.split(':').next())
+                .and_then(|h| u64::from_str_radix(h, 16).ok());
+            match conductor::profile::timed("chronometry", || chain.commit(&universe, beat, heard))
+            {
                 Ok(rims) => {
-                    let out_of_phase = rims.iter().filter(|(_, r)| *r != cfe::ratio::ratio(0, 1)).count();
+                    let out_of_phase = rims
+                        .iter()
+                        .filter(|(_, r)| *r != cfe::ratio::ratio(0, 1))
+                        .count();
                     println!("beat {beat}: CHRONOMETRY — committed {} entries in all; {} rims, {out_of_phase} with a residual against their mantle; point {:?}", chain.entries, rims.len(), heard);
                 }
                 Err(e) => println!("beat {beat}: CHRONOMETRY — not committed: {e}"),
             }
         }
-        let h_now = point.as_deref().and_then(|p| p.split('/').nth(1)).and_then(|l| l.split(':').next()).and_then(|h| u64::from_str_radix(h, 16).ok());
+        let h_now = point
+            .as_deref()
+            .and_then(|p| p.split('/').nth(1))
+            .and_then(|l| l.split(':').next())
+            .and_then(|h| u64::from_str_radix(h, 16).ok());
         if let (Some(h), None) = (h_now, dilation_from) {
             dilation_from = Some((beat, h));
         }
@@ -720,12 +938,42 @@ fn main() {
         // docs/70 P2, docs/72: the beat's one reading of the throats' keepers
         // (G3, the envoys counted) and the mapped gates' roads, for the hubs.
         let (spots, hubs) = {
-            let keepers_now = conductor::ancients::keepers(&worlds, &book, &registry, std::path::Path::new(&var_root));
-            let roads = conductor::ascension::roads(&worlds, &book, &registry, std::path::Path::new(&var_root), &keepers_now);
-            conductor::profile::timed("stamp_market_step", || conductor::stamp_market_step(&mut worlds, &book, std::path::Path::new(&var_root), &keepers_now, &roads, beat, &span, &built))
+            let keepers_now = conductor::ancients::keepers(
+                &worlds,
+                &book,
+                &registry,
+                std::path::Path::new(&var_root),
+            );
+            let roads = conductor::ascension::roads(
+                &worlds,
+                &book,
+                &registry,
+                std::path::Path::new(&var_root),
+                &keepers_now,
+            );
+            conductor::profile::timed("stamp_market_step", || {
+                conductor::stamp_market_step(
+                    &mut worlds,
+                    &book,
+                    std::path::Path::new(&var_root),
+                    &keepers_now,
+                    &roads,
+                    beat,
+                    &span,
+                    &built,
+                )
+            })
         };
-        let tolls = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, toll, _)| t + toll.clone());
-        let gated = spots.iter().fold(cfe::ratio::ratio(0, 1), |t, (_, _, _, gate)| t + gate.clone());
+        let tolls = spots
+            .iter()
+            .fold(cfe::ratio::ratio(0, 1), |t, (_, _, toll, _)| {
+                t + toll.clone()
+            });
+        let gated = spots
+            .iter()
+            .fold(cfe::ratio::ratio(0, 1), |t, (_, _, _, gate)| {
+                t + gate.clone()
+            });
         for (line, hub) in &hubs.met {
             contacts.add(line, hub);
         }
@@ -733,9 +981,15 @@ fn main() {
             passages.add(line, core);
         }
         for (from, core, arrived) in &hubs.gate_tolls {
-            *gate_tolls.entry((from.clone(), core.clone())).or_insert_with(|| cfe::ratio::ratio(0, 1)) += arrived.clone();
+            *gate_tolls
+                .entry((from.clone(), core.clone()))
+                .or_insert_with(|| cfe::ratio::ratio(0, 1)) += arrived.clone();
         }
-        let refused: Vec<String> = hubs.refused.iter().map(|(why, n)| format!("{n} {why}")).collect();
+        let refused: Vec<String> = hubs
+            .refused
+            .iter()
+            .map(|(why, n)| format!("{n} {why}"))
+            .collect();
         println!(
             "beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each); road tolls {tolls} STAMP to the keepers, gate tolls {gated} STAMP to the builders; not cleared: {} alone, {} closed, {} unmet; buyers' STAMP legs: {} carried in part, refused [{}]",
             spots.len(),
@@ -751,7 +1005,15 @@ fn main() {
             "beat {beat}: DECIDE hull — {} lines seen, {} lost for want of hull; persistence {} of {} rows this beat, {} of {} over the books' windows; {} books, {} triples",
             d.rows, d.lost, d.correct, d.scored, hubs.persistence.0, hubs.persistence.1, hubs.books.0, hubs.books.1
         );
-        if let Err(e) = annal.beat(beat, &hubs, spots.len(), &tolls, &gated, released, &breath_reading) {
+        if let Err(e) = annal.beat(
+            beat,
+            &hubs,
+            spots.len(),
+            &tolls,
+            &gated,
+            released,
+            &breath_reading,
+        ) {
             println!("beat {beat}: THE UNIVERSE JOURNAL is not kept this beat: {e}");
         }
         // Concordance 3.9: the councils the house seats, published for it.
@@ -761,7 +1023,12 @@ fn main() {
         // docs/66 Y2 — commissions: one attempt a beat at an open need.
         {
             let commission = conductor::profile::timed("commissions_step", || {
-                conductor::commissions::step(&mut worlds, &book, std::path::Path::new(&var_root), beat)
+                conductor::commissions::step(
+                    &mut worlds,
+                    &book,
+                    std::path::Path::new(&var_root),
+                    beat,
+                )
             });
             if let Some((core, admitted)) = &commission.ambiguous {
                 println!("beat {beat}: COMMISSION OPEN — {core}: the pairs still admit {admitted} orders; no closure by a tie-break");
@@ -773,31 +1040,52 @@ fn main() {
         // docs/69 — the spacing guild in the substrata: the ancients' tubes
         // open, and one task a beat is traversed below.
         let below = conductor::profile::timed("substrata_step", || {
-            conductor::substrata::step(&mut worlds, &book, std::path::Path::new(&var_root), beat, epoch_base + beat)
+            conductor::substrata::step(
+                &mut worlds,
+                &book,
+                std::path::Path::new(&var_root),
+                beat,
+                epoch_base + beat,
+            )
         });
         for (sigil, origin, depth) in &below.opened {
-            println!("beat {beat}: A TUBE OPENS — {sigil} opens a substratum {origin} at depth {depth}");
+            println!(
+                "beat {beat}: A TUBE OPENS — {sigil} opens a substratum {origin} at depth {depth}"
+            );
         }
         if let Some((origin, depth, first)) = &below.closed {
-            println!("beat {beat}: BELOW — substratum {origin} (depth {depth}) closed {}", if *first { "a first action" } else { "an action again" });
+            println!(
+                "beat {beat}: BELOW — substratum {origin} (depth {depth}) closed {}",
+                if *first {
+                    "a first action"
+                } else {
+                    "an action again"
+                }
+            );
         }
         // Consilience (38 §5): independent lines that resolved their
         // knowledge to the same invariant crystallize a shared axiom.
-        for (world, mass, hardness) in conductor::profile::timed("consilience_step", || conductor::consilience_step(&mut worlds, beat)) {
+        for (world, mass, hardness) in conductor::profile::timed("consilience_step", || {
+            conductor::consilience_step(&mut worlds, beat)
+        }) {
             println!(
                 "beat {beat}: CONSILIENCE — {world} shares a truth {mass} lines reached (hardness {hardness})"
             );
         }
         // The knowledge market (ARC C): a prosperous line licenses a word
         // it lacks from the roster's pool — ideas circulate, not just matter.
-        for (world, price) in conductor::profile::timed("knowledge_market_step", || conductor::knowledge_market_step(&mut worlds, beat)) {
+        for (world, price) in conductor::profile::timed("knowledge_market_step", || {
+            conductor::knowledge_market_step(&mut worlds, beat)
+        }) {
             println!(
                 "beat {beat}: KNOWLEDGE MARKET — {world} licenses an idea (depth {price}); vocabulary spreads"
             );
         }
         // Speech between LINES (docs/60 D2): each line hears its nearest
         // neighbour; a word outside its senses is misheard.
-        if let Some(line) = conductor::profile::timed("conversation_step", || conductor::conversation_step(&mut worlds, beat, &span)) {
+        if let Some(line) = conductor::profile::timed("conversation_step", || {
+            conductor::conversation_step(&mut worlds, beat, &span)
+        }) {
             println!("beat {beat}: {line}");
         }
         // JOURNAL-1 (08 §3): on year boundaries every civilization
@@ -810,7 +1098,10 @@ fn main() {
             let mut year_lines: Vec<String> = Vec::new();
             for polity in worlds.iter_mut().filter(|e| !e.penned) {
                 for deal in polity.world.maintain_routes(cfe::world::FIRST_ORB) {
-                    year_lines.push(format!("LANE {deal} LAPSES on {} — raw space takes the path back", polity.spec.world_name));
+                    year_lines.push(format!(
+                        "LANE {deal} LAPSES on {} — raw space takes the path back",
+                        polity.spec.world_name
+                    ));
                 }
             }
             conductor::profile::timed("year:journals", || {
@@ -830,16 +1121,41 @@ fn main() {
             );
             // The year's bounce (cores, ancients, ascension, parliaments,
             // councils): one library function.
-            year_lines.extend(conductor::profile::timed("year:bounce", || conductor::year_bounce(&mut worlds, &book, &registry, std::path::Path::new(&var_root), beat, epoch_base)));
+            year_lines.extend(conductor::profile::timed("year:bounce", || {
+                conductor::year_bounce(
+                    &mut worlds,
+                    &book,
+                    &registry,
+                    std::path::Path::new(&var_root),
+                    beat,
+                    epoch_base,
+                )
+            }));
             // The sovereigns: lineages holding their own star systems (`tiers`).
-            year_lines.extend(conductor::tiers::sovereigns(&mut worlds, &registry, std::path::Path::new(&var_root)));
+            year_lines.extend(conductor::tiers::sovereigns(
+                &mut worlds,
+                &registry,
+                std::path::Path::new(&var_root),
+            ));
             // docs/75: the term's realms, read from its contacts, then a new term.
             // The four gauges (Xylarium 11.0 (37), read from this universe):
             // each living line's, re-read from its present state.
             {
-                let place_of: std::collections::BTreeMap<String, Vec<u64>> = worlds.iter().filter_map(|p| p.spec.place.clone().map(|pl| (p.spec.world_name.clone(), pl))).collect();
+                let place_of: std::collections::BTreeMap<String, Vec<u64>> = worlds
+                    .iter()
+                    .filter_map(|p| {
+                        p.spec
+                            .place
+                            .clone()
+                            .map(|pl| (p.spec.world_name.clone(), pl))
+                    })
+                    .collect();
                 for p in worlds.iter().filter(|p| !p.penned) {
-                    let partners: Vec<Vec<u64>> = contacts.partners(&p.spec.world_name).iter().filter_map(|w| place_of.get(w).cloned()).collect();
+                    let partners: Vec<Vec<u64>> = contacts
+                        .partners(&p.spec.world_name)
+                        .iter()
+                        .filter_map(|w| place_of.get(w).cloned())
+                        .collect();
                     let g = conductor::gauges::read(p, &partners);
                     let pct = |x: &cfe::ratio::Ratio| (x * cfe::ratio::ratio(100, 1)).floor();
                     year_lines.push(format!(
@@ -853,11 +1169,23 @@ fn main() {
                     ));
                 }
             }
-            year_lines.extend(conductor::profile::timed("year:realms", || conductor::realms::bounce(&mut worlds, &registry, std::path::Path::new(&var_root), &contacts, &passages, beat / scribe::journal::YEAR_TICKS)));
+            year_lines.extend(conductor::profile::timed("year:realms", || {
+                conductor::realms::bounce(
+                    &mut worlds,
+                    &registry,
+                    std::path::Path::new(&var_root),
+                    &contacts,
+                    &passages,
+                    beat / scribe::journal::YEAR_TICKS,
+                )
+            }));
             contacts.clear();
             passages.clear();
             // docs/77: each gate's account, its term's road tolls added.
-            year_lines.extend(conductor::ascension::accounts(std::path::Path::new(&var_root), &gate_tolls));
+            year_lines.extend(conductor::ascension::accounts(
+                std::path::Path::new(&var_root),
+                &gate_tolls,
+            ));
             gate_tolls.clear();
             for line in &year_lines {
                 println!("beat {beat}: {line}");
@@ -872,7 +1200,11 @@ fn main() {
                 let rss = || {
                     std::fs::read_to_string("/proc/self/statm")
                         .ok()
-                        .and_then(|t| t.split_whitespace().nth(1).and_then(|p| p.parse::<u64>().ok()))
+                        .and_then(|t| {
+                            t.split_whitespace()
+                                .nth(1)
+                                .and_then(|p| p.parse::<u64>().ok())
+                        })
                         .map(|pages| pages * 4)
                         .unwrap_or(0)
                 };
@@ -881,21 +1213,27 @@ fn main() {
                 unsafe {
                     libc::malloc_trim(0);
                 }
-                println!("beat {beat}: MEMORY — rss {} MB before the trim, {} MB after", before / 1024, rss() / 1024);
+                println!(
+                    "beat {beat}: MEMORY — rss {} MB before the trim, {} MB after",
+                    before / 1024,
+                    rss() / 1024
+                );
             }
             // Carry STATE forward: every world's snapshot at the year's close,
             // so a boot resumes from here, never from genesis.
             for polity in worlds.iter_mut().filter(|e| !e.penned) {
                 if let Err(e) = polity.carry(&book) {
-                    eprintln!("beat {beat}: {} was not carried forward: {e}", polity.spec.world_name);
+                    eprintln!(
+                        "beat {beat}: {} was not carried forward: {e}",
+                        polity.spec.world_name
+                    );
                 }
             }
             // GALAXY-1b: the observation sweep rides the year voice.
             for galaxy in observe_crossings(&worlds, &registry, &book, epoch_base + beat) {
                 println!(
                     "beat {beat}: OBSERVATION — the galaxy {} enters the chart, reach {}",
-                    galaxy.name,
-                    galaxy.reach
+                    galaxy.name, galaxy.reach
                 );
             }
         }
@@ -942,12 +1280,24 @@ fn main() {
             eprintln!(
                 "census beat {beat}: memory entries={held} budget={} witness={hits}{}",
                 conductor::MIND_ENTRY_BUDGET,
-                if hits > 0 { " ALARM: a basin met the byte witness" } else { "" }
+                if hits > 0 {
+                    " ALARM: a basin met the byte witness"
+                } else {
+                    ""
+                }
             );
             // 78.156: the dilation du/dh since the first point read, a reading.
-            let h = hubs_cleared_at.as_deref().and_then(|p| p.split('/').nth(1)).and_then(|l| l.split(':').next()).and_then(|h| u64::from_str_radix(h, 16).ok());
+            let h = hubs_cleared_at
+                .as_deref()
+                .and_then(|p| p.split('/').nth(1))
+                .and_then(|l| l.split(':').next())
+                .and_then(|h| u64::from_str_radix(h, 16).ok());
             if let (Some((b0, h0)), Some(h)) = (dilation_from, h) {
-                eprintln!("census beat {beat}: dilation du/dh = {}/{}", beat - b0, h.saturating_sub(h0));
+                eprintln!(
+                    "census beat {beat}: dilation du/dh = {}/{}",
+                    beat - b0,
+                    h.saturating_sub(h0)
+                );
             }
             let _ = std::io::stderr().flush();
         }
@@ -1000,7 +1350,10 @@ fn main() {
             // this process's own "N civilizations" line the Mycelium monitor's
             // civs column depends on (`engine_stats()`'s `(\d+) civilizations`
             // regex, tools/observe.py) long before an operator could read it.
-            println!("conductor: {} civilizations live — beat {beat}", worlds.len());
+            println!(
+                "conductor: {} civilizations live — beat {beat}",
+                worlds.len()
+            );
             let summary: Vec<String> = worlds
                 .iter()
                 .map(|b| {
@@ -1048,5 +1401,8 @@ fn main() {
     println!(
         "COGNITION-1/2 probe: {choice_points} genuine settlement choices, {lookahead_decided} decided by the lookahead"
     );
-    println!("era complete: {beat} heartbeats, {} civilizations live", worlds.len());
+    println!(
+        "era complete: {beat} heartbeats, {} civilizations live",
+        worlds.len()
+    );
 }

@@ -40,11 +40,26 @@ pub fn role_of(tier: &str) -> Option<Role> {
 /// seat its stable id by name.
 pub fn held_seats(admissions: &[Admission], id: &mut dyn FnMut(&str) -> u32) -> Vec<Held> {
     let mut out = Vec::new();
-    for a in admissions.iter().filter(|a| a.refused.is_none() && !a.world.is_empty()) {
-        out.push(Held { seat: id(&format!("attach:{}", a.world)), mind: a.mind, world: a.world.clone(), handle: a.handle.clone(), role: Role::Sovereign });
+    for a in admissions
+        .iter()
+        .filter(|a| a.refused.is_none() && !a.world.is_empty())
+    {
+        out.push(Held {
+            seat: id(&format!("attach:{}", a.world)),
+            mind: a.mind,
+            world: a.world.clone(),
+            handle: a.handle.clone(),
+            role: Role::Sovereign,
+        });
         for t in &a.tiers {
             if let Some(role) = role_of(t) {
-                out.push(Held { seat: id(&format!("attach:{}:{t}", a.world)), mind: a.mind, world: a.world.clone(), handle: a.handle.clone(), role });
+                out.push(Held {
+                    seat: id(&format!("attach:{}:{t}", a.world)),
+                    mind: a.mind,
+                    world: a.world.clone(),
+                    handle: a.handle.clone(),
+                    role,
+                });
             }
         }
     }
@@ -55,19 +70,49 @@ pub fn held_seats(admissions: &[Admission], id: &mut dyn FnMut(&str) -> u32) -> 
 pub fn world_fns() -> Vec<SeatFn> {
     let count = Arg::Count(0).tag();
     vec![
-        SeatFn { id: FN_ZONE, tags: vec![count, count] },
-        SeatFn { id: FN_RAZE, tags: vec![count] },
-        SeatFn { id: FN_COLLECT, tags: Vec::new() },
-        SeatFn { id: FN_SANDBOX, tags: Vec::new() },
-        SeatFn { id: FN_DETACH, tags: Vec::new() },
+        SeatFn {
+            id: FN_ZONE,
+            tags: vec![count, count],
+        },
+        SeatFn {
+            id: FN_RAZE,
+            tags: vec![count],
+        },
+        SeatFn {
+            id: FN_COLLECT,
+            tags: Vec::new(),
+        },
+        SeatFn {
+            id: FN_SANDBOX,
+            tags: Vec::new(),
+        },
+        SeatFn {
+            id: FN_DETACH,
+            tags: Vec::new(),
+        },
     ]
 }
 
 /// The door seat and every held seat, as listed.
 pub fn listed(held: &[Held], beat: &Arg) -> Vec<Seat> {
-    let mut seats = vec![Seat { seat: DOOR, role: Role::Sovereign, on: door_key(), beat: beat.clone(), fns: vec![SeatFn { id: FN_ATTACH, tags: vec![Arg::Count(0).tag()] }] }];
+    let mut seats = vec![Seat {
+        seat: DOOR,
+        role: Role::Sovereign,
+        on: door_key(),
+        beat: beat.clone(),
+        fns: vec![SeatFn {
+            id: FN_ATTACH,
+            tags: vec![Arg::Count(0).tag()],
+        }],
+    }];
     for h in held {
-        seats.push(Seat { seat: h.seat, role: h.role, on: crate::house::line_key(&h.world), beat: beat.clone(), fns: world_fns() });
+        seats.push(Seat {
+            seat: h.seat,
+            role: h.role,
+            on: crate::house::line_key(&h.world),
+            beat: beat.clone(),
+            fns: world_fns(),
+        });
     }
     seats
 }
@@ -86,10 +131,20 @@ pub enum Act {
 /// The act a call on a world seat asks for, or `None` where its function or
 /// arguments do not read.
 pub fn act_of(fn_id: u16, args: &[Arg], handle: &str) -> Option<Act> {
-    let directive = |verb: &str, args: Vec<String>| Act::Directive(Directive { verb: verb.into(), args, acting_as: handle.into() });
+    let directive = |verb: &str, args: Vec<String>| {
+        Act::Directive(Directive {
+            verb: verb.into(),
+            args,
+            acting_as: handle.into(),
+        })
+    };
     match (fn_id, args) {
-        (FN_ZONE, [Arg::Count(tile), Arg::Count(kind)]) if *tile < 64 => Some(directive("zone", vec![tile.to_string(), kind.to_string()])),
-        (FN_RAZE, [Arg::Count(tile)]) if *tile < 64 => Some(directive("raze", vec![tile.to_string()])),
+        (FN_ZONE, [Arg::Count(tile), Arg::Count(kind)]) if *tile < 64 => {
+            Some(directive("zone", vec![tile.to_string(), kind.to_string()]))
+        }
+        (FN_RAZE, [Arg::Count(tile)]) if *tile < 64 => {
+            Some(directive("raze", vec![tile.to_string()]))
+        }
         (FN_COLLECT, []) => Some(directive("collect", Vec::new())),
         (FN_SANDBOX, []) => Some(Act::Sandbox),
         (FN_DETACH, []) => Some(Act::Detach),
@@ -99,7 +154,13 @@ pub fn act_of(fn_id: u16, args: &[Arg], handle: &str) -> Option<Act> {
 
 /// Carry out an act for `held`: a directive into its world's inbox under the
 /// call's reference, or a sandbox or detachment request.
-pub fn carry(var_root: &Path, worlds: &Path, held: &Held, act: &Act, reference: &[u8; 32]) -> std::io::Result<()> {
+pub fn carry(
+    var_root: &Path,
+    worlds: &Path,
+    held: &Held,
+    act: &Act,
+    reference: &[u8; 32],
+) -> std::io::Result<()> {
     match act {
         Act::Directive(d) => {
             let inbox = worlds.join(&held.world).join("inbox");
@@ -115,7 +176,10 @@ pub fn carry(var_root: &Path, worlds: &Path, held: &Held, act: &Act, reference: 
 /// where the argument names none.
 pub fn request_of(args: &[Arg], mind: [u8; 32]) -> Option<files::Request> {
     match args {
-        [Arg::Count(code)] => Some(files::Request { mind, metabolism: metabolism_of(*code)?.to_string() }),
+        [Arg::Count(code)] => Some(files::Request {
+            mind,
+            metabolism: metabolism_of(*code)?.to_string(),
+        }),
         _ => None,
     }
 }
@@ -123,7 +187,12 @@ pub fn request_of(args: &[Arg], mind: [u8; 32]) -> Option<files::Request> {
 /// The results of a held seat's calls not yet reported: `(call reference,
 /// applied)`, from its world inbox's dispositions and the finished sandbox
 /// requests, excluding those already in `reported`.
-pub fn results(var_root: &Path, worlds: &Path, held: &Held, reported: &dyn Fn(&[u8; 32]) -> bool) -> Vec<([u8; 32], bool)> {
+pub fn results(
+    var_root: &Path,
+    worlds: &Path,
+    held: &Held,
+    reported: &dyn Fn(&[u8; 32]) -> bool,
+) -> Vec<([u8; 32], bool)> {
     let mut out = Vec::new();
     let inbox = worlds.join(&held.world).join("inbox");
     for (sub, applied) in [("applied", true), ("refused", false)] {
@@ -151,7 +220,14 @@ mod tests {
     use super::*;
 
     fn admission(world: &str, tiers: &[&str]) -> Admission {
-        Admission { mind: [1; 32], world: world.into(), sigil: "att01010101".into(), handle: handle_of(&[1; 32]), tiers: tiers.iter().map(|t| t.to_string()).collect(), refused: None }
+        Admission {
+            mind: [1; 32],
+            world: world.into(),
+            sigil: "att01010101".into(),
+            handle: handle_of(&[1; 32]),
+            tiers: tiers.iter().map(|t| t.to_string()).collect(),
+            refused: None,
+        }
     }
 
     #[test]
@@ -161,13 +237,30 @@ mod tests {
             next += 1;
             next
         };
-        let refused = Admission { refused: Some(NO_VIABLE_WORLD), world: String::new(), ..admission("", &[]) };
-        let held = held_seats(&[admission("w0-1-2", &["progenitor", "ancient"]), refused], &mut id);
-        assert_eq!(held.iter().map(|h| h.role).collect::<Vec<_>>(), vec![Role::Sovereign, Role::Progenitor, Role::Ancients]);
+        let refused = Admission {
+            refused: Some(NO_VIABLE_WORLD),
+            world: String::new(),
+            ..admission("", &[])
+        };
+        let held = held_seats(
+            &[admission("w0-1-2", &["progenitor", "ancient"]), refused],
+            &mut id,
+        );
+        assert_eq!(
+            held.iter().map(|h| h.role).collect::<Vec<_>>(),
+            vec![Role::Sovereign, Role::Progenitor, Role::Ancients]
+        );
         let seats = listed(&held, &Arg::Q { num: 1, den: 1 });
         assert_eq!(seats[0].seat, DOOR, "the door is listed first");
-        assert_eq!(seats.len(), 4, "the door, the world seat and two tier seats");
-        assert_eq!(seats[1].fns.iter().map(|f| f.id).collect::<Vec<_>>(), WORLD_FNS.to_vec());
+        assert_eq!(
+            seats.len(),
+            4,
+            "the door, the world seat and two tier seats"
+        );
+        assert_eq!(
+            seats[1].fns.iter().map(|f| f.id).collect::<Vec<_>>(),
+            WORLD_FNS.to_vec()
+        );
     }
 
     #[test]
@@ -175,12 +268,27 @@ mod tests {
         let h = handle_of(&[1; 32]);
         assert_eq!(
             act_of(FN_ZONE, &[Arg::Count(12), Arg::Count(1)], &h),
-            Some(Act::Directive(Directive { verb: "zone".into(), args: vec!["12".into(), "1".into()], acting_as: h.clone() }))
+            Some(Act::Directive(Directive {
+                verb: "zone".into(),
+                args: vec!["12".into(), "1".into()],
+                acting_as: h.clone()
+            }))
         );
-        assert_eq!(act_of(FN_ZONE, &[Arg::Count(64), Arg::Count(1)], &h), None, "a tile off the grid does not read");
+        assert_eq!(
+            act_of(FN_ZONE, &[Arg::Count(64), Arg::Count(1)], &h),
+            None,
+            "a tile off the grid does not read"
+        );
         assert_eq!(act_of(FN_DETACH, &[], &h), Some(Act::Detach));
-        assert_eq!(act_of(FN_ATTACH, &[Arg::Count(1)], &h), None, "attach is the door's, not a world seat's");
-        assert_eq!(request_of(&[Arg::Count(2)], [3; 32]).map(|r| r.metabolism), Some("biotic".to_string()));
+        assert_eq!(
+            act_of(FN_ATTACH, &[Arg::Count(1)], &h),
+            None,
+            "attach is the door's, not a world seat's"
+        );
+        assert_eq!(
+            request_of(&[Arg::Count(2)], [3; 32]).map(|r| r.metabolism),
+            Some("biotic".to_string())
+        );
         assert_eq!(request_of(&[Arg::Count(7)], [3; 32]), None);
     }
 
@@ -189,16 +297,34 @@ mod tests {
         let root = std::env::temp_dir().join(format!("hypha-attached-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
         let worlds = root.join("worlds");
-        let held = Held { seat: 7, mind: [1; 32], world: "w0-1-2".into(), handle: handle_of(&[1; 32]), role: Role::Sovereign };
+        let held = Held {
+            seat: 7,
+            mind: [1; 32],
+            world: "w0-1-2".into(),
+            handle: handle_of(&[1; 32]),
+            role: Role::Sovereign,
+        };
         let act = act_of(FN_COLLECT, &[], &held.handle).expect("reads");
         carry(&root, &worlds, &held, &act, &[9; 32]).expect("carried");
         let file = worlds.join("w0-1-2/inbox").join(directive_name(&[9; 32]));
         assert!(file.exists(), "the directive waits in the world's inbox");
         // The conductor applies it and archives it as applied.
         std::fs::create_dir_all(worlds.join("w0-1-2/inbox/applied")).expect("dir");
-        std::fs::rename(&file, worlds.join("w0-1-2/inbox/applied").join(directive_name(&[9; 32]))).expect("archived");
-        assert_eq!(results(&root, &worlds, &held, &|_| false), vec![([9; 32], true)]);
-        assert!(results(&root, &worlds, &held, &|r| *r == [9; 32]).is_empty(), "a reported result is not reported again");
+        std::fs::rename(
+            &file,
+            worlds
+                .join("w0-1-2/inbox/applied")
+                .join(directive_name(&[9; 32])),
+        )
+        .expect("archived");
+        assert_eq!(
+            results(&root, &worlds, &held, &|_| false),
+            vec![([9; 32], true)]
+        );
+        assert!(
+            results(&root, &worlds, &held, &|r| *r == [9; 32]).is_empty(),
+            "a reported result is not reported again"
+        );
         let _ = std::fs::remove_dir_all(root);
     }
 }

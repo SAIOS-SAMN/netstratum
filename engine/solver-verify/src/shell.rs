@@ -126,7 +126,11 @@ impl ShapeReading {
     /// The derivation, in words, for a caller or an operator.
     pub fn because(&self) -> String {
         match self {
-            ShapeReading::Holds { longitude, latitude, cells } => format!(
+            ShapeReading::Holds {
+                longitude,
+                latitude,
+                cells,
+            } => format!(
                 "holds: {} cells. longitude — {}. latitude — {}",
                 cells,
                 longitude.because(),
@@ -167,9 +171,16 @@ impl Shell {
         }
         let wanted = bands.saturating_mul(slots);
         if cells != wanted {
-            return ShapeReading::CellCountWrong { given: cells, wanted };
+            return ShapeReading::CellCountWrong {
+                given: cells,
+                wanted,
+            };
         }
-        ShapeReading::Holds { longitude, latitude, cells }
+        ShapeReading::Holds {
+            longitude,
+            latitude,
+            cells,
+        }
     }
 
     /// The one door. Every admission carries the proof that admitted it.
@@ -180,7 +191,11 @@ impl Shell {
         if cells.iter().any(|&hue| hue >= HUES) {
             return None;
         }
-        Some(Shell { bands, slots, cells })
+        Some(Shell {
+            bands,
+            slots,
+            cells,
+        })
     }
 
     pub fn bands(&self) -> usize {
@@ -210,9 +225,12 @@ impl Shell {
                 cells.push(f(band, slot));
             }
         }
-        Shell { bands, slots, cells }
+        Shell {
+            bands,
+            slots,
+            cells,
+        }
     }
-
 }
 
 /// A transform of the shell. Every one is a permutation of cells (or a
@@ -273,7 +291,8 @@ pub type Ring = Vec<Turn>;
 
 /// Apply a word, left to right.
 pub fn run(word: &Ring, input: &Shell) -> Shell {
-    word.iter().fold(input.clone(), |held, turn| turn.apply(&held))
+    word.iter()
+        .fold(input.clone(), |held, turn| turn.apply(&held))
 }
 
 /// **The CLOSED vocabulary of A SHELL** — every exact transform,
@@ -413,15 +432,24 @@ impl FrameProof {
             true => format!(
                 "gcd({}, {}) = 1, so the frames are individual and the period is {}. \
                  Carriers {} (=1 mod {}, =0 mod {}) and {} (=0 mod {}, =1 mod {})",
-                self.ring, self.stack, self.period,
-                self.ring_carrier, self.ring, self.stack,
-                self.stack_carrier, self.ring, self.stack
+                self.ring,
+                self.stack,
+                self.period,
+                self.ring_carrier,
+                self.ring,
+                self.stack,
+                self.stack_carrier,
+                self.ring,
+                self.stack
             ),
             false => format!(
                 "gcd({}, {}) = {} — the bases SHARE a factor, so the map collapses: \
                  {} pairs would fold onto {} indices and entities would collide",
-                self.ring, self.stack, self.common,
-                self.ring * self.stack, self.period / self.common.max(1)
+                self.ring,
+                self.stack,
+                self.common,
+                self.ring * self.stack,
+                self.period / self.common.max(1)
             ),
         }
     }

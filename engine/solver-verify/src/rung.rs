@@ -75,13 +75,22 @@ impl Rung {
         if let Some(axis) = shape.iter().position(|&e| e == 0) {
             return Err(RungFault::EmptyExtent { axis });
         }
-        if shape.iter().try_fold(1usize, |n, &e| n.checked_mul(e)).is_none() {
+        if shape
+            .iter()
+            .try_fold(1usize, |n, &e| n.checked_mul(e))
+            .is_none()
+        {
             return Err(RungFault::TooVast);
         }
         if train_pairs == 0 {
             return Err(RungFault::NothingToProve);
         }
-        Ok(Rung { tier, word_len, shape, train_pairs })
+        Ok(Rung {
+            tier,
+            word_len,
+            shape,
+            train_pairs,
+        })
     }
 
     pub fn tier(&self) -> u8 {
@@ -113,26 +122,116 @@ impl Rung {
     pub fn level(rank: usize, level: u32) -> Rung {
         match rank {
             2 => match level {
-                0 | 1 => Rung { tier: 1, word_len: 1, shape: vec![3, 3], train_pairs: 2 },
-                2 => Rung { tier: 1, word_len: 2, shape: vec![4, 4], train_pairs: 2 },
-                3 => Rung { tier: 2, word_len: 2, shape: vec![4, 5], train_pairs: 3 },
-                4 => Rung { tier: 3, word_len: 2, shape: vec![3, 3], train_pairs: 3 },
-                5 => Rung { tier: 3, word_len: 3, shape: vec![4, 4], train_pairs: 3 },
-                6 => Rung { tier: 3, word_len: 4, shape: vec![4, 4], train_pairs: 3 },
-                7 => Rung { tier: 3, word_len: 5, shape: vec![4, 5], train_pairs: 3 },
-                8 => Rung { tier: 3, word_len: 6, shape: vec![5, 5], train_pairs: 3 },
-                _ => Rung { tier: 3, word_len: 6, shape: vec![5, 5], train_pairs: 3 },
+                0 | 1 => Rung {
+                    tier: 1,
+                    word_len: 1,
+                    shape: vec![3, 3],
+                    train_pairs: 2,
+                },
+                2 => Rung {
+                    tier: 1,
+                    word_len: 2,
+                    shape: vec![4, 4],
+                    train_pairs: 2,
+                },
+                3 => Rung {
+                    tier: 2,
+                    word_len: 2,
+                    shape: vec![4, 5],
+                    train_pairs: 3,
+                },
+                4 => Rung {
+                    tier: 3,
+                    word_len: 2,
+                    shape: vec![3, 3],
+                    train_pairs: 3,
+                },
+                5 => Rung {
+                    tier: 3,
+                    word_len: 3,
+                    shape: vec![4, 4],
+                    train_pairs: 3,
+                },
+                6 => Rung {
+                    tier: 3,
+                    word_len: 4,
+                    shape: vec![4, 4],
+                    train_pairs: 3,
+                },
+                7 => Rung {
+                    tier: 3,
+                    word_len: 5,
+                    shape: vec![4, 5],
+                    train_pairs: 3,
+                },
+                8 => Rung {
+                    tier: 3,
+                    word_len: 6,
+                    shape: vec![5, 5],
+                    train_pairs: 3,
+                },
+                _ => Rung {
+                    tier: 3,
+                    word_len: 6,
+                    shape: vec![5, 5],
+                    train_pairs: 3,
+                },
             },
             3 => match level {
-                0 | 1 => Rung { tier: 1, word_len: 1, shape: vec![2, 3, 3], train_pairs: 2 },
-                2 => Rung { tier: 2, word_len: 2, shape: vec![3, 3, 3], train_pairs: 2 },
-                3 => Rung { tier: 2, word_len: 2, shape: vec![3, 4, 4], train_pairs: 3 },
-                4 => Rung { tier: 3, word_len: 3, shape: vec![4, 4, 4], train_pairs: 3 },
-                5 => Rung { tier: 3, word_len: 3, shape: vec![5, 4, 5], train_pairs: 3 },
-                6 => Rung { tier: 3, word_len: 4, shape: vec![5, 4, 5], train_pairs: 3 },
-                7 => Rung { tier: 3, word_len: 5, shape: vec![5, 5, 5], train_pairs: 3 },
-                8 => Rung { tier: 3, word_len: 6, shape: vec![5, 5, 5], train_pairs: 3 },
-                _ => Rung { tier: 3, word_len: 6, shape: vec![5, 5, 5], train_pairs: 3 },
+                0 | 1 => Rung {
+                    tier: 1,
+                    word_len: 1,
+                    shape: vec![2, 3, 3],
+                    train_pairs: 2,
+                },
+                2 => Rung {
+                    tier: 2,
+                    word_len: 2,
+                    shape: vec![3, 3, 3],
+                    train_pairs: 2,
+                },
+                3 => Rung {
+                    tier: 2,
+                    word_len: 2,
+                    shape: vec![3, 4, 4],
+                    train_pairs: 3,
+                },
+                4 => Rung {
+                    tier: 3,
+                    word_len: 3,
+                    shape: vec![4, 4, 4],
+                    train_pairs: 3,
+                },
+                5 => Rung {
+                    tier: 3,
+                    word_len: 3,
+                    shape: vec![5, 4, 5],
+                    train_pairs: 3,
+                },
+                6 => Rung {
+                    tier: 3,
+                    word_len: 4,
+                    shape: vec![5, 4, 5],
+                    train_pairs: 3,
+                },
+                7 => Rung {
+                    tier: 3,
+                    word_len: 5,
+                    shape: vec![5, 5, 5],
+                    train_pairs: 3,
+                },
+                8 => Rung {
+                    tier: 3,
+                    word_len: 6,
+                    shape: vec![5, 5, 5],
+                    train_pairs: 3,
+                },
+                _ => Rung {
+                    tier: 3,
+                    word_len: 6,
+                    shape: vec![5, 5, 5],
+                    train_pairs: 3,
+                },
             },
             // Any other rank: the planar progression, widened. Deliberate
             // rather than a refusal — a rank with no hand-written table
@@ -208,13 +307,19 @@ fn sample_axis(beacon: &Beacon, rung: &Rung, slot: usize) -> Axis {
         _ => 4,
     };
     match beacon.uniform_index(&format!("nforge.family.{slot}"), families) {
-        0 => Axis::Reverse(beacon.uniform_index(&format!("nforge.rev.{slot}"), rank as u64) as usize),
+        0 => {
+            Axis::Reverse(beacon.uniform_index(&format!("nforge.rev.{slot}"), rank as u64) as usize)
+        }
         1 => {
             let a = beacon.uniform_index(&format!("nforge.swap.a.{slot}"), rank as u64) as usize;
             // A swap with itself is the identity, which would make a
             // word-length-1 task a copy task by accident rather than by
             // the ladder's choice. Step to a genuine partner.
-            let b = (a + 1 + beacon.uniform_index(&format!("nforge.swap.b.{slot}"), (rank.max(2) - 1) as u64) as usize) % rank;
+            let b = (a
+                + 1
+                + beacon.uniform_index(&format!("nforge.swap.b.{slot}"), (rank.max(2) - 1) as u64)
+                    as usize)
+                % rank;
             Axis::Swap(a, b)
         }
         2 => {
@@ -231,7 +336,9 @@ fn sample_axis(beacon: &Beacon, rung: &Rung, slot: usize) -> Axis {
         _ => {
             let axis = beacon.uniform_index(&format!("nforge.roll.a.{slot}"), rank as u64) as usize;
             let extent = rung.shape[axis].max(2);
-            let by = 1 + beacon.uniform_index(&format!("nforge.roll.b.{slot}"), (extent - 1) as u64) as usize;
+            let by = 1
+                + beacon.uniform_index(&format!("nforge.roll.b.{slot}"), (extent - 1) as u64)
+                    as usize;
             Axis::Roll(axis, by)
         }
     }

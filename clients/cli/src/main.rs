@@ -79,9 +79,18 @@ fn main() {
 }
 
 fn banner(style: &Style) {
-    println!("{}", style.border("╔══════════════════════════════════════════════════╗"));
-    println!("{}", style.title("║  NETSTRATUM — bench · intel · trade · diplo      ║"));
-    println!("{}", style.border("╚══════════════════════════════════════════════════╝"));
+    println!(
+        "{}",
+        style.border("╔══════════════════════════════════════════════════╗")
+    );
+    println!(
+        "{}",
+        style.title("║  NETSTRATUM — bench · intel · trade · diplo      ║")
+    );
+    println!(
+        "{}",
+        style.border("╚══════════════════════════════════════════════════╝")
+    );
     println!(
         "  {} · {} · {} · {} · {}",
         style.verb("bench"),
@@ -91,7 +100,6 @@ fn banner(style: &Style) {
         style.key("help")
     );
 }
-
 
 /// Blocker A3: the active profile's station — the authority the
 /// Operator seat claim — **session config**, not colony law.
@@ -155,12 +163,14 @@ fn profile_field(text: &str, key: &str) -> Option<String> {
 }
 
 /// The far WORLD (union wiring, 2026-07-30): cross-world deeds load
-/// the partner from its resume carrier (var/worlds/<name>/chronicle.tlv
+/// the partner from its resume carrier (`var/worlds/<name>/chronicle.tlv`
 /// — CLI-saved worlds carry one; polity worlds are export-only and
 /// refuse with the cure named). After a two-legged deed both sides
 /// sync immediately — conservation is never left half-saved.
 fn far_world(name: &str) -> Result<World, String> {
-    let path = std::path::PathBuf::from("var/worlds").join(name).join("chronicle.tlv");
+    let path = std::path::PathBuf::from("var/worlds")
+        .join(name)
+        .join("chronicle.tlv");
     if !path.exists() {
         return Err(format!(
             "{name} carries no resume chronicle — cross-world deeds reach CLI-saved worlds (save there first)"
@@ -243,7 +253,6 @@ fn charted_position(name: &str) -> (Ratio, Ratio, Ratio) {
 
 /// Parse `p/q` or a plain integer (the lens's exact rendering).
 // parse_ratio_text retired with data_field starchart scrape — desk::charted_position owns chart reads.
-
 fn sync_world(world: &World) -> Result<usize, String> {
     let name = world.orb().map(|orb| orb.name.clone()).ok_or("no colony")?;
     sync_world_at(world, &name)
@@ -253,7 +262,9 @@ fn sync_world(world: &World) -> Result<usize, String> {
 /// not its colony's (the conductor seats them apart; MESH-1b writes
 /// must land where the conductor re-resumes from).
 fn sync_world_at(world: &World, name: &str) -> Result<usize, String> {
-    let path = std::path::PathBuf::from("var/worlds").join(name).join("chronicle.tlv");
+    let path = std::path::PathBuf::from("var/worlds")
+        .join(name)
+        .join("chronicle.tlv");
     cfe::persist::sync(world.chronicle(), &path).map_err(|r| format!("{r:?}"))
 }
 
@@ -5511,10 +5522,7 @@ fn stamp_command(
                                 .unwrap_or_else(|| ratio(0, 1))
                         ))
                     ),
-                    Err(err) => println!(
-                        "{} minted but sync refused: {err}",
-                        style.bad("✗")
-                    ),
+                    Err(err) => println!("{} minted but sync refused: {err}", style.bad("✗")),
                 },
                 Err(refusal) => refuse(world, &refusal, style),
             }
@@ -5541,7 +5549,7 @@ fn stamp_command(
                         let distance = conductor::spatial_l1(
                             &charted_position(&my_name),
                             &charted_position(&target),
-                                &desk::universe_span(),
+                            &desk::universe_span(),
                         );
                         let melt = cfe::world::route_melt(world, &far, &distance);
                         match cfe::world::stamp_aperture_transfer(
@@ -5605,11 +5613,7 @@ fn fleet_command(
                 style.value(&cap),
                 style.strong(&world.hulls().len().to_string())
             );
-            let metab = world
-                .committed()
-                .genesis
-                .as_ref()
-                .map(|g| g.metabolism);
+            let metab = world.committed().genesis.as_ref().map(|g| g.metabolism);
             for h in world.hulls() {
                 let role = cfe::dop::HullRole::from_wire(h.role)
                     .map(|r| cfe::world::hull_voice(r, metab))
@@ -5725,17 +5729,11 @@ fn fleet_command(
                 "runner" => cfe::dop::HullRole::Runner,
                 "escort" => cfe::dop::HullRole::Escort,
                 _ => {
-                    println!(
-                        "{} role must be hauler|semi|runner|escort",
-                        style.bad("✗")
-                    );
+                    println!("{} role must be hauler|semi|runner|escort", style.bad("✗"));
                     return;
                 }
             };
-            let grade = words
-                .next()
-                .and_then(|w| w.parse::<u8>().ok())
-                .unwrap_or(0);
+            let grade = words.next().and_then(|w| w.parse::<u8>().ok()).unwrap_or(0);
             let finance = matches!(words.next(), Some("finance") | Some("note") | Some("fin"));
             if finance {
                 match world.mint_hull_financed(current, role, grade) {
@@ -5808,7 +5806,11 @@ fn fleet_command(
             match world.scrap_hull(hull_id) {
                 Ok(()) => {
                     let _ = sync_world(world);
-                    println!("{} hull {} scrapped", style.ok("⚙"), style.strong(&hull_id.to_string()));
+                    println!(
+                        "{} hull {} scrapped",
+                        style.ok("⚙"),
+                        style.strong(&hull_id.to_string())
+                    );
                 }
                 Err(refusal) => refuse(world, &refusal, style),
             }
@@ -6012,7 +6014,6 @@ fn element_command(
     }
 }
 
-
 fn parse_scope(word: &str) -> Option<Scope> {
     match word {
         "build" => Some(Scope::Build),
@@ -6096,7 +6097,10 @@ fn act_as(world: &mut World, actor: u64, rest: &[&str], style: &Style, current: 
                         Err(refusal) => refuse(world, &refusal, style),
                     }
                 }
-                _ => println!("{} as <handle> book post <kept> <lost> <name>", style.bad("✗")),
+                _ => println!(
+                    "{} as <handle> book post <kept> <lost> <name>",
+                    style.bad("✗")
+                ),
             }
         }
         ["book", "archive", name @ ..] | ["book", "close", name @ ..] if !name.is_empty() => {
@@ -6221,10 +6225,17 @@ fn scan(world: &mut World, style: &Style, prober: u64, exemplar: u64) {
                 );
             }
             if read.hits.is_empty() && read.refusals.is_empty() {
-                println!("{}", style.dim("  (nothing resonates — the bucket is empty)"));
+                println!(
+                    "{}",
+                    style.dim("  (nothing resonates — the bucket is empty)")
+                );
             }
         }
-        Err(ActionRefused::CannotAfford { resource: Resource::Crystal, need, have }) => println!(
+        Err(ActionRefused::CannotAfford {
+            resource: Resource::Crystal,
+            need,
+            have,
+        }) => println!(
             "{} scanning draws {} crystal and you have {} — crystals come from a resonator ({})",
             style.bad("✗"),
             style.strong(&amount(&need)),
@@ -6237,7 +6248,10 @@ fn scan(world: &mut World, style: &Style, prober: u64, exemplar: u64) {
 
 /// ELEMENT-GRAMMAR-1: the element id's short spoken form.
 fn hex_prefix(element: &[u8; 32]) -> String {
-    element[..4].iter().map(|byte| format!("{byte:02x}")).collect()
+    element[..4]
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
 }
 
 /// **#42 the political spectrum** — `treaty <kind> with <world> [deal
@@ -6290,7 +6304,10 @@ pub(crate) fn treaty_command(
             };
             let mut elements = Vec::new();
             for prefix in &prefixes {
-                match known.iter().find(|id| hex_prefix(id).starts_with(prefix.as_str())) {
+                match known
+                    .iter()
+                    .find(|id| hex_prefix(id).starts_with(prefix.as_str()))
+                {
                     Some(id) => {
                         if !elements.contains(id) {
                             elements.push(*id);
@@ -6575,9 +6592,7 @@ fn corpus_command(
                         true => format!(" · {}", style.strong("BLIND")),
                         false => String::new(),
                     },
-                    style.strong(
-                        &earned.map(|w| amount(&w)).unwrap_or_else(|| "—".into())
-                    ),
+                    style.strong(&earned.map(|w| amount(&w)).unwrap_or_else(|| "—".into())),
                     match corpus::already_earned(world.chronicle(), &held.task_id) {
                         true => format!(" · {}", style.dim("already earned here")),
                         false => String::new(),
@@ -6625,13 +6640,7 @@ fn corpus_command(
     }
 }
 
-fn show_task(
-    served: &[corpus::Served],
-    at: usize,
-    style: &Style,
-    color: bool,
-    world: &World,
-) {
+fn show_task(served: &[corpus::Served], at: usize, style: &Style, color: bool, world: &World) {
     let held = &served[at];
     let earned = kernel::corpus_weight(&held.task_id);
     println!(
@@ -6679,7 +6688,12 @@ fn show_task(
     }
 }
 
-fn try_program(served: &corpus::Served, program: &solver_verify::Program, style: &Style, color: bool) {
+fn try_program(
+    served: &corpus::Served,
+    program: &solver_verify::Program,
+    style: &Style,
+    color: bool,
+) {
     let verdicts = corpus::train_verdicts(&served.task, program);
     let held = verdicts.iter().filter(|held| **held).count();
     for (n, (pair, ok)) in served.task.train.iter().zip(&verdicts).enumerate() {
@@ -6750,7 +6764,10 @@ fn solve_task(
     }
     let proof = corpus::seal(served, program);
     let Some(payload) = corpus::payload(&proof) else {
-        println!("{} that proof does not encode — nothing was minted", style.bad("✗"));
+        println!(
+            "{} that proof does not encode — nothing was minted",
+            style.bad("✗")
+        );
         return;
     };
     // The amount is the kernel's own reading, never a number chosen
@@ -6863,9 +6880,21 @@ fn genesis_picker(world: &mut World, style: &Style) {
         style,
         "DISPOSITION",
         &[
-            (1, "expansionist", "growth and reach — provisioning appetite, research siphon"),
-            (2, "empiricist", "knowledge and precision — the research-first line"),
-            (3, "epicurean", "comfort and craft — leisure-weighted provisioning"),
+            (
+                1,
+                "expansionist",
+                "growth and reach — provisioning appetite, research siphon",
+            ),
+            (
+                2,
+                "empiricist",
+                "knowledge and precision — the research-first line",
+            ),
+            (
+                3,
+                "epicurean",
+                "comfort and craft — leisure-weighted provisioning",
+            ),
         ],
     ) else {
         println!("{} founding cancelled", style.dim("○"));
@@ -6877,8 +6906,16 @@ fn genesis_picker(world: &mut World, style: &Style) {
         "METABOLISM",
         &[
             (1, "mineral", "eats iron, farms iron — a smelter economy"),
-            (2, "biotic", "eats biomass, farms biomass — the common ration"),
-            (3, "plasmic", "eats embers — plasmic agriculture IS the thermal loop, encasement-fed"),
+            (
+                2,
+                "biotic",
+                "eats biomass, farms biomass — the common ration",
+            ),
+            (
+                3,
+                "plasmic",
+                "eats embers — plasmic agriculture IS the thermal loop, encasement-fed",
+            ),
         ],
     ) else {
         println!("{} founding cancelled", style.dim("○"));
@@ -6891,7 +6928,11 @@ fn genesis_picker(world: &mut World, style: &Style) {
         &[
             (1, "planar", "the 2D grid — the plain read"),
             (2, "volumetric", "reads the whole depth, not the surface"),
-            (3, "harmonic", "frequency-basis — the civ that speaks in music"),
+            (
+                3,
+                "harmonic",
+                "frequency-basis — the civ that speaks in music",
+            ),
             (4, "umbral", "occlusion-basis — reads by what is shadowed"),
         ],
     ) else {
@@ -6923,11 +6964,21 @@ fn genesis_picker(world: &mut World, style: &Style) {
 /// One numbered menu: prints `options`, reads a line, accepts either
 /// the numeric code or the axis word typed out, loops on anything
 /// else. `q`/`quit`/EOF returns `None` (cancel).
-fn pick_axis(stdin: &io::Stdin, style: &Style, label: &str, options: &[(u8, &str, &str)]) -> Option<u8> {
+fn pick_axis(
+    stdin: &io::Stdin,
+    style: &Style,
+    label: &str,
+    options: &[(u8, &str, &str)],
+) -> Option<u8> {
     loop {
         println!("{}", style.strong(label));
         for (code, name, blurb) in options {
-            println!("  {} {} — {}", style.key(&code.to_string()), style.strong(name), blurb);
+            println!(
+                "  {} {} — {}",
+                style.key(&code.to_string()),
+                style.strong(name),
+                blurb
+            );
         }
         print!("{} ", style.prompt("choice>"));
         io::stdout().flush().ok();
@@ -6947,7 +6998,11 @@ fn pick_axis(stdin: &io::Stdin, style: &Style, label: &str, options: &[(u8, &str
                 if let Some((code, _, _)) = options.iter().find(|(_, name, _)| *name == trimmed) {
                     return Some(*code);
                 }
-                println!("{} not a valid choice — type a number or the name, or {} to cancel", style.bad("✗"), style.key("q"));
+                println!(
+                    "{} not a valid choice — type a number or the name, or {} to cancel",
+                    style.bad("✗"),
+                    style.key("q")
+                );
             }
             Err(_) => return None,
         }
@@ -7112,7 +7167,10 @@ fn parse_ratio_arg(word: &str) -> Option<Ratio> {
 fn thermal_line(world: &World, style: &Style, current: u64) {
     use cfe::thermal;
     let Some(class) = world.star() else {
-        println!("{}", style.dim("(no star — 'star <class>' commissions one)"));
+        println!(
+            "{}",
+            style.dim("(no star — 'star <class>' commissions one)")
+        );
         return;
     };
     let Some(orb) = world.orb_by_id(current) else {
@@ -7125,10 +7183,17 @@ fn thermal_line(world: &World, style: &Style, current: u64) {
         style.strong(star_name(class as u8))
     );
     let Some(site) = &orb.thermal else {
-        println!("{}", style.dim("  (this planet is unsited — 'site <albedo> <r>')"));
+        println!(
+            "{}",
+            style.dim("  (this planet is unsited — 'site <albedo> <r>')")
+        );
         return;
     };
-    let t4 = thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
+    let t4 = thermal::t_eq4(
+        &class.luminosity(),
+        site.albedo.value(),
+        site.orbit_r.value(),
+    );
     let band = match thermal::band_of(&t4) {
         Some(thermal::SubstrateBand::Cryogenic) => "CRYOGENIC (the vault: lossless ember store)",
         Some(thermal::SubstrateBand::Mesic) => "MESIC (near-zero life-support overhead)",
@@ -7153,7 +7218,10 @@ fn thermal_line(world: &World, style: &Style, current: u64) {
         .find(|(resource, _)| *resource == Resource::Ember)
         .map(|(_, amount)| amount);
     if let Some(value) = embers {
-        println!("  accrued embers {} (encased, uncollected)", style.strong(&amount(&value)));
+        println!(
+            "  accrued embers {} (encased, uncollected)",
+            style.strong(&amount(&value))
+        );
     }
     let s = orb.syntropy_contained.clone();
     let e = orb.entropy_vented.clone();
@@ -7173,7 +7241,10 @@ fn thermal_line(world: &World, style: &Style, current: u64) {
         }
     );
     if world.regenerator_stands(current) {
-        println!("  {}", style.ok("regenerator stands — order-work uncapped by strain"));
+        println!(
+            "  {}",
+            style.ok("regenerator stands — order-work uncapped by strain")
+        );
     }
 }
 
@@ -7217,7 +7288,10 @@ fn book_name_fault(fault: &cfe::books::BookNameFault, style: &Style) -> String {
             "a book needs a name that is not only whitespace".to_string()
         }
         cfe::books::BookNameFault::Charter { name } => {
-            format!("{} is a charter book — law, not inventory", style.strong(name))
+            format!(
+                "{} is a charter book — law, not inventory",
+                style.strong(name)
+            )
         }
     }
 }
@@ -7941,7 +8015,10 @@ fn refuse_text(world: &World, refusal: &ActionRefused, style: &Style) -> String 
 
 fn map(world: &World, style: &Style, current: u64) {
     let Some(orb) = world.orb_by_id(current) else {
-        println!("{}", style.dim("(no colony yet — the map begins at 'found <name>')"));
+        println!(
+            "{}",
+            style.dim("(no colony yet — the map begins at 'found <name>')")
+        );
         return;
     };
     println!(
@@ -8006,7 +8083,11 @@ fn accrued_lines(world: &World, style: &Style, current: u64) {
             "    {} {} {}  {}",
             style.warn("◔"),
             style.warn("accrued"),
-            format_args!("{}: {}", resource_name(*resource), style.strong(&amount(value))),
+            format_args!(
+                "{}: {}",
+                resource_name(*resource),
+                style.strong(&amount(value))
+            ),
             style.dim("(workspace — collect to keep)")
         );
     }
@@ -8146,7 +8227,9 @@ fn journal_feed(world: &World, style: &Style) {
     // The year just closed, narrated from the live state (no replay of past
     // years — the conductor keeps each year's entry as it closes).
     let entries: Vec<_> =
-        scribe::journal::narrate_year(&orb.name, world, &voice, scribe::journal::YEAR_TICKS, 0).into_iter().collect();
+        scribe::journal::narrate_year(&orb.name, world, &voice, scribe::journal::YEAR_TICKS, 0)
+            .into_iter()
+            .collect();
     if entries.is_empty() {
         println!(
             "{} no completed year yet — a year is {} ticks; the clock stands at {}",
@@ -8167,7 +8250,10 @@ fn journal_feed(world: &World, style: &Style) {
             style.head(&format!("YEAR {}", entry.year)),
             style.dim(&format!(
                 "cycle {} · {} · {} · {}",
-                entry.cycle, entry.world, entry.archetype, entry.alert.word()
+                entry.cycle,
+                entry.world,
+                entry.archetype,
+                entry.alert.word()
             )),
             headline
         );
@@ -8199,13 +8285,23 @@ fn journal_feed(world: &World, style: &Style) {
 /// requirements. The depot bench surfaces the whole provisioning society.
 fn workbench_panel(world: &World, style: &Style, current: u64) {
     use cfe::world::workbench::BenchKind;
-    for kind in [BenchKind::Depot, BenchKind::Refinery, BenchKind::ShipYard, BenchKind::Lab, BenchKind::Civic] {
+    for kind in [
+        BenchKind::Depot,
+        BenchKind::Refinery,
+        BenchKind::ShipYard,
+        BenchKind::Lab,
+        BenchKind::Civic,
+    ] {
         let Some(view) = world.workbench(current, kind) else {
             continue;
         };
         println!("{}", style.head(&format!("⚙ {} bench", kind.word())));
         for component in &view.components {
-            let mark = if component.active { style.ok("●") } else { style.bad("○") };
+            let mark = if component.active {
+                style.ok("●")
+            } else {
+                style.bad("○")
+            };
             println!("  {mark} {}", component.label);
         }
         for (label, value) in &view.gauges {
@@ -8489,8 +8585,9 @@ fn chronicle(world: &World, style: &Style) {
                 resource,
                 style.strong(if *to_seat == cfe::dop::SEAT_ELDER { "elder" } else { "ancient" })
             ),
-            cfe::dop::ClosureEvent::ElderWarded {} => 
-                "⛨ the ELDER stands warded — the reverse shield seats".to_string(),
+            cfe::dop::ClosureEvent::ElderWarded {} => {
+                "⛨ the ELDER stands warded — the reverse shield seats".to_string()
+            }
             cfe::dop::ClosureEvent::WardLifted { claimer } => format!(
                 "⛨ the ward LIFTS — the depth gate opened by {}",
                 style.strong(claimer)
@@ -9409,7 +9506,9 @@ fn resolve_witness(world: &World, word: &str) -> Result<[u8; 32], String> {
     match matches.len() {
         1 => Ok(matches[0]),
         0 => Err(format!("no receipt in this chronicle begins {word}")),
-        n => Err(format!("{word} names {n} receipts — type more of the digest")),
+        n => Err(format!(
+            "{word} names {n} receipts — type more of the digest"
+        )),
     }
 }
 

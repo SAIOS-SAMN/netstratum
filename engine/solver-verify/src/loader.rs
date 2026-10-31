@@ -73,10 +73,18 @@ pub fn load_task(path: &Path) -> Result<Task, LoadError> {
         }
     }
 
-    let take = |label: &str| grids.iter().find(|(l, _)| l == label).map(|(_, g)| g.clone());
+    let take = |label: &str| {
+        grids
+            .iter()
+            .find(|(l, _)| l == label)
+            .map(|(_, g)| g.clone())
+    };
     let mut train = Vec::new();
     for i in 1.. {
-        match (take(&format!("train{i}_in")), take(&format!("train{i}_out"))) {
+        match (
+            take(&format!("train{i}_in")),
+            take(&format!("train{i}_out")),
+        ) {
             (Some(input), Some(output)) => train.push(TaskPair { input, output }),
             (None, None) => break,
             _ => return Err(LoadError::Malformed(format!("train{i} pair incomplete"))),

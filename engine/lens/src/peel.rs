@@ -137,7 +137,12 @@ pub fn peel(delta: &Delta, support: &Support, depth: Depth) -> View {
                         if *value == zero {
                             continue; // observed, and carries nothing
                         }
-                        entries.push(Entry { i, j, l, value: value.clone() });
+                        entries.push(Entry {
+                            i,
+                            j,
+                            l,
+                            value: value.clone(),
+                        });
                     }
                 }
             }
@@ -156,5 +161,4 @@ impl View {
             View::Near(_) => Depth::Near,
         }
     }
-
 }

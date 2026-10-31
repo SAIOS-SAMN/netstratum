@@ -23,7 +23,9 @@ fn the_big_bang_is_first_and_written_once() {
     assert_eq!(again, seed);
     let ledger = cfe::persist::load(&root.join("convergence.tlv")).unwrap();
     assert_eq!(ledger.receipts().len(), 1);
-    assert!(matches!(ledger.receipts()[0].event(), ClosureEvent::UniverseFounded { over: None, roster, .. } if *roster == [1; 32]));
+    assert!(
+        matches!(ledger.receipts()[0].event(), ClosureEvent::UniverseFounded { over: None, roster, .. } if *roster == [1; 32])
+    );
     let _ = std::fs::remove_dir_all(&root);
 }
 
@@ -32,12 +34,21 @@ fn a_used_ledger_is_refounded_late_and_says_so() {
     let root = scratch("late");
     let book = Ledger::at(&root);
     let zero = cfe::ratio::ratio(0, 1);
-    book.observe_galaxy("someone", "someone", (&zero, &zero, &zero), 3).unwrap();
-    let head = cfe::persist::load(&root.join("convergence.tlv")).unwrap().receipts().last().unwrap().own().0;
+    book.observe_galaxy("someone", "someone", (&zero, &zero, &zero), 3)
+        .unwrap();
+    let head = cfe::persist::load(&root.join("convergence.tlv"))
+        .unwrap()
+        .receipts()
+        .last()
+        .unwrap()
+        .own()
+        .0;
     book.found_universe([1; 32], [2; 32], 4).unwrap();
     let ledger = cfe::persist::load(&root.join("convergence.tlv")).unwrap();
     let last = ledger.receipts().last().unwrap();
-    assert!(matches!(last.event(), ClosureEvent::UniverseFounded { over: Some(h), .. } if *h == head));
+    assert!(
+        matches!(last.event(), ClosureEvent::UniverseFounded { over: Some(h), .. } if *h == head)
+    );
     let _ = std::fs::remove_dir_all(&root);
 }
 
@@ -45,12 +56,42 @@ fn a_used_ledger_is_refounded_late_and_says_so() {
 fn both_events_round_trip_the_wire() {
     use cfe::tlv;
     for event in [
-        ClosureEvent::UniverseFounded { topology: "torus".into(), span: cfe::ratio::ratio(64, 1), roster: [3; 32], matter: [4; 32], over: None },
-        ClosureEvent::UniverseFounded { topology: "torus".into(), span: cfe::ratio::ratio(64, 1), roster: [3; 32], matter: [4; 32], over: Some([5; 32]) },
+        ClosureEvent::UniverseFounded {
+            topology: "torus".into(),
+            span: cfe::ratio::ratio(64, 1),
+            roster: [3; 32],
+            matter: [4; 32],
+            over: None,
+        },
+        ClosureEvent::UniverseFounded {
+            topology: "torus".into(),
+            span: cfe::ratio::ratio(64, 1),
+            roster: [3; 32],
+            matter: [4; 32],
+            over: Some([5; 32]),
+        },
         ClosureEvent::UniverseCited { universe: [6; 32] },
-        ClosureEvent::AncientArose { sigil: "tallykeep".into(), tree: 5, living: 41 },
-        ClosureEvent::SubstratumOpened { core: "stillcold-sky-3".into(), origin: [7; 32], parent: [0; 32], depth: 1, level: 4, opener: "stillcold".into() },
-        ClosureEvent::SubstratumOpened { core: "the-founding".into(), origin: [8; 32], parent: [7; 32], depth: 2, level: 5, opener: "slagborn".into() },
+        ClosureEvent::AncientArose {
+            sigil: "tallykeep".into(),
+            tree: 5,
+            living: 41,
+        },
+        ClosureEvent::SubstratumOpened {
+            core: "stillcold-sky-3".into(),
+            origin: [7; 32],
+            parent: [0; 32],
+            depth: 1,
+            level: 4,
+            opener: "stillcold".into(),
+        },
+        ClosureEvent::SubstratumOpened {
+            core: "the-founding".into(),
+            origin: [8; 32],
+            parent: [7; 32],
+            depth: 2,
+            level: 5,
+            opener: "slagborn".into(),
+        },
     ] {
         let bytes = event.wire_bytes();
         let (tag, value) = tlv::records(&bytes).next().unwrap();

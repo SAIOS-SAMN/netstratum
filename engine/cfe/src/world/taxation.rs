@@ -65,7 +65,8 @@ impl World {
     /// spends only what the stall costs. This is the fiscal outflow the
     /// collect touch settles (a negative `TreasurySettled`).
     pub fn welfare_spend(&self, orb: u64, stamp: u64) -> Ratio {
-        self.treasury_of(orb).min(self.welfare_budget_needed(orb, stamp))
+        self.treasury_of(orb)
+            .min(self.welfare_budget_needed(orb, stamp))
     }
 
     /// **The welfare subsidy** (`49_TAXATION` §5) — how much a WelfareHub
@@ -101,7 +102,7 @@ impl World {
     /// accumulates and the Locust churns. `grain/lifespan`, capped at one;
     /// derived (grain and lifespan are structural, not dialed).
     pub fn continuity_tax(&self) -> Ratio {
-        let grain = crate::almanac::REGROWTH_GRAIN as i64;
+        let grain = crate::almanac::REGROWTH_GRAIN;
         let lifespan = self.lifespan_of().max(1) as i64;
         ratio(grain, lifespan).min(ratio(1, 1))
     }

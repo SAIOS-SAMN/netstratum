@@ -18,11 +18,7 @@ fn resume_from_chronicle_ignores_missing_state_json() {
     w.zone(1, ZoneKind::Habitat).expect("hab");
 
     // Sync chronicle only — no state.json written.
-    let dir = std::env::temp_dir().join(format!(
-        "no-json-auth-{}-{}",
-        std::process::id(),
-        "tlv"
-    ));
+    let dir = std::env::temp_dir().join(format!("no-json-auth-{}-{}", std::process::id(), "tlv"));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).expect("dir");
     let path = dir.join("chronicle.tlv");
@@ -55,5 +51,5 @@ fn state_tlv_wire_round_trips_banks_without_json() {
     let bytes = w.orb().expect("orb").wire_bytes();
     assert!(!bytes.is_empty());
     // Wire is the machine mirror — non-empty without JSON.
-    assert!(bytes.iter().any(|&b| b == 17), "zone entries on wire");
+    assert!(bytes.contains(&17), "zone entries on wire");
 }

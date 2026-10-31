@@ -125,7 +125,11 @@ pub fn open_at(z: u32, heat: &Ratio) -> u32 {
     }
     // Stripped AT or below the heat (operator, 2026-10-18): a heart that
     // rings strips what is held as loosely as hydrogen's lone electron.
-    let left: u64 = ws.iter().filter(|(t, _, _)| *t > *heat).map(|(_, v, o)| if *v <= *o { *v } else { 2 * o - v }).sum();
+    let left: u64 = ws
+        .iter()
+        .filter(|(t, _, _)| *t > *heat)
+        .map(|(_, v, o)| if *v <= *o { *v } else { 2 * o - v })
+        .sum();
     u32::try_from(left).unwrap_or(u32::MAX)
 }
 
@@ -152,7 +156,11 @@ fn build(z: u32) -> (Atom, Vec<Winding>) {
                     continue;
                 }
                 let reach = u64::from(n + 1) * u64::from(l + 1);
-                let inside: u64 = occ.iter().filter(|((m, _), _)| *m != n && u64::from(*m) * u64::from(m + 1) < reach).map(|(_, v)| *v).sum();
+                let inside: u64 = occ
+                    .iter()
+                    .filter(|((m, _), _)| *m != n && u64::from(*m) * u64::from(m + 1) < reach)
+                    .map(|(_, v)| *v)
+                    .sum();
                 let t = ratio(i64::from(z) - inside as i64, i64::from(n));
                 let better = match &best {
                     None => true,
@@ -167,10 +175,29 @@ fn build(z: u32) -> (Atom, Vec<Winding>) {
         *occ.entry((n, l)).or_insert(0) += 1;
     }
     let depth = occ.keys().map(|(n, _)| *n).max().unwrap_or(1);
-    let outer: u64 = occ.iter().filter(|((n, _), _)| *n == depth).map(|(_, v)| *v).sum();
-    let inner: u64 = occ.iter().filter(|((n, _), _)| *n < depth).map(|(_, v)| *v).sum();
-    let unpaired: u64 = occ.iter().map(|((_, l), v)| { let o = orientations(*l); if *v <= o { *v } else { 2 * o - v } }).sum();
-    let closed = occ.iter().all(|((_, l), v)| *v == 2 * orientations(*l)) && (0..depth).all(|l| occ.get(&(depth, l)).copied().unwrap_or(0) == 2 * orientations(l));
+    let outer: u64 = occ
+        .iter()
+        .filter(|((n, _), _)| *n == depth)
+        .map(|(_, v)| *v)
+        .sum();
+    let inner: u64 = occ
+        .iter()
+        .filter(|((n, _), _)| *n < depth)
+        .map(|(_, v)| *v)
+        .sum();
+    let unpaired: u64 = occ
+        .iter()
+        .map(|((_, l), v)| {
+            let o = orientations(*l);
+            if *v <= o {
+                *v
+            } else {
+                2 * o - v
+            }
+        })
+        .sum();
+    let closed = occ.iter().all(|((_, l), v)| *v == 2 * orientations(*l))
+        && (0..depth).all(|l| occ.get(&(depth, l)).copied().unwrap_or(0) == 2 * orientations(l));
     let to32 = |x: u64| u32::try_from(x).unwrap_or(u32::MAX);
     let enclosed = to32(u64::from(z) - inner);
     // Each occupied winding's tightness in the finished atom, as the fill
@@ -179,11 +206,30 @@ fn build(z: u32) -> (Atom, Vec<Winding>) {
         .iter()
         .map(|((n, l), v)| {
             let reach = u64::from(n + 1) * u64::from(l + 1);
-            let inside: u64 = occ.iter().filter(|((m, _), _)| m != n && u64::from(*m) * u64::from(m + 1) < reach).map(|(_, v)| *v).sum();
-            (ratio(i64::from(z) - inside as i64, i64::from(*n)), *v, orientations(*l))
+            let inside: u64 = occ
+                .iter()
+                .filter(|((m, _), _)| m != n && u64::from(*m) * u64::from(m + 1) < reach)
+                .map(|(_, v)| *v)
+                .sum();
+            (
+                ratio(i64::from(z) - inside as i64, i64::from(*n)),
+                *v,
+                orientations(*l),
+            )
         })
         .collect();
-    (Atom { z, depth, outer: to32(outer), unpaired: to32(unpaired), closed, enclosed, tightness: ratio(i64::from(enclosed), i64::from(depth)) }, ws)
+    (
+        Atom {
+            z,
+            depth,
+            outer: to32(outer),
+            unpaired: to32(unpaired),
+            closed,
+            enclosed,
+            tightness: ratio(i64::from(enclosed), i64::from(depth)),
+        },
+        ws,
+    )
 }
 
 /// A CANONICAL element (the refactor onto era 1, 2026-10-15): era 1's matter
@@ -193,7 +239,10 @@ fn build(z: u32) -> (Atom, Vec<Winding>) {
 const MARK: [u8; 4] = *b"Zatm";
 
 pub fn canonical(z: u32) -> [u8; 32] {
-    let mut id = *blake3::Hasher::new_derive_key("netstratum element Z v1").update(&z.to_le_bytes()).finalize().as_bytes();
+    let mut id = *blake3::Hasher::new_derive_key("netstratum element Z v1")
+        .update(&z.to_le_bytes())
+        .finalize()
+        .as_bytes();
     id[8..12].copy_from_slice(&MARK);
     id[12..14].copy_from_slice(&(z as u16).to_le_bytes());
     id
@@ -234,18 +283,22 @@ pub fn hold(z: u32) -> u32 {
 /// - no atom has more unpaired than all the others together (its partners
 ///   must be elsewhere);
 /// - the bonds can join every atom (at least one fewer than the atoms).
-/// Exact conditions for a connected bond graph with those counts; nothing
-/// is searched.
+///   Exact conditions for a connected bond graph with those counts; nothing
+///   is searched.
 pub fn closes(zs: &[u32]) -> bool {
-    let Some(counts) = zs.iter().map(|&z| atom(z).map(|a| a.unpaired)).collect::<Option<Vec<u32>>>() else {
+    let Some(counts) = zs
+        .iter()
+        .map(|&z| atom(z).map(|a| a.unpaired))
+        .collect::<Option<Vec<u32>>>()
+    else {
         return false;
     };
-    if zs.len() < 2 || counts.iter().any(|&u| u == 0) {
+    if zs.len() < 2 || counts.contains(&0) {
         return false;
     }
     let total: u32 = counts.iter().sum();
     let most = counts.iter().copied().max().unwrap_or(0);
-    total % 2 == 0 && most <= total - most && total / 2 + 1 >= zs.len() as u32
+    total.is_multiple_of(2) && most <= total - most && total / 2 + 1 >= zs.len() as u32
 }
 
 #[cfg(test)]
@@ -255,8 +308,14 @@ mod tests {
     #[test]
     fn the_harmonic_shells_close_at_two_and_twenty_eight() {
         // Orientations of the degree-l harmonics on S^11.
-        assert_eq!((0..4).map(orientations).collect::<Vec<_>>(), vec![1, 12, 77, 352]);
-        assert_eq!((1..=3).map(shell_room).collect::<Vec<_>>(), vec![2, 26, 180]);
+        assert_eq!(
+            (0..4).map(orientations).collect::<Vec<_>>(),
+            vec![1, 12, 77, 352]
+        );
+        assert_eq!(
+            (1..=3).map(shell_room).collect::<Vec<_>>(),
+            vec![2, 26, 180]
+        );
         assert!(atom(2).unwrap().closed);
         assert!(atom(28).unwrap().closed);
         assert!(!atom(27).unwrap().closed);

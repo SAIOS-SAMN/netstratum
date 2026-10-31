@@ -28,11 +28,8 @@ impl World {
 
     /// Does a Regenerator stand on this orb?
     pub fn regenerator_stands(&self, orb: u64) -> bool {
-        peek(&self.orbs, orb).is_some_and(|held| {
-            held.zones
-                .iter()
-                .any(|z| z.kind == ZoneKind::Regenerator)
-        })
+        peek(&self.orbs, orb)
+            .is_some_and(|held| held.zones.iter().any(|z| z.kind == ZoneKind::Regenerator))
     }
 
     /// Half as 1/(1+1) — orderly floor.

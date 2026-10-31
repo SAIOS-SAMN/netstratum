@@ -99,7 +99,9 @@ pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
             _ => {
                 let whole = motes[i].clone();
                 for (j, (n, z)) in ps.into_iter().enumerate() {
-                    let Some(kind) = crate::chem::Kind::atom(z) else { continue };
+                    let Some(kind) = crate::chem::Kind::atom(z) else {
+                        continue;
+                    };
                     let mut atom = whole.clone();
                     atom.key = kind;
                     atom.amount = whole.amount.clone() * ratio(i64::from(n), 1);
@@ -124,12 +126,23 @@ pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
 /// (holding units): they stand at the throat (reach 0), and the spin they
 /// carried in passes with them to the core (`spun`), never lost; the rest
 /// leave.
-pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ratio, bell: u64, densest: u32) -> Recycled {
+pub fn recycle(
+    motes: &mut Vec<Mote>,
+    at: &[usize],
+    b: &Ratio,
+    s: &Ratio,
+    g: &Ratio,
+    bell: u64,
+    densest: u32,
+) -> Recycled {
     let mut out = Recycled::default();
     if *b <= ratio(0, 1) || *s <= ratio(0, 1) {
         return out;
     }
-    let h_in = at.iter().filter(|&&i| i < motes.len() && motes[i].key == crate::chem::hydrogen()).fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone());
+    let h_in = at
+        .iter()
+        .filter(|&&i| i < motes.len() && motes[i].key == crate::chem::hydrogen())
+        .fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone());
     let e = b.clone() * s.clone();
     let built = s.clone() / (s.clone() + e.clone());
     let mut stack: Vec<usize> = at.iter().copied().filter(|&i| i < motes.len()).collect();
@@ -137,13 +150,18 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     let mut load: Vec<(usize, u32, Ratio)> = Vec::new();
     let mut light = ratio(0, 1);
     for &i in &stack.clone() {
-        let Some(z) = crate::chem::atom_w(&motes[i].key) else { continue };
+        let Some(z) = crate::chem::atom_w(&motes[i].key) else {
+            continue;
+        };
         let a = motes[i].amount.clone();
         let pressed = crate::pulse::nucleus(&(a.clone() * built.clone())).min(a.clone());
         // Pressed only to the universe's densest element (docs/97 §14), its
         // product read before anything leaves (nucleons conserved: a pair
         // with no product is never taken).
-        let product = z.checked_mul(2).filter(|&p| p <= densest).and_then(crate::chem::Kind::atom);
+        let product = z
+            .checked_mul(2)
+            .filter(|&p| p <= densest)
+            .and_then(crate::chem::Kind::atom);
         if let (Some(l), Some(product)) = (rung_light(z), product) {
             let pairs = crate::pulse::nucleus(&(pressed.clone() / ratio(2, 1)));
             if pairs > ratio(0, 1) {
@@ -167,10 +185,13 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     // Deconstructed: the reverberation with construction's light, shared by
     // holding over the load, each kind peeled loosest first.
     let pool = e + light;
-    let whole = load.iter().fold(ratio(0, 1), |acc, (_, z, n)| acc + n.clone() * ratio(i64::from(nuclide_hold(*z)), 1));
+    let whole = load.iter().fold(ratio(0, 1), |acc, (_, z, n)| {
+        acc + n.clone() * ratio(i64::from(nuclide_hold(*z)), 1)
+    });
     if whole > ratio(0, 1) {
         for (i, z, n) in load {
-            let mut share = pool.clone() * n.clone() * ratio(i64::from(nuclide_hold(z)), 1) / whole.clone();
+            let mut share =
+                pool.clone() * n.clone() * ratio(i64::from(nuclide_hold(z)), 1) / whole.clone();
             // As deep as it pays, every nucleus alike; a releasing step is
             // always taken.
             let mut k = 0u32;
@@ -183,15 +204,26 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
                 k += 1;
             }
             // Whole nuclei one step further with what is left.
-            let next = if k + 1 < z { peel_cost(z, k + 1) - peel_cost(z, k) } else { 0 };
-            let deeper = if next > 0 { crate::pulse::nucleus(&(share.clone() / ratio(next, 1))).min(n.clone()) } else { ratio(0, 1) };
+            let next = if k + 1 < z {
+                peel_cost(z, k + 1) - peel_cost(z, k)
+            } else {
+                0
+            };
+            let deeper = if next > 0 {
+                crate::pulse::nucleus(&(share.clone() / ratio(next, 1))).min(n.clone())
+            } else {
+                ratio(0, 1)
+            };
             if k == 0 && deeper <= ratio(0, 1) {
                 continue;
             }
             out.spent += n.clone() * ratio(peel_cost(z, k), 1) + deeper.clone() * ratio(next, 1);
             out.peeled += n.clone();
             motes[i].amount -= n.clone();
-            let emit = |key: Option<crate::chem::Kind>, amount: Ratio, motes: &mut Vec<Mote>, stack: &mut Vec<usize>| {
+            let emit = |key: Option<crate::chem::Kind>,
+                        amount: Ratio,
+                        motes: &mut Vec<Mote>,
+                        stack: &mut Vec<usize>| {
                 if let (Some(key), true) = (key, amount > ratio(0, 1)) {
                     let mut m = motes[i].clone();
                     m.key = key;
@@ -201,12 +233,26 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
                 }
             };
             let shallow = n.clone() - deeper.clone();
-            let hydrogen = shallow.clone() * ratio(i64::from(k), 1) + deeper.clone() * ratio(i64::from(k + 1), 1);
+            let hydrogen = shallow.clone() * ratio(i64::from(k), 1)
+                + deeper.clone() * ratio(i64::from(k + 1), 1);
             let (rest, rest_deep) = (z - k, z - k - 1);
             let mut h_total = hydrogen;
-            if rest == 1 { h_total += shallow.clone() } else { emit(crate::chem::Kind::atom(rest), shallow, motes, &mut stack) }
+            if rest == 1 {
+                h_total += shallow.clone()
+            } else {
+                emit(crate::chem::Kind::atom(rest), shallow, motes, &mut stack)
+            }
             if deeper > ratio(0, 1) {
-                if rest_deep == 1 { h_total += deeper.clone() } else { emit(crate::chem::Kind::atom(rest_deep), deeper, motes, &mut stack) }
+                if rest_deep == 1 {
+                    h_total += deeper.clone()
+                } else {
+                    emit(
+                        crate::chem::Kind::atom(rest_deep),
+                        deeper,
+                        motes,
+                        &mut stack,
+                    )
+                }
             }
             emit(Some(crate::chem::hydrogen()), h_total, motes, &mut stack);
         }
@@ -239,7 +285,11 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
     // Past the balance it releases everything; the rest leaves on the
     // continuum.
     let mut room = ((g.clone() - s.clone()) / ratio(2, 1)).max(ratio(0, 1));
-    let mut order: Vec<usize> = stack.iter().copied().filter(|&i| motes[i].amount > ratio(0, 1)).collect();
+    let mut order: Vec<usize> = stack
+        .iter()
+        .copied()
+        .filter(|&i| motes[i].amount > ratio(0, 1))
+        .collect();
     order.sort_by_key(|&i| std::cmp::Reverse(crate::chem::weight(&motes[i].key)));
     let mut held: Vec<(crate::chem::Kind, Ratio)> = Vec::new();
     for i in order {
@@ -265,7 +315,9 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
                 motes[i].amount -= x.clone();
                 t -= x.clone();
                 // Its carried spin goes with it into the container.
-                out.spun += x.clone() * crate::flows::weight(&k) * (motes[i].ell_o.clone() + motes[i].ell_orth.clone());
+                out.spun += x.clone()
+                    * crate::flows::weight(&k)
+                    * (motes[i].ell_o.clone() + motes[i].ell_orth.clone());
                 if at_throat.is_none() {
                     let mut m = motes[i].clone();
                     m.amount = ratio(0, 1);
@@ -285,7 +337,11 @@ pub fn recycle(motes: &mut Vec<Mote>, at: &[usize], b: &Ratio, s: &Ratio, g: &Ra
             motes.push(m);
         }
     }
-    out.hydrogen = stack.iter().filter(|&&i| motes[i].key == crate::chem::hydrogen()).fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone()) - h_in;
+    out.hydrogen = stack
+        .iter()
+        .filter(|&&i| motes[i].key == crate::chem::hydrogen())
+        .fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone())
+        - h_in;
     // Everything that passed leaves on the continuum (operator 2026-10-19:
     // "redistributed back via the continuum"); the trapped stand at the
     // throat, continuum matter too.
@@ -300,11 +356,25 @@ mod tests {
     use super::*;
 
     fn mote(key: &str, amount: Ratio) -> Mote {
-        Mote { key: crate::chem::Kind::parse(key).expect("a kind"), amount, ell_o: ratio(1, 2), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }
+        Mote {
+            key: crate::chem::Kind::parse(key).expect("a kind"),
+            amount,
+            ell_o: ratio(1, 2),
+            ell_orth: ratio(0, 1),
+            phase: crate::flows::rest(ratio(1, 2)),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: true,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            tilt: Vec::new(),
+        }
     }
 
     fn three_z(ms: &[Mote]) -> Ratio {
-        ms.iter().fold(ratio(0, 1), |s, m| s + m.amount.clone() * ratio(i64::from(crate::chem::weight(&m.key)), 1))
+        ms.iter().fold(ratio(0, 1), |s, m| {
+            s + m.amount.clone() * ratio(i64::from(crate::chem::weight(&m.key)), 1)
+        })
     }
 
     #[test]
@@ -320,8 +390,15 @@ mod tests {
         // `1 − H/(R + H)`, fixed at R = H (both ½). No radius is squared.
         let d = |r: Ratio, h: Ratio| h.clone() / (r + h);
         let push = |r: Ratio, h: Ratio| r.clone() / (r + h);
-        for (r, h) in [(ratio(1, 3), ratio(3, 2)), (ratio(7, 2), ratio(1, 1)), (ratio(2, 1), ratio(2, 1))] {
-            assert_eq!(push(r.clone(), h.clone()), ratio(1, 1) - d(r.clone(), h.clone()));
+        for (r, h) in [
+            (ratio(1, 3), ratio(3, 2)),
+            (ratio(7, 2), ratio(1, 1)),
+            (ratio(2, 1), ratio(2, 1)),
+        ] {
+            assert_eq!(
+                push(r.clone(), h.clone()),
+                ratio(1, 1) - d(r.clone(), h.clone())
+            );
             if r == h {
                 assert_eq!(d(r, h), ratio(1, 2));
             }
@@ -336,32 +413,86 @@ mod tests {
         assert_eq!(at.len(), 2);
         // A bounce B = ½ on S = 4: a third is peeled, two thirds pressed.
         let before = three_z(&ms);
-        let r = recycle(&mut ms, &at, &ratio(1, 2), &ratio(4, 1), &ratio(4, 1), 1, 1612);
+        let r = recycle(
+            &mut ms,
+            &at,
+            &ratio(1, 2),
+            &ratio(4, 1),
+            &ratio(4, 1),
+            1,
+            1612,
+        );
         assert_eq!(three_z(&ms), before);
         assert!(r.pressed > ratio(0, 1) && r.light > ratio(0, 1));
         assert!(r.peeled > ratio(0, 1));
         // No bounce, nothing recycled.
         let mut ms = vec![mote("W0010", ratio(1, 1))];
-        assert_eq!(recycle(&mut ms, &[0], &ratio(0, 1), &ratio(4, 1), &ratio(4, 1), 1, 1612), Recycled::default());
-        assert_eq!(ms[0].key, crate::chem::Kind::parse("W0010").expect("a kind"));
+        assert_eq!(
+            recycle(
+                &mut ms,
+                &[0],
+                &ratio(0, 1),
+                &ratio(4, 1),
+                &ratio(4, 1),
+                1,
+                1612
+            ),
+            Recycled::default()
+        );
+        assert_eq!(
+            ms[0].key,
+            crate::chem::Kind::parse("W0010").expect("a kind")
+        );
     }
 
     #[test]
     fn pressing_stops_at_the_densest_element_and_never_loses_a_nucleon() {
         use crate::flows::Mote;
-        let mote = |key: &str| Mote { key: crate::chem::Kind::parse(key).expect("a kind"), amount: ratio(1000, 1), ell_o: ratio(1, 2), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
-        let nucleons = |ms: &[Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * ratio(i64::from(crate::chem::weight(&x.key)), 1));
+        let mote = |key: &str| Mote {
+            key: crate::chem::Kind::parse(key).expect("a kind"),
+            amount: ratio(1000, 1),
+            ell_o: ratio(1, 2),
+            ell_orth: ratio(0, 1),
+            phase: crate::flows::rest(ratio(1, 2)),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: true,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            tilt: Vec::new(),
+        };
+        let nucleons = |ms: &[Mote]| {
+            ms.iter().fold(ratio(0, 1), |s, x| {
+                s + x.amount.clone() * ratio(i64::from(crate::chem::weight(&x.key)), 1)
+            })
+        };
         // At the densest weight nothing presses past it; nucleons conserved.
         let mut ms = vec![mote("W1612")];
         let before = nucleons(&ms);
-        let r = recycle(&mut ms, &[0], &ratio(1, 2), &ratio(4, 1), &ratio(4, 1), 1, 1612);
+        let r = recycle(
+            &mut ms,
+            &[0],
+            &ratio(1, 2),
+            &ratio(4, 1),
+            &ratio(4, 1),
+            1,
+            1612,
+        );
         assert_eq!(nucleons(&ms), before);
         assert!(ms.iter().all(|x| crate::chem::weight(&x.key) <= 1612));
         let _ = r;
         // Below it, pressing runs and still conserves.
         let mut ms = vec![mote("W0004")];
         let before = nucleons(&ms);
-        let _ = recycle(&mut ms, &[0], &ratio(1, 2), &ratio(4, 1), &ratio(4, 1), 1, 1612);
+        let _ = recycle(
+            &mut ms,
+            &[0],
+            &ratio(1, 2),
+            &ratio(4, 1),
+            &ratio(4, 1),
+            1,
+            1612,
+        );
         assert_eq!(nucleons(&ms), before);
     }
 }

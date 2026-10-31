@@ -2,11 +2,11 @@
 
 ## Start here
 
-- [Status](STATUS.md): what Netstratum is, what works today, and where each
+- [Status](../ROADMAP.md): what Netstratum is, what works today, and where each
   part is heading.
 - [Architecture](ARCHITECTURE.md): how the workspace is organized and where
   to make a change.
-- [Concepts](CONCEPTS.md): every term, with its definition, formula and code
+- [Concepts](../GLOSSARY.md): every term, with its definition, formula and code
   location.
 - [Attachment](109_ATTACHMENT.md): how external agents and sandboxes attach
   through the hypha and are contained in the universe.
@@ -16,7 +16,7 @@
 
 The numbered documents below are the design record: each states a law or a
 decision before the code that builds it. They are reference material, read
-when working on the part they cover; [STATUS.md](STATUS.md) and the code take
+when working on the part they cover; [ROADMAP.md](../ROADMAP.md) and the code take
 precedence where they differ. The register of open era-1 work is
 [102_ALIGNMENT.md](102_ALIGNMENT.md); the equations are collected in
 [EQUATIONS.md](EQUATIONS.md); open questions are in

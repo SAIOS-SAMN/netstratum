@@ -41,8 +41,7 @@
 
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::Committed;
-use rfa_core::{
-    holonomies, boundary_form, Degree, Delta, Flow, Support, Holonomy,};
+use rfa_core::{boundary_form, holonomies, Degree, Delta, Flow, Holonomy, Support};
 
 /// BOND-1: the standing order, `source` → `target` at `rate`/tick.
 pub const CHANNEL_BOND: usize = 0;
@@ -321,9 +320,7 @@ impl EntangledRead {
     pub fn degree(&self) -> Degree {
         Degree::in_volume(self.volume, self.rank)
     }
-
 }
-
 
 /// Project committed state onto the relational tensor: `Δ(V)`.
 ///
@@ -536,7 +533,11 @@ fn symmetry_foundation(delta: &Delta, support: &Support) -> Vec<Residual> {
     let mut found = Vec::new();
     for l in 0..fiber {
         let adjacent: Vec<Vec<usize>> = (0..dim)
-            .map(|i| (0..dim).filter(|&j| j != i && support.has(i, j, l)).collect())
+            .map(|i| {
+                (0..dim)
+                    .filter(|&j| j != i && support.has(i, j, l))
+                    .collect()
+            })
             .collect();
         for (i, from) in adjacent.iter().enumerate() {
             for &j in from {
@@ -544,9 +545,8 @@ fn symmetry_foundation(delta: &Delta, support: &Support) -> Vec<Residual> {
                     if k == i || !support.has(i, k, l) {
                         continue;
                     }
-                    let value = delta.entry(i, k, l).clone()
-                        - delta.entry(i, j, l)
-                        - delta.entry(j, k, l);
+                    let value =
+                        delta.entry(i, k, l).clone() - delta.entry(i, j, l) - delta.entry(j, k, l);
                     if value != zero {
                         found.push(Residual { i, j, k, l, value });
                     }
@@ -570,7 +570,7 @@ pub fn read_entangled(state: &Committed) -> EntangledRead {
 
 /// The cross-book door: the same one-pass read, carrying the count of
 /// pairs the observer could not see. While `unknown > 0` the complex
-/// has holes of unknown shape and [`EntangledRead::capacity_is_defined`]
+/// has holes of unknown shape and `EntangledRead::capacity_is_defined`
 /// refuses — discharge them by [`Resolve::Telescope`] or
 /// [`Resolve::LockOn`] before reading capacity, never by assuming
 /// absence.
@@ -596,7 +596,14 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
     // readings the caller may need (operator ruling 2026-08-02).
     let holonomy = holonomies(&delta, &support);
     let rank = holonomy.len();
-    EntangledRead { rank, holonomy, symmetry_foundation, flows, unknown, volume }
+    EntangledRead {
+        rank,
+        holonomy,
+        symmetry_foundation,
+        flows,
+        unknown,
+        volume,
+    }
 }
 
 /// The fold guard — the occupancy floor, on both offices at once
@@ -643,12 +650,13 @@ pub enum FoldGuard {
     CarriedWithinFloor,
     /// REFUSED — carried structure would land in fewer tones than it
     /// occupies. The D floor is breached.
-    RoomBelowOccupancy { carried_rank: usize, successor_degree: usize },
+    RoomBelowOccupancy {
+        carried_rank: usize,
+        successor_degree: usize,
+    },
     /// REFUSED — an orb present before is absent after and absent from
     /// the archive. Something admitted ceased without account.
     StandingDroppedWithoutAccount { orbs: usize },
 }
 
-impl FoldGuard {
-}
-
+impl FoldGuard {}

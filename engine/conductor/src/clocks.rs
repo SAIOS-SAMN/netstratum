@@ -33,7 +33,14 @@ pub fn half_mass_rate(u: &Universe, i: usize, unit: &Ratio) -> Option<Ratio> {
 /// A galaxy's EPOCHS (rungs of its half-mass layer) between two bells.
 /// None where the galaxy has no half-mass layer or the count passes the
 /// carrier.
-pub fn galaxy_epochs(u: &Universe, i: usize, unit: &Ratio, t_u: u64, from: u64, to: u64) -> Option<u64> {
+pub fn galaxy_epochs(
+    u: &Universe,
+    i: usize,
+    unit: &Ratio,
+    t_u: u64,
+    from: u64,
+    to: u64,
+) -> Option<u64> {
     let r = half_mass_rate(u, i, unit)?;
     rungs(&slip(&r, to, t_u))?.checked_sub(rungs(&slip(&r, from, t_u))?)
 }
@@ -43,7 +50,13 @@ pub fn galaxy_epochs(u: &Universe, i: usize, unit: &Ratio, t_u: u64, from: u64, 
 pub fn galaxy_terms(u: &Universe, i: usize, t_u: u64, from: u64, to: u64) -> Option<u64> {
     let delay = crate::ring::whole(&u.cores.get(i)?.radius)?;
     let first = delay.checked_add(t_u)?;
-    let echoes = |n: u64| if n < first || t_u == 0 { 0 } else { (n - delay) / t_u };
+    let echoes = |n: u64| {
+        if n < first || t_u == 0 {
+            0
+        } else {
+            (n - delay) / t_u
+        }
+    };
     echoes(to).checked_sub(echoes(from))
 }
 
@@ -66,6 +79,10 @@ mod tests {
         assert_eq!(local_years(&ratio(60, 1), 0, 180), Some(3));
         assert_eq!(local_years(&ratio(60, 1), 59, 61), Some(1));
         assert_eq!(local_years(&ratio(90, 1), 100, 170), Some(0));
-        assert_eq!(local_years(&ratio(0, 1), 0, 10), None, "a world with no period keeps no years");
+        assert_eq!(
+            local_years(&ratio(0, 1), 0, 10),
+            None,
+            "a world with no period keeps no years"
+        );
     }
 }

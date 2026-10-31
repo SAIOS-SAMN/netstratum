@@ -8,6 +8,7 @@
 //! Slice 2 (this landing): the `Grid → FullMeasurement` transducer only.
 //! Slice 3 adds `think_task`, the render table, and the certificate.
 
+use crate::volume::VolumeSolveRead;
 use reduct::peel::{CellFrame, FullMeasurement, GaugeDirection, MeasurementRefusal, Site};
 use reduct::reduction::{Exchange, Flip, ObserverFrame, PlaneElement, Relabel};
 use reduct::{think, Crystal, PairClosure, TaskThought};
@@ -18,7 +19,6 @@ use solver_verify::volume::{
     run_volume, verify_volume_certificate, VOp, VProgram, Volume, VolumeCertificate,
     VolumeCertificateRead, VolumeTask,
 };
-use crate::volume::VolumeSolveRead;
 
 /// The typed solve reading — the ARC seat's verdict (moved here from the retired
 /// `search` module, deleted 2026-08-19: the mind observes, it does not search).
@@ -54,12 +54,25 @@ pub fn measure_grid(grid: &Grid) -> Result<FullMeasurement, MeasurementRefusal> 
     let occupancy = (0..grid.rows)
         .flat_map(|r| (0..grid.cols).map(move |c| (r, c)))
         .map(|(r, c)| {
-            (Site { row: r as i64, col: c as i64, layer: 0 }, GaugeDirection { index: grid.at(r, c) })
+            (
+                Site {
+                    row: r as i64,
+                    col: c as i64,
+                    layer: 0,
+                },
+                GaugeDirection {
+                    index: grid.at(r, c),
+                },
+            )
         })
         .collect();
     FullMeasurement::try_new(
         HUES,
-        CellFrame { rows: grid.rows as u32, cols: grid.cols as u32, layers: 1 },
+        CellFrame {
+            rows: grid.rows as u32,
+            cols: grid.cols as u32,
+            layers: 1,
+        },
         occupancy,
     )
 }
@@ -79,21 +92,39 @@ pub fn measure_volume(volume: &Volume) -> Result<FullMeasurement, MeasurementRef
         // measure" case `Volume::new` itself already refuses to construct
         // (`layers.first()?` there), so this arm is unreachable through the
         // public API; kept as an explicit, honest refusal rather than a panic.
-        return FullMeasurement::try_new(HUES, CellFrame { rows: 0, cols: 0, layers: 0 }, Vec::new());
+        return FullMeasurement::try_new(
+            HUES,
+            CellFrame {
+                rows: 0,
+                cols: 0,
+                layers: 0,
+            },
+            Vec::new(),
+        );
     };
     let (rows, cols) = (first.rows, first.cols);
     let occupancy = (0..layers.len())
         .flat_map(|l| (0..rows).flat_map(move |r| (0..cols).map(move |c| (l, r, c))))
         .map(|(l, r, c)| {
             (
-                Site { row: r as i64, col: c as i64, layer: l as i64 },
-                GaugeDirection { index: layers[l].at(r, c) },
+                Site {
+                    row: r as i64,
+                    col: c as i64,
+                    layer: l as i64,
+                },
+                GaugeDirection {
+                    index: layers[l].at(r, c),
+                },
             )
         })
         .collect();
     FullMeasurement::try_new(
         HUES,
-        CellFrame { rows: rows as u32, cols: cols as u32, layers: layers.len() as u32 },
+        CellFrame {
+            rows: rows as u32,
+            cols: cols as u32,
+            layers: layers.len() as u32,
+        },
         occupancy,
     )
 }
@@ -135,7 +166,12 @@ fn d4_words() -> [Program; 8] {
 fn render_plane(plane: PlaneElement) -> Option<Program> {
     let probe = Grid::new(2, 2, vec![0, 1, 2, 3]).expect("the 2×2 probe is lawful");
     let probe_m = measure_grid(&probe).ok()?;
-    let target = ObserverFrame { plane, relabel: Relabel::new(Vec::new()) }.apply(&probe_m).ok()?;
+    let target = ObserverFrame {
+        plane,
+        relabel: Relabel::new(Vec::new()),
+    }
+    .apply(&probe_m)
+    .ok()?;
     let word = plane_word(plane);
     (measure_grid(&run(&word, &probe)).ok()? == target).then_some(word)
 }
@@ -202,9 +238,16 @@ fn render_vplane(plane: PlaneElement, depth: usize) -> Option<VProgram> {
     let layer = Grid::new(2, 2, vec![0, 1, 2, 3]).expect("the 2×2 probe is lawful");
     let probe = Volume::new(vec![layer; depth.max(1)])?;
     let probe_m = measure_volume(&probe).ok()?;
-    let target = ObserverFrame { plane, relabel: Relabel::new(Vec::new()) }.apply(&probe_m).ok()?;
+    let target = ObserverFrame {
+        plane,
+        relabel: Relabel::new(Vec::new()),
+    }
+    .apply(&probe_m)
+    .ok()?;
     d4_vwords().into_iter().find(|word| {
-        measure_volume(&run_volume(word, &probe)).map(|m| m == target).unwrap_or(false)
+        measure_volume(&run_volume(word, &probe))
+            .map(|m| m == target)
+            .unwrap_or(false)
     })
 }
 
@@ -215,7 +258,11 @@ fn render_vplane(plane: PlaneElement, depth: usize) -> Option<VProgram> {
 /// frame or one that needs a stack move this render cannot reach.
 fn render_vframe(frame: &ObserverFrame, depth: usize) -> Option<VProgram> {
     let mut program = render_vplane(frame.plane, depth)?;
-    program.extend(render_relabel(&frame.relabel)?.into_iter().map(VOp::PerLayer));
+    program.extend(
+        render_relabel(&frame.relabel)?
+            .into_iter()
+            .map(VOp::PerLayer),
+    );
     Some(program)
 }
 
@@ -268,7 +315,11 @@ pub fn think_volume_task(task: &VolumeTask, grown: &mut Vec<Crystal>) -> VolumeS
         return VolumeSolveRead::Unsolved;
     };
     // Pin A: the program must reproduce every train output exactly.
-    if task.train.iter().any(|(input, expected)| &run_volume(&program, input) != expected) {
+    if task
+        .train
+        .iter()
+        .any(|(input, expected)| &run_volume(&program, input) != expected)
+    {
         return VolumeSolveRead::Unsolved;
     }
     let test_output = run_volume(&program, &task.test_in);
@@ -278,8 +329,16 @@ pub fn think_volume_task(task: &VolumeTask, grown: &mut Vec<Crystal>) -> VolumeS
     {
         return VolumeSolveRead::Unsolved;
     }
-    let matches_expected = task.test_expected.as_ref().map(|expected| expected == &test_output);
-    VolumeSolveRead::Solved { program, test_output, matches_expected, certificate }
+    let matches_expected = task
+        .test_expected
+        .as_ref()
+        .map(|expected| expected == &test_output);
+    VolumeSolveRead::Solved {
+        program,
+        test_output,
+        matches_expected,
+        certificate,
+    }
 }
 
 #[cfg(test)]
@@ -340,7 +399,8 @@ mod volumetric_render_tests {
         // no PerLayer word can move a site between layers.
         if let ReduceVerdict::CongruentThroughP { p } = reduce_pair(&ma, &mb, &[]) {
             assert_eq!(
-                render_vplane(p.plane, 2), None,
+                render_vplane(p.plane, 2),
+                None,
                 "no PerLayer word can express a move between layers"
             );
         }
@@ -357,7 +417,10 @@ mod volumetric_render_tests {
         let a = probe(2);
         let ma = measure_volume(&a).expect("whole");
         let expected = frame.apply(&ma).expect("whole");
-        assert_eq!(measure_volume(&run_volume(&program, &a)).expect("whole"), expected);
+        assert_eq!(
+            measure_volume(&run_volume(&program, &a)).expect("whole"),
+            expected
+        );
     }
 }
 
@@ -397,10 +460,16 @@ fn recognize_frame_conjecturing(
     }
     match think(&observations, grown) {
         TaskThought::Glued(PairClosure::Frame(frame)) => render_frame(&frame),
-        TaskThought::UnglueableAcrossObservations { conjectures: held, .. } => {
+        TaskThought::UnglueableAcrossObservations {
+            conjectures: held, ..
+        } => {
             for (frame, closed) in held {
                 if let Some(program) = render_frame(&frame) {
-                    conjectures.push(Conjecture { program, closed, of: pairs.len() });
+                    conjectures.push(Conjecture {
+                        program,
+                        closed,
+                        of: pairs.len(),
+                    });
                 }
             }
             None
@@ -507,8 +576,8 @@ fn read_mirror(block: &Grid, base: &Grid) -> Option<TileMirror> {
 ///   3. verify the tile cheaply (`Tile(base0) == out0`, one apply) before paying
 ///      the reduce organ, then recognise the base transform `input → base0`
 ///      through it exactly once.
-/// Pin A (the caller) is the authority: a candidate that does not replay every
-/// pair withholds.
+///      Pin A (the caller) is the authority: a candidate that does not replay every
+///      pair withholds.
 fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
     let (in0, out0) = *pairs.first()?;
     // The base is a D₄ image of the input: its dims are the input's, or swapped.
@@ -520,7 +589,9 @@ fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<
         if down * across <= 1 {
             continue; // no growth — the same-frame seat already owns this
         }
-        let Some(base0) = top_left_block(out0, br, bc) else { continue };
+        let Some(base0) = top_left_block(out0, br, bc) else {
+            continue;
+        };
         // READ each odd-band mirror off its own block — two 1-D reads, not a
         // 2-D product. A band that is not a reflection of the base is no tiling.
         let odd_row = if down >= 2 {
@@ -539,7 +610,12 @@ fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<
         } else {
             TileMirror::None
         };
-        let tile = Op::Tile { down, across, odd_row, odd_col };
+        let tile = Op::Tile {
+            down,
+            across,
+            odd_row,
+            odd_col,
+        };
         // Cheap structural pin (one apply) — the derived tile must reproduce the
         // whole output from its own (0,0) block. Only then pay the reduce organ.
         if run(&vec![tile.clone()], &base0) != *out0 {
@@ -552,7 +628,9 @@ fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<
             .collect();
         let Some(bases) = bases else { continue };
         let base_refs: Vec<(&Grid, &Grid)> = bases.iter().map(|(i, b)| (i, b)).collect();
-        let Some(mut word) = recognize_frame(&base_refs, grown) else { continue };
+        let Some(mut word) = recognize_frame(&base_refs, grown) else {
+            continue;
+        };
         word.push(tile);
         return Some(word);
     }
@@ -564,7 +642,10 @@ fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<
 /// not such a tiling of `base`. Derive `(down,across)` from the dimension ratio
 /// and READ the mirrors off blocks (1,0)/(0,1); the cheap apply is the pin.
 fn recognize_pure_tile(base: &Grid, tiled: &Grid) -> Option<Op> {
-    if base.rows == 0 || base.cols == 0 || tiled.rows % base.rows != 0 || tiled.cols % base.cols != 0
+    if base.rows == 0
+        || base.cols == 0
+        || !tiled.rows.is_multiple_of(base.rows)
+        || !tiled.cols.is_multiple_of(base.cols)
     {
         return None;
     }
@@ -582,7 +663,12 @@ fn recognize_pure_tile(base: &Grid, tiled: &Grid) -> Option<Op> {
     } else {
         TileMirror::None
     };
-    let tile = Op::Tile { down, across, odd_row, odd_col };
+    let tile = Op::Tile {
+        down,
+        across,
+        odd_row,
+        odd_col,
+    };
     (run(&vec![tile.clone()], base) == *tiled).then_some(tile)
 }
 
@@ -616,7 +702,9 @@ fn recognize_tile_first(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
     let inv = d4_inverse_map();
     for (i, final_word) in words.iter().enumerate() {
         let tiled0 = run(&words[inv[i]], out0); // final⁻¹(output) = the tiled grid
-        let Some(tile) = recognize_pure_tile(in0, &tiled0) else { continue };
+        let Some(tile) = recognize_pure_tile(in0, &tiled0) else {
+            continue;
+        };
         let mut word = vec![tile];
         word.extend(final_word.iter().cloned());
         if run(&word, in0) == *out0 {
@@ -635,7 +723,10 @@ fn recognize_tile_first(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
 fn recognize_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
     for objop in solver_verify::objects::OBJ_OPS {
         let program = vec![Op::Object(objop)];
-        if pairs.iter().all(|&(input, output)| run(&program, input) == *output) {
+        if pairs
+            .iter()
+            .all(|&(input, output)| run(&program, input) == *output)
+        {
             return Some(program);
         }
     }
@@ -666,7 +757,10 @@ fn hue_profile(g: &Grid) -> Vec<usize> {
 /// the object op followed by it. A bounded walk over the fixed object
 /// vocabulary with a cheap structural check before each think; Pin A (the
 /// caller) is the authority.
-fn recognize_object_then_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
+fn recognize_object_then_frame(
+    pairs: &[(&Grid, &Grid)],
+    grown: &mut Vec<Crystal>,
+) -> Option<Program> {
     for objop in solver_verify::objects::OBJ_OPS {
         let first = vec![Op::Object(objop)];
         let staged: Vec<Grid> = pairs.iter().map(|(input, _)| run(&first, input)).collect();
@@ -674,13 +768,18 @@ fn recognize_object_then_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal
             continue; // the op does nothing to this family
         }
         let fits = pairs.iter().zip(&staged).all(|((_, output), s)| {
-            ((s.rows, s.cols) == (output.rows, output.cols) || (s.rows, s.cols) == (output.cols, output.rows))
+            ((s.rows, s.cols) == (output.rows, output.cols)
+                || (s.rows, s.cols) == (output.cols, output.rows))
                 && hue_profile(s) == hue_profile(output)
         });
         if !fits {
             continue;
         }
-        let staged_pairs: Vec<(&Grid, &Grid)> = staged.iter().zip(pairs).map(|(s, (_, output))| (s, *output)).collect();
+        let staged_pairs: Vec<(&Grid, &Grid)> = staged
+            .iter()
+            .zip(pairs)
+            .map(|(s, (_, output))| (s, *output))
+            .collect();
         if let Some(rest) = recognize_frame(&staged_pairs, grown) {
             let mut word = first;
             word.extend(rest);
@@ -700,7 +799,10 @@ fn recognize_frame_then_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
         for objop in solver_verify::objects::OBJ_OPS {
             let mut program = motion.clone();
             program.push(Op::Object(objop));
-            if pairs.iter().all(|&(input, output)| run(&program, input) == *output) {
+            if pairs
+                .iter()
+                .all(|&(input, output)| run(&program, input) == *output)
+            {
                 return Some(program);
             }
         }
@@ -716,19 +818,36 @@ fn recognize_frame_then_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
 ///   whole scale `k` on both axes (or the input's the output's);
 /// - a translator where the frames agree: the vector from the first
 ///   non-background cell of the first input to that of its output.
-/// The staged grids are paired with the outputs and the organ is asked once
-/// for the frame; the word is the generator followed by it. Pin A (the
-/// caller) is the authority.
-fn recognize_affine_then_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
+///   The staged grids are paired with the outputs and the organ is asked once
+///   for the frame; the word is the generator followed by it. Pin A (the
+///   caller) is the authority.
+fn recognize_affine_then_frame(
+    pairs: &[(&Grid, &Grid)],
+    grown: &mut Vec<Crystal>,
+) -> Option<Program> {
     let (in0, out0) = *pairs.first()?;
-    let scale = |a: usize, b: usize| (a > 0 && b > a && b % a == 0).then(|| b / a);
-    let generator = match (scale(in0.rows, out0.rows), scale(in0.cols, out0.cols), scale(out0.rows, in0.rows), scale(out0.cols, in0.cols)) {
-        (Some(k), Some(l), _, _) if k == l => Op::Dilate { up: u8::try_from(k).ok()?, down: 1 },
-        (_, _, Some(k), Some(l)) if k == l => Op::Dilate { up: 1, down: u8::try_from(k).ok()? },
+    let scale = |a: usize, b: usize| (a > 0 && b > a && b.is_multiple_of(a)).then(|| b / a);
+    let generator = match (
+        scale(in0.rows, out0.rows),
+        scale(in0.cols, out0.cols),
+        scale(out0.rows, in0.rows),
+        scale(out0.cols, in0.cols),
+    ) {
+        (Some(k), Some(l), _, _) if k == l => Op::Dilate {
+            up: u8::try_from(k).ok()?,
+            down: 1,
+        },
+        (_, _, Some(k), Some(l)) if k == l => Op::Dilate {
+            up: 1,
+            down: u8::try_from(k).ok()?,
+        },
         _ if (in0.rows, in0.cols) == (out0.rows, out0.cols) => {
             let first = |g: &Grid| {
                 let bg = solver_verify::objects::background(g);
-                g.cells.iter().position(|&h| h != bg).map(|i| ((i / g.cols) as i64, (i % g.cols) as i64))
+                g.cells
+                    .iter()
+                    .position(|&h| h != bg)
+                    .map(|i| ((i / g.cols) as i64, (i % g.cols) as i64))
             };
             let ((r0, c0), (r1, c1)) = (first(in0)?, first(out0)?);
             let (dr, dc) = (i8::try_from(r1 - r0).ok()?, i8::try_from(c1 - c0).ok()?);
@@ -741,13 +860,25 @@ fn recognize_affine_then_frame(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal
     };
     let first = vec![generator];
     let staged: Vec<Grid> = pairs.iter().map(|(input, _)| run(&first, input)).collect();
-    if !pairs.iter().zip(&staged).all(|((_, output), s)| (s.rows, s.cols) == (output.rows, output.cols)) {
+    if !pairs
+        .iter()
+        .zip(&staged)
+        .all(|((_, output), s)| (s.rows, s.cols) == (output.rows, output.cols))
+    {
         return None;
     }
-    if pairs.iter().zip(&staged).all(|((_, output), s)| s == *output) {
+    if pairs
+        .iter()
+        .zip(&staged)
+        .all(|((_, output), s)| s == *output)
+    {
         return Some(first);
     }
-    let staged_pairs: Vec<(&Grid, &Grid)> = staged.iter().zip(pairs).map(|(s, (_, output))| (s, *output)).collect();
+    let staged_pairs: Vec<(&Grid, &Grid)> = staged
+        .iter()
+        .zip(pairs)
+        .map(|(s, (_, output))| (s, *output))
+        .collect();
     let rest = recognize_frame(&staged_pairs, grown)?;
     let mut word = first;
     word.extend(rest);
@@ -773,7 +904,11 @@ pub fn think_task(task: &Task, grown: &mut Vec<Crystal>) -> SolveRead {
 /// unglued thought closed some pairs with are held for later tasks. Every
 /// answer still passes Pin A and its certificate — a claim closes or it is
 /// none.
-pub fn think_task_held(task: &Task, grown: &mut Vec<Crystal>, held: &mut Vec<Conjecture>) -> SolveRead {
+pub fn think_task_held(
+    task: &Task,
+    grown: &mut Vec<Crystal>,
+    held: &mut Vec<Conjecture>,
+) -> SolveRead {
     think_task_sensing(task, grown, held, crate::senses::Senses::ALL)
 }
 
@@ -791,7 +926,11 @@ pub fn think_task_sensing(
     let Some(first) = task.train.first() else {
         return SolveRead::Unsolved; // no pairs proves nothing
     };
-    if let Some(at) = held.iter().position(|c| task.train.iter().all(|pair| run(&c.program, &pair.input) == pair.output)) {
+    if let Some(at) = held.iter().position(|c| {
+        task.train
+            .iter()
+            .all(|pair| run(&c.program, &pair.input) == pair.output)
+    }) {
         let program = held.remove(at).program;
         return seal_answer(task, program);
     }
@@ -822,7 +961,10 @@ pub fn think_task_sensing(
     .or_else(|| recognize_affine_then_frame(&pairs, grown))
     // docs/62 L7: the selection the pairs show, as a projector.
     .or_else(|| {
-        let owned: Vec<(Grid, Grid)> = pairs.iter().map(|(i, o)| ((*i).clone(), (*o).clone())).collect();
+        let owned: Vec<(Grid, Grid)> = pairs
+            .iter()
+            .map(|(i, o)| ((*i).clone(), (*o).clone()))
+            .collect();
         crate::percept::learn(&owned).map(|rule| vec![Op::Project(rule)])
     })
     .filter(|program| senses.covers(Senses::of_word(program)));
@@ -837,7 +979,11 @@ pub fn think_task_sensing(
 /// Pin A and the certificate: an answer reproduces every train output
 /// exactly, or it is a withhold — never an emitted guess.
 fn seal_answer(task: &Task, program: Program) -> SolveRead {
-    if task.train.iter().any(|pair| run(&program, &pair.input) != pair.output) {
+    if task
+        .train
+        .iter()
+        .any(|pair| run(&program, &pair.input) != pair.output)
+    {
         return SolveRead::Unsolved;
     }
     let test_output = run(&program, &task.test_in);
@@ -845,8 +991,16 @@ fn seal_answer(task: &Task, program: Program) -> SolveRead {
     if verify_certificate(&certificate, task, &program, &test_output) != CertificateRead::Intact {
         return SolveRead::Unsolved;
     }
-    let matches_expected = task.test_expected.as_ref().map(|expected| *expected == test_output);
-    SolveRead::Solved { program, test_output, matches_expected, certificate }
+    let matches_expected = task
+        .test_expected
+        .as_ref()
+        .map(|expected| *expected == test_output);
+    SolveRead::Solved {
+        program,
+        test_output,
+        matches_expected,
+        certificate,
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────

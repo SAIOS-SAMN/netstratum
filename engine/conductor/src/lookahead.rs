@@ -53,8 +53,16 @@ fn read_projection(world: &World) -> Option<Projection> {
     let held = world.orb()?;
     Some(Projection {
         zones_total: held.zones.len(),
-        ext: held.zones.iter().filter(|z| z.kind == ZoneKind::Extractor).count() as i64,
-        hab: held.zones.iter().filter(|z| z.kind == ZoneKind::Habitat).count() as i64,
+        ext: held
+            .zones
+            .iter()
+            .filter(|z| z.kind == ZoneKind::Extractor)
+            .count() as i64,
+        hab: held
+            .zones
+            .iter()
+            .filter(|z| z.kind == ZoneKind::Habitat)
+            .count() as i64,
         iron: held
             .banked
             .iter()

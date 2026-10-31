@@ -87,7 +87,6 @@ impl PairPlane {
             .map(Self)
             .ok_or(MultivectorError::InvalidPairPlane { i, j })
     }
-
 }
 
 /// **`PLUS_SIG_BIT`** — conformal-extension positive-signature basis
@@ -1100,5 +1099,4 @@ mod tests {
         let n = scalar_x.unipotent_generator().unwrap();
         assert!(n.is_zero(), "scalar content must be in the kernel of N");
     }
-
 }

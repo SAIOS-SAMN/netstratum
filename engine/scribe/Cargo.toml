@@ -11,3 +11,6 @@ cfe = { path = "../cfe" }
 ledger = { path = "../ledger" }
 lens = { path = "../lens" }
 physics = { path = "../physics" }
+
+[lints]
+workspace = true

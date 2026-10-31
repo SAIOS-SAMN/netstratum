@@ -43,7 +43,10 @@ pub enum TaskThought {
     /// unglued hypotheses, kept rather than discarded, in first-seen order.
     /// A conjecture is private thought: it is never a claim until it closes
     /// every pair of a task.
-    UnglueableAcrossObservations { residuals: Vec<Remainder>, conjectures: Vec<(ObserverFrame, usize)> },
+    UnglueableAcrossObservations {
+        residuals: Vec<Remainder>,
+        conjectures: Vec<(ObserverFrame, usize)>,
+    },
     /// A GenerationGap wall was minted and adopted this pass — the task learned
     /// but did not close; the next think of the same class drains.
     Withheld,
@@ -58,7 +61,9 @@ pub fn think(
     grown: &mut Vec<Crystal>,
 ) -> TaskThought {
     if observations.len() < 2 {
-        return TaskThought::InsufficientObservations { count: observations.len() };
+        return TaskThought::InsufficientObservations {
+            count: observations.len(),
+        };
     }
     // Judge every pair against the same pre-think basis, so two same-class walls
     // both wall (and mint one crystal) this pass rather than the second draining
@@ -97,7 +102,10 @@ pub fn think(
     }
     if !residuals.is_empty() {
         let conjectures = conjectures(&closures);
-        return TaskThought::UnglueableAcrossObservations { residuals, conjectures };
+        return TaskThought::UnglueableAcrossObservations {
+            residuals,
+            conjectures,
+        };
     }
     glue(closures)
 }
@@ -122,12 +130,18 @@ fn conjectures(closures: &[PairClosure]) -> Vec<(ObserverFrame, usize)> {
 /// from one pair did not generalize).
 fn glue(closures: Vec<PairClosure>) -> TaskThought {
     match closures.first() {
-        None => TaskThought::UnglueableAcrossObservations { residuals: Vec::new(), conjectures: Vec::new() },
+        None => TaskThought::UnglueableAcrossObservations {
+            residuals: Vec::new(),
+            conjectures: Vec::new(),
+        },
         Some(first) => {
             if closures.iter().all(|c| c == first) {
                 TaskThought::Glued(first.clone())
             } else {
-                TaskThought::UnglueableAcrossObservations { residuals: Vec::new(), conjectures: conjectures(&closures) }
+                TaskThought::UnglueableAcrossObservations {
+                    residuals: Vec::new(),
+                    conjectures: conjectures(&closures),
+                }
             }
         }
     }

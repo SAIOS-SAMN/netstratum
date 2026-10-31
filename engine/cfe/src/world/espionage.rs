@@ -128,11 +128,7 @@ impl World {
         self.sabotage_instrument_as(SOVEREIGN, orb)
     }
 
-    pub fn sabotage_instrument_as(
-        &mut self,
-        actor: u64,
-        orb: u64,
-    ) -> Result<u8, ActionRefused> {
+    pub fn sabotage_instrument_as(&mut self, actor: u64, orb: u64) -> Result<u8, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         self.require_detection(1)?;
         if !self.spy_marks.iter().any(|(o, _)| *o == orb) {

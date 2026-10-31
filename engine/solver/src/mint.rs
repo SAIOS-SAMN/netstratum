@@ -186,11 +186,7 @@ pub fn standing_orbits(vocabulary: &[Op]) -> Vec<[u8; 32]> {
 /// depth ≥ 2, against this line's library and the standing letters.
 /// Returns the candidate's orbit if it may seek confirmation; `None`
 /// names no fault — most compositions are re-spellings, lawfully.
-pub fn consider(
-    word: &[Op],
-    library: &Library,
-    standing: &[[u8; 32]],
-) -> Option<[u8; 32]> {
+pub fn consider(word: &[Op], library: &Library, standing: &[[u8; 32]]) -> Option<[u8; 32]> {
     if word.len() < 2 {
         return None; // a single letter is already in the alphabet
     }
@@ -213,7 +209,12 @@ pub const CONFIRMS_TO_MINT: usize = 3;
 /// no dial.
 pub fn family_census(library: &Library) -> Vec<crate::need::Family> {
     use crate::need::{family_of, Family};
-    let families = [Family::Symmetry, Family::Recolor, Family::Tile, Family::Object];
+    let families = [
+        Family::Symmetry,
+        Family::Recolor,
+        Family::Tile,
+        Family::Object,
+    ];
     let mut counts: Vec<(Family, usize)> = families
         .iter()
         .map(|family| {
@@ -235,10 +236,7 @@ pub fn family_census(library: &Library) -> Vec<crate::need::Family> {
 /// knows. The sweep runs unchanged behind it, so nothing previously
 /// reachable is lost and the enumeration order of the old search is
 /// untouched (same first match for everything the library misses).
-pub fn pre_reach(
-    task: &solver_verify::loader::Task,
-    library: &Library,
-) -> Option<Vec<Op>> {
+pub fn pre_reach(task: &solver_verify::loader::Task, library: &Library) -> Option<Vec<Op>> {
     if task.train.is_empty() {
         return None; // the vacuous-solve refusal, upheld here too
     }
@@ -353,13 +351,20 @@ fn derived_tiles(task: &Task) -> Vec<Op> {
                 }
             }
         }
-        let Some((down, across)) = ratio.filter(|_| holds) else { continue };
+        let Some((down, across)) = ratio.filter(|_| holds) else {
+            continue;
+        };
         if down * across <= 1 || down > 6 || across > 6 {
             continue;
         }
         for odd_row in TileMirror::ALL {
             for odd_col in TileMirror::ALL {
-                let op = Op::Tile { down, across, odd_row, odd_col };
+                let op = Op::Tile {
+                    down,
+                    across,
+                    odd_row,
+                    odd_col,
+                };
                 if !ops.contains(&op) {
                     ops.push(op);
                 }
@@ -385,6 +390,11 @@ pub fn sweep_vocabulary(task: &Task) -> Vec<Op> {
         Op::FlipV,
         Op::Transpose,
     ]);
-    vocabulary.extend(solver_verify::objects::OBJ_OPS.iter().cloned().map(Op::Object));
+    vocabulary.extend(
+        solver_verify::objects::OBJ_OPS
+            .iter()
+            .cloned()
+            .map(Op::Object),
+    );
     vocabulary
 }

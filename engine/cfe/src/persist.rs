@@ -73,10 +73,14 @@ pub fn sync(chronicle: &Chronicle, path: &Path) -> Result<usize, PersistRefused>
         return Err(PersistRefused::HistoryDiverged { at: total as u64 });
     }
     if on_disk.len() < base {
-        return Err(PersistRefused::HistoryDiverged { at: on_disk.len() as u64 });
+        return Err(PersistRefused::HistoryDiverged {
+            at: on_disk.len() as u64,
+        });
     }
     if base > 0 && on_disk[base - 1].own() != chronicle.base_parent() {
-        return Err(PersistRefused::HistoryDiverged { at: (base - 1) as u64 });
+        return Err(PersistRefused::HistoryDiverged {
+            at: (base - 1) as u64,
+        });
     }
     for (at, stored) in on_disk.iter().enumerate().skip(base) {
         if stored != &held[at - base] {
@@ -157,21 +161,39 @@ pub fn read_tail(path: &Path, cursor: &mut TailCursor) -> Result<Vec<Receipt>, P
     let mut file = match fs::File::open(path) {
         Ok(f) => f,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
-        Err(error) => return Err(PersistRefused::Io { message: error.to_string() }),
+        Err(error) => {
+            return Err(PersistRefused::Io {
+                message: error.to_string(),
+            })
+        }
     };
-    let len = file.metadata().map(|m| m.len()).map_err(|error| PersistRefused::Io { message: error.to_string() })?;
+    let len = file
+        .metadata()
+        .map(|m| m.len())
+        .map_err(|error| PersistRefused::Io {
+            message: error.to_string(),
+        })?;
     if len < cursor.bytes {
-        return Err(PersistRefused::HistoryDiverged { at: cursor.receipts });
+        return Err(PersistRefused::HistoryDiverged {
+            at: cursor.receipts,
+        });
     }
-    file.seek(SeekFrom::Start(cursor.bytes)).map_err(|error| PersistRefused::Io { message: error.to_string() })?;
+    file.seek(SeekFrom::Start(cursor.bytes))
+        .map_err(|error| PersistRefused::Io {
+            message: error.to_string(),
+        })?;
     let mut tail = Vec::new();
-    file.read_to_end(&mut tail).map_err(|error| PersistRefused::Io { message: error.to_string() })?;
+    file.read_to_end(&mut tail)
+        .map_err(|error| PersistRefused::Io {
+            message: error.to_string(),
+        })?;
     let mut receipts = Vec::new();
     let mut consumed = 0usize;
     for (frame, (tag, value)) in tlv::records(&tail).enumerate() {
         consumed += 5 + value.len();
         if tag == crate::vrp::RECEIPT_FRAME_TAG || tag == crate::vrp::RECEIPT_FRAME_TAG_V2 {
-            receipts.push(Receipt::from_wire(tag, value).ok_or(PersistRefused::Malformed { frame })?);
+            receipts
+                .push(Receipt::from_wire(tag, value).ok_or(PersistRefused::Malformed { frame })?);
         }
     }
     let parent = cursor.head.unwrap_or(crate::vrp::ReceiptHash::GENESIS);
@@ -206,7 +228,10 @@ pub fn sync_from(
     let cold = |cursor: &mut SyncCursor| -> Result<usize, PersistRefused> {
         let appended = sync(chronicle, path)?;
         let bytes = fs::metadata(path).map(|m| m.len()).unwrap_or(0);
-        *cursor = SyncCursor { receipts: total, bytes };
+        *cursor = SyncCursor {
+            receipts: total,
+            bytes,
+        };
         Ok(appended)
     };
     if cursor.receipts == 0 || !path.exists() {
@@ -215,21 +240,26 @@ pub fn sync_from(
     let mut file = fs::File::open(path).map_err(|error| PersistRefused::Io {
         message: error.to_string(),
     })?;
-    let file_len = file.metadata().map(|m| m.len()).map_err(|error| PersistRefused::Io {
-        message: error.to_string(),
-    })?;
+    let file_len = file
+        .metadata()
+        .map(|m| m.len())
+        .map_err(|error| PersistRefused::Io {
+            message: error.to_string(),
+        })?;
     if file_len < cursor.bytes {
         // Shorter than what this process already proved — never trust
         // a shrunk carrier; re-derive the cursor from a full check.
         return cold(cursor);
     }
-    file.seek(SeekFrom::Start(cursor.bytes)).map_err(|error| PersistRefused::Io {
-        message: error.to_string(),
-    })?;
+    file.seek(SeekFrom::Start(cursor.bytes))
+        .map_err(|error| PersistRefused::Io {
+            message: error.to_string(),
+        })?;
     let mut tail_bytes = Vec::new();
-    file.read_to_end(&mut tail_bytes).map_err(|error| PersistRefused::Io {
-        message: error.to_string(),
-    })?;
+    file.read_to_end(&mut tail_bytes)
+        .map_err(|error| PersistRefused::Io {
+            message: error.to_string(),
+        })?;
     let mut on_disk_tail = Vec::new();
     for (frame, (tag, value)) in tlv::records(&tail_bytes).enumerate() {
         if tag == crate::vrp::RECEIPT_FRAME_TAG || tag == crate::vrp::RECEIPT_FRAME_TAG_V2 {
@@ -250,15 +280,20 @@ pub fn sync_from(
     }
     for (i, stored) in on_disk_tail.iter().enumerate() {
         if stored != &held_from_cursor[i] {
-            return Err(PersistRefused::HistoryDiverged { at: (proved + i) as u64 });
+            return Err(PersistRefused::HistoryDiverged {
+                at: (proved + i) as u64,
+            });
         }
     }
     let to_write = &held_from_cursor[on_disk_tail.len()..];
     let mut appended_bytes: u64 = 0;
     if !to_write.is_empty() {
-        let mut file = fs::OpenOptions::new().append(true).open(path).map_err(|error| {
-            PersistRefused::Io { message: error.to_string() }
-        })?;
+        let mut file = fs::OpenOptions::new()
+            .append(true)
+            .open(path)
+            .map_err(|error| PersistRefused::Io {
+                message: error.to_string(),
+            })?;
         for receipt in to_write {
             let wire = receipt.wire_bytes();
             appended_bytes += wire.len() as u64;
@@ -270,6 +305,9 @@ pub fn sync_from(
             message: error.to_string(),
         })?;
     }
-    *cursor = SyncCursor { receipts: total, bytes: file_len + appended_bytes };
+    *cursor = SyncCursor {
+        receipts: total,
+        bytes: file_len + appended_bytes,
+    };
     Ok(to_write.len())
 }

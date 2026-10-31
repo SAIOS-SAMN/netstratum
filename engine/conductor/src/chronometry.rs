@@ -67,8 +67,17 @@ impl Keeper {
         let slip = (ratio(1, 1) - self.rate.clone()) * since;
         let rung = slip.floor();
         let frac = slip.clone() - rung.clone();
-        let off = if frac > ratio(1, 2) { ratio(1, 1) - frac } else { frac };
-        Reading { local, slip, coherence: ratio(1, 1) - ratio(2, 1) * off, rung: rung.to_integer().try_into().unwrap_or(0) }
+        let off = if frac > ratio(1, 2) {
+            ratio(1, 1) - frac
+        } else {
+            frac
+        };
+        Reading {
+            local,
+            slip,
+            coherence: ratio(1, 1) - ratio(2, 1) * off,
+            rung: rung.to_integer().try_into().unwrap_or(0),
+        }
     }
 
     fn key(&self) -> (u32, u8) {
@@ -79,16 +88,37 @@ impl Keeper {
 /// The universe's keepers now, each with the index of the keeper inside it.
 pub fn keepers(u: &Universe) -> Vec<(Keeper, Option<usize>)> {
     let unit = unit_mass(u);
-    let mut out = vec![(Keeper { galaxy: None, shell: Shell::Epicenter, rate: ratio(1, 1), delay: ratio(0, 1) }, None)];
+    let mut out = vec![(
+        Keeper {
+            galaxy: None,
+            shell: Shell::Epicenter,
+            rate: ratio(1, 1),
+            delay: ratio(0, 1),
+        },
+        None,
+    )];
     // The ring's light: the home galaxy's rim radius is half a bell.
-    let home = u.cores.iter().max_by(|a, b| mass(&a.kept).cmp(&mass(&b.kept)));
-    let light = home.and_then(|c| c.satellites.last()).map(|s| ratio(2, 1) * s.radius.clone()).filter(|l| !l.is_zero()).unwrap_or_else(|| ratio(1, 1));
+    let home = u
+        .cores
+        .iter()
+        .max_by(|a, b| mass(&a.kept).cmp(&mass(&b.kept)));
+    let light = home
+        .and_then(|c| c.satellites.last())
+        .map(|s| ratio(2, 1) * s.radius.clone())
+        .filter(|l| !l.is_zero())
+        .unwrap_or_else(|| ratio(1, 1));
     for (i, core) in u.cores.iter().enumerate() {
         let half = galactic_year(core).map(|(k, _)| k).unwrap_or(0);
-        let shells = [(Shell::Core, 0usize), (Shell::Mantle, half), (Shell::Rim, core.satellites.len().saturating_sub(1))];
+        let shells = [
+            (Shell::Core, 0usize),
+            (Shell::Mantle, half),
+            (Shell::Rim, core.satellites.len().saturating_sub(1)),
+        ];
         let mut inner = 0usize;
         for (shell, k) in shells {
-            let Some(sys) = core.satellites.get(k) else { continue };
+            let Some(sys) = core.satellites.get(k) else {
+                continue;
+            };
             let keeper = Keeper {
                 galaxy: core.path.first().map(|g| *g as u32),
                 shell,
@@ -146,13 +176,22 @@ impl Chain {
                 }
             }
         }
-        Chain { path, heads, entries }
+        Chain {
+            path,
+            heads,
+            entries,
+        }
     }
 
     /// Commit a moment at the epicenter's count `n`; `point` the last final
     /// point's height the house heard (None: unlinked). Returns each rim's
     /// residual against its mantle.
-    pub fn commit(&mut self, u: &Universe, n: u64, point: Option<u64>) -> std::io::Result<Vec<(u32, Ratio)>> {
+    pub fn commit(
+        &mut self,
+        u: &Universe,
+        n: u64,
+        point: Option<u64>,
+    ) -> std::io::Result<Vec<(u32, Ratio)>> {
         let keepers = keepers(u);
         let at = ratio(n as i64, 1);
         let mut slips: Vec<Ratio> = Vec::with_capacity(keepers.len());
@@ -161,13 +200,20 @@ impl Chain {
         let mut out = Vec::new();
         for (keeper, inner) in &keepers {
             let r = keeper.read(&at);
-            let residual = inner.map(|i| r.slip.clone() - slips[i].clone()).unwrap_or_else(|| ratio(0, 1));
+            let residual = inner
+                .map(|i| r.slip.clone() - slips[i].clone())
+                .unwrap_or_else(|| ratio(0, 1));
             let parent = self.heads.get(&keeper.key()).copied().unwrap_or([0; 32]);
             let inner_hash = inner.map(|i| hashes[i]).unwrap_or([0; 32]);
             let mut h = blake3::Hasher::new_derive_key("netstratum chronometry entry v1");
             h.update(&keeper.key().0.to_le_bytes());
             h.update(&[keeper.key().1]);
-            for part in [at.to_string(), r.local.to_string(), r.slip.to_string(), residual.to_string()] {
+            for part in [
+                at.to_string(),
+                r.local.to_string(),
+                r.slip.to_string(),
+                residual.to_string(),
+            ] {
                 h.update(part.as_bytes());
                 h.update(&[0]);
             }
@@ -213,10 +259,22 @@ mod tests {
 
     #[test]
     fn a_keeper_reads_its_slip_and_rungs() {
-        let k = Keeper { galaxy: Some(1), shell: Shell::Rim, rate: ratio(3, 4), delay: ratio(20, 1) };
+        let k = Keeper {
+            galaxy: Some(1),
+            shell: Shell::Rim,
+            rate: ratio(3, 4),
+            delay: ratio(20, 1),
+        };
         let r = k.read(&ratio(28, 1));
-        assert_eq!((r.local, r.slip.clone(), r.rung), (ratio(6, 1), ratio(2, 1), 2));
+        assert_eq!(
+            (r.local, r.slip.clone(), r.rung),
+            (ratio(6, 1), ratio(2, 1), 2)
+        );
         assert_eq!(r.coherence, ratio(1, 1), "back in phase at two whole slips");
-        assert_eq!(k.read(&ratio(10, 1)).slip, ratio(0, 1), "before the echo arrives, nothing");
+        assert_eq!(
+            k.read(&ratio(10, 1)).slip,
+            ratio(0, 1),
+            "before the echo arrives, nothing"
+        );
     }
 }

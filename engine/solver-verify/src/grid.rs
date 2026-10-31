@@ -42,7 +42,6 @@ impl Grid {
         self.cells[r * self.cols + c]
     }
 
-
     /// Refill this grid in place, reusing its existing allocation.
     ///
     /// A grid at live difficulty is 3×3 to 4×4 — nine to sixteen bytes.
@@ -98,11 +97,17 @@ pub enum Op {
     /// A translator (docs/62 L1): every cell carried by `(dr, dc)`; a cell
     /// the motion vacates takes the grid's background. A generator of the
     /// algebra, not a named transform: its arguments are the motion.
-    Shift { dr: i8, dc: i8 },
+    Shift {
+        dr: i8,
+        dc: i8,
+    },
     /// A dilator (docs/62 L1): each cell becomes an `up x up` block, or each
     /// `down x down` block is read as its top-left cell. One of `up`, `down`
     /// is 1.
-    Dilate { up: u8, down: u8 },
+    Dilate {
+        up: u8,
+        down: u8,
+    },
     /// A projector (docs/62 L7): the bodies a predicate picks, recoloured
     /// or removed. Learned from the pairs, never a named object op.
     Project(crate::project::ObjectRule),
@@ -184,7 +189,11 @@ impl Op {
     /// should use [`Op::apply_into`] with one reused buffer instead;
     /// this is the same computation, called not copied.
     pub fn apply(&self, g: &Grid) -> Grid {
-        let mut out = Grid { rows: 0, cols: 0, cells: Vec::new() };
+        let mut out = Grid {
+            rows: 0,
+            cols: 0,
+            cells: Vec::new(),
+        };
         self.apply_into(g, &mut out);
         out
     }
@@ -217,19 +226,22 @@ impl Op {
             Op::FlipH => out.fill_from(g.rows, g.cols, |r, c| g.at(r, g.cols - 1 - c)),
             Op::FlipV => out.fill_from(g.rows, g.cols, |r, c| g.at(g.rows - 1 - r, c)),
             Op::Transpose => out.fill_from(g.cols, g.rows, |r, c| g.at(c, r)),
-            Op::Tile { down, across, odd_row, odd_col } => {
-                out.fill_from(g.rows * down, g.cols * across, |r, c| {
-                    let (tile_r, mut rr) = (r / g.rows, r % g.rows);
-                    let (tile_c, mut cc) = (c / g.cols, c % g.cols);
-                    if tile_r % 2 == 1 {
-                        odd_row.apply(&mut rr, &mut cc, g.rows, g.cols);
-                    }
-                    if tile_c % 2 == 1 {
-                        odd_col.apply(&mut rr, &mut cc, g.rows, g.cols);
-                    }
-                    g.at(rr, cc)
-                })
-            }
+            Op::Tile {
+                down,
+                across,
+                odd_row,
+                odd_col,
+            } => out.fill_from(g.rows * down, g.cols * across, |r, c| {
+                let (tile_r, mut rr) = (r / g.rows, r % g.rows);
+                let (tile_c, mut cc) = (c / g.cols, c % g.cols);
+                if tile_r % 2 == 1 {
+                    odd_row.apply(&mut rr, &mut cc, g.rows, g.cols);
+                }
+                if tile_c % 2 == 1 {
+                    odd_col.apply(&mut rr, &mut cc, g.rows, g.cols);
+                }
+                g.at(rr, cc)
+            }),
             Op::Shift { dr, dc } => {
                 let bg = crate::objects::background(g);
                 let (dr, dc) = (i64::from(*dr), i64::from(*dc));
@@ -246,11 +258,12 @@ impl Op {
             Op::Project(rule) => *out = crate::project::apply(rule, g),
             Op::Dilate { up, down } => {
                 let (up, down) = (usize::from((*up).max(1)), usize::from((*down).max(1)));
-                out.fill_from(g.rows * up / down, g.cols * up / down, |r, c| g.at(r * down / up, c * down / up))
+                out.fill_from(g.rows * up / down, g.cols * up / down, |r, c| {
+                    g.at(r * down / up, c * down / up)
+                })
             }
         }
     }
-
 }
 
 /// A program: an ordered word over the vocabulary, applied left to

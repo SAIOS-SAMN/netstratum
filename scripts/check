@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+# Everything a change passes before it lands (CONTRIBUTING.md). Long physics
+# reads are not part of it.
+set -e
+cd "$(dirname "$0")/.."
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+mkdir -p .testtmp
+TMPDIR="${TMPDIR:-$PWD/.testtmp}" cargo test --workspace
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
+scripts/check-docs
+echo "check: all passed"

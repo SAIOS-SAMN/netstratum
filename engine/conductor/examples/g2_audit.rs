@@ -12,7 +12,9 @@ use cfe::dop::ClosureEvent as E;
 use std::collections::BTreeMap;
 
 fn main() {
-    let root = std::env::args().nth(1).unwrap_or_else(|| "var-g2".to_string());
+    let root = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| "var-g2".to_string());
     let mut dirs: Vec<_> = std::fs::read_dir(format!("{root}/worlds"))
         .expect("a worlds directory")
         .flatten()
@@ -22,11 +24,25 @@ fn main() {
     dirs.sort();
     println!(
         "{:<18} {:>6} {:>5} {:>5} {:>5} {:>5} {:>7} {:>9} {:>9} {:>4} {:>4}",
-        "world", "rcpts", "band", "pop", "peak", "dips", "famine", "unpaired", "discov", "div", "fall"
+        "world",
+        "rcpts",
+        "band",
+        "pop",
+        "peak",
+        "dips",
+        "famine",
+        "unpaired",
+        "discov",
+        "div",
+        "fall"
     );
     let mut flags = Vec::new();
     for dir in dirs {
-        let name = dir.file_name().and_then(|n| n.to_str()).unwrap_or("?").to_string();
+        let name = dir
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("?")
+            .to_string();
         let chronicle = match cfe::persist::load(&dir.join("chronicle.tlv")) {
             Ok(c) => c,
             Err(e) => {
@@ -54,11 +70,15 @@ fn main() {
                         dips += 1;
                     }
                     if *held < 0 {
-                        flags.push(format!("{name}: orb {orb_id} headcount below zero ({held})"));
+                        flags.push(format!(
+                            "{name}: orb {orb_id} headcount below zero ({held})"
+                        ));
                     }
                     peak = peak.max(pop.values().sum());
                 }
-                E::FamineStruck { orb_id, resource, .. } => {
+                E::FamineStruck {
+                    orb_id, resource, ..
+                } => {
                     struck += 1;
                     *open.entry((*orb_id, format!("{resource:?}"))).or_default() += 1;
                 }
@@ -76,7 +96,9 @@ fn main() {
         let now: i64 = pop.values().sum();
         let unpaired: u32 = open.values().sum();
         if band_ok == Some(false) {
-            flags.push(format!("{name}: first PopulationSettled is not the +4 founding band"));
+            flags.push(format!(
+                "{name}: first PopulationSettled is not the +4 founding band"
+            ));
         }
         if diverged > 1 {
             flags.push(format!("{name}: cleaved {diverged} times (one per line)"));
@@ -89,7 +111,11 @@ fn main() {
             Some(false) => "BAD".into(),
             None => "-".into(),
         };
-        let discov = if discov.is_empty() { "-".to_string() } else { discov.join(",") };
+        let discov = if discov.is_empty() {
+            "-".to_string()
+        } else {
+            discov.join(",")
+        };
         println!(
             "{name:<18} {:>6} {band:>5} {now:>5} {peak:>5} {dips:>5} {struck:>7} {unpaired:>9} {discov:>9} {diverged:>4} {:>4}",
             chronicle.receipts().len(),

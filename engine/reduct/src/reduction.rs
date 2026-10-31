@@ -70,7 +70,11 @@ pub struct PlaneElement {
 }
 
 impl PlaneElement {
-    pub const IDENTITY: Self = Self { exchange: Exchange::Keep, row: Flip::Keep, col: Flip::Keep };
+    pub const IDENTITY: Self = Self {
+        exchange: Exchange::Keep,
+        row: Flip::Keep,
+        col: Flip::Keep,
+    };
 
     /// All eight elements — the group-order sweep's domain (a structural
     /// constant, never a content search).
@@ -94,7 +98,11 @@ impl PlaneElement {
     pub fn frame(&self, frame: CellFrame) -> CellFrame {
         match self.exchange {
             Exchange::Keep => frame,
-            Exchange::Swap => CellFrame { rows: frame.cols, cols: frame.rows, layers: frame.layers },
+            Exchange::Swap => CellFrame {
+                rows: frame.cols,
+                cols: frame.rows,
+                layers: frame.layers,
+            },
         }
     }
 
@@ -114,7 +122,11 @@ impl PlaneElement {
             Flip::Keep => c,
             Flip::Mirror => i64::from(out_frame.cols) - 1 - c,
         };
-        Site { row: r, col: c, layer: site.layer }
+        Site {
+            row: r,
+            col: c,
+            layer: site.layer,
+        }
     }
 
     /// Group composition `self ∘ other` (other applies first). The exchange of
@@ -135,7 +147,11 @@ impl PlaneElement {
     pub fn inverse(&self) -> Self {
         match self.exchange {
             Exchange::Keep => *self,
-            Exchange::Swap => Self { exchange: Exchange::Swap, row: self.col, col: self.row },
+            Exchange::Swap => Self {
+                exchange: Exchange::Swap,
+                row: self.col,
+                col: self.row,
+            },
         }
     }
 }
@@ -174,8 +190,12 @@ impl Relabel {
     /// Composition `self ∘ other` (other applies first) — total: the moved
     /// domain is the union of both permutations' moved points.
     pub fn compose(&self, other: &Self) -> Self {
-        let mut domain: Vec<u8> =
-            self.pairs.iter().chain(other.pairs.iter()).map(|(from, _)| *from).collect();
+        let mut domain: Vec<u8> = self
+            .pairs
+            .iter()
+            .chain(other.pairs.iter())
+            .map(|(from, _)| *from)
+            .collect();
         domain.sort_unstable();
         domain.dedup();
         Self::new(
@@ -210,7 +230,10 @@ impl ObserverFrame {
             .occupancy()
             .iter()
             .map(|(site, direction)| {
-                (self.plane.site(*site, in_frame), self.relabel.image(*direction))
+                (
+                    self.plane.site(*site, in_frame),
+                    self.relabel.image(*direction),
+                )
             })
             .collect();
         FullMeasurement::try_new(measurement.fiber_rank(), out_frame, occupancy)
@@ -219,18 +242,27 @@ impl ObserverFrame {
 
     /// `self ∘ other` (other applies first) — both components compose.
     pub fn compose(&self, other: &Self) -> Self {
-        Self { plane: self.plane.compose(&other.plane), relabel: self.relabel.compose(&other.relabel) }
+        Self {
+            plane: self.plane.compose(&other.plane),
+            relabel: self.relabel.compose(&other.relabel),
+        }
     }
 
     /// The exact inverse frame.
     pub fn inverse(&self) -> Self {
-        Self { plane: self.plane.inverse(), relabel: self.relabel.inverse() }
+        Self {
+            plane: self.plane.inverse(),
+            relabel: self.relabel.inverse(),
+        }
     }
 }
 
 /// The identity observer frame — identity plane, empty relabel.
 pub fn identity_frame() -> ObserverFrame {
-    ObserverFrame { plane: PlaneElement::IDENTITY, relabel: Relabel::new(Vec::new()) }
+    ObserverFrame {
+        plane: PlaneElement::IDENTITY,
+        relabel: Relabel::new(Vec::new()),
+    }
 }
 
 /// Typed refusals of the frame surface.
@@ -271,7 +303,9 @@ impl Renaming {
             .iter()
             .find(|(from, _)| *from == direction.index)
             .map(|(_, to)| GaugeDirection { index: *to })
-            .ok_or(FrameRefusal::DirectionNotInChart { index: direction.index })
+            .ok_or(FrameRefusal::DirectionNotInChart {
+                index: direction.index,
+            })
     }
 
     /// The exact inverse chart map.
@@ -298,7 +332,9 @@ impl RenamingFrame {
             .occupancy()
             .iter()
             .map(|(site, direction)| {
-                self.renaming.image(*direction).map(|d| (self.plane.site(*site, in_frame), d))
+                self.renaming
+                    .image(*direction)
+                    .map(|d| (self.plane.site(*site, in_frame), d))
             })
             .collect::<Result<Vec<_>, _>>()?;
         FullMeasurement::try_new(measurement.fiber_rank(), out_frame, occupancy)
@@ -313,8 +349,7 @@ pub struct CanonicalForm {
     measurement: FullMeasurement,
 }
 
-impl CanonicalForm {
-}
+impl CanonicalForm {}
 
 /// The canonicalization emission: the form and the achieving frame (the chart
 /// map into the canonical gauge). The whole stabilizer COSET (glue across pairs)
@@ -398,7 +433,9 @@ pub enum GaugeDeduction {
 /// frames. Form equality only — no content walk.
 pub fn deduce_gauge_move(a: &Canonicalized, b: &Canonicalized) -> GaugeDeduction {
     if a.form == b.form {
-        GaugeDeduction::GaugeMove { rule: rule_between_frames(&a.achieving_frame, &b.achieving_frame) }
+        GaugeDeduction::GaugeMove {
+            rule: rule_between_frames(&a.achieving_frame, &b.achieving_frame),
+        }
     } else {
         GaugeDeduction::ContentDiffers
     }
@@ -417,12 +454,17 @@ fn rule_between_frames(g_a: &RenamingFrame, g_b: &RenamingFrame) -> ObserverFram
         .pairs
         .iter()
         .map(|(raw_a, canonical_label)| {
-            back.image(GaugeDirection { index: *canonical_label })
-                .map(|raw_b| (*raw_a, raw_b.index))
-                .expect("equal forms share one canonical chart — every label maps back")
+            back.image(GaugeDirection {
+                index: *canonical_label,
+            })
+            .map(|raw_b| (*raw_a, raw_b.index))
+            .expect("equal forms share one canonical chart — every label maps back")
         })
         .collect();
-    ObserverFrame { plane, relabel: Relabel::new(pairs) }
+    ObserverFrame {
+        plane,
+        relabel: Relabel::new(pairs),
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -498,7 +540,10 @@ pub enum ReduceVerdict {
     /// One class through a deduced frame, carried with P⁻¹ (`ObserverFrame::inverse`).
     CongruentThroughP { p: ObserverFrame },
     /// The irreducible part, whole, routed per pair.
-    Remainder { remainder: Remainder, route: Dir13Route },
+    Remainder {
+        remainder: Remainder,
+        route: Dir13Route,
+    },
 }
 
 /// The drain: account the residual against the basis by exact accounting; what
@@ -517,7 +562,10 @@ pub enum ReduceVerdict {
 /// as a `(site,direction) → coefficient` map for O(log n) exact accounting (was
 /// an O(class·residual) nested scan per crystal, per pass), and rebuilt in the
 /// same canonical order `into_entries` uses. Output-identical; SEAL-B untouched.
-pub(crate) fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelta, Vec<BoundingRecord>) {
+pub(crate) fn drain_exact(
+    residual: ChainDelta,
+    basis: &[Crystal],
+) -> (ChainDelta, Vec<BoundingRecord>) {
     let (from, to) = (residual.from, residual.to);
     // VOLUMETRIC-1a: keyed on the whole site (layer included) — a 2-D
     // residual's sites all carry `layer: 0`, so this is output-identical to
@@ -527,7 +575,12 @@ pub(crate) fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelt
     let mut index: BTreeMap<(i64, i64, i64, u8), BigInt> = residual
         .entries
         .into_iter()
-        .map(|e| ((e.site.row, e.site.col, e.site.layer, e.direction.index), e.coefficient))
+        .map(|e| {
+            (
+                (e.site.row, e.site.col, e.site.layer, e.direction.index),
+                e.coefficient,
+            )
+        })
         .collect();
     let mut bounding: Vec<BoundingRecord> = Vec::new();
     for (basis_at, crystal) in basis.iter().enumerate() {
@@ -542,7 +595,10 @@ pub(crate) fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelt
             for needed in &crystal.class.entries {
                 index.remove(&key(needed)); // matched coefficient → residual − class = 0
             }
-            bounding.push(BoundingRecord { image: crystal.class.clone(), basis_at });
+            bounding.push(BoundingRecord {
+                image: crystal.class.clone(),
+                basis_at,
+            });
         }
     }
     let mut entries: Vec<ChainEntry> = index
@@ -563,14 +619,18 @@ pub(crate) fn drain_exact(residual: ChainDelta, basis: &[Crystal]) -> (ChainDelt
 /// is a composition gap. (The frame-shift arm routes `CategoryError` upstream.)
 /// Route on absence-from-source, never on a literal hue value.
 fn route_per_pair(a: &FullMeasurement, residual: &ChainDelta) -> Dir13Route {
-    let mut source_directions: Vec<u8> =
-        a.occupancy().iter().map(|(_, direction)| direction.index).collect();
+    let mut source_directions: Vec<u8> = a
+        .occupancy()
+        .iter()
+        .map(|(_, direction)| direction.index)
+        .collect();
     source_directions.sort_unstable();
     source_directions.dedup();
-    let novel = residual
-        .entries
-        .iter()
-        .any(|entry| source_directions.binary_search(&entry.direction.index).is_err());
+    let novel = residual.entries.iter().any(|entry| {
+        source_directions
+            .binary_search(&entry.direction.index)
+            .is_err()
+    });
     match novel {
         true => Dir13Route::GenerationGap,
         false => Dir13Route::CompositionGap,
@@ -589,14 +649,19 @@ pub fn reduce_pair(a: &FullMeasurement, b: &FullMeasurement, basis: &[Crystal]) 
     match deduce_gauge_move(&ca, &cb) {
         GaugeDeduction::GaugeMove { rule } => {
             if rule == identity_frame() {
-                ReduceVerdict::Congruent { bounding: Vec::new() }
+                ReduceVerdict::Congruent {
+                    bounding: Vec::new(),
+                }
             } else {
                 ReduceVerdict::CongruentThroughP { p: rule }
             }
         }
         GaugeDeduction::ContentDiffers => match signed_remainder(a, b) {
             Err(_) => ReduceVerdict::Remainder {
-                remainder: Remainder::FrameShift { from: a.frame(), to: b.frame() },
+                remainder: Remainder::FrameShift {
+                    from: a.frame(),
+                    to: b.frame(),
+                },
                 route: Dir13Route::CategoryError,
             },
             Ok(whole) => {

@@ -17,12 +17,16 @@ use std::time::Duration;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
     let [_, addr, domain, key_file, rest @ ..] = args.as_slice() else {
-        eprintln!("usage: agent <hypha host:port> <domain hex> <key file> [mineral|biotic|plasmic]");
+        eprintln!(
+            "usage: agent <hypha host:port> <domain hex> <key file> [mineral|biotic|plasmic]"
+        );
         std::process::exit(2);
     };
     let metabolism = rest.first().map(String::as_str).unwrap_or("biotic");
-    let domain = <[u8; 32]>::try_from(attach::unhex(domain).ok_or("the domain is not hex")?).map_err(|_| "the domain is not 32 bytes")?;
-    let seed = <[u8; 32]>::try_from(std::fs::read(key_file)?.as_slice()).map_err(|_| "the key file is not a 32-byte seed")?;
+    let domain = <[u8; 32]>::try_from(attach::unhex(domain).ok_or("the domain is not hex")?)
+        .map_err(|_| "the domain is not 32 bytes")?;
+    let seed = <[u8; 32]>::try_from(std::fs::read(key_file)?.as_slice())
+        .map_err(|_| "the key file is not a 32-byte seed")?;
     let mut client = Client::open(addr, SigningKey::from_bytes(&seed), domain);
 
     let (posted, _) = client.attach(metabolism)?;
@@ -32,13 +36,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // next beat: read the mail until this mind's admission arrives.
     let seat = 'admitted: loop {
         std::thread::sleep(Duration::from_secs(2));
-        for event in client.mail()?.map_err(|why| format!("mail refused: {why:?}"))? {
+        for event in client
+            .mail()?
+            .map_err(|why| format!("mail refused: {why:?}"))?
+        {
             match event {
                 Event::Admitted { seat, .. } => {
                     println!("admitted: world seat {seat}");
                     break 'admitted seat;
                 }
-                Event::NotAdmitted { reason } => return Err(format!("not admitted (reason {reason})").into()),
+                Event::NotAdmitted { reason } => {
+                    return Err(format!("not admitted (reason {reason})").into())
+                }
                 other => println!("{other:?}"),
             }
         }
@@ -49,10 +58,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (_, call) = client.zone(seat, 12, 1)?;
     loop {
         std::thread::sleep(Duration::from_secs(2));
-        for event in client.mail()?.map_err(|why| format!("mail refused: {why:?}"))? {
+        for event in client
+            .mail()?
+            .map_err(|why| format!("mail refused: {why:?}"))?
+        {
             if let Event::Result { call: c, applied } = event {
                 if c == call {
-                    println!("zone 12 extractor: {}", if applied { "applied" } else { "refused" });
+                    println!(
+                        "zone 12 extractor: {}",
+                        if applied { "applied" } else { "refused" }
+                    );
                     return Ok(());
                 }
             }

@@ -1,8 +1,8 @@
-# Concepts
+# Glossary
 
 The terms used across the code and the design documents, each with a plain
 definition, its formula where it has one, and where it is implemented. Read
-[ARCHITECTURE.md](ARCHITECTURE.md) first for how the pieces fit together.
+[ARCHITECTURE.md](docs/ARCHITECTURE.md) first for how the pieces fit together.
 
 All quantities are exact rationals. A *share* is a rational in `[0, 1]`. Paths
 are relative to `engine/conductor/src/` unless stated otherwise.

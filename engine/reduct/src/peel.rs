@@ -94,7 +94,9 @@ impl FullMeasurement {
             carried[index] = carried[index].saturating_add(1);
         }
         let duplicated = occupancy.iter().find(|(site, _)| {
-            frame_index(*site, frame).map(|index| carried[index] > 1).unwrap_or(false)
+            frame_index(*site, frame)
+                .map(|index| carried[index] > 1)
+                .unwrap_or(false)
         });
         let uncarried = carried.iter().position(|count| *count == 0);
         match (duplicated, uncarried) {
@@ -111,7 +113,11 @@ impl FullMeasurement {
                 // re-form's remove-then-push must not read as a different value).
                 let mut occupancy = occupancy;
                 occupancy.sort_by_key(|(site, _)| (site.layer, site.row, site.col));
-                Ok(Self { fiber_rank, frame, occupancy })
+                Ok(Self {
+                    fiber_rank,
+                    frame,
+                    occupancy,
+                })
             }
         }
     }
@@ -178,8 +184,7 @@ pub struct Cover {
     pub value: ValueManifold,
 }
 
-impl Cover {
-}
+impl Cover {}
 
 /// Peel a full measurement into its cover. Pure measurement — no judgment, no
 /// transform, no comparison of covers (that is the congruence read's seat).
@@ -238,7 +243,11 @@ fn neighbors(index: usize, frame: CellFrame) -> Vec<usize> {
         .iter()
         .filter_map(|(dr, dc)| {
             frame_index(
-                Site { row: here.row + dr, col: here.col + dc, layer: here.layer },
+                Site {
+                    row: here.row + dr,
+                    col: here.col + dc,
+                    layer: here.layer,
+                },
                 frame,
             )
         })
@@ -283,7 +292,11 @@ fn connected_bodies(measurement: &FullMeasurement) -> Vec<Body> {
         bodies.push(Body { direction, sites });
     }
     bodies.sort_by_key(|b| {
-        let first = b.sites.first().copied().unwrap_or(Site { row: 0, col: 0, layer: 0 });
+        let first = b.sites.first().copied().unwrap_or(Site {
+            row: 0,
+            col: 0,
+            layer: 0,
+        });
         (b.direction.index, first.layer, first.row, first.col)
     });
     bodies

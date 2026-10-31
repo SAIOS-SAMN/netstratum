@@ -95,13 +95,20 @@ fn arc_of(r: &Ratio, u: &Ratio, w: &Ratio) -> Ratio {
 impl Orbit {
     /// The orbit of a line founded at `founded` about the core at `centre`,
     /// on a torus of side `span`; `None` for a line at its core.
-    pub fn of(centre: &(Ratio, Ratio, Ratio), founded: &(Ratio, Ratio, Ratio), span: &Ratio, period: &Ratio) -> Option<Orbit> {
+    pub fn of(
+        centre: &(Ratio, Ratio, Ratio),
+        founded: &(Ratio, Ratio, Ratio),
+        span: &Ratio,
+        period: &Ratio,
+    ) -> Option<Orbit> {
         if *period <= ratio(0, 1) {
             return None;
         }
         let centre = arr(centre);
         let founded = arr(founded);
-        let d: Vec<Ratio> = (0..3).map(|i| wrapped(&founded[i], &centre[i], span)).collect();
+        let d: Vec<Ratio> = (0..3)
+            .map(|i| wrapped(&founded[i], &centre[i], span))
+            .collect();
         let mut order = [0usize, 1, 2];
         order.sort_by(|x, y| abs(&d[*y]).cmp(&abs(&d[*x])).then(x.cmp(y)));
         let [a, b, c] = order;
@@ -114,14 +121,27 @@ impl Orbit {
         let h = &d[c] / &radius;
         let w = d[b].clone();
         let u = &d[a] - &h * &w;
-        let (k, lift) = if u == ratio(0, 1) { (ratio(0, 1), d[c].clone()) } else { (&d[c] / &u, ratio(0, 1)) };
+        let (k, lift) = if u == ratio(0, 1) {
+            (ratio(0, 1), d[c].clone())
+        } else {
+            (&d[c] / &u, ratio(0, 1))
+        };
         let r = abs(&u) + abs(&w);
         if r == ratio(0, 1) {
             return None;
         }
         let s0 = arc_of(&r, &u, &w);
         let per_beat = &r * ratio(8, 1) / period;
-        Some(Orbit { centre, axes: [a, b, c], h, k, lift, r, s0, per_beat })
+        Some(Orbit {
+            centre,
+            axes: [a, b, c],
+            h,
+            k,
+            lift,
+            r,
+            s0,
+            per_beat,
+        })
     }
 
     /// The line's place at beat `beat` of its own clock, on the torus of side `span`.
@@ -134,7 +154,9 @@ impl Orbit {
         x[self.axes[0]] = &u + &self.h * &w;
         x[self.axes[1]] = w;
         x[self.axes[2]] = &self.k * &u + &self.lift;
-        let p: Vec<Ratio> = (0..3).map(|i| onto(&self.centre[i] + &x[i], span)).collect();
+        let p: Vec<Ratio> = (0..3)
+            .map(|i| onto(&self.centre[i] + &x[i], span))
+            .collect();
         (p[0].clone(), p[1].clone(), p[2].clone())
     }
 }
@@ -147,7 +169,11 @@ mod tests {
     fn the_orbit_starts_where_the_line_was_founded_and_closes() {
         let span = ratio(2, 1);
         let centre = (ratio(1, 2), ratio(1, 2), ratio(1, 2));
-        let founded = (ratio(1, 2) + ratio(3, 32), ratio(1, 2) - ratio(2, 32), ratio(1, 2) + ratio(1, 32));
+        let founded = (
+            ratio(1, 2) + ratio(3, 32),
+            ratio(1, 2) - ratio(2, 32),
+            ratio(1, 2) + ratio(1, 32),
+        );
         let orbit = Orbit::of(&centre, &founded, &span, &ratio(360, 1)).expect("off its core");
         assert_eq!(orbit.at(0, &span), founded, "beat 0 is the founding place");
         // One circuit in its period: back at 360 beats.

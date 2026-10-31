@@ -58,7 +58,7 @@
 //! inflate its own capacity by adding a pure coboundary, which is the
 //! forgery this meter exists to refuse. Capacity counts the
 //! gauge-INVARIANT content (circulation) above a floor that is never
-//! zero. The divergence stays a first-class reading ([`egress`]) for
+//! zero. The divergence stays a first-class reading (`egress`) for
 //! the sign law; it is simply not `D`.
 //!
 //! The cosmological naming that once wrapped these two readings is
@@ -148,14 +148,20 @@ impl Degree {
     /// The floor's base case: one orb, nothing circulating. `α ≅ Ω` is
     /// not nothing — it is a POINT (`24_FORM` §2e), one dimension,
     /// never none. Wider estates stand on wider floors.
-    pub const GROUND: Degree = Degree { volume: Extent::GROUND, circulation: 0 };
+    pub const GROUND: Degree = Degree {
+        volume: Extent::GROUND,
+        circulation: 0,
+    };
 
     /// The point-weighted constructor: volume one, plus circulation.
     /// This is the pre-opening reading and remains correct wherever no
     /// estate stands behind the extent (the bare algebra, a lens over a
     /// projection). Below-ground stays arithmetically out of reach.
     pub fn above_ground(circulation: usize) -> Self {
-        Degree { volume: Extent::GROUND, circulation }
+        Degree {
+            volume: Extent::GROUND,
+            circulation,
+        }
     }
 
     /// **The opened constructor** — the estate's volume weighting the
@@ -163,7 +169,10 @@ impl Degree {
     /// at least the point, so never-zero survives the opening by
     /// construction rather than by guard.
     pub fn in_volume(volume: usize, circulation: usize) -> Self {
-        Degree { volume: volume.max(Extent::GROUND), circulation }
+        Degree {
+            volume: volume.max(Extent::GROUND),
+            circulation,
+        }
     }
 
     /// The reading as a number, for a lens:
@@ -389,14 +398,17 @@ pub struct Flux {
     pub balanced: usize,
 }
 
-impl Flux {
-}
+impl Flux {}
 
 /// The flux census — both poles of the divergence, counted and
 /// named: divergence sources, convergence sinks, and the balanced
 /// circulate. Neither pole is a fault (see [`divergence`]).
 pub fn flux(delta: &Delta) -> Flux {
-    let mut census = Flux { sources: 0, sinks: 0, balanced: 0 };
+    let mut census = Flux {
+        sources: 0,
+        sinks: 0,
+        balanced: 0,
+    };
     for row in divergence(delta) {
         let positive = row.iter().any(|d| d.is_positive());
         let negative = row.iter().any(|d| d.is_negative());
@@ -600,8 +612,11 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
                     if factor == zero {
                         continue;
                     }
-                    let taken: Vec<_> =
-                        aug[r].iter().take(k + 1).map(|cell| cell * &factor).collect();
+                    let taken: Vec<_> = aug[r]
+                        .iter()
+                        .take(k + 1)
+                        .map(|cell| cell * &factor)
+                        .collect();
                     for (cell, take) in aug[other].iter_mut().zip(taken) {
                         *cell -= take;
                     }
@@ -613,8 +628,11 @@ pub fn circulation_on(delta: &Delta, support: &Support) -> Delta {
                 }
             }
             for (col, &v) in unknowns.iter().enumerate() {
-                potential[v] =
-                    if pivot_of[col] == usize::MAX { zero.clone() } else { aug[pivot_of[col]][k].clone() };
+                potential[v] = if pivot_of[col] == usize::MAX {
+                    zero.clone()
+                } else {
+                    aug[pivot_of[col]][k].clone()
+                };
             }
         }
 
@@ -789,7 +807,9 @@ pub fn borne(delta: &Delta, support: &Support) -> Vec<Ratio> {
 /// admitted; only the constants-breaking directions are refused.
 /// Permutations (`c = 1`) are the relabelling subgroup.
 pub fn preserves_hodge_split(matrix: &[Vec<Ratio>]) -> bool {
-    let mut rows = matrix.iter().map(|r| r.iter().fold(Ratio::zero(), |s, x| s + x));
+    let mut rows = matrix
+        .iter()
+        .map(|r| r.iter().fold(Ratio::zero(), |s, x| s + x));
     let Some(first) = rows.next() else {
         return true; // the empty matrix moves nothing
     };
@@ -810,5 +830,9 @@ pub fn preserves_hodge_split(matrix: &[Vec<Ratio>]) -> bool {
 /// and that is the reading Article II consults. The state has not
 /// vanished; it stands on the surface holding one degree, itself.
 pub fn ground() -> Extent {
-    Extent { entities: 0, layers: 0, coordinates: 0 }
+    Extent {
+        entities: 0,
+        layers: 0,
+        coordinates: 0,
+    }
 }

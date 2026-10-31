@@ -10,7 +10,7 @@
 //! * `rational` — Field trait, Space/Temporal/Gauge, `Rational<F>`,
 //!   `OverflowError`, `lcm_smooth_primes`
 //! * `vector_module` — `VectorModule<F>` polynomial-per-plane carrier + the
-//!   F[x] ring surface (div_rem, ring gcd, pseudo-remainder, primitive
+//!   F\[x\] ring surface (div_rem, ring gcd, pseudo-remainder, primitive
 //!   part, Cauchy bound)
 //! * `multivector` — `PlaneIndex`/`PairPlane`, `Multivector<F>` (CGA
 //!   signature (p+1,1), geometric product, reverse, the e₀-split unipotent

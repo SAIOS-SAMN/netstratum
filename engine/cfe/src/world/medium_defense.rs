@@ -143,11 +143,7 @@ impl World {
         self.medium_reinforce_as(SOVEREIGN, orb)
     }
 
-    pub fn medium_reinforce_as(
-        &mut self,
-        actor: u64,
-        orb: u64,
-    ) -> Result<Ratio, ActionRefused> {
+    pub fn medium_reinforce_as(&mut self, actor: u64, orb: u64) -> Result<Ratio, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         let step = eighth();
         // P5.19b: spend species medium resource (iron / biomass / crystal).

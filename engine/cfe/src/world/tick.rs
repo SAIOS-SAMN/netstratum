@@ -34,9 +34,7 @@ impl World {
                 false => true,
             });
             for debt in lapsed {
-                if let Some(held) =
-                    self.orbs.iter_mut().find(|held| held.orb_id == debt.debtor)
-                {
+                if let Some(held) = self.orbs.iter_mut().find(|held| held.orb_id == debt.debtor) {
                     held.extracted_across += debt.remainder.clone();
                 }
                 self.chronicle.append(
@@ -85,20 +83,15 @@ impl World {
                     continue;
                 };
                 let pact = self.forwards.remove(at);
-                let stake =
-                    pact.collateral.clone() * crate::dop::commensurate_weight(resource);
+                let stake = pact.collateral.clone() * crate::dop::commensurate_weight(resource);
                 let recipient = match fulfilled {
                     true => obligor,
                     false => beneficiary,
                 };
-                if let Some(held) =
-                    peel(&mut self.orbs, recipient)
-                {
+                if let Some(held) = peel(&mut self.orbs, recipient) {
                     held.bank(resource, pact.collateral.clone());
                 }
-                if let Some(held) =
-                    peel(&mut self.orbs, obligor)
-                {
+                if let Some(held) = peel(&mut self.orbs, obligor) {
                     match fulfilled {
                         true => held.forwards_fulfilled += stake,
                         false => held.forwards_breached += stake,
@@ -140,8 +133,11 @@ impl World {
                     .position(|pact| pact.council == id)
                     .expect("due above");
                 let pact = self.councils.remove(at);
-                let verdicts: Vec<bool> =
-                    pact.delivered.iter().map(|given| *given >= pact.quota).collect();
+                let verdicts: Vec<bool> = pact
+                    .delivered
+                    .iter()
+                    .map(|given| *given >= pact.quota)
+                    .collect();
                 let faithful = verdicts.iter().filter(|kept| **kept).count() as i64;
                 let breachers = pact.members.len() as i64 - faithful;
                 let share = match faithful {
@@ -157,9 +153,7 @@ impl World {
                         (false, _) => ratio(0, 1),
                     };
                     let stake = pact.collateral.clone() * weight.clone();
-                    if let Some(held) =
-                        peel(&mut self.orbs, *member)
-                    {
+                    if let Some(held) = peel(&mut self.orbs, *member) {
                         if banked > ratio(0, 1) {
                             held.bank(pact.resource, banked.clone());
                         }
@@ -239,7 +233,8 @@ impl World {
             .taxon
             .map(|(class, _)| crate::vocabulary::archetype_binding(class))
             .unwrap_or_default();
-        let class_yield = crate::vocabulary::factor_on(&archetype, crate::vocabulary::CHANNEL_YIELD);
+        let class_yield =
+            crate::vocabulary::factor_on(&archetype, crate::vocabulary::CHANNEL_YIELD);
         let class_upkeep =
             crate::vocabulary::factor_on(&archetype, crate::vocabulary::CHANNEL_UPKEEP);
         // **#41: the minted buildings' own bindings, sheared once.**
@@ -249,14 +244,12 @@ impl World {
         // the peel/shear ruling forbids. One pass, then a lookup by
         // code — and a world that has minted no buildings pays for an
         // empty vector.
-        let minted_zones: Vec<(u8, Vec<(u8, Ratio)>)> = crate::vocabulary::fold(
-            self.chronicle(),
-            crate::vocabulary::Axis::Zone,
-        )
-        .into_iter()
-        .filter(|entry| !entry.binding.is_empty())
-        .map(|entry| (entry.code, entry.binding))
-        .collect();
+        let minted_zones: Vec<(u8, Vec<(u8, Ratio)>)> =
+            crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Zone)
+                .into_iter()
+                .filter(|entry| !entry.binding.is_empty())
+                .map(|entry| (entry.code, entry.binding))
+                .collect();
         let minted_on = |kind: ZoneKind, channel: u8| -> Ratio {
             match kind {
                 ZoneKind::Minted(code) => minted_zones
@@ -309,7 +302,11 @@ impl World {
             let mut t4: Option<Ratio> = None;
             let mut frozen = false;
             if let (Some(class), Some(site)) = (self.star, site) {
-                let t_eq4 = thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
+                let t_eq4 = thermal::t_eq4(
+                    &class.luminosity(),
+                    site.albedo.value(),
+                    site.orbit_r.value(),
+                );
                 // ECON-E freeze-lock (05 §1.2): a sub-mesic orb in ember
                 // famine is frozen whole — no flows until fuel arrives.
                 let sub_mesic = t_eq4 < thermal::SubstrateBand::Mesic.bounds4().0;
@@ -323,7 +320,9 @@ impl World {
                 // TECH-1b: the doctrine crystallized — the radiator
                 // sheds at the magnitude its receipt asserted (10 §3).
                 let radiator = match &boon[4] {
-                    Some(magnitude) => rates.get(Parameter::RadiatorBase).clone() * magnitude.clone(),
+                    Some(magnitude) => {
+                        rates.get(Parameter::RadiatorBase).clone() * magnitude.clone()
+                    }
                     None => rates.get(Parameter::RadiatorBase).clone(),
                 };
                 let heat_net = stellar_load + factory - radiator;
@@ -370,7 +369,8 @@ impl World {
                         .iter()
                         .filter(|(zone, _)| zone.kind == ZoneKind::Encasement)
                         .fold(zero.clone(), |sum, (_, vigour)| sum + vigour.clone());
-                    let mut throughput = rates.get(Parameter::EncasementThroughput).clone() * shells;
+                    let mut throughput =
+                        rates.get(Parameter::EncasementThroughput).clone() * shells;
                     // TECH-1b: discipline crystallized — the shells
                     // encase at the receipted magnitude (10 §3).
                     if let Some(magnitude) = &boon[2] {
@@ -394,8 +394,7 @@ impl World {
                             Some((_, pending)) => *pending += overflow.clone(),
                             None => self.vent_pending.push((*orb_id, overflow.clone())),
                         }
-                        let held = peel(&mut self.orbs, *orb_id)
-                            .expect("orb exists");
+                        let held = peel(&mut self.orbs, *orb_id).expect("orb exists");
                         if !held.overheat {
                             held.overheat = true;
                             self.chronicle.append(
@@ -413,8 +412,7 @@ impl World {
                 t4 = Some(t_eq4);
             }
             if efficiency == one {
-                let held = peel(&mut self.orbs, *orb_id)
-                    .expect("orb exists");
+                let held = peel(&mut self.orbs, *orb_id).expect("orb exists");
                 if held.overheat {
                     held.overheat = false;
                     self.chronicle.append(
@@ -433,7 +431,11 @@ impl World {
             // stored: the moment trade or minting refills the element
             // bank, the next beat's bill is met and the line runs again.
             if let Some(element) = element_ration {
-                let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+                let metabolism = self
+                    .genesis
+                    .as_ref()
+                    .map(|held| held.metabolism)
+                    .unwrap_or(2);
                 let bill = Self::element_food_bill(active, metabolism);
                 let have = peek(&self.orbs, *orb_id)
                     .map(|held| held.element_amount(&element))
@@ -446,7 +448,11 @@ impl World {
                 // G2 (04 §1.2): every flow reads through the sealed
                 // metabolism's ration/harvest map — biotic and
                 // unsealed read ruleset v1 verbatim.
-                let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+                let metabolism = self
+                    .genesis
+                    .as_ref()
+                    .map(|held| held.metabolism)
+                    .unwrap_or(2);
                 let standing: Vec<Zone> = active.iter().map(|(zone, _)| zone.clone()).collect();
                 // G2 trace elements (2026-08-14): the harvest is modulated
                 // by how well the line meets the trace-element need its own
@@ -475,12 +481,10 @@ impl World {
                         ZoneKind::Regenerator => {
                             crate::almanac::regen_yield_scale(eco.mode, eco.fit)
                         }
-                        ZoneKind::Habitat => {
-                            crate::almanac::habitat_yield_scale(eco.mode, eco.fit)
-                        }
+                        ZoneKind::Habitat => crate::almanac::habitat_yield_scale(eco.mode, eco.fit),
                         _ => ratio(1, 1),
                     };
-                    amount = amount * mode_scale;
+                    amount *= mode_scale;
                     let boost = terrain_boost(&terrain, *orb_id, zone, &standing);
                     // The class's mechanism composes with the adopted
                     // practices, never instead of them: identity and
@@ -645,11 +649,8 @@ impl World {
                         }
                         let struck = self.wants.iter().any(|(o, k)| o == orb && *k == kind);
                         match last {
-                            Some(stamp)
-                                if stamp_now.saturating_sub(stamp) >= window && !struck =>
-                            {
-                                let reading =
-                                    ratio(stamp_now.saturating_sub(stamp) as i64, 1);
+                            Some(stamp) if stamp_now.saturating_sub(stamp) >= window && !struck => {
+                                let reading = ratio(stamp_now.saturating_sub(stamp) as i64, 1);
                                 self.wants.push((*orb, kind));
                                 self.chronicle.append(
                                     ClosureEvent::WantStruck {
@@ -661,8 +662,7 @@ impl World {
                                     vec![],
                                 );
                             }
-                            Some(stamp)
-                                if stamp_now.saturating_sub(stamp) >= window => {}
+                            Some(stamp) if stamp_now.saturating_sub(stamp) >= window => {}
                             Some(_) if struck => {
                                 // Fed within the window: relieved.
                                 self.wants.retain(|(o, k)| !(o == orb && *k == kind));
@@ -764,20 +764,27 @@ impl World {
     pub(super) fn relieve_recovered(&mut self, orb: u64) {
         let stamp = self.clock.now();
         let star = self.star;
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
-        let heating_rate =
-            crate::parameter::of(self.chronicle(), crate::parameter::Parameter::HeatingPerZone);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
+        let heating_rate = crate::parameter::of(
+            self.chronicle(),
+            crate::parameter::Parameter::HeatingPerZone,
+        );
         let Some(held) = peel(&mut self.orbs, orb) else {
             return;
         };
         let heating_need: Ratio = match (star, &held.thermal) {
             (Some(class), Some(site)) => {
-                let t4 =
-                    crate::thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
+                let t4 = crate::thermal::t_eq4(
+                    &class.luminosity(),
+                    site.albedo.value(),
+                    site.orbit_r.value(),
+                );
                 match t4 < crate::thermal::SubstrateBand::Mesic.bounds4().0 {
-                    true => {
-                        heating_rate.clone() * ratio(held.zones.len() as i64, 1)
-                    }
+                    true => heating_rate.clone() * ratio(held.zones.len() as i64, 1),
                     false => ratio(0, 1),
                 }
             }
@@ -890,10 +897,7 @@ impl World {
     /// slot) summed and vigour-weighted, exactly the shape ECON-E's
     /// heating burn takes. This is both the stasis threshold (a line
     /// that cannot meet it freezes) and the amount consumed when it can.
-    pub(super) fn element_food_bill(
-        active: &[(Zone, Ratio)],
-        metabolism: u8,
-    ) -> Ratio {
+    pub(super) fn element_food_bill(active: &[(Zone, Ratio)], metabolism: u8) -> Ratio {
         active.iter().fold(ratio(0, 1), |sum, (zone, vigour)| {
             let per_zone: Ratio = crate::dop::zone_upkeep(zone.priced_as(), metabolism)
                 .into_iter()

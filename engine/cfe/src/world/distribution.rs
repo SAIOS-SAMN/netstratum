@@ -50,8 +50,8 @@ impl World {
         let Some(class) = self.star else {
             return true;
         };
-        let pref = crate::almanac::clade_preferred_region(self.rejuvenation_clade()).flux_level()
-            as i64;
+        let pref =
+            crate::almanac::clade_preferred_region(self.rejuvenation_clade()).flux_level() as i64;
         let mesic = crate::almanac::ThermalRegion::Mesic.flux_level() as i64;
         let (family, _, _) = crate::dop::element_properties(element, class);
         let clade_warmth = pref - mesic; // + hot, − cold, 0 temperate
@@ -253,7 +253,11 @@ impl World {
         hasher.update(salt);
         hasher.update(&founding);
         hasher.update(&orb.to_le_bytes());
-        u64::from_le_bytes(hasher.finalize().as_bytes()[..8].try_into().expect("eight bytes"))
+        u64::from_le_bytes(
+            hasher.finalize().as_bytes()[..8]
+                .try_into()
+                .expect("eight bytes"),
+        )
     }
 
     /// **The planet's surface area** (COG Slice 2b) — the total geometric
@@ -262,7 +266,10 @@ impl World {
     /// derived from the founding digest, so a system's worlds range from
     /// small rocks to broad giants deterministically. In `[8, 40)` units.
     pub fn surface_area_of(&self, orb: u64) -> Ratio {
-        ratio(8 + (self.planet_geometry_seed(orb, b"netstratum.planet.area.v1") % 32) as i64, 1)
+        ratio(
+            8 + (self.planet_geometry_seed(orb, b"netstratum.planet.area.v1") % 32) as i64,
+            1,
+        )
     }
 
     /// **The arable ratio** `ρ` (COG Slice 2b) — the fraction of the surface
@@ -270,7 +277,10 @@ impl World {
     /// (the hydrology/nutrient face of the world). Hash-derived in
     /// `(1/16, 15/16)`, so no world is wholly barren or wholly fertile.
     pub fn arable_ratio_of(&self, orb: u64) -> Ratio {
-        ratio(1 + (self.planet_geometry_seed(orb, b"netstratum.planet.arable.v1") % 15) as i64, 16)
+        ratio(
+            1 + (self.planet_geometry_seed(orb, b"netstratum.planet.arable.v1") % 15) as i64,
+            16,
+        )
     }
 
     /// **The arable area** `Area × ρ` — the growing surface primary
@@ -367,11 +377,17 @@ impl World {
                     .prospects
                     .iter()
                     .filter(|vein| vein.orb == orb && vein.element == staple)
-                    .map(|vein| crate::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated))
+                    .map(|vein| {
+                        crate::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated)
+                    })
                     .fold(ratio(0, 1), |sum, richness| sum + richness);
             }
         };
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
         let Some(held) = self.orb_by_id(orb) else {
             return ratio(0, 1);
         };
@@ -410,9 +426,7 @@ impl World {
             return ratio(0, 1);
         }
         let flow = self.syntropic_flow(orb) + self.cultivated_yield(orb);
-        (flow / draw)
-            * self.cooling_k_factor(orb)
-            * self.footprint_permanence_factor(orb)
+        (flow / draw) * self.cooling_k_factor(orb) * self.footprint_permanence_factor(orb)
     }
 
     /// **The evolutionary stage** (`44_LINEAGES` §2c) — how far this line
@@ -453,10 +467,11 @@ impl World {
         // dispositions, minted lines inherit their base's traits with no
         // further change here.
         if code > 3 {
-            if let Some(base) = crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Disposition)
-                .into_iter()
-                .find(|entry| entry.code == code)
-                .and_then(|entry| entry.base)
+            if let Some(base) =
+                crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Disposition)
+                    .into_iter()
+                    .find(|entry| entry.code == code)
+                    .and_then(|entry| entry.base)
             {
                 return crate::dop::disposition_traits(base).contains(&wanted);
             }
@@ -467,7 +482,9 @@ impl World {
     /// **The stellar flux an orb bathes in** (`44_LINEAGES` §2b) — the flux
     /// level of its thermal band (0 coldest … 7 hottest). A pure reading.
     pub fn stellar_flux_of(&self, orb: u64) -> u8 {
-        self.orb_region(orb).map(|region| region.flux_level()).unwrap_or(0)
+        self.orb_region(orb)
+            .map(|region| region.flux_level())
+            .unwrap_or(0)
     }
 
     /// **Is the sitting CLADE flux-driven?** (`44_LINEAGES` §2b) — a line
@@ -581,11 +598,12 @@ impl World {
     /// fold. The caste set is exactly this set, so castes are as open as the
     /// axis is — never a fixed three.
     pub fn disposition_codes(&self) -> Vec<u8> {
-        let mut codes: Vec<u8> = crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Disposition)
-            .into_iter()
-            .map(|entry| entry.code)
-            .filter(|&code| code != 0) // 0 is the unclassed ground state
-            .collect();
+        let mut codes: Vec<u8> =
+            crate::vocabulary::fold(self.chronicle(), crate::vocabulary::Axis::Disposition)
+                .into_iter()
+                .map(|entry| entry.code)
+                .filter(|&code| code != 0) // 0 is the unclassed ground state
+                .collect();
         codes.sort_unstable();
         codes.dedup();
         codes
@@ -738,7 +756,11 @@ impl World {
         let p2 = crate::thermal::orbital_period_squared(&orbit_r, &mass);
         let p_unit2 = crate::thermal::orbital_period_squared(&ratio(1, 1), &mass);
         let denom = p_unit2.clone() + p2;
-        let orbital_tempo = if denom <= zero { zero.clone() } else { p_unit2 / denom };
+        let orbital_tempo = if denom <= zero {
+            zero.clone()
+        } else {
+            p_unit2 / denom
+        };
         thermal * dry * orbital_tempo
     }
 
@@ -808,7 +830,10 @@ impl World {
         self.leisure_receipted.push((orb, live.clone()));
         let stamp = self.clock.now();
         self.chronicle.append(
-            crate::dop::ClosureEvent::LeisureSettled { orb_id: orb, delta: live - held },
+            crate::dop::ClosureEvent::LeisureSettled {
+                orb_id: orb,
+                delta: live - held,
+            },
             stamp,
             vec![],
         );
@@ -890,8 +915,11 @@ impl World {
     pub fn leisure_of(&self, orb: u64) -> Option<Resource> {
         match self.ration_of(orb) {
             Ration::Resource(_) => {
-                let metabolism =
-                    self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+                let metabolism = self
+                    .genesis
+                    .as_ref()
+                    .map(|held| held.metabolism)
+                    .unwrap_or(2);
                 Some(metabolic_leisure(metabolism))
             }
             Ration::Element(_) => None,
@@ -951,7 +979,11 @@ impl World {
     /// Both the caloric demand (population loop) and the leisure demand read
     /// this one rate.
     pub fn per_capita_ration(&self) -> Ratio {
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
         let pair = ratio(1, 1) + ratio(1, 1);
         let base = crate::dop::metabolic_harvest_of(metabolism, self.metabolic_element()).1 / pair;
         base * self.class_ration_factor()

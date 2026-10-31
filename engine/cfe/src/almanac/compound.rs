@@ -37,7 +37,10 @@ pub fn compounds(elements: &[[u8; 32]]) -> bool {
         return false;
     }
     let read: Vec<Periodic> = elements.iter().map(periodic_of).collect();
-    if read.iter().any(|p| p.shell != first.shell || p.phase != first.phase) {
+    if read
+        .iter()
+        .any(|p| p.shell != first.shell || p.phase != first.phase)
+    {
         return false;
     }
     let sum: u32 = read.iter().map(|p| u32::from(p.binds)).sum();
@@ -77,8 +80,12 @@ pub fn gem_of(elements: &[[u8; 32]]) -> Option<[u8; 32]> {
 ///
 /// No compound, no knowledge: `None`, never a zero.
 pub fn knowledge_of(elements: &[[u8; 32]]) -> Option<u16> {
-    compounds(elements)
-        .then(|| elements.iter().map(|e| u16::from(periodic_of(e).line)).sum())
+    compounds(elements).then(|| {
+        elements
+            .iter()
+            .map(|e| u16::from(periodic_of(e).line))
+            .sum()
+    })
 }
 
 /// **A set that compounds, proven at construction** (P1,

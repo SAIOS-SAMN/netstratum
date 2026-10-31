@@ -328,7 +328,8 @@ impl Receipt {
                 }
                 let region_seed: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
                 at += 32;
-                let gauge_len = u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?) as usize;
+                let gauge_len =
+                    u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?) as usize;
                 at += 4;
                 let gauge = value.get(at..at + gauge_len)?.to_vec();
                 at += gauge_len;
@@ -376,7 +377,11 @@ pub const CONDUCTOR_HAND: u64 = 1;
 pub fn hand_of(name: &str) -> u64 {
     let digest = blake3::hash(name.as_bytes());
     let hand = u64::from_le_bytes(digest.as_bytes()[..8].try_into().expect("8 bytes"));
-    if hand <= CONDUCTOR_HAND { 2 } else { hand }
+    if hand <= CONDUCTOR_HAND {
+        2
+    } else {
+        hand
+    }
 }
 
 /// The chronicle: append-only — no removal, no mutation, no reorder.
@@ -484,7 +489,10 @@ impl Chronicle {
             ClosureEvent::EstateSurveyed { .. } => self.last_survey = Some((own, event.clone())),
             _ => {}
         }
-        if matches!(event, ClosureEvent::SolverWordMinted { .. } | ClosureEvent::KnowledgeLicensed { .. }) {
+        if matches!(
+            event,
+            ClosureEvent::SolverWordMinted { .. } | ClosureEvent::KnowledgeLicensed { .. }
+        ) {
             self.word_receipts += 1;
         }
         match event {
@@ -539,16 +547,39 @@ impl Chronicle {
     }
 
     pub fn new() -> Self {
-        Self { base_parent: ReceiptHash::GENESIS, ..Self::default() }
+        Self {
+            base_parent: ReceiptHash::GENESIS,
+            ..Self::default()
+        }
     }
 
     /// A chronicle that holds only a tail: `receipts` follow `base` drained
     /// ones, the last of which hashed to `base_parent`. Verified from there,
     /// the same door as [`Chronicle::from_receipts`].
-    pub fn from_tail(base: u64, base_parent: ReceiptHash, receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
+    pub fn from_tail(
+        base: u64,
+        base_parent: ReceiptHash,
+        receipts: Vec<Receipt>,
+    ) -> Result<Self, ChainRead> {
         match verify_from(base_parent, &receipts) {
             ChainRead::Intact => {
-                let mut chronicle = Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base, base_parent, annals: crate::annals::Annals::default(), params: Default::default(), minted: Default::default(), held_words: Default::default(), converged: Default::default(), vocabulary: Vec::new(), recipes: Vec::new(), word_receipts: 0, last_survey: None };
+                let mut chronicle = Self {
+                    receipts,
+                    hand: None,
+                    region_seed: None,
+                    gauge_cache: Vec::new(),
+                    base,
+                    base_parent,
+                    annals: crate::annals::Annals::default(),
+                    params: Default::default(),
+                    minted: Default::default(),
+                    held_words: Default::default(),
+                    converged: Default::default(),
+                    vocabulary: Vec::new(),
+                    recipes: Vec::new(),
+                    word_receipts: 0,
+                    last_survey: None,
+                };
                 chronicle.refresh_params();
                 Ok(chronicle)
             }
@@ -593,7 +624,9 @@ impl Chronicle {
     /// The world's history as the live world reads it: the drained receipts
     /// the annals keep (every non-bulk kind), then every held receipt — in
     /// order. A history reader iterates this, never `receipts()`.
-    pub fn history(&self) -> impl DoubleEndedIterator<Item = std::borrow::Cow<'_, Receipt>> + Clone {
+    pub fn history(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = std::borrow::Cow<'_, Receipt>> + Clone {
         // The drained receipts are kept as frames and decoded as reached; the
         // held tail is borrowed. Walk backward to read only the recent past.
         self.annals
@@ -631,7 +664,23 @@ impl Chronicle {
     pub fn from_receipts(receipts: Vec<Receipt>) -> Result<Self, ChainRead> {
         match verify_receipts(&receipts) {
             ChainRead::Intact => {
-                let mut chronicle = Self { receipts, hand: None, region_seed: None, gauge_cache: Vec::new(), base: 0, base_parent: ReceiptHash::GENESIS, annals: crate::annals::Annals::default(), params: Default::default(), minted: Default::default(), held_words: Default::default(), converged: Default::default(), vocabulary: Vec::new(), recipes: Vec::new(), word_receipts: 0, last_survey: None };
+                let mut chronicle = Self {
+                    receipts,
+                    hand: None,
+                    region_seed: None,
+                    gauge_cache: Vec::new(),
+                    base: 0,
+                    base_parent: ReceiptHash::GENESIS,
+                    annals: crate::annals::Annals::default(),
+                    params: Default::default(),
+                    minted: Default::default(),
+                    held_words: Default::default(),
+                    converged: Default::default(),
+                    vocabulary: Vec::new(),
+                    recipes: Vec::new(),
+                    word_receipts: 0,
+                    last_survey: None,
+                };
                 chronicle.refresh_params();
                 Ok(chronicle)
             }
@@ -704,7 +753,15 @@ impl Chronicle {
         let receipt = match self.region_seed {
             Some(region_seed) => {
                 let gauge = self.gauge_cache.clone();
-                let own = receipt_digest_v2(sequence, stamp, &parent, &event_bytes, &provenance, &region_seed, &gauge);
+                let own = receipt_digest_v2(
+                    sequence,
+                    stamp,
+                    &parent,
+                    &event_bytes,
+                    &provenance,
+                    &region_seed,
+                    &gauge,
+                );
                 Receipt::V2(ManifoldReceipt {
                     sequence,
                     stamp,
@@ -754,7 +811,13 @@ pub fn verify_from(parent: ReceiptHash, receipts: &[Receipt]) -> ChainRead {
     let mut parent = parent;
     for receipt in receipts {
         let expected = match receipt {
-            Receipt::V1(r) => receipt_digest(r.sequence, r.stamp, &parent, &r.event.wire_bytes(), &r.provenance),
+            Receipt::V1(r) => receipt_digest(
+                r.sequence,
+                r.stamp,
+                &parent,
+                &r.event.wire_bytes(),
+                &r.provenance,
+            ),
             Receipt::V2(r) => receipt_digest_v2(
                 r.sequence,
                 r.stamp,

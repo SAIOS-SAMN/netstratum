@@ -114,17 +114,30 @@ pub struct Commitment {
 /// The typed arbor refusal.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArborRefused {
-    Io { message: String },
+    Io {
+        message: String,
+    },
     /// A frame that is not a well-formed tag-84 record — gate-side,
     /// unknown refuses.
-    Malformed { frame: usize },
+    Malformed {
+        frame: usize,
+    },
     /// A record whose commit does not recompute, a broken parent
     /// link, or a tampered store blob.
-    Forged { frame: usize },
+    Forged {
+        frame: usize,
+    },
     Occupied,
-    ArrowBroken { t: u64, head: u64 },
-    BranchUnknown { name: String },
-    BranchTaken { name: String },
+    ArrowBroken {
+        t: u64,
+        head: u64,
+    },
+    BranchUnknown {
+        name: String,
+    },
+    BranchTaken {
+        name: String,
+    },
     ForkUnknown,
     StateUndecodable,
     /// A second pass through the adoption door: the mainline already
@@ -139,7 +152,9 @@ pub enum ArborRefused {
     /// kernel verdict, so it will not admit the claim. Admission is
     /// re-judging, never trust; a judgment that cannot be re-run is
     /// a judgment not held.
-    JudgedWithoutProof { frame: usize },
+    JudgedWithoutProof {
+        frame: usize,
+    },
     /// [`Arbor::extend_judged`]: the judge's prior state is not this
     /// branch's head (its digest differs) — the verdict was reached on a
     /// state the arbor does not hold, so it does not carry here.
@@ -147,11 +162,15 @@ pub enum ArborRefused {
     /// SPINE-UPLINK: a received record references a blob absent from
     /// the segment and from the local store — the geometry is unheld,
     /// the record unverifiable.
-    BlobUnheld { frame: usize },
+    BlobUnheld {
+        frame: usize,
+    },
 }
 
 fn io(error: std::io::Error) -> ArborRefused {
-    ArborRefused::Io { message: error.to_string() }
+    ArborRefused::Io {
+        message: error.to_string(),
+    }
 }
 
 /// Seal a commitment: compute its commit hash from its fields —
@@ -172,7 +191,15 @@ pub fn seal(
     hasher.update(&state);
     hasher.update(&parent);
     let commit = *hasher.finalize().as_bytes();
-    Commitment { coordinate, schema, kernel, judged, state, parent, commit }
+    Commitment {
+        coordinate,
+        schema,
+        kernel,
+        judged,
+        state,
+        parent,
+        commit,
+    }
 }
 
 impl Commitment {
@@ -205,7 +232,11 @@ impl Commitment {
             *at += used;
             Some(held)
         };
-        let s = [take_ratio(&mut at)?, take_ratio(&mut at)?, take_ratio(&mut at)?];
+        let s = [
+            take_ratio(&mut at)?,
+            take_ratio(&mut at)?,
+            take_ratio(&mut at)?,
+        ];
         let g = take_ratio(&mut at)?;
         let t = u64::from_le_bytes(value.get(at..at + 8)?.try_into().ok()?);
         at += 8;
@@ -230,7 +261,21 @@ impl Commitment {
         if at != value.len() {
             return None;
         }
-        Some(Commitment { coordinate: Coordinate { branch, s, g, t, sub }, schema, kernel, judged, state, parent, commit })
+        Some(Commitment {
+            coordinate: Coordinate {
+                branch,
+                s,
+                g,
+                t,
+                sub,
+            },
+            schema,
+            kernel,
+            judged,
+            state,
+            parent,
+            commit,
+        })
     }
 }
 
@@ -262,7 +307,11 @@ impl Arbor {
         fs::create_dir_all(root.join("store")).map_err(io)?;
         let stream_path = root.join("arbor.tlv");
         if !stream_path.exists() {
-            return Ok(Self { root, records: Vec::new(), heads_only: true });
+            return Ok(Self {
+                root,
+                records: Vec::new(),
+                heads_only: true,
+            });
         }
         // Streamed, frame by frame: every record recomputes, its parent is
         // its branch's head, and the arrow ascends — the same checks as
@@ -292,20 +341,36 @@ impl Arbor {
             }
             remaining -= len;
             let mut value = vec![0u8; len as usize];
-            reader.read_exact(&mut value).map_err(|_| ArborRefused::Malformed { frame })?;
-            let record = Commitment::from_wire(header[0], &value).ok_or(ArborRefused::Malformed { frame })?;
-            let resealed = seal(record.coordinate.clone(), record.schema, record.kernel, record.judged, record.state, record.parent);
+            reader
+                .read_exact(&mut value)
+                .map_err(|_| ArborRefused::Malformed { frame })?;
+            let record = Commitment::from_wire(header[0], &value)
+                .ok_or(ArborRefused::Malformed { frame })?;
+            let resealed = seal(
+                record.coordinate.clone(),
+                record.schema,
+                record.kernel,
+                record.judged,
+                record.state,
+                record.parent,
+            );
             if resealed.commit != record.commit {
                 return Err(ArborRefused::Forged { frame });
             }
-            match heads.iter().position(|h| h.coordinate.branch == record.coordinate.branch) {
+            match heads
+                .iter()
+                .position(|h| h.coordinate.branch == record.coordinate.branch)
+            {
                 Some(at) => {
                     let head = &heads[at];
                     if record.parent != head.commit {
                         return Err(ArborRefused::Forged { frame });
                     }
                     if !ascends(&record.coordinate, &head.coordinate) {
-                        return Err(ArborRefused::ArrowBroken { t: record.coordinate.t, head: head.coordinate.t });
+                        return Err(ArborRefused::ArrowBroken {
+                            t: record.coordinate.t,
+                            head: head.coordinate.t,
+                        });
                     }
                     heads[at] = record;
                 }
@@ -319,7 +384,11 @@ impl Arbor {
             }
             frame += 1;
         }
-        Ok(Self { root, records: heads, heads_only: true })
+        Ok(Self {
+            root,
+            records: heads,
+            heads_only: true,
+        })
     }
 
     fn open_with(root: impl AsRef<Path>, heads_only: bool) -> Result<Self, ArborRefused> {
@@ -333,8 +402,8 @@ impl Arbor {
             let mut addresses: HashSet<Vec<u8>> = HashSet::new();
             let mut commits: HashMap<[u8; 32], usize> = HashMap::new();
             for (frame, (tag, value)) in tlv::records(&bytes).enumerate() {
-                let record = Commitment::from_wire(tag, value)
-                    .ok_or(ArborRefused::Malformed { frame })?;
+                let record =
+                    Commitment::from_wire(tag, value).ok_or(ArborRefused::Malformed { frame })?;
                 let resealed = seal(
                     record.coordinate.clone(),
                     record.schema,
@@ -394,19 +463,28 @@ impl Arbor {
         if heads_only {
             let mut kept: Vec<Commitment> = Vec::new();
             for record in records.into_iter().rev() {
-                if !kept.iter().any(|h| h.coordinate.branch == record.coordinate.branch) {
+                if !kept
+                    .iter()
+                    .any(|h| h.coordinate.branch == record.coordinate.branch)
+                {
                     kept.push(record);
                 }
             }
             kept.reverse();
             records = kept;
         }
-        Ok(Self { root, records, heads_only })
+        Ok(Self {
+            root,
+            records,
+            heads_only,
+        })
     }
 
     /// Where the universe stands at one coordinate.
     pub fn resolve(&self, coordinate: &Coordinate) -> Option<&Commitment> {
-        self.records.iter().find(|record| &record.coordinate == coordinate)
+        self.records
+            .iter()
+            .find(|record| &record.coordinate == coordinate)
     }
 
     /// The verified records, in stream order — a lens over the open
@@ -417,7 +495,10 @@ impl Arbor {
 
     /// The branch's latest commitment.
     pub fn head(&self, branch: &str) -> Option<&Commitment> {
-        self.records.iter().rev().find(|record| record.coordinate.branch == branch)
+        self.records
+            .iter()
+            .rev()
+            .find(|record| record.coordinate.branch == branch)
     }
 
     /// The geometry, verified on arrival: a tampered blob refuses.
@@ -444,8 +525,7 @@ impl Arbor {
         state_bytes: &[u8],
         step: Option<&kernel::Step>,
     ) -> Result<&Commitment, ArborRefused> {
-        let next = codec::from_state_bytes(state_bytes)
-            .ok_or(ArborRefused::StateUndecodable)?;
+        let next = codec::from_state_bytes(state_bytes).ok_or(ArborRefused::StateUndecodable)?;
         // The record repeats the blob's leading byte — the codec owns
         // the form; the arbor never asserts its own schema constant.
         let schema = *state_bytes.first().ok_or(ArborRefused::StateUndecodable)?;
@@ -475,7 +555,9 @@ impl Arbor {
                 [0u8; 32]
             }
             None => {
-                return Err(ArborRefused::BranchUnknown { name: coordinate.branch });
+                return Err(ArborRefused::BranchUnknown {
+                    name: coordinate.branch,
+                });
             }
         };
         let state = *blake3::hash(state_bytes).as_bytes();
@@ -512,9 +594,14 @@ impl Arbor {
         if self.resolve(&coordinate).is_some() {
             return Err(ArborRefused::Occupied);
         }
-        let head = self.head(&coordinate.branch).ok_or(ArborRefused::GenesisJudged)?;
+        let head = self
+            .head(&coordinate.branch)
+            .ok_or(ArborRefused::GenesisJudged)?;
         if !ascends(&coordinate, &head.coordinate) {
-            return Err(ArborRefused::ArrowBroken { t: coordinate.t, head: head.coordinate.t });
+            return Err(ArborRefused::ArrowBroken {
+                t: coordinate.t,
+                head: head.coordinate.t,
+            });
         }
         if head.state != prior {
             return Err(ArborRefused::PriorDiverged);
@@ -543,7 +630,9 @@ impl Arbor {
     ) -> Result<&Commitment, ArborRefused> {
         if !coordinate.branch.is_empty() {
             // Nurseries are born by `branch`, never adopted.
-            return Err(ArborRefused::BranchUnknown { name: coordinate.branch });
+            return Err(ArborRefused::BranchUnknown {
+                name: coordinate.branch,
+            });
         }
         if self.head("").is_some() {
             return Err(ArborRefused::AlreadyAdopted);
@@ -613,11 +702,15 @@ impl Arbor {
                         .and_then(|s| s.try_into().ok())
                         .ok_or(ArborRefused::Malformed { frame })?;
                     let actor = u64::from_le_bytes(
-                        value.get(32..40).and_then(|s| s.try_into().ok())
+                        value
+                            .get(32..40)
+                            .and_then(|s| s.try_into().ok())
                             .ok_or(ArborRefused::Malformed { frame })?,
                     );
                     let stamp = u64::from_le_bytes(
-                        value.get(40..48).and_then(|s| s.try_into().ok())
+                        value
+                            .get(40..48)
+                            .and_then(|s| s.try_into().ok())
                             .ok_or(ArborRefused::Malformed { frame })?,
                     );
                     let (etag, eval) = tlv::records(value.get(48..).unwrap_or_default())
@@ -625,7 +718,14 @@ impl Arbor {
                         .ok_or(ArborRefused::Malformed { frame })?;
                     let event = ClosureEvent::from_wire(etag, eval)
                         .ok_or(ArborRefused::Malformed { frame })?;
-                    steps.insert(commit, kernel::Step { event, actor, stamp });
+                    steps.insert(
+                        commit,
+                        kernel::Step {
+                            event,
+                            actor,
+                            stamp,
+                        },
+                    );
                 }
                 // Gate-side: an unknown frame in a segment refuses
                 // (never skip — a skipped frame is an unadmitted truth).
@@ -676,7 +776,9 @@ impl Arbor {
         //    hash-matched, decodes, and its leading byte is the schema.
         let state_bytes = match blobs.get(&record.state) {
             Some(bytes) => bytes.clone(),
-            None => self.fetch(&record.state).map_err(|_| ArborRefused::BlobUnheld { frame })?,
+            None => self
+                .fetch(&record.state)
+                .map_err(|_| ArborRefused::BlobUnheld { frame })?,
         };
         if blake3::hash(&state_bytes).as_bytes() != &record.state {
             return Err(ArborRefused::Forged { frame });
@@ -684,8 +786,7 @@ impl Arbor {
         if state_bytes.first() != Some(&record.schema) {
             return Err(ArborRefused::Forged { frame });
         }
-        let next = codec::from_state_bytes(&state_bytes)
-            .ok_or(ArborRefused::StateUndecodable)?;
+        let next = codec::from_state_bytes(&state_bytes).ok_or(ArborRefused::StateUndecodable)?;
         // 3. Chain-extension — the record extends this arbor's own head.
         let branch = record.coordinate.branch.clone();
         let prior_state = self.head(&branch).map(|head| head.state);
@@ -733,8 +834,8 @@ impl Arbor {
                 .ok_or(ArborRefused::JudgedWithoutProof { frame })?;
             let prior_state = prior_state.ok_or(ArborRefused::GenesisJudged)?;
             let prior_bytes = self.fetch(&prior_state)?;
-            let prior = codec::from_state_bytes(&prior_bytes)
-                .ok_or(ArborRefused::StateUndecodable)?;
+            let prior =
+                codec::from_state_bytes(&prior_bytes).ok_or(ArborRefused::StateUndecodable)?;
             kernel::admits(&prior, &next, step).map_err(ArborRefused::Refused)?;
         }
         // 5. Admit — write the blob, append the record verbatim (its
@@ -756,7 +857,8 @@ impl Arbor {
         stream.write_all(&record.wire_bytes()).map_err(io)?;
         stream.flush().map_err(io)?;
         if self.heads_only {
-            self.records.retain(|h| h.coordinate.branch != record.coordinate.branch);
+            self.records
+                .retain(|h| h.coordinate.branch != record.coordinate.branch);
         }
         self.records.push(record);
         Ok(self.records.last().expect("just appended"))

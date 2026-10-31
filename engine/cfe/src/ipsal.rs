@@ -66,7 +66,9 @@ impl Entity {
 pub fn permits_in(entities: &[Entity], actor: u64, scope: Scope) -> bool {
     let mut at = actor;
     for _ in 0..=entities.len() {
-        let Some(entity) = entities.iter().find(|held| held.entity_id == at) else { return false };
+        let Some(entity) = entities.iter().find(|held| held.entity_id == at) else {
+            return false;
+        };
         if !entity.permits(scope) {
             return false;
         }

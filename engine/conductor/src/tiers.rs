@@ -41,12 +41,17 @@ pub fn rises(held: Option<&str>, want: &str) -> bool {
 
 /// Seat `want` on the line if it rises there and is not an ancient.
 pub fn raise(p: &mut Polity, registry: &Registry, want: &str, ancients: &[String]) -> bool {
-    !ancients.contains(&p.spec.civilization.sigil) && rises(p.spec.civilization.station.as_deref(), want) && p.take_station(registry, want)
+    !ancients.contains(&p.spec.civilization.sigil)
+        && rises(p.spec.civilization.station.as_deref(), want)
+        && p.take_station(registry, want)
 }
 
 /// The living ancients' lines.
 pub fn ancients(var_root: &Path) -> Vec<String> {
-    crate::ancients::arisen(var_root).into_iter().map(|(_, s)| s).collect()
+    crate::ancients::arisen(var_root)
+        .into_iter()
+        .map(|(_, s)| s)
+        .collect()
 }
 
 fn depth(sigil: &str, parents: &BTreeMap<String, Vec<String>>) -> usize {
@@ -66,23 +71,39 @@ fn depth(sigil: &str, parents: &BTreeMap<String, Vec<String>>) -> usize {
 /// one lineage only, two or more of them, seats the lineage's eldest line
 /// there (fewest generations from its root, then the first seated).
 pub fn sovereigns(worlds: &mut [Polity], registry: &Registry, var_root: &Path) -> Vec<String> {
-    let parents: BTreeMap<String, Vec<String>> = registry.list().into_iter().map(|c| (c.sigil, c.lineage)).collect();
+    let parents: BTreeMap<String, Vec<String>> = registry
+        .list()
+        .into_iter()
+        .map(|c| (c.sigil, c.lineage))
+        .collect();
     let ancients = ancients(var_root);
     let mut systems: BTreeMap<(u64, u64), Vec<(usize, String)>> = BTreeMap::new();
     for (i, p) in worlds.iter().enumerate() {
         if p.penned {
             continue;
         }
-        let Some(path) = p.spec.place.as_deref() else { continue };
-        let (Some(&g), Some(&s)) = (path.first(), path.get(1)) else { continue };
-        systems.entry((g, s)).or_default().push((i, crate::ancients::root_of(&p.spec.civilization.sigil, &parents)));
+        let Some(path) = p.spec.place.as_deref() else {
+            continue;
+        };
+        let (Some(&g), Some(&s)) = (path.first(), path.get(1)) else {
+            continue;
+        };
+        systems.entry((g, s)).or_default().push((
+            i,
+            crate::ancients::root_of(&p.spec.civilization.sigil, &parents),
+        ));
     }
     let mut said = Vec::new();
     for ((g, s), lines) in systems {
         if lines.len() < 2 || lines.iter().any(|(_, r)| *r != lines[0].1) {
             continue;
         }
-        let Some(&(eldest, _)) = lines.iter().min_by_key(|(i, _)| (depth(&worlds[*i].spec.civilization.sigil, &parents), *i)) else { continue };
+        let Some(&(eldest, _)) = lines
+            .iter()
+            .min_by_key(|(i, _)| (depth(&worlds[*i].spec.civilization.sigil, &parents), *i))
+        else {
+            continue;
+        };
         if raise(&mut worlds[eldest], registry, "sovereign", &ancients) {
             said.push(format!(
                 "A SOVEREIGN EMERGES — {} holds the system {g}/{s}: {} worlds of the lineage {}",

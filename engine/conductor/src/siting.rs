@@ -187,7 +187,7 @@ fn draws(civilization: &Civilization, beacon: &Beacon) -> Vec<Option<Ratio>> {
     (0..REROLL_LIMIT)
         .map(|attempt| {
             let unit = beacon.draw(&format!("genesis.diophantine.k.{attempt}")); // ∈ [0, 1)
-            // Grain k here — before track() exponentiates it (see grain_k).
+                                                                                 // Grain k here — before track() exponentiates it (see grain_k).
             let k = grain_k(&(k_center.clone() + (unit - half.clone()) * full_width.clone()));
             (k > ratio(0, 1)).then_some(k)
         })
@@ -199,7 +199,12 @@ fn draws(civilization: &Civilization, beacon: &Beacon) -> Vec<Option<Ratio>> {
 /// `albedo` at `r` (`cfe::almanac::substrate_viability`, the same product
 /// `carrying_capacity` reads). A fresh siting has no world yet, so aridity is
 /// neutral (the solid/organic phases ignore it).
-pub(crate) fn viability_at(civilization: &Civilization, class: StarClass, albedo: &Ratio, r: &Ratio) -> Ratio {
+pub(crate) fn viability_at(
+    civilization: &Civilization,
+    class: StarClass,
+    albedo: &Ratio,
+    r: &Ratio,
+) -> Ratio {
     let clade = cfe::almanac::table_clade_from_word(&civilization.clade)
         .unwrap_or(cfe::almanac::FLATLANDER_CLADE as u16);
     let metab: u8 = match civilization.metabolism.as_str() {
@@ -238,10 +243,17 @@ pub(crate) fn founding_options(
     let mut options = Vec::new();
     let mut refused = None;
     if let Some((class, albedo, orbit)) = home {
-        let lawful = cfe::dop::Unit::new(albedo.clone()).is_some() && cfe::dop::Positive::new(orbit.clone()).is_some();
+        let lawful = cfe::dop::Unit::new(albedo.clone()).is_some()
+            && cfe::dop::Positive::new(orbit.clone()).is_some();
         if lawful {
             let viability = viability_at(civilization, class, &albedo, &orbit);
-            options.push(SiteOption { class, albedo, orbit, viability, home: true });
+            options.push(SiteOption {
+                class,
+                albedo,
+                orbit,
+                viability,
+                home: true,
+            });
         } else {
             refused = Some(format!("{class:?} albedo {albedo} orbit {orbit}"));
         }
@@ -265,7 +277,13 @@ pub(crate) fn founding_options(
         for k in &ks {
             let (orbit, _p) = track(&class.mass(), k);
             let viability = viability_at(civilization, class, &albedo, &orbit);
-            options.push(SiteOption { class, albedo: albedo.clone(), orbit, viability, home: false });
+            options.push(SiteOption {
+                class,
+                albedo: albedo.clone(),
+                orbit,
+                viability,
+                home: false,
+            });
         }
     }
     (options, refused)
@@ -283,7 +301,13 @@ pub(crate) fn choose_site(options: &[SiteOption], seed: [u8; 32]) -> Option<usiz
     let lattice = ratio(crate::civic::LATTICE, 1);
     let mut weights: Vec<u64> = options
         .iter()
-        .map(|o| (o.viability.clone() * lattice.clone()).floor().to_integer().to_u64().unwrap_or(0))
+        .map(|o| {
+            (o.viability.clone() * lattice.clone())
+                .floor()
+                .to_integer()
+                .to_u64()
+                .unwrap_or(0)
+        })
         .collect();
     if weights.iter().all(|w| *w == 0) {
         weights.iter_mut().for_each(|w| *w = 1);
@@ -336,7 +360,10 @@ mod tests {
         let (class, albedo, r) = diophantine_siting(&civ("biotic"), &beacon);
         assert_eq!(class, StarClass::Yellow);
         let eta = thermal::coverage(&thermal::t_eq4(&class.luminosity(), &albedo, &r));
-        assert!(eta >= ratio(1, HALVING), "a mesic world sites viable: η = {eta}");
+        assert!(
+            eta >= ratio(1, HALVING),
+            "a mesic world sites viable: η = {eta}"
+        );
     }
 
     #[test]
@@ -346,7 +373,10 @@ mod tests {
         let beacon = Beacon::from_digest([42u8; 32]);
         let (_, _, r_furnace) = diophantine_siting(&civ("mineral"), &beacon);
         let (_, _, r_mesic) = diophantine_siting(&civ("biotic"), &beacon);
-        assert!(r_furnace < r_mesic, "furnace sits inward: {r_furnace} < {r_mesic}");
+        assert!(
+            r_furnace < r_mesic,
+            "furnace sits inward: {r_furnace} < {r_mesic}"
+        );
     }
 
     #[test]
@@ -371,7 +401,10 @@ mod tests {
         // And it sits inward (hotter) than a mesic biotic line under the same
         // digest — the plasma seeks the furnace.
         let (_, _, r_mesic) = diophantine_siting(&civ("biotic"), &beacon);
-        assert!(r_plasmic < r_mesic, "plasma sits inward: {r_plasmic} < {r_mesic}");
+        assert!(
+            r_plasmic < r_mesic,
+            "plasma sits inward: {r_plasmic} < {r_mesic}"
+        );
     }
 
     #[test]
@@ -392,16 +425,38 @@ mod tests {
         assert!(options[0].home, "the compiled home leads the options");
         assert!(options.len() > 1, "the derived draws stand beside it");
         // albedo 1 fails the Unit door: no home option, and the refusal is named.
-        let (options, refused) = founding_options(&civ("biotic"), &beacon, Some((StarClass::Yellow, ratio(1, 1), ratio(1, 1))));
-        assert!(refused.is_some(), "an unlawful home is reported, never silently unsited");
+        let (options, refused) = founding_options(
+            &civ("biotic"),
+            &beacon,
+            Some((StarClass::Yellow, ratio(1, 1), ratio(1, 1))),
+        );
+        assert!(
+            refused.is_some(),
+            "an unlawful home is reported, never silently unsited"
+        );
         assert!(options.iter().all(|o| !o.home));
-        assert!(!options.is_empty(), "the band still has derived places to go");
+        assert!(
+            !options.is_empty(),
+            "the band still has derived places to go"
+        );
     }
 
     #[test]
     fn a_dead_site_is_never_chosen_while_living_land_exists() {
-        let dead = SiteOption { class: StarClass::BlueWhite, albedo: ratio(1, 4), orbit: ratio(1, 1), viability: ratio(0, 1), home: true };
-        let alive = SiteOption { class: StarClass::Yellow, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(3, 4), home: false };
+        let dead = SiteOption {
+            class: StarClass::BlueWhite,
+            albedo: ratio(1, 4),
+            orbit: ratio(1, 1),
+            viability: ratio(0, 1),
+            home: true,
+        };
+        let alive = SiteOption {
+            class: StarClass::Yellow,
+            albedo: ratio(0, 1),
+            orbit: ratio(1, 1),
+            viability: ratio(3, 4),
+            home: false,
+        };
         for n in 0..64u8 {
             let pick = choose_site(&[dead.clone(), alive.clone()], [n; 32]);
             assert_eq!(pick, Some(1), "seed {n}: zero viability carries no weight");
@@ -410,19 +465,53 @@ mod tests {
 
     #[test]
     fn the_choice_replays_and_a_band_with_no_living_land_still_settles() {
-        let a = SiteOption { class: StarClass::Red, albedo: ratio(0, 1), orbit: ratio(2, 1), viability: ratio(0, 1), home: true };
-        let b = SiteOption { class: StarClass::Yellow, albedo: ratio(0, 1), orbit: ratio(9, 1), viability: ratio(0, 1), home: false };
+        let a = SiteOption {
+            class: StarClass::Red,
+            albedo: ratio(0, 1),
+            orbit: ratio(2, 1),
+            viability: ratio(0, 1),
+            home: true,
+        };
+        let b = SiteOption {
+            class: StarClass::Yellow,
+            albedo: ratio(0, 1),
+            orbit: ratio(9, 1),
+            viability: ratio(0, 1),
+            home: false,
+        };
         let options = [a, b];
-        assert_eq!(choose_site(&options, [9u8; 32]), choose_site(&options, [9u8; 32]), "same seed, same choice");
-        let picks: std::collections::BTreeSet<_> = (0..64u8).filter_map(|n| choose_site(&options, [n; 32])).collect();
-        assert_eq!(picks.len(), 2, "with nothing viable the draw is free across every option");
+        assert_eq!(
+            choose_site(&options, [9u8; 32]),
+            choose_site(&options, [9u8; 32]),
+            "same seed, same choice"
+        );
+        let picks: std::collections::BTreeSet<_> = (0..64u8)
+            .filter_map(|n| choose_site(&options, [n; 32]))
+            .collect();
+        assert_eq!(
+            picks.len(),
+            2,
+            "with nothing viable the draw is free across every option"
+        );
         assert_eq!(choose_site(&[], [0u8; 32]), None);
     }
 
     #[test]
     fn the_better_site_is_likelier_never_certain() {
-        let good = SiteOption { class: StarClass::Yellow, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(1, 1), home: false };
-        let poor = SiteOption { class: StarClass::Orange, albedo: ratio(0, 1), orbit: ratio(1, 1), viability: ratio(1, 8), home: true };
+        let good = SiteOption {
+            class: StarClass::Yellow,
+            albedo: ratio(0, 1),
+            orbit: ratio(1, 1),
+            viability: ratio(1, 1),
+            home: false,
+        };
+        let poor = SiteOption {
+            class: StarClass::Orange,
+            albedo: ratio(0, 1),
+            orbit: ratio(1, 1),
+            viability: ratio(1, 8),
+            home: true,
+        };
         let (mut g, mut p) = (0, 0);
         for n in 0..=255u8 {
             let mut seed = [0u8; 32];
@@ -448,7 +537,11 @@ mod tests {
                 _ => None,
             };
             for n in 0..8u8 {
-                let (options, _) = founding_options(&spec.civilization, &Beacon::from_digest([n; 32]), home.clone());
+                let (options, _) = founding_options(
+                    &spec.civilization,
+                    &Beacon::from_digest([n; 32]),
+                    home.clone(),
+                );
                 assert!(
                     options.iter().any(|o| o.viability > ratio(0, 1)),
                     "{} (clade {}, {}) has no living land among {} options at digest {n}",

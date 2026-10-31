@@ -24,7 +24,9 @@
 
 use crate::wire::HouseActs;
 use ed25519_dalek::SigningKey;
-use mycelium::anastome::dialogue::seat::{Arg, Outcome, Percept, Post, Record, Refusal, Role, Seat, SeatFn, Seats, Taken};
+use mycelium::anastome::dialogue::seat::{
+    Arg, Outcome, Percept, Post, Record, Refusal, Role, Seat, SeatFn, Seats, Taken,
+};
 use mycelium::client::sdk::seat_mind::task::{FN_DECLINE, FN_SOLVE, KIND_TASK};
 use mycelium::sdk::seat::HouseMail;
 use std::collections::BTreeMap;
@@ -77,7 +79,9 @@ pub fn living_lines(worlds: &Path) -> Vec<String> {
             d.flatten()
                 .filter(|e| {
                     let p = e.path();
-                    p.join("world.card").exists() && p.join("state.snap").exists() && !p.join("collapsed").exists()
+                    p.join("world.card").exists()
+                        && p.join("state.snap").exists()
+                        && !p.join("collapsed").exists()
                 })
                 .map(|e| e.file_name().to_string_lossy().to_string())
                 .filter(|n| !n.contains("--closed-"))
@@ -96,8 +100,12 @@ pub fn line_key(name: &str) -> [u8; 32] {
 /// A key file that must already exist (the house never mints its keys).
 fn held_key(home: &Path, file: &str) -> io::Result<SigningKey> {
     let b = std::fs::read(home.join(file))?;
-    let seed = <[u8; 32]>::try_from(b.as_slice())
-        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, format!("{file} is not a 32-byte seed")))?;
+    let seed = <[u8; 32]>::try_from(b.as_slice()).map_err(|_| {
+        io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("{file} is not a 32-byte seed"),
+        )
+    })?;
     Ok(SigningKey::from_bytes(&seed))
 }
 
@@ -161,13 +169,18 @@ impl House {
     /// with the reserve's `home/tier-union.key`, offering the lines living in
     /// `worlds`.
     pub fn open(home: &Path, worlds: &Path) -> io::Result<House> {
-        let domain = held_key(home, "tier-domain.key")?.verifying_key().to_bytes();
+        let domain = held_key(home, "tier-domain.key")?
+            .verifying_key()
+            .to_bytes();
         let key = held_key(home, "tier-union.key")?;
         let dir = home.join("house");
         std::fs::create_dir_all(&dir)?;
         let ids_file = dir.join("seats");
         let mut ids = BTreeMap::new();
-        for row in std::fs::read_to_string(&ids_file).unwrap_or_default().lines() {
+        for row in std::fs::read_to_string(&ids_file)
+            .unwrap_or_default()
+            .lines()
+        {
             if let Some((id, name)) = row.split_once(' ') {
                 if let Ok(id) = id.parse::<u32>() {
                     ids.insert(name.to_string(), id);
@@ -180,7 +193,9 @@ impl House {
             // `seq epoch seat line mind`
             let f: Vec<&str> = row.split(' ').collect();
             if let [_, _, _, line, mind] = f.as_slice() {
-                let b: Option<Vec<u8>> = (0..mind.len() / 2).map(|i| u8::from_str_radix(mind.get(2 * i..2 * i + 2)?, 16).ok()).collect();
+                let b: Option<Vec<u8>> = (0..mind.len() / 2)
+                    .map(|i| u8::from_str_radix(mind.get(2 * i..2 * i + 2)?, 16).ok())
+                    .collect();
                 if let Some(Ok(m)) = b.map(<[u8; 32]>::try_from) {
                     seated_before.insert(line.to_string(), m);
                 }
@@ -226,20 +241,33 @@ impl House {
     /// minds seat at the ancients and nowhere else; a steward's seat holds no
     /// network mind.
     fn council(&self) -> Vec<String> {
-        let path = self.worlds.parent().map(|p| p.join("council.bin")).unwrap_or_default();
+        let path = self
+            .worlds
+            .parent()
+            .map(|p| p.join("council.bin"))
+            .unwrap_or_default();
         let bytes = std::fs::read(path).unwrap_or_default();
-        cfe::tlv::records(&bytes).filter(|(tag, _)| *tag == 1).filter_map(|(_, v)| String::from_utf8(v.to_vec()).ok()).collect()
+        cfe::tlv::records(&bytes)
+            .filter(|(tag, _)| *tag == 1)
+            .filter_map(|(_, v)| String::from_utf8(v.to_vec()).ok())
+            .collect()
     }
 
     fn seated(&mut self) -> io::Result<Vec<(u32, String)>> {
         let mut out = Vec::new();
         let council = self.council();
-        for name in living_lines(&self.worlds).into_iter().filter(|n| council.contains(n)) {
+        for name in living_lines(&self.worlds)
+            .into_iter()
+            .filter(|n| council.contains(n))
+        {
             let id = match self.ids.get(&name) {
                 Some(&id) => id,
                 None => {
                     let id = self.ids.values().max().map_or(1, |m| m + 1);
-                    let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&self.ids_file)?;
+                    let mut f = std::fs::OpenOptions::new()
+                        .create(true)
+                        .append(true)
+                        .open(&self.ids_file)?;
                     writeln!(f, "{id} {name}")?;
                     self.ids.insert(name.clone(), id);
                     id
@@ -256,24 +284,50 @@ impl House {
         if seat == 0 {
             return Some("the house".to_string());
         }
-        self.lines.iter().find(|(id, _)| *id == seat).map(|(_, n)| n.clone())
+        self.lines
+            .iter()
+            .find(|(id, _)| *id == seat)
+            .map(|(_, n)| n.clone())
     }
 
     fn listing(&self) -> Seats {
         let beat = Arg::Q { num: 1, den: 1 };
-        let mut seats = vec![Seat { seat: 0, role: Role::Ancients, on: self.key.verifying_key().to_bytes(), beat: beat.clone(), fns: Vec::new() }];
+        let mut seats = vec![Seat {
+            seat: 0,
+            role: Role::Ancients,
+            on: self.key.verifying_key().to_bytes(),
+            beat: beat.clone(),
+            fns: Vec::new(),
+        }];
         // fn 1 solve: the rule's tape and the outputs (the steps ride after).
-        let solve = SeatFn { id: FN_SOLVE, tags: vec![Arg::Bytes(Vec::new()).tag(), Arg::Bytes(Vec::new()).tag()] };
+        let solve = SeatFn {
+            id: FN_SOLVE,
+            tags: vec![Arg::Bytes(Vec::new()).tag(), Arg::Bytes(Vec::new()).tag()],
+        };
         // fn 2 decline: the task's citation and the stop the mind's reading
         // reached short of a solve (Mycelium's `STOPS`, one past its place).
-        let decline = SeatFn { id: FN_DECLINE, tags: vec![Arg::Key([0u8; 32]).tag(), Arg::Count(0).tag()] };
+        let decline = SeatFn {
+            id: FN_DECLINE,
+            tags: vec![Arg::Key([0u8; 32]).tag(), Arg::Count(0).tag()],
+        };
         for (id, name) in &self.lines {
             // A council seat at an ancient's house (Concordance 3.9).
-            seats.push(Seat { seat: *id, role: Role::Ancients, on: line_key(name), beat: beat.clone(), fns: vec![solve.clone(), decline.clone()] });
+            seats.push(Seat {
+                seat: *id,
+                role: Role::Ancients,
+                on: line_key(name),
+                beat: beat.clone(),
+                fns: vec![solve.clone(), decline.clone()],
+            });
         }
         // docs/109: the door, and the seats admitted minds hold.
         seats.extend(crate::attached::listed(&self.held_seats, &beat));
-        Seats { domain: self.domain, sub_origin: None, epoch: self.epoch, seats }
+        Seats {
+            domain: self.domain,
+            sub_origin: None,
+            epoch: self.epoch,
+            seats,
+        }
     }
 
     /// One tend: list the seats again when the living lines changed, then
@@ -282,17 +336,31 @@ impl House {
         self.tends += 1;
         // A deferred perception leaves the acts for the next tend; the tasks are
         // still handed.
-        let mut said = self.receive_acts(seat).unwrap_or_else(|e| vec![format!("acts not received: {e}")]);
+        let mut said = self
+            .receive_acts(seat)
+            .unwrap_or_else(|e| vec![format!("acts not received: {e}")]);
         // 78.153: the answers not judged yet are filed again, the same answer.
         let waiting: Vec<u32> = self.refile.keys().copied().collect();
         for s in waiting {
-            let (Some((id, _)), Some((rule, outputs))) = (self.task.get(&s).copied(), self.refile.remove(&s)) else { continue };
+            let (Some((id, _)), Some((rule, outputs))) =
+                (self.task.get(&s).copied(), self.refile.remove(&s))
+            else {
+                continue;
+            };
             let (_, _, line) = self.judge(seat, s, id, rule, outputs);
             said.push(format!("REFILED seat {s} task {}: {line}", hex(&id[..6])));
         }
-        said.extend(self.hand_tasks(seat).unwrap_or_else(|e| vec![format!("tasks not handed: {e}")]));
-        said.extend(self.report_attachments(seat).unwrap_or_else(|e| vec![format!("attachments not reported: {e}")]));
-        let Some(var_root) = self.worlds.parent().map(Path::to_path_buf) else { return Ok(said) };
+        said.extend(
+            self.hand_tasks(seat)
+                .unwrap_or_else(|e| vec![format!("tasks not handed: {e}")]),
+        );
+        said.extend(
+            self.report_attachments(seat)
+                .unwrap_or_else(|e| vec![format!("attachments not reported: {e}")]),
+        );
+        let Some(var_root) = self.worlds.parent().map(Path::to_path_buf) else {
+            return Ok(said);
+        };
         // docs/72 A4: after the re-founding, the gates the conductor built are
         // mapped as local throats (5.9: no crossing on a private map).
         match crate::refound::map_gates(seat.session(), &self.home, &var_root) {
@@ -310,19 +378,30 @@ impl House {
         // And a home that has never re-founded (a new domain, founded but not
         // yet originated) completes its founding on the house's own session,
         // which hears the court's final point.
-        if std::mem::take(&mut self.unknown_domain) || crate::refound::refounded_under(&self.home).is_none() {
+        if std::mem::take(&mut self.unknown_domain)
+            || crate::refound::refounded_under(&self.home).is_none()
+        {
             said.extend(self.refound(seat, &var_root));
         }
         Ok(said)
     }
 
     fn refound(&mut self, seat: &crate::seat::Seat, var_root: &Path) -> Vec<String> {
-        let Some(point) = seat.session().tuniversal() else { return vec!["REFOUND waits: the court refused the domain, and no final point is read yet".into()] };
+        let Some(point) = seat.session().tuniversal() else {
+            return vec![
+                "REFOUND waits: the court refused the domain, and no final point is read yet"
+                    .into(),
+            ];
+        };
         let origin = crate::refound::origin_of(&point);
         if crate::refound::refounded_under(&self.home).as_deref() == Some(origin.as_str()) {
             return Vec::new();
         }
-        if self.refound_tried.as_ref().is_some_and(|(o, at)| *o == origin && self.tends - at <= PATIENCE) {
+        if self
+            .refound_tried
+            .as_ref()
+            .is_some_and(|(o, at)| *o == origin && self.tends - at <= PATIENCE)
+        {
             return Vec::new();
         }
         self.refound_tried = Some((origin.clone(), self.tends));
@@ -342,14 +421,24 @@ impl House {
 
     /// The world's axis coordinate u: the conductor's beat beside the worlds.
     fn u(&self) -> u64 {
-        let beat = self.worlds.parent().map(|p| p.join("conductor.beat")).unwrap_or_default();
-        std::fs::read_to_string(beat).ok().and_then(|t| t.trim().parse().ok()).unwrap_or(self.tends)
+        let beat = self
+            .worlds
+            .parent()
+            .map(|p| p.join("conductor.beat"))
+            .unwrap_or_default();
+        std::fs::read_to_string(beat)
+            .ok()
+            .and_then(|t| t.trim().parse().ok())
+            .unwrap_or(self.tends)
     }
 
     /// The seated minds free for a task: a mind on a seat (never the house's
     /// own, seat 0) with no task outstanding.
     pub fn free_seats(&self) -> usize {
-        self.held.iter().filter(|(s, _)| **s != 0 && !self.task.contains_key(s)).count()
+        self.held
+            .iter()
+            .filter(|(s, _)| **s != 0 && !self.task.contains_key(s))
+            .count()
     }
 
     /// Put the tasks Netstratum's mind did not close before free seated
@@ -357,15 +446,26 @@ impl House {
     fn hand_tasks(&mut self, seat: &mut crate::seat::Seat) -> io::Result<Vec<String>> {
         let mut said = Vec::new();
         let tends = self.tends;
-        let stale: Vec<u32> = self.task.iter().filter(|(_, (_, at))| tends - at > PATIENCE).map(|(s, _)| *s).collect();
+        let stale: Vec<u32> = self
+            .task
+            .iter()
+            .filter(|(_, (_, at))| tends - at > PATIENCE)
+            .map(|(s, _)| *s)
+            .collect();
         for s in stale {
             if let Some((id, _)) = self.task.remove(&s) {
                 seat.give_back(id);
             }
         }
-        let free: Vec<(u32, [u8; 32])> = self.held.iter().filter(|(s, _)| **s != 0 && !self.task.contains_key(s)).map(|(s, m)| (*s, *m)).collect();
+        let free: Vec<(u32, [u8; 32])> = self
+            .held
+            .iter()
+            .filter(|(s, _)| **s != 0 && !self.task.contains_key(s))
+            .map(|(s, m)| (*s, *m))
+            .collect();
         let tends_now = self.tends;
-        self.declined.retain(|_, (_, at)| tends_now - *at <= PATIENCE);
+        self.declined
+            .retain(|_, (_, at)| tends_now - *at <= PATIENCE);
         for (s, mind) in free {
             // The next task this mind has not declined; one it declined is
             // dropped (the court sets it before another seat or later).
@@ -386,9 +486,15 @@ impl House {
                 mind,
                 // 78.156 / seat-wire v1.4: the world's axis coordinate u (the
                 // conductor's beat), so a seated mind reads its dilation du/dh.
-                local_time: Arg::Q { num: i64::try_from(self.u()).unwrap_or(i64::MAX), den: 1 },
+                local_time: Arg::Q {
+                    num: i64::try_from(self.u()).unwrap_or(i64::MAX),
+                    den: 1,
+                },
                 seq: self.percepts,
-                records: vec![Record::Plain { kind: KIND_TASK, args: vec![Arg::Key(id)] }],
+                records: vec![Record::Plain {
+                    kind: KIND_TASK,
+                    args: vec![Arg::Key(id)],
+                }],
                 // 78.152: the percept is stamped with the house's last final point.
                 point: seat.tuniversal(),
             };
@@ -396,7 +502,11 @@ impl House {
                 Ok(seq) => {
                     self.task.insert(s, (id, tends));
                     seat.tally.handed += 1;
-                    said.push(format!("PERCEPT seq {seq}: task {} before seat {s} ({})", hex(&id[..6]), self.line_on(s).unwrap_or_default()));
+                    said.push(format!(
+                        "PERCEPT seq {seq}: task {} before seat {s} ({})",
+                        hex(&id[..6]),
+                        self.line_on(s).unwrap_or_default()
+                    ));
                 }
                 Err(why) => {
                     self.unknown_domain |= why == Refusal::UnknownDomain;
@@ -410,8 +520,19 @@ impl House {
 
     /// A declination received (fn 2): the task outstanding on the seat, named
     /// by its citation, goes back to the queue and the seat is free at once.
-    fn decline(&mut self, _seat: &mut crate::seat::Seat, s: u32, args: &[Arg]) -> (u16, [u8; 32], String) {
-        let (Some(Arg::Key(citation)), stop) = (args.first(), args.get(1)) else { return (UNREAD, [0u8; 32], "the arguments are not [Key, Count]".into()) };
+    fn decline(
+        &mut self,
+        _seat: &mut crate::seat::Seat,
+        s: u32,
+        args: &[Arg],
+    ) -> (u16, [u8; 32], String) {
+        let (Some(Arg::Key(citation)), stop) = (args.first(), args.get(1)) else {
+            return (
+                UNREAD,
+                [0u8; 32],
+                "the arguments are not [Key, Count]".into(),
+            );
+        };
         let stop = match stop {
             Some(Arg::Count(n)) => n.to_string(),
             _ => "unread".into(),
@@ -424,30 +545,65 @@ impl House {
                 if let Some(&mind) = self.held.get(&s) {
                     self.declined.insert(id, (mind, self.tends));
                 }
-                (DECLINED, id, format!("declined task {} (stop {stop}): the seat is free", hex(&id[..6])))
+                (
+                    DECLINED,
+                    id,
+                    format!(
+                        "declined task {} (stop {stop}): the seat is free",
+                        hex(&id[..6])
+                    ),
+                )
             }
-            _ => (NO_TASK, *citation, format!("a declination of task {} the seat does not hold (args as received: {args:?})", hex(&citation[..6]))),
+            _ => (
+                NO_TASK,
+                *citation,
+                format!(
+                    "a declination of task {} the seat does not hold (args as received: {args:?})",
+                    hex(&citation[..6])
+                ),
+            ),
         }
     }
 
     /// A call's answer filed: the reason the outcome names.
-    fn file(&mut self, seat: &mut crate::seat::Seat, s: u32, args: &[Arg]) -> (u16, [u8; 32], String) {
-        let Some(&(id, _)) = self.task.get(&s) else { return (NO_TASK, [0u8; 32], "no task before the seat".into()) };
+    fn file(
+        &mut self,
+        seat: &mut crate::seat::Seat,
+        s: u32,
+        args: &[Arg],
+    ) -> (u16, [u8; 32], String) {
+        let Some(&(id, _)) = self.task.get(&s) else {
+            return (NO_TASK, [0u8; 32], "no task before the seat".into());
+        };
         let (Some(Arg::Bytes(tape)), Some(Arg::Bytes(outs))) = (args.first(), args.get(1)) else {
-            return (UNREAD, id, "the arguments are not [Bytes, Bytes, ..]".into());
+            return (
+                UNREAD,
+                id,
+                "the arguments are not [Bytes, Bytes, ..]".into(),
+            );
         };
         let mut at = 0;
-        let rule = mycelium::transducer::element::Element::from_bytes(tape, &mut at).filter(|_| at == tape.len());
+        let rule = mycelium::transducer::element::Element::from_bytes(tape, &mut at)
+            .filter(|_| at == tape.len());
         let outputs = mycelium::anastome::dialogue::decode_grids(outs);
         // The tape must read whole as a rule; it is filed as the mind sent it.
-        let (Some(_), Some(outputs)) = (rule, outputs) else { return (UNREAD, id, "the tape or the grids do not read whole".into()) };
+        let (Some(_), Some(outputs)) = (rule, outputs) else {
+            return (UNREAD, id, "the tape or the grids do not read whole".into());
+        };
         self.judge(seat, s, id, tape.clone(), outputs)
     }
 
     /// File an answer and read the court's verdict. Not judged yet (78.153):
     /// the task stays before its seat and the same answer waits to be re-filed;
     /// every other verdict lets the task go.
-    fn judge(&mut self, seat: &mut crate::seat::Seat, s: u32, id: [u8; 32], rule: Vec<u8>, outputs: Vec<Vec<Vec<u8>>>) -> (u16, [u8; 32], String) {
+    fn judge(
+        &mut self,
+        seat: &mut crate::seat::Seat,
+        s: u32,
+        id: [u8; 32],
+        rule: Vec<u8>,
+        outputs: Vec<Vec<Vec<u8>>>,
+    ) -> (u16, [u8; 32], String) {
         let verdict = seat.file_answer(&id, &rule, &outputs);
         if verdict.is_some_and(|(code, _)| code == SOLVE_UNREAD) {
             self.task.insert(s, (id, self.tends));
@@ -457,9 +613,19 @@ impl House {
         self.task.remove(&s);
         self.refile.remove(&s);
         match verdict {
-            Some((code, mu)) if code == mycelium::anastome::dialogue::SOLVE_BOUNTY => (CLOSED, id, format!("CLOSED FIRST, paid {mu:?} to the house")),
-            Some((code, _)) if code == mycelium::anastome::dialogue::SOLVE_FLOOR => (CLOSED, id, "closed again".into()),
-            Some((code, _)) => (COURT_REFUSED, id, format!("refused by the court (code {code})")),
+            Some((code, mu)) if code == mycelium::anastome::dialogue::SOLVE_BOUNTY => (
+                CLOSED,
+                id,
+                format!("CLOSED FIRST, paid {mu:?} to the house"),
+            ),
+            Some((code, _)) if code == mycelium::anastome::dialogue::SOLVE_FLOOR => {
+                (CLOSED, id, "closed again".into())
+            }
+            Some((code, _)) => (
+                COURT_REFUSED,
+                id,
+                format!("refused by the court (code {code})"),
+            ),
             None => (WITHHELD, id, "withheld at home".into()),
         }
     }
@@ -471,7 +637,10 @@ impl House {
         if lines != self.lines || held_now != self.held_seats {
             self.held_seats = held_now;
             // The latest epoch replaces: an epoch is the listing's time.
-            let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs())
+                .unwrap_or(0);
             self.epoch = now.max(self.epoch + 1);
             self.lines = lines;
             // A seat whose line is gone is no longer held.
@@ -480,7 +649,13 @@ impl House {
             listed.extend(self.held_seats.iter().map(|h| h.seat));
             // Seat 0 is the house's own: no other mind holds it.
             let house = self.key.verifying_key().to_bytes();
-            self.held.retain(|s, m| if *s == 0 { *m == house } else { listed.contains(s) });
+            self.held.retain(|s, m| {
+                if *s == 0 {
+                    *m == house
+                } else {
+                    listed.contains(s)
+                }
+            });
             self.task.retain(|s, _| listed.contains(s));
             for (id, name) in &self.lines {
                 if let Some(m) = self.seated_before.get(name) {
@@ -492,7 +667,13 @@ impl House {
                 self.held.insert(h.seat, h.mind);
             }
             match seat.session().post_seats(&self.key, self.listing())? {
-                Ok(seq) => said.push(format!("SEATS seq {seq}: domain {}, epoch {}, {} seats (the house and {} lines)", hex(&self.domain), self.epoch, n + 1, n)),
+                Ok(seq) => said.push(format!(
+                    "SEATS seq {seq}: domain {}, epoch {}, {} seats (the house and {} lines)",
+                    hex(&self.domain),
+                    self.epoch,
+                    n + 1,
+                    n
+                )),
                 Err(why) => {
                     self.unknown_domain |= why == Refusal::UnknownDomain;
                     self.lines.clear(); // listed again next tend
@@ -503,17 +684,24 @@ impl House {
         }
         // Seat-wire v1.4: perceived at the relay's standing, the cursor
         // kept with the epoch it was read under; a new epoch is a restart.
-        let read = match seat.session().perceive(&self.key, self.after, self.relay_epoch.unwrap_or(0))? {
-            Ok(m) => m,
-            Err(why) => {
-                self.unknown_domain |= why == Refusal::UnknownDomain;
-                said.push(format!("perception refused: {why:?}"));
-                return Ok(said);
-            }
-        };
+        let read =
+            match seat
+                .session()
+                .perceive(&self.key, self.after, self.relay_epoch.unwrap_or(0))?
+            {
+                Ok(m) => m,
+                Err(why) => {
+                    self.unknown_domain |= why == Refusal::UnknownDomain;
+                    said.push(format!("perception refused: {why:?}"));
+                    return Ok(said);
+                }
+            };
         let cursor = read.cursor(self.relay_epoch, self.after);
         if cursor != self.after {
-            said.push(format!("the relay restarted (epoch {:x}): the acts are perceived from its start", read.epoch));
+            said.push(format!(
+                "the relay restarted (epoch {:x}): the acts are perceived from its start",
+                read.epoch
+            ));
         }
         // A restarted relay is volatile: its listing is gone, so the seats are
         // listed again next tend (Mycelium 2026-10-09).
@@ -529,7 +717,11 @@ impl House {
                 Post::Take(t) => acts.push(HouseMail::Take(m.seq, t.clone())),
                 Post::Call(c) => {
                     if let Some(reference) = s.reference() {
-                        acts.push(HouseMail::Call { seq: m.seq, call: c.clone(), reference });
+                        acts.push(HouseMail::Call {
+                            seq: m.seq,
+                            call: c.clone(),
+                            reference,
+                        });
                     }
                 }
                 _ => {}
@@ -548,13 +740,20 @@ impl House {
                         // The door is called, never taken.
                         HOUSE_SEAT
                     } else if let Some(h) = &attached {
-                        if t.domain == self.domain && t.sub_origin.is_none() && t.mind == h.mind { TAKEN_OK } else { SEAT_HELD }
+                        if t.domain == self.domain && t.sub_origin.is_none() && t.mind == h.mind {
+                            TAKEN_OK
+                        } else {
+                            SEAT_HELD
+                        }
                     } else if t.domain != self.domain || t.sub_origin.is_some() || line.is_none() {
                         NO_SEAT
                     } else if t.seat == 0 && t.mind != self.key.verifying_key().to_bytes() {
                         HOUSE_SEAT
                     } else if self.held.get(&t.seat).is_some_and(|m| *m != t.mind)
-                        && self.heard.get(&t.seat).is_some_and(|at| self.tends.saturating_sub(*at) <= PATIENCE)
+                        && self
+                            .heard
+                            .get(&t.seat)
+                            .is_some_and(|at| self.tends.saturating_sub(*at) <= PATIENCE)
                     {
                         SEAT_HELD
                     } else {
@@ -570,32 +769,74 @@ impl House {
                             if let Some((id, _)) = self.task.remove(&t.seat) {
                                 self.refile.remove(&t.seat);
                                 seat.give_back(id);
-                                said.push(format!("seat {} changed hands: task {} back to the queue", t.seat, hex(&id[..6])));
+                                said.push(format!(
+                                    "seat {} changed hands: task {} back to the queue",
+                                    t.seat,
+                                    hex(&id[..6])
+                                ));
                             }
                         }
                         self.held.insert(t.seat, t.mind);
                         self.heard.insert(t.seat, self.tends);
                         let line = line.unwrap_or_default();
                         self.seated_before.insert(line.clone(), t.mind);
-                        if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(&self.log) {
-                            let _ = writeln!(f, "{seq} {} {} {line} {}", self.epoch, t.seat, hex(&t.mind));
+                        if let Ok(mut f) = std::fs::OpenOptions::new()
+                            .create(true)
+                            .append(true)
+                            .open(&self.log)
+                        {
+                            let _ = writeln!(
+                                f,
+                                "{seq} {} {} {line} {}",
+                                self.epoch,
+                                t.seat,
+                                hex(&t.mind)
+                            );
                         }
                     }
-                    let answer = seat.session().post_taken(&self.key, Taken { domain: t.domain, sub_origin: t.sub_origin, seat: t.seat, mind: t.mind, ok, reason })?;
+                    let answer = seat.session().post_taken(
+                        &self.key,
+                        Taken {
+                            domain: t.domain,
+                            sub_origin: t.sub_origin,
+                            seat: t.seat,
+                            mind: t.mind,
+                            ok,
+                            reason,
+                        },
+                    )?;
                     self.unknown_domain |= answer == Err(Refusal::UnknownDomain);
-                    said.push(format!("TAKE seq {seq} seat {} by {}: {} ({answer:?})", t.seat, hex(&t.mind[..4]), if ok { "taken" } else { "refused" }));
+                    said.push(format!(
+                        "TAKE seq {seq} seat {} by {}: {} ({answer:?})",
+                        t.seat,
+                        hex(&t.mind[..4]),
+                        if ok { "taken" } else { "refused" }
+                    ));
                 }
-                HouseMail::Call { seq, call, reference } => {
+                HouseMail::Call {
+                    seq,
+                    call,
+                    reference,
+                } => {
                     self.after = self.after.max(seq);
                     if self.held.get(&call.seat) == Some(&call.mind) {
                         self.heard.insert(call.seat, self.tends);
                     }
                     let (reason, deed, what) = if call.seat == attach::DOOR {
                         self.door_call(&call, reference)
-                    } else if let Some(h) = self.held_seats.iter().find(|h| h.seat == call.seat).cloned() {
+                    } else if let Some(h) = self
+                        .held_seats
+                        .iter()
+                        .find(|h| h.seat == call.seat)
+                        .cloned()
+                    {
                         self.held_call(&h, &call, reference)
                     } else if self.held.get(&call.seat) != Some(&call.mind) {
-                        (NOT_SEATED, [0u8; 32], "the caller does not hold the seat".to_string())
+                        (
+                            NOT_SEATED,
+                            [0u8; 32],
+                            "the caller does not hold the seat".to_string(),
+                        )
                     } else if call.fn_id == FN_DECLINE && call.seat != 0 {
                         self.decline(seat, call.seat, &call.args)
                     } else if call.fn_id != FN_SOLVE || call.seat == 0 {
@@ -603,10 +844,22 @@ impl House {
                     } else {
                         self.file(seat, call.seat, &call.args)
                     };
-                    let o = Outcome { domain: call.domain, sub_origin: call.sub_origin, seat: call.seat, mind: call.mind, call: reference, applied: reason == CLOSED, reason, deed };
+                    let o = Outcome {
+                        domain: call.domain,
+                        sub_origin: call.sub_origin,
+                        seat: call.seat,
+                        mind: call.mind,
+                        call: reference,
+                        applied: reason == CLOSED,
+                        reason,
+                        deed,
+                    };
                     let answer = seat.session().post_outcome(&self.key, o)?;
                     self.unknown_domain |= answer == Err(Refusal::UnknownDomain);
-                    said.push(format!("CALL seq {seq} seat {} fn {}: {what} ({answer:?})", call.seat, call.fn_id));
+                    said.push(format!(
+                        "CALL seq {seq} seat {} fn {}: {what} ({answer:?})",
+                        call.seat, call.fn_id
+                    ));
                 }
             }
         }
@@ -617,7 +870,10 @@ impl House {
 /// docs/109 — the house's attachment acts.
 impl House {
     fn var_root(&self) -> PathBuf {
-        self.worlds.parent().map(Path::to_path_buf).unwrap_or_default()
+        self.worlds
+            .parent()
+            .map(Path::to_path_buf)
+            .unwrap_or_default()
     }
 
     /// The seats admitted minds hold, each with its stable id.
@@ -636,7 +892,10 @@ impl House {
         };
         let held = crate::attached::held_seats(&admissions, &mut id);
         if !fresh.is_empty() {
-            let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&self.ids_file)?;
+            let mut f = std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&self.ids_file)?;
             for name in &fresh {
                 writeln!(f, "{} {name}", ids[name])?;
             }
@@ -646,47 +905,97 @@ impl House {
     }
 
     /// A call on the door: an attachment request for the next beat.
-    fn door_call(&mut self, call: &mycelium::anastome::dialogue::seat::Call, reference: [u8; 32]) -> (u16, [u8; 32], String) {
+    fn door_call(
+        &mut self,
+        call: &mycelium::anastome::dialogue::seat::Call,
+        reference: [u8; 32],
+    ) -> (u16, [u8; 32], String) {
         if call.fn_id != attach::FN_ATTACH {
-            return (NO_FUNCTION, [0u8; 32], format!("the door lists no fn {}", call.fn_id));
+            return (
+                NO_FUNCTION,
+                [0u8; 32],
+                format!("the door lists no fn {}", call.fn_id),
+            );
         }
-        let Some(request) = crate::attached::request_of(&call.args, call.mind) else { return (UNREAD, [0u8; 32], "the argument names no metabolism".into()) };
+        let Some(request) = crate::attached::request_of(&call.args, call.mind) else {
+            return (UNREAD, [0u8; 32], "the argument names no metabolism".into());
+        };
         match attach::files::write_request(&self.var_root(), &request) {
-            Ok(()) => (attach::QUEUED, reference, format!("attachment requested ({})", request.metabolism)),
-            Err(e) => (UNREAD, [0u8; 32], format!("the request was not written: {e}")),
+            Ok(()) => (
+                attach::QUEUED,
+                reference,
+                format!("attachment requested ({})", request.metabolism),
+            ),
+            Err(e) => (
+                UNREAD,
+                [0u8; 32],
+                format!("the request was not written: {e}"),
+            ),
         }
     }
 
     /// A call on a seat an admitted mind holds: its act, carried for the next
     /// beat.
-    fn held_call(&mut self, held: &crate::attached::Held, call: &mycelium::anastome::dialogue::seat::Call, reference: [u8; 32]) -> (u16, [u8; 32], String) {
+    fn held_call(
+        &mut self,
+        held: &crate::attached::Held,
+        call: &mycelium::anastome::dialogue::seat::Call,
+        reference: [u8; 32],
+    ) -> (u16, [u8; 32], String) {
         if call.mind != held.mind {
-            return (NOT_SEATED, [0u8; 32], "the caller does not hold the seat".into());
+            return (
+                NOT_SEATED,
+                [0u8; 32],
+                "the caller does not hold the seat".into(),
+            );
         }
         self.heard.insert(call.seat, self.tends);
-        let Some(act) = crate::attached::act_of(call.fn_id, &call.args, &held.handle) else { return (NO_FUNCTION, [0u8; 32], format!("no fn {} with these arguments", call.fn_id)) };
+        let Some(act) = crate::attached::act_of(call.fn_id, &call.args, &held.handle) else {
+            return (
+                NO_FUNCTION,
+                [0u8; 32],
+                format!("no fn {} with these arguments", call.fn_id),
+            );
+        };
         match crate::attached::carry(&self.var_root(), &self.worlds, held, &act, &reference) {
-            Ok(()) => (attach::QUEUED, reference, format!("queued for {}", held.world)),
+            Ok(()) => (
+                attach::QUEUED,
+                reference,
+                format!("queued for {}", held.world),
+            ),
             Err(e) => (UNREAD, [0u8; 32], format!("not carried: {e}")),
         }
     }
 
     fn mark_reported(&mut self, id: [u8; 32]) {
         if self.reported.insert(id) {
-            if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(&self.reported_file) {
+            if let Ok(mut f) = std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&self.reported_file)
+            {
                 let _ = writeln!(f, "{}", attach::hex(&id));
             }
         }
     }
 
-    fn post_record(&mut self, seat: &crate::seat::Seat, at: u32, mind: [u8; 32], record: Record) -> io::Result<bool> {
+    fn post_record(
+        &mut self,
+        seat: &crate::seat::Seat,
+        at: u32,
+        mind: [u8; 32],
+        record: Record,
+    ) -> io::Result<bool> {
         self.percepts += 1;
         let p = Percept {
             sub_origin: None,
             domain: self.domain,
             seat: at,
             mind,
-            local_time: Arg::Q { num: i64::try_from(self.u()).unwrap_or(i64::MAX), den: 1 },
+            local_time: Arg::Q {
+                num: i64::try_from(self.u()).unwrap_or(i64::MAX),
+                den: 1,
+            },
             seq: self.percepts,
             records: vec![record],
             point: seat.tuniversal(),
@@ -713,25 +1022,74 @@ impl House {
                 continue;
             }
             let posted = match a.refused {
-                Some(why) => self.post_record(seat, attach::DOOR, a.mind, Record::Plain { kind: attach::KIND_NOT_ADMITTED, args: vec![Arg::Count(u64::from(why))] })?,
-                None => match self.held_seats.iter().find(|h| h.mind == a.mind && h.world == a.world && h.role == Role::Sovereign).map(|h| h.seat) {
-                    Some(at) => self.post_record(seat, at, a.mind, Record::Plain { kind: attach::KIND_ADMITTED, args: vec![Arg::Key(line_key(&a.world)), Arg::Count(u64::from(at))] })?,
+                Some(why) => self.post_record(
+                    seat,
+                    attach::DOOR,
+                    a.mind,
+                    Record::Plain {
+                        kind: attach::KIND_NOT_ADMITTED,
+                        args: vec![Arg::Count(u64::from(why))],
+                    },
+                )?,
+                None => match self
+                    .held_seats
+                    .iter()
+                    .find(|h| h.mind == a.mind && h.world == a.world && h.role == Role::Sovereign)
+                    .map(|h| h.seat)
+                {
+                    Some(at) => self.post_record(
+                        seat,
+                        at,
+                        a.mind,
+                        Record::Plain {
+                            kind: attach::KIND_ADMITTED,
+                            args: vec![Arg::Key(line_key(&a.world)), Arg::Count(u64::from(at))],
+                        },
+                    )?,
                     None => false,
                 },
             };
             if posted {
                 self.mark_reported(tag);
-                said.push(format!("ATTACH {} {}", attach::hex(&a.mind[..4]), if a.refused.is_some() { "not admitted".to_string() } else { format!("admitted to {}", a.world) }));
+                said.push(format!(
+                    "ATTACH {} {}",
+                    attach::hex(&a.mind[..4]),
+                    if a.refused.is_some() {
+                        "not admitted".to_string()
+                    } else {
+                        format!("admitted to {}", a.world)
+                    }
+                ));
             }
         }
         let worlds = self.worlds.clone();
-        let sovereign: Vec<crate::attached::Held> = self.held_seats.iter().filter(|h| h.role == Role::Sovereign).cloned().collect();
+        let sovereign: Vec<crate::attached::Held> = self
+            .held_seats
+            .iter()
+            .filter(|h| h.role == Role::Sovereign)
+            .cloned()
+            .collect();
         for h in sovereign {
             let reported = self.reported.clone();
-            for (reference, applied) in crate::attached::results(&var_root, &worlds, &h, &|r| reported.contains(r)) {
-                if self.post_record(seat, h.seat, h.mind, Record::Plain { kind: attach::KIND_RESULT, args: vec![Arg::Key(reference), Arg::Count(u64::from(applied))] })? {
+            for (reference, applied) in
+                crate::attached::results(&var_root, &worlds, &h, &|r| reported.contains(r))
+            {
+                if self.post_record(
+                    seat,
+                    h.seat,
+                    h.mind,
+                    Record::Plain {
+                        kind: attach::KIND_RESULT,
+                        args: vec![Arg::Key(reference), Arg::Count(u64::from(applied))],
+                    },
+                )? {
                     self.mark_reported(reference);
-                    said.push(format!("RESULT {} for {}: {}", attach::hex(&reference[..6]), h.world, if applied { "applied" } else { "refused" }));
+                    said.push(format!(
+                        "RESULT {} for {}: {}",
+                        attach::hex(&reference[..6]),
+                        h.world,
+                        if applied { "applied" } else { "refused" }
+                    ));
                 }
             }
         }

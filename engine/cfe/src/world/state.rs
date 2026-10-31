@@ -138,7 +138,7 @@ pub struct Committed {
     pub crossed: bool,
     /// GAUGE-N: the world's gauge key — a graded vector of wrapped
     /// exact rationals on the torus fiber, grown only by receipt.
-    /// Grade 0 is the landed scalar; genesis is [0].
+    /// Grade 0 is the landed scalar; genesis is \[0\].
     pub gauge: Vec<Ratio>,
     /// G1 (04 §1/§5): the sealed line — the world-side copy of the
     /// binding receipt; None until the axes seal.
@@ -476,4 +476,3 @@ pub(super) struct CrystalDeposit {
     /// novelty reading (licensed arrivals count: foreign signal feeds).
     pub(super) last_node: Option<u64>,
 }
-

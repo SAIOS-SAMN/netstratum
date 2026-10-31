@@ -7,6 +7,14 @@ members = [
 [workspace.package]
 license = "Apache-2.0"
 
+# Clippy lints the physics code's idiom does not meet by design: exact
+# readings returned as tuples, torque laws that take every reading they
+# combine, and indexed loops over parallel per-plane arrays.
+[workspace.lints.clippy]
+type_complexity = "allow"
+too_many_arguments = "allow"
+needless_range_loop = "allow"
+
 [workspace.dependencies]
 # Mycelium, the network substrate Netstratum's engine speaks through (its
 # clock, atlas and law forms), pinned at a tagged release; bumping it is a

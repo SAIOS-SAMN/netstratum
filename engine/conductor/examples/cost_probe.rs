@@ -79,7 +79,11 @@ fn main() {
         let receipt = &receipts[cut];
         let step = kernel::Step {
             event: receipt.event().clone(),
-            actor: receipt.provenance().first().copied().unwrap_or(cfe::world::SOVEREIGN),
+            actor: receipt
+                .provenance()
+                .first()
+                .copied()
+                .unwrap_or(cfe::world::SOVEREIGN),
             stamp: receipt.stamp(),
         };
         // The verdict is not the probe's business — only its cost is.
@@ -98,7 +102,10 @@ fn main() {
     println!("one full replay     {replay:?}");
     println!("codec::state_bytes  {encode:?}");
     println!("---");
-    println!("ONE CHAINED BEAT    {beat:?}   ({judged} deeds judged, {} replays)", judged + 1);
+    println!(
+        "ONE CHAINED BEAT    {beat:?}   ({judged} deeds judged, {} replays)",
+        judged + 1
+    );
     println!(
         "per-deed cost       {:?}",
         beat.checked_div(judged.max(1) as u32).unwrap_or_default()

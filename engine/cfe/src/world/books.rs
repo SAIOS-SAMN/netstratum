@@ -81,7 +81,9 @@ impl World {
         let kind = kind_of(name);
         // The novelty gate: same normal form, same kind, same book.
         if let Some(standing) = self.orb_by_id(orb).and_then(|held| held.book(kind)) {
-            return Err(ActionRefused::BookAlreadyMinted { name: standing.name.clone() });
+            return Err(ActionRefused::BookAlreadyMinted {
+                name: standing.name.clone(),
+            });
         }
         let held = peel(&mut self.orbs, orb).expect("judged above");
         held.books.push(BookAccount {
@@ -94,7 +96,14 @@ impl World {
         });
         // Kind-ascending: one state, one encoding.
         held.books.sort_by_key(|held| held.kind);
-        self.close(ClosureEvent::BookMinted { orb_id: orb, kind, name: name.to_string() }, actor);
+        self.close(
+            ClosureEvent::BookMinted {
+                orb_id: orb,
+                kind,
+                name: name.to_string(),
+            },
+            actor,
+        );
         Ok(kind)
     }
 
@@ -137,7 +146,9 @@ impl World {
             None => return Err(ActionRefused::NoSuchBook),
             // §16c: closed to writing. This is the only place that bites.
             Some(standing) if standing.archived => {
-                return Err(ActionRefused::BookClosedToWriting { name: standing.name.clone() })
+                return Err(ActionRefused::BookClosedToWriting {
+                    name: standing.name.clone(),
+                })
             }
             Some(_) => {}
         }
@@ -149,7 +160,15 @@ impl World {
             .expect("judged above");
         account.kept += kept.clone();
         account.lost += lost.clone();
-        self.close(ClosureEvent::BookPosted { orb_id: orb, kind, kept, lost }, actor);
+        self.close(
+            ClosureEvent::BookPosted {
+                orb_id: orb,
+                kind,
+                kept,
+                lost,
+            },
+            actor,
+        );
         Ok(())
     }
 
@@ -188,12 +207,16 @@ impl World {
             .iter()
             .find(|held| kind_of(held) == kind)
         {
-            return Err(ActionRefused::CharterBookNotArchivable { name: (*name).to_string() });
+            return Err(ActionRefused::CharterBookNotArchivable {
+                name: (*name).to_string(),
+            });
         }
         match self.orb_by_id(orb).and_then(|held| held.book(kind)) {
             None => return Err(ActionRefused::NoSuchBook),
             Some(standing) if standing.archived => {
-                return Err(ActionRefused::BookAlreadyArchived { name: standing.name.clone() })
+                return Err(ActionRefused::BookAlreadyArchived {
+                    name: standing.name.clone(),
+                })
             }
             Some(_) => {}
         }

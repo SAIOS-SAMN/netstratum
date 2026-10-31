@@ -78,7 +78,8 @@ pub struct Entry {
 }
 
 fn put_record(out: &mut Vec<u8>, e: &Entry) -> io::Result<()> {
-    let len = u32::try_from(e.entry.len()).map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "an entry past 4 GiB"))?;
+    let len = u32::try_from(e.entry.len())
+        .map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "an entry past 4 GiB"))?;
     out.extend_from_slice(&e.head);
     out.extend_from_slice(&e.cite);
     out.extend_from_slice(&len.to_le_bytes());
@@ -122,7 +123,12 @@ impl TierLine {
                 off.copy_from_slice(&b[32..]);
                 (head, u64::from_le_bytes(off))
             }
-            Ok(_) => return Err(io::Error::new(io::ErrorKind::InvalidData, format!("{}: not a base", base_path.display()))),
+            Ok(_) => {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("{}: not a base", base_path.display()),
+                ))
+            }
             Err(e) if e.kind() == io::ErrorKind::NotFound => ([0; 32], 0),
             Err(e) => return Err(e),
         };
@@ -131,7 +137,12 @@ impl TierLine {
             Err(e) if e.kind() == io::ErrorKind::NotFound => Vec::new(),
             Err(e) => return Err(e),
         };
-        let bad = |at: usize, why: &str| io::Error::new(io::ErrorKind::InvalidData, format!("{}: record {at}: {why}", path.display()));
+        let bad = |at: usize, why: &str| {
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("{}: record {at}: {why}", path.display()),
+            )
+        };
         let mut entries = Vec::new();
         let mut prev = base;
         let mut p = 0;
@@ -144,7 +155,9 @@ impl TierLine {
             };
             let head: [u8; 32] = take(&mut p, 32)?.try_into().map_err(|_| bad(at, "head"))?;
             let cite: [u8; 32] = take(&mut p, 32)?.try_into().map_err(|_| bad(at, "cite"))?;
-            let len = u32::from_le_bytes(take(&mut p, 4)?.try_into().map_err(|_| bad(at, "length"))?) as usize;
+            let len =
+                u32::from_le_bytes(take(&mut p, 4)?.try_into().map_err(|_| bad(at, "length"))?)
+                    as usize;
             let entry = take(&mut p, len)?.to_vec();
             if next_head(&prev, &entry) != head {
                 return Err(bad(at, "the head does not follow from the line"));
@@ -152,7 +165,13 @@ impl TierLine {
             prev = head;
             entries.push(Entry { head, cite, entry });
         }
-        Ok(TierLine { path, base_path, base, offset, entries })
+        Ok(TierLine {
+            path,
+            base_path,
+            base,
+            offset,
+            entries,
+        })
     }
 
     /// The head after the last entry (the base for an empty hot line).
@@ -173,7 +192,9 @@ impl TierLine {
 
     /// The head the line would have after every entry in `batch`.
     pub fn peek_all(&self, batch: &[(Vec<u8>, [u8; 32])]) -> [u8; 32] {
-        batch.iter().fold(self.head(), |head, (entry, _)| next_head(&head, entry))
+        batch
+            .iter()
+            .fold(self.head(), |head, (entry, _)| next_head(&head, entry))
     }
 
     /// Append every entry in `batch`, in order, as one write and one sync —
@@ -189,7 +210,10 @@ impl TierLine {
             put_record(&mut bytes, &e)?;
             landed.push(e);
         }
-        let mut f = OpenOptions::new().create(true).append(true).open(&self.path)?;
+        let mut f = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&self.path)?;
         f.write_all(&bytes)?;
         f.sync_data()?;
         self.entries.extend(landed);
@@ -215,14 +239,20 @@ impl TierLine {
             return Ok(());
         }
         if n > self.entries.len() {
-            return Err(io::Error::new(io::ErrorKind::InvalidInput, "pruning past the hot line's end"));
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "pruning past the hot line's end",
+            ));
         }
         let mut out = Vec::new();
         for e in &self.entries[..n] {
             put_record(&mut out, e)?;
         }
         let archive = self.path.with_extension("archive");
-        let mut f = OpenOptions::new().create(true).append(true).open(&archive)?;
+        let mut f = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&archive)?;
         f.write_all(&out)?;
         f.sync_data()?;
         let (base, offset) = (self.entries[n - 1].head, self.offset + n as u64);
@@ -264,7 +294,10 @@ impl TierLine {
     pub fn restart(&mut self, epoch: &str) -> io::Result<PathBuf> {
         let kept = self.path.with_extension(epoch);
         if kept.exists() {
-            return Err(io::Error::new(io::ErrorKind::AlreadyExists, format!("{} already holds an epoch", kept.display())));
+            return Err(io::Error::new(
+                io::ErrorKind::AlreadyExists,
+                format!("{} already holds an epoch", kept.display()),
+            ));
         }
         if self.path.exists() {
             fs::rename(&self.path, &kept)?;
@@ -303,7 +336,12 @@ impl FoldLog {
             Err(e) if e.kind() == io::ErrorKind::NotFound => Vec::new(),
             Err(e) => return Err(e),
         };
-        let bad = || io::Error::new(io::ErrorKind::InvalidData, format!("{}: truncated", path.display()));
+        let bad = || {
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("{}: truncated", path.display()),
+            )
+        };
         let mut folds = Vec::new();
         let mut p = 0;
         while p < bytes.len() {
@@ -322,12 +360,16 @@ impl FoldLog {
     }
 
     pub fn push(&mut self, mark: FoldMark) -> io::Result<()> {
-        let klen = u16::try_from(mark.at.len()).map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "a stamp key past 64 KiB"))?;
+        let klen = u16::try_from(mark.at.len())
+            .map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "a stamp key past 64 KiB"))?;
         let mut b = klen.to_le_bytes().to_vec();
         b.extend_from_slice(&mark.at);
         b.extend_from_slice(&mark.first.to_le_bytes());
         b.extend_from_slice(&mark.count.to_le_bytes());
-        let mut f = OpenOptions::new().create(true).append(true).open(&self.path)?;
+        let mut f = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&self.path)?;
         f.write_all(&b)?;
         f.sync_data()?;
         self.folds.push(mark);
@@ -340,7 +382,9 @@ impl FoldLog {
         self.folds.retain(|f| f.first < from);
         let mut b = Vec::new();
         for mark in &self.folds {
-            let klen = u16::try_from(mark.at.len()).map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "a stamp key past 64 KiB"))?;
+            let klen = u16::try_from(mark.at.len()).map_err(|_| {
+                io::Error::new(io::ErrorKind::InvalidInput, "a stamp key past 64 KiB")
+            })?;
             b.extend_from_slice(&klen.to_le_bytes());
             b.extend_from_slice(&mark.at);
             b.extend_from_slice(&mark.first.to_le_bytes());
@@ -354,7 +398,11 @@ impl FoldLog {
     /// it does not. Returns how many hot entries those folds' spans cover.
     pub fn prunable(&self, line: &TierLine, mut settled: impl FnMut(&FoldMark) -> bool) -> usize {
         let mut through = line.offset;
-        for f in self.folds.iter().filter(|f| f.first + f.count > line.offset) {
+        for f in self
+            .folds
+            .iter()
+            .filter(|f| f.first + f.count > line.offset)
+        {
             if f.first != through || f.first + f.count > line.total() || !settled(f) {
                 break;
             }
@@ -371,7 +419,15 @@ impl FoldLog {
 pub fn entry_bytes(mut rows: Vec<Net>, mut declared: Vec<Net>) -> Vec<u8> {
     rows.sort_by_key(|(who, _)| *who);
     declared.sort_by_key(|(who, _)| *who);
-    TierFold { tier: [0; 32], prefix: [0; 32], rows, declared, children: Vec::new(), handoffs: Vec::new() }.rows_bytes()
+    TierFold {
+        tier: [0; 32],
+        prefix: [0; 32],
+        rows,
+        declared,
+        children: Vec::new(),
+        handoffs: Vec::new(),
+    }
+    .rows_bytes()
 }
 
 fn take_nets(b: &[u8], p: &mut usize) -> Option<Vec<Net>> {
@@ -413,7 +469,9 @@ pub fn fold_of(entries: &[CourtEntry]) -> (Vec<Net>, Vec<Net>) {
                 }
             }
         }
-        by.into_iter().filter(|(_, l)| l.iter().any(|v| *v != 0)).collect::<Vec<Net>>()
+        by.into_iter()
+            .filter(|(_, l)| l.iter().any(|v| *v != 0))
+            .collect::<Vec<Net>>()
     };
     (sum(&|e| &e.rows), sum(&|e| &e.declared))
 }
@@ -436,11 +494,18 @@ impl Cursors {
             Err(e) if e.kind() == io::ErrorKind::NotFound => String::new(),
             Err(e) => return Err(e),
         };
-        let bad = |line: &str| io::Error::new(io::ErrorKind::InvalidData, format!("{}: unreadable cursor {line:?}", path.display()));
+        let bad = |line: &str| {
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("{}: unreadable cursor {line:?}", path.display()),
+            )
+        };
         let mut at = BTreeMap::new();
         for line in text.lines().filter(|l| !l.is_empty()) {
             let mut f = line.split('\t');
-            let (Some(people), Some(n), Some(hex)) = (f.next(), f.next(), f.next()) else { return Err(bad(line)) };
+            let (Some(people), Some(n), Some(hex)) = (f.next(), f.next(), f.next()) else {
+                return Err(bad(line));
+            };
             let n: usize = n.parse().map_err(|_| bad(line))?;
             let mut hash = [0u8; 32];
             if hex.len() != 64 {
@@ -538,8 +603,14 @@ mod tests {
         let mut log = FoldLog::open(&home, "colonies").unwrap();
         for (i, n) in [2usize, 3, 1].into_iter().enumerate() {
             let first = line.total();
-            line.append_all((0..n).map(|j| (vec![i as u8, j as u8], [0; 32])).collect()).unwrap();
-            log.push(FoldMark { at: vec![i as u8], first, count: n as u64 }).unwrap();
+            line.append_all((0..n).map(|j| (vec![i as u8, j as u8], [0; 32])).collect())
+                .unwrap();
+            log.push(FoldMark {
+                at: vec![i as u8],
+                first,
+                count: n as u64,
+            })
+            .unwrap();
         }
         let head = line.head();
         // the first two folds settled, the third provisional
@@ -548,28 +619,49 @@ mod tests {
         line.prune_through(n).unwrap();
         let back = TierLine::open(&home, "colonies").unwrap();
         assert_eq!((back.offset, back.entries.len(), back.head()), (5, 1, head));
-        assert_eq!(FoldLog::open(&home, "colonies").unwrap().prunable(&back, |_| true), 1);
+        assert_eq!(
+            FoldLog::open(&home, "colonies")
+                .unwrap()
+                .prunable(&back, |_| true),
+            1
+        );
 
         let mut back = back;
         back.restart("pre-test").unwrap();
-        assert!(back.restart("pre-test").is_err(), "an epoch is never overwritten");
+        assert!(
+            back.restart("pre-test").is_err(),
+            "an epoch is never overwritten"
+        );
         let fresh = TierLine::open(&home, "colonies").unwrap();
-        assert_eq!((fresh.base, fresh.offset, fresh.entries.len()), ([0; 32], 6, 0));
+        assert_eq!(
+            (fresh.base, fresh.offset, fresh.entries.len()),
+            ([0; 32], 6, 0)
+        );
         assert_eq!(fresh.peek(b"x"), next_head(&[0; 32], b"x"));
         let _ = fs::remove_dir_all(&home);
     }
 
     #[test]
     fn an_entry_reads_back_whole_and_a_fold_re_derives_from_its_entries() {
-        let a = entry_bytes(vec![([2; 32], [5, 0, 0, 0]), ([1; 32], [-5, 0, 0, 0])], vec![]);
-        let b = entry_bytes(vec![([1; 32], [5, 0, 0, 0]), ([4; 32], [0, 3, 0, 0])], vec![([7; 32], [0, 3, 0, 0])]);
+        let a = entry_bytes(
+            vec![([2; 32], [5, 0, 0, 0]), ([1; 32], [-5, 0, 0, 0])],
+            vec![],
+        );
+        let b = entry_bytes(
+            vec![([1; 32], [5, 0, 0, 0]), ([4; 32], [0, 3, 0, 0])],
+            vec![([7; 32], [0, 3, 0, 0])],
+        );
         let (ea, eb) = (decode_entry(&a).unwrap(), decode_entry(&b).unwrap());
         assert_eq!(entry_bytes(ea.rows.clone(), ea.declared.clone()), a);
         let mut long = a.clone();
         long.push(0);
         assert!(decode_entry(&long).is_none());
         let (rows, declared) = fold_of(&[ea, eb]);
-        assert_eq!(rows, vec![([2; 32], [5, 0, 0, 0]), ([4; 32], [0, 3, 0, 0])], "identity 1 nets to zero and drops");
+        assert_eq!(
+            rows,
+            vec![([2; 32], [5, 0, 0, 0]), ([4; 32], [0, 3, 0, 0])],
+            "identity 1 nets to zero and drops"
+        );
         assert_eq!(declared, vec![([7; 32], [0, 3, 0, 0])]);
     }
 
@@ -580,15 +672,29 @@ mod tests {
         let mut log = FoldLog::open(&home, "colonies").unwrap();
         for (i, n) in [3usize, 2, 2].into_iter().enumerate() {
             let first = line.total();
-            line.append_all((0..n).map(|j| (vec![i as u8, j as u8], [i as u8; 32])).collect()).unwrap();
-            log.push(FoldMark { at: vec![i as u8], first, count: n as u64 }).unwrap();
+            line.append_all(
+                (0..n)
+                    .map(|j| (vec![i as u8, j as u8], [i as u8; 32]))
+                    .collect(),
+            )
+            .unwrap();
+            log.push(FoldMark {
+                at: vec![i as u8],
+                first,
+                count: n as u64,
+            })
+            .unwrap();
         }
         let court_head = line.entries[2].head; // the court kept only the first fold
         let removed = line.truncate_to(3).unwrap();
         assert_eq!(removed.len(), 4);
         log.truncate_from(3).unwrap();
         let back = TierLine::open(&home, "colonies").unwrap();
-        assert_eq!((back.head(), back.entries.len()), (court_head, 3), "the line re-verifies at the court's head");
+        assert_eq!(
+            (back.head(), back.entries.len()),
+            (court_head, 3),
+            "the line re-verifies at the court's head"
+        );
         assert_eq!(FoldLog::open(&home, "colonies").unwrap().folds.len(), 1);
         let mut c = Cursors::open(&home, "colonies").unwrap();
         c.set("p", 9, [1; 32]).unwrap();
@@ -605,14 +711,30 @@ mod tests {
         let ours = next_head(&[9; 32], &entry_bytes(rows.clone(), declared.clone()));
         let mut sorted = rows;
         sorted.sort_by_key(|(w, _)| *w);
-        assert_eq!(ours, line_head([9; 32], &[CourtEntry { rows: sorted, declared }]));
+        assert_eq!(
+            ours,
+            line_head(
+                [9; 32],
+                &[CourtEntry {
+                    rows: sorted,
+                    declared
+                }]
+            )
+        );
     }
 
     #[test]
     fn an_entry_writes_as_the_court_writes_a_fold_rows() {
         let rows = vec![([2; 32], [5, 0, 0, 0]), ([1; 32], [-5, 0, 0, 0])];
         let sorted = vec![([1; 32], [-5, 0, 0, 0]), ([2; 32], [5, 0, 0, 0])];
-        let court = TierFold { tier: [7; 32], prefix: [8; 32], rows: sorted, declared: vec![], children: vec![], handoffs: vec![] };
+        let court = TierFold {
+            tier: [7; 32],
+            prefix: [8; 32],
+            rows: sorted,
+            declared: vec![],
+            children: vec![],
+            handoffs: vec![],
+        };
         assert_eq!(entry_bytes(rows, vec![]), court.rows_bytes());
     }
 }

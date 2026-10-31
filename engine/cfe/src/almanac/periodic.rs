@@ -51,7 +51,8 @@ pub const PHASES: u8 = 4;
 pub const SPINS: u8 = 2;
 
 /// Every cell the table carries — the product of all five axes.
-pub const CELLS: u32 = (LINES as u32) * (LANES as u32) * (SHELLS as u32) * (PHASES as u32) * (SPINS as u32);
+pub const CELLS: u32 =
+    (LINES as u32) * (LANES as u32) * (SHELLS as u32) * (PHASES as u32) * (SPINS as u32);
 
 /// Where an element sits, and what that implies.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -125,7 +126,15 @@ fn atom_cell(z: u32) -> Option<Periodic> {
     let lane = a.unpaired.clamp(1, u32::from(LANES / 2)) as u8;
     let shell = a.outer.clamp(1, u32::from(SHELLS)) as u8;
     let grip = a.tightness.clone() * ratio(2760, 1);
-    let phase = if grip < ratio(250, 1) { 1 } else if grip < ratio(600, 1) { 2 } else if grip <= ratio(2273, 1) { 3 } else { PHASES };
+    let phase = if grip < ratio(250, 1) {
+        1
+    } else if grip < ratio(600, 1) {
+        2
+    } else if grip <= ratio(2273, 1) {
+        3
+    } else {
+        PHASES
+    };
     Some(Periodic {
         line,
         lane,

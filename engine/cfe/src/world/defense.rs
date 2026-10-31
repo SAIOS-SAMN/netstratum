@@ -275,9 +275,7 @@ impl World {
             3 => "epicurean surplus",
             _ => "doctrine open",
         };
-        let voice = format!(
-            "{met_voice} — {clade_voice}; {dis_word}; {per_voice}"
-        );
+        let voice = format!("{met_voice} — {clade_voice}; {dis_word}; {per_voice}");
 
         DefensePosture {
             primary,
@@ -343,11 +341,7 @@ impl World {
         held.bank_stamp(-fee);
         self.posture_disposition = Some(disposition);
         self.posture_perception = Some(perception);
-        self.posture_primary = if primary == 0 {
-            None
-        } else {
-            Some(primary)
-        };
+        self.posture_primary = if primary == 0 { None } else { Some(primary) };
         self.close(
             ClosureEvent::PostureReoriented {
                 disposition,
@@ -540,11 +534,7 @@ impl World {
         self.mark_convoy_risk_as(SOVEREIGN, deal)
     }
 
-    pub fn mark_convoy_risk_as(
-        &mut self,
-        actor: u64,
-        deal: u64,
-    ) -> Result<Ratio, ActionRefused> {
+    pub fn mark_convoy_risk_as(&mut self, actor: u64, deal: u64) -> Result<Ratio, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         if deal == 0 {
             return Err(ActionRefused::RouteUnknown { deal: 0 });

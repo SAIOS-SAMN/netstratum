@@ -8,7 +8,7 @@
 //!     same verifier (law 12 — one reader), so the two can only disagree if
 //!     the builds differ.
 //!   * Fold: a tier's net positions per identity per lane over a prefix of
-//!     the tier's own line ([`line`]), signed by the tier, admitted by
+//!     the tier's own line (`line`), signed by the tier, admitted by
 //!     continuity (78.119). [`census`] derives those folds from a colony's
 //!     chronicle exactly.
 //!
@@ -30,14 +30,13 @@ pub mod follow;
 pub mod house;
 pub mod line;
 pub mod probe;
+pub mod refound;
 pub mod seat;
 pub mod wire;
-pub mod refound;
 
 /// No default court: the standalone :7520 court is retired (coordinator
 /// 2026-10-09, docs/PORT.md) and the fleet's hyphae are real tiers, so every
 /// command names its hypha (`--at` / `NS_HYPHA`).
-
 /// One session to one hypha, under Netstratum's own voice.
 pub struct Uplink {
     session: Session,
@@ -66,7 +65,12 @@ pub fn unmeasured(b: &Breach) -> bool {
 
 /// The laws a verdict says were breached, not counting unmeasured readings.
 pub fn laws_of(v: &Verdict) -> Vec<Law> {
-    let mut l: Vec<Law> = v.breaches.iter().filter(|(_, b)| !unmeasured(b)).map(|(law, _)| *law).collect();
+    let mut l: Vec<Law> = v
+        .breaches
+        .iter()
+        .filter(|(_, b)| !unmeasured(b))
+        .map(|(law, _)| *law)
+        .collect();
     l.sort_by_key(|law| law.index());
     l.dedup();
     l
@@ -111,12 +115,16 @@ impl Uplink {
     pub fn open(addr: &str, home: &Path) -> io::Result<Uplink> {
         std::fs::create_dir_all(home)?;
         let key_path = home.join("voice.key");
-        let key_name = key_path
-            .to_str()
-            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "the key path is not UTF-8"))?;
+        let key_name = key_path.to_str().ok_or_else(|| {
+            io::Error::new(io::ErrorKind::InvalidInput, "the key path is not UTF-8")
+        })?;
         let voice = HyphaKey::load_or_mint(key_name).vk_bytes();
         let kernel = mycelium::sdk::Kernel::from_voice(voice);
-        Ok(Uplink { session: Session::open(addr, kernel), addr: addr.to_string(), voice })
+        Ok(Uplink {
+            session: Session::open(addr, kernel),
+            addr: addr.to_string(),
+            voice,
+        })
     }
 
     /// The register the hypha holds: every law at its coordinate.
@@ -128,15 +136,28 @@ impl Uplink {
 
     pub fn laws(&self) -> io::Result<Vec<mycelium::physics::laws::codec::Served>> {
         use mycelium::physics::laws::codec::{decode_register_reply, encode_register_request};
-        decode_register_reply(&self.session.speak(encode_register_request())?).ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "the register's reply did not decode"))
+        decode_register_reply(&self.session.speak(encode_register_request())?).ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                "the register's reply did not decode",
+            )
+        })
     }
 
     /// The server's lexicon version, and every term in [`TERMS`] it does not
     /// serve in the vocabulary Netstratum means it in.
     pub fn lexicon_check(&self) -> io::Result<(u8, Vec<String>)> {
-        use mycelium::physics::laws::lexicon::Vocabulary;
         use mycelium::physics::laws::codec::{decode_lexicon_reply, encode_lexicon_request};
-        let (version, served) = decode_lexicon_reply(&self.session.speak(encode_lexicon_request())?).ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "the lexicon's reply did not decode"))?;
+        use mycelium::physics::laws::lexicon::Vocabulary;
+        let (version, served) = decode_lexicon_reply(
+            &self.session.speak(encode_lexicon_request())?,
+        )
+        .ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                "the lexicon's reply did not decode",
+            )
+        })?;
         let theirs = |v: Vocab| match v {
             Vocab::Physical => Vocabulary::Physical,
             Vocab::Civic => Vocabulary::Civic,
@@ -144,7 +165,11 @@ impl Uplink {
         };
         let missing = TERMS
             .iter()
-            .filter(|(name, v)| !served.iter().any(|t| t.name == *name && t.vocabulary == theirs(*v)))
+            .filter(|(name, v)| {
+                !served
+                    .iter()
+                    .any(|t| t.name == *name && t.vocabulary == theirs(*v))
+            })
             .map(|(name, v)| format!("{name} ({v:?})"))
             .collect();
         Ok((version, missing))
@@ -152,12 +177,22 @@ impl Uplink {
 
     /// `t` read by this kernel and by the court, side by side.
     pub fn verify_both(&self, t: &Transition) -> io::Result<Reading> {
-        let reply = self.session.speak(mycelium::physics::laws::codec::encode_verify_request(t))?;
+        let reply = self
+            .session
+            .speak(mycelium::physics::laws::codec::encode_verify_request(t))?;
         let mut p = 0;
         let court = match mycelium::physics::laws::codec::take_verdict(&reply, &mut p) {
             Some(v) if p == reply.len() => v,
-            _ => return Err(io::Error::new(io::ErrorKind::InvalidData, "the verdict did not decode")),
+            _ => {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    "the verdict did not decode",
+                ))
+            }
         };
-        Ok(Reading { local: verify_local(t), court })
+        Ok(Reading {
+            local: verify_local(t),
+            court,
+        })
     }
 }

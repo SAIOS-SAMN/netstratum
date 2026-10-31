@@ -72,7 +72,10 @@ fn derive_symmetries(task: &Task) -> Vec<Candidate> {
             _ => or == ir && oc == ic,
         };
         if fits {
-            found.push(Candidate { op, family: Family::Symmetry });
+            found.push(Candidate {
+                op,
+                family: Family::Symmetry,
+            });
         }
     }
     found
@@ -120,7 +123,10 @@ fn derive_recolors(task: &Task) -> Vec<Candidate> {
         }
         let op = Op::Recolor(map);
         if !found.iter().any(|c| c.op == op) {
-            found.push(Candidate { op, family: Family::Recolor });
+            found.push(Candidate {
+                op,
+                family: Family::Recolor,
+            });
         }
     }
     found
@@ -148,9 +154,17 @@ fn derive_tiles(task: &Task) -> Vec<Candidate> {
     let mut found = Vec::new();
     for odd_row in TileMirror::ALL {
         for odd_col in TileMirror::ALL {
-            let op = Op::Tile { down, across, odd_row, odd_col };
+            let op = Op::Tile {
+                down,
+                across,
+                odd_row,
+                odd_col,
+            };
             if op.apply(&first.input) == first.output {
-                found.push(Candidate { op, family: Family::Tile });
+                found.push(Candidate {
+                    op,
+                    family: Family::Tile,
+                });
                 return found; // the observation named exactly one
             }
         }
@@ -172,7 +186,10 @@ fn derive_objects(task: &Task) -> Vec<Candidate> {
     let objects = segment(input, bg, false);
     let mut found = Vec::new();
     let push = |op: ObjOp, found: &mut Vec<Candidate>| {
-        found.push(Candidate { op: Op::Object(op), family: Family::Object });
+        found.push(Candidate {
+            op: Op::Object(op),
+            family: Family::Object,
+        });
     };
 
     if objects.is_empty() {

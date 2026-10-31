@@ -16,9 +16,27 @@ matches the standards of the projects Netstratum publishes with
 ## Checks every change passes
 
 ```
-cargo check --workspace --all-targets   # no errors, no warnings
-cargo test  --workspace                 # every test passes
+scripts/check
 ```
+
+It runs, and requires clean: `cargo fmt --check`, `cargo clippy --workspace
+--all-targets -- -D warnings`, `cargo test --workspace`, `cargo doc
+--workspace --no-deps` with `-D warnings`, and `scripts/check-docs` (every
+relative link in the Markdown resolves). There is no hosted CI. Long physics
+reads are time-boxed and are not part of the check.
+
+## Workflow
+
+- Every change is made on a branch and lands on `main` by a pull request.
+  `main` is protected: it takes no direct pushes, and the maintainer merges
+  once `scripts/check` passes.
+- External contributions are pull requests, reviewed by the maintainer
+  ([MAINTAINERS.md](MAINTAINERS.md)).
+- Releases are annotated `vX.Y.Z` tags on `main` (SemVer) with a GitHub
+  Release whose notes are that version's [CHANGELOG.md](CHANGELOG.md)
+  section.
+- Design questions and cross-project proposals are issues; an accepted
+  decision is recorded in the design documents and the changelog.
 
 A physics change also carries its witness: a test that proves the law it
 builds (an identity, a conservation, a fixed point), never a test that pins

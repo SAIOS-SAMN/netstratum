@@ -11,13 +11,10 @@ use cfe::dop::{ClosureEvent, ColonyOrb, Resource};
 use cfe::ipsal::{Entity, Scope};
 use cfe::ratio::{ratio, Ratio};
 use cfe::world::{World, SOVEREIGN};
-use mesh::arbor::{Coordinate, Arbor, ArborRefused};
+use mesh::arbor::{Arbor, ArborRefused, Coordinate};
 
 fn scratch(name: &str) -> PathBuf {
-    let dir = std::env::temp_dir().join(format!(
-        "netstratum-arbor-{}-{name}",
-        std::process::id()
-    ));
+    let dir = std::env::temp_dir().join(format!("netstratum-arbor-{}-{name}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     dir
 }
@@ -41,12 +38,19 @@ fn coord_at(t: u64, sub: u32) -> Coordinate {
 }
 
 fn branch_coord(branch: &str, t: u64) -> Coordinate {
-    Coordinate { branch: branch.into(), ..coord(t) }
+    Coordinate {
+        branch: branch.into(),
+        ..coord(t)
+    }
 }
 
 /// One orb holding `iron` iron — the gate's test material.
 fn orb(id: u64, iron: (i64, i64)) -> ColonyOrb {
-    let mut held = ColonyOrb { orb_id: id, name: format!("orb-{id}"), ..Default::default() };
+    let mut held = ColonyOrb {
+        orb_id: id,
+        name: format!("orb-{id}"),
+        ..Default::default()
+    };
     held.bank(Resource::Iron, ratio(iron.0, iron.1));
     held
 }
@@ -59,7 +63,12 @@ fn two_orb_state(a: (i64, i64), b: (i64, i64)) -> Vec<u8> {
     let mut committed = World::new().committed();
     committed.orbs = vec![orb(1, a), orb(2, b)];
     committed.entities = vec![
-        Entity { entity_id: SOVEREIGN, handle: "sovereign".into(), principal: None, grants: vec![] },
+        Entity {
+            entity_id: SOVEREIGN,
+            handle: "sovereign".into(),
+            principal: None,
+            grants: vec![],
+        },
         Entity {
             entity_id: 100,
             handle: "hand".into(),
@@ -74,7 +83,9 @@ fn two_orb_state(a: (i64, i64), b: (i64, i64)) -> Vec<u8> {
 fn played_state(shift: Option<Ratio>) -> Vec<u8> {
     let mut world = World::new();
     world.found("meridian").expect("genesis");
-    world.zone(0, cfe::dop::ZoneKind::Extractor).expect("builds");
+    world
+        .zone(0, cfe::dop::ZoneKind::Extractor)
+        .expect("builds");
     for _ in 0..4 {
         world.tick();
     }
@@ -105,37 +116,60 @@ fn the_spine_walks_and_reloads_whole() {
     let bytes_a = played_state(None);
     let bytes_b = played_state(Some(ratio(1, 3)));
 
-    let genesis = arbor.extend(coord(0), &bytes_a, None).expect("genesis").clone();
+    let genesis = arbor
+        .extend(coord(0), &bytes_a, None)
+        .expect("genesis")
+        .clone();
     assert_eq!(genesis.parent, [0u8; 32], "genesis is parentless");
     // The record repeats the blob's own leading byte — read against
     // the blob, not a frozen version constant (re-pinned 2026-08-12:
     // the codec is at v19 now, and every schema bump since v5 broke a
     // hardcoded assertion; the law is "the record echoes the blob").
-    assert_eq!(genesis.schema, bytes_a[0], "the record repeats the blob's form");
+    assert_eq!(
+        genesis.schema, bytes_a[0],
+        "the record repeats the blob's form"
+    );
     assert_eq!(genesis.kernel, kernel::VERSION);
     assert!(!genesis.judged, "genesis is honestly unjudged");
 
-    let second = arbor.extend(coord(4), &bytes_b, None).expect("walks").clone();
+    let second = arbor
+        .extend(coord(4), &bytes_b, None)
+        .expect("walks")
+        .clone();
     assert_eq!(second.parent, genesis.commit, "the path links");
     assert_eq!(
         arbor.resolve(&coord(4)).expect("resolves").commit,
         second.commit,
         "one coordinate, one commitment"
     );
-    assert_eq!(arbor.fetch(&second.state).expect("the geometry unpacks"), bytes_b);
+    assert_eq!(
+        arbor.fetch(&second.state).expect("the geometry unpacks"),
+        bytes_b
+    );
 
     // A step offered at genesis refuses: nothing prior to gate from.
     let fresh = scratch("walks-genesis");
     let mut fresh_spine = Arbor::open(&fresh).expect("opens");
-    let refused = fresh_spine.extend(coord(0), &bytes_a, Some(&transfer_step(0))).unwrap_err();
+    let refused = fresh_spine
+        .extend(coord(0), &bytes_a, Some(&transfer_step(0)))
+        .unwrap_err();
     assert_eq!(refused, ArborRefused::GenesisJudged);
 
     // SEAL B for the arbor: reload from disk, identical maps.
     drop(arbor);
     let reloaded = Arbor::open(&root).expect("reloads whole");
-    assert_eq!(reloaded.head("").expect("head stands").commit, second.commit);
-    assert_eq!(reloaded.resolve(&coord(0)).expect("genesis stands").commit, genesis.commit);
-    assert_eq!(reloaded.fetch(&second.state).expect("store survives"), bytes_b);
+    assert_eq!(
+        reloaded.head("").expect("head stands").commit,
+        second.commit
+    );
+    assert_eq!(
+        reloaded.resolve(&coord(0)).expect("genesis stands").commit,
+        genesis.commit
+    );
+    assert_eq!(
+        reloaded.fetch(&second.state).expect("store survives"),
+        bytes_b
+    );
 }
 
 #[test]
@@ -148,7 +182,10 @@ fn the_arrow_and_the_address_hold() {
 
     // One value per address: the exact head address refuses occupied;
     // the clock only walks forward: a backward tick refuses the arrow.
-    assert_eq!(arbor.extend(coord(4), &bytes, None).unwrap_err(), ArborRefused::Occupied);
+    assert_eq!(
+        arbor.extend(coord(4), &bytes, None).unwrap_err(),
+        ArborRefused::Occupied
+    );
     assert!(matches!(
         arbor.extend(coord(2), &bytes, None).unwrap_err(),
         ArborRefused::ArrowBroken { .. }
@@ -171,7 +208,8 @@ fn the_arrow_and_the_address_hold() {
         .open(root.join("arbor.tlv"))
         .expect("the file opens");
     use std::io::Write as _;
-    file.write_all(&forged.wire_bytes()).expect("the forgery lands");
+    file.write_all(&forged.wire_bytes())
+        .expect("the forgery lands");
     drop(file);
     drop(arbor);
     assert!(matches!(
@@ -188,11 +226,17 @@ fn the_nursery_owns_its_addresses() {
     let bytes_b = played_state(Some(ratio(1, 3)));
     let bytes_c = played_state(Some(ratio(2, 5)));
     arbor.extend(coord(0), &bytes_a, None).expect("genesis");
-    let mainline_head = arbor.extend(coord(4), &bytes_b, None).expect("walks").clone();
+    let mainline_head = arbor
+        .extend(coord(4), &bytes_b, None)
+        .expect("walks")
+        .clone();
 
     // The fork: the same state entering a new address space,
     // parent-linked to the mainline commitment (NS-5 §7.6/§9.2).
-    let fork = arbor.branch(&coord(4), "fork-1").expect("the nursery opens").clone();
+    let fork = arbor
+        .branch(&coord(4), "fork-1")
+        .expect("the nursery opens")
+        .clone();
     assert_eq!(fork.state, mainline_head.state, "the same geometry");
     assert_eq!(fork.parent, mainline_head.commit, "linked to the mainline");
     assert_eq!(fork.coordinate.branch, "fork-1");
@@ -200,25 +244,36 @@ fn the_nursery_owns_its_addresses() {
 
     // The nursery walks on its own addresses; the mainline is
     // untouched from inside it.
-    arbor.extend(branch_coord("fork-1", 5), &bytes_c, None).expect("the nursery plays");
-    assert_eq!(arbor.head("").expect("mainline").commit, mainline_head.commit);
+    arbor
+        .extend(branch_coord("fork-1", 5), &bytes_c, None)
+        .expect("the nursery plays");
+    assert_eq!(
+        arbor.head("").expect("mainline").commit,
+        mainline_head.commit
+    );
     assert_eq!(
         arbor.resolve(&coord(4)).expect("mainline address").commit,
         mainline_head.commit,
         "the mainline is unwritable from the nursery"
     );
-    arbor.extend(coord(7), &bytes_c, None).expect("the mainline still walks");
+    arbor
+        .extend(coord(7), &bytes_c, None)
+        .expect("the mainline still walks");
 
     assert_eq!(
         arbor.branch(&coord(4), "fork-1").unwrap_err(),
-        ArborRefused::BranchTaken { name: "fork-1".into() }
+        ArborRefused::BranchTaken {
+            name: "fork-1".into()
+        }
     );
     assert_eq!(
         arbor.branch(&coord(2), "fork-2").unwrap_err(),
         ArborRefused::ForkUnknown
     );
     assert!(matches!(
-        arbor.extend(branch_coord("ghost", 9), &bytes_c, None).unwrap_err(),
+        arbor
+            .extend(branch_coord("ghost", 9), &bytes_c, None)
+            .unwrap_err(),
         ArborRefused::BranchUnknown { .. }
     ));
 }
@@ -228,7 +283,10 @@ fn the_store_and_the_record_verify() {
     let root = scratch("verify");
     let mut arbor = Arbor::open(&root).expect("opens");
     let bytes = played_state(None);
-    let genesis = arbor.extend(coord(0), &bytes, None).expect("genesis").clone();
+    let genesis = arbor
+        .extend(coord(0), &bytes, None)
+        .expect("genesis")
+        .clone();
 
     // Tamper the store blob: fetch re-hashes and refuses.
     let hex: String = genesis.state.iter().map(|b| format!("{b:02x}")).collect();
@@ -236,7 +294,10 @@ fn the_store_and_the_record_verify() {
     let mut held = fs::read(&blob).expect("the blob stands");
     held[10] ^= 0xff;
     fs::write(&blob, held).expect("the tamper lands");
-    assert!(matches!(arbor.fetch(&genesis.state).unwrap_err(), ArborRefused::Forged { .. }));
+    assert!(matches!(
+        arbor.fetch(&genesis.state).unwrap_err(),
+        ArborRefused::Forged { .. }
+    ));
 
     // Tamper the record stream: the commit does not recompute; the
     // whole file refuses on open.
@@ -245,7 +306,10 @@ fn the_store_and_the_record_verify() {
     stream[at] ^= 0xff;
     fs::write(root.join("arbor.tlv"), stream).expect("the tamper lands");
     drop(arbor);
-    assert!(matches!(Arbor::open(&root).unwrap_err(), ArborRefused::Forged { .. }));
+    assert!(matches!(
+        Arbor::open(&root).unwrap_err(),
+        ArborRefused::Forged { .. }
+    ));
 }
 
 #[test]
@@ -270,7 +334,10 @@ fn the_judge_stands_at_the_door() {
         .unwrap_err();
     assert!(matches!(
         refused,
-        ArborRefused::Refused(kernel::Refused::ConservationBroken { resource: Resource::Iron, .. })
+        ArborRefused::Refused(kernel::Refused::ConservationBroken {
+            resource: Resource::Iron,
+            ..
+        })
     ));
 
     // A judged refusal reaches the arbor and refuses. Witness
@@ -288,7 +355,9 @@ fn the_judge_stands_at_the_door() {
         stamp: 2,
     };
     assert_eq!(
-        arbor.extend(coord(2), &lawful_next, Some(&refused)).unwrap_err(),
+        arbor
+            .extend(coord(2), &lawful_next, Some(&refused))
+            .unwrap_err(),
         ArborRefused::Refused(kernel::Refused::NotPermitted {
             actor: 100,
             scope: cfe::ipsal::Scope::Build,
@@ -297,8 +366,14 @@ fn the_judge_stands_at_the_door() {
 
     // A step-less extend still stamps gated = false (the pre-chain
     // adoption shape — no judgment claimed, honestly recorded).
-    let hole = arbor.extend(coord(2), &minting_next, None).expect("admitted unjudged").clone();
-    assert!(!hole.judged, "no judgment claimed is visible in the record, never hidden");
+    let hole = arbor
+        .extend(coord(2), &minting_next, None)
+        .expect("admitted unjudged")
+        .clone();
+    assert!(
+        !hole.judged,
+        "no judgment claimed is visible in the record, never hidden"
+    );
 }
 
 /// The commitment's schema field speaks the blob's leading byte — the
@@ -310,7 +385,10 @@ fn the_record_speaks_the_blobs_schema() {
     let root = scratch("schema-truth");
     let mut arbor = Arbor::open(&root).expect("opens empty");
     let bytes = played_state(None);
-    let genesis = arbor.extend(coord(0), &bytes, None).expect("genesis").clone();
+    let genesis = arbor
+        .extend(coord(0), &bytes, None)
+        .expect("genesis")
+        .clone();
     assert_eq!(
         genesis.schema, bytes[0],
         "the record's schema is the blob's leading byte, never a constant"
@@ -335,9 +413,18 @@ fn adoption_is_once_and_names_its_debt() {
     // A world with pre-chain history: its chronicle is the Tier-A
     // debt. Adoption seats its current state, gated=0 stamped.
     let debt = two_orb_state((10, 1), (0, 1));
-    let adopted = arbor.adopt(coord(1), &debt).expect("the debt is adopted").clone();
-    assert_eq!(adopted.parent, [0u8; 32], "adoption is the mainline's birth");
-    assert!(!adopted.judged, "the pre-chain debt is stamped unjudged, named never hidden");
+    let adopted = arbor
+        .adopt(coord(1), &debt)
+        .expect("the debt is adopted")
+        .clone();
+    assert_eq!(
+        adopted.parent, [0u8; 32],
+        "adoption is the mainline's birth"
+    );
+    assert!(
+        !adopted.judged,
+        "the pre-chain debt is stamped unjudged, named never hidden"
+    );
 
     // One truth, one birth: the door shuts behind the first pass.
     assert!(matches!(
@@ -354,9 +441,18 @@ fn adoption_is_once_and_names_its_debt() {
     // economy — a lawful transfer chains on top of the adopted state.
     let next = two_orb_state((7, 1), (3, 1));
     let step = transfer_step(2);
-    let chained = arbor.extend(coord(2), &next, Some(&step)).expect("judged").clone();
-    assert!(chained.judged, "the step after adoption is judged, the flag stamped");
-    assert_eq!(chained.parent, adopted.commit, "the path links through the door");
+    let chained = arbor
+        .extend(coord(2), &next, Some(&step))
+        .expect("judged")
+        .clone();
+    assert!(
+        chained.judged,
+        "the step after adoption is judged, the flag stamped"
+    );
+    assert_eq!(
+        chained.parent, adopted.commit,
+        "the path links through the door"
+    );
 }
 
 /// **The PHASE-3 addressing law** (`39_PHASE3_FLIP` §3, operator
@@ -384,7 +480,10 @@ fn several_deeds_share_one_tick_addressed_by_sub() {
         .expect("a second deed at the SAME t, next sub, commits")
         .clone();
     assert!(second.judged);
-    assert_eq!(second.parent, first.commit, "the second deed chains off the first");
+    assert_eq!(
+        second.parent, first.commit,
+        "the second deed chains off the first"
+    );
 
     // The old law — one record per tick — is gone: a second deed at
     // t=1 sub=0 (repeating the first's exact address) still refuses
@@ -392,7 +491,9 @@ fn several_deeds_share_one_tick_addressed_by_sub() {
     // used to (measured, pre-flip: "per-deed commitment refuses
     // Occupied on the second deed of any beat").
     assert_eq!(
-        arbor.extend(coord_at(1, 0), &after_first, None).unwrap_err(),
+        arbor
+            .extend(coord_at(1, 0), &after_first, None)
+            .unwrap_err(),
         ArborRefused::Occupied
     );
 
@@ -416,7 +517,9 @@ fn several_deeds_share_one_tick_addressed_by_sub() {
         // A fresh address (t=1, sub=5 was never committed) that is
         // still behind the head (t=2, sub=0) — Occupied cannot fire
         // (the address is free); the arrow catches it instead.
-        reopened.extend(coord_at(1, 5), &after_first, None).unwrap_err(),
+        reopened
+            .extend(coord_at(1, 5), &after_first, None)
+            .unwrap_err(),
         ArborRefused::ArrowBroken { .. }
     ));
 }
@@ -434,14 +537,25 @@ fn the_judged_door_carries_a_verdict_only_from_the_head_it_was_reached_on() {
     assert_eq!(head.state, *blake3::hash(&genesis).as_bytes());
 
     let stranger = *blake3::hash(&next).as_bytes();
-    assert!(matches!(arbor.extend_judged(coord(1), &next, stranger), Err(ArborRefused::PriorDiverged)));
-    let committed = arbor.extend_judged(coord(1), &next, head.state).unwrap().clone();
+    assert!(matches!(
+        arbor.extend_judged(coord(1), &next, stranger),
+        Err(ArborRefused::PriorDiverged)
+    ));
+    let committed = arbor
+        .extend_judged(coord(1), &next, head.state)
+        .unwrap()
+        .clone();
     assert!(committed.judged, "a carried verdict is stamped judged");
     assert_eq!(committed.parent, head.commit);
     assert_eq!(arbor.fetch(&committed.state).unwrap(), next);
     // the arrow and the address still hold at this door
-    assert!(matches!(arbor.extend_judged(coord(1), &genesis, committed.state), Err(ArborRefused::Occupied)));
-    assert!(matches!(arbor.extend_judged(coord(0), &genesis, committed.state), Err(_)));
+    assert!(matches!(
+        arbor.extend_judged(coord(1), &genesis, committed.state),
+        Err(ArborRefused::Occupied)
+    ));
+    assert!(arbor
+        .extend_judged(coord(0), &genesis, committed.state)
+        .is_err());
     // and it reloads whole
     drop(arbor);
     let back = Arbor::open(&root).unwrap();
@@ -466,9 +580,18 @@ fn a_heads_only_arbor_verifies_whole_and_holds_one_record_a_branch() {
     assert_eq!(heads.records().len(), 1, "one record a branch");
     assert_eq!(heads.head("").unwrap(), &head);
     let next = two_orb_state((1, 1), (9, 1));
-    let appended = heads.extend_judged(coord(6), &next, head.state).unwrap().clone();
+    let appended = heads
+        .extend_judged(coord(6), &next, head.state)
+        .unwrap()
+        .clone();
     assert_eq!(heads.records().len(), 1, "an append replaces the head");
-    assert!(matches!(heads.extend_judged(coord(6), &next, appended.state), Err(ArborRefused::Occupied | ArborRefused::ArrowBroken { .. })), "a position is never written twice");
+    assert!(
+        matches!(
+            heads.extend_judged(coord(6), &next, appended.state),
+            Err(ArborRefused::Occupied | ArborRefused::ArrowBroken { .. })
+        ),
+        "a position is never written twice"
+    );
     drop(heads);
     // the file stayed whole: a full open walks all seven
     assert_eq!(Arbor::open(&root).unwrap().records().len(), 7);

@@ -8,9 +8,7 @@
 //! than the uncollapsed carrier). No boolean form: the reading is read, never
 //! gated.
 
-use crate::peel::{
-    peel, CellFrame, Cover, FullMeasurement, GaugeDirection, Site, ValueManifold,
-};
+use crate::peel::{peel, CellFrame, Cover, FullMeasurement, GaugeDirection, Site, ValueManifold};
 use num_bigint::BigInt;
 use std::collections::BTreeMap;
 use thiserror::Error;
@@ -57,7 +55,6 @@ impl CongruenceReading {
             }
         }
     }
-
 }
 
 /// Read the grade-0 Δ of a cover pair. Frames must agree for the site-conserving
@@ -65,7 +62,10 @@ impl CongruenceReading {
 /// organ; refusing typed is honest, a fabricated same-frame Δ is not).
 pub fn congruence_read(a: &Cover, b: &Cover) -> Result<CongruenceReading, CongruenceRefusal> {
     if a.cell.frame != b.cell.frame {
-        return Err(CongruenceRefusal::FramesDisagree { from: a.cell.frame, to: b.cell.frame });
+        return Err(CongruenceRefusal::FramesDisagree {
+            from: a.cell.frame,
+            to: b.cell.frame,
+        });
     }
     let mut directions: Vec<GaugeDirection> = a
         .value
@@ -84,7 +84,11 @@ pub fn congruence_read(a: &Cover, b: &Cover) -> Result<CongruenceReading, Congru
             let departed = difference(in_a, in_b);
             let arrived = difference(in_b, in_a);
             let real = !(departed.is_empty() && arrived.is_empty());
-            real.then_some(DirectionAsymmetry { direction, departed, arrived })
+            real.then_some(DirectionAsymmetry {
+                direction,
+                departed,
+                arrived,
+            })
         })
         .collect();
     Ok(CongruenceReading {
@@ -146,18 +150,30 @@ impl ChainDelta {
         reading.expand_signed_terms(&mut |site, direction, value| {
             ledger.add(site, direction, BigInt::from(value));
         });
-        Self { from: reading.source_frame, to: reading.target_frame, entries: ledger.into_entries() }
+        Self {
+            from: reading.source_frame,
+            to: reading.target_frame,
+            entries: ledger.into_entries(),
+        }
     }
 
     /// The empty (identity) chain between one frame and itself.
     pub fn empty(frame: CellFrame) -> Self {
-        Self { from: frame, to: frame, entries: Vec::new() }
+        Self {
+            from: frame,
+            to: frame,
+            entries: Vec::new(),
+        }
     }
 
     /// The chain expands its own entries (each scaled by `sign`) into `visit`.
     pub fn expand_entries(&self, sign: i64, visit: &mut impl FnMut(Site, GaugeDirection, BigInt)) {
         for entry in &self.entries {
-            visit(entry.site, entry.direction, &entry.coefficient * BigInt::from(sign));
+            visit(
+                entry.site,
+                entry.direction,
+                &entry.coefficient * BigInt::from(sign),
+            );
         }
     }
 
@@ -184,7 +200,11 @@ impl ChainDelta {
         if self.to != other.from {
             return Err(CongruenceRefusal::ChainsDoNotCompose);
         }
-        Ok(Self { from: self.from, to: other.to, entries: signed_entry_sum(&[(self, 1), (other, 1)]) })
+        Ok(Self {
+            from: self.from,
+            to: other.to,
+            entries: signed_entry_sum(&[(self, 1), (other, 1)]),
+        })
     }
 }
 
@@ -200,7 +220,9 @@ pub struct Ledger {
 
 impl Ledger {
     pub fn new() -> Self {
-        Self { slots: BTreeMap::new() }
+        Self {
+            slots: BTreeMap::new(),
+        }
     }
 
     /// One signed exact contribution at (site, direction). VOLUMETRIC-1a: keyed
@@ -241,7 +263,9 @@ impl Default for Ledger {
 pub fn signed_entry_sum(terms: &[(&ChainDelta, i64)]) -> Vec<ChainEntry> {
     let mut ledger = Ledger::new();
     for (chain, sign) in terms {
-        chain.expand_entries(*sign, &mut |site, direction, value| ledger.add(site, direction, value));
+        chain.expand_entries(*sign, &mut |site, direction, value| {
+            ledger.add(site, direction, value)
+        });
     }
     ledger.into_entries()
 }
@@ -264,7 +288,10 @@ pub enum CongruenceRefusal {
     FramesDisagree { from: CellFrame, to: CellFrame },
 
     #[error("departure from a site the source does not carry: direction {}, site ({}, {}, layer {})", direction.index, site.row, site.col, site.layer)]
-    DepartureFromAbsentSite { direction: GaugeDirection, site: Site },
+    DepartureFromAbsentSite {
+        direction: GaugeDirection,
+        site: Site,
+    },
 
     #[error("the chains do not compose a→b→c")]
     ChainsDoNotCompose,

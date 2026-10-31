@@ -59,7 +59,9 @@ fn main() -> ExitCode {
     }
     // Every command from here speaks to a hypha, and there is no default court.
     let Some(at) = named else {
-        eprintln!("ns-hypha: name the hypha with --at host:port (or NS_HYPHA); there is no default court");
+        eprintln!(
+            "ns-hypha: name the hypha with --at host:port (or NS_HYPHA); there is no default court"
+        );
         return ExitCode::from(2);
     };
     if cmd == Some("seat") {
@@ -72,11 +74,19 @@ fn main() -> ExitCode {
             return ExitCode::from(2);
         }
     };
-    let vk: String = up.voice.iter().take(4).map(|b| format!("{b:02x}")).collect();
+    let vk: String = up
+        .voice
+        .iter()
+        .take(4)
+        .map(|b| format!("{b:02x}"))
+        .collect();
     match cmd {
         Some("laws") => match up.laws() {
             Ok(served) => {
-                println!("hypha {at} (netstratum voice {vk}…) holds {} laws:", served.len());
+                println!(
+                    "hypha {at} (netstratum voice {vk}…) holds {} laws:",
+                    served.len()
+                );
                 for s in served {
                     println!("  [{}] {} — {}", s.law.index(), s.law.name(), s.statement);
                 }
@@ -87,22 +97,30 @@ fn main() -> ExitCode {
                 ExitCode::from(1)
             }
         },
-        Some("lexicon") => match up.lexicon_check() {
-            Ok((version, missing)) if missing.is_empty() => {
-                println!("lexicon v{version}: every netstratum term is served as netstratum means it");
-                ExitCode::SUCCESS
+        Some("lexicon") => {
+            match up.lexicon_check() {
+                Ok((version, missing)) if missing.is_empty() => {
+                    println!("lexicon v{version}: every netstratum term is served as netstratum means it");
+                    ExitCode::SUCCESS
+                }
+                Ok((version, missing)) => {
+                    println!(
+                        "lexicon v{version}: not served as netstratum means them: {}",
+                        missing.join(", ")
+                    );
+                    ExitCode::from(1)
+                }
+                Err(e) => {
+                    eprintln!("ns-hypha: the lexicon was not read: {e}");
+                    ExitCode::from(1)
+                }
             }
-            Ok((version, missing)) => {
-                println!("lexicon v{version}: not served as netstratum means them: {}", missing.join(", "));
-                ExitCode::from(1)
-            }
-            Err(e) => {
-                eprintln!("ns-hypha: the lexicon was not read: {e}");
-                ExitCode::from(1)
-            }
-        },
+        }
         Some("probe") => {
-            let cases = [("lawful turn, height advancing", probe::lawful(1), true), ("the same turn, height still", probe::timeless(1), false)];
+            let cases = [
+                ("lawful turn, height advancing", probe::lawful(1), true),
+                ("the same turn, height still", probe::timeless(1), false),
+            ];
             let mut ok = true;
             for (name, t, want) in cases {
                 let Some(t) = t else {
@@ -116,8 +134,14 @@ fn main() -> ExitCode {
                         println!(
                             "  {name}: court {} {:?}, local {:?}, agree {}",
                             if admitted { "ADMITTED" } else { "REFUSED" },
-                            laws_of(&r.court).iter().map(|l| l.name()).collect::<Vec<_>>(),
-                            laws_of(&r.local).iter().map(|l| l.name()).collect::<Vec<_>>(),
+                            laws_of(&r.court)
+                                .iter()
+                                .map(|l| l.name())
+                                .collect::<Vec<_>>(),
+                            laws_of(&r.local)
+                                .iter()
+                                .map(|l| l.name())
+                                .collect::<Vec<_>>(),
                             r.agree()
                         );
                         ok &= r.agree() && admitted == want;
@@ -148,8 +172,13 @@ fn main() -> ExitCode {
         Some("originate") => {
             // The universe's seed: the own-hash of its Big Bang on the universe
             // ledger, read from the var root named (default var-g2).
-            let root = args.get(2).filter(|a| !a.starts_with("--")).cloned().unwrap_or_else(|| "var-g2".into());
-            let ledger = match cfe::persist::load(&Path::new(&root).join("worlds/convergence.tlv")) {
+            let root = args
+                .get(2)
+                .filter(|a| !a.starts_with("--"))
+                .cloned()
+                .unwrap_or_else(|| "var-g2".into());
+            let ledger = match cfe::persist::load(&Path::new(&root).join("worlds/convergence.tlv"))
+            {
                 Ok(l) => l,
                 Err(e) => {
                     eprintln!("ns-hypha: {root}'s universe ledger did not read: {e:?}");
@@ -218,7 +247,10 @@ fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
     match cfe::persist::load(&dir.join("chronicle.tlv")) {
         Ok(c) => Ok((people, c)),
         Err(e) => {
-            eprintln!("ns-hypha: {}: the chronicle did not load: {e:?}", dir.display());
+            eprintln!(
+                "ns-hypha: {}: the chronicle did not load: {e:?}",
+                dir.display()
+            );
             Err(ExitCode::from(1))
         }
     }
@@ -229,7 +261,13 @@ fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
 fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
     use ns_hypha::mycelium::anastome::dialogue::challenge::Finality;
     use ns_hypha::mycelium::chronometry::Stamp;
-    let (line, log, key) = match TierLine::open(home, "colonies").and_then(|l| Ok((l, FoldLog::open(home, "colonies")?, tier_key(home, "colonies")?))) {
+    let (line, log, key) = match TierLine::open(home, "colonies").and_then(|l| {
+        Ok((
+            l,
+            FoldLog::open(home, "colonies")?,
+            tier_key(home, "colonies")?,
+        ))
+    }) {
         Ok(x) => x,
         Err(e) => {
             eprintln!("ns-hypha: the colonies line: {e}");
@@ -237,7 +275,11 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
         }
     };
     let mut ok = true;
-    for f in log.folds.iter().filter(|f| f.first >= line.offset && f.first + f.count <= line.total()) {
+    for f in log
+        .folds
+        .iter()
+        .filter(|f| f.first >= line.offset && f.first + f.count <= line.total())
+    {
         let span = format!("[{}, {})", f.first, f.first + f.count);
         match Stamp::from_key(&f.at).map(|at| up.finality(at)) {
             Some(Ok((Finality::Provisional { .. }, _))) => {}
@@ -257,7 +299,9 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
             }
         }
         match ns_hypha::follow::publish_fold(up, &key, &line, f) {
-            Ok(c) if ns_hypha::follow::answered(&c) => println!("  fold at entries {span}: answered — {c:?}"),
+            Ok(c) if ns_hypha::follow::answered(&c) => {
+                println!("  fold at entries {span}: answered — {c:?}")
+            }
             Ok(c) => {
                 println!("  fold at entries {span}: NOT UPHELD {c:?}");
                 ok = false;
@@ -277,7 +321,8 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
 
 /// Prune by finality (see `ns_hypha::follow::prune`).
 fn prune_cmd(up: &Uplink, home: &Path) -> ExitCode {
-    let opened = TierLine::open(home, "colonies").and_then(|l| Ok((l, FoldLog::open(home, "colonies")?)));
+    let opened =
+        TierLine::open(home, "colonies").and_then(|l| Ok((l, FoldLog::open(home, "colonies")?)));
     let (mut line, log) = match opened {
         Ok(x) => x,
         Err(e) => {
@@ -288,9 +333,15 @@ fn prune_cmd(up: &Uplink, home: &Path) -> ExitCode {
     match ns_hypha::follow::prune(up, &mut line, &log) {
         Ok((n, unread)) => {
             if let Some(e) = unread {
-                eprintln!("ns-hypha: a finality was not read ({e}); pruned only what was read settled");
+                eprintln!(
+                    "ns-hypha: a finality was not read ({e}); pruned only what was read settled"
+                );
             }
-            println!("prune: {n} entries archived; hot line now {} entries from entry {}", line.entries.len(), line.offset);
+            println!(
+                "prune: {n} entries archived; hot line now {} entries from entry {}",
+                line.entries.len(),
+                line.offset
+            );
             ExitCode::SUCCESS
         }
         Err(e) => {
@@ -308,7 +359,10 @@ fn follow_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
         eprintln!("usage: ns-hypha follow <var-root> [--every SECS] [--rounds N]");
         return ExitCode::from(2);
     };
-    let every: u64 = flag(args, "--every").and_then(|n| n.parse().ok()).unwrap_or(60).max(1);
+    let every: u64 = flag(args, "--every")
+        .and_then(|n| n.parse().ok())
+        .unwrap_or(60)
+        .max(1);
     let rounds: Option<u64> = flag(args, "--rounds").and_then(|n| n.parse().ok());
     let per_round: Option<usize> = flag(args, "--per-round").and_then(|n| n.parse().ok());
     let mut follower = match ns_hypha::follow::Follower::new(Path::new(root), home) {
@@ -410,7 +464,13 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
         Ok(x) => x,
         Err(code) => return code,
     };
-    let opened = Cursors::open(home, "colonies").and_then(|c| Ok((c, TierLine::open(home, "colonies")?, FoldLog::open(home, "colonies")?)));
+    let opened = Cursors::open(home, "colonies").and_then(|c| {
+        Ok((
+            c,
+            TierLine::open(home, "colonies")?,
+            FoldLog::open(home, "colonies")?,
+        ))
+    });
     let (mut cursors, mut line, mut folds) = match opened {
         Ok(x) => x,
         Err(e) => {
@@ -430,7 +490,9 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
             n
         }
         None => {
-            let last = flag(args, "--last").and_then(|n| n.parse::<usize>().ok()).unwrap_or(len);
+            let last = flag(args, "--last")
+                .and_then(|n| n.parse::<usize>().ok())
+                .unwrap_or(len);
             len.saturating_sub(last)
         }
     };
@@ -446,15 +508,28 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
         }
     };
     let head: String = c.head.iter().take(6).map(|b| format!("{b:02x}")).collect();
-    println!("census of {people}: receipts [{}, {}) of {len}, head {head}…, {} moved a holding", c.from, c.to, c.steps.len());
+    println!(
+        "census of {people}: receipts [{}, {}) of {len}, head {head}…, {} moved a holding",
+        c.from,
+        c.to,
+        c.steps.len()
+    );
     println!("  holdings moved ({}):", c.rows.len());
     for (orb, h, v) in &c.rows {
-        println!("    orb {orb:>4} {:<10} {:>14}", format!("{h:?}").replace("Matter(", "").replace(')', ""), grains(*v));
+        println!(
+            "    orb {orb:>4} {:<10} {:>14}",
+            format!("{h:?}").replace("Matter(", "").replace(')', ""),
+            grains(*v)
+        );
     }
     println!("  emitted by kind ({}):", c.declared.len());
     for (kind, h, v) in &c.declared {
         let side = if *v > 0 { "source" } else { "sink" };
-        println!("    {side:<6} {kind:<24} {:<10} {:>14}", format!("{h:?}").replace("Matter(", "").replace(')', ""), grains(*v));
+        println!(
+            "    {side:<6} {kind:<24} {:<10} {:>14}",
+            format!("{h:?}").replace("Matter(", "").replace(')', ""),
+            grains(*v)
+        );
     }
     let key = match tier_key(home, "colonies") {
         Ok(k) => k,
@@ -470,7 +545,11 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
     // cursor always names the last admitted fold.
     let chunks = c.chunks(census::MAX_SPAN);
     if chunks.len() > 1 {
-        println!("  {} folds of at most {} entries", chunks.len(), census::MAX_SPAN);
+        println!(
+            "  {} folds of at most {} entries",
+            chunks.len(),
+            census::MAX_SPAN
+        );
     }
     if let Some(up) = up {
         if let Err(e) = up.check_line_head(&key, line.head()) {
@@ -501,13 +580,25 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
         }
         match up.uplink_fold(&signed) {
             Ok(Uplinked::Admitted { at, .. }) => {
-                let mark = FoldMark { at: at.key(), first: line.total(), count: batch.len() as u64 };
-                let held = line.append_all(batch).and_then(|_| folds.push(mark)).and_then(|()| cursors.set(&people, chunk.to, chunk.head));
+                let mark = FoldMark {
+                    at: at.key(),
+                    first: line.total(),
+                    count: batch.len() as u64,
+                };
+                let held = line
+                    .append_all(batch)
+                    .and_then(|_| folds.push(mark))
+                    .and_then(|()| cursors.set(&people, chunk.to, chunk.head));
                 if let Err(e) = held {
                     eprintln!("  fold {n}: ADMITTED BUT NOT HELD: the line or cursor did not take it: {e}");
                     return ExitCode::from(1);
                 }
-                let h: String = line.head().iter().take(6).map(|b| format!("{b:02x}")).collect();
+                let h: String = line
+                    .head()
+                    .iter()
+                    .take(6)
+                    .map(|b| format!("{b:02x}"))
+                    .collect();
                 println!("  fold {n}: admitted at h {}; line {} entries, head {h}…; {people} folded through {}", at.h, line.entries.len(), chunk.to);
             }
             Ok(u) => {
@@ -534,12 +625,19 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
 /// one task a stroke, a stroke every `--every` seconds (default 2), its tally
 /// printed every 20 strokes. Runs until stopped.
 fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
-    let every: u64 = flag(args, "--every").and_then(|s| s.parse().ok()).unwrap_or(2);
+    let every: u64 = flag(args, "--every")
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(2);
     // The signing key in `home` (default the house key, Concordance 6.2a).
     let key = flag(args, "--key").unwrap_or_else(|| "tier-union.key".to_string());
     // The seat speaks to every hypha named (`--at a,b,c`), one stroke each in
     // turn, so the work is spread across the fleet rather than one server.
-    let hyphae: Vec<String> = at.split(',').map(str::trim).filter(|a| !a.is_empty()).map(String::from).collect();
+    let hyphae: Vec<String> = at
+        .split(',')
+        .map(str::trim)
+        .filter(|a| !a.is_empty())
+        .map(String::from)
+        .collect();
     let mut seats = Vec::new();
     for addr in &hyphae {
         match ns_hypha::seat::Seat::open_as(addr, home, &key) {
@@ -550,10 +648,15 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     if seats.is_empty() {
         return ExitCode::from(2);
     }
-    println!("seat: netstratum's client kernel at {}, a stroke every {every}s", hyphae.join(", "));
+    println!(
+        "seat: netstratum's client kernel at {}, a stroke every {every}s",
+        hyphae.join(", ")
+    );
     // The house (78.145) on the first hypha named: a house and the minds it
     // seats share one hypha's impressions. `--worlds` names the universe's lines.
-    let worlds = std::path::PathBuf::from(flag(args, "--worlds").unwrap_or_else(|| "var-g2/worlds".to_string()));
+    let worlds = std::path::PathBuf::from(
+        flag(args, "--worlds").unwrap_or_else(|| "var-g2/worlds".to_string()),
+    );
     let mut house = match ns_hypha::house::House::open(home, &worlds) {
         Ok(h) => Some(h),
         Err(e) => {
@@ -580,14 +683,19 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
         // budget, and the relay exempts one read per window.
         if let Some(h) = house.as_mut().filter(|_| strokes.is_multiple_of(10)) {
             match h.tend(&mut seats[0].1) {
-                Ok(said) => said.iter().for_each(|l| println!("house [{}]: {l}", seats[0].0)),
+                Ok(said) => said
+                    .iter()
+                    .for_each(|l| println!("house [{}]: {l}", seats[0].0)),
                 Err(e) => eprintln!("house [{}]: the tend did not complete: {e}", seats[0].0),
             }
         }
         // Operator ruling 7: every task the house pulls goes before a seated
         // mind, so the house's seat pulls only for a free seat no task already
         // waits for.
-        let idle = at == 0 && house.as_ref().is_some_and(|h| h.free_seats() <= seats[0].1.queued());
+        let idle = at == 0
+            && house
+                .as_ref()
+                .is_some_and(|h| h.free_seats() <= seats[0].1.queued());
         let (addr, seat) = &mut seats[at];
         match if idle { Ok(None) } else { seat.stroke() } {
             Ok(Some(line)) => {
@@ -607,14 +715,20 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
         // the last). The conductor reads it per beat; no point, or no advance,
         // is a hold, never a zero (Concordance 1.11).
         for (_, seat) in &seats {
-            if let Some(point) = seat.tuniversal().filter(|p| p.advances(final_point.as_ref())) {
+            if let Some(point) = seat
+                .tuniversal()
+                .filter(|p| p.advances(final_point.as_ref()))
+            {
                 final_point = Some(point);
             }
         }
         if let Some(point) = final_point.filter(|p| Some(*p) != written) {
             let path = worlds.parent().unwrap_or(Path::new(".")).join("tuniversal");
             let staged = path.with_extension("staged");
-            if std::fs::write(&staged, point.print()).and_then(|_| std::fs::rename(&staged, &path)).is_ok() {
+            if std::fs::write(&staged, point.print())
+                .and_then(|_| std::fs::rename(&staged, &path))
+                .is_ok()
+            {
                 written = Some(point);
             }
         }
@@ -633,7 +747,11 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
 /// (`ns_hypha::refound::refound`): the domain, its origin, its reserve, its
 /// first ledger entry, then the marker. Keys are loaded, never minted.
 fn refound_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
-    let root = args.get(2).filter(|a| !a.starts_with("--")).cloned().unwrap_or_else(|| "var-g2".into());
+    let root = args
+        .get(2)
+        .filter(|a| !a.starts_with("--"))
+        .cloned()
+        .unwrap_or_else(|| "var-g2".into());
     match ns_hypha::refound::refound(up.session(), home, Path::new(&root)) {
         Ok((sealed, said)) => {
             for line in said {

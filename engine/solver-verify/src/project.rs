@@ -38,13 +38,26 @@ pub fn perceive(g: &Grid) -> Percept {
         .into_iter()
         .map(|o| {
             let hue = o.cells[0].2;
-            let mut shape: Vec<(usize, usize)> = o.cells.iter().map(|&(r, c, _)| (r - o.top, c - o.left)).collect();
+            let mut shape: Vec<(usize, usize)> = o
+                .cells
+                .iter()
+                .map(|&(r, c, _)| (r - o.top, c - o.left))
+                .collect();
             shape.sort_unstable();
-            let border = o.top == 0 || o.left == 0 || o.bottom + 1 == g.rows || o.right + 1 == g.cols;
-            Body { cells: o.cells.iter().map(|&(r, c, _)| (r, c)).collect(), hue, shape, border }
+            let border =
+                o.top == 0 || o.left == 0 || o.bottom + 1 == g.rows || o.right + 1 == g.cols;
+            Body {
+                cells: o.cells.iter().map(|&(r, c, _)| (r, c)).collect(),
+                hue,
+                shape,
+                border,
+            }
         })
         .collect();
-    Percept { background: bg, bodies }
+    Percept {
+        background: bg,
+        bodies,
+    }
 }
 
 /// Which bodies A RULE selects — the predicates, in the order a mind tries
@@ -62,7 +75,10 @@ pub enum Select {
     /// sorted L1 relations to the other bodies, read at a `Cut`. Deduced by
     /// `solver::percept`, never supplied: `Central` is its case
     /// `Ordered { cut: All, extreme: Least }`.
-    Ordered { cut: Cut, extreme: Extreme },
+    Ordered {
+        cut: Cut,
+        extreme: Extreme,
+    },
     /// Supplied (coordinator audit 2026-10-09): the hub-siting commission's
     /// measure handed to the language before the minds could deduce it. Kept so
     /// the words minted with it still read; the learner no longer offers it.
@@ -106,7 +122,11 @@ impl Select {
                 spread.iter().min() == Some(&spread[i])
             }
             Select::Border(on) => b.border == *on,
-            Select::TwinOfOtherHue => p.bodies.iter().enumerate().any(|(j, o)| j != i && o.hue != b.hue && o.shape == b.shape),
+            Select::TwinOfOtherHue => p
+                .bodies
+                .iter()
+                .enumerate()
+                .any(|(j, o)| j != i && o.hue != b.hue && o.shape == b.shape),
             Select::Shape(s) => &b.shape == s,
             Select::Not(inner) => !inner.picks(p, i),
             Select::And(a, b) => a.picks(p, i) && b.picks(p, i),
@@ -118,7 +138,11 @@ impl Select {
 fn gap(a: &Body, b: &Body) -> usize {
     a.cells
         .iter()
-        .flat_map(|&(r, c)| b.cells.iter().map(move |&(s, d)| r.abs_diff(s) + c.abs_diff(d)))
+        .flat_map(|&(r, c)| {
+            b.cells
+                .iter()
+                .map(move |&(s, d)| r.abs_diff(s) + c.abs_diff(d))
+        })
         .min()
         .unwrap_or(0)
 }
@@ -144,7 +168,13 @@ pub enum Extreme {
 pub fn relations(p: &Percept) -> Vec<Vec<usize>> {
     (0..p.bodies.len())
         .map(|i| {
-            let mut r: Vec<usize> = p.bodies.iter().enumerate().filter(|(j, _)| *j != i).map(|(_, o)| gap(&p.bodies[i], o)).collect();
+            let mut r: Vec<usize> = p
+                .bodies
+                .iter()
+                .enumerate()
+                .filter(|(j, _)| *j != i)
+                .map(|(_, o)| gap(&p.bodies[i], o))
+                .collect();
             r.sort_unstable();
             r
         })
@@ -163,7 +193,12 @@ pub fn integral(relation: &[usize], cut: Cut) -> usize {
 
 /// Body `i`'s L1 distance to every other body, summed (`Select::Central`).
 pub fn spread(p: &Percept, i: usize) -> usize {
-    p.bodies.iter().enumerate().filter(|(j, _)| *j != i).map(|(_, o)| gap(&p.bodies[i], o)).sum()
+    p.bodies
+        .iter()
+        .enumerate()
+        .filter(|(j, _)| *j != i)
+        .map(|(_, o)| gap(&p.bodies[i], o))
+        .sum()
 }
 
 /// What A RULE does to the bodies it selects.
@@ -197,4 +232,3 @@ pub fn apply(rule: &ObjectRule, g: &Grid) -> Grid {
     }
     out
 }
-

@@ -110,7 +110,11 @@ mod tests {
     #[test]
     fn grain_is_idempotent() {
         let g = grain_rate(&wild());
-        assert_eq!(grain_rate(&g), g, "grain_rate(grain_rate(x)) == grain_rate(x)");
+        assert_eq!(
+            grain_rate(&g),
+            g,
+            "grain_rate(grain_rate(x)) == grain_rate(x)"
+        );
     }
 
     #[test]
@@ -130,13 +134,21 @@ mod tests {
         let fine = ratio(3, 64);
         assert_eq!(grain_rate(&fine), fine);
         let edge = ratio(7, GRAIN_DENOM_MAX);
-        assert_eq!(grain_rate(&edge), edge, "a denominator == the bound still fits");
+        assert_eq!(
+            grain_rate(&edge),
+            edge,
+            "a denominator == the bound still fits"
+        );
     }
 
     #[test]
     fn grain_is_odd_sign_is_carried() {
         let x = wild();
-        assert_eq!(grain_rate(&(-&x)), -grain_rate(&x), "grain(-x) == -grain(x)");
+        assert_eq!(
+            grain_rate(&(-&x)),
+            -grain_rate(&x),
+            "grain(-x) == -grain(x)"
+        );
         assert_eq!(grain_rate(&ratio(0, 1)), ratio(0, 1), "zero grains to zero");
     }
 }

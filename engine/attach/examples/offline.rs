@@ -12,28 +12,56 @@
 use attach::files;
 
 fn mind_of(hex: &str) -> [u8; 32] {
-    <[u8; 32]>::try_from(attach::unhex(hex).expect("the mind is hex")).expect("the mind is 32 bytes")
+    <[u8; 32]>::try_from(attach::unhex(hex).expect("the mind is hex"))
+        .expect("the mind is 32 bytes")
 }
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    match args.iter().map(String::as_str).collect::<Vec<_>>().as_slice() {
+    match args
+        .iter()
+        .map(String::as_str)
+        .collect::<Vec<_>>()
+        .as_slice()
+    {
         ["request", var, mind, metabolism] => {
-            files::write_request(std::path::Path::new(var), &files::Request { mind: mind_of(mind), metabolism: metabolism.to_string() }).expect("written");
+            files::write_request(
+                std::path::Path::new(var),
+                &files::Request {
+                    mind: mind_of(mind),
+                    metabolism: metabolism.to_string(),
+                },
+            )
+            .expect("written");
             println!("requested");
         }
         ["admissions", var] => {
             for a in files::admissions(std::path::Path::new(var)) {
                 match a.refused {
-                    Some(why) => println!("{} not admitted (reason {why})", attach::hex(&a.mind[..4])),
-                    None => println!("{} admitted: line {} on world {} as {} tiers {:?}", attach::hex(&a.mind[..4]), a.sigil, a.world, a.handle, a.tiers),
+                    Some(why) => {
+                        println!("{} not admitted (reason {why})", attach::hex(&a.mind[..4]))
+                    }
+                    None => println!(
+                        "{} admitted: line {} on world {} as {} tiers {:?}",
+                        attach::hex(&a.mind[..4]),
+                        a.sigil,
+                        a.world,
+                        a.handle,
+                        a.tiers
+                    ),
                 }
             }
         }
         ["zone", var, mind, tile, kind] => {
             let mind = mind_of(mind);
-            let a = files::admissions(std::path::Path::new(var)).into_iter().find(|a| a.mind == mind && a.refused.is_none()).expect("the mind is admitted");
-            let inbox = std::path::Path::new(var).join("worlds").join(&a.world).join("inbox");
+            let a = files::admissions(std::path::Path::new(var))
+                .into_iter()
+                .find(|a| a.mind == mind && a.refused.is_none())
+                .expect("the mind is admitted");
+            let inbox = std::path::Path::new(var)
+                .join("worlds")
+                .join(&a.world)
+                .join("inbox");
             std::fs::create_dir_all(&inbox).expect("inbox");
             let reference = [0x5a; 32];
             let d = ledger_directive(&a.handle, tile, kind);

@@ -22,7 +22,10 @@ fn main() {
             // A fresh mind per task (no shared basin) — the seat's own reach.
             if matches!(
                 think_task(&task, &mut Vec::new()),
-                SolveRead::Solved { matches_expected: Some(true), .. }
+                SolveRead::Solved {
+                    matches_expected: Some(true),
+                    ..
+                }
             ) {
                 solved += 1;
             }

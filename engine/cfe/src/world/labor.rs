@@ -45,11 +45,7 @@ impl World {
         let habitats = self.habitat_count(orb);
         let clones = self.clone_count_of(orb);
         let force = habitats.saturating_add(clones);
-        let work_slots = if force == 0 {
-            0
-        } else {
-            (force / 2).max(1)
-        };
+        let work_slots = if force == 0 { 0 } else { (force / 2).max(1) };
         let next_hint = if force == 0 {
             "no labor — build habitat zones (`zone <tile> hab`) or seat clone path".into()
         } else if habitats == 0 && clones > 0 {

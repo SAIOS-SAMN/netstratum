@@ -11,9 +11,7 @@
 //! colony's bank — conservation holds; no colony after the first gets
 //! free matter.
 
-use crate::dop::{
-    founding_reserves, ClosureEvent, ColonyOrb, Resource, Station, Zone, ZoneKind,
-};
+use crate::dop::{founding_reserves, ClosureEvent, ColonyOrb, Resource, Station, Zone, ZoneKind};
 use crate::ipsal::{Entity, Scope};
 use crate::ratio::{ratio, Ratio};
 use crate::vrp::{Attestation, Chronicle, Timekeeper, WorldClock};
@@ -24,7 +22,6 @@ pub const SOVEREIGN: u64 = 1;
 
 /// The genesis orb id — the first colony.
 pub const FIRST_ORB: u64 = 1;
-
 
 // Ground §4c — the world is one organ presenting one surface. These
 // modules are internal structure; every name is re-exported below so
@@ -38,72 +35,65 @@ pub use rules::{
     MintWarrant, NoWarrant,
 };
 
-
-
-
 pub mod accord;
+pub mod ap_budget;
+pub mod balance;
+pub mod bench_games;
 pub mod books;
 pub mod chemistry;
-pub mod diplomacy;
-pub mod growth;
-pub mod literature;
+pub mod cog_cyb;
 pub mod core;
+pub mod deep_rails;
+pub mod defense;
+pub mod diplomacy;
+pub mod distribution;
 pub mod economy;
+pub mod espionage;
+pub mod fleet;
 pub mod gauge;
 pub mod genesis;
+pub mod growth;
+pub mod instruments;
+pub mod intel;
+pub mod labor;
+pub mod literature;
+pub mod market_defense;
+pub mod medium_defense;
+pub mod offices;
+pub mod rejuvenation;
+pub mod replay;
+pub mod science_lab;
+pub mod state;
+pub mod stock;
 pub mod survey;
+pub mod sustenance;
+pub mod taxation;
 pub mod tech;
 pub mod thermal;
 pub mod tick;
-pub mod zones;
-pub mod replay;
-pub mod state;
-pub mod stock;
-pub mod fleet;
-pub mod balance;
-pub mod instruments;
-pub mod defense;
-pub mod market_defense;
-pub mod medium_defense;
-pub mod intel;
-pub mod cog_cyb;
-pub mod espionage;
-pub mod deep_rails;
-pub mod xrail_deeds;
-pub mod offices;
-pub mod bench_games;
-pub mod science_lab;
-pub mod ap_budget;
-pub mod labor;
-pub mod rejuvenation;
-pub mod sustenance;
-pub mod distribution;
 pub mod workbench;
-pub mod taxation;
+pub mod xrail_deeds;
+pub mod zones;
 
-pub use science_lab::{LabCreateResult, ScienceLabBoard};
-pub use sustenance::FoodSource;
+pub use ap_budget::{ApBoard, ApKind, AP_BASE, AP_EXCHANGE_BONUS, AP_HABITAT_MULT, AP_YEAR_TICKS};
 pub use bench_games::{
     DoctrineBoard, IntelBoard, IntelStep, LinkBoard, ResearchBoard, ResearchNode,
     StellarCapacityBoard, StellarLineRow, StellarVeinRow,
 };
-pub use ap_budget::{
-    ApBoard, ApKind, AP_BASE, AP_EXCHANGE_BONUS, AP_HABITAT_MULT, AP_YEAR_TICKS,
-};
 pub use labor::LaborBoard;
+pub use science_lab::{LabCreateResult, ScienceLabBoard};
+pub use sustenance::FoodSource;
 
-pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
-pub use market_defense::{
-    MarketIntegrity, BREAKER_TICKS, CLEAR_SEAL_DEPTH, RESUME_AUDIT_DEPTH,
-};
-pub use medium_defense::{DualUseAtm, MediumIntegrity, tamper_threshold};
-pub use intel::{InfIntegrity, WardState};
 pub use cog_cyb::{CogIntegrity, CybIntegrity};
-pub use espionage::EspionageIntegrity;
 pub use deep_rails::DeepRailStatus;
+pub use defense::{CorridorFog, DefenseDomain, DefensePosture, KinIntegrity, RiskBand};
+pub use espionage::EspionageIntegrity;
+pub use intel::{InfIntegrity, WardState};
+pub use market_defense::{MarketIntegrity, BREAKER_TICKS, CLEAR_SEAL_DEPTH, RESUME_AUDIT_DEPTH};
+pub use medium_defense::{tamper_threshold, DualUseAtm, MediumIntegrity};
 
-pub use replay::{replay, Replayer};
 pub use fleet::hull_voice;
+pub use replay::{replay, Replayer};
 pub use state::{
     AbsorptionDebt, Bond, Committed, Council, Forward, Genesis, Leap, Offer, Prospected,
     TickOutcome, World,
@@ -111,120 +101,6 @@ pub use state::{
 // Internal to the organ — never re-exported (Ground §3 invariant 1:
 // the parts are structure, not a new seam for other crates).
 use state::CrystalDeposit;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /// NS-4 APERTURE (BUILD_ORDER §3a) — the cross-WORLD value carrier.
 /// Banked value crosses from an orb in one world to an orb in another,
@@ -248,7 +124,16 @@ pub fn aperture_transfer(
     amount: crate::dop::Positive,
     deal: u64,
 ) -> Result<(), ActionRefused> {
-    haul(src, from, dst, to, resource, amount.value().clone(), deal, &ratio(0, 1))
+    haul(
+        src,
+        from,
+        dst,
+        to,
+        resource,
+        amount.value().clone(),
+        deal,
+        &ratio(0, 1),
+    )
 }
 
 /// E-APT-1 — cross-world element haul with melt. Zero melt is the
@@ -313,7 +198,9 @@ fn haul(
     let src_supply = standing_supply(&src.orbs);
     let dst_supply = standing_supply(&dst.orbs);
     if *melt >= ratio(1, 1) {
-        return Err(ActionRefused::EconomicallyWalled { melt: Box::new(melt.clone()) });
+        return Err(ActionRefused::EconomicallyWalled {
+            melt: Box::new(melt.clone()),
+        });
     }
     // FLEET-1: positive melt hauls need hull capacity (Phase 3).
     if *melt > ratio(0, 1) {
@@ -336,7 +223,9 @@ fn haul(
     // This is what makes war expensive — it costs the trade, not a
     // number chosen to make it costly.
     if src.at_war_with(dst.name()) || dst.at_war_with(src.name()) {
-        return Err(ActionRefused::AtWar { partner: dst.name().to_string() });
+        return Err(ActionRefused::AtWar {
+            partner: dst.name().to_string(),
+        });
     }
     if !src.knows_its_star() || !dst.knows_its_star() {
         return Err(ActionRefused::Shielded {
@@ -355,12 +244,22 @@ fn haul(
     // Affordability on the source's post-decay bank — honest at the
     // stamp, computed pure, so a refusal moves nothing in either world.
     {
-        let source = src.orbs.iter().find(|held| held.orb_id == from).expect("checked");
-        let decay = demurrage_due(source, src.star, src_stamp, &ease_of(&src.techs, from, src_stamp), &standing_supply(&src.orbs))
-            .into_iter()
-            .find(|(due, _)| *due == resource)
-            .map(|(_, decay)| decay)
-            .unwrap_or_else(|| ratio(0, 1));
+        let source = src
+            .orbs
+            .iter()
+            .find(|held| held.orb_id == from)
+            .expect("checked");
+        let decay = demurrage_due(
+            source,
+            src.star,
+            src_stamp,
+            &ease_of(&src.techs, from, src_stamp),
+            &standing_supply(&src.orbs),
+        )
+        .into_iter()
+        .find(|(due, _)| *due == resource)
+        .map(|(_, decay)| decay)
+        .unwrap_or_else(|| ratio(0, 1));
         let have = source.banked_amount(resource) - decay;
         if have < amount {
             return Err(ActionRefused::CannotAfford {
@@ -372,13 +271,29 @@ fn haul(
     }
     // The touch (SINK-1) then the debit, in the source world.
     {
-        let source = src.orbs.iter_mut().find(|held| held.orb_id == from).expect("checked");
+        let source = src
+            .orbs
+            .iter_mut()
+            .find(|held| held.orb_id == from)
+            .expect("checked");
         let ease = ease_of(&src.techs, from, src_stamp);
-        touch(source, src.star, &mut src.chronicle, src_stamp, &ease, &src_supply);
+        touch(
+            source,
+            src.star,
+            &mut src.chronicle,
+            src_stamp,
+            &ease,
+            &src_supply,
+        );
         source.bank(resource, -amount.clone());
     }
     src.chronicle.append(
-        ClosureEvent::ApertureSent { deal, from_orb: from, resource, amount: amount.clone() },
+        ClosureEvent::ApertureSent {
+            deal,
+            from_orb: from,
+            resource,
+            amount: amount.clone(),
+        },
         src_stamp,
         vec![SOVEREIGN],
     );
@@ -407,14 +322,30 @@ fn haul(
         smelt_resource(&(after_melt - interdicted))
     };
     {
-        let target = dst.orbs.iter_mut().find(|held| held.orb_id == to).expect("checked");
+        let target = dst
+            .orbs
+            .iter_mut()
+            .find(|held| held.orb_id == to)
+            .expect("checked");
         let ease = ease_of(&dst.techs, to, dst_stamp);
-        touch(target, dst.star, &mut dst.chronicle, dst_stamp, &ease, &dst_supply);
+        touch(
+            target,
+            dst.star,
+            &mut dst.chronicle,
+            dst_stamp,
+            &ease,
+            &dst_supply,
+        );
         target.bank(resource, delivered.clone());
     }
     let void_share = amount.clone() - delivered.clone();
     dst.chronicle.append(
-        ClosureEvent::ApertureReceived { deal, to_orb: to, resource, amount: delivered },
+        ClosureEvent::ApertureReceived {
+            deal,
+            to_orb: to,
+            resource,
+            amount: delivered,
+        },
         dst_stamp,
         vec![SOVEREIGN],
     );
@@ -425,7 +356,12 @@ fn haul(
     // silent. Banks never move on it.
     if void_share > ratio(0, 1) {
         dst.chronicle.append(
-            ClosureEvent::VoidShare { orb_id: to, deal, resource, amount: void_share },
+            ClosureEvent::VoidShare {
+                orb_id: to,
+                deal,
+                resource,
+                amount: void_share,
+            },
             dst_stamp,
             vec![SOVEREIGN],
         );
@@ -593,7 +529,10 @@ pub fn charter_element_route(
     deal: u64,
 ) -> Result<(), ActionRefused> {
     if crate::dop::Rail::from_wire(rail).is_none() {
-        return Err(ActionRefused::UnknownAxisValue { axis: 0, code: rail });
+        return Err(ActionRefused::UnknownAxisValue {
+            axis: 0,
+            code: rail,
+        });
     }
     // E3.9: a lane specialized to a barred element cannot be
     // chartered — the fence reads at the charter as at the haul.
@@ -643,7 +582,9 @@ pub fn charter_element_route(
             vec![SOVEREIGN],
         );
         world.routes.push((deal, eta.clone()));
-        world.element_routes.push((deal, eta.clone(), element, rail));
+        world
+            .element_routes
+            .push((deal, eta.clone(), element, rail));
         world.chronicle.append(
             ClosureEvent::ElementRouteChartered {
                 deal,
@@ -847,13 +788,20 @@ pub fn charter_route(
         held.bank(Resource::Biomass, -cost.clone());
         let stamp = world.clock.now();
         world.chronicle.append(
-            ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Biomass, amount: cost.clone() },
+            ClosureEvent::UpkeepSettled {
+                orb_id: orb,
+                resource: Resource::Biomass,
+                amount: cost.clone(),
+            },
             stamp,
             vec![SOVEREIGN],
         );
         world.routes.push((deal, eta.clone()));
         world.chronicle.append(
-            ClosureEvent::RouteChartered { deal, eta: eta.clone() },
+            ClosureEvent::RouteChartered {
+                deal,
+                eta: eta.clone(),
+            },
             stamp,
             vec![SOVEREIGN],
         );
@@ -900,7 +848,10 @@ impl World {
             return None;
         }
         let dust = sweep_element_grain(&mut self.orbs);
-        self.close(ClosureEvent::ElementStocksSwept { dust: dust.clone() }, SOVEREIGN);
+        self.close(
+            ClosureEvent::ElementStocksSwept { dust: dust.clone() },
+            SOVEREIGN,
+        );
         Some(dust)
     }
 
@@ -921,7 +872,10 @@ impl World {
             return None;
         }
         let dust = sweep_resource_grain(&mut self.orbs);
-        self.close(ClosureEvent::ResourceStocksSwept { dust: dust.clone() }, SOVEREIGN);
+        self.close(
+            ClosureEvent::ResourceStocksSwept { dust: dust.clone() },
+            SOVEREIGN,
+        );
         Some(dust)
     }
 
@@ -940,7 +894,9 @@ impl World {
         let deals: Vec<u64> = self.routes.iter().map(|(deal, _)| *deal).collect();
         for deal in deals {
             let stamp = self.clock.now();
-            let Some(held) = peel(&mut self.orbs, orb) else { break };
+            let Some(held) = peel(&mut self.orbs, orb) else {
+                break;
+            };
             if held.banked_amount(Resource::Ember) >= toll {
                 held.bank(Resource::Ember, -toll.clone());
                 self.chronicle.append(
@@ -954,8 +910,10 @@ impl World {
                 );
             } else {
                 self.routes.retain(|(held_deal, _)| *held_deal != deal);
-                self.element_routes.retain(|(held_deal, _, _, _)| *held_deal != deal);
-                self.chronicle.append(ClosureEvent::RouteLapsed { deal }, stamp, vec![SOVEREIGN]);
+                self.element_routes
+                    .retain(|(held_deal, _, _, _)| *held_deal != deal);
+                self.chronicle
+                    .append(ClosureEvent::RouteLapsed { deal }, stamp, vec![SOVEREIGN]);
                 lapsed.push(deal);
             }
         }
@@ -1065,11 +1023,7 @@ fn phased_theta(
 }
 
 /// Thermal site as the orbit law sees it at `now` (θ advanced; ψ fixed).
-fn phased_site(
-    world: &World,
-    site: &crate::dop::ThermalSite,
-    now: u64,
-) -> crate::dop::ThermalSite {
+fn phased_site(world: &World, site: &crate::dop::ThermalSite, now: u64) -> crate::dop::ThermalSite {
     let mut out = site.clone();
     out.theta = phased_theta(world, site, now);
     out
@@ -1100,8 +1054,12 @@ pub fn effective_distance(a: &World, b: &World, d_chart: &Ratio) -> Ratio {
 /// Alignment band from current `D_orbit` (exact thresholds: 1/4, 1/2).
 pub fn alignment_of(a: &World, b: &World) -> Alignment {
     let (Some(_), Some(_)) = (
-        a.orb().and_then(|o| o.thermal.as_ref()).and_then(|s| s.theta.as_ref()),
-        b.orb().and_then(|o| o.thermal.as_ref()).and_then(|s| s.theta.as_ref()),
+        a.orb()
+            .and_then(|o| o.thermal.as_ref())
+            .and_then(|s| s.theta.as_ref()),
+        b.orb()
+            .and_then(|o| o.thermal.as_ref())
+            .and_then(|s| s.theta.as_ref()),
     ) else {
         return Alignment::Unplaced;
     };
@@ -1121,12 +1079,7 @@ pub fn alignment_of(a: &World, b: &World) -> Alignment {
 }
 
 /// Projected melt at a future home clock (peer clock held). Pure.
-pub fn route_melt_at(
-    a: &World,
-    b: &World,
-    d_chart: &Ratio,
-    home_now: u64,
-) -> Ratio {
+pub fn route_melt_at(a: &World, b: &World, d_chart: &Ratio, home_now: u64) -> Ratio {
     // Temporarily phase home against an explicit now by constructing
     // D_orbit with a synthetic read: recompute separation with home
     // phased to home_now and peer to its own now.
@@ -1176,8 +1129,13 @@ pub fn pair_melt(a: &World, b: &World, distance: &Ratio) -> Ratio {
     // holding caravan further suppresses melt by one instrument grade
     // of η. Grade is the Resonator's crystal yield (landed table), not
     // a new dial.
-    let caravan = a.stations.iter().any(|(_, s)| *s == Station::Caravan.as_wire())
-        || b.stations.iter().any(|(_, s)| *s == Station::Caravan.as_wire());
+    let caravan = a
+        .stations
+        .iter()
+        .any(|(_, s)| *s == Station::Caravan.as_wire())
+        || b.stations
+            .iter()
+            .any(|(_, s)| *s == Station::Caravan.as_wire());
     if caravan {
         let grade = ZoneKind::Resonator.yield_per_tick().1;
         melt *= ratio(1, 1) - grade;
@@ -1328,9 +1286,8 @@ pub fn sweep_resource_grain(orbs: &mut [ColonyOrb]) -> Ratio {
 fn any_resource_off_grain(orbs: &[ColonyOrb]) -> bool {
     let grid = num_bigint::BigInt::from(RESOURCE_LEDGER_GRAIN);
     let off = |a: &Ratio| (&grid % a.denom()) != num_bigint::BigInt::from(0);
-    orbs.iter().any(|orb| {
-        orb.banked.iter().any(|(_, a)| off(a)) || off(&orb.stamp)
-    })
+    orbs.iter()
+        .any(|orb| orb.banked.iter().any(|(_, a)| off(a)) || off(&orb.stamp))
 }
 
 /// MARKET-1 (BUILD_ORDER §3a) — clear A crossing: two resting offers
@@ -1431,25 +1388,39 @@ pub fn clear_trade(
     // The two directions — each an aperture pair (resource or element),
     // shield-checked; sent − received = the void's exact share.
     haul_cargo(a, held_a.orb, b, held_b.orb, &held_a.give, x, deal, &melt)?;
-    haul_cargo(b, held_b.orb, a, held_a.orb, &held_b.give, y, deal + 1, &melt)?;
+    haul_cargo(
+        b,
+        held_b.orb,
+        a,
+        held_a.orb,
+        &held_b.give,
+        y,
+        deal + 1,
+        &melt,
+    )?;
     // Both intents close; replay removes them.
     a.offers.retain(|held| held.offer != offer_a);
     b.offers.retain(|held| held.offer != offer_b);
     let stamp_a = a.clock.now();
     a.chronicle.append(
-        ClosureEvent::OfferCleared { offer: offer_a, deal },
+        ClosureEvent::OfferCleared {
+            offer: offer_a,
+            deal,
+        },
         stamp_a,
         vec![SOVEREIGN],
     );
     let stamp_b = b.clock.now();
     b.chronicle.append(
-        ClosureEvent::OfferCleared { offer: offer_b, deal },
+        ClosureEvent::OfferCleared {
+            offer: offer_b,
+            deal,
+        },
         stamp_b,
         vec![SOVEREIGN],
     );
     Ok(())
 }
-
 
 /// PLANNER-1 (12_UNION §2) — license A technology leap into another
 /// world: the planner's issuing power, receipted in both chronicles
@@ -1468,7 +1439,12 @@ pub fn license_tech(
     to: u64,
     leap: Leap,
 ) -> Result<(), ActionRefused> {
-    let Leap { condition, name, deal, council } = leap;
+    let Leap {
+        condition,
+        name,
+        deal,
+        council,
+    } = leap;
     if condition == 0 {
         return Err(ActionRefused::StellarLeapNeverLicensed);
     }
@@ -1526,8 +1502,7 @@ pub fn license_tech(
     // obeys the receipt (receipt authority, operator ruling
     // 2026-08-05). Pre-ruling licensed receipts asserted 1, and 1 they
     // remain: history stands as written.
-    let (modifier, magnitude) =
-        crate::dop::tech_node_of(condition).unwrap_or((0, ratio(1, 1)));
+    let (modifier, magnitude) = crate::dop::tech_node_of(condition).unwrap_or((0, ratio(1, 1)));
     dst.techs.push((to, condition, node, magnitude.clone()));
     dst.chronicle.append(
         ClosureEvent::TechDiscovered {
@@ -1599,10 +1574,18 @@ fn terrain_boost(
     let beside = |tile: u16| -> Vec<u16> {
         let (row, col) = (tile / 8, tile % 8);
         let mut out = Vec::new();
-        if row > 0 { out.push(tile - 8); }
-        if row < 7 { out.push(tile + 8); }
-        if col > 0 { out.push(tile - 1); }
-        if col < 7 { out.push(tile + 1); }
+        if row > 0 {
+            out.push(tile - 8);
+        }
+        if row < 7 {
+            out.push(tile + 8);
+        }
+        if col > 0 {
+            out.push(tile - 1);
+        }
+        if col < 7 {
+            out.push(tile + 1);
+        }
         out
     };
     match zone.kind {
@@ -1614,9 +1597,11 @@ fn terrain_boost(
             boost *= ratio(5, 4);
         }
         ZoneKind::Habitat
-            if beside(zone.tile)
-                .into_iter()
-                .any(|t| active.iter().any(|z| z.tile == t && z.kind == ZoneKind::Extractor)) =>
+            if beside(zone.tile).into_iter().any(|t| {
+                active
+                    .iter()
+                    .any(|z| z.tile == t && z.kind == ZoneKind::Extractor)
+            }) =>
         {
             boost *= ratio(3, 4);
         }
@@ -1632,7 +1617,10 @@ fn terrain_boost(
 /// The carried annals' last aperture stamp per orb (the one value the sheet
 /// takes from the drained bulk kinds), folded into a sheet built from the
 /// kept history — the latest stamp wins, as `deposit_receipt` would have set.
-fn deposit_last_links(sheet: &mut Vec<(u64, CrystalDeposit)>, links: &std::collections::BTreeMap<u64, u64>) {
+fn deposit_last_links(
+    sheet: &mut Vec<(u64, CrystalDeposit)>,
+    links: &std::collections::BTreeMap<u64, u64>,
+) {
     for (orb, stamp) in links {
         let held = match sheet.iter().position(|(held, _)| held == orb) {
             Some(at) => &mut sheet[at].1,
@@ -1654,11 +1642,18 @@ fn deposit_receipt(sheet: &mut Vec<(u64, CrystalDeposit)>, receipt: &crate::vrp:
         &mut sheet.last_mut().expect("just pushed").1
     }
     match receipt.event() {
-        ClosureEvent::FamineStruck { orb_id, resource: Resource::Ember, .. } => {
+        ClosureEvent::FamineStruck {
+            orb_id,
+            resource: Resource::Ember,
+            ..
+        } => {
             let held = deposit(sheet, *orb_id);
             held.famine_open = held.famine_open.or(Some(receipt.stamp()));
         }
-        ClosureEvent::FamineRelieved { orb_id, resource: Resource::Ember } => {
+        ClosureEvent::FamineRelieved {
+            orb_id,
+            resource: Resource::Ember,
+        } => {
             let held = deposit(sheet, *orb_id);
             if let Some(struck) = held.famine_open.take() {
                 held.famine_total += receipt.stamp().saturating_sub(struck);
@@ -1676,15 +1671,25 @@ fn deposit_receipt(sheet: &mut Vec<(u64, CrystalDeposit)>, receipt: &crate::vrp:
                 .vented_entries
                 .push((receipt.stamp(), amount.clone()));
         }
-        ClosureEvent::YieldCollected { orb_id, resource: Resource::Ember, amount } => {
+        ClosureEvent::YieldCollected {
+            orb_id,
+            resource: Resource::Ember,
+            amount,
+        } => {
             deposit(sheet, *orb_id)
                 .encased_entries
                 .push((receipt.stamp(), amount.clone()));
         }
-        ClosureEvent::ApertureSent { from_orb: orb_id, .. }
+        ClosureEvent::ApertureSent {
+            from_orb: orb_id, ..
+        }
         | ClosureEvent::ApertureReceived { to_orb: orb_id, .. }
-        | ClosureEvent::BondSealed { source_orb: orb_id, .. }
-        | ClosureEvent::BondSettled { source_orb: orb_id, .. } => {
+        | ClosureEvent::BondSealed {
+            source_orb: orb_id, ..
+        }
+        | ClosureEvent::BondSettled {
+            source_orb: orb_id, ..
+        } => {
             deposit(sheet, *orb_id).last_link = Some(receipt.stamp());
         }
         ClosureEvent::TechDiscovered { orb_id, .. } => {
@@ -1693,9 +1698,6 @@ fn deposit_receipt(sheet: &mut Vec<(u64, CrystalDeposit)>, receipt: &crate::vrp:
         _ => {}
     }
 }
-
-
-
 
 /// The touch law (SINK-1, extended by TRADE-1): settle an orb's due
 /// demurrage by receipt and anchor `last_touch` — decay or not, a
@@ -1721,7 +1723,10 @@ fn touch(
             orb.bank(*resource, -decay.clone());
         }
         chronicle.append(
-            ClosureEvent::DemurrageTouched { orb_id: orb.orb_id, decays },
+            ClosureEvent::DemurrageTouched {
+                orb_id: orb.orb_id,
+                decays,
+            },
             stamp,
             vec![],
         );
@@ -1770,7 +1775,6 @@ fn reciprocity_reading(orb: &ColonyOrb) -> Ratio {
         false => ratio(1, 1),
     }
 }
-
 
 /// Peel — lift one orb out of the field by id: the single hand into
 /// the collection (operator ruling 2026-07-30: no cartesian find-scan

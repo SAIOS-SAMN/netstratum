@@ -60,16 +60,18 @@ impl World {
 
     /// P5.21 instrument-guard: refuse re-forge of identical grade/node on orb
     /// (anti-spoof — one grade per tech node per orb).
-    pub fn instrument_guard_ok(&self, orb: u64, tech_hash: [u8; 32], grade: u8) -> Result<(), ActionRefused> {
+    pub fn instrument_guard_ok(
+        &self,
+        orb: u64,
+        tech_hash: [u8; 32],
+        grade: u8,
+    ) -> Result<(), ActionRefused> {
         if self
             .instruments
             .iter()
             .any(|(o, h, g)| *o == orb && *h == tech_hash && *g == grade)
         {
-            return Err(ActionRefused::InstrumentSpoof {
-                orb,
-                grade,
-            });
+            return Err(ActionRefused::InstrumentSpoof { orb, grade });
         }
         Ok(())
     }

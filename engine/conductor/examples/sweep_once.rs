@@ -25,7 +25,9 @@ fn main() {
     println!("{} worlds resumed at terminal clock {stamp}", worlds.len());
     let created = observe_crossings(&worlds, &registry, &book, stamp);
     if created.is_empty() {
-        println!("the sweep observed nothing new — every crossed anchor stands inside a charted reach");
+        println!(
+            "the sweep observed nothing new — every crossed anchor stands inside a charted reach"
+        );
     }
     for galaxy in created {
         println!(
@@ -34,6 +36,9 @@ fn main() {
         );
     }
     for galaxy in book.galaxies() {
-        println!("charted: {} at ({}, {}, {})", galaxy.name, galaxy.center.0, galaxy.center.1, galaxy.center.2);
+        println!(
+            "charted: {} at ({}, {}, {})",
+            galaxy.name, galaxy.center.0, galaxy.center.1, galaxy.center.2
+        );
     }
 }

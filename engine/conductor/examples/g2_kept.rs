@@ -7,12 +7,19 @@ use std::path::Path;
 
 fn main() {
     let root = std::env::args().nth(1).unwrap_or_else(|| "var-g2".into());
-    let mut dirs: Vec<_> = std::fs::read_dir(Path::new(&root).join("worlds")).unwrap().flatten().map(|e| e.path()).filter(|p| p.join("state.snap").exists() && !p.to_string_lossy().contains("--closed-")).collect();
+    let mut dirs: Vec<_> = std::fs::read_dir(Path::new(&root).join("worlds"))
+        .unwrap()
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.join("state.snap").exists() && !p.to_string_lossy().contains("--closed-"))
+        .collect();
     dirs.sort();
     let mut kinds: BTreeMap<String, (u64, u64)> = BTreeMap::new();
     let (mut worlds, mut kept, mut held) = (0u64, 0u64, 0u64);
     for d in dirs {
-        let Some((w, _, _)) = snapshot::boot(&d) else { continue };
+        let Some((w, _, _)) = snapshot::boot(&d) else {
+            continue;
+        };
         worlds += 1;
         let c = w.chronicle();
         held += c.receipts().len() as u64;
@@ -26,7 +33,11 @@ fn main() {
         for r in c.annals().kept_iter() {
             kept += 1;
             let name = format!("{:?}", r.event());
-            let kind = name.split([' ', '{', '(']).next().unwrap_or("?").to_string();
+            let kind = name
+                .split([' ', '{', '('])
+                .next()
+                .unwrap_or("?")
+                .to_string();
             let e = kinds.entry(kind).or_default();
             e.0 += 1;
             e.1 += r.wire_bytes().len() as u64;

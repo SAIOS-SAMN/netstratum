@@ -48,7 +48,10 @@ fn hex(bytes: &[u8]) -> String {
 }
 
 fn unhex32(text: &str) -> Option<[u8; 32]> {
-    let bytes: Option<Vec<u8>> = (0..text.len()).step_by(2).map(|i| u8::from_str_radix(text.get(i..i + 2)?, 16).ok()).collect();
+    let bytes: Option<Vec<u8>> = (0..text.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(text.get(i..i + 2)?, 16).ok())
+        .collect();
     bytes?.try_into().ok()
 }
 
@@ -115,7 +118,18 @@ impl Tube {
     }
 
     fn from_bytes(origin: [u8; 32], bytes: &[u8]) -> Option<Tube> {
-        let mut tube = Tube { origin, core: String::new(), parent: [0; 32], depth: 0, level: 0, opener: String::new(), cursor: 0, seen: 0, laws: Vec::new(), closed: Vec::new() };
+        let mut tube = Tube {
+            origin,
+            core: String::new(),
+            parent: [0; 32],
+            depth: 0,
+            level: 0,
+            opener: String::new(),
+            cursor: 0,
+            seen: 0,
+            laws: Vec::new(),
+            closed: Vec::new(),
+        };
         let u32_of = |v: &[u8]| v.try_into().ok().map(u32::from_le_bytes);
         let u64_of = |v: &[u8]| v.try_into().ok().map(u64::from_le_bytes);
         for (tag, value) in cfe::tlv::records(bytes) {
@@ -130,7 +144,11 @@ impl Tube {
                 8 => {
                     let orbit: [u8; 32] = value.get(..32)?.try_into().ok()?;
                     let expansion = solver_verify::program_from_bytes(value.get(32..)?)?;
-                    tube.laws.push(MintedWord { orbit, expansion, cited: vec![origin] });
+                    tube.laws.push(MintedWord {
+                        orbit,
+                        expansion,
+                        cited: vec![origin],
+                    });
                 }
                 9 => tube.closed.push(value.try_into().ok()?),
                 _ => {}
@@ -153,22 +171,31 @@ fn write_atomic(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
 /// Every tube's record, by origin (a directory read; compact records only).
 pub fn tubes(var_root: &Path) -> Vec<Tube> {
     let mut out = Vec::new();
-    let Ok(entries) = std::fs::read_dir(dir(var_root)) else { return out };
+    let Ok(entries) = std::fs::read_dir(dir(var_root)) else {
+        return out;
+    };
     for entry in entries.flatten() {
         let name = entry.file_name().to_string_lossy().to_string();
-        let Some(stem) = name.strip_suffix(".tube") else { continue };
-        let (Some(origin), Ok(bytes)) = (unhex32(stem), std::fs::read(entry.path())) else { continue };
+        let Some(stem) = name.strip_suffix(".tube") else {
+            continue;
+        };
+        let (Some(origin), Ok(bytes)) = (unhex32(stem), std::fs::read(entry.path())) else {
+            continue;
+        };
         if let Some(tube) = Tube::from_bytes(origin, &bytes) {
             out.push(tube);
         }
     }
-    out.sort_by(|a, b| a.origin.cmp(&b.origin));
+    out.sort_by_key(|a| a.origin);
     out
 }
 
 fn save(var_root: &Path, tube: &Tube) -> std::io::Result<()> {
     std::fs::create_dir_all(dir(var_root))?;
-    write_atomic(&dir(var_root).join(format!("{}.tube", hex(&tube.origin))), &tube.to_bytes())
+    write_atomic(
+        &dir(var_root).join(format!("{}.tube", hex(&tube.origin))),
+        &tube.to_bytes(),
+    )
 }
 
 /// The guild's float, by ancient: a checkpoint of binary records (the
@@ -181,7 +208,9 @@ pub fn floats(var_root: &Path) -> BTreeMap<String, Ratio> {
         if tag != 1 {
             continue;
         }
-        let Some(sigil) = get_text(value, &mut at) else { continue };
+        let Some(sigil) = get_text(value, &mut at) else {
+            continue;
+        };
         if let Some((amount, _)) = value.get(at..).and_then(cfe::ratio::decode) {
             out.insert(sigil, amount);
         }
@@ -228,7 +257,11 @@ fn difficulty(level: u32) -> Difficulty {
 /// the quarter (docs/66 Y1's ratio). Not the kernel's ladder price, which pays
 /// zero at the saturated rungs by ruling (and the guild works there).
 fn earned(first: bool) -> Ratio {
-    if first { ratio(1, 1) } else { ratio(1, 4) }
+    if first {
+        ratio(1, 1)
+    } else {
+        ratio(1, 4)
+    }
 }
 
 /// What a tube at `depth` costs to open, in discoveries: its depth. A deeper
@@ -238,9 +271,22 @@ fn cost(depth: u32) -> Ratio {
 }
 
 /// Open a tube: its origin, its receipt on the universe ledger, its record.
-fn open(var_root: &Path, book: &Ledger, polity: &Polity, core: &str, parent: Option<&Tube>, stamp: u64) -> Option<Tube> {
+fn open(
+    var_root: &Path,
+    book: &Ledger,
+    polity: &Polity,
+    core: &str,
+    parent: Option<&Tube>,
+    stamp: u64,
+) -> Option<Tube> {
     let point = std::fs::read_to_string(var_root.join("tuniversal")).unwrap_or_default();
-    let head = polity.world.chronicle().receipts().last().map(|r| r.own().0).unwrap_or([0; 32]);
+    let head = polity
+        .world
+        .chronicle()
+        .receipts()
+        .last()
+        .map(|r| r.own().0)
+        .unwrap_or([0; 32]);
     let parent_origin = parent.map(|t| t.origin).unwrap_or([0; 32]);
     let mut h = blake3::Hasher::new();
     h.update(b"netstratum.substratum.v1");
@@ -254,10 +300,34 @@ fn open(var_root: &Path, book: &Ledger, polity: &Polity, core: &str, parent: Opt
         None => (1, level_of(polity.level), polity.laws_for_below(LAWS)),
     };
     let opener = polity.spec.civilization.sigil.clone();
-    let event = cfe::dop::ClosureEvent::SubstratumOpened { core: core.to_string(), origin, parent: parent_origin, depth, level, opener: opener.clone() };
+    let event = cfe::dop::ClosureEvent::SubstratumOpened {
+        core: core.to_string(),
+        origin,
+        parent: parent_origin,
+        depth,
+        level,
+        opener: opener.clone(),
+    };
     book.append_universe(vec![event], stamp).ok()?;
-    let laws = laws.into_iter().map(|w| MintedWord { cited: vec![origin], ..w }).collect();
-    let tube = Tube { origin, core: core.to_string(), parent: parent_origin, depth, level, opener, cursor: 0, seen: 0, laws, closed: Vec::new() };
+    let laws = laws
+        .into_iter()
+        .map(|w| MintedWord {
+            cited: vec![origin],
+            ..w
+        })
+        .collect();
+    let tube = Tube {
+        origin,
+        core: core.to_string(),
+        parent: parent_origin,
+        depth,
+        level,
+        opener,
+        cursor: 0,
+        seen: 0,
+        laws,
+        closed: Vec::new(),
+    };
     save(var_root, &tube).ok()?;
     Some(tube)
 }
@@ -265,7 +335,13 @@ fn open(var_root: &Path, book: &Ledger, polity: &Polity, core: &str, parent: Opt
 /// A sandbox (docs/109 A5): a first tube opened by an admitted line at its
 /// galaxy's core, paid from its surplus, its leisure bank, at the first
 /// tube's cost. `None` where the line cannot pay or the tube does not open.
-pub(crate) fn open_for(var_root: &Path, book: &Ledger, polity: &mut Polity, core: &str, stamp: u64) -> Option<Tube> {
+pub(crate) fn open_for(
+    var_root: &Path,
+    book: &Ledger,
+    polity: &mut Polity,
+    core: &str,
+    stamp: u64,
+) -> Option<Tube> {
     let cost = crate::attachment::sandbox_cost();
     let orb = cfe::world::FIRST_ORB;
     if polity.world.leisure_bank_of(orb) < cost {
@@ -285,14 +361,22 @@ pub struct Traversal {
 
 /// The guild's BEAT: open every arisen ancient's first tube, then one
 /// traversal (one task) in one tube, and any tube the float now pays for.
-pub fn step(worlds: &mut [Polity], book: &Ledger, var_root: &Path, beat: u64, stamp: u64) -> Traversal {
+pub fn step(
+    worlds: &mut [Polity],
+    book: &Ledger,
+    var_root: &Path,
+    beat: u64,
+    stamp: u64,
+) -> Traversal {
     let mut done = Traversal::default();
     let mut guild = crate::ancients::arisen(var_root);
     let mut all = tubes(var_root);
     // The lines that opened a sandbox traverse their own tubes too (docs/109
     // A5): every opener among the living, beside the arisen ancients.
     for t in &all {
-        if !guild.iter().any(|(_, s)| *s == t.opener) && worlds.iter().any(|p| p.spec.civilization.sigil == t.opener) {
+        if !guild.iter().any(|(_, s)| *s == t.opener)
+            && worlds.iter().any(|p| p.spec.civilization.sigil == t.opener)
+        {
             guild.push((t.core.clone(), t.opener.clone()));
         }
     }
@@ -304,17 +388,35 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, var_root: &Path, beat: u64, st
         if all.iter().any(|t| &t.opener == sigil) {
             continue;
         }
-        let Some(polity) = worlds.iter().find(|p| !p.penned && &p.spec.civilization.sigil == sigil) else { continue };
+        let Some(polity) = worlds
+            .iter()
+            .find(|p| !p.penned && &p.spec.civilization.sigil == sigil)
+        else {
+            continue;
+        };
         if let Some(tube) = open(var_root, book, polity, core, None, stamp) {
-            done.opened.push((sigil.clone(), hex(&tube.origin[..6]), tube.depth));
+            done.opened
+                .push((sigil.clone(), hex(&tube.origin[..6]), tube.depth));
             all.push(tube);
         }
     }
     // One traversal: the guild member whose turn it is, in its least
     // recently observed tube.
     let (_, sigil) = &guild[(beat as usize) % guild.len()];
-    let Some(at) = worlds.iter().position(|p| !p.penned && &p.spec.civilization.sigil == sigil) else { return done };
-    let Some(mut tube) = all.iter().filter(|t| &t.opener == sigil).min_by_key(|t| (t.seen, t.depth, t.origin)).cloned() else { return done };
+    let Some(at) = worlds
+        .iter()
+        .position(|p| !p.penned && &p.spec.civilization.sigil == sigil)
+    else {
+        return done;
+    };
+    let Some(mut tube) = all
+        .iter()
+        .filter(|t| &t.opener == sigil)
+        .min_by_key(|t| (t.seen, t.depth, t.origin))
+        .cloned()
+    else {
+        return done;
+    };
     let mut seed = blake3::Hasher::new();
     seed.update(&tube.origin);
     seed.update(&tube.cursor.to_le_bytes());
@@ -328,7 +430,11 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, var_root: &Path, beat: u64, st
     let program = solver::mint::pre_reach(&task, &library).or_else(|| {
         let (mut basin, mut held) = (Vec::new(), Vec::new());
         match solver::think_task_sensing(&task, &mut basin, &mut held, worlds[at].senses()) {
-            SolveRead::Solved { program, matches_expected, .. } if matches_expected != Some(false) => Some(program),
+            SolveRead::Solved {
+                program,
+                matches_expected,
+                ..
+            } if matches_expected != Some(false) => Some(program),
             _ => None,
         }
     });
@@ -340,7 +446,11 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, var_root: &Path, beat: u64, st
         *float.entry(sigil.clone()).or_insert_with(|| ratio(0, 1)) += earned;
         if first {
             tube.closed.push(orbit);
-            let word = MintedWord { orbit, expansion: program, cited: vec![tube.origin] };
+            let word = MintedWord {
+                orbit,
+                expansion: program,
+                cited: vec![tube.origin],
+            };
             if !tube.laws.iter().any(|w| w.orbit == orbit) {
                 if tube.laws.len() >= LAWS {
                     tube.laws.remove(0);
@@ -355,7 +465,8 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, var_root: &Path, beat: u64, st
         if float.get(sigil).is_some_and(|f| *f >= cost) {
             if let Some(child) = open(var_root, book, &worlds[at], &tube.core, Some(&tube), stamp) {
                 *float.get_mut(sigil).expect("held") -= cost;
-                done.opened.push((sigil.clone(), hex(&child.origin[..6]), child.depth));
+                done.opened
+                    .push((sigil.clone(), hex(&child.origin[..6]), child.depth));
             }
         }
         let _ = save_floats(var_root, &float);

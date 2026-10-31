@@ -57,3 +57,6 @@ solver-verify = { path = "../solver-verify" }
 [[bin]]
 name = "conductor"
 path = "src/main.rs"
+
+[lints]
+workspace = true

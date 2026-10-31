@@ -196,9 +196,11 @@ pub fn bench(
         Some("math") | Some("maths") | Some("mathematics") | Some("ratios") => {
             math_bench(world, words, style, current)
         }
-        Some("research") | Some("tech") | Some("practice") | Some("lab") | Some("constellation") => {
-            research_craft_bench(world, words, style, current)
-        }
+        Some("research")
+        | Some("tech")
+        | Some("practice")
+        | Some("lab")
+        | Some("constellation") => research_craft_bench(world, words, style, current),
         Some("econ") | Some("economics") | Some("craft") => {
             econ_bench(world, words, style, current)
         }
@@ -216,10 +218,7 @@ pub fn bench(
         }
         Some("assay") | Some("court") => assay_bench(world, words, style, current),
         // Dual law: activity root S ⇒ craft surface `bench S`.
-        Some("diplomatic")
-        | Some("diplomacy")
-        | Some("diplomatics")
-        | Some("diplo")
+        Some("diplomatic") | Some("diplomacy") | Some("diplomatics") | Some("diplo")
         | Some("pact") => diplo_craft_bench(world, words, style, current),
         Some("intel") | Some("intelligence") | Some("intel-craft") | Some("knowledge-craft") => {
             intel_craft_bench(world, words, style, current)
@@ -228,10 +227,7 @@ pub fn bench(
             trade_craft_bench(world, words, style, current)
         }
         // Dual law: polity identity craft twin (pol.2).
-        Some("polity")
-        | Some("line")
-        | Some("identity")
-        | Some("polity-craft") => {
+        Some("polity") | Some("line") | Some("identity") | Some("polity-craft") => {
             polity_craft_bench(world, words, style, current)
         }
         // Activity-domain shortcuts still land on intel activity (not craft).
@@ -267,9 +263,17 @@ fn bench_index(style: &Style) {
     );
     println!();
     println!("  {}", style.section("MATTER & PLACE"));
-    row(style, "bench planetary", "bio · chem · worldshape · medium · thermal · balance");
+    row(
+        style,
+        "bench planetary",
+        "bio · chem · worldshape · medium · thermal · balance",
+    );
     row(style, "bench build", "zones · yard · refinery · regen");
-    row(style, "bench star", "commission · site · age · rings · capacity (C1.7)");
+    row(
+        style,
+        "bench star",
+        "commission · site · age · rings · capacity (C1.7)",
+    );
     row(style, "bench estate", "chart · parcels · appraise · ladder");
     row(style, "bench medium", "ATM envelope · reinforce · tamper");
     println!();
@@ -278,19 +282,54 @@ fn bench_index(style: &Style) {
     row(style, "bench chem", "chemistry · bonds · iso · catalog");
     row(style, "bench biology", "life · biomass · regen · habitat");
     row(style, "bench physics", "star · thermal · medium · site");
-    row(style, "bench math", "ratios · balances · thresholds · books");
-    row(style, "bench research", "constellation · forge · practice craft");
+    row(
+        style,
+        "bench math",
+        "ratios · balances · thresholds · books",
+    );
+    row(
+        style,
+        "bench research",
+        "constellation · forge · practice craft",
+    );
     println!();
     println!("  {}", style.section("CRAFT DOMAINS"));
-    row(style, "bench econ", "instruments · routes · rails (also under bench trade)");
-    row(style, "bench fleet", "hulls · yard (also under bench trade)");
-    row(style, "bench offices", "seats (trade vault/books · diplomatic)");
+    row(
+        style,
+        "bench econ",
+        "instruments · routes · rails (also under bench trade)",
+    );
+    row(
+        style,
+        "bench fleet",
+        "hulls · yard (also under bench trade)",
+    );
+    row(
+        style,
+        "bench offices",
+        "seats (trade vault/books · diplomatic)",
+    );
     row(style, "bench assay", "T7 court craft");
-    row(style, "bench doctrine", "posture/KIN prep → trade fleet defend");
+    row(
+        style,
+        "bench doctrine",
+        "posture/KIN prep → trade fleet defend",
+    );
     println!();
-    println!("  {}", style.section("DUAL LAW — activity roots as craft twins"));
-    row(style, "bench intel", "forge chain · instruments · chem → root `intel`");
-    row(style, "bench trade", "econ · fleet · offices umbrella → root `trade`");
+    println!(
+        "  {}",
+        style.section("DUAL LAW — activity roots as craft twins")
+    );
+    row(
+        style,
+        "bench intel",
+        "forge chain · instruments · chem → root `intel`",
+    );
+    row(
+        style,
+        "bench trade",
+        "econ · fleet · offices umbrella → root `trade`",
+    );
     row(
         style,
         "bench diplomatic",
@@ -323,16 +362,32 @@ fn planetary(
     match w.as_deref() {
         None | Some("help") | Some("?") => {
             banner(style, "BENCH › PLANETARY");
-            row(style, "bench planetary biologic", "regen · biomass · balance");
+            row(
+                style,
+                "bench planetary biologic",
+                "regen · biomass · balance",
+            );
             row(style, "bench planetary chem", "→ chem craft");
             row(style, "bench planetary worldshape", "WORLDSHAPE crown");
             row(style, "bench planetary medium", "→ medium domain");
             row(style, "bench planetary thermal", "heat · encase · cryo");
             row(style, "bench planetary balance", "entropy ∥ syntropy");
             row(style, "bench planetary prospect <n>", "deep: open stratum");
-            row(style, "bench planetary assay <prefix>", "deep: draw richness");
-            row(style, "bench planetary refine <prefix>", "deep: ElementRefinery");
-            leaf(style, "prospect · assay · refine", "veins (also top-level CLI)");
+            row(
+                style,
+                "bench planetary assay <prefix>",
+                "deep: draw richness",
+            );
+            row(
+                style,
+                "bench planetary refine <prefix>",
+                "deep: ElementRefinery",
+            );
+            leaf(
+                style,
+                "prospect · assay · refine",
+                "veins (also top-level CLI)",
+            );
             foot_bench(style, Some("planetary"));
         }
         // Deep deeds — fire prospect / assay / refine from the hub leaf.
@@ -399,11 +454,9 @@ fn planetary(
             let target = resolve_element_prefix(world, current, &prefix);
             match target {
                 Some(el) => match world.refine(current, el) {
-                    Ok(refined) => println!(
-                        "{} refined → {}",
-                        style.ok("◈"),
-                        &hex_prefix(&refined)
-                    ),
+                    Ok(refined) => {
+                        println!("{} refined → {}", style.ok("◈"), &hex_prefix(&refined))
+                    }
                     Err(e) => println!("{} refine refused: {e:?}", style.bad("✗")),
                 },
                 None => println!(
@@ -417,7 +470,11 @@ fn planetary(
         Some("bio") | Some("biologic") | Some("living") => {
             banner(style, "BENCH › PLANETARY › BIOLOGIC");
             if let Some(o) = world.orb_by_id(current).or_else(|| world.orb()) {
-                let regen = o.zones.iter().filter(|z| z.kind == ZoneKind::Regenerator).count();
+                let regen = o
+                    .zones
+                    .iter()
+                    .filter(|z| z.kind == ZoneKind::Regenerator)
+                    .count();
                 println!(
                     "  biomass {} · regenerators {}",
                     amount(&o.banked_amount(Resource::Biomass)),
@@ -453,7 +510,9 @@ fn planetary(
             banner(style, "BENCH › PLANETARY › BALANCE");
             println!(
                 "  {}",
-                style.dim("Order-work (refine/compound/hull) may refuse when entropy dominates (34).")
+                style.dim(
+                    "Order-work (refine/compound/hull) may refuse when entropy dominates (34)."
+                )
             );
             leaf(style, "zone … regen", "restore syntropy");
             leaf(style, "zone … enc", "encase heat");
@@ -461,7 +520,11 @@ fn planetary(
             foot_bench(style, Some("planetary"));
         }
         Some(other) => {
-            println!("{} planetary leaf {} — bio|chem|worldshape|medium|thermal|balance|back", style.bad("✗"), other);
+            println!(
+                "{} planetary leaf {} — bio|chem|worldshape|medium|thermal|balance|back",
+                style.bad("✗"),
+                other
+            );
             foot_bench(style, Some("planetary"));
         }
     }
@@ -485,7 +548,11 @@ fn build_bench(
             println!("    tile {} · {:?}", z.tile, z.kind);
         }
     }
-    leaf(style, "zone <tile> ext|hab|smelt|synth|enc|cryo|res|regen|yard", "");
+    leaf(
+        style,
+        "zone <tile> ext|hab|smelt|synth|enc|cryo|res|regen|yard",
+        "",
+    );
     leaf(style, "raze <tile>", "remove");
     leaf(style, "bench fleet", "hull craft after yard");
     foot_bench(style, Some("build"));
@@ -545,10 +612,18 @@ fn star_bench(
         board.refinable_now
     );
     leaf(style, "bench star capacity", "C1.7 game — lines_of as play");
-    leaf(style, "star <class> · site · thermal · rings · sky", "deeds");
+    leaf(
+        style,
+        "star <class> · site · thermal · rings · sky",
+        "deeds",
+    );
     leaf(style, "bench star age", "deep: age_star year voice");
     leaf(style, "worldshape", "earned crown");
-    leaf(style, "prospect <stratum> · assay · refine", "open & work veins");
+    leaf(
+        style,
+        "prospect <stratum> · assay · refine",
+        "open & work veins",
+    );
     foot_bench(style, Some("star"));
 }
 
@@ -565,7 +640,10 @@ fn stellar_capacity_board(world: &World, style: &Style, current: u64) {
             b.civ_reach,
             amount(&b.pressure_now)
         ),
-        None => println!("  {}", style.warn("no star — commission before capacity plays")),
+        None => println!(
+            "  {}",
+            style.warn("no star — commission before capacity plays")
+        ),
     }
     println!(
         "  open strata {} · local veins {} · refinable now {} · deepest open {}",
@@ -624,8 +702,16 @@ fn stellar_capacity_board(world: &World, style: &Style, current: u64) {
     println!();
     println!("  {} {}", style.section("NEXT"), style.hint(&b.next_move));
     leaf(style, "prospect <stratum>", "open a depth reading");
-    leaf(style, "assay <prefix> · refine <prefix>", "work local matter");
-    leaf(style, "star <class> · age", "commission / evolve the forge depth");
+    leaf(
+        style,
+        "assay <prefix> · refine <prefix>",
+        "work local matter",
+    );
+    leaf(
+        style,
+        "star <class> · age",
+        "commission / evolve the forge depth",
+    );
     foot_bench(style, Some("star"));
 }
 
@@ -663,10 +749,16 @@ fn medium_bench(
     );
     println!(
         "  voice {} · dual-use tax={} · {}",
-        m.residual_voice, d.dual_use_tax, style.dim("metabolism-coloured")
+        m.residual_voice,
+        d.dual_use_tax,
+        style.dim("metabolism-coloured")
     );
     leaf(style, "bench medium reinforce", "deep: lower pressure");
-    leaf(style, "bench medium tamper", "deep: covert ATM (taxed if WORLDSHAPE)");
+    leaf(
+        style,
+        "bench medium tamper",
+        "deep: covert ATM (taxed if WORLDSHAPE)",
+    );
     leaf(style, "medium · tamper", "same deeds outside hub");
     foot_bench(style, Some("medium"));
 }
@@ -692,7 +784,11 @@ fn offices_bench(
         deep.anchor_seated
     );
     println!();
-    leaf(style, "seat exchange|assay|vault|anchor", "StationSeated craft");
+    leaf(
+        style,
+        "seat exchange|assay|vault|anchor",
+        "StationSeated craft",
+    );
     leaf(style, "bench assay", "T7 consilience court");
     leaf(style, "trade vault · trade books", "run after seat");
     foot_bench(style, Some("offices"));
@@ -714,7 +810,12 @@ fn assay_bench(
     println!("  seated={}", world.assay_seated());
     println!(
         "  prospects {}",
-        world.committed().prospects.iter().filter(|p| p.orb == current).count()
+        world
+            .committed()
+            .prospects
+            .iter()
+            .filter(|p| p.orb == current)
+            .count()
     );
     leaf(style, "seat assay", "open T7");
     leaf(style, "challenge <element-prefix>", "consilience / slash");
@@ -749,9 +850,9 @@ fn fleet_craft_bench(
         }
     }
     banner(style, "BENCH › FLEET CRAFT");
-    let yard = world.orb_by_id(current).is_some_and(|o| {
-        o.zones.iter().any(|z| z.kind == ZoneKind::ShipYard)
-    });
+    let yard = world
+        .orb_by_id(current)
+        .is_some_and(|o| o.zones.iter().any(|z| z.kind == ZoneKind::ShipYard));
     println!(
         "  yard={} · hulls {} · free capacity {}",
         yard,
@@ -759,8 +860,16 @@ fn fleet_craft_bench(
         amount(&world.free_capacity(0))
     );
     leaf(style, "zone <tile> yard", "ShipYard component");
-    leaf(style, "bench fleet mint [hauler|escort|semi|runner] [g]", "deep mint");
-    leaf(style, "salvage · fleet mint … finance", "scrap + optional note");
+    leaf(
+        style,
+        "bench fleet mint [hauler|escort|semi|runner] [g]",
+        "deep mint",
+    );
+    leaf(
+        style,
+        "salvage · fleet mint … finance",
+        "scrap + optional note",
+    );
     leaf(style, "trade fleet", "RUN capacity · escort · risk");
     foot_bench(style, Some("fleet"));
 }
@@ -819,7 +928,10 @@ fn chem_bench(
         bench_index(style);
         return;
     }
-    let science = !matches!(mode.as_deref(), Some("bonds") | Some("list") | Some("standing"));
+    let science = !matches!(
+        mode.as_deref(),
+        Some("bonds") | Some("list") | Some("standing")
+    );
     if science {
         banner(style, "BENCH › CHEM — chemistry craft");
         if let Some(ax) = world.civ_axes() {
@@ -864,7 +976,11 @@ fn chem_bench(
                 "  {} top net {} · {}",
                 style.warn("NEXT"),
                 amount(n),
-                if *d > *s { "dark leading" } else { "survival leading" }
+                if *d > *s {
+                    "dark leading"
+                } else {
+                    "survival leading"
+                }
             );
             let _ = st;
         }
@@ -880,8 +996,16 @@ fn chem_bench(
         );
         leaf(style, "bench science seat chem", "pay crystal unlock");
         leaf(style, "compound · iso · catalog", "deeds (need seat R1)");
-        leaf(style, "bench science create chem|biochem", "dual ± create (need R2)");
-        leaf(style, "intel knowledge", "catalog appears in knowledge bases");
+        leaf(
+            style,
+            "bench science create chem|biochem",
+            "dual ± create (need R2)",
+        );
+        leaf(
+            style,
+            "intel knowledge",
+            "catalog appears in knowledge bases",
+        );
         leaf(style, "bench science", "all science disciplines");
         foot_bench(style, Some("chem"));
     } else {
@@ -962,22 +1086,14 @@ fn science_index(
                         style.dim(card.known_neg.1)
                     );
                     match card.hidden_pos {
-                        Some((_, g)) => println!(
-                            "  {} + {}",
-                            style.ok("HIDDEN +"),
-                            style.dim(g)
-                        ),
+                        Some((_, g)) => println!("  {} + {}", style.ok("HIDDEN +"), style.dim(g)),
                         None => println!(
                             "  {} (seat math / empiricist to reveal)",
                             style.dim("HIDDEN +")
                         ),
                     }
                     match card.hidden_neg {
-                        Some((_, g)) => println!(
-                            "  {} − {}",
-                            style.bad("HIDDEN −"),
-                            style.dim(g)
-                        ),
+                        Some((_, g)) => println!("  {} − {}", style.bad("HIDDEN −"), style.dim(g)),
                         None => println!(
                             "  {} (revealed if dark-led or will explode)",
                             style.dim("HIDDEN −")
@@ -994,12 +1110,8 @@ fn science_index(
                                 println!(
                                     "  {} EXPLOSION {} — {}",
                                     style.bad("💥"),
-                                    r.explosion_kind
-                                        .map(|k| k.word())
-                                        .unwrap_or("?"),
-                                    r.explosion_kind
-                                        .map(|k| k.gloss())
-                                        .unwrap_or("")
+                                    r.explosion_kind.map(|k| k.word()).unwrap_or("?"),
+                                    r.explosion_kind.map(|k| k.gloss()).unwrap_or("")
                                 );
                             } else {
                                 println!(
@@ -1033,13 +1145,21 @@ fn science_index(
             if let Some(path) = cfe::almanac::LabPath::from_word(&pname) {
                 let card = world.lab_preview(current, path);
                 banner(style, "BENCH › SCIENCE › PREVIEW");
-                println!("  path {} · risk {} · explode={}", path.word(), amount(&card.risk), card.will_explode);
+                println!(
+                    "  path {} · risk {} · explode={}",
+                    path.word(),
+                    amount(&card.risk),
+                    card.will_explode
+                );
                 println!("  {} {}", style.ok("+ known"), card.known_pos.1);
                 println!("  {} {}", style.warn("− known"), card.known_neg.1);
                 if let Some((_, g)) = card.hidden_pos {
                     println!("  {} {}", style.ok("+ hidden"), g);
                 } else {
-                    println!("  {}", style.dim("+ hidden — seat math or empiricist perception"));
+                    println!(
+                        "  {}",
+                        style.dim("+ hidden — seat math or empiricist perception")
+                    );
                 }
                 if let Some((_, g)) = card.hidden_neg {
                     println!("  {} {}", style.bad("− hidden"), g);
@@ -1054,9 +1174,7 @@ fn science_index(
         Some("chem") | Some("chemistry") | Some("alchemy") => {
             chem_bench(world, words, style, current)
         }
-        Some("bio") | Some("biology") | Some("life") => {
-            biology_bench(world, words, style, current)
-        }
+        Some("bio") | Some("biology") | Some("life") => biology_bench(world, words, style, current),
         Some("phys") | Some("physics") => physics_bench(world, words, style, current),
         Some("math") | Some("maths") | Some("mathematics") => {
             math_bench(world, words, style, current)
@@ -1098,7 +1216,10 @@ fn science_index(
                 )
             );
             if world.off_planet_ready() {
-                println!("  {}", style.ok("off-planet resourcing: ready (crossed/route/element route)"));
+                println!(
+                    "  {}",
+                    style.ok("off-planet resourcing: ready (crossed/route/element route)")
+                );
             } else {
                 println!(
                     "  {}",
@@ -1132,16 +1253,32 @@ fn science_index(
             }
             println!();
             println!("  {}", style.section("VERBS"));
-            row(style, "bench science seat <discipline>", "pay crystal · unlock rank");
-            row(style, "bench science preview <path>", "poles + explosion risk");
+            row(
+                style,
+                "bench science seat <discipline>",
+                "pay crystal · unlock rank",
+            );
+            row(
+                style,
+                "bench science preview <path>",
+                "poles + explosion risk",
+            );
             row(
                 style,
                 "bench science create <path>",
                 "chem|biochem|synth|clone|skin (needs R2 seats)",
             );
-            row(style, "bench chem|biology|physics|math|research", "discipline craft");
+            row(
+                style,
+                "bench chem|biology|physics|math|research",
+                "discipline craft",
+            );
             row(style, "bench science synth|clone|skin", "mod paths");
-            leaf(style, "intel research · intel knowledge", "RUN knowledge activity");
+            leaf(
+                style,
+                "intel research · intel knowledge",
+                "RUN knowledge activity",
+            );
             foot_bench(style, Some("science"));
         }
         Some(other) => {
@@ -1155,7 +1292,12 @@ fn science_index(
     }
 }
 
-fn synth_bench(world: &mut World, mut words: impl Iterator<Item = String>, style: &Style, current: u64) {
+fn synth_bench(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
     let w = words.next();
     if is_back(w.as_deref()) {
         science_index(world, std::iter::empty(), style, current);
@@ -1168,7 +1310,11 @@ fn synth_bench(world: &mut World, mut words: impl Iterator<Item = String>, style
         world.rogue_pressure_of(current)
     );
     let card = world.lab_preview(current, cfe::almanac::LabPath::SynthMod);
-    println!("  risk {} · explode={}", amount(&card.risk), card.will_explode);
+    println!(
+        "  risk {} · explode={}",
+        amount(&card.risk),
+        card.will_explode
+    );
     println!("  {} {}", style.ok("+"), card.known_pos.1);
     println!("  {} {}", style.warn("−"), card.known_neg.1);
     if let Some((_, g)) = card.hidden_neg {
@@ -1180,7 +1326,12 @@ fn synth_bench(world: &mut World, mut words: impl Iterator<Item = String>, style
     let _ = w;
 }
 
-fn clone_bench(world: &mut World, mut words: impl Iterator<Item = String>, style: &Style, current: u64) {
+fn clone_bench(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
     let w = words.next();
     if is_back(w.as_deref()) {
         science_index(world, std::iter::empty(), style, current);
@@ -1192,7 +1343,11 @@ fn clone_bench(world: &mut World, mut words: impl Iterator<Item = String>, style
         world.clone_count_of(current)
     );
     let card = world.lab_preview(current, cfe::almanac::LabPath::CloneWork);
-    println!("  risk {} · explode={}", amount(&card.risk), card.will_explode);
+    println!(
+        "  risk {} · explode={}",
+        amount(&card.risk),
+        card.will_explode
+    );
     println!("  {} {}", style.ok("+"), card.known_pos.1);
     println!("  {} {}", style.warn("−"), card.known_neg.1);
     leaf(style, "bench science seat clone · seat biology", "unlock");
@@ -1201,19 +1356,31 @@ fn clone_bench(world: &mut World, mut words: impl Iterator<Item = String>, style
     let _ = w;
 }
 
-fn skin_bench(world: &mut World, mut words: impl Iterator<Item = String>, style: &Style, current: u64) {
+fn skin_bench(
+    world: &mut World,
+    mut words: impl Iterator<Item = String>,
+    style: &Style,
+    current: u64,
+) {
     let w = words.next();
     if is_back(w.as_deref()) {
         science_index(world, std::iter::empty(), style, current);
         return;
     }
-    banner(style, "BENCH › SKIN — face/disguise craft (Tleilaxu-shaped)");
+    banner(
+        style,
+        "BENCH › SKIN — face/disguise craft (Tleilaxu-shaped)",
+    );
     println!(
         "  skin grade {} · seat skin+biology R2",
         world.skin_grade_of(current)
     );
     let card = world.lab_preview(current, cfe::almanac::LabPath::SkinWork);
-    println!("  risk {} · explode={}", amount(&card.risk), card.will_explode);
+    println!(
+        "  risk {} · explode={}",
+        amount(&card.risk),
+        card.will_explode
+    );
     println!("  {} {}", style.ok("+"), card.known_pos.1);
     println!("  {} {}", style.warn("−"), card.known_neg.1);
     if let Some((_, g)) = card.hidden_pos {
@@ -1258,8 +1425,16 @@ fn biology_bench(
         );
     }
     if let Some(o) = world.orb_by_id(current).or_else(|| world.orb()) {
-        let regen = o.zones.iter().filter(|z| z.kind == ZoneKind::Regenerator).count();
-        let hab = o.zones.iter().filter(|z| z.kind == ZoneKind::Habitat).count();
+        let regen = o
+            .zones
+            .iter()
+            .filter(|z| z.kind == ZoneKind::Regenerator)
+            .count();
+        let hab = o
+            .zones
+            .iter()
+            .filter(|z| z.kind == ZoneKind::Habitat)
+            .count();
         println!(
             "  biomass {} · regenerators {} · habitats {}",
             amount(&o.banked_amount(Resource::Biomass)),
@@ -1325,9 +1500,17 @@ fn physics_bench(
         "  {}",
         style.dim("Star · thermal · medium · site. No second physics — pure world readings.")
     );
-    println!("  star={:?} · can_worldshape={}", world.star(), world.can_worldshape());
+    println!(
+        "  star={:?} · can_worldshape={}",
+        world.star(),
+        world.can_worldshape()
+    );
     let (heat, cold) = world.thermal_books_of(current);
-    println!("  thermal books heat={} · cold={}", amount(&heat), amount(&cold));
+    println!(
+        "  thermal books heat={} · cold={}",
+        amount(&heat),
+        amount(&cold)
+    );
     if let Some(bal) = world.thermal_balance_of(current) {
         println!("  thermal balance {}", amount(&bal));
     }
@@ -1407,7 +1590,11 @@ fn math_bench(
     );
     println!();
     println!("  {}", style.section("READ / DERIVE"));
-    leaf(style, "thermal · market · suite", "band / integrity readings");
+    leaf(
+        style,
+        "thermal · market · suite",
+        "band / integrity readings",
+    );
     leaf(style, "bench research", "constellation thresholds as play");
     leaf(style, "bench physics · bench chem", "apply ratios in craft");
     leaf(style, "verify · replay", "SEAL B sealed math");
@@ -1432,7 +1619,7 @@ fn research_craft_bench(
     if matches!(w.as_deref(), Some("forge") | Some("practice") | Some("run")) {
         println!("  {} → {}", style.dim("↳"), style.key("intel research"));
         let rest: Vec<String> = std::iter::once("research".into())
-            .chain(w.into_iter())
+            .chain(w)
             .chain(words)
             .collect();
         intel(world, rest.into_iter(), style, current);
@@ -1446,11 +1633,7 @@ fn research_craft_bench(
     let board = world.research_board(current);
     println!(
         "  held {} · forgeable {} · instruments {} · practices {} · wants {}",
-        board.held_count,
-        board.forgeable_ready,
-        board.instruments,
-        board.practices,
-        board.wants
+        board.held_count, board.forgeable_ready, board.instruments, board.practices, board.wants
     );
     if board.novelty_blocked {
         println!(
@@ -1477,11 +1660,23 @@ fn research_craft_bench(
     leaf(style, "zone <tile> smelt|synth|res", "forge chain zones");
     leaf(style, "forge <condition>", "instrument (deed)");
     leaf(style, "bench intel", "tool craft umbrella");
-    leaf(style, "bench chem · bench math", "matter / threshold support");
+    leaf(
+        style,
+        "bench chem · bench math",
+        "matter / threshold support",
+    );
     println!();
     println!("  {}", style.section("THEN RUN ON"));
-    leaf(style, "intel research [forge|practice]", "knowledge activity");
-    leaf(style, "bench research forge <c>", "shortcut → intel research forge");
+    leaf(
+        style,
+        "intel research [forge|practice]",
+        "knowledge activity",
+    );
+    leaf(
+        style,
+        "bench research forge <c>",
+        "shortcut → intel research forge",
+    );
     leaf(style, "bench science", "all science disciplines");
     foot_bench(style, Some("research"));
 }
@@ -1510,7 +1705,11 @@ fn econ_bench(
         world.perps().iter().filter(|p| p.open).count(),
     );
     leaf(style, "seat exchange|vault|anchor", "or bench offices");
-    leaf(style, "forge · note issue · future · share · perp", "MM listing");
+    leaf(
+        style,
+        "forge · note issue · future · share · perp",
+        "MM listing",
+    );
     leaf(style, "charter · element charter · rail promote", "lanes");
     leaf(style, "stamp mint", "unit craft (run under trade stamp)");
     leaf(style, "trade books|stamp|element|rails", "RUN activity");
@@ -1548,16 +1747,28 @@ fn diplo_craft_bench(
     );
     println!();
     println!("  {}", style.section("COMPONENTS TO CRAFT"));
-    leaf(style, "seat … · bench offices", "diplomatic standing / economic seats");
+    leaf(
+        style,
+        "seat … · bench offices",
+        "diplomatic standing / economic seats",
+    );
     leaf(style, "council …", "multilateral forward (accord craft)");
     leaf(style, "bond · forward", "standing orders / vitrified pacts");
     leaf(style, "charter · element charter", "lanes for pair trade");
-    leaf(style, "forge <c>", "instruments (trust / detection for talks)");
+    leaf(
+        style,
+        "forge <c>",
+        "instruments (trust / detection for talks)",
+    );
     leaf(style, "bench fleet mint escort", "KIN for convoy diplomacy");
     println!();
     println!("  {}", style.section("THEN RUN ON"));
     leaf(style, "diplomatic local", "seal/renounce treaties");
-    leaf(style, "diplomatic stellar", "war wall · aperture · license leap");
+    leaf(
+        style,
+        "diplomatic stellar",
+        "war wall · aperture · license leap",
+    );
     leaf(style, "intel link", "license path readiness");
     foot_bench(style, Some("diplomatic"));
     let _ = (w, current);
@@ -1599,12 +1810,12 @@ fn intel_craft_bench(
         "  {}",
         style.dim("Build the tools. Run research/ops/bases on root `intel` (not here).")
     );
-    let smelt = world.orb_by_id(current).is_some_and(|o| {
-        o.zones.iter().any(|z| z.kind == ZoneKind::Smelter)
-    });
-    let synth = world.orb_by_id(current).is_some_and(|o| {
-        o.zones.iter().any(|z| z.kind == ZoneKind::Synthesizer)
-    });
+    let smelt = world
+        .orb_by_id(current)
+        .is_some_and(|o| o.zones.iter().any(|z| z.kind == ZoneKind::Smelter));
+    let synth = world
+        .orb_by_id(current)
+        .is_some_and(|o| o.zones.iter().any(|z| z.kind == ZoneKind::Synthesizer));
     println!(
         "  smelter={} · synthesizer={} · instruments {} · detection g{}",
         smelt,
@@ -1614,15 +1825,31 @@ fn intel_craft_bench(
     );
     println!();
     println!("  {}", style.section("COMPONENTS TO CRAFT"));
-    leaf(style, "zone <tile> smelt|synth|res", "forge chain components");
-    leaf(style, "forge <condition>", "instrument (or intel research forge)");
+    leaf(
+        style,
+        "zone <tile> smelt|synth|res",
+        "forge chain components",
+    );
+    leaf(
+        style,
+        "forge <condition>",
+        "instrument (or intel research forge)",
+    );
     leaf(style, "bench chem · catalog", "recipes → intel knowledge");
-    leaf(style, "bench build", "smelter / synthesizer / research zones");
+    leaf(
+        style,
+        "bench build",
+        "smelter / synthesizer / research zones",
+    );
     leaf(style, "bench doctrine", "posture prep for ops");
     println!();
     println!("  {}", style.section("THEN RUN ON"));
     leaf(style, "intel research", "constellation · forge · practice");
-    leaf(style, "intel knowledge · intel ops · intel link", "bases / spy / co-op");
+    leaf(
+        style,
+        "intel knowledge · intel ops · intel link",
+        "bases / spy / co-op",
+    );
     foot_bench(style, Some("intel"));
     let _ = w;
 }
@@ -1685,9 +1912,21 @@ fn trade_craft_bench(
     leaf(style, "bench doctrine", "KIN / posture for escort run");
     println!();
     println!("  {}", style.section("THEN RUN ON"));
-    leaf(style, "trade books · trade stamp · trade element", "market / unit / matter");
-    leaf(style, "trade fleet · trade vault · trade rails", "haul / custody / rails");
-    leaf(style, "diplomatic", "treaties are their own root (bench diplomatic crafts them)");
+    leaf(
+        style,
+        "trade books · trade stamp · trade element",
+        "market / unit / matter",
+    );
+    leaf(
+        style,
+        "trade fleet · trade vault · trade rails",
+        "haul / custody / rails",
+    );
+    leaf(
+        style,
+        "diplomatic",
+        "treaties are their own root (bench diplomatic crafts them)",
+    );
     foot_bench(style, Some("trade"));
     let _ = w;
 }
@@ -1730,14 +1969,21 @@ fn polity_craft_bench(
             );
             println!("  {}", style.hint(&labor.next_hint));
             leaf(style, "zone <tile> hab", "seat a habitat (labor +1)");
-            leaf(style, "bench science create clone", "clone residual population");
+            leaf(
+                style,
+                "bench science create clone",
+                "clone residual population",
+            );
             leaf(style, "polity ap", "shared AP budget (P8.1)");
             foot_bench(style, Some("polity"));
             return;
         }
         _ => {}
     }
-    banner(style, "BENCH › POLITY — identity components (craft · POL.2)");
+    banner(
+        style,
+        "BENCH › POLITY — identity components (craft · POL.2)",
+    );
     println!(
         "  {}",
         style.dim("Build the pieces that root `polity` runs. Dual law: activity S ⇒ bench S.")
@@ -1747,7 +1993,10 @@ fn polity_craft_bench(
             "  genesis {} · dis {} · met {} · per {}",
             g.civilization, g.disposition, g.metabolism, g.perception
         ),
-        None => println!("  {}", style.warn("genesis unsealed — seal on activity root first")),
+        None => println!(
+            "  {}",
+            style.warn("genesis unsealed — seal on activity root first")
+        ),
     }
     let labor = world.labor_board(current);
     let ap = world.ap_board();
@@ -1762,15 +2011,31 @@ fn polity_craft_bench(
     );
     println!();
     println!("  {}", style.section("COMPONENTS TO CRAFT"));
-    leaf(style, "bench polity labor", "habitats · clones · work slots");
-    leaf(style, "bench offices", "seat exchange|vault|assay|anchor (identity ladder)");
+    leaf(
+        style,
+        "bench polity labor",
+        "habitats · clones · work slots",
+    );
+    leaf(
+        style,
+        "bench offices",
+        "seat exchange|vault|assay|anchor (identity ladder)",
+    );
     leaf(style, "bench doctrine", "posture / KIN prep for the line");
-    leaf(style, "bench research", "practice adopt (discipline binds the line)");
+    leaf(
+        style,
+        "bench research",
+        "practice adopt (discipline binds the line)",
+    );
     leaf(style, "bench build", "zone habitat — labor seats");
     println!();
     println!("  {}", style.section("THEN RUN ON"));
     leaf(style, "polity genesis · polity taxon", "axes / class-clade");
-    leaf(style, "polity mint · polity ap", "discovery mint / AP board");
+    leaf(
+        style,
+        "polity mint · polity ap",
+        "discovery mint / AP board",
+    );
     foot_bench(style, Some("polity"));
     let _ = w;
 }
@@ -1869,17 +2134,37 @@ fn intel_index(style: &Style) {
     );
     println!();
     row(style, "intel research", "constellation · forge · practice");
-    row(style, "intel knowledge", "all bases: tech · chem · stash · lit · books");
+    row(
+        style,
+        "intel knowledge",
+        "all bases: tech · chem · stash · lit · books",
+    );
     row(style, "intel culture", "literature aspire / claim");
     row(style, "intel books", "orb account books (BOOK-1)");
-    row(style, "intel ops", "spy pipeline probe · exfil · sabotage · scan");
+    row(
+        style,
+        "intel ops",
+        "spy pipeline probe · exfil · sabotage · scan",
+    );
     row(style, "intel opsec", "veil · ward · detection");
     row(style, "intel link", "cross-pollination · license · council");
-    row(style, "intel wants", "cognitive wants (novelty / resonance)");
+    row(
+        style,
+        "intel wants",
+        "cognitive wants (novelty / resonance)",
+    );
     println!();
     println!("  {}", style.section("CRAFT (on bench)"));
-    row(style, "bench intel", "forge chain · instruments · chem · zones");
-    row(style, "bench chem · bench build · bench doctrine", "related components");
+    row(
+        style,
+        "bench intel",
+        "forge chain · instruments · chem · zones",
+    );
+    row(
+        style,
+        "bench chem · bench build · bench doctrine",
+        "related components",
+    );
     foot_intel(style, None);
 }
 
@@ -1952,7 +2237,11 @@ fn intel_research(
         let forge = if n.forgeable { " ←FORGE" } else { "" };
         println!("  {mark} c{:<2} {:?}{bar}{forge}", n.condition, n.kind);
     }
-    leaf(style, "intel research forge <c> · practice <n>", "deep deeds");
+    leaf(
+        style,
+        "intel research forge <c> · practice <n>",
+        "deep deeds",
+    );
     leaf(style, "bench build", "smelter/synth components");
     foot_intel(style, Some("research"));
 }
@@ -1961,7 +2250,11 @@ fn intel_knowledge(world: &World, style: &Style, current: u64) {
     banner(style, "INTEL › KNOWLEDGE BASES");
     // Tech
     println!("  {}", style.section("TECH"));
-    let techs: Vec<_> = world.techs().iter().filter(|(o, _, _, _)| *o == current).collect();
+    let techs: Vec<_> = world
+        .techs()
+        .iter()
+        .filter(|(o, _, _, _)| *o == current)
+        .collect();
     if techs.is_empty() {
         println!("  {}", style.dim("(empty)"));
     } else {
@@ -2010,9 +2303,17 @@ fn intel_knowledge(world: &World, style: &Style, current: u64) {
     println!(
         "  practices {:?} · instruments {}",
         world.committed().practices,
-        world.instruments().iter().filter(|(o, _, _)| *o == current).count()
+        world
+            .instruments()
+            .iter()
+            .filter(|(o, _, _)| *o == current)
+            .count()
     );
-    leaf(style, "intel culture · intel books · intel research · intel ops", "grow bases");
+    leaf(
+        style,
+        "intel culture · intel books · intel research · intel ops",
+        "grow bases",
+    );
     foot_intel(style, Some("knowledge"));
 }
 
@@ -2064,7 +2365,10 @@ fn intel_books(
     banner(style, "INTEL › BOOKS — orb accounts (BOOK-1)");
     if let Some(o) = world.orb_by_id(current) {
         if o.books.is_empty() {
-            println!("  {}", style.dim("no minted books — mint_book via books CLI"));
+            println!(
+                "  {}",
+                style.dim("no minted books — mint_book via books CLI")
+            );
         } else {
             for b in &o.books {
                 println!("  · {} · archived={}", b.name, b.archived);
@@ -2122,7 +2426,12 @@ fn intel_ops(
         board.detection, board.instruments, board.probe_marks, board.intel_stash, board.veiled
     );
     println!("  {} {}", style.warn("NEXT"), board.next_hint);
-    for (need, label) in [(0u8, "surface"), (1, "probe"), (2, "stratum"), (3, "optics")] {
+    for (need, label) in [
+        (0u8, "surface"),
+        (1, "probe"),
+        (2, "stratum"),
+        (3, "optics"),
+    ] {
         println!(
             "  {} g≥{need} {label}",
             if board.detection >= need {
@@ -2211,15 +2520,27 @@ fn intel_link(
     println!("  {} {}", style.warn("NEXT"), board.next_hint);
     leaf(style, "council · license … via …", "tech leap");
     leaf(style, "absorb · bond · forward", "mesh");
-    leaf(style, "diplomatic local · diplomatic stellar", "oath / aperture RUN");
-    leaf(style, "bench diplomatic", "craft councils/bonds/seats first");
+    leaf(
+        style,
+        "diplomatic local · diplomatic stellar",
+        "oath / aperture RUN",
+    );
+    leaf(
+        style,
+        "bench diplomatic",
+        "craft councils/bonds/seats first",
+    );
     foot_intel(style, Some("link"));
     let _ = w;
 }
 
 fn intel_wants(world: &World, style: &Style, current: u64) {
     banner(style, "INTEL › WANTS — mind famine");
-    let wants: Vec<_> = world.wants().iter().filter(|(o, _)| *o == current).collect();
+    let wants: Vec<_> = world
+        .wants()
+        .iter()
+        .filter(|(o, _)| *o == current)
+        .collect();
     if wants.is_empty() {
         println!("  {}", style.dim("no cognitive wants struck"));
     } else {
@@ -2235,7 +2556,10 @@ fn intel_wants(world: &World, style: &Style, current: u64) {
     }
     let board = world.research_board(current);
     if board.novelty_blocked {
-        println!("  {}", style.warn("novelty blocks crystallize — license / discovery"));
+        println!(
+            "  {}",
+            style.warn("novelty blocks crystallize — license / discovery")
+        );
     }
     leaf(style, "intel link · license", "feed novelty");
     leaf(style, "intel research", "see constellation");
@@ -2269,11 +2593,7 @@ pub fn trade(
         Some("vault") | Some("custody") => trade_vault(world, style, current),
         Some("aperture") | Some("haul") | Some("cross") => trade_aperture(style),
         // Diplomacy is its own root — redirect.
-        Some("diplo")
-        | Some("diplomatic")
-        | Some("diplomacy")
-        | Some("treaty")
-        | Some("local") => {
+        Some("diplo") | Some("diplomatic") | Some("diplomacy") | Some("treaty") | Some("local") => {
             println!("  {} → {}", style.dim("↳"), style.key("diplomatic local"));
             let rest: Vec<String> = std::iter::once("local".into()).chain(words).collect();
             diplo(world, rest.into_iter(), style, current);
@@ -2319,8 +2639,16 @@ fn trade_index(style: &Style) {
     );
     println!();
     row(style, "trade books", "offers · instruments · market war");
-    row(style, "trade stamp", "mint · aperture (unit of account run)");
-    row(style, "trade element", "element aperture · charter · refine path");
+    row(
+        style,
+        "trade stamp",
+        "mint · aperture (unit of account run)",
+    );
+    row(
+        style,
+        "trade element",
+        "element aperture · charter · refine path",
+    );
     row(style, "trade fleet", "capacity · assign · escort · risk");
     row(style, "trade rails", "R1–R4 · Anchor import/export");
     row(style, "trade vault", "custody · margin");
@@ -2328,8 +2656,16 @@ fn trade_index(style: &Style) {
     row(style, "trade desk", "interactive suite");
     println!();
     println!("  {}", style.section("CRAFT (on bench)"));
-    row(style, "bench trade", "econ · fleet · offices · assay umbrella");
-    row(style, "bench econ · bench fleet · bench offices", "direct craft domains");
+    row(
+        style,
+        "bench trade",
+        "econ · fleet · offices · assay umbrella",
+    );
+    row(
+        style,
+        "bench econ · bench fleet · bench offices",
+        "direct craft domains",
+    );
     println!();
     println!("  {}", style.section("DIPLOMACY (own root)"));
     row(
@@ -2337,8 +2673,16 @@ fn trade_index(style: &Style) {
         "diplomatic local · diplomatic stellar",
         "treaties · war · license (not under trade)",
     );
-    row(style, "bench diplomatic", "craft councils · bonds · seats · routes");
-    leaf(style, "trade <id> with <world> <id> deal <n>", "barter clear");
+    row(
+        style,
+        "bench diplomatic",
+        "craft councils · bonds · seats · routes",
+    );
+    leaf(
+        style,
+        "trade <id> with <world> <id> deal <n>",
+        "barter clear",
+    );
     foot_trade(style, None);
 }
 
@@ -2359,7 +2703,11 @@ fn trade_books(world: &World, style: &Style) {
         "  clear depth crystal {}/{}",
         mi.crystal_depth, mi.seal_need
     );
-    leaf(style, "offer · note|future|share|perp · market · suite market", "");
+    leaf(
+        style,
+        "offer · note|future|share|perp · market · suite market",
+        "",
+    );
     leaf(style, "trade stamp", "unit of account");
     foot_trade(style, Some("books"));
 }
@@ -2370,7 +2718,11 @@ fn trade_stamp(world: &World, style: &Style, current: u64) {
         .orb_by_id(current)
         .map(|o| o.stamp_amount())
         .unwrap_or_else(|| ratio(0, 1));
-    println!("  free STAMP {} · vault {}", amount(&stamp), amount(&world.vault_balance_of(current)));
+    println!(
+        "  free STAMP {} · vault {}",
+        amount(&stamp),
+        amount(&world.vault_balance_of(current))
+    );
     leaf(style, "stamp mint · stamp aperture", "run unit");
     leaf(style, "trade vault", "custody");
     leaf(style, "bench econ", "craft side");
@@ -2453,7 +2805,11 @@ fn trade_vault(world: &World, style: &Style, current: u64) {
 
 fn trade_aperture(style: &Style) {
     banner(style, "TRADE › APERTURE");
-    leaf(style, "aperture · element aperture · stamp aperture", "haul");
+    leaf(
+        style,
+        "aperture · element aperture · stamp aperture",
+        "haul",
+    );
     leaf(style, "diplomatic local · diplomatic stellar", "gates");
     leaf(style, "bench diplomatic", "craft components");
     foot_trade(style, Some("aperture"));
@@ -2515,9 +2871,21 @@ fn diplo_index(style: &Style) {
         style.dim("Run treaties and stellar haul. Craft: `bench diplomatic`. Alias: diplo.")
     );
     println!();
-    row(style, "diplomatic local", "pair treaties · renounce · same-system play");
-    row(style, "diplomatic stellar", "crossed · war walls · aperture · license leap");
-    row(style, "diplomatic mesh", "councils · bonds · forwards standing");
+    row(
+        style,
+        "diplomatic local",
+        "pair treaties · renounce · same-system play",
+    );
+    row(
+        style,
+        "diplomatic stellar",
+        "crossed · war walls · aperture · license leap",
+    );
+    row(
+        style,
+        "diplomatic mesh",
+        "councils · bonds · forwards standing",
+    );
     println!();
     println!("  {}", style.section("CRAFT (on bench)"));
     row(
@@ -2525,7 +2893,11 @@ fn diplo_index(style: &Style) {
         "bench diplomatic",
         "council · bond · forward · seats · routes · escorts",
     );
-    row(style, "bench offices · bench fleet · bench econ", "related components");
+    row(
+        style,
+        "bench offices · bench fleet · bench econ",
+        "related components",
+    );
     leaf(style, "diplo …", "short alias for diplomatic …");
     foot_diplomatic(style, None);
 }
@@ -2541,10 +2913,26 @@ fn diplo_local(world: &World, style: &Style) {
     for t in treaties.iter().take(16) {
         println!("  · deal {} · {:?} · partner {}", t.deal, t.kind, t.partner);
     }
-    leaf(style, "diplomatic local trade|defense|peace|war with <world>", "seal (deep deed)");
-    leaf(style, "diplomatic local renounce <deal> <world>", "drop (deep deed)");
-    leaf(style, "diplomatic local elements <deal> <world> <id>...", "fence (deep deed, E3.9)");
-    leaf(style, "diplomatic stellar", "interstellar wall / haul / license");
+    leaf(
+        style,
+        "diplomatic local trade|defense|peace|war with <world>",
+        "seal (deep deed)",
+    );
+    leaf(
+        style,
+        "diplomatic local renounce <deal> <world>",
+        "drop (deep deed)",
+    );
+    leaf(
+        style,
+        "diplomatic local elements <deal> <world> <id>...",
+        "fence (deep deed, E3.9)",
+    );
+    leaf(
+        style,
+        "diplomatic stellar",
+        "interstellar wall / haul / license",
+    );
     leaf(style, "bench diplomatic", "craft components first");
     foot_diplomatic(style, Some("local"));
 }
@@ -2574,9 +2962,17 @@ fn diplo_stellar(world: &World, style: &Style) {
         board.council_open
     );
     println!("  {} {}", style.warn("NEXT"), board.next_hint);
-    leaf(style, "aperture · element aperture · stamp aperture", "cross haul");
+    leaf(
+        style,
+        "aperture · element aperture · stamp aperture",
+        "cross haul",
+    );
     leaf(style, "treaty war|peace with <world>", "stellar wall");
-    leaf(style, "license <c> to <world> via <council> deal <n>", "tech leap");
+    leaf(
+        style,
+        "license <c> to <world> via <council> deal <n>",
+        "tech leap",
+    );
     leaf(style, "intel link · diplomatic mesh", "prepare co-op");
     leaf(style, "bench diplomatic", "craft councils/bonds/routes");
     foot_diplomatic(style, Some("stellar"));
@@ -2584,7 +2980,12 @@ fn diplo_stellar(world: &World, style: &Style) {
 
 fn diplo_mesh(world: &World, style: &Style, _current: u64) {
     banner(style, "DIPLOMATIC › MESH — standing accords");
-    let now = world.committed().orbs.first().map(|_| world.now()).unwrap_or(0);
+    let now = world
+        .committed()
+        .orbs
+        .first()
+        .map(|_| world.now())
+        .unwrap_or(0);
     let board = world.link_board();
     println!(
         "  councils {} open {} · bonds {} · forwards {} · score {}",
@@ -2604,10 +3005,7 @@ fn diplo_mesh(world: &World, style: &Style, _current: u64) {
         );
     }
     for b in world.bonds().iter().take(8) {
-        println!(
-            "  · bond {}→{} · {:?}",
-            b.source, b.target, b.resource
-        );
+        println!("  · bond {}→{} · {:?}", b.source, b.target, b.resource);
     }
     leaf(style, "council · bond · forward · absorb", "deeds (CLI)");
     leaf(style, "bench diplomatic", "craft path");
@@ -2631,7 +3029,11 @@ fn foot_polity(style: &Style, parent: Option<&str>) {
     }
     leaf(style, "back · .. · home", "polity root");
     peers_line(style);
-    leaf(style, "polity · bench · intel · trade · diplomatic", "five roots (polity optional)");
+    leaf(
+        style,
+        "polity · bench · intel · trade · diplomatic",
+        "five roots (polity optional)",
+    );
 }
 
 /// Optional 5th root — line identity (genesis · taxon · mint · AP).
@@ -2685,7 +3087,10 @@ pub fn polity(
 }
 
 fn polity_index(world: &World, style: &Style, current: u64) {
-    banner(style, "POLITY — LINE IDENTITY (optional 5th root · vent open)");
+    banner(
+        style,
+        "POLITY — LINE IDENTITY (optional 5th root · vent open)",
+    );
     println!(
         "  {}",
         style.dim(
@@ -2703,7 +3108,11 @@ fn polity_index(world: &World, style: &Style, current: u64) {
             g.metabolism,
             g.perception
         ),
-        None => println!("  {} {}", style.section("genesis"), style.warn("unsealed — `genesis …`")),
+        None => println!(
+            "  {} {}",
+            style.section("genesis"),
+            style.warn("unsealed — `genesis …`")
+        ),
     }
     let eco = world.taxon_economy_of(current);
     println!(
@@ -2723,15 +3132,35 @@ fn polity_index(world: &World, style: &Style, current: u64) {
         style.dim(&format!("window t{}–t{}", ap.window_start, ap.window_end))
     );
     println!();
-    row(style, "polity genesis", "seal / read disposition · metabolism · perception");
-    row(style, "polity taxon", "class · clade · economy mode · planet fit");
-    row(style, "polity mint", "discovery mint path (warrant · crystal · no free mint)");
+    row(
+        style,
+        "polity genesis",
+        "seal / read disposition · metabolism · perception",
+    );
+    row(
+        style,
+        "polity taxon",
+        "class · clade · economy mode · planet fit",
+    );
+    row(
+        style,
+        "polity mint",
+        "discovery mint path (warrant · crystal · no free mint)",
+    );
     row(style, "polity ap", "P8.1 shared action budget board");
     row(style, "polity labor", "P8.3 force from habitats + clones");
     println!();
     println!("  {}", style.section("CRAFT (on bench)"));
-    row(style, "bench polity", "axes · offices · doctrine · labor · practice (POL.2 dual law)");
-    leaf(style, "law", "no free mint · call-not-copy · SEAL B — same as peer roots");
+    row(
+        style,
+        "bench polity",
+        "axes · offices · doctrine · labor · practice (POL.2 dual law)",
+    );
+    leaf(
+        style,
+        "law",
+        "no free mint · call-not-copy · SEAL B — same as peer roots",
+    );
     foot_polity(style, None);
 }
 
@@ -2784,7 +3213,11 @@ fn polity_taxon(world: &World, style: &Style, current: u64) {
         world.extractor_soft_cap()
     );
     leaf(style, "taxon …", "seal class/clade (CLI — see help taxon)");
-    leaf(style, "docs/37_IMPERIUM_TAXON.md", "imperium words · open clade");
+    leaf(
+        style,
+        "docs/37_IMPERIUM_TAXON.md",
+        "imperium words · open clade",
+    );
     foot_polity(style, Some("taxon"));
 }
 
@@ -2801,7 +3234,11 @@ fn polity_mint(world: &World, style: &Style, current: u64) {
         style.dim("Discovery mint requires sealed work warrant — never free crystal.")
     );
     leaf(style, "mint discovery …", "warranted mint path (CLI)");
-    leaf(style, "stamp mint <amt>", "1:1 crystal→STAMP convert (not discovery)");
+    leaf(
+        style,
+        "stamp mint <amt>",
+        "1:1 crystal→STAMP convert (not discovery)",
+    );
     leaf(style, "polity ap", "AP gates build/prospect/research/quote");
     foot_polity(style, Some("mint"));
 }

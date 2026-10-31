@@ -148,7 +148,10 @@ impl Move {
 
     /// A single banked move, for construction and witness.
     pub fn banked_of(orb: u64, resource: Resource, delta: Ratio) -> Self {
-        Self { banked: vec![((orb, resource), delta)], ..Self::default() }
+        Self {
+            banked: vec![((orb, resource), delta)],
+            ..Self::default()
+        }
     }
 
     /// The inversion axiom — every move has a formal inverse: negate
@@ -198,8 +201,16 @@ impl Move {
         let width = self.gauge.len().max(next.gauge.len());
         let gauge = (0..width)
             .map(|plane| {
-                let left = self.gauge.get(plane).cloned().unwrap_or_else(|| ratio(0, 1));
-                let right = next.gauge.get(plane).cloned().unwrap_or_else(|| ratio(0, 1));
+                let left = self
+                    .gauge
+                    .get(plane)
+                    .cloned()
+                    .unwrap_or_else(|| ratio(0, 1));
+                let right = next
+                    .gauge
+                    .get(plane)
+                    .cloned()
+                    .unwrap_or_else(|| ratio(0, 1));
                 left + right
             })
             .collect();
@@ -220,7 +231,13 @@ impl Move {
         let mut records = self.records.clone();
         records.extend(next.records.iter().cloned());
 
-        Self { banked, gauge, seats, books, records }
+        Self {
+            banked,
+            gauge,
+            seats,
+            books,
+            records,
+        }
     }
 
     /// The commutator `[a, b] = a ∘ b ∘ a⁻¹ ∘ b⁻¹`, taken in the free
@@ -230,9 +247,10 @@ impl Move {
     /// Written with `then_free` deliberately: a clamped composition is
     /// not a group and the commutator would not be defined in it.
     pub fn commutator(&self, other: &Self) -> Self {
-        self.then_free(other).then_free(&self.inverse()).then_free(&other.inverse())
+        self.then_free(other)
+            .then_free(&self.inverse())
+            .then_free(&other.inverse())
     }
-
 }
 
 /// A standing POSITION — what a move is applied to. Sparse and
@@ -301,12 +319,20 @@ impl Standing {
         }
         records.sort_by_key(|entry| entry.0);
 
-        Self { banked, seats, books, records }
+        Self {
+            banked,
+            seats,
+            books,
+            records,
+        }
     }
 
     /// Does a record stand at this address?
     pub fn record(&self, key: RecordKey) -> Option<&[u8]> {
-        self.records.iter().find(|(k, _)| *k == key).map(|(_, body)| body.as_slice())
+        self.records
+            .iter()
+            .find(|(k, _)| *k == key)
+            .map(|(_, body)| body.as_slice())
     }
 
     /// An accumulator's reading.
@@ -396,7 +422,12 @@ pub fn project(state: &Committed) -> Standing {
     let mut seats: Vec<(String, u8)> = state.stations.clone();
     seats.sort();
 
-    Standing { banked, seats, books: Vec::new(), records: Vec::new() }
+    Standing {
+        banked,
+        seats,
+        books: Vec::new(),
+        records: Vec::new(),
+    }
 }
 
 /// The move one deed makes — `event → Move`.
@@ -418,17 +449,25 @@ pub fn move_of(event: &ClosureEvent) -> Option<Move> {
         // is not canonical — `Standing::then` would apply the legs
         // sequentially and could floor between them, turning a no-op
         // into a loss. Built through `then_free`, which merges.
-        ClosureEvent::ResourceTransferred { from_orb, to_orb, resource, amount } => {
+        ClosureEvent::ResourceTransferred {
+            from_orb,
+            to_orb,
+            resource,
+            amount,
+        } => {
             let out = Move::banked_of(*from_orb, *resource, -amount.clone());
             let into = Move::banked_of(*to_orb, *resource, amount.clone());
             Some(out.then_free(&into))
         }
-        ClosureEvent::StationSeated { line, station } => {
-            Some(Move { seats: vec![(line.clone(), *station)], ..Move::default() })
-        }
-        ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
-            Some(Move::banked_of(*orb_id, *resource, -amount.clone()))
-        }
+        ClosureEvent::StationSeated { line, station } => Some(Move {
+            seats: vec![(line.clone(), *station)],
+            ..Move::default()
+        }),
+        ClosureEvent::DemurrageSettled {
+            orb_id,
+            resource,
+            amount,
+        } => Some(Move::banked_of(*orb_id, *resource, -amount.clone())),
         // The atomic touch (tag 102): every settled row folds into one
         // move — one deed, one motion.
         ClosureEvent::DemurrageTouched { orb_id, decays } => {
@@ -443,9 +482,11 @@ pub fn move_of(event: &ClosureEvent) -> Option<Move> {
         // YIELD-1: a collection banks what the zones produced. Added
         // only after a live run showed 0/2 coverage — the deeds a world
         // actually writes are not the deeds that read well on paper.
-        ClosureEvent::YieldCollected { orb_id, resource, amount } => {
-            Some(Move::banked_of(*orb_id, *resource, amount.clone()))
-        }
+        ClosureEvent::YieldCollected {
+            orb_id,
+            resource,
+            amount,
+        } => Some(Move::banked_of(*orb_id, *resource, amount.clone())),
         // Not yet expressible. Not a default arm that guesses — an
         // explicit refusal, so coverage stays measurable.
         _ => None,

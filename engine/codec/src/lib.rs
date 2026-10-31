@@ -687,7 +687,10 @@ impl<'a> Take<'a> {
 pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
     let mut take = Take { bytes, at: 0 };
     let schema = take.u8()?;
-    if schema != SCHEMA_V1 && schema != SCHEMA_V2 && schema != SCHEMA_V3 && schema != SCHEMA_V4
+    if schema != SCHEMA_V1
+        && schema != SCHEMA_V2
+        && schema != SCHEMA_V3
+        && schema != SCHEMA_V4
         && schema != SCHEMA_V5
         && schema != SCHEMA_V6
         && schema != SCHEMA_V7
@@ -733,7 +736,12 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
         for _ in 0..take.u32()? {
             grants.push(Scope::from_wire(take.u8()?)?);
         }
-        entities.push(Entity { entity_id, handle, principal, grants });
+        entities.push(Entity {
+            entity_id,
+            handle,
+            principal,
+            grants,
+        });
     }
 
     let star = match take.u8()? {
@@ -882,7 +890,11 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
             last_assay: take.u64()?,
             // ONT-3 (schema v25): appended after last_assay; a pre-v25 snapshot
             // has no rejuvenation and reads richness as natural − extracted.
-            rejuvenated: if schema >= SCHEMA_V25 { take.ratio()? } else { ratio::ratio(0, 1) },
+            rejuvenated: if schema >= SCHEMA_V25 {
+                take.ratio()?
+            } else {
+                ratio::ratio(0, 1)
+            },
         });
     }
 
@@ -981,7 +993,14 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
             for _ in 0..take.u32()? {
                 terms.push((take.u8()?, take.ratio()?));
             }
-            treaties.push(cfe::treaty::Treaty { deal, kind, partner, terms, sealed, term });
+            treaties.push(cfe::treaty::Treaty {
+                deal,
+                kind,
+                partner,
+                terms,
+                sealed,
+                term,
+            });
         }
     }
 
@@ -1083,7 +1102,13 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
             let par = take.ratio()?;
             let open = take.u8()? != 0;
             shares.push(cfe::dop::MarketShare {
-                share_id, orb_id, holder, stream, units, par, open,
+                share_id,
+                orb_id,
+                holder,
+                stream,
+                units,
+                par,
+                open,
             });
         }
         for _ in 0..take.u32()? {
@@ -1097,7 +1122,15 @@ pub fn from_state_bytes(bytes: &[u8]) -> Option<Committed> {
             let margin = take.ratio()?;
             let open = take.u8()? != 0;
             perps.push(cfe::dop::MarketPerp {
-                perp_id, orb_id, long, short, resource, notional, entry, margin, open,
+                perp_id,
+                orb_id,
+                long,
+                short,
+                resource,
+                notional,
+                entry,
+                margin,
+                open,
             });
         }
     }

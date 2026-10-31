@@ -20,7 +20,11 @@ fn main() {
     // orbits on each universal echo).
     // From a checkpoint (TUniversal 11.0 (23)): a universe written at a beat
     // resumes there (`conductor.beat`), never from the founding.
-    let start: u64 = std::fs::read_to_string(Path::new(era1).join("conductor.beat")).ok().and_then(|t| t.trim().parse().ok()).unwrap_or(0).min(until);
+    let start: u64 = std::fs::read_to_string(Path::new(era1).join("conductor.beat"))
+        .ok()
+        .and_then(|t| t.trim().parse().ok())
+        .unwrap_or(0)
+        .min(until);
     if start > 0 {
         println!("RESUMED at bell {start} (the checkpoint)");
     }
@@ -67,7 +71,18 @@ fn main() {
         };
         fn body(tier: &str, b: &pulse::Body, put: &mut dyn FnMut(String, &cfe::ratio::Ratio)) {
             let f = |n: &str| format!("{tier}.{n}");
-            for (n, r) in [("ell", &b.ell), ("ell_orth", &b.ell_orth), ("radius", &b.radius), ("period", &b.period), ("medium_spin", &b.medium_spin), ("state", &b.state), ("reservoir", &b.reservoir), ("turning", &b.turning), ("load", &b.load), ("heat", &b.heat)] {
+            for (n, r) in [
+                ("ell", &b.ell),
+                ("ell_orth", &b.ell_orth),
+                ("radius", &b.radius),
+                ("period", &b.period),
+                ("medium_spin", &b.medium_spin),
+                ("state", &b.state),
+                ("reservoir", &b.reservoir),
+                ("turning", &b.turning),
+                ("load", &b.load),
+                ("heat", &b.heat),
+            ] {
                 put(f(n), r);
             }
             for p in b.phase.iter() {
@@ -83,7 +98,13 @@ fn main() {
                 put(f("medium"), a);
             }
             for x in &b.flows {
-                for (n, r) in [("amount", &x.amount), ("ell_o", &x.ell_o), ("ell_orth", &x.ell_orth), ("agitation", &x.agitation), ("lever_place", &x.lever_place)] {
+                for (n, r) in [
+                    ("amount", &x.amount),
+                    ("ell_o", &x.ell_o),
+                    ("ell_orth", &x.ell_orth),
+                    ("agitation", &x.agitation),
+                    ("lever_place", &x.lever_place),
+                ] {
                     put(format!("{tier}.mote.{n}"), r);
                 }
                 for p in x.phase.iter() {
@@ -95,7 +116,12 @@ fn main() {
             }
         }
         for x in &u.ocean {
-            for (n, r) in [("amount", &x.amount), ("ell_o", &x.ell_o), ("ell_orth", &x.ell_orth), ("agitation", &x.agitation)] {
+            for (n, r) in [
+                ("amount", &x.amount),
+                ("ell_o", &x.ell_o),
+                ("ell_orth", &x.ell_orth),
+                ("agitation", &x.agitation),
+            ] {
                 put(format!("ocean.{n}"), r);
             }
             for p in x.phase.iter() {
@@ -113,7 +139,12 @@ fn main() {
         }
         w
     };
-    let show = |w: &std::collections::BTreeMap<String, u64>| w.iter().map(|(k, b)| format!("{k} {b}")).collect::<Vec<_>>().join(", ");
+    let show = |w: &std::collections::BTreeMap<String, u64>| {
+        w.iter()
+            .map(|(k, b)| format!("{k} {b}"))
+            .collect::<Vec<_>>()
+            .join(", ")
+    };
     eprintln!("FIELDS at bell {start}: {}", show(&fields(&u)));
     let started = std::time::Instant::now();
     let mut grown_past: Option<u64> = None;
@@ -124,15 +155,35 @@ fn main() {
         // universal echo.
         // Each universal echo: the motes, the systems' bodies, the time.
         if t_u > 0 && (b + 1) % t_u == 0 {
-            let bodies: usize = u.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len() + s.flows.len()).sum();
+            let bodies: usize = u
+                .cores
+                .iter()
+                .flat_map(|c| &c.satellites)
+                .map(|s| s.satellites.len() + s.flows.len())
+                .sum();
             let systems: usize = u.cores.iter().map(|c| c.satellites.len()).sum();
-            let (merged_n, dissolved_n, born_n, worlds_n): (usize, usize, usize, usize) = events.iter().fold((0, 0, 0, 0), |a, e| (a.0 + e.merged, a.1 + e.dissolved, a.2 + e.stars, a.3 + e.fates.0));
-            let worlds_now: usize = u.cores.iter().flat_map(|c| &c.satellites).map(|s| s.satellites.len()).sum();
+            let (merged_n, dissolved_n, born_n, worlds_n): (usize, usize, usize, usize) =
+                events.iter().fold((0, 0, 0, 0), |a, e| {
+                    (
+                        a.0 + e.merged,
+                        a.1 + e.dissolved,
+                        a.2 + e.stars,
+                        a.3 + e.fates.0,
+                    )
+                });
+            let worlds_now: usize = u
+                .cores
+                .iter()
+                .flat_map(|c| &c.satellites)
+                .map(|s| s.satellites.len())
+                .sum();
             eprintln!("echo at bell {}: {} systems ({} merged, {} dissolved, {} born so far), {} worlds standing ({} grown), {} bodies and motes in systems, {} galaxy motes, {} ocean motes, {:?} since start", b + 1, systems, merged_n, dissolved_n, born_n, worlds_now, worlds_n, bodies, u.cores.iter().map(|c| c.flows.len()).sum::<usize>(), u.ocean.len(), started.elapsed());
         }
         if t_u > 0 && (b + 1) % (10 * t_u) == 0 {
             let (motes, widest, in_systems) = carrier(&u);
-            let (rung, read) = events.iter().fold((0usize, 0usize), |a, e| (a.0 + e.rang.0, a.1 + e.rang.1));
+            let (rung, read) = events
+                .iter()
+                .fold((0usize, 0usize), |a, e| (a.0 + e.rang.0, a.1 + e.rang.1));
             eprintln!("bell {}: {} echoes read; {motes} motes ({in_systems} in the systems), widest {widest} bits; star bells rang {rung} of {read} star-echoes", b + 1, events.len());
             eprintln!("FIELDS at bell {}: {}", b + 1, show(&fields(&u)));
             if last_motes > 0 && motes > 2 * last_motes {
@@ -149,29 +200,105 @@ fn main() {
     let unit = breath::unit_mass(&u);
     let births: usize = events.iter().map(|e| e.stars).sum();
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();
-    let returned = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
-    println!("STARS MET — {} merged, {} bounced", events.iter().map(|e| e.merged).sum::<usize>(), events.iter().map(|e| e.encounters).sum::<usize>());
+    let returned = events
+        .iter()
+        .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
+    println!(
+        "STARS MET — {} merged, {} bounced",
+        events.iter().map(|e| e.merged).sum::<usize>(),
+        events.iter().map(|e| e.encounters).sum::<usize>()
+    );
     {
         let sticks: usize = events.iter().map(|e| e.grown.0).sum();
         let bounces: usize = events.iter().map(|e| e.grown.1).sum();
-        let escaped = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.escaped.clone());
-        let last: std::collections::BTreeMap<u32, (usize, usize)> = events.iter().map(|e| (e.galaxy, (e.grown.2, e.grown.3))).collect();
-        let born = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.discs.0.clone());
-        let out = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.discs.1.clone());
-        let (cl, fell) = events.iter().fold((cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1)), |s, e| (s.0 + e.collapse.0.clone(), s.1 + e.collapse.1.clone()));
-        println!("INFALL — bindings {} (holding); fell into the hearts {}, the rest their discs", conductor::reading::sector(&cl), conductor::reading::sector(&fell));
-        let f = events.iter().fold((0usize, 0usize, 0usize, 0usize), |s, e| (s.0 + e.fates.0, s.1 + e.fates.1, s.2 + e.fates.2, s.3 + e.fates.3));
+        let escaped = events
+            .iter()
+            .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.escaped.clone());
+        let last: std::collections::BTreeMap<u32, (usize, usize)> = events
+            .iter()
+            .map(|e| (e.galaxy, (e.grown.2, e.grown.3)))
+            .collect();
+        let born = events
+            .iter()
+            .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.discs.0.clone());
+        let out = events
+            .iter()
+            .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.discs.1.clone());
+        let (cl, fell) = events.iter().fold(
+            (cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1)),
+            |s, e| (s.0 + e.collapse.0.clone(), s.1 + e.collapse.1.clone()),
+        );
+        println!(
+            "INFALL — bindings {} (holding); fell into the hearts {}, the rest their discs",
+            conductor::reading::sector(&cl),
+            conductor::reading::sector(&fell)
+        );
+        let f = events
+            .iter()
+            .fold((0usize, 0usize, 0usize, 0usize), |s, e| {
+                (
+                    s.0 + e.fates.0,
+                    s.1 + e.fates.1,
+                    s.2 + e.fates.2,
+                    s.3 + e.fates.3,
+                )
+            });
         println!("GROWN — bodies grown by meetings: {} worlds, {} ignited as stars, {} whose core held nothing, {} that left past the rim", f.0, f.1, f.2, f.3);
-        let w = events.iter().fold([cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1)], |mut s, e| { for (a, b) in s.iter_mut().zip(e.weights.iter()) { *a += b.clone(); } s });
-        let mean = |m: &cfe::ratio::Ratio, n: &cfe::ratio::Ratio| if n.is_zero() { "none".to_string() } else { conductor::reading::sector(&(m.clone() / n.clone())).to_string() };
+        let w = events.iter().fold(
+            [
+                cfe::ratio::ratio(0, 1),
+                cfe::ratio::ratio(0, 1),
+                cfe::ratio::ratio(0, 1),
+                cfe::ratio::ratio(0, 1),
+            ],
+            |mut s, e| {
+                for (a, b) in s.iter_mut().zip(e.weights.iter()) {
+                    *a += b.clone();
+                }
+                s
+            },
+        );
+        let mean = |m: &cfe::ratio::Ratio, n: &cfe::ratio::Ratio| {
+            if n.is_zero() {
+                "none".to_string()
+            } else {
+                conductor::reading::sector(&(m.clone() / n.clone())).to_string()
+            }
+        };
         println!("WEIGHT — a nucleus's mean hold: grown groups that left past the rim {}, worlds grown {}", mean(&w[0], &w[1]), mean(&w[2], &w[3]));
-        let im = events.iter().fold((0usize, 0usize, 0usize), |s, e| (s.0 + e.impacts.0, s.1 + e.impacts.1, s.2 + e.impacts.2));
+        let im = events.iter().fold((0usize, 0usize, 0usize), |s, e| {
+            (s.0 + e.impacts.0, s.1 + e.impacts.1, s.2 + e.impacts.2)
+        });
         println!("IMPACTS — bounces that struck as matter {}, tugs between neighbouring worlds {}; grown groups carried past the rim by their orthogonal orbit's swing alone {}", im.0, im.1, im.2);
-        let ms = events.iter().fold([0usize; 6], |mut a, e| { for i in 0..5 { a[i] += e.motes[i]; } a });
-        let held: usize = { let mut last: std::collections::BTreeMap<u32, usize> = std::collections::BTreeMap::new(); for e in &events { last.insert(e.galaxy, e.motes[5]); } last.values().sum() };
+        let ms = events.iter().fold([0usize; 6], |mut a, e| {
+            for i in 0..5 {
+                a[i] += e.motes[i];
+            }
+            a
+        });
+        let held: usize = {
+            let mut last: std::collections::BTreeMap<u32, usize> =
+                std::collections::BTreeMap::new();
+            for e in &events {
+                last.insert(e.galaxy, e.motes[5]);
+            }
+            last.values().sum()
+        };
         println!("MOTES — entered the galaxies' flows: arrivals {}, shed and through the stars' throats {}, recycling {}, binding members returned {}; folded by the merge {}; held at the end {held}", ms[0], ms[1], ms[2], ms[3], ms[4]);
-        let rel = events.iter().fold((0usize, cfe::ratio::ratio(0, 1)), |s, e| (s.0 + e.released.0, s.1 + e.released.1.clone()));
-        let throat_left: cfe::ratio::Ratio = { let mut last: std::collections::BTreeMap<u32, cfe::ratio::Ratio> = std::collections::BTreeMap::new(); for e in &events { last.insert(e.galaxy, e.released.2.clone()); } last.values().fold(cfe::ratio::ratio(0, 1), |s, x| s + x.clone()) };
+        let rel = events
+            .iter()
+            .fold((0usize, cfe::ratio::ratio(0, 1)), |s, e| {
+                (s.0 + e.released.0, s.1 + e.released.1.clone())
+            });
+        let throat_left: cfe::ratio::Ratio = {
+            let mut last: std::collections::BTreeMap<u32, cfe::ratio::Ratio> =
+                std::collections::BTreeMap::new();
+            for e in &events {
+                last.insert(e.galaxy, e.released.2.clone());
+            }
+            last.values()
+                .fold(cfe::ratio::ratio(0, 1), |s, x| s + x.clone())
+        };
         println!("RELEASE — the bounces released {} motes from the throats, holding {}; the throats still hold {}", rel.0, conductor::reading::sector(&rel.1), conductor::reading::sector(&throat_left));
         println!("DISCS — released at the stars' births {} (holding), at or past the rim when released {}", conductor::reading::sector(&born), conductor::reading::sector(&out));
         println!("SYSTEMS MET — {sticks} stuck, {bounces} bounced; overstepped the rims {} (holding); after the last echo, motes and bodies by galaxy {last:?}", conductor::reading::sector(&escaped));
@@ -181,37 +308,67 @@ fn main() {
     }
     println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up)", until, events.len(), returned.round());
     for (i, c) in u.cores.iter().enumerate() {
-        let echoes = events.iter().filter(|e| u64::from(e.galaxy) == c.path[0]).count();
+        let echoes = events
+            .iter()
+            .filter(|e| u64::from(e.galaxy) == c.path[0])
+            .count();
         let born = c.satellites.len();
         let orbs: usize = c.satellites.iter().map(|s| s.satellites.len()).sum();
         // Its galactic year and the bell its next one closes (`motion`).
-        let year = motion::galactic_year(c).map(|(k, t)| {
-            let next = t.turns(until).and_then(|n| t.bell_of_turn(n + 1)).map(|b| b.to_string()).unwrap_or_else(|| "past the carrier".into());
-            format!("half-mass system {}, year {} bells, next closes at bell {next}", k + 1, t.period.round())
-        }).unwrap_or_else(|| "no year yet".into());
+        let year = motion::galactic_year(c)
+            .map(|(k, t)| {
+                let next = t
+                    .turns(until)
+                    .and_then(|n| t.bell_of_turn(n + 1))
+                    .map(|b| b.to_string())
+                    .unwrap_or_else(|| "past the carrier".into());
+                format!(
+                    "half-mass system {}, year {} bells, next closes at bell {next}",
+                    k + 1,
+                    t.period.round()
+                )
+            })
+            .unwrap_or_else(|| "no year yet".into());
         // The pump (convection, `ocean::pump`): the universal tide's
         // difference across the galaxy's swing.
         let pump = {
             let whole = pulse::mass(&u.total());
-            let h_g = if num_traits::Zero::is_zero(&whole) { cfe::ratio::ratio(0, 1) } else { (pulse::core_state(c) + pulse::mass(&c.total())) / whole };
+            let h_g = if num_traits::Zero::is_zero(&whole) {
+                cfe::ratio::ratio(0, 1)
+            } else {
+                (pulse::core_state(c) + pulse::mass(&c.total())) / whole
+            };
             let ring = cfe::ratio::ratio(t_u as i64, 4);
-            conductor::reading::sector(&conductor::ocean::pump(&(c.radius.clone() / ring), &h_g, &conductor::ocean::universe_hold(&u))).to_string()
+            conductor::reading::sector(&conductor::ocean::pump(
+                &(c.radius.clone() / ring),
+                &h_g,
+                &conductor::ocean::universe_hold(&u),
+            ))
+            .to_string()
         };
         let year = format!("{year}; pump {pump}");
         let medium = pulse::mass(&c.medium) / unit.clone();
         match breath::galaxy_rate(&u, i, &unit) {
             Some(g_rate) => {
                 let aeon = g_rate.clone() * cfe::ratio::ratio(until as i64, 1);
-                let rungs = breath::rungs(&breath::slip(&g_rate, until, t_u)).map(|r| r.to_string()).unwrap_or_else(|| "unread".into());
+                let rungs = breath::rungs(&breath::slip(&g_rate, until, t_u))
+                    .map(|r| r.to_string())
+                    .unwrap_or_else(|| "unread".into());
                 let coh = breath::coherence(&breath::slip(&g_rate, until, t_u));
                 println!("  galaxy {:?} at {} bells out: {echoes} echoes, {rungs} rungs (recoherences), coherence now {}%, aeon {} bells (rate {}); {born} systems, {orbs} orbs; medium left {}; {year}", c.path, c.radius, (coh * cfe::ratio::ratio(100, 1)).round(), aeon.round(), conductor::reading::sector(&g_rate), medium.round());
             }
             None => {
                 // The home's bodies read their own clocks: the spread of its
                 // systems' rates against the source.
-                let rates: Vec<cfe::ratio::Ratio> = (0..c.satellites.len()).map(|s| breath::system_clock(&u, i, s, &unit)).collect();
+                let rates: Vec<cfe::ratio::Ratio> = (0..c.satellites.len())
+                    .map(|s| breath::system_clock(&u, i, s, &unit))
+                    .collect();
                 let span = match (rates.iter().min(), rates.iter().max()) {
-                    (Some(a), Some(b)) => format!("{}..{}", conductor::reading::sector(a), conductor::reading::sector(b)),
+                    (Some(a), Some(b)) => format!(
+                        "{}..{}",
+                        conductor::reading::sector(a),
+                        conductor::reading::sector(b)
+                    ),
                     _ => "none".into(),
                 };
                 println!("  the HOME {:?} at the source: {echoes} echoes; no clock of its own, its {born} systems' clocks {span}; {orbs} orbs; medium left {}; {year}", c.path, medium.round());
@@ -219,9 +376,19 @@ fn main() {
         }
     }
     // The clocks (docs/78): which duty comes due how often, by layer.
-    let terms: Vec<Option<u64>> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_terms(&u, i, t_u, 0, until)).collect();
-    let epochs: Vec<Option<u64>> = (0..u.cores.len()).map(|i| conductor::clocks::galaxy_epochs(&u, i, &unit, t_u, 0, until)).collect();
-    let worlds: Vec<u64> = u.cores.iter().flat_map(|c| &c.satellites).flat_map(|s| &s.satellites).filter_map(|o| conductor::clocks::local_years(&o.period, 0, until)).collect();
+    let terms: Vec<Option<u64>> = (0..u.cores.len())
+        .map(|i| conductor::clocks::galaxy_terms(&u, i, t_u, 0, until))
+        .collect();
+    let epochs: Vec<Option<u64>> = (0..u.cores.len())
+        .map(|i| conductor::clocks::galaxy_epochs(&u, i, &unit, t_u, 0, until))
+        .collect();
+    let worlds: Vec<u64> = u
+        .cores
+        .iter()
+        .flat_map(|c| &c.satellites)
+        .flat_map(|s| &s.satellites)
+        .filter_map(|o| conductor::clocks::local_years(&o.period, 0, until))
+        .collect();
     let journaled = worlds.iter().filter(|&&y| y > 0).count();
     let mut w = worlds.clone();
     w.sort();
@@ -238,11 +405,29 @@ fn main() {
     // physics of recycling): hydrogen's and helium's shares by nuclei at the
     // founding and now, a reading of age, never a flag.
     let all = u.total();
-    let count = |m: &pulse::Manifest, k: Option<conductor::chem::Kind>| k.and_then(|k| m.get(&k).cloned()).unwrap_or_else(|| cfe::ratio::ratio(0, 1));
-    let whole = |m: &pulse::Manifest| m.values().fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone());
-    let share = |m: &pulse::Manifest, z: u32| conductor::reading::share(&count(m, conductor::chem::Kind::element(z)), &whole(m));
-    let commonest = all.iter().max_by(|a, b| a.1.cmp(b.1)).map(|(k, _)| k.to_string()).unwrap_or_else(|| "none".into());
-    println!("AGE — by nuclei, H {} -> {}, He {} -> {} (founding -> now); commonest now {commonest}", share(&before, 1), share(&all, 1), share(&before, 2), share(&all, 2));
+    let count = |m: &pulse::Manifest, k: Option<conductor::chem::Kind>| {
+        k.and_then(|k| m.get(&k).cloned())
+            .unwrap_or_else(|| cfe::ratio::ratio(0, 1))
+    };
+    let whole = |m: &pulse::Manifest| {
+        m.values()
+            .fold(cfe::ratio::ratio(0, 1), |s, a| s + a.clone())
+    };
+    let share = |m: &pulse::Manifest, z: u32| {
+        conductor::reading::share(&count(m, conductor::chem::Kind::element(z)), &whole(m))
+    };
+    let commonest = all
+        .iter()
+        .max_by(|a, b| a.1.cmp(b.1))
+        .map(|(k, _)| k.to_string())
+        .unwrap_or_else(|| "none".into());
+    println!(
+        "AGE — by nuclei, H {} -> {}, He {} -> {} (founding -> now); commonest now {commonest}",
+        share(&before, 1),
+        share(&all, 1),
+        share(&before, 2),
+        share(&all, 2)
+    );
     // The parity (with Xylarium): the odd share of the Z >= 3 atoms by
     // nuclei, clusters counted by their parts (equal-halves recycling sorts
     // the heavy matter by parity).
@@ -261,23 +446,47 @@ fn main() {
         }
         conductor::reading::share(&o, &t)
     };
-    println!("PARITY — odd share of Z >= 3 by nuclei: {} -> {} (founding -> now)", odd(&before), odd(&all));
+    println!(
+        "PARITY — odd share of Z >= 3 by nuclei: {} -> {} (founding -> now)",
+        odd(&before),
+        odd(&all)
+    );
     // Recycling at the galaxies' throats (`conductor::recycle`, 11.0 (18)):
     // pressed (constructed) and peeled (deconstructed), the light and the
     // opened holding, and what was trapped at the throats.
-    let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e));
+    let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| {
+        events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e))
+    };
     let f = conductor::reading::sector;
     {
         // The heaviest nuclide standing anywhere (docs/97 §10).
         let all = u.total();
-        let top = all.keys().flat_map(|k| k.parts().iter().map(|(_, w)| *w).collect::<Vec<_>>()).max().unwrap_or(0);
-        let heavy: cfe::ratio::Ratio = all.iter().filter(|(k, _)| conductor::chem::weight(k) > 4).fold(cfe::ratio::ratio(0, 1), |s, (k, a)| s + a.clone() * cfe::ratio::ratio(i64::from(conductor::chem::weight(k)), 1)) / pulse::mass(&all);
-        println!("HEAVIEST — weight {top} (Q {}, Z {}); matter past weight 4 by mass {}", conductor::nuclides::protons(top).unwrap_or(0), conductor::nuclides::neutrons(top).unwrap_or(0), f(&heavy));
+        let top = all
+            .keys()
+            .flat_map(|k| k.parts().iter().map(|(_, w)| *w).collect::<Vec<_>>())
+            .max()
+            .unwrap_or(0);
+        let heavy: cfe::ratio::Ratio = all
+            .iter()
+            .filter(|(k, _)| conductor::chem::weight(k) > 4)
+            .fold(cfe::ratio::ratio(0, 1), |s, (k, a)| {
+                s + a.clone() * cfe::ratio::ratio(i64::from(conductor::chem::weight(k)), 1)
+            })
+            / pulse::mass(&all);
+        println!(
+            "HEAVIEST — weight {top} (Q {}, Z {}); matter past weight 4 by mass {}",
+            conductor::nuclides::protons(top).unwrap_or(0),
+            conductor::nuclides::neutrons(top).unwrap_or(0),
+            f(&heavy)
+        );
     }
     println!("CIRCULATION — the shear moved {} outward, the pressure {} radially and {} around the shells' circles ({} shell planes parted into cells), and the field {} (spin, ledger units); the luminal bound turned {} motes onto the Möbius leg; the stream read {} on the vacuum; the trapped carried {} spin to the reservoirs; {} jets left past the rims", f(&sum(&|e| e.circulation.0.clone())), f(&sum(&|e| e.circulation.1.clone())), f(&sum(&|e| e.circulation.5.clone())), events.iter().map(|e| e.circulation.6).sum::<usize>(), f(&sum(&|e| e.circulation.2.clone())), events.iter().map(|e| e.circulation.3).sum::<usize>(), events.iter().map(|e| e.circulation.4).sum::<usize>(), f(&sum(&|e| e.recycled.spun.clone())), events.iter().map(|e| e.jets).sum::<usize>());
     let closing: Vec<u32> = motion::years_closing(&u, until);
     let rungs: Vec<u64> = events.iter().map(|e| e.rung).collect();
-    let parallel = events.iter().filter(|e| matches!(e.write, breath::Write::Parallel)).count();
+    let parallel = events
+        .iter()
+        .filter(|e| matches!(e.write, breath::Write::Parallel))
+        .count();
     println!("ECHOES — rungs read {}..{}, {} written parallel and {} perpendicular; galactic years closing at bell {until}: {closing:?}", rungs.iter().min().copied().unwrap_or(0), rungs.iter().max().copied().unwrap_or(0), parallel, events.len() - parallel);
     println!("RECYCLING — the throats pressed {} and peeled {} (grains of nuclei); light given {}, holding opened {}, trapped {} (units); {} echoes recycled", f(&sum(&|e| e.recycled.pressed.clone())), f(&sum(&|e| e.recycled.peeled.clone())), f(&sum(&|e| e.recycled.light.clone())), f(&sum(&|e| e.recycled.spent.clone())), f(&sum(&|e| e.recycled.trapped.clone())), events.iter().filter(|e| e.recycled != Default::default()).count());
     // The burn and the return as rates (TUniversal 11.0 (23)): hydrogen fused
@@ -286,24 +495,48 @@ fn main() {
     // Where the two meet is the hydrogen's steady state, a fixed point; a
     // read this early is the first instant, never a judgement.
     {
-        let h_now = all.get(&conductor::chem::hydrogen()).cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+        let h_now = all
+            .get(&conductor::chem::hydrogen())
+            .cloned()
+            .unwrap_or_else(|| cfe::ratio::ratio(0, 1));
         let echoes = ((until - start) / t_u.max(1)).max(1);
         let window = (echoes / 10).max(1);
         let mut rows: Vec<String> = Vec::new();
         let mut w = 0;
         while w * window < echoes {
-            let (lo, hi) = (start + w * window * t_u, (start + (w + 1) * window * t_u).min(until));
+            let (lo, hi) = (
+                start + w * window * t_u,
+                (start + (w + 1) * window * t_u).min(until),
+            );
             let sel = events.iter().filter(|e| e.bell > lo && e.bell <= hi);
             let (mut b, mut r) = (cfe::ratio::ratio(0, 1), cfe::ratio::ratio(0, 1));
             for e in sel {
-                b += e.burned.get(&conductor::chem::hydrogen()).cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+                b += e
+                    .burned
+                    .get(&conductor::chem::hydrogen())
+                    .cloned()
+                    .unwrap_or_else(|| cfe::ratio::ratio(0, 1));
                 r += e.recycled.hydrogen.clone();
             }
-            let per = |x: cfe::ratio::Ratio| conductor::reading::share(&x, &(h_now.clone() * cfe::ratio::ratio(window as i64, 1)));
-            rows.push(format!("u {}-{}: burned {} returned {}", start / t_u.max(1) + w * window, start / t_u.max(1) + (w + 1) * window, per(b), per(r)));
+            let per = |x: cfe::ratio::Ratio| {
+                conductor::reading::share(
+                    &x,
+                    &(h_now.clone() * cfe::ratio::ratio(window as i64, 1)),
+                )
+            };
+            rows.push(format!(
+                "u {}-{}: burned {} returned {}",
+                start / t_u.max(1) + w * window,
+                start / t_u.max(1) + (w + 1) * window,
+                per(b),
+                per(r)
+            ));
             w += 1;
         }
-        println!("RATES — hydrogen per universal echo, as a share of the hydrogen now: {}", rows.join("; "));
+        println!(
+            "RATES — hydrogen per universal echo, as a share of the hydrogen now: {}",
+            rows.join("; ")
+        );
     }
     // The carrier's size (design law 8; the cut-over's measure): the widest
     // exact rational held, by what it carries, in bits.
@@ -349,23 +582,47 @@ fn main() {
         for e in &events {
             all.join(&e.cross);
         }
-        let row: Vec<String> = all.counts().iter().map(|(f, n)| format!("{f:?} {n}")).collect();
-        println!("CROSS — residues by fate over the run: {}", if row.is_empty() { "none".into() } else { row.join(", ") });
+        let row: Vec<String> = all
+            .counts()
+            .iter()
+            .map(|(f, n)| format!("{f:?} {n}"))
+            .collect();
+        println!(
+            "CROSS — residues by fate over the run: {}",
+            if row.is_empty() {
+                "none".into()
+            } else {
+                row.join(", ")
+            }
+        );
     }
     // The light ledger: light made (the ℚ → ℤ transduction's flux), received
     // as heat by the bodies on its continuum face, drained into the vacuum.
     {
-        let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e));
-        let (made, got, gone) = (sum(&|e| e.light.made.clone()), sum(&|e| e.light.received.clone()), sum(&|e| e.light.drained.clone()));
+        let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| {
+            events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e))
+        };
+        let (made, got, gone) = (
+            sum(&|e| e.light.made.clone()),
+            sum(&|e| e.light.received.clone()),
+            sum(&|e| e.light.drained.clone()),
+        );
         println!("LIGHT — made {}, received {} by the bodies on the continuum face, drained {} into the vacuum (units); balanced: {}", conductor::reading::sector(&made), conductor::reading::sector(&got), conductor::reading::sector(&gone), made == got.clone() + gone.clone());
     }
     // The firmament's collective (docs/111 §4): its bonds read at each
     // universal bounce; the last bounce's reading and the greatest.
     {
-        let read: Vec<&pulse::Collective> = events.iter().filter_map(|e| e.collective.as_ref()).collect();
+        let read: Vec<&pulse::Collective> = events
+            .iter()
+            .filter_map(|e| e.collective.as_ref())
+            .collect();
         if let Some(last) = read.last() {
             let most = read.iter().map(|c| c.collections).max().unwrap_or(0);
-            let share = if last.held == cfe::ratio::ratio(0, 1) { cfe::ratio::ratio(0, 1) } else { last.in_collections.clone() / last.held.clone() };
+            let share = if last.held == cfe::ratio::ratio(0, 1) {
+                cfe::ratio::ratio(0, 1)
+            } else {
+                last.in_collections.clone() / last.held.clone()
+            };
             println!("COLLECTIVE — {} bounces read; the last: {} motes, {} collections ({} motes bonded, the largest {}), {} of the holding bonded; at most {} collections; the transmission τ {}; weights held {}..={}, the collective's mean {}", read.len(), last.motes, last.collections, last.bonded, last.largest, conductor::reading::sector(&share), most, conductor::reading::sector(&last.tau), last.lightest, last.heaviest, conductor::reading::sector(&last.mean));
         }
     }
@@ -374,16 +631,31 @@ fn main() {
         let tolls: Vec<&breath::Toll> = events.iter().flat_map(|e| e.tolls.iter()).collect();
         println!("TOLLS — {} stars passed", tolls.len());
         for t in tolls {
-            let heard: Vec<String> = (0..u.cores.len()).filter_map(|g| t.heard_after(&u, g).map(|d| format!("{:?} after {}", u.cores[g].path, conductor::reading::sector(&d)))).collect();
+            let heard: Vec<String> = (0..u.cores.len())
+                .filter_map(|g| {
+                    t.heard_after(&u, g).map(|d| {
+                        format!(
+                            "{:?} after {}",
+                            u.cores[g].path,
+                            conductor::reading::sector(&d)
+                        )
+                    })
+                })
+                .collect();
             println!("  star {:?} at bell {}: {:?}, {} strokes, returned {} holding and {} spin; heard by {}", t.star, t.bell, t.passing, t.strokes.map(|n| n.to_string()).unwrap_or_else(|| "uncounted".into()), conductor::reading::sector(&t.returned), conductor::reading::sector(&t.spin), heard.join(", "));
         }
     }
     // The spin identities (docs/90): each check's residual, `after − before`
     // of its ledger's whole sum, exact where 0.
     {
-        let mut kinds: std::collections::BTreeMap<&str, (u64, u64, cfe::ratio::Ratio)> = std::collections::BTreeMap::new();
+        let mut kinds: std::collections::BTreeMap<&str, (u64, u64, cfe::ratio::Ratio)> =
+            std::collections::BTreeMap::new();
         for (kind, r) in events.iter().flat_map(|e| e.identity.iter()) {
-            let abs = if *r < cfe::ratio::ratio(0, 1) { -r.clone() } else { r.clone() };
+            let abs = if *r < cfe::ratio::ratio(0, 1) {
+                -r.clone()
+            } else {
+                r.clone()
+            };
             let e = kinds.entry(kind).or_insert((0, 0, cfe::ratio::ratio(0, 1)));
             e.0 += 1;
             if abs == cfe::ratio::ratio(0, 1) {
@@ -394,7 +666,10 @@ fn main() {
             }
         }
         for (kind, (n, exact, worst)) in &kinds {
-            println!("IDENTITY {kind} — {exact} of {n} exact; greatest residual {}", conductor::reading::sector(worst));
+            println!(
+                "IDENTITY {kind} — {exact} of {n} exact; greatest residual {}",
+                conductor::reading::sector(worst)
+            );
         }
         let spin_after = pulse::spin_total(&u, &breath::unit_mass(&u));
         println!("IDENTITY ledger — the bodies' spin (both orbits) and media, before {} after {}: moved {} (motes and reservoirs are outside it)", conductor::reading::sector(&spin_before), conductor::reading::sector(&spin_after), conductor::reading::sector(&(spin_after.clone() - spin_before.clone())));
@@ -406,36 +681,84 @@ fn main() {
     // holding-weighted mean; and the orthogonal spin the ledger holds (Σ m·ℓ_⊥).
     {
         let unit = breath::unit_mass(&u);
-        let abs = |x: &cfe::ratio::Ratio| if *x < cfe::ratio::ratio(0, 1) { -x.clone() } else { x.clone() };
-        let e_of = |b: &pulse::Body| if b.ell.is_zero() { cfe::ratio::ratio(0, 1) } else { abs(&b.ell_orth) / abs(&b.ell) };
+        let abs = |x: &cfe::ratio::Ratio| {
+            if *x < cfe::ratio::ratio(0, 1) {
+                -x.clone()
+            } else {
+                x.clone()
+            }
+        };
+        let e_of = |b: &pulse::Body| {
+            if b.ell.is_zero() {
+                cfe::ratio::ratio(0, 1)
+            } else {
+                abs(&b.ell_orth) / abs(&b.ell)
+            }
+        };
         let read = |bodies: &[&pulse::Body]| -> String {
-            let swung: Vec<&&pulse::Body> = bodies.iter().filter(|b| !b.ell_orth.is_zero()).collect();
-            let most = bodies.iter().map(|b| e_of(b)).max().unwrap_or_else(|| cfe::ratio::ratio(0, 1));
-            let held = bodies.iter().fold(cfe::ratio::ratio(0, 1), |s, b| s + pulse::mass(&b.total()));
-            let mean = if held.is_zero() { cfe::ratio::ratio(0, 1) } else { bodies.iter().fold(cfe::ratio::ratio(0, 1), |s, b| s + pulse::mass(&b.total()) * e_of(b)) / held };
-            format!("{} of {} swinging, greatest e {}, mean e {}", swung.len(), bodies.len(), conductor::reading::sector(&most), conductor::reading::sector(&mean))
+            let swung: Vec<&&pulse::Body> =
+                bodies.iter().filter(|b| !b.ell_orth.is_zero()).collect();
+            let most = bodies
+                .iter()
+                .map(|b| e_of(b))
+                .max()
+                .unwrap_or_else(|| cfe::ratio::ratio(0, 1));
+            let held = bodies
+                .iter()
+                .fold(cfe::ratio::ratio(0, 1), |s, b| s + pulse::mass(&b.total()));
+            let mean = if held.is_zero() {
+                cfe::ratio::ratio(0, 1)
+            } else {
+                bodies.iter().fold(cfe::ratio::ratio(0, 1), |s, b| {
+                    s + pulse::mass(&b.total()) * e_of(b)
+                }) / held
+            };
+            format!(
+                "{} of {} swinging, greatest e {}, mean e {}",
+                swung.len(),
+                bodies.len(),
+                conductor::reading::sector(&most),
+                conductor::reading::sector(&mean)
+            )
         };
         let mut orth_spin = cfe::ratio::ratio(0, 1);
         for core in &u.cores {
             let stars: Vec<&pulse::Body> = core.satellites.iter().collect();
-            let worlds: Vec<&pulse::Body> = core.satellites.iter().flat_map(|s| s.satellites.iter()).collect();
+            let worlds: Vec<&pulse::Body> = core
+                .satellites
+                .iter()
+                .flat_map(|s| s.satellites.iter())
+                .collect();
             for b in stars.iter().chain(worlds.iter()) {
                 orth_spin += pulse::mass(&b.total()) / unit.clone() * b.ell_orth.clone();
             }
-            println!("SWING {:?} — stars: {}; worlds: {}", core.path, read(&stars), read(&worlds));
+            println!(
+                "SWING {:?} — stars: {}; worlds: {}",
+                core.path,
+                read(&stars),
+                read(&worlds)
+            );
         }
-        println!("SWING — the bodies' orthogonal spin on the ledger, Σ m·ℓ_⊥ = {}", conductor::reading::sector(&orth_spin));
+        println!(
+            "SWING — the bodies' orthogonal spin on the ledger, Σ m·ℓ_⊥ = {}",
+            conductor::reading::sector(&orth_spin)
+        );
     }
     // The joint READ (concordance 2.10, the landing rule): each star's burn
     // as the form holds it, its runs `(1 − x_i, n_i)` on its own clock in the
     // order lived, and the reading of what remains on the 60⁻⁶ grain; written
     // whole to `<var>/runs.txt`.
     {
-        let mut bodies: std::collections::BTreeMap<(Vec<u64>, u32), conductor::compound::Remaining> = std::collections::BTreeMap::new();
+        let mut bodies: std::collections::BTreeMap<
+            (Vec<u64>, u32),
+            conductor::compound::Remaining,
+        > = std::collections::BTreeMap::new();
         let mut refused = 0usize;
         for e in &events {
             for (path, z, x, n) in &e.burns {
-                let was = bodies.remove(&(path.clone(), *z)).unwrap_or_else(conductor::compound::Remaining::whole);
+                let was = bodies
+                    .remove(&(path.clone(), *z))
+                    .unwrap_or_else(conductor::compound::Remaining::whole);
                 match was.clone().after(x, *n) {
                     Ok(r) => {
                         bodies.insert((path.clone(), *z), r);
@@ -451,10 +774,17 @@ fn main() {
         let mut runs = 0usize;
         for ((path, z), r) in &bodies {
             runs += r.factors().len();
-            let factors: Vec<String> = r.factors().iter().map(|(b, n)| format!("({b}, {n})")).collect();
+            let factors: Vec<String> = r
+                .factors()
+                .iter()
+                .map(|(b, n)| format!("({b}, {n})"))
+                .collect();
             // Joint reads compare exact values (Mycelium, 2026-10-21: no grid):
             // the runs are written exactly; their product is read off them.
-            text.push_str(&format!("star {path:?} Z{z}: runs [{}]\n", factors.join(", ")));
+            text.push_str(&format!(
+                "star {path:?} Z{z}: runs [{}]\n",
+                factors.join(", ")
+            ));
         }
         let _ = std::fs::write(Path::new(era1).join("runs.txt"), text);
         println!("JOINT READ — {} burning bodies (star, rung), {runs} runs on their own clocks, {refused} refused; written {era1}/runs.txt", bodies.len());

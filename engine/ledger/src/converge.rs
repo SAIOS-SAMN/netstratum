@@ -13,11 +13,11 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use cfe::dop::ClosureEvent;
-use cfe::world::wrap_gauge;
 use cfe::persist;
 use cfe::ratio::{ratio, Ratio};
 use cfe::tlv;
 use cfe::vrp::{receipt_digest, receipt_digest_v2, ReceiptHash};
+use cfe::world::wrap_gauge;
 use num_traits::Zero;
 use physics::{AxisVector, Triple};
 
@@ -115,9 +115,7 @@ pub fn converge(book: &Ledger, eras: &[(String, PathBuf)]) -> std::io::Result<Co
         .receipts()
         .iter()
         .filter_map(|receipt| match receipt.event() {
-            ClosureEvent::EraAnnexed { era, world, .. } => {
-                Some((era.clone(), world.clone()))
-            }
+            ClosureEvent::EraAnnexed { era, world, .. } => Some((era.clone(), world.clone())),
             _ => None,
         })
         .collect();
@@ -302,13 +300,19 @@ fn deposit(events: &[ClosureEvent]) -> Triple {
         // The pace line: every receipt +1 @0.
         temporal = temporal.add(&at_grade(0, ratio(1, 1)));
         match event {
-            ClosureEvent::YieldCollected { resource, amount, .. } => {
+            ClosureEvent::YieldCollected {
+                resource, amount, ..
+            } => {
                 spatial = spatial.add(&at_grade(*resource as usize - 1, amount.clone()));
             }
-            ClosureEvent::UpkeepSettled { resource, amount, .. } => {
+            ClosureEvent::UpkeepSettled {
+                resource, amount, ..
+            } => {
                 spatial = spatial.add(&at_grade(*resource as usize - 1, -amount.clone()));
             }
-            ClosureEvent::FamineStruck { resource, drawn, .. } => {
+            ClosureEvent::FamineStruck {
+                resource, drawn, ..
+            } => {
                 spatial = spatial.add(&at_grade(*resource as usize - 1, -drawn.clone()));
             }
             ClosureEvent::EntityRegistered { .. } => {

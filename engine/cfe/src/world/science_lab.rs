@@ -15,7 +15,9 @@ use crate::dop::{Resource, ZoneKind};
 impl World {
     /// Taxon economy reading (mode · planet fit · flatlander flag).
     pub fn taxon_economy_of(&self, orb: u64) -> crate::almanac::TaxonEconomy {
-        let (class, clade) = self.taxon.unwrap_or((0, u16::from(crate::almanac::FLATLANDER_CLADE)));
+        let (class, clade) = self
+            .taxon
+            .unwrap_or((0, u16::from(crate::almanac::FLATLANDER_CLADE)));
         // Unsealed taxon defaults flatlander baseline for play readability.
         let clade = if self.taxon.is_none() {
             u16::from(crate::almanac::FLATLANDER_CLADE)
@@ -51,9 +53,7 @@ impl World {
     /// True if the line has crossed the void, holds an element route,
     /// or holds any ROUTE-1 deal (aperture-capable resourcing path).
     pub fn off_planet_ready(&self) -> bool {
-        self.has_crossed()
-            || !self.element_routes.is_empty()
-            || !self.routes.is_empty()
+        self.has_crossed() || !self.element_routes.is_empty() || !self.routes.is_empty()
     }
 
     fn require_off_planet(&self, kind: u8) -> Result<(), ActionRefused> {
@@ -272,7 +272,10 @@ impl World {
         // headcount); a touch that only moves the carry emits no promotion.
         if promotion != 0 {
             self.chronicle.append(
-                crate::dop::ClosureEvent::PopulationSettled { orb_id: orb, delta: promotion },
+                crate::dop::ClosureEvent::PopulationSettled {
+                    orb_id: orb,
+                    delta: promotion,
+                },
                 stamp,
                 vec![],
             );
@@ -281,7 +284,10 @@ impl World {
         // only when it changed, so a whole-integer settle carries no new deed.
         if remainder != prev_carry {
             self.chronicle.append(
-                crate::dop::ClosureEvent::PopulationAccrued { orb_id: orb, remainder },
+                crate::dop::ClosureEvent::PopulationAccrued {
+                    orb_id: orb,
+                    remainder,
+                },
                 stamp,
                 vec![],
             );
@@ -291,8 +297,8 @@ impl World {
         // zero headcount and no fractional carry anywhere (a `0.4`-colonist
         // band is still alive and still growing, so it is not a collapse).
         // Checked here, fires exactly once, idempotent (None -> Some only).
-        let extinct = self.clone_counts.iter().all(|(_, count)| *count == 0)
-            && self.pop_accrued.is_empty();
+        let extinct =
+            self.clone_counts.iter().all(|(_, count)| *count == 0) && self.pop_accrued.is_empty();
         if self.collapsed.is_none() && extinct {
             self.collapsed = Some(stamp);
             self.chronicle.append(
@@ -348,7 +354,9 @@ impl World {
     /// severs the WORLD's external apertures (the Agent Door to inbound
     /// trade, and melt/trade treaties), so the reading is world-wide.
     pub fn world_quarantined(&self) -> bool {
-        self.orbs.iter().any(|held| self.is_quarantined(held.orb_id))
+        self.orbs
+            .iter()
+            .any(|held| self.is_quarantined(held.orb_id))
     }
 
     fn set_science_seat(&mut self, orb: u64, discipline: ScienceDiscipline, rank: u8) {
@@ -406,7 +414,7 @@ impl World {
         self.afford_bill(orb, &bill)?;
         self.pay_bill(orb, &bill);
         let fee = bill_crystal_portion(&bill); // receipt displays crystal portion (may be 0)
-        // If no crystal, still carry a non-zero ratio for kernel: first line amount.
+                                               // If no crystal, still carry a non-zero ratio for kernel: first line amount.
         let fee = if fee > ratio(0, 1) {
             fee
         } else {
@@ -449,9 +457,7 @@ impl World {
         // Survival proxy: biomass+crystal standing as "health" of the lab.
         let survival = self
             .orb_by_id(orb)
-            .map(|o| {
-                o.banked_amount(Resource::Biomass) + o.banked_amount(Resource::Crystal)
-            })
+            .map(|o| o.banked_amount(Resource::Biomass) + o.banked_amount(Resource::Crystal))
             .unwrap_or_else(|| ratio(0, 1));
         let unseated = self.unseated_cross(orb, path);
         let order_thin = self.order_balance_thin(orb);

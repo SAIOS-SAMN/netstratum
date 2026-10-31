@@ -19,9 +19,9 @@
 use cfe::dop::{zone_upkeep, zone_yield, Resource, ZoneKind};
 use cfe::ratio::{ratio, Ratio};
 use cfe::vocabulary::Entry;
-use reduct::resolve::overlay;
 use num_bigint::BigInt;
 use num_traits::{Signed, ToPrimitive, Zero};
+use reduct::resolve::overlay;
 
 /// The lattice a rational rate is quantized onto to become a `ℤ`-module
 /// coordinate — the melt grid the market already speaks. Rates are exact
@@ -392,9 +392,18 @@ pub fn cascade(supply: Ratio, demands: &[(Drive, Ratio)]) -> Cascade {
             binding = Some(*drive);
         }
         flow = (flow - demand.clone()).max(zero.clone());
-        tiers.push(TierReading { drive: *drive, demand, met, deficit });
+        tiers.push(TierReading {
+            drive: *drive,
+            demand,
+            met,
+            deficit,
+        });
     }
-    Cascade { tiers, leisure: flow, binding }
+    Cascade {
+        tiers,
+        leisure: flow,
+        binding,
+    }
 }
 
 /// **The live cascade** (COG-1) — read a colony's stratified demand from its
@@ -457,7 +466,9 @@ impl LeisureManifold {
     /// structure lives in `strata`; this is its projection for a scalar reader
     /// (the COG-13 gate, the mint), so nothing downstream must change to read it.
     pub fn budget(&self) -> Ratio {
-        self.strata.iter().fold(ratio(0, 1), |sum, (_, bal)| sum + bal.clone())
+        self.strata
+            .iter()
+            .fold(ratio(0, 1), |sum, (_, bal)| sum + bal.clone())
     }
 
     /// One stratum's standing balance (zero if the tier banks nothing).
@@ -468,7 +479,6 @@ impl LeisureManifold {
             .map(|(_, bal)| bal.clone())
             .unwrap_or_else(|| ratio(0, 1))
     }
-
 }
 
 /// The EROI friction margin μ (> 1): a thought must return more than it costs,
@@ -492,8 +502,8 @@ const FRICTION_MARGIN: i64 = 2;
 ///   metabolic exchange), both in the same food-surplus units.
 /// - **ROI**: the expected return is the deficit the geometry targets (`γ`, the
 ///   binding tier's unmet demand) carried over a generation `T_gen`
-///   ([`World::lifespan_of`]); it must exceed the cost by the friction margin
-///   `μ` ([`FRICTION_MARGIN`]). A cheap topology that solves a real deficit
+///   (`World::lifespan_of`); it must exceed the cost by the friction margin
+///   `μ` (`FRICTION_MARGIN`). A cheap topology that solves a real deficit
 ///   clears it; an over-complex one (high `W`) is rejected and the line waits
 ///   for a cheaper configuration.
 /// - **Dynamic reserve** `R(γ) = R_max·(1 − s)`: the buffer collapses with
@@ -530,9 +540,10 @@ pub fn cognitive_investment(world: &cfe::world::World, orb: u64, price: &Ratio) 
         .binding
         .and_then(|drive| cascade.tiers.iter().find(|tier| tier.drive == drive))
     {
-        Some(tier) if tier.demand > zero => {
-            (tier.deficit.clone(), tier.deficit.clone() / tier.demand.clone())
-        }
+        Some(tier) if tier.demand > zero => (
+            tier.deficit.clone(),
+            tier.deficit.clone() / tier.demand.clone(),
+        ),
         _ => (zero.clone(), zero.clone()),
     };
     // Systemic resilience: the reserve collapses proportionally to stress.
@@ -577,11 +588,19 @@ pub fn classify_defect(residual: &[BigInt], torsion: &[BigInt]) -> Vec<solver::n
     }
     let structure = [Family::Tile, Family::Object]; // Make what was not there
     let correspondence = [Family::Symmetry, Family::Recolor]; // relate what is
-    // The dominant character leads; the other trails (still reachable).
+                                                              // The dominant character leads; the other trails (still reachable).
     if free >= twist {
-        structure.iter().chain(correspondence.iter()).copied().collect()
+        structure
+            .iter()
+            .chain(correspondence.iter())
+            .copied()
+            .collect()
     } else {
-        correspondence.iter().chain(structure.iter()).copied().collect()
+        correspondence
+            .iter()
+            .chain(structure.iter())
+            .copied()
+            .collect()
     }
 }
 
@@ -686,7 +705,11 @@ mod tests {
         ];
         let peel = peel_economy(&[b(0), b(0), b(5)], &[b(0), b(0), b(0)], &buildables);
         assert!(!peel.covered, "no structure covers the knowledge deficit");
-        assert_eq!(peel.residual, vec![b(0), b(0), b(5)], "the irreducible defect → the Mind");
+        assert_eq!(
+            peel.residual,
+            vec![b(0), b(0), b(5)],
+            "the irreducible defect → the Mind"
+        );
         // Building farms won't fix a knowledge wall — Production is silent here;
         // this γ is Research's problem (a Sullivan mint), not Production's.
         assert!(sample_build(&peel.coefficients, seed(b"orb")).is_none());
@@ -701,13 +724,19 @@ mod tests {
         let axes = resource_axes();
         let fold = cfe::vocabulary::seed(cfe::vocabulary::Axis::Zone);
         let generators = fold_generators(&fold, 2, &axes); // 2 = biotic
-        assert!(!generators.is_empty(), "the fold yields buildable generators");
+        assert!(
+            !generators.is_empty(),
+            "the fold yields buildable generators"
+        );
 
         let (_, extractor) = generators
             .iter()
             .find(|(kind, _)| *kind == ZoneKind::Extractor)
             .expect("the extractor stands in the fold");
-        assert!(extractor.iter().any(|c| c.is_positive()), "the extractor PRODUCES (a +yield axis)");
+        assert!(
+            extractor.iter().any(|c| c.is_positive()),
+            "the extractor PRODUCES (a +yield axis)"
+        );
         assert!(
             extractor.iter().any(|c| c.is_negative()),
             "the extractor CONSUMES upkeep (a −axis) — a multi-axis boundary, not a scalar"
@@ -715,7 +744,11 @@ mod tests {
         // A different metabolism reads a different vector from the same fold —
         // the structure's boundary is species-relative.
         let plasmic = fold_generators(&fold, 3, &axes); // 3 = plasmic
-        assert_eq!(plasmic.len(), generators.len(), "same fold, per-species capacity");
+        assert_eq!(
+            plasmic.len(),
+            generators.len(),
+            "same fold, per-species capacity"
+        );
     }
 
     fn r(n: i64, d: i64) -> Ratio {
@@ -730,13 +763,25 @@ mod tests {
         // the higher tiers get nothing.
         let starving = cascade(
             r(3, 1),
-            &[(Metabolic, r(10, 1)), (Homeostatic, r(5, 1)), (Cognitive, r(8, 1))],
+            &[
+                (Metabolic, r(10, 1)),
+                (Homeostatic, r(5, 1)),
+                (Cognitive, r(8, 1)),
+            ],
         );
-        assert_eq!(starving.binding, Some(Metabolic), "an unmet floor is starvation");
+        assert_eq!(
+            starving.binding,
+            Some(Metabolic),
+            "an unmet floor is starvation"
+        );
         assert_eq!(starving.tiers[0].met, r(3, 1));
         assert_eq!(starving.tiers[0].deficit, r(7, 1), "the caloric shortfall");
         assert_eq!(starving.tiers[2].met, r(0, 1), "nothing reaches cognition");
-        assert_eq!(starving.leisure, r(0, 1), "a starving line banks no leisure");
+        assert_eq!(
+            starving.leisure,
+            r(0, 1),
+            "a starving line banks no leisure"
+        );
 
         // Stagnation — fed past the floor, but the surplus cannot cover the
         // cognitive demand. The binding constraint is a higher tier (Cognitive),
@@ -744,13 +789,33 @@ mod tests {
         // is the Sated crisis the flat model could never express.
         let stagnant = cascade(
             r(25, 1),
-            &[(Metabolic, r(10, 1)), (Homeostatic, r(5, 1)), (Cognitive, r(30, 1))],
+            &[
+                (Metabolic, r(10, 1)),
+                (Homeostatic, r(5, 1)),
+                (Cognitive, r(30, 1)),
+            ],
         );
-        assert_eq!(stagnant.tiers[0].deficit, r(0, 1), "the floor IS met — not starving");
+        assert_eq!(
+            stagnant.tiers[0].deficit,
+            r(0, 1),
+            "the floor IS met — not starving"
+        );
         assert_eq!(stagnant.tiers[1].deficit, r(0, 1), "containment met too");
-        assert_eq!(stagnant.binding, Some(Cognitive), "the binding γ is a cognitive need, not food");
-        assert_eq!(stagnant.tiers[2].met, r(10, 1), "10 of the 30 cognitive demand covered");
-        assert_eq!(stagnant.leisure, r(0, 1), "no surplus survives an unmet cognitive tier");
+        assert_eq!(
+            stagnant.binding,
+            Some(Cognitive),
+            "the binding γ is a cognitive need, not food"
+        );
+        assert_eq!(
+            stagnant.tiers[2].met,
+            r(10, 1),
+            "10 of the 30 cognitive demand covered"
+        );
+        assert_eq!(
+            stagnant.leisure,
+            r(0, 1),
+            "no surplus survives an unmet cognitive tier"
+        );
     }
 
     #[test]
@@ -760,11 +825,22 @@ mod tests {
         // whole waterfall is the leisure the Mind banks. 100 − (10+20+30) = 40.
         let rich = cascade(
             r(100, 1),
-            &[(Metabolic, r(10, 1)), (Homeostatic, r(20, 1)), (Cognitive, r(30, 1))],
+            &[
+                (Metabolic, r(10, 1)),
+                (Homeostatic, r(20, 1)),
+                (Cognitive, r(30, 1)),
+            ],
         );
         assert_eq!(rich.binding, None, "no drive left wanting");
-        assert!(rich.tiers.iter().all(|t| t.deficit == r(0, 1)), "all tiers met");
-        assert_eq!(rich.leisure, r(40, 1), "the surplus above every drive is leisure");
+        assert!(
+            rich.tiers.iter().all(|t| t.deficit == r(0, 1)),
+            "all tiers met"
+        );
+        assert_eq!(
+            rich.leisure,
+            r(40, 1),
+            "the surplus above every drive is leisure"
+        );
     }
 
     #[test]
@@ -772,21 +848,48 @@ mod tests {
         use Drive::*;
         // Both homeostatic and cognitive go unmet, but the first unmet tier is
         // the binding one — priority is strict, not a max over deficits.
-        let c = cascade(r(12, 1), &[(Metabolic, r(10, 1)), (Homeostatic, r(9, 1)), (Cognitive, r(9, 1))]);
-        assert_eq!(c.binding, Some(Homeostatic), "the lower unmet tier binds, not the larger deficit");
-        assert_eq!(c.tiers[1].met, r(2, 1), "homeostatic takes the 2 surplus after the floor");
-        assert_eq!(c.tiers[2].met, r(0, 1), "nothing spills past the unmet homeostatic tier");
+        let c = cascade(
+            r(12, 1),
+            &[
+                (Metabolic, r(10, 1)),
+                (Homeostatic, r(9, 1)),
+                (Cognitive, r(9, 1)),
+            ],
+        );
+        assert_eq!(
+            c.binding,
+            Some(Homeostatic),
+            "the lower unmet tier binds, not the larger deficit"
+        );
+        assert_eq!(
+            c.tiers[1].met,
+            r(2, 1),
+            "homeostatic takes the 2 surplus after the floor"
+        );
+        assert_eq!(
+            c.tiers[2].met,
+            r(0, 1),
+            "nothing spills past the unmet homeostatic tier"
+        );
         // A negative demand is simply a drive not felt — it passes surplus on.
         let unfelt = cascade(r(10, 1), &[(Metabolic, r(4, 1)), (Cognitive, r(-3, 1))]);
         assert_eq!(unfelt.binding, None, "a drive not felt is never a deficit");
-        assert_eq!(unfelt.leisure, r(6, 1), "the unfelt tier passes its surplus straight through");
+        assert_eq!(
+            unfelt.leisure,
+            r(6, 1),
+            "the unfelt tier passes its surplus straight through"
+        );
     }
 
     #[test]
     fn the_homology_sets_the_bill_a_wider_or_twisted_void_costs_more() {
         // A pure free residual (no torsion): the bill is the void's extent —
         // Σ|residualᵢ|, what the new generator must span. Nothing to twist.
-        assert_eq!(mint_cost(&[b(0), b(0), b(5)], &[]), b(5), "the free void costs its extent");
+        assert_eq!(
+            mint_cost(&[b(0), b(0), b(5)], &[]),
+            b(5),
+            "the free void costs its extent"
+        );
         // A deeper void along the same axis costs strictly more.
         assert!(
             mint_cost(&[b(0), b(0), b(10)], &[]) > mint_cost(&[b(0), b(0), b(5)], &[]),
@@ -811,23 +914,40 @@ mod tests {
         );
         // Covered is free: a vanished residual mints nothing, whatever twist the
         // lattice carries — the shear is paid only to bridge a genuine void.
-        assert_eq!(mint_cost(&[b(0), b(0), b(0)], &[b(4)]), b(0), "no void, no bill — even through a twist");
+        assert_eq!(
+            mint_cost(&[b(0), b(0), b(0)], &[b(4)]),
+            b(0),
+            "no void, no bill — even through a twist"
+        );
     }
 
     #[test]
     fn fasting_breaks_the_deadlock_the_poor_still_think_slowly() {
         // The rich: large leisure dwarfs the trickle — they coin instantly.
         let rich = fasting_fill(r(500, 1), r(80, 1));
-        assert!(rich > r(500, 1), "leisure plus a trickle exceeds leisure alone");
+        assert!(
+            rich > r(500, 1),
+            "leisure plus a trickle exceeds leisure alone"
+        );
         // The destitute: zero leisure, but a live syntropic flow still feeds a
         // base cognitive trickle — the accumulator inches up, never stuck at 0.
         let poor = fasting_fill(r(0, 1), r(80, 1));
-        assert!(poor > r(0, 1), "a zero-leisure line still fills from the wild trickle: {poor}");
+        assert!(
+            poor > r(0, 1),
+            "a zero-leisure line still fills from the wild trickle: {poor}"
+        );
         // The truly barren: no wild flow either (unsited/dead world) — no trickle,
         // no thought. The floor is survival, not free cognition.
-        assert_eq!(fasting_fill(r(0, 1), r(0, 1)), r(0, 1), "no wild flow, no trickle");
+        assert_eq!(
+            fasting_fill(r(0, 1), r(0, 1)),
+            r(0, 1),
+            "no wild flow, no trickle"
+        );
         // The trickle is a small fraction of the wild flow — slow, not free.
-        assert!(poor < r(80, 1), "the trickle is a fraction of the flow, not all of it");
+        assert!(
+            poor < r(80, 1),
+            "the trickle is a fraction of the flow, not all of it"
+        );
     }
 
     #[test]
@@ -836,9 +956,15 @@ mod tests {
         // crisis exchange is deliberately worse than thinking on a full stomach.
         let leisure_price = r(3, 1);
         let heads = desperation_price(&leisure_price);
-        assert!(heads > leisure_price, "burning people is dearer than spending leisure: {heads}");
+        assert!(
+            heads > leisure_price,
+            "burning people is dearer than spending leisure: {heads}"
+        );
         // A costlier thought burns proportionally more of the colony.
-        assert!(desperation_price(&r(6, 1)) > desperation_price(&r(3, 1)), "a deeper Eureka costs more lives");
+        assert!(
+            desperation_price(&r(6, 1)) > desperation_price(&r(3, 1)),
+            "a deeper Eureka costs more lives"
+        );
     }
 
     #[test]
@@ -847,14 +973,28 @@ mod tests {
         // A free-dominated void (unspanned direction, no twist) → the Mind must
         // make structure: the structure families lead.
         let structure = classify_defect(&[b(0), b(0), b(9)], &[]);
-        assert_eq!(structure.first(), Some(&Family::Tile), "an unspanned void leads with structure");
-        assert!(structure.contains(&Family::Symmetry), "correspondence still reachable (ordering only)");
+        assert_eq!(
+            structure.first(),
+            Some(&Family::Tile),
+            "an unspanned void leads with structure"
+        );
+        assert!(
+            structure.contains(&Family::Symmetry),
+            "correspondence still reachable (ordering only)"
+        );
         // A torsion-dominated void (tiny free part, heavy twist) → the Mind must
         // relate existing structure: the correspondence families lead.
         let twist = classify_defect(&[b(1)], &[b(255), b(255)]);
-        assert_eq!(twist.first(), Some(&Family::Symmetry), "a twisted void leads with correspondence");
+        assert_eq!(
+            twist.first(),
+            Some(&Family::Symmetry),
+            "a twisted void leads with correspondence"
+        );
         // A covered deficit is no void — nothing to classify, no search at all.
-        assert!(classify_defect(&[b(0), b(0)], &[]).is_empty(), "covered → no search");
+        assert!(
+            classify_defect(&[b(0), b(0)], &[]).is_empty(),
+            "covered → no search"
+        );
     }
 
     #[test]
@@ -864,7 +1004,11 @@ mod tests {
         let buildables = vec![vec![b(2), b(0), b(0)], vec![b(0), b(3), b(0)]];
         let peel = peel_economy(&[b(4), b(0), b(0)], &[b(0), b(0), b(0)], &buildables);
         assert!(peel.covered, "the deficit is spanned");
-        assert_eq!(mint_cost(&peel.residual, &peel.torsion), b(0), "no void, no bill");
+        assert_eq!(
+            mint_cost(&peel.residual, &peel.torsion),
+            b(0),
+            "no void, no bill"
+        );
     }
 
     #[test]
@@ -877,7 +1021,10 @@ mod tests {
         let peel = peel_economy(&[b(0), b(0), b(5)], &[b(0), b(0), b(0)], &buildables);
         assert!(!peel.covered, "the knowledge wall stands");
         let bill = mint_cost(&peel.residual, &peel.torsion);
-        assert!(bill > b(0), "an irreducible deficit carries a real bill: {bill}");
+        assert!(
+            bill > b(0),
+            "an irreducible deficit carries a real bill: {bill}"
+        );
         // The bill is the void's extent (5 units of unspanned knowledge) plus
         // the shear of threading the new generator through the economy's own
         // standing twist: the food/metal generators (yields 2 and 3) span a
@@ -886,7 +1033,11 @@ mod tests {
         let extent: BigInt = peel.residual.iter().map(|x| x.abs()).sum();
         let shear: BigInt = peel.torsion.iter().map(|d| BigInt::from(d.bits())).sum();
         assert_eq!(extent, b(5), "the unspanned knowledge deficit");
-        assert_eq!(bill, extent + shear, "extent plus the ambient lattice shear");
+        assert_eq!(
+            bill,
+            extent + shear,
+            "extent plus the ambient lattice shear"
+        );
         assert_eq!(bill, b(8), "5 unspanned + 3 shear through the ℤ/6 twist");
     }
 
@@ -896,7 +1047,14 @@ mod tests {
         // not a greedy pick. Seeded from state → replayable.
         let coeffs = vec![b(3), b(0), b(1)];
         let pick = sample_build(&coeffs, seed(b"orb-7"));
-        assert!(matches!(pick, Some(0) | Some(2)), "picks a called-for structure, weighted");
-        assert_eq!(sample_build(&coeffs, seed(b"orb-7")), pick, "same seed → same build");
+        assert!(
+            matches!(pick, Some(0) | Some(2)),
+            "picks a called-for structure, weighted"
+        );
+        assert_eq!(
+            sample_build(&coeffs, seed(b"orb-7")),
+            pick,
+            "same seed → same build"
+        );
     }
 }

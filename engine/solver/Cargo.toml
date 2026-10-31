@@ -16,3 +16,6 @@ solver-verify = { path = "../solver-verify" }
 # `reduct::FullMeasurement` and reads them through the one reduce organ
 # (`reduct::think`). A clean new edge — reduct never imports solver/cfe, so no cycle.
 reduct = { path = "../reduct" }
+
+[lints]
+workspace = true

@@ -106,16 +106,36 @@ fn grip(a: &Atom) -> Ratio {
 /// HYDROGEN_K`), and its clock against its star (the coupling's rate). None
 /// where it is cold through (nothing agitates it) or holds nothing.
 #[allow(clippy::too_many_arguments)]
-pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, star_burn: &Ratio, world_scale: &Ratio, delay: u64) -> Option<World> {
+pub fn read(
+    path: Vec<u64>,
+    matter: &Manifest,
+    heat: &Ratio,
+    coupling: &Ratio,
+    star_burn: &Ratio,
+    world_scale: &Ratio,
+    delay: u64,
+) -> Option<World> {
     if heat.is_zero() || matter.is_empty() {
         return None;
     }
     let heat = heat.clone();
-    let atoms: Vec<(Atom, Ratio)> = matter.iter().filter_map(|(k, g)| z_of(k).and_then(crate::chem::atom_of).map(|a| (a, g.clone()))).collect();
+    let atoms: Vec<(Atom, Ratio)> = matter
+        .iter()
+        .filter_map(|(k, g)| {
+            z_of(k)
+                .and_then(crate::chem::atom_of)
+                .map(|a| (a, g.clone()))
+        })
+        .collect();
     // Every kind's atoms are its size, a cluster's by its parts
     // (`chem::components`): a world of compounds is not empty.
     let loose = matter.iter().fold(ratio(0, 1), |s, (k, g)| {
-        let sized = crate::chem::components(k).iter().filter_map(|&(n, z)| crate::chem::atom_of(z).map(|a| i64::from(n) * i64::from(a.enclosed * a.depth))).sum::<i64>();
+        let sized = crate::chem::components(k)
+            .iter()
+            .filter_map(|&(n, z)| {
+                crate::chem::atom_of(z).map(|a| i64::from(n) * i64::from(a.enclosed * a.depth))
+            })
+            .sum::<i64>();
         s + g.clone() * ratio(sized, 1)
     });
     if loose.is_zero() {
@@ -130,9 +150,26 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
     // The volatiles: closed atoms or those bonding once, plasma, and the
     // closed clusters its chemistry made (they bond no further), by their
     // holding (`chem::hold`).
-    let mut gases: Vec<(u32, Ratio)> = atoms.iter().filter(|(a, _)| volatile(a) || plasma(a)).map(|(a, g)| (cfe::almanac::atom::hold(a.z), g.clone())).collect();
-    gases.extend(matter.iter().filter(|(k, _)| z_of(k).is_none() && crate::chem::unpaired(k) == 0).map(|(k, g)| (crate::chem::hold(k), g.clone())));
-    let core_matter: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(crate::chem::atom_of).is_some_and(|a| !plasma(&a) && a.unpaired >= 2)).map(|(k, g)| (k.clone(), g.clone())).collect();
+    let mut gases: Vec<(u32, Ratio)> = atoms
+        .iter()
+        .filter(|(a, _)| volatile(a) || plasma(a))
+        .map(|(a, g)| (cfe::almanac::atom::hold(a.z), g.clone()))
+        .collect();
+    gases.extend(
+        matter
+            .iter()
+            .filter(|(k, _)| z_of(k).is_none() && crate::chem::unpaired(k) == 0)
+            .map(|(k, g)| (crate::chem::hold(k), g.clone())),
+    );
+    let core_matter: Manifest = matter
+        .iter()
+        .filter(|(k, _)| {
+            z_of(k)
+                .and_then(crate::chem::atom_of)
+                .is_some_and(|a| !plasma(&a) && a.unpaired >= 2)
+        })
+        .map(|(k, g)| (k.clone(), g.clone()))
+        .collect();
     let core = mass(&core_matter) / mass(matter);
     let hold = gravity.clone() * (ratio(1, 1) + core.clone()) / heat.clone();
     // Chemical: the compound it lives in. First the closed clusters its
@@ -143,7 +180,10 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
     let mut chemical: Option<(Ratio, Ratio)> = None;
     let mut consider = |share: Ratio, contact_tightness: Ratio| {
         if chemical.as_ref().is_none_or(|(s, _)| share > *s) {
-            chemical = Some((share, contact_tightness * ratio(CONTACT_K, 1) / heat.clone()));
+            chemical = Some((
+                share,
+                contact_tightness * ratio(CONTACT_K, 1) / heat.clone(),
+            ));
         }
     };
     for (k, g) in matter.iter() {
@@ -152,40 +192,99 @@ pub fn read(path: Vec<u64>, matter: &Manifest, heat: &Ratio, coupling: &Ratio, s
         }
     }
     let grip_units = heat.clone() / ratio(HYDROGEN_K, 1);
-    let bonders: Vec<&(Atom, Ratio)> = atoms.iter().filter(|(a, _)| !plasma(a) && a.unpaired > 0).collect();
+    let bonders: Vec<&(Atom, Ratio)> = atoms
+        .iter()
+        .filter(|(a, _)| !plasma(a) && a.unpaired > 0)
+        .collect();
     for (i, (a, ga)) in bonders.iter().enumerate() {
         for (b, gb) in bonders.iter().skip(i) {
-            let (ua, ub) = (cfe::almanac::atom::open_at(a.z, &grip_units), cfe::almanac::atom::open_at(b.z, &grip_units));
+            let (ua, ub) = (
+                cfe::almanac::atom::open_at(a.z, &grip_units),
+                cfe::almanac::atom::open_at(b.z, &grip_units),
+            );
             if crate::chem::closing(a.z, ua, b.z, ub).is_none() {
                 continue;
             }
             if grip(a).min(grip(b)) <= heat {
                 continue;
             }
-            consider(ga.clone().min(gb.clone()), a.tightness.clone().min(b.tightness.clone()));
+            consider(
+                ga.clone().min(gb.clone()),
+                a.tightness.clone().min(b.tightness.clone()),
+            );
         }
     }
     // Lithic: the most abundant network former (two or more bonds) the
     // heat does not melt to plasma.
     // A lattice holds a pattern by as many contacts as the former bonds.
-    let lithic = atoms.iter().filter(|(a, _)| !plasma(a) && a.unpaired >= 2).max_by(|x, y| x.1.cmp(&y.1)).map(|(a, _)| a.tightness.clone() * ratio(CONTACT_K * i64::from(a.unpaired), 1) / heat.clone());
+    let lithic = atoms
+        .iter()
+        .filter(|(a, _)| !plasma(a) && a.unpaired >= 2)
+        .max_by(|x, y| x.1.cmp(&y.1))
+        .map(|(a, _)| {
+            a.tightness.clone() * ratio(CONTACT_K * i64::from(a.unpaired), 1) / heat.clone()
+        });
     // Informational: the coupling's coherence over its slip, `rate / (1 − rate)`.
-    let informational = (*coupling < ratio(1, 1)).then(|| coupling.clone() / (ratio(1, 1) - coupling.clone()));
+    let informational =
+        (*coupling < ratio(1, 1)).then(|| coupling.clone() / (ratio(1, 1) - coupling.clone()));
     // Plasmic: the field the coupling sets holding the ionised share.
     let plasma_share = {
         let all = mass(matter);
-        let ionised: Manifest = matter.iter().filter(|(k, _)| z_of(k).and_then(crate::chem::atom_of).is_some_and(|a| plasma(&a))).map(|(k, g)| (k.clone(), g.clone())).collect();
-        if all.is_zero() { ratio(0, 1) } else { mass(&ionised) / all }
+        let ionised: Manifest = matter
+            .iter()
+            .filter(|(k, _)| {
+                z_of(k)
+                    .and_then(crate::chem::atom_of)
+                    .is_some_and(|a| plasma(&a))
+            })
+            .map(|(k, g)| (k.clone(), g.clone()))
+            .collect();
+        if all.is_zero() {
+            ratio(0, 1)
+        } else {
+            mass(&ionised) / all
+        }
     };
-    let plasmic = informational.clone().filter(|_| plasma_share > ratio(0, 1)).map(|x| x * plasma_share);
-    Some(World { path, heat, burn: star_burn.clone(), size, gravity, core, hold, atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases, chemical: chemical.map(|(_, x)| x), lithic, plasmic, informational, coupling: coupling.clone(), delay, belts: ratio(0, 1), window: u64::MAX, days: None })
+    let plasmic = informational
+        .clone()
+        .filter(|_| plasma_share > ratio(0, 1))
+        .map(|x| x * plasma_share);
+    Some(World {
+        path,
+        heat,
+        burn: star_burn.clone(),
+        size,
+        gravity,
+        core,
+        hold,
+        atmosphere: ratio(0, 1),
+        pressure: ratio(0, 1),
+        gases,
+        chemical: chemical.map(|(_, x)| x),
+        lithic,
+        plasmic,
+        informational,
+        coupling: coupling.clone(),
+        delay,
+        belts: ratio(0, 1),
+        window: u64::MAX,
+        days: None,
+    })
 }
 
 /// `e^(−λ)` bounded above by whole halvings, `2^(−⌊λ · 1442/1000⌋)` (so the
 /// kept share errs toward a thinner atmosphere).
 fn lost(lambda: &Ratio) -> Ratio {
-    let n: u32 = (lambda.clone() * ratio(1442, 1000)).floor().to_integer().try_into().unwrap_or(u32::MAX).min(64);
-    Ratio::new(num_bigint::BigInt::from(1), num_bigint::BigInt::from(2u8).pow(n))
+    let n: u32 = (lambda.clone() * ratio(1442, 1000))
+        .floor()
+        .to_integer()
+        .try_into()
+        .unwrap_or(u32::MAX)
+        .min(64);
+    Ratio::new(
+        num_bigint::BigInt::from(1),
+        num_bigint::BigInt::from(2u8).pow(n),
+    )
 }
 
 /// The atmosphere a world keeps, its hold calibrated by `k` (the median
@@ -232,7 +331,11 @@ pub fn wake_bell(w: &World, k: u64, t_u: u64) -> Option<u64> {
     if slip <= ratio(0, 1) {
         return None;
     }
-    let echoes: u64 = (ratio(k as i64, 1) / slip).ceil().to_integer().try_into().ok()?;
+    let echoes: u64 = (ratio(k as i64, 1) / slip)
+        .ceil()
+        .to_integer()
+        .try_into()
+        .ok()?;
     Some(w.delay + echoes.checked_mul(t_u)?)
 }
 
@@ -251,10 +354,26 @@ pub struct Home {
 /// and that star's innermost world are the rulers (the breath moves and
 /// empties systems, so the first in order need not hold one).
 pub fn home(u: &Universe) -> Option<Home> {
-    let core = u.cores.iter().filter(|c| c.satellites.iter().any(|s| !s.satellites.is_empty())).max_by(|a, b| mass(&a.kept).cmp(&mass(&b.kept)))?;
-    let sys = core.satellites.iter().filter(|s| !s.satellites.is_empty()).min_by(|a, b| a.radius.cmp(&b.radius))?;
-    let orb = sys.satellites.iter().min_by(|a, b| a.radius.cmp(&b.radius))?;
-    Some(Home { star: mass(&sys.kept), world: mass(&orb.kept), year_bells: orb.period.clone(), heat: orb.heat.clone() * ratio(HYDROGEN_K, 1) })
+    let core = u
+        .cores
+        .iter()
+        .filter(|c| c.satellites.iter().any(|s| !s.satellites.is_empty()))
+        .max_by(|a, b| mass(&a.kept).cmp(&mass(&b.kept)))?;
+    let sys = core
+        .satellites
+        .iter()
+        .filter(|s| !s.satellites.is_empty())
+        .min_by(|a, b| a.radius.cmp(&b.radius))?;
+    let orb = sys
+        .satellites
+        .iter()
+        .min_by(|a, b| a.radius.cmp(&b.radius))?;
+    Some(Home {
+        star: mass(&sys.kept),
+        world: mass(&orb.kept),
+        year_bells: orb.period.clone(),
+        heat: orb.heat.clone() * ratio(HYDROGEN_K, 1),
+    })
 }
 
 /// The bell (Xylarium's ladder, shared): the home core's ring, the pulse's
@@ -276,7 +395,9 @@ pub const VIABLE_PEOPLE: i64 = 500;
 
 /// Whether a world's matter can carry a viable people (exact, in nuclei).
 pub fn viable(matter: &Manifest) -> bool {
-    let grains = matter.values().fold(ratio(0, 1), |s, a| s + a.clone() * ratio(1024, 1));
+    let grains = matter
+        .values()
+        .fold(ratio(0, 1), |s, a| s + a.clone() * ratio(1024, 1));
     let nuclei = grains.floor().to_integer() * crate::pulse::nuclei_per_grain();
     nuclei >= num_bigint::BigInt::from(VIABLE_PEOPLE) * num_bigint::BigInt::from(GENOME_BITS)
 }
@@ -289,7 +410,13 @@ pub fn viable(matter: &Manifest) -> bool {
 /// is its own (`days` a year, its clock's slips against its star in one
 /// orbit): a world with no day (locked to its star) gives cells no
 /// generations, and climbs nothing.
-pub fn climb_bells(period_bells: &Ratio, home_year_bells: &Ratio, days: &Ratio, x: &Ratio, compression: &Ratio) -> Option<Ratio> {
+pub fn climb_bells(
+    period_bells: &Ratio,
+    home_year_bells: &Ratio,
+    days: &Ratio,
+    x: &Ratio,
+    compression: &Ratio,
+) -> Option<Ratio> {
     let _rungs = recoherences_needed(x, compression)?;
     if *days <= ratio(0, 1) {
         return None;
@@ -316,7 +443,11 @@ pub fn window_echoes(star: &Ratio, worlds: &Ratio) -> u64 {
     let q = (star.clone() / worlds.clone()).floor().to_integer();
     let halvings = q.bits().saturating_sub(1);
     let epsilon = crate::pulse::tier(1).medium;
-    (ratio(halvings as i64, 1) * ratio(693, 1000) * ratio(2, 1) / epsilon).floor().to_integer().try_into().unwrap_or(0)
+    (ratio(halvings as i64, 1) * ratio(693, 1000) * ratio(2, 1) / epsilon)
+        .floor()
+        .to_integer()
+        .try_into()
+        .unwrap_or(0)
 }
 
 /// A world's twist a bell (docs/100 §2): its galaxy's core's winding from its
@@ -325,14 +456,23 @@ pub fn window_echoes(star: &Ratio, worlds: &Ratio) -> u64 {
 /// One reading for every impact law (`climb`, `readings`).
 pub fn twist_of(u: &Universe, path: &[u64]) -> Ratio {
     let galaxy = path.first().copied();
-    let body_tilt = u.cores.iter().find(|c| c.path.first().copied() == galaxy)
+    let body_tilt = u
+        .cores
+        .iter()
+        .find(|c| c.path.first().copied() == galaxy)
         .and_then(|c| c.satellites.iter().find(|s| s.path.get(1) == path.get(1)))
         .and_then(|s| s.satellites.iter().find(|o| o.path.get(2) == path.get(2)))
-        .map(|o| o.tilt.clone()).unwrap_or_default();
-    u.cores.iter().position(|c| c.path.first().copied() == galaxy).map(|i| {
-        let rate = crate::breath::galaxy_rate(u, i, &crate::breath::unit_mass(u)).unwrap_or_else(|| ratio(1, 1));
-        crate::quantum::twist(&rate, &u.cores[i].tilt, &body_tilt)
-    }).unwrap_or_else(|| ratio(0, 1))
+        .map(|o| o.tilt.clone())
+        .unwrap_or_default();
+    u.cores
+        .iter()
+        .position(|c| c.path.first().copied() == galaxy)
+        .map(|i| {
+            let rate = crate::breath::galaxy_rate(u, i, &crate::breath::unit_mass(u))
+                .unwrap_or_else(|| ratio(1, 1));
+            crate::quantum::twist(&rate, &u.cores[i].tilt, &body_tilt)
+        })
+        .unwrap_or_else(|| ratio(0, 1))
 }
 
 /// The climb with erasure (docs/82): recoherence by recoherence, each
@@ -344,8 +484,22 @@ pub fn twist_of(u: &Universe, path: &[u64]) -> Ratio {
 /// life never undone. The mind wakes at the recoherence its last rung is
 /// written, if within the star's window; else never.
 #[allow(clippy::too_many_arguments)]
-pub fn climb(w: &World, x: &Ratio, compression: &Ratio, twist: &Ratio, t_u: u64, period_bells: &Ratio, home_year_bells: &Ratio) -> Option<u64> {
-    let bells = climb_bells(period_bells, home_year_bells, w.days.as_ref()?, x, compression)?;
+pub fn climb(
+    w: &World,
+    x: &Ratio,
+    compression: &Ratio,
+    twist: &Ratio,
+    t_u: u64,
+    period_bells: &Ratio,
+    home_year_bells: &Ratio,
+) -> Option<u64> {
+    let bells = climb_bells(
+        period_bells,
+        home_year_bells,
+        w.days.as_ref()?,
+        x,
+        compression,
+    )?;
     let slip = ratio(1, 1) - w.coupling.clone();
     if slip <= ratio(0, 1) {
         return None;
@@ -354,7 +508,11 @@ pub fn climb(w: &World, x: &Ratio, compression: &Ratio, twist: &Ratio, t_u: u64,
     // after its climb completes, each impact at a recoherence before then
     // costing that interval again (the rung's need kept). Within the star's
     // window, or never.
-    let last: u64 = (ratio(w.window.min(u32::MAX as u64) as i64, 1) * slip.clone()).floor().to_integer().try_into().unwrap_or(0);
+    let last: u64 = (ratio(w.window.min(u32::MAX as u64) as i64, 1) * slip.clone())
+        .floor()
+        .to_integer()
+        .try_into()
+        .unwrap_or(0);
     let p = w.belts.clone() / (ratio(1, 1) + compression.clone());
     let mut due = ratio(w.delay as i64, 1) + bells;
     for k in 1..=last {
@@ -416,7 +574,11 @@ pub struct Reading {
 pub fn reference_pressure(worlds: &[World]) -> Ratio {
     let mut pressures: Vec<Ratio> = worlds.iter().map(|w| w.pressure.clone()).collect();
     pressures.sort();
-    pressures.get(pressures.len() / 2).cloned().filter(|p| *p > ratio(0, 1)).unwrap_or_else(|| ratio(1, 1))
+    pressures
+        .get(pressures.len() / 2)
+        .cloned()
+        .filter(|p| *p > ratio(0, 1))
+        .unwrap_or_else(|| ratio(1, 1))
 }
 
 /// A people's medium, from its metabolism in the registry's vocabulary (the
@@ -457,12 +619,23 @@ pub fn medium_halvings(w: &World, compression: &Ratio, medium: &str) -> Option<R
 /// (`VIABLE_PEOPLE`, a declared placeholder anchor):
 /// `wild = ⌊VIABLE_PEOPLE · T · (1 − 2^(−⌊h⌋)) / T_home⌋`, heads whole.
 pub fn wild(w: &World, compression: &Ratio, medium: &str, home_heat: &Ratio) -> Ratio {
-    let Some(h) = medium_halvings(w, compression, medium) else { return ratio(0, 1) };
+    let Some(h) = medium_halvings(w, compression, medium) else {
+        return ratio(0, 1);
+    };
     if home_heat.is_zero() {
         return ratio(0, 1);
     }
-    let whole: u32 = h.floor().to_integer().try_into().unwrap_or(u32::MAX).min(64);
-    let carried = ratio(1, 1) - Ratio::new(num_bigint::BigInt::from(1), num_bigint::BigInt::from(2u8).pow(whole));
+    let whole: u32 = h
+        .floor()
+        .to_integer()
+        .try_into()
+        .unwrap_or(u32::MAX)
+        .min(64);
+    let carried = ratio(1, 1)
+        - Ratio::new(
+            num_bigint::BigInt::from(1),
+            num_bigint::BigInt::from(2u8).pow(whole),
+        );
     (ratio(VIABLE_PEOPLE, 1) * w.heat.clone() * carried / home_heat.clone()).floor()
 }
 
@@ -475,37 +648,81 @@ pub fn readings(u: &Universe, _seed: &[u8; 32]) -> std::collections::BTreeMap<Ve
     for w in worlds {
         let period = (|| {
             let core = u.cores.iter().find(|c| c.path.first() == w.path.first())?;
-            let sys = core.satellites.iter().find(|s| s.path.get(1) == w.path.get(1))?;
-            sys.satellites.iter().find(|o| o.path.get(2) == w.path.get(2)).map(|o| o.period.clone())
+            let sys = core
+                .satellites
+                .iter()
+                .find(|s| s.path.get(1) == w.path.get(1))?;
+            sys.satellites
+                .iter()
+                .find(|o| o.path.get(2) == w.path.get(2))
+                .map(|o| o.period.clone())
         })();
         let compression = w.pressure.clone() / reference.clone();
         let matter = (|| {
             let core = u.cores.iter().find(|c| c.path.first() == w.path.first())?;
-            let sys = core.satellites.iter().find(|s| s.path.get(1) == w.path.get(1))?;
-            sys.satellites.iter().find(|o| o.path.get(2) == w.path.get(2)).map(|o| o.kept.clone())
+            let sys = core
+                .satellites
+                .iter()
+                .find(|s| s.path.get(1) == w.path.get(1))?;
+            sys.satellites
+                .iter()
+                .find(|o| o.path.get(2) == w.path.get(2))
+                .map(|o| o.kept.clone())
         })();
         // Its galaxy's twist a bell (docs/100 §2): derived, never drawn.
         let torsion = twist_of(u, &w.path);
         let turn = period.clone().unwrap_or_else(|| ratio(0, 1));
-        let climb = period.filter(|_| matter.as_ref().is_some_and(viable)).and_then(|p| {
-            [("chemical", &w.chemical), ("lithic", &w.lithic), ("plasmic", &w.plasmic)]
+        let climb = period
+            .filter(|_| matter.as_ref().is_some_and(viable))
+            .and_then(|p| {
+                [
+                    ("chemical", &w.chemical),
+                    ("lithic", &w.lithic),
+                    ("plasmic", &w.plasmic),
+                ]
                 .into_iter()
-                .filter_map(|(m, x)| x.as_ref().and_then(|x| climb_bells(&p, &home.year_bells, w.days.as_ref()?, x, &compression)).map(|b| (b, m)))
+                .filter_map(|(m, x)| {
+                    x.as_ref()
+                        .and_then(|x| {
+                            climb_bells(&p, &home.year_bells, w.days.as_ref()?, x, &compression)
+                        })
+                        .map(|b| (b, m))
+                })
                 .min_by(|a, b| a.0.cmp(&b.0))
-        });
-        out.insert(w.path.clone(), Reading { world: w, compression, climb, period: turn, torsion });
+            });
+        out.insert(
+            w.path.clone(),
+            Reading {
+                world: w,
+                compression,
+                climb,
+                period: turn,
+                torsion,
+            },
+        );
     }
     out
 }
 
 /// Advance every world's climb to `bell`, reading each at its own
 /// recoherences; returns the minds that wake.
-pub fn advance(readings: &std::collections::BTreeMap<Vec<u64>, Reading>, climbs: &mut Climbs, t_u: u64, bell: u64) -> (Vec<Waking>, u64) {
+pub fn advance(
+    readings: &std::collections::BTreeMap<Vec<u64>, Reading>,
+    climbs: &mut Climbs,
+    t_u: u64,
+    bell: u64,
+) -> (Vec<Waking>, u64) {
     let mut woke = Vec::new();
     let mut measured = 0u64;
     for (path, r) in readings {
         let w = &r.world;
-        let climb = climbs.entry(path.clone()).or_insert_with(|| Climb { written: ratio(0, 1), k: 1, last: w.delay, next: wake_bell(w, 1, t_u).unwrap_or(u64::MAX), woken: false });
+        let climb = climbs.entry(path.clone()).or_insert_with(|| Climb {
+            written: ratio(0, 1),
+            k: 1,
+            last: w.delay,
+            next: wake_bell(w, 1, t_u).unwrap_or(u64::MAX),
+            woken: false,
+        });
         if climb.woken {
             continue;
         }
@@ -520,11 +737,16 @@ pub fn advance(readings: &std::collections::BTreeMap<Vec<u64>, Reading>, climbs:
                 let struck = crate::quantum::measure(&u, &p);
                 measured += 1;
                 if !struck && *length > ratio(0, 1) {
-                    climb.written += ratio(at.saturating_sub(climb.last) as i64, 1) / length.clone();
+                    climb.written +=
+                        ratio(at.saturating_sub(climb.last) as i64, 1) / length.clone();
                 }
                 if climb.written >= ratio(1, 1) {
                     climb.woken = true;
-                    woke.push(Waking { bell: at, path: path.clone(), medium });
+                    woke.push(Waking {
+                        bell: at,
+                        path: path.clone(),
+                        medium,
+                    });
                 }
             }
             climb.last = at;
@@ -586,7 +808,16 @@ pub fn read_climbs(var_root: &std::path::Path) -> Climbs {
                 at += 8;
             }
             let woken = *v.get(at)? == 1;
-            Some((path, Climb { written, k: u[0], last: u[1], next: u[2], woken }))
+            Some((
+                path,
+                Climb {
+                    written,
+                    k: u[0],
+                    last: u[1],
+                    next: u[2],
+                    woken,
+                },
+            ))
         })
         .collect()
 }
@@ -595,16 +826,25 @@ pub fn read_climbs(var_root: &std::path::Path) -> Climbs {
 pub fn worlds(u: &Universe) -> Vec<World> {
     let median = |mut v: Vec<Ratio>| -> Ratio {
         v.sort();
-        v.get(v.len() / 2).cloned().filter(|m| !m.is_zero()).unwrap_or_else(|| ratio(1, 1))
+        v.get(v.len() / 2)
+            .cloned()
+            .filter(|m| !m.is_zero())
+            .unwrap_or_else(|| ratio(1, 1))
     };
     // One ruler per tier (shared with Xylarium, 2026-10-14): the home
     // reference body: the home galaxy (the deepest core), its innermost
     // star, and that star's innermost world.
     let _ = median;
     let home = home(u);
-    let star_scale = home.as_ref().map(|h| h.star.clone()).unwrap_or_else(|| ratio(1, 1));
+    let star_scale = home
+        .as_ref()
+        .map(|h| h.star.clone())
+        .unwrap_or_else(|| ratio(1, 1));
     let t_u = ratio(i64::try_from(u.t_u).unwrap_or(i64::MAX), 1);
-    let world_scale = home.as_ref().map(|h| h.world.clone()).unwrap_or_else(|| ratio(1, 1));
+    let world_scale = home
+        .as_ref()
+        .map(|h| h.world.clone())
+        .unwrap_or_else(|| ratio(1, 1));
     let mut out = Vec::new();
     for core in &u.cores {
         for sys in &core.satellites {
@@ -613,15 +853,33 @@ pub fn worlds(u: &Universe) -> Vec<World> {
             let mut inside = star.clone();
             let delay: u64 = core.radius.floor().to_integer().try_into().unwrap_or(0);
             let system = mass(&sys.total());
-            let belts = if system.is_zero() { ratio(0, 1) } else { mass(&sys.medium) / system };
-            let worlds_mass = sys.satellites.iter().fold(ratio(0, 1), |s, o| s + mass(&o.total()));
+            let belts = if system.is_zero() {
+                ratio(0, 1)
+            } else {
+                mass(&sys.medium) / system
+            };
+            let worlds_mass = sys
+                .satellites
+                .iter()
+                .fold(ratio(0, 1), |s, o| s + mass(&o.total()));
             let window = window_echoes(&star, &worlds_mass);
             for orb in &sys.satellites {
-                let coupling = crate::ring::rate(&orb.radius, &(inside.clone() / crate::breath::unit_mass(u)));
-                if let Some(mut w) = read(orb.path.clone(), &orb.kept, &(orb.heat.clone() * ratio(HYDROGEN_K, 1)), &coupling, &star_burn, &world_scale, delay) {
+                let coupling =
+                    crate::ring::rate(&orb.radius, &(inside.clone() / crate::breath::unit_mass(u)));
+                if let Some(mut w) = read(
+                    orb.path.clone(),
+                    &orb.kept,
+                    &(orb.heat.clone() * ratio(HYDROGEN_K, 1)),
+                    &coupling,
+                    &star_burn,
+                    &world_scale,
+                    delay,
+                ) {
                     w.belts = belts.clone();
                     w.window = window;
-                    w.days = (!t_u.is_zero()).then(|| (ratio(1, 1) - coupling.clone()) * orb.period.clone() / t_u.clone());
+                    w.days = (!t_u.is_zero()).then(|| {
+                        (ratio(1, 1) - coupling.clone()) * orb.period.clone() / t_u.clone()
+                    });
                     out.push(w);
                 }
                 inside += mass(&orb.total());
@@ -632,7 +890,11 @@ pub fn worlds(u: &Universe) -> Vec<World> {
     // world's atmosphere and its pressure.
     let mut holds: Vec<Ratio> = out.iter().map(|w| w.hold.clone()).collect();
     holds.sort();
-    let hold_ref = holds.get(holds.len() / 2).cloned().filter(|h| !h.is_zero()).unwrap_or_else(|| ratio(1, 1));
+    let hold_ref = holds
+        .get(holds.len() / 2)
+        .cloned()
+        .filter(|h| !h.is_zero())
+        .unwrap_or_else(|| ratio(1, 1));
     for w in out.iter_mut() {
         w.atmosphere = atmosphere(w, &hold_ref);
         w.pressure = w.atmosphere.clone() * w.gravity.clone();
@@ -646,17 +908,43 @@ mod tests {
 
     #[test]
     fn the_land_takes_up_the_flux_its_medium_carries() {
-        let mut w = World { path: vec![], heat: ratio(2, 1), burn: ratio(1, 1), size: ratio(1, 1), gravity: ratio(1, 1), core: ratio(0, 1), hold: ratio(1, 1), atmosphere: ratio(0, 1), pressure: ratio(0, 1), gases: vec![], chemical: Some(ratio(2, 1)), lithic: Some(ratio(1, 2)), plasmic: None, informational: None, coupling: ratio(0, 1), delay: 0, belts: ratio(0, 1), window: 0, days: None };
+        let mut w = World {
+            path: vec![],
+            heat: ratio(2, 1),
+            burn: ratio(1, 1),
+            size: ratio(1, 1),
+            gravity: ratio(1, 1),
+            core: ratio(0, 1),
+            hold: ratio(1, 1),
+            atmosphere: ratio(0, 1),
+            pressure: ratio(0, 1),
+            gases: vec![],
+            chemical: Some(ratio(2, 1)),
+            lithic: Some(ratio(1, 2)),
+            plasmic: None,
+            informational: None,
+            coupling: ratio(0, 1),
+            delay: 0,
+            belts: ratio(0, 1),
+            window: 0,
+            days: None,
+        };
         // x = 2 at no compression: h = 2·1442/1000 = 2.884, two whole
         // halvings, 3/4 carried; twice the home heat: 500·2·3/4 = 750.
-        assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(750, 1));
+        assert_eq!(
+            wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)),
+            ratio(750, 1)
+        );
         // Under a halving the medium carries nothing; an absent medium too.
         assert_eq!(wild(&w, &ratio(0, 1), "lithic", &ratio(1, 1)), ratio(0, 1));
         assert_eq!(wild(&w, &ratio(0, 1), "plasmic", &ratio(1, 1)), ratio(0, 1));
         // Hotter flux, a weaker medium: the uptake is the product, no band.
         w.heat = ratio(4, 1);
         w.chemical = Some(ratio(1, 1));
-        assert_eq!(wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)), ratio(1000, 1));
+        assert_eq!(
+            wild(&w, &ratio(0, 1), "chemical", &ratio(1, 1)),
+            ratio(1000, 1)
+        );
     }
 
     #[test]
@@ -664,17 +952,58 @@ mod tests {
         // Hydrogen (single bond) and a two-bond kind at its own heat of
         // 1,000 K: Z = 6 on the harmonic atom (Z = 4 pairs its round shape
         // and bonds nothing).
-        let matter: Manifest = [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(10, 1)), (crate::chem::Kind::parse("W0008").expect("a kind"), ratio(5, 1))].into();
-        let w = read(vec![1, 1, 1], &matter, &ratio(1000, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1_000_000, 1), 240).unwrap();
+        let matter: Manifest = [
+            (
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(10, 1),
+            ),
+            (
+                crate::chem::Kind::parse("W0008").expect("a kind"),
+                ratio(5, 1),
+            ),
+        ]
+        .into();
+        let w = read(
+            vec![1, 1, 1],
+            &matter,
+            &ratio(1000, 1),
+            &ratio(59, 60),
+            &ratio(1, 1),
+            &ratio(1_000_000, 1),
+            240,
+        )
+        .unwrap();
         assert_eq!(w.heat, ratio(1000, 1), "a world's heat is its own");
-        let heavy = read(vec![1, 1, 1], &matter, &ratio(1000, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1, 1), 240).unwrap();
+        let heavy = read(
+            vec![1, 1, 1],
+            &matter,
+            &ratio(1000, 1),
+            &ratio(59, 60),
+            &ratio(1, 1),
+            &ratio(1, 1),
+            240,
+        )
+        .unwrap();
         assert!(heavy.gravity > w.gravity, "a compressed world pulls harder");
         // A world cold through offers nothing.
-        assert!(read(vec![1, 1, 1], &matter, &ratio(0, 1), &ratio(59, 60), &ratio(1, 1), &ratio(1, 1), 240).is_none());
+        assert!(read(
+            vec![1, 1, 1],
+            &matter,
+            &ratio(0, 1),
+            &ratio(59, 60),
+            &ratio(1, 1),
+            &ratio(1, 1),
+            240
+        )
+        .is_none());
         // A coupling at 59/60 slips 1/60 a echo: its first recoherence at
         // echo 60, after the galaxy's 240-bell delay.
         assert_eq!(wake_bell(&w, 1, 60), Some(240 + 60 * 60));
-        assert_eq!(recoherences_needed(&ratio(1, 2), &ratio(0, 1)), None, "under a halving, nothing carries");
+        assert_eq!(
+            recoherences_needed(&ratio(1, 2), &ratio(0, 1)),
+            None,
+            "under a halving, nothing carries"
+        );
         assert!(w.chemical.is_some(), "1 + 6 close and hold at 1,000 K");
         assert!(w.lithic.is_some());
         assert_eq!(w.informational, Some(ratio(59, 1)));

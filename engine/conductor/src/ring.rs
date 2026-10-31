@@ -94,7 +94,9 @@ pub fn surface(density: &Ratio, activity: &Ratio) -> Ratio {
 
 /// The front's strength past the surfaces it crossed, `S = Π (1 − σ_j)`.
 pub fn strength(surfaces: &[Ratio]) -> Ratio {
-    surfaces.iter().fold(ratio(1, 1), |s, x| s * (ratio(1, 1) - x.clone()))
+    surfaces
+        .iter()
+        .fold(ratio(1, 1), |s, x| s * (ratio(1, 1) - x.clone()))
 }
 
 /// The specific spin of a body at reach r about the holding H inside it:
@@ -143,7 +145,10 @@ pub fn grain(x: &Ratio) -> Ratio {
 /// One mark of the spin grain, `60⁻⁶`: the width of a certified interval's
 /// bounds on the grain (`flows::torque`).
 pub fn grain_step() -> Ratio {
-    Ratio::new(num_bigint::BigInt::from(1), num_bigint::BigInt::from(60).pow(6))
+    Ratio::new(
+        num_bigint::BigInt::from(1),
+        num_bigint::BigInt::from(60).pow(6),
+    )
 }
 
 /// The whole count of a non-negative exact value, `⌊x⌋`, where a `u64`
@@ -159,7 +164,11 @@ pub fn whole(x: &Ratio) -> Option<u64> {
 /// six sexagesimal places, docs/78): which sector holds it, by exact floor.
 pub fn sector(share: &Ratio) -> u64 {
     let places = Ratio::from_integer(num_bigint::BigInt::from(60).pow(6));
-    (share.clone() * places).floor().to_integer().try_into().unwrap_or(0)
+    (share.clone() * places)
+        .floor()
+        .to_integer()
+        .try_into()
+        .unwrap_or(0)
 }
 
 /// A body's IDENTITY is its birth reading, never a row number (operator
@@ -195,7 +204,11 @@ mod tests {
         assert!(!open(&ratio(3, 1), &h));
         assert_eq!(density(&ratio(4, 1), &h), ratio(1, 2));
         assert_eq!(density(&ratio(1, 1), &h), ratio(1, 1));
-        assert_eq!(deficit(&ratio(2, 1), &h), ratio(1, 2), "δ_s = ½ at the throat");
+        assert_eq!(
+            deficit(&ratio(2, 1), &h),
+            ratio(1, 2),
+            "δ_s = ½ at the throat"
+        );
         // Density and activity each count; an open body is wholly a surface.
         assert_eq!(surface(&ratio(1, 2), &ratio(1, 2)), ratio(3, 4));
         assert_eq!(surface(&ratio(1, 1), &ratio(0, 1)), ratio(1, 1));
@@ -209,13 +222,24 @@ mod tests {
         let (r, h) = (ratio(3, 1), ratio(1, 1));
         assert_eq!(rate(&r, &h), ratio(3, 4));
         assert_eq!(deficit(&r, &h), ratio(1, 4));
-        assert_eq!(rate(&r, &h) + deficit(&r, &h), ratio(1, 1), "the clock is 1 − δ");
-        assert_eq!(period(&r, &h), ratio(4, 1), "one turn in 1/δ received rings");
+        assert_eq!(
+            rate(&r, &h) + deficit(&r, &h),
+            ratio(1, 1),
+            "the clock is 1 − δ"
+        );
+        assert_eq!(
+            period(&r, &h),
+            ratio(4, 1),
+            "one turn in 1/δ received rings"
+        );
         // The balance gives back the reach its spin was read at.
         assert_eq!(radius(&spin(&r, &h), &h), Some(r.clone()));
         // Orbits breathe: half the holding, twice the reach; double, half.
         assert_eq!(radius(&spin(&r, &h), &ratio(1, 2)), Some(ratio(6, 1)));
         assert_eq!(radius(&spin(&r, &h), &ratio(2, 1)), Some(ratio(3, 2)));
-        assert!(deficit(&ratio(1, 1_000_000), &ratio(1_000_000, 1)) < ratio(1, 1), "bounded below light");
+        assert!(
+            deficit(&ratio(1, 1_000_000), &ratio(1_000_000, 1)) < ratio(1, 1),
+            "bounded below light"
+        );
     }
 }

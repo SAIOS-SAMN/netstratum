@@ -73,7 +73,7 @@ pub struct DirectionRead {
     pub families: usize,
     /// Connected family-bodies in the peel cover — the material's structure.
     pub bodies: usize,
-    /// syntropy / (syntropy + entropy) ∈ [0,1]; None when the books are cold.
+    /// syntropy / (syntropy + entropy) ∈ \[0,1\]; None when the books are cold.
     pub cohesion: Option<Ratio>,
     /// Derived: is the line composing its material self (ordering) or dissipating?
     pub ordering: bool,
@@ -109,8 +109,14 @@ pub fn gauge_occupancy(
         .map(|(i, (id, _amount))| {
             let (family, _tier, _richness) = cfe::dop::element_properties(id, class);
             (
-                Site { row: 0, col: i as i64, layer: 0 },
-                GaugeDirection { index: family.saturating_sub(1) },
+                Site {
+                    row: 0,
+                    col: i as i64,
+                    layer: 0,
+                },
+                GaugeDirection {
+                    index: family.saturating_sub(1),
+                },
             )
         })
         .collect()
@@ -130,18 +136,28 @@ pub fn observe_direction(
     // A 1×n frame is whole by construction (each cell carried exactly once),
     // so `try_new` admits it.
     let occupancy = gauge_occupancy(holdings, class);
-    let measurement =
-        FullMeasurement::try_new(5, CellFrame { rows: 1, cols: cols as u32, layers: 1 }, occupancy).ok()?;
+    let measurement = FullMeasurement::try_new(
+        5,
+        CellFrame {
+            rows: 1,
+            cols: cols as u32,
+            layers: 1,
+        },
+        occupancy,
+    )
+    .ok()?;
     let cover = peel(&measurement);
     let families = cover.value.supports.len();
     let bodies = cover.object.bodies.len();
     let cohesion = cfe::dop::cohesion_ratio(syntropy, entropy);
-    let ordering = cohesion
-        .as_ref()
-        .map(|c| *c > ratio(1, 2))
-        .unwrap_or(false)
-        && families >= 2;
-    Some(DirectionRead { elements: cols, families, bodies, cohesion, ordering })
+    let ordering = cohesion.as_ref().map(|c| *c > ratio(1, 2)).unwrap_or(false) && families >= 2;
+    Some(DirectionRead {
+        elements: cols,
+        families,
+        bodies,
+        cohesion,
+        ordering,
+    })
 }
 
 /// The base affinity a natively-bounded building carries before the genus scale.
@@ -159,8 +175,16 @@ fn conversions() -> [(ZoneKind, Option<Resource>, Resource); 6] {
     [
         (ZoneKind::Extractor, None, Resource::Iron),
         (ZoneKind::Smelter, Some(Resource::Iron), Resource::Alloy),
-        (ZoneKind::Synthesizer, Some(Resource::Alloy), Resource::Diamond),
-        (ZoneKind::Resonator, Some(Resource::Alloy), Resource::Crystal),
+        (
+            ZoneKind::Synthesizer,
+            Some(Resource::Alloy),
+            Resource::Diamond,
+        ),
+        (
+            ZoneKind::Resonator,
+            Some(Resource::Alloy),
+            Resource::Crystal,
+        ),
         (ZoneKind::Encasement, Some(Resource::Iron), Resource::Ember),
         (ZoneKind::CryoArray, Some(Resource::Iron), Resource::Sink),
     ]
@@ -302,7 +326,11 @@ impl SpeciesManifold {
         // whose endpoints are both reachable is an edge), plus the ration source
         // edge (Habitat) and the recycling return edge (ration → ⊥).
         let idx = |r: Resource, traits: &[Resource]| -> usize {
-            traits.iter().position(|t| *t == r).map(|p| p + 1).unwrap_or(0)
+            traits
+                .iter()
+                .position(|t| *t == r)
+                .map(|p| p + 1)
+                .unwrap_or(0)
         };
         let mut edges: Vec<(usize, usize)> = Vec::new();
         for (input, output) in &relevant {
@@ -336,7 +364,12 @@ impl SpeciesManifold {
         let beta1 = (edges.len() - rank) as u64;
         let genus = beta0 + beta1;
 
-        SpeciesManifold { traits: reachable, boundary, genus, ration }
+        SpeciesManifold {
+            traits: reachable,
+            boundary,
+            genus,
+            ration,
+        }
     }
 
     /// The vertex index of a trait (`None` = the environment source `⊥` at 0),
@@ -397,7 +430,6 @@ impl SpeciesManifold {
             0
         }
     }
-
 }
 
 /// Exact integer `A · x`.
@@ -728,7 +760,10 @@ mod tests {
         // conversion is relevant, so the forge pathway is bounded — its class
         // vanishes, its affinity is W_base·genus > 0.
         let m = balanced();
-        assert!(m.bounds(ZoneKind::Smelter), "the iron forge is native to a balanced line");
+        assert!(
+            m.bounds(ZoneKind::Smelter),
+            "the iron forge is native to a balanced line"
+        );
         assert!(m.affinity(ZoneKind::Smelter) > 0);
         // The sources are always native — the environment bounds them.
         assert!(m.bounds(ZoneKind::Extractor) && m.bounds(ZoneKind::Habitat));
@@ -742,11 +777,26 @@ mod tests {
         // even be expressed; the pairing is a non-trivial obstruction; 𝒯 → 0.
         // No boolean gate, no species table — a topological fact.
         let plasmic = SpeciesManifold::of(3, "plasmic", false);
-        assert!(!plasmic.bounds(ZoneKind::Smelter), "the iron forge is a hole for a plasmic line");
-        assert_eq!(plasmic.affinity(ZoneKind::Smelter), 0, "obstructed → excluded from Z");
-        assert_eq!(plasmic.affinity(ZoneKind::Synthesizer), 0, "the deeper forge too");
+        assert!(
+            !plasmic.bounds(ZoneKind::Smelter),
+            "the iron forge is a hole for a plasmic line"
+        );
+        assert_eq!(
+            plasmic.affinity(ZoneKind::Smelter),
+            0,
+            "obstructed → excluded from Z"
+        );
+        assert_eq!(
+            plasmic.affinity(ZoneKind::Synthesizer),
+            0,
+            "the deeper forge too"
+        );
         // A plasmic line never mines ore either — iron is simply not in its world.
-        assert_eq!(plasmic.affinity(ZoneKind::Extractor), 0, "no iron to extract");
+        assert_eq!(
+            plasmic.affinity(ZoneKind::Extractor),
+            0,
+            "no iron to extract"
+        );
         // Yet it still settles — the ration house (its Ember energy) is native.
         assert!(plasmic.affinity(ZoneKind::Habitat) > 0);
     }
@@ -778,10 +828,22 @@ mod tests {
         let biotic = SpeciesManifold::of(2, "aqueous", false);
         let plasmic = SpeciesManifold::of(3, "plasmic", false);
 
-        assert!(mineral.bounds(ZoneKind::Smelter), "the iron forge is native to a mineral line");
-        assert!(biotic.bounds(ZoneKind::Smelter), "the generalist biotic line mines iron too");
-        assert!(!plasmic.bounds(ZoneKind::Smelter), "a plasmic line has no iron in its world");
-        assert!(!plasmic.bounds(ZoneKind::Extractor), "and never reaches for the ore");
+        assert!(
+            mineral.bounds(ZoneKind::Smelter),
+            "the iron forge is native to a mineral line"
+        );
+        assert!(
+            biotic.bounds(ZoneKind::Smelter),
+            "the generalist biotic line mines iron too"
+        );
+        assert!(
+            !plasmic.bounds(ZoneKind::Smelter),
+            "a plasmic line has no iron in its world"
+        );
+        assert!(
+            !plasmic.bounds(ZoneKind::Extractor),
+            "and never reaches for the ore"
+        );
         // Yet each still settles — the ration house is native to all.
         assert!(mineral.bounds(ZoneKind::Habitat) && plasmic.bounds(ZoneKind::Habitat));
     }
@@ -802,7 +864,10 @@ mod tests {
         // And the draw is replayable: same digest, same building.
         let m = balanced();
         let full = [ZoneKind::Smelter, ZoneKind::Extractor, ZoneKind::Habitat];
-        assert_eq!(choose_build(&full, &m, None, 0, seed(5)), choose_build(&full, &m, None, 0, seed(5)));
+        assert_eq!(
+            choose_build(&full, &m, None, 0, seed(5)),
+            choose_build(&full, &m, None, 0, seed(5))
+        );
     }
 
     #[test]
@@ -820,7 +885,10 @@ mod tests {
                 }
             }
         }
-        assert!(seen.len() >= 2, "the draw explores more than one native building");
+        assert!(
+            seen.len() >= 2,
+            "the draw explores more than one native building"
+        );
     }
 
     #[test]
@@ -847,7 +915,10 @@ mod tests {
         );
         // The tilt is a lean, not a lock: industry is still sometimes drawn even
         // while starving (the workbench stays open).
-        assert!(starving < 90, "even a starving line still explores ({starving})");
+        assert!(
+            starving < 90,
+            "even a starving line still explores ({starving})"
+        );
 
         // And a sated society (binding None) reads exactly the SOC-2 uniform draw:
         // the tilt vanishes, every native equally weighted regardless of drive.
