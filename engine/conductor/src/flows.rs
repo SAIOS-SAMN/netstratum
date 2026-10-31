@@ -237,6 +237,30 @@ pub fn band(q: &Ratio, r: &Ratio, h: &Ratio) -> Ratio {
     q.clone() * u - ratio(1, 2) * g * r.clone() * h.clone()
 }
 
+/// The band as an attractor (docs/112 F3): its step at reach R, never
+/// carrying a mote of spin ℓ past its rest point (`R·R = 2q`, read exactly
+/// on the squares, never by a root): where a whole step would cross it, the
+/// step is halved until it does not, so the motion converges on the rest
+/// and never swings through it. What is not given stays with the core.
+pub fn toward_rest(q: &Ratio, r: &Ratio, h: &Ratio, ell: &Ratio) -> Ratio {
+    let mut step = band(q, r, h);
+    if h.is_zero() || step.is_zero() {
+        return step;
+    }
+    let rest = ratio(2, 1) * q.clone();
+    let side = |reach: &Ratio| (reach.clone() * reach.clone()).cmp(&rest);
+    let now = side(r);
+    for _ in 0..64 {
+        let after = (ell.clone() + step.clone()) / h.clone();
+        let then = side(&after);
+        if then == now || then == std::cmp::Ordering::Equal || now == std::cmp::Ordering::Equal {
+            return step;
+        }
+        step = step / ratio(2, 1);
+    }
+    ratio(0, 1)
+}
+
 /// A phase difference as a signed displacement in `(−½, ½]`.
 pub fn signed(d: &Ratio) -> Ratio {
     let f = frac(d);
@@ -834,7 +858,7 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
             let q = push.clone() / weight(&x.key);
             let at = |reach: &Ratio| band(&q, reach, h);
             if !x.vacuum {
-                at(r_o)
+                toward_rest(&q, r_o, h, &x.ell_o)
             } else {
                 let mirrored = through(r_o, &throat);
                 if mirrored > ratio(0, 1) { -at(&mirrored) } else { ratio(0, 1) }
@@ -2118,6 +2142,21 @@ mod passage_tests {
         let light = ratio(1, 2) * ratio(9, 4);
         assert!(super::band(&light, &ratio(1, 1), &ratio(1, 1)) > ratio(0, 1));
         assert_eq!(super::face(&ratio(1, 2)), (ratio(1, 2), ratio(1, 2)), "the faces balance at the ring");
+    }
+
+    #[test]
+    fn the_band_as_an_attractor_converges_on_its_rest_without_crossing_it() {
+        // docs/112 F3: R* = 2/3 about H = 1 (q = 2/9); from R = 1/10 the
+        // spin climbs toward ℓ* = 2/3 and never passes it.
+        let (q, h) = (ratio(1, 2) * ratio(4, 9), ratio(1, 1));
+        let mut ell = ratio(1, 10);
+        for _ in 0..60 {
+            let r = ell.clone() / h.clone();
+            // On the grain each bell, as the torque holds its spins.
+            ell = crate::ring::grain(&(ell.clone() + super::toward_rest(&q, &r, &h, &ell)));
+            assert!(ell <= ratio(2, 3), "never past the rest");
+        }
+        assert!(ratio(2, 3) - ell.clone() < ratio(1, 1000), "it converges");
     }
 
     #[test]

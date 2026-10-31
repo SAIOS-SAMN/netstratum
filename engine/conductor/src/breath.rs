@@ -1270,7 +1270,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     if take <= ratio(0, 1) {
                         continue;
                     }
-                    let r = ratio(1, 1) + span_r.clone() * c.clone();
+                    // Released inside the core (docs/112 §3.1): its
+                    // dispersal reach `1 + span·c` read through the throat
+                    // on the inverse face, `R → 2 − R`; a kind carried past
+                    // the centre stands at the magnitude on the far side
+                    // (the light pass through, the heavy stay within).
+                    let out = ratio(1, 1) + span_r.clone() * c.clone();
+                    let mirrored = crate::flows::through(&out, &ratio(1, 1));
+                    let passed = mirrored < ratio(0, 1);
+                    let r = if passed { -mirrored } else { mirrored };
                     let ell = crate::ring::grain(&(r.clone() * enc_r.hold_within(&r)));
                     let d_k = base.clone() / (c.clone() + base.clone());
                     let z = ratio(i64::from(crate::chem::charge(&k)), 2);
@@ -1278,6 +1286,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let mut phase = crate::flows::rest(crate::ring::grain(&frac(ratio(1, 2) + z)));
                     for (j, &sp) in crate::flows::SPACE.iter().enumerate() {
                         phase[sp] = crate::ring::grain(&frac(base.clone() + ratio(1, 2) * twist_t[j].clone() * rings_now.clone()));
+                    }
+                    if passed {
+                        crate::flows::antipode(&mut phase);
                     }
                     if let Some(x) = core.throat.get_mut(&k) {
                         *x -= take.clone();

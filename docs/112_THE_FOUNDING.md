@@ -5,7 +5,7 @@ derives a table of elements by weight, and the whole table stands inside the
 universal core. Everything outside the core emerges later, as the bonds
 inside it tighten and its pressure releases matter through the throat.
 
-**Status:** scoped; not built. It replaces the cascade's shells
+**Status:** F1, F2, F3 and F5 built (§8); F4 and F6 open. It replaces the cascade's shells
 (`pulse::cascade`) and the galaxies standing at the founding
 (`pulse::deploy`). It realises docs/111 §5 and depends on docs/104 §6 (the
 band) and docs/111 §4 (the collections).
@@ -178,3 +178,31 @@ Everything outside the core is matter that crossed the throat:
 4. **Xylarium.** Its founding stands galaxies at `t = 0` and has every galaxy
    hear the core from the start. Under this document both change; that is a
    decision for its operator.
+
+## 8. Built
+
+- **F1.** `pulse::deploy` stands the home alone, its throat the whole table
+  and its flows empty; `Universe::founded` is the table's holding. The bell's
+  period is still read from the cascade's echo (§7.1).
+- **F2.** The release law's reach `1 + span·c` is read through the throat
+  (`flows::through`, `R → 2 − R`). A kind carried past the centre stands at
+  the magnitude on the far side, its phases at the antipode.
+- **F3.** `flows::toward_rest`: the band's step, halved where a whole step
+  would carry the mote past its rest (`R·R = 2q`, compared on the squares).
+- **F5.** `τ = (founded − throat − firmament)/founded`, the firmament by held
+  share (`pulse::firmament_holding`).
+- Witnesses:
+  - `the_founding_holds_the_whole_table_in_the_universal_cores_throat`;
+  - `the_band_as_an_attractor_converges_on_its_rest_without_crossing_it`.
+
+Read on a fresh 2^40 universe (1495 nuclides), with conservation and the
+torque identity exact at each bounce:
+
+| Bounce | Released motes | Systems born in the zero galaxy | Wholly held firmament | Weights held | `w̄_c` | `τ` |
+|---|---|---|---|---|---|---|
+| 1 | 997 | 6 | 0 | — | — | 0 |
+| 2 | 2142 | 2 | 99 | 5–1193 | 6.95 | 0.070 |
+
+The third bounce did not finish within 4.5 minutes, so the read stopped on
+the carrier's growth. The founding itself takes 2m50s: `disperse` over the
+whole table, now that the home holds all of it.

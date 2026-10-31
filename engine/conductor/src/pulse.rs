@@ -190,11 +190,6 @@ pub fn tier(depth: u8) -> Tier {
     }
 }
 
-/// `f` of each element, floored to the grain.
-pub(crate) fn take(from: &Manifest, f: &Ratio) -> Manifest {
-    from.iter().map(|(k, a)| (k.clone(), grain(&(a.clone() * f.clone())))).filter(|(_, a)| *a > ratio(0, 1)).collect()
-}
-
 pub(crate) fn less(from: &mut Manifest, by: &Manifest) {
     for (k, a) in by {
         if let Some(have) = from.get_mut(k) {
@@ -517,9 +512,10 @@ pub struct Universe {
     /// every later climb (the stars' captures, the burn's product) stops
     /// there.
     pub densest: u32,
-    /// The firmament's founded holding (tag 28; docs/111 §4.5), grains ×
-    /// weight, read from `firmament` at the founding: `held + left =
-    /// founded`. A save from before it reads its present firmament.
+    /// The founded table's holding (tag 28; docs/112 F5), grains × weight,
+    /// all in the universal core at the founding: `held + left = founded`,
+    /// `held` its throat and its firmament. A save from before it reads its
+    /// whole matter.
     pub founded: Ratio,
     /// The firmament's phases at the last universal bounce (tag 29; docs/111
     /// §4.1), each mote by its kind and its occurrence among that kind's
@@ -795,174 +791,21 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
 }
 
 pub fn deploy(manifest: &Manifest) -> Option<Universe> {
-    // The founding cascade (above): the Wellspring holds what stays within its
-    // throat; its held kinds are the universe's medium about it (the central
-    // galaxy's cut is read from them once the ocean is motes: owed); every
-    // galaxy is a bead of the expanding shells, at its pinch's reach. No
-    // draws. A bead too slight to hold a hole of a nucleus stays medium.
-    let (wellspring, beads, echo) = cascade(manifest);
-    // The galaxies carry the whole mix (docs/97 §12; docs/78: "every share
-    // carries the manifest's composition in proportion"): each bead keeps its
-    // place and its mass and takes the beads' pooled composition in
-    // proportion to its mass, in whole nuclei; what flooring leaves joins the
-    // heaviest bead. Never a slice by weight.
-    let beads = {
-        let mut pool = Manifest::new();
-        for (_, m) in &beads {
-            for (k, a) in m {
-                *pool.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
-            }
-        }
-        let whole_b = mass(&pool);
-        let mut left = pool.clone();
-        let heaviest = beads.iter().enumerate().max_by(|a, b| mass(&a.1 .1).cmp(&mass(&b.1 .1))).map(|(i, _)| i);
-        let mut mixed: Vec<(Ratio, Manifest)> = beads.iter().map(|(d, m)| {
-            let f = if whole_b.is_zero() { ratio(0, 1) } else { mass(m) / whole_b.clone() };
-            let part: Manifest = pool.iter().map(|(k, a)| (k.clone(), nucleus(&(a.clone() * f.clone())))).filter(|(_, a)| *a > ratio(0, 1)).collect();
-            less(&mut left, &part);
-            (d.clone(), part)
-        }).collect();
-        if let Some(i) = heaviest {
-            for (k, a) in left {
-                *mixed[i].1.entry(k).or_insert_with(|| ratio(0, 1)) += a;
-            }
-        }
-        mixed
-    };
-    // The bell's period in whole bells; a core ring is a quarter of it, so a
-    // founding whose echo cannot carry one ring a quarter is refused.
+    // The founding (docs/112 §2): the whole table stands in the universal
+    // core's throat, unreleased; nothing is placed outside it. The
+    // firmament, the zero galaxy and the ocean begin empty and fill only by
+    // the bounces' release (docs/112 §3). The bell's period is the founding
+    // bubble's round trip (`cascade`'s echo: the front's light-time out to
+    // where the founding push carries the lightest kind and back; docs/112
+    // §7.1 holds the rim's own reading open).
+    let (_, _, echo) = cascade(manifest);
     let t_u: u64 = echo.ceil().to_integer().try_into().ok().filter(|t: &u64| *t >= 4)?;
-    // The firmament: the Wellspring's held kinds stay at the singularity as
-    // motes at their capture phases (`flows::founding`), never poured into
-    // the ocean.
-    let firmament = if wellspring.is_empty() { Vec::new() } else { crate::flows::founding(&wellspring, None)? };
-    // Beads too slight to hold a hole of a nucleus stay the ocean: motes at
-    // their beads' reach, on the vacuum leg (set down below, once the
-    // galaxies inside them are known).
-    let mut slight: Vec<(Ratio, Manifest)> = Vec::new();
-    let whole = mass(manifest);
-    let mut shares: Vec<(u32, Manifest, Ratio)> = Vec::new();
-    for (i, (d, m)) in beads.into_iter().enumerate() {
-        if take(&m, &tier(2).centre).is_empty() {
-            slight.push((d, m));
-            continue;
-        }
-        shares.push((i as u32 + 1, m, d));
-    }
-    let weight_of = |m: &Manifest| if whole.is_zero() { ratio(0, 1) } else { mass(m) / whole.clone() };
-    // The singularity's state (1) and the firmament it holds (its holding
-    // share, as matter).
-    let firm = if whole.is_zero() { ratio(0, 1) } else { firmament.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key)) / whole.clone() };
-    // A bead stands as A GALAXY only where it holds its own (with Xylarium,
-    // 11.0 (25); gravity's reach, one grammar at every tier, operator
-    // 2026-10-18): the pinch between the universal core and a bead at reach R
-    // is `d = R·H_b/(H_b + H_inside)`. H_b is the bead's own matter, w (a
-    // bead not yet standing has no throat, as a binding binds by its own λw);
-    // H_inside is the enclosed hold, the singularity's state 1, the
-    // firmament, and every galaxy standing inside at its standing hold 2w.
-    // Its spread `R·s_final` (s_final = ½·1/(1 + 2) = 1/6, the cascade's last
-    // face with all of it held) must lie within d. A bead that cannot hold its
-    // spread is the universal core's own: its matter is the home.
-    let mut home = Manifest::new();
-    {
-        let s_final = ratio(1, 6);
-        shares.sort_by(|a, b| a.2.cmp(&b.2));
-        let mut inside = ratio(1, 1) + firm.clone();
-        let mut kept: Vec<(u32, Manifest, Ratio)> = Vec::new();
-        for (i, m, d) in std::mem::take(&mut shares) {
-            let w = weight_of(&m);
-            let region = d.clone() * w.clone() / (w.clone() + inside.clone());
-            if d.clone() * s_final.clone() <= region {
-                inside += ratio(2, 1) * w;
-                kept.push((i, m, d));
-            } else {
-                for (k, a) in m {
-                    *home.entry(k).or_insert_with(|| ratio(0, 1)) += a;
-                }
-            }
-        }
-        shares = kept;
-    }
-    // The big bang populates the universe (docs/78): each core keeps its disc,
-    // and its galaxy's first generation of star systems and their planets is
-    // laid down by the tidal law; what forms no system is the galaxy's medium,
-    // gas the breath later forms into new systems. A core stands where the cut
-    // one tier up holds it (above); its echoes arrive that many bells later.
-    // Each core keeps what its bounce holds (`disperse`), in its own units.
-    let discs: Vec<Manifest> = shares.iter().map(|(_, m, _)| disperse(m)).collect();
-    // The unit is the deepest galactic hole; with no galaxy standing, the
-    // home's.
-    let unit = discs.iter().map(mass).max().filter(|m| !m.is_zero()).or_else(|| Some(mass(&disperse(&home))).filter(|m| !m.is_zero()))?;
-    // Formation (docs/83): no system is placed. Each core keeps its disc;
-    // the rest is its galaxy's gas, laid down as motes where the push left
-    // each element; stars collapse from it as it cools (`breath`).
-    // The galaxies orbit the universal singularity (operator): inside out,
-    // each about the universal state plus every core inside it (each core
-    // its galaxy's state and grains, 2·w_j), by the motion law, in core
-    // rings; a core ring is a quarter of the bell's period in bells (the universe's own echo is the
-    // round trip to its rim 2). The first ring is the deepest well.
-    let mut order: Vec<usize> = (0..shares.len()).collect();
-    order.sort_by(|&a, &b| shares[a].2.cmp(&shares[b].2));
-    let mut orbits: Vec<(Ratio, Ratio, Ratio)> = vec![(ratio(0, 1), ratio(0, 1), ratio(0, 1)); shares.len()];
-    // Inside every galaxy: the singularity's state, the firmament, and the
-    // home's matter (its state is the singularity's, counted once).
-    let mut inside = ratio(1, 1) + firm.clone() + weight_of(&home);
-    let bells = ratio(t_u as i64, 4);
-    let mut k = 0;
-    while k < order.len() {
-        // A ring: every core at the same reach orbits about what is inside it.
-        let d = shares[order[k]].2.clone();
-        let ring: Vec<usize> = order[k..].iter().copied().take_while(|&j| shares[j].2 == d).collect();
-        for &j in &ring {
-            orbits[j] = (d.clone() * bells.clone(), crate::ring::period(&d, &inside) * bells.clone(), crate::ring::spin(&d, &inside));
-        }
-        for &j in &ring {
-            inside += ratio(2, 1) * weight_of(&shares[j].1);
-        }
-        k += ring.len();
-    }
-    // The ocean at the founding: each slight bead's kinds as motes at its
-    // reach, turning at the balance of that place about the singularity and
-    // every galaxy inside it (the galaxies' own law), on the vacuum leg.
-    let base_in = ratio(1, 1) + firm.clone() + weight_of(&home);
-    let mut ocean: Vec<crate::flows::Mote> = Vec::new();
-    for (d, m) in slight {
-        let inside = shares.iter().filter(|(_, _, dj)| *dj < d).fold(base_in.clone(), |a, (_, mj, _)| a + ratio(2, 1) * weight_of(mj));
-        let ell = crate::ring::spin(&d, &inside);
-        for (k, a) in m {
-            if a > ratio(0, 1) {
-                ocean.push(crate::flows::Mote { key: k, amount: a, ell_o: crate::ring::grain(&ell), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() });
-            }
-        }
-    }
-    let mut cores = shares
-        .into_iter()
-        .zip(discs)
-        .zip(orbits)
-        .map(|(((i, m, _), _disc), (radius, period, ell))| {
-            // The throat holds (docs/96 step 3; ruling of 2026-10-26: each
-            // bounce from the core does not 'throw', it pushes): a galaxy's
-            // grains stand in its core's throat at the founding, its state
-            // its grains; every bounce's tide releases its share onto the
-            // continuum (`breath`), and the void distributes it.
-            let state = mass(&m);
-            Some(Body { solid: false, coupled: None, ell_orth: ratio(0, 1), path: vec![u64::from(i)], radius, period, kept: Manifest::new(), satellites: Vec::new(), medium: Manifest::new(), ell, medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state, flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: m })
-        })
-        .collect::<Option<Vec<Body>>>()?;
-    // The universal core's own GALAXY, the home (docs/101 §2, B1): always
-    // standing; its throat the matter its gravity holds, its flows the
-    // firmament (its held cut, counted in its `kept`), never a second list.
-    let mut firm_kept = Manifest::new();
-    for x in &firmament {
-        *firm_kept.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
-    }
-    cores.insert(0, Body { solid: false, coupled: None, ell_orth: ratio(0, 1), path: vec![0], radius: ratio(0, 1), period: ratio(0, 1), kept: firm_kept, satellites: Vec::new(), medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: firmament, reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: home });
-    // Nothing is placed (docs/96): stars and worlds gather from what the
-    // bounces release and the void distributes.
+    // The unit of mass: the home's hole, its throat's held disc.
+    let unit = Some(mass(&disperse(manifest))).filter(|m| !m.is_zero())?;
+    let home = Body { solid: false, coupled: None, ell_orth: ratio(0, 1), path: vec![0], radius: ratio(0, 1), period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: manifest.clone() };
     let densest = manifest.keys().filter_map(crate::chem::atom_w).max().unwrap_or(1);
-    let mut u = Universe { cores, ocean, unit, t_u, densest, founded: ratio(0, 1), firm_prev: Vec::new() };
-    u.founded = firmament_holding(&u);
-    Some(u)
+    // The books (docs/112 F5): the table's whole holding, all in the core.
+    Some(Universe { cores: vec![home], ocean: Vec::new(), unit, t_u, densest, founded: mass(manifest), firm_prev: Vec::new() })
 }
 
 /// A set of motes' holding, grains × weight (the firmament's books).
@@ -1122,7 +965,10 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
         for (&j, x) in held.iter().zip(firm) {
             u.cores[i].flows[j] = x;
         }
-        let now = firmament_holding(u);
+        // The books (docs/112 F5): what the core holds is its throat's
+        // unreleased table and its firmament (each mote by its held share);
+        // the rest of the founded table has crossed the throat.
+        let now = firmament_holding(u) + mass(&u.cores[i].throat);
         let founded = u.founded.clone();
         collective.tau = if founded.is_zero() || now >= founded { ratio(0, 1) } else { (founded.clone() - now.clone()) / founded };
         collective.held = now;
@@ -1691,7 +1537,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     let was_founded = founded.is_some();
     let mut u = Universe { cores, ocean, unit, t_u, densest, founded: founded.unwrap_or_else(|| ratio(0, 1)), firm_prev };
     if !was_founded {
-        u.founded = firmament_holding(&u);
+        u.founded = mass(&u.total());
     }
     Some((seed?, u))
 }
@@ -1744,6 +1590,19 @@ mod tests {
         assert_eq!(back.founded, ratio(37, 5));
         assert_eq!(back.firm_prev, prev);
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_founding_holds_the_whole_table_in_the_universal_cores_throat() {
+        // docs/112 F1: nothing placed; one core, its throat the table.
+        let table: Manifest = [("W0001", 3000), ("W0004", 900), ("W0012", 40), ("W0160", 7)].iter().map(|(k, a)| (crate::chem::Kind::parse(k).expect("a kind"), ratio(*a, 1))).collect();
+        let u = deploy(&table).expect("founded");
+        assert_eq!(u.cores.len(), 1, "no galaxy stands at the founding");
+        assert!(is_home(&u.cores[0]));
+        assert_eq!(u.cores[0].throat, table, "the whole table, unreleased");
+        assert!(u.cores[0].flows.is_empty() && u.ocean.is_empty());
+        assert_eq!(u.founded, mass(&table));
+        assert_eq!(mass(&u.total()), mass(&table), "conserved");
     }
 
     #[test]
