@@ -14,6 +14,10 @@ the record.
 
 ## Start here
 
+- [Architecture](ARCHITECTURE.md): how the workspace is organized and where
+  to make a change.
+- [Concepts](CONCEPTS.md): every term, with its definition, formula and code
+  location.
 - [00 — The charter](00_CHARTER.md): the founding document, read whole.
 - [102 — Alignment](102_ALIGNMENT.md): one vocabulary for every tier and the
   register of everything built and owed (kept current).

@@ -20,6 +20,8 @@ under human editorial direction.
 
 | Document | Purpose |
 |---|---|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the workspace is organized: crates, the two models, state on disk, where to make a change |
+| [docs/CONCEPTS.md](docs/CONCEPTS.md) | Every term used in the code and documents, with its definition, formula and location |
 | [docs/README.md](docs/README.md) | The index of every design document |
 | [docs/00_CHARTER.md](docs/00_CHARTER.md) | The founding charter, read whole |
 | [docs/78_SPHERES.md](docs/78_SPHERES.md) | The sphere universe and its design laws, which bind every new law |
@@ -100,8 +102,10 @@ heartbeat (`./install.sh --help`).
 
 ## Documentation
 
-Start with [docs/README.md](docs/README.md): the charter, the era-1
-derivations in order, the vocabulary and the register of what is owed.
+Start with [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and
+[docs/CONCEPTS.md](docs/CONCEPTS.md). [docs/README.md](docs/README.md) indexes
+the design documents: the charter, the era-1 derivations in order, and the
+register of what is owed.
 Contribution and commit standards are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
