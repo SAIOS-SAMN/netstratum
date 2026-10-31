@@ -1,390 +1,370 @@
 # Netstratum — the Charter
 
-**The one founding document. Read first, whole. Everything else in this repo is
-downstream of what is inscribed here.**
+This document defines the project's scope, its binding rules and the
+protocol stack. Every other document in this repository refines it and may
+not contradict it. Read it in full before the rest of the documentation.
 
-Netstratum is an AI MUD — a text-first, multi-planetary city-building and
-exploration game in the lineage of Cities:Skylines (the intuitive joy of zoning,
-growth, and trade) and Dark Forest (the decentralized, hidden-information
-cosmos) — that is simultaneously the **playable reference implementation of the
-dimensional web**: the NS protocol stack (DOP, RQP, VRP, APERTURE, MESH, IPSAL-OS,
-anchor) specified in Rational Field Algebra (RFA) and executed by the Canonical
-Field Engine (CFE).
+Netstratum is a text-based, multi-planetary city-building and exploration
+game in which autonomous agents play alongside human players (an "AI MUD").
+Its design draws on Cities: Skylines (zoning, growth and trade) and Dark
+Forest (a decentralized world with hidden information). The game is also the
+reference implementation of the NS protocol stack (NS-1 to NS-7: DOP, RQP,
+VRP, APERTURE, MESH, IPSAL-OS and Anchor), which is specified in Rational
+Field Algebra (RFA) and executed by the Canonical Field Engine (CFE).
 
-The game is the front door. The protocols are the building. The engine is the
-ground. One repo holds all three so they cannot drift apart.
+The repository holds three layers: the game (the client and the conductor),
+the protocol specifications (`protocols/`) and the engine (`engine/`). They
+share a repository so that a change to one layer is checked against the
+other two in the same commit.
 
 ---
 
-## 1. The core mandate (law xvii, inherited and binding)
+## 1. Specifications and mechanics are coupled (law xvii)
 
-> **A protocol section may only be written when its first game consumer is
-> named, and a game mechanic may only ship when its protocol section and test
-> vectors exist.**
+> **A protocol section is written only when the game mechanic that first
+> consumes it is named. A game mechanic ships only when its protocol
+> section and its test vectors exist.**
 
-No spec without a consumer. No mechanic without a spec. The shared test vectors
-are the joint: fixtures written in the protocol document are consumed verbatim
-by the engine's conformance tests. A spec that cannot be executed is prose; a
-mechanic that cannot be verified is a bug that hasn't landed yet.
+The protocol documents contain the shared test vectors, and the engine's
+conformance tests consume them verbatim. A specification without an
+executable test is incomplete; a mechanic without verification is
+unfinished.
 
-## 2. The fun-first substrate rule
+## 2. Infrastructure is not exposed to the player
 
-RFA determinism, TLV codecs, receipts, and the refused-functionals
-discipline are **invisible infrastructure**. The player sees zoning,
-exploration, trade, fleets, and other citizens of the stratum — never the math.
-Rigor serves play the way a traffic solver serves a city builder: absolutely,
-and silently. When a design choice pits mathematical elegance against player
-experience, the spec bends and the substrate absorbs the complexity. The
-substrate's law ("valid or rejected, nothing in between") governs state
-transitions, not game design.
+Determinism, the TLV codecs, receipts and the refused functionals are
+infrastructure. The player works with zoning, exploration, trade, fleets
+and other players, not with the mathematics. Where mathematical elegance
+conflicts with the player's experience, the specification is adjusted and
+the engine absorbs the complexity. The engine's rule that a state
+transition is either valid or rejected applies to state transitions, not
+to game design.
 
-## 2a. The syntropic register (operator ruling 2026-08-01)
+## 2a. Rules are stated constructively
 
-**This charter is written syntropic, never negentropic.** The distinction
-is exact and not stylistic. *Negentropy* is negative entropy — a good
-defined as the absence of a bad, which makes the bad the primary object
-and the good its shadow. *Syntropy* is a positive quantity in its own
-right: it names what is built, and needs no failure to point at.
+A quantity can be defined in two ways: directly, as a measurement of what
+the state contains, or by complement, as what remains of a reference set
+once something is removed (`x = U − y`). A complement depends on the
+reference `U`: if `U` is misidentified, `x` measures the wrong object, and
+nothing in `x` itself shows the error. A direct measurement depends only on
+the state it reads. The documents therefore use a syntropic register, not a
+negentropic one: *syntropy* is a positive quantity measured on what is
+built, while *negentropy* is defined as the absence of entropy, a
+complement.
 
-Three bindings follow, and they order every section below:
+Three rules follow, and they apply to every section below:
 
-1. **The generative side leads.** What the system makes is stated first
-   and stands on its own merit. Refusals, bans, slashes and lints are
-   real and stay — but they are subordinate clauses of a positive law,
-   never the law itself. A rule that can only be stated as a prohibition
-   is a rule that has not yet found its object.
-2. **Convergence is the frame; divergence is a case within it.** The
-   mesh converges (NS-5, proof-of-convergence); honest forking is a
-   lawful case inside that frame, not the frame's opposite. Where this
-   document must name divergence it names it as the lesser reading —
-   what convergence tolerates, never what the system is organised
-   around.
-3. **A negative assumption carries less weight than a positive
-   measurement.** Where a refusal and a reading disagree about what a
-   state is, the reading governs. The engine measures what is there
-   before it prices what is missing.
+1. **The constructive rule is stated first.** Refusals, bans, slashing
+   conditions and lints remain in force, but each is stated as a
+   consequence of a constructive rule, because a prohibition only names the
+   complement of a set the constructive rule defines. A rule that can only
+   be stated as a prohibition has not yet defined that set.
+2. **Convergence is the primary frame.** The mesh's process is convergence
+   (NS-5, proof of convergence); a fork is a branch inside that process
+   which convergence later annexes, not its opposite.
+3. **Measurements take precedence over assumptions.** A refusal encodes an
+   assumption about which states occur; a reading measures the state. Where
+   they disagree, the assumption is the part that is wrong, so the reading
+   applies.
 
-**Why this is law and not taste.** The corpus has drifted this way twice
-already and both times it cost real correctness: the value law read as
-two ceilings with no direction until `I4`/`I5` recovered their
-syntropy/entropy names, and capacity was built as a residue — what
-survives after stripping — until it was rebuilt as the circulation it
-positively is. In both cases the negentropic form was not merely bleak,
-it measured the wrong object. Stating the positive first is how the
-object stays in view.
+**Evidence.** Both complement definitions used so far produced incorrect
+results. The value law was stated as two ceilings without a direction until
+`I4` and `I5` were restated as direct syntropy and entropy measures, and
+capacity was implemented as what remains after stripping until it was
+rebuilt as the measured circulation.
 
-## 3. The inscribed constraints (five things this system builds)
+## 3. Design constraints
 
-Five standing constructions, each stated as what it makes. Dark Forest
-(0xPARC, ~2020) proved decentralized hidden-information worlds are
-possible, and the ways it came apart are the evidence these five are
-load-bearing — evidence, never the definition. Each stands on its own
-merit and would stand had that project never existed:
+Dark Forest (0xPARC) showed that a decentralized world with hidden
+information is feasible; the points at which it failed motivate the five
+constraints below. Each is stated as a property of this system:
 
-1. **Persistence by construction.** The append-only VRP chronicle is the world
-   state. There are no resets, no wipes, no ephemeral beta rounds — a reset is
-   not a refused policy but an operation that does not exist.
-2. **Zero floating-point tax.** All state transitions are native RFA (exact
-   rational arithmetic). No
-   float emulation, no constraint blowup, no thermal throttling. If state is
-   ever bridged to ZK proofs, rational arithmetic keeps circuits light.
-3. **MESH consensus, no chokepoint.** Peers verify each other's state by exact
-   measurement (proof-of-convergence). There is no central server to melt and
-   no global RPC to crash.
-4. **Governed autonomous agents.** This is an AI MUD: bots are not cheating,
-   they are citizens. Every agent — player-written or NPC — runs inside
-   ipsal-os containment with dimensional permissions and generation-tagged
-   receipts. Automation is governed, never banned and never an arms race.
-5. **Instant onboarding.** One command launches the CLI client. No wallet, no
-   gas, no invite keys, no bridging. The barrier to entry is typing.
+1. **Persistence.** The append-only VRP chronicle is the world state. The
+   system has no reset, wipe or ephemeral round, and no operation exists to
+   perform one.
+2. **No floating point.** Every state transition uses exact rational
+   arithmetic (RFA). There is no float emulation. If state is later bridged
+   to zero-knowledge proofs, rational arithmetic keeps the circuits small.
+3. **Consensus without a central server.** Peers verify each other's state
+   by exact measurement (NS-5, proof of convergence). There is no central
+   server or global RPC endpoint whose failure stops the world.
+4. **Governed agents.** Automated agents are participants. Every agent,
+   whether written by a player or run as an NPC, executes inside IPSAL-OS
+   containment with dimensional permissions and generation-tagged receipts.
+   Automation is governed, not banned.
+5. **Immediate access.** The CLI client starts with one command and needs
+   no wallet, gas, invite key or bridge.
 
-## 3a. The lens law — no mirrors in the infrastructure
+## 3a. Observation uses lenses, never mirrors
 
-**Ruled 2026-08-01. A mirror is banned as a structure and as a word.**
-The difference is what the instrument is for, and which way it points.
+Let `S` be the committed state.
 
-- **A lens offers solutions.** A lens is turned on something to resolve
-  it — it magnifies, focuses, and returns a reading that did not exist
-  before the looking. It points outward, at an object, and its whole
-  purpose is to produce what was not previously legible. A lens is
-  generative: it answers a question.
-- **A mirror returns the self.** A mirror is used for self-inspection.
-  It points inward and gives back exactly what was already there — no
-  new information, by construction, because self-inspection is the one
-  operation that cannot resolve anything. It answers nothing; it
-  confirms.
+- A **lens** is a function `L: S → R`, evaluated on demand. Its output is
+  determined by `S`, so it carries no information beyond `S`
+  (`H(L(S) | S) = 0`), and it cannot disagree with `S`: there is no second
+  record to compare against.
+- A **mirror** is a stored record `S′` with the intended invariant
+  `S′ = S`. Every update `u` must then be applied twice, `S ← u(S)` and
+  `S′ ← u(S′)`. An update applied to one record and not the other (a
+  partial write, a failure between the two writes, a defect in either
+  path) breaks the invariant, so `S′ ≠ S` is a reachable state.
 
-**This is the dogmatic loop wearing glass.** A system that inspects
-itself and calls the looking work is precisely `α ≅ Ω` — motion that
-returns to its origin, deeds emitted against nothing gained, which
-Article III prices at zero. The mirror is that loop's instrument. The
-lens is how a system looks at something other than itself and comes
-back holding more than it left with.
+The mirror's value is zero in both cases: while the invariant holds,
+`H(S′ | S) = 0` and `S′` adds nothing; once it fails, `S′` is wrong. Its
+cost is a second write path and a reconciler `r(S, S′)` that exists only to
+repair the divergence, and that reconciler is itself a second update path,
+which §11 rule 3 excludes. Inspection of the system's own state by a copy of
+itself is the identity map (`α ≅ Ω`), which Article III prices at zero.
 
-*The copy is the consequence, not the definition.* Because a mirror
-returns the self, it must hold a second image to return — and from that
-moment there are two things that can disagree, and every reconciler
-after it is a tool built to manage a problem that should not exist.
+**Consequence.** No crate, module, type, field or specification primitive is
+a mirror or is named one. Observation is a lens (`SYSTEM_SPEC` §3), as are
+rendering, the observer, the wall and the journals. Every reading is derived
+from `S`.
 
-**Binding:** no crate, module, type, field, or spec primitive in this
-workspace may be a mirror or be named one. Observation is a lens
-(`SYSTEM_SPEC` §3); rendering is a lens; the observer, the wall and the
-journals are lenses. Where a reading is needed, it derives.
+**History.** `engine/mirror` began as a read-only dashboard and became
+load-bearing through successive changes, because no rule prevented it. §11
+was written in response; the crate was removed (d606b01), together with
+`cfe::opposition`, the reconciler it had required (c7cad9e). ANTI-MIRROR
+followed: verification by opposition requires two records to compare, which
+§11 rule 5 clause 1 forbids.
 
-**This is the section that was earned rather than reasoned.**
-`engine/mirror` was born a read-only dashboard and was safe while that
-was all it was. It became load-bearing one useful change at a time, and
-no rule existed to stop it — so §11 was written, the crate was excised
-(d606b01), and `cfe::opposition`, the reconciler it had made necessary,
-went with it (c7cad9e). ANTI-MIRROR followed: verification by opposition
-still needs two records to set against each other, which §11 rule 5
-clause 1 forbids outright. *What cannot diverge needs no reconciling.*
+**Enforcement.** Standing tests hold the rule:
+`recurrence_guard::the_dead_name_stays_dead` (the crate and its workspace
+member stay removed), `recurrence_guard::the_anti_mirror_stays_excised`
+(the reconciler stays removed) and `constitution_lint::no_mirror_in_the_law`
+(the name stays out of the specifications).
 
-**Held by standing tests, never by memory:**
-`recurrence_guard::the_dead_name_stays_dead` keeps the crate and the
-workspace member dead; `recurrence_guard::the_anti_mirror_stays_excised`
-keeps the reconciler dead; `constitution_lint::no_mirror_in_the_law`
-keeps the name out of the specifications. Vigilance did not catch it the
-first time; a standing test did.
-
-## 4. The protocol-to-mechanic binding map
+## 4. Protocol-to-mechanic map
 
 | Spec | Protocol | First game consumer |
 |---|---|---|
-| NS-1 | **DOP** — Dimensional Object Protocol | Colony, sector, and profile orbs — every game object is a self-contained orb with provenance |
-| NS-2 | **RQP** — Resonance Query Protocol | The scanner: search by structural resonance, not string match |
-| NS-3 | **VRP** — Verification Receipt Protocol | The world chronicle: every action an append-only, predecessor-linked receipt |
-| NS-4 | **APERTURE** — the controlled opening | Sector-map sharing and private trade offers, opened at a granted facet (summary → detail → full) |
-| NS-5 | **MESH** — Proof-of-Convergence Consensus | Multi-node world synchronization ("two laptops, one world") |
-| NS-6 | **IPSAL-OS** — Entity Containment | Player, NPC, and bot identity: the profile of every individual inside the network |
-| NS-7 | **Anchor** — WWW3 Settlement Bridge | High-value settlement: minting a rare world, macro-trades, asset ownership anchored to an external chain |
+| NS-1 | **DOP** — Dimensional Object Protocol | Colony, sector and profile orbs: every game object is a self-contained orb with provenance |
+| NS-2 | **RQP** — Resonance Query Protocol | The scanner: search by structural resonance, not by string match |
+| NS-3 | **VRP** — Verification Receipt Protocol | The world chronicle: every action is an append-only receipt linked to its predecessor |
+| NS-4 | **APERTURE** — controlled disclosure | Sector-map sharing and private trade offers, disclosed at a granted level (summary, detail, full) |
+| NS-5 | **MESH** — Proof-of-Convergence Consensus | Multi-node world synchronization (two machines running the same world) |
+| NS-6 | **IPSAL-OS** — Entity Containment | Player, NPC and bot identity: the profile of every individual on the network |
+| NS-7 | **Anchor** — external settlement bridge | High-value settlement: minting a rare world, large trades, and asset ownership anchored to an external chain |
 
-## 5. Ancestry (consult, never port blindly)
+## 5. Prior work
 
-- `/opt/repos/` — the reference era: convergence-engine (the math),
-  AI-TECHNOLOGY-WWW (the WWW4 protocol drafts the NS specs supersede),
-  governance (the five-layer architecture), NEBULA-PRODUCTS (the platform
-  vision), AI-scientists (the safety research). Shapes are reference; every
-  scalar/scored/capped form is refused.
-- `/opt/ipsal-autic-v0.4/` — the sealed engine build: the chronicle (VRP's
-  working predecessor), the sigil index (RQP's), consilience (MESH's), the TLV
-  wire, and `docs/GROUND.md`'s organ map — the do-not-rebuild gate.
-- **Naming:** SAIOS is retired (external name collision). The sovereign layer
-  is **ipsal-os**, here and everywhere forward.
+The following earlier repositories informed the design. Their structure
+may be consulted; code is not ported without review, and every scalar,
+scored or capped form in them is refused.
+
+- `/opt/repos/`: convergence-engine (the mathematics), AI-TECHNOLOGY-WWW
+  (the WWW4 protocol drafts that the NS specifications supersede),
+  governance (a five-layer architecture), NEBULA-PRODUCTS (platform
+  design) and AI-scientists (safety research).
+- `/opt/ipsal-autic-v0.4/`: the sealed engine build, containing the
+  chronicle (the predecessor of VRP), the sigil index (of RQP), consilience
+  (of MESH), the TLV wire format, and the component map in
+  `docs/GROUND.md`, which lists what is not to be rebuilt.
+- **Naming:** the sovereign layer is named **ipsal-os**. The earlier name,
+  SAIOS, is retired for this layer because of an external name collision.
 
 ## 6. Governance
 
-`docs/BUILD_ORDER.md` is the one carrier of build order — the current landing
-is always read there, never inferred. Landings are red-first with recorded
-output; one landing at a time; evidence blocks verbatim; the chronicle of the
-repo is its git history, committed only on explicit operator go.
+`docs/BUILD_ORDER.md` records the build order, and the current landing is
+read there rather than inferred. Each landing is written test-first, with
+its failing and passing output recorded; landings proceed one at a time;
+evidence is quoted verbatim. The repository's history is its git history,
+and changes are committed only on the operator's approval.
 
-## 7. The WWW3 bridge (settlement, never simulation)
+## 7. Settlement on external chains
 
-WWW3 (existing EVM/UTXO blockchains) and WWW4 (the NS mesh) are not rivals;
-WWW4 is the glue between them. The scope rule is absolute:
+Existing blockchains (EVM and UTXO chains, referred to as WWW3) and the NS
+mesh (WWW4) have separate roles; the mesh connects to the chains without
+moving game logic onto them.
 
-> **Game logic lives in the NS specs (RFA/CFE). WWW3 chains are strictly
-> external settlement layers — temporal anchors, asset ownership, liquidity.
-> No game rule is ever encoded in contract bytecode.**
+> **Game logic is defined in the NS specifications (RFA) and executed by
+> the CFE. External chains are used only for settlement: timestamps, asset
+> ownership and liquidity. No game rule is encoded in contract bytecode.**
 
-**Dual anchoring** (the architecture that avoids Dark Forest's every-tick-
-on-chain mistake):
+**Anchoring in three levels.** This design avoids Dark Forest's approach of
+writing every tick on chain:
 
-1. **High-frequency local simulation** — CFE state ticks run locally at full
-   speed; every transition emits an NS-3 receipt. No gas, no RPC.
-2. **Mesh consensus** — peers converge on state via NS-5 proof-of-convergence.
-   Multiplayer sync happens here, chain-free.
-3. **Periodic anchoring (NS-7)** — at defined intervals or on high-value
-   events, the mesh computes one consensus root of the chronicle and posts
-   that single lightweight root to a WWW3 chain. The chain stores checkpoints,
-   never ticks. A WWW3 fork, upgrade, or outage cannot pause or break the
-   running world.
+1. **Local simulation.** CFE state transitions run locally at full speed,
+   and each emits an NS-3 receipt. No gas or RPC call is involved.
+2. **Mesh consensus.** Peers converge on state through NS-5 proof of
+   convergence. Multiplayer synchronization happens here, without a chain.
+3. **Periodic anchoring (NS-7).** At defined intervals, or on high-value
+   events, the mesh computes a consensus root of the chronicle and posts
+   that root to an external chain. The chain stores checkpoints, not ticks,
+   so a fork, upgrade or outage of the chain does not stop the world.
 
-**The three safety seals** (upgrades must never break state):
+**Compatibility guarantees.** An upgrade never breaks state:
 
-- **SEAL A — codec compatibility.** The TLV wire format is additive: a reader
-  skips unknown tags, never crashes on them; landed state round-trips
-  byte-exact across every engine version.
-- **SEAL B — the chronicle is ground truth.** The world lives in the
-  append-only NS-3 chronicle, not in any mutable database or contract
-  variable. Swap the renderer, upgrade the engine, migrate the chain — the
-  chronicle replays the universe from tick zero.
-- **SEAL C — adapters, not logic.** WWW3 contracts are thin adapters
-  (ERC-721/1155/account-abstraction) mapping wallet addresses to ipsal-os
-  entity IDs. Retargeting to a new chain style means rewriting an adapter,
-  never touching game state.
+- **SEAL A — codec compatibility.** The TLV wire format is additive: a
+  reader skips unknown tags, and stored state round-trips byte-exact across
+  every engine version.
+- **SEAL B — the chronicle is authoritative.** The world is stored in the
+  append-only NS-3 chronicle, not in a mutable database or a contract
+  variable. The renderer can be replaced, the engine upgraded or the chain
+  migrated; the chronicle replays the world from tick zero.
+- **SEAL C — adapters, not logic.** External contracts are thin adapters
+  (ERC-721, ERC-1155, account abstraction) that map wallet addresses to
+  IPSAL-OS entity IDs. Moving to a different chain means rewriting an
+  adapter, never changing game state.
 
-## 8. Terminology law
+## 8. Terminology
 
-The substrate has two names and only two, split by responsibility:
+The substrate has two names, divided by responsibility:
 
-- **RFA — Rational Field Algebra**: the mathematical specification vocabulary.
-  Exact fractions p/q in canonical coprime form (gcd(p,q)=1), the refused
-  functionals, zero rounding drift. Protocol specs write "RFA semantics."
-- **CFE — Canonical Field Engine**: the executable runtime — the Rust
-  workspace that evaluates RFA state transitions, runs the TLV codecs, and
-  drives the simulation ticks.
+- **RFA — Rational Field Algebra:** the mathematical specification
+  vocabulary. Exact fractions p/q in canonical coprime form (gcd(p, q) = 1),
+  the refused functionals, and no rounding drift. Protocol specifications
+  refer to "RFA semantics".
+- **CFE — Canonical Field Engine:** the executable runtime, the Rust
+  workspace that evaluates RFA state transitions, runs the TLV codecs and
+  drives the simulation.
 
-Single mathematical set-letters are never used as names, brands, or shorthand
-anywhere in this project — not for the rationals, not for the integers, not as
-a hyphenated tag, and not inside derivations. Single-letter mathematical
-branding attracts internet pattern-matching noise (political and otherwise)
-the work does not need, and the mathematics is fully specified by its own
-proper words.
+Single mathematical set letters are not used as names, brands or shorthand
+anywhere in the project: not for the rationals, not for the integers, not
+as hyphenated tags and not inside derivations. Such shorthand attracts
+unrelated associations online, and the mathematics is fully specified by
+its proper names.
 
-The standing vocabulary is written out:
+The standard vocabulary:
 
-- **exact rational arithmetic** — the principle; as an adjective,
-  **exact-rational** (e.g. "exact-rational embers", "an exact-rational state
-  machine").
-- **the exact rationals** / **the rationals** — the number domain; **a pair of
-  exact rationals** for a two-component value.
-- **the symbolic-π extension** — the rationals with π adjoined as an exact
-  symbol; values are **exact-rational polynomials in π**.
-- **RFA — Rational Field Algebra** and **CFE — Canonical Field Engine** stay
-  as the two names above: both spell their concept out and carry no
+- **exact rational arithmetic** for the principle, and **exact-rational**
+  as the adjective (for example "exact-rational embers", "an exact-rational
+  state machine");
+- **the exact rationals** or **the rationals** for the number domain, and
+  **a pair of exact rationals** for a two-component value;
+- **the symbolic-π extension** for the rationals with π adjoined as an
+  exact symbol, whose values are **exact-rational polynomials in π**;
+- **RFA** and **CFE** as defined above; both are spelled out and carry no
   single-letter shorthand.
 
-## 9. The stochastic law (inscribed before any randomness lands)
+## 9. Randomness
 
 In Netstratum, **"stochastic" means chronicle-seeded, receipted, replayable
-randomness — never ambient entropy, never floats.** Any mechanic that draws
-chance (hazards, shocks, prospecting) draws from a PRNG seeded by the
-previous tick's receipt digest, with probabilities as exact rationals and
-draws as exact modular arithmetic. A replay of the chronicle therefore
-reproduces every "random" outcome bit-for-bit. Wall-clock time, OS entropy,
-and floating-point sampling are refused at write time — they would break
-SEAL B (replay = committed world) and with it mesh consensus (NS-5) and
-anchoring (NS-7). Randomness is a *reading of history*, not an oracle
-outside it.
+randomness: never ambient entropy and never floating point.** A mechanic
+that draws chance (hazards, shocks, prospecting) draws from a PRNG seeded
+by the previous tick's receipt digest, with probabilities as exact
+rationals and draws as exact modular arithmetic. Replaying the chronicle
+therefore reproduces every random outcome bit for bit. Wall-clock time,
+operating-system entropy and floating-point sampling are refused at write
+time, because each would break SEAL B (a replay reproduces the committed
+world) and with it mesh consensus (NS-5) and anchoring (NS-7). Randomness is
+derived from the recorded history.
 
-## 10. The parallel-node protocol (coder-01 / coder-02, ratified 2026-07-25)
+## 10. Parallel development
 
-Two engineering nodes work this repo. File ownership keeps merges
-conflict-free: **coder-02 (vocabulary node, main tree)** owns `docs/`
-(Except the substrate contract), `engine/cfe/src/world/`, `clients/cli/`.
-**coder-01 (substrate node, worktree)** owns `engine/rfa-core/`,
-`engine/physics/`, `engine/solver/`, `engine/ledger/` (registry +
-observer), `docs/03_SUBSTRATE_CONTRACT.md`, and the workspace `Cargo.toml`
-members line. Runtime state (`var/`) is never tracked; the registry under
-it is a directory of receipted truth, never a source of it (04 §5).
-Neither node edits the other's territory without an operator relay. Cross-layer meaning is pinned by
-`docs/03_SUBSTRATE_CONTRACT.md` (each mechanic stated as mechanic →
-primitive → witness test) — the layers hold each other by tests, not by
-memory.
+When two engineering nodes, coder-01 and coder-02, worked this repository,
+file ownership kept their merges free of conflicts:
 
-## 11. The ONE-TRUTH amendment (operator ruling 2026-07-31; rewritten
-to the plain register by the same ruling — the document says what it
-means; pen coder-03, review coder-04, all seats bound)
+- **coder-02** (the vocabulary node, main tree) owned `docs/` (except the
+  substrate contract), `engine/cfe/src/world/` and `clients/cli/`;
+- **coder-01** (the substrate node, a worktree) owned `engine/rfa-core/`,
+  `engine/physics/`, `engine/solver/`, `engine/ledger/` (the registry and
+  the observer), `docs/03_SUBSTRATE_CONTRACT.md` and the `members` line of
+  the workspace `Cargo.toml`.
 
-*The game is one walk: the coordinate names it, the kernel steps it,
-the chain remembers it, the galaxy flavors it, the ideology judges
-it. Everything below is those five layers stated as rules.*
+Neither node edited the other's files without a relay through the operator.
+Runtime state (`var/`) is never tracked; the registry under it is a
+directory of receipted records, never a source of truth (04 §5). Meaning
+across the layers is pinned by `docs/03_SUBSTRATE_CONTRACT.md`, which states
+each mechanic as mechanic, primitive and witness test, so that the layers
+are held together by tests.
 
-**The one truth.** The game keeps exactly one machine-readable copy of
-state, and every reading derives from it. That is the whole of this
-section; the prohibition below is its consequence, not its content
-(§2a: a refusal is a subordinate clause of a positive law).
+## 11. The ONE-TRUTH amendment
 
-*Consequent:* a second machine-readable copy, or a tool that reconciles
-two copies after the fact, is therefore banned — there is nothing for it
-to be a second of. The opposition module was deleted under this section
-(2026-07-31); the ledger's display half (the excised crate's lens
-exports) deletes at Step 4 once views serve from the chain.
+This section defines how state is stored, changed and observed: a coordinate
+names each state, the kernel changes it, the chain records it, the galaxy
+supplies its context and the ideology evaluates it.
 
-**The five rules (normative):**
+**Principle.** The game keeps exactly one machine-readable copy of state,
+and every reading is derived from it. The prohibition that follows is a
+consequence of this principle (§2a).
 
-1. **Single source of truth.** The game keeps exactly one
-   machine-readable copy of state: a hash-chained sequence of state
-   snapshots, each named by its coordinate TUniversal{S, G, T} and
-   bound to its predecessor.
-2. **Exports are write-only.** JSON files, dashboards, and save-file
-   copies are display output. No code ever parses them back in.
-3. **One validated update function.** All state changes go through
-   `admits(prior, next, step) -> Ok | typed refusal`: pure, total, no
-   I/O, and encoding-blind — it works on in-memory state only and
-   never produces or reads bytes. Serialization belongs exclusively
-   to the codec (rule 1's snapshot encoder), so the update function
-   and the chain can never disagree about bytes: only one component
-   ever produces them. The rules it enforces — totals balance,
-   permissions checked, exact arithmetic only — are invariants inside
-   it, each proven by its own witness, written red-first. The
-   function is versioned like this charter: changes are amendments.
-4. **One input boundary.** Anything external — a person, a tool,
-   another node — submits a request to the inbox queue; the update
-   function validates and applies it. No direct edits, ever.
-5. **The review lint (applied to every change, forever).**
-   Clause 1: a change that adds a second readable state copy, or a
-   reconciling check between copies, is rejected regardless of how
-   useful it looks — useful is how the last one got in.
-   Clause 2: a change that puts state-changing logic outside the
-   update function, or grows the update function without an
-   amendment, is rejected the same way.
+**Consequence.** A second machine-readable copy of state, or a tool that
+reconciles two copies after the fact, is not permitted. The opposition
+module was removed under this section (c7cad9e); the ledger's display
+exports are removed at step 4, once views are served from the chain.
 
-**The build order (each step gated on the last; all other boards
-frozen meanwhile):**
+**Rules (normative):**
+
+1. **Single source of truth.** The game keeps exactly one machine-readable
+   copy of state: a hash-chained sequence of state snapshots, each named by
+   its coordinate TUniversal{S, G, T} and bound to its predecessor.
+2. **Exports are write-only.** JSON files, dashboards and save-file copies
+   are display output. No code parses them back in.
+3. **A single validated update function.** Every state change goes through
+   `admits(prior, next, step) -> Ok | typed refusal`, which is pure, total,
+   free of I/O and independent of encoding: it operates on in-memory state
+   and never produces or reads bytes. Serialization belongs to the codec
+   (the snapshot encoder of rule 1) alone, so the update function and the
+   chain cannot disagree about bytes. The invariants the function enforces
+   (totals balance, permissions are checked, arithmetic is exact) are each
+   proven by a witness test written test-first. The function is versioned
+   like this charter: a change to it is an amendment.
+4. **A single input boundary.** Every external party (a person, a tool or
+   another node) submits requests to the inbox queue; the update function
+   validates and applies them. State is never edited directly.
+5. **The review lint (applied to every change).** Clause 1: a change that
+   adds a second readable copy of state, or a reconciling check between
+   copies, is rejected, however useful it appears. Clause 2: a change that
+   puts state-changing logic outside the update function, or extends the
+   update function without an amendment, is rejected likewise.
+
+**Build order.** Each step depends on the previous one; other work is
+paused meanwhile.
 
 - **Step 1 — the update function**, extracted and sealed per rule 3. Its
-  full law — the six invariants, the equations (coherence functional,
-  constitution digest, commitment, the fold gate), and the convergence
-  algorithm (dimensional resolution, not gradient descent) — is inscribed
-  in `engine/kernel/CHARTER.md`, subordinate to this section and amended
-  charter-tier (bumping `kernel::VERSION`).
-- **Step 2 — the snapshot codec** (coder-04's lane): the canonical
-  encoding of the whole committed state — the thing the hashes bind.
-  It carries a schema version; changing the state's field set is
-  itself an amendment, and old chains verify under the version they
-  were cut with. **The freeze window: the committed state's field
-  set holds stable until codec v1 lands** — any in-flight change
-  touching it coordinates with the codec lane first. The commitment
-  is `H(schema ‖ state_bytes ‖ predecessor ‖ coordinate)`, produced by
-  the spine only; the update function never reads it.
-- **Step 3 — the chain and the vertical axis**: snapshots chained;
-  identity, station, lineage, roster, galaxies, and eras become
-  chained state changed only through the inbox. The seeds file is
-  genesis input, hashed once at adoption, dead thereafter.
-- **Step 4 — views first, then deletion**: read-only views (observer,
-  wall, journals) serve from the chain before the ledger's display
-  half is deleted — the operator's window never goes dark. Then the
-  lens exports are removed, not deprecated (the opposition module is
-  already gone, 2026-07-31).
-- **Step 5 — the mesh, last.** Nothing replicates to other nodes —
-  code, claims, or documents — until this universe runs on the
-  chain. The old mesh spec's consensus claims stand superseded until
-  then.
+  specification (the six invariants; the equations for the coherence
+  functional, the constitution digest, the commitment and the fold gate;
+  and the convergence algorithm, which is dimensional resolution rather
+  than gradient descent) is in `engine/kernel/CHARTER.md`. That document is
+  subordinate to this section and is amended at charter level (bumping
+  `kernel::VERSION`).
+- **Step 2 — the snapshot codec** (coder-04): the canonical encoding of the
+  whole committed state, which the hashes bind. It carries a schema
+  version; a change to the state's field set is an amendment, and existing
+  chains verify under the version they were written with. The committed
+  state's field set is frozen until codec v1 lands, and any change touching
+  it is coordinated with the codec owner first. The commitment is
+  `H(schema ‖ state_bytes ‖ predecessor ‖ coordinate)`; only the spine
+  produces it, and the update function never reads it.
+- **Step 3 — the chain and the vertical axis.** Snapshots are chained.
+  Identity, station, lineage, roster, galaxies and eras become chained
+  state, changed only through the inbox. The seeds file is genesis input,
+  hashed once at adoption and not read again.
+- **Step 4 — views first, then removal.** Read-only views (the observer,
+  the wall and the journals) are served from the chain before the ledger's
+  display exports are removed, so the operator's view is never
+  interrupted. The exports are then removed, not deprecated (the
+  opposition module is already removed).
+- **Step 5 — the mesh.** Nothing (code, claims or documents) replicates to
+  other nodes until this universe runs on the chain. The consensus claims of
+  the previous mesh specification are suspended until then.
 
-**The adoption rule (the running universe survives):** every existing
-world's event log is replayed once under the sealed update function;
-the resulting state becomes that world's first chained snapshot, with
-the old log hashed in as history. Nothing running is deleted by the
-cure.
+**Adoption.** Each existing world's event log is replayed once under the
+sealed update function; the resulting state becomes that world's first
+chained snapshot, with the old log hashed in as history. No running world is
+deleted.
 
-**The nursery law.** A world is born and raised on one node — the nursery
-— and because its commitment shape and its judge are already the mesh's
-own, it is born MESH-ready. Joining the mesh is the audience growing: a
-node presents its chain, peers re-run the identical kernel over every step,
-and admission is verification. A **puppet universe is precisely a nursery
-that never earned confirmation** — the same vocabulary names the sandbox
-law and the Sybil analysis.
+**Nurseries.** A world is created and run on a single node, its nursery.
+Because its commitment format and its validation are the mesh's own, it can
+join the mesh without conversion. Joining is verification: a node presents
+its chain, peers re-run the same kernel over every step, and admission
+follows. A puppet universe is a nursery that never obtained confirmation, so
+the sandbox rules and the Sybil analysis use the same terms.
 
-**The alignment covenant — weight is earned (§2a: the generative side
-leads).** The ordering mechanism is one economy read from its positive
-end. **Consensus weight is earned by certificate-verified genuine
-difference** — proof-of-useful-work, the primary half, and the one still
-unbuilt: it is the load-bearing gap precisely because it is the half
-that generates. The subordinate half, ruled and boarded (NS-5 §7.6),
-prices fabrication: **honest forking is lawful and expected — a node
-that forks openly is a lawful nursery; only fabricated confirmation is
-slashed.** A node that fabricates confirmation and is
-proven to has its pen, its work, and its stake forfeited — reusing the
-landed `ForwardSlashed`/forfeit mechanics. The puppet web is made
-expensive by work-anchoring and ruinous by stake-slashing on proven
-fabrication. The three economics questions — what verified work earns,
-what the stake is, how much slashes — are operator rulings, ruled in one
-sitting because the carrot and the stick are one economy.
+**Consensus weight.** Consensus weight is
+earned by certificate-verified genuine difference: proof of useful work.
+This is the primary mechanism and it is not yet built. The secondary
+mechanism, specified in NS-5 §7.6, penalizes fabrication: an open
+fork is permitted, and a node that forks openly is a lawful nursery; only
+fabricated confirmation is slashed. A node proven to have fabricated
+confirmation forfeits its work and its stake, through the existing
+`ForwardSlashed` and forfeit mechanics. Work anchoring makes a network of
+puppet nodes costly, and slashing on proven fabrication removes their
+stake. Three economic parameters remain to be set (what verified work earns, the
+size of the stake and the slashing amount); they are set together, because
+the reward and the penalty act on the same balance.
 
-**Why this section exists:** the old mirror was born as a read-only
-dashboard and was safe while that was all it was. It became
-load-bearing one useful change at a time, and no rule existed to stop
-that. Rule 5 is that rule.
+**Rationale.** The former `engine/mirror` began as a read-only dashboard
+and became load-bearing through successive changes, because no rule
+prevented it. Rule 5 is that rule.
