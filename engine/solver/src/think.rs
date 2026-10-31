@@ -576,8 +576,8 @@ fn read_mirror(block: &Grid, base: &Grid) -> Option<TileMirror> {
 ///   3. verify the tile cheaply (`Tile(base0) == out0`, one apply) before paying
 ///      the reduce organ, then recognise the base transform `input → base0`
 ///      through it exactly once.
-/// Pin A (the caller) is the authority: a candidate that does not replay every
-/// pair withholds.
+///      Pin A (the caller) is the authority: a candidate that does not replay every
+///      pair withholds.
 fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<Program> {
     let (in0, out0) = *pairs.first()?;
     // The base is a D₄ image of the input: its dims are the input's, or swapped.
@@ -644,8 +644,8 @@ fn recognize_tile(pairs: &[(&Grid, &Grid)], grown: &mut Vec<Crystal>) -> Option<
 fn recognize_pure_tile(base: &Grid, tiled: &Grid) -> Option<Op> {
     if base.rows == 0
         || base.cols == 0
-        || tiled.rows % base.rows != 0
-        || tiled.cols % base.cols != 0
+        || !tiled.rows.is_multiple_of(base.rows)
+        || !tiled.cols.is_multiple_of(base.cols)
     {
         return None;
     }
@@ -818,15 +818,15 @@ fn recognize_frame_then_object(pairs: &[(&Grid, &Grid)]) -> Option<Program> {
 ///   whole scale `k` on both axes (or the input's the output's);
 /// - a translator where the frames agree: the vector from the first
 ///   non-background cell of the first input to that of its output.
-/// The staged grids are paired with the outputs and the organ is asked once
-/// for the frame; the word is the generator followed by it. Pin A (the
-/// caller) is the authority.
+///   The staged grids are paired with the outputs and the organ is asked once
+///   for the frame; the word is the generator followed by it. Pin A (the
+///   caller) is the authority.
 fn recognize_affine_then_frame(
     pairs: &[(&Grid, &Grid)],
     grown: &mut Vec<Crystal>,
 ) -> Option<Program> {
     let (in0, out0) = *pairs.first()?;
-    let scale = |a: usize, b: usize| (a > 0 && b > a && b % a == 0).then(|| b / a);
+    let scale = |a: usize, b: usize| (a > 0 && b > a && b.is_multiple_of(a)).then(|| b / a);
     let generator = match (
         scale(in0.rows, out0.rows),
         scale(in0.cols, out0.cols),

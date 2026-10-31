@@ -794,7 +794,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     Some(0)
                 }
             };
-            let echo_start = if bell > t_u { bell - t_u } else { 0 };
+            let echo_start = bell.saturating_sub(t_u);
             let (Some(r_now), Some(r_then)) = (rings_at(bell), rings_at(echo_start)) else {
                 keep.push(sys);
                 continue;
@@ -1382,7 +1382,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             for z in rungs {
                 // A rung whose product passes the universe's densest element
                 // does not run (docs/97 §14).
-                if z.checked_mul(2).map_or(true, |p| p > densest) {
+                if z.checked_mul(2).is_none_or(|p| p > densest) {
                     continue;
                 }
                 let (Some(key), Some(made_kind)) =

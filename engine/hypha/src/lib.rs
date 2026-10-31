@@ -8,7 +8,7 @@
 //!     same verifier (law 12 — one reader), so the two can only disagree if
 //!     the builds differ.
 //!   * Fold: a tier's net positions per identity per lane over a prefix of
-//!     the tier's own line ([`line`]), signed by the tier, admitted by
+//!     the tier's own line (`line`), signed by the tier, admitted by
 //!     continuity (78.119). [`census`] derives those folds from a colony's
 //!     chronicle exactly.
 //!
@@ -37,7 +37,6 @@ pub mod wire;
 /// No default court: the standalone :7520 court is retired (coordinator
 /// 2026-10-09, docs/PORT.md) and the fleet's hyphae are real tiers, so every
 /// command names its hypha (`--at` / `NS_HYPHA`).
-
 /// One session to one hypha, under Netstratum's own voice.
 pub struct Uplink {
     session: Session,

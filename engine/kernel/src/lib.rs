@@ -79,7 +79,7 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// **VERSION 5 — D4, the revocation law lands** (operator ruling
 /// 2026-08-04, cognition lane). A `DiscoveryMinted` deed refuses unless
 /// it carries a strictly positive capacity increment, over a resolved
-/// rank reading. See [`revocation_law`].
+/// rank reading. See `revocation_law`.
 ///
 /// **Both numbers are kept and neither is ambiguous.** They were minted
 /// on separate branches for separate reasons; 4 was skipped on main so
@@ -211,8 +211,8 @@ pub const KERNEL_VERSION: Version = Version {
 ///        a split of one rule into named parts, a faster read.
 /// ```
 ///
-/// The split of D4 into [`d4a_resolution`], [`d4b_standing_claim`] and
-/// [`d4c_increment`] is the first `patch`-shaped change: three named
+/// The split of D4 into `d4a_resolution`, `d4b_standing_claim` and
+/// `d4c_increment` is the first `patch`-shaped change: three named
 /// rules where there was one, judging identically.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Version {
@@ -258,7 +258,7 @@ pub struct Step {
 
 /// A refused transition — typed, carrying its measurement whole (the
 /// house law: a refusal names its cure; a break shows its residual,
-/// never a scalar). An `Ok(())` from [`lawful`] is the transition
+/// never a scalar). An `Ok(())` from `lawful` is the transition
 /// admitted.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Refused {
@@ -2878,7 +2878,7 @@ pub enum Layer {
 }
 
 /// **The layer law — exhaustive by design**, in the shape of
-/// [`scope_of`]: adding a `ClosureEvent` variant forces a layer
+/// `scope_of`: adding a `ClosureEvent` variant forces a layer
 /// decision here at compile time. There is no wildcard arm and there
 /// must never be one, because a wildcard is exactly the inference this
 /// function exists to abolish.

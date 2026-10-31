@@ -102,7 +102,7 @@ impl World {
     /// accumulates and the Locust churns. `grain/lifespan`, capped at one;
     /// derived (grain and lifespan are structural, not dialed).
     pub fn continuity_tax(&self) -> Ratio {
-        let grain = crate::almanac::REGROWTH_GRAIN as i64;
+        let grain = crate::almanac::REGROWTH_GRAIN;
         let lifespan = self.lifespan_of().max(1) as i64;
         ratio(grain, lifespan).min(ratio(1, 1))
     }

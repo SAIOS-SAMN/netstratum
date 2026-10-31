@@ -354,7 +354,7 @@ pub fn local_years(orbit_r: &Ratio, mass: &Ratio, beats: u64) -> u64 {
     // the year is a direct rational floor, no isqrt.
     if let Some(period) = exact_sqrt(&p2) {
         let years = (ratio(beats as i64, 1) / period).floor();
-        return years.to_integer().to_u128().unwrap_or(u128::MAX as u128) as u64;
+        return years.to_integer().to_u128().unwrap_or(u128::MAX) as u64;
     }
     // The fallback (off-track r): the exact integer-sqrt floor of beats²/P².
     let beats2 = ratio(beats as i64, 1) * ratio(beats as i64, 1);
@@ -369,7 +369,7 @@ pub fn local_years(orbit_r: &Ratio, mass: &Ratio, beats: u64) -> u64 {
         hi = hi.saturating_mul(2);
     }
     while lo < hi {
-        let mid = lo + (hi - lo + 1) / 2;
+        let mid = lo + (hi - lo).div_ceil(2);
         if (mid as u128).saturating_mul(mid as u128) <= x {
             lo = mid;
         } else {

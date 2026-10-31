@@ -100,10 +100,10 @@ fn checkpoint_records(var_root: &Path) -> Vec<(Vec<u8>, Vec<Arg>)> {
 }
 
 /// 4. The first ledger entry (78.154 sub-kind 12): at the world's axis
-/// coordinate `u`, committing to the checkpoints, no events, parent zero for
-/// the first (the head after it is kept in `home/ledger-head`).
-/// The ledger entry's frame, built and signed by `reserve` (no session): the
-/// commitment over the checkpoints, no events, the given parent and point.
+///    coordinate `u`, committing to the checkpoints, no events, parent zero for
+///    the first (the head after it is kept in `home/ledger-head`).
+///    The ledger entry's frame, built and signed by `reserve` (no session): the
+///    commitment over the checkpoints, no events, the given parent and point.
 pub fn ledger_frame(
     reserve: &ed25519_dalek::SigningKey,
     domain: [u8; 32],
@@ -386,11 +386,11 @@ pub fn map_frame(
 }
 
 /// 5. The gates as LOCAL throats (map record kind 2), each signed by the
-/// reserve and citing a final point: every gate offered at a place it is not
-/// sealed at is mapped there, and the seal written back with that place for
-/// the conductor (`gates-mapped.bin`). Only after the re-founding under the
-/// present origin. Returns what happened, and whether the court refused an act
-/// as an unknown domain (the recut).
+///    reserve and citing a final point: every gate offered at a place it is not
+///    sealed at is mapped there, and the seal written back with that place for
+///    the conductor (`gates-mapped.bin`). Only after the re-founding under the
+///    present origin. Returns what happened, and whether the court refused an act
+///    as an unknown domain (the recut).
 pub fn map_gates(
     session: &Session,
     home: &Path,

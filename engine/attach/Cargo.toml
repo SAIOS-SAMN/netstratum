@@ -9,3 +9,6 @@ description = "Attachment to Netstratum through the Mycelium hypha: the interfac
 mycelium.workspace = true
 cfe = { path = "../cfe" }
 ed25519-dalek = "2.1"
+
+[lints]
+workspace = true

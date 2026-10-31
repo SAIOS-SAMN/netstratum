@@ -60,7 +60,7 @@ impl Delta {
     /// does not enforce antisymmetry. It exists for one lawful use: the
     /// image of a general `GL_n(Rat)` conjugation `A·Δ·A⁻¹` (the fold
     /// gate's orbit), which need not be antisymmetric. The result's
-    /// lawfulness is never assumed — [`verify_conservation`] is the
+    /// lawfulness is never assumed — `verify_conservation` is the
     /// check the orbit applies at every step, breaking any orbit whose
     /// operator left the antisymmetric surface. Panics on a ragged
     /// tensor (every row `dim` wide, every entry `fiber` deep).

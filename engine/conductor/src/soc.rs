@@ -73,7 +73,7 @@ pub struct DirectionRead {
     pub families: usize,
     /// Connected family-bodies in the peel cover — the material's structure.
     pub bodies: usize,
-    /// syntropy / (syntropy + entropy) ∈ [0,1]; None when the books are cold.
+    /// syntropy / (syntropy + entropy) ∈ \[0,1\]; None when the books are cold.
     pub cohesion: Option<Ratio>,
     /// Derived: is the line composing its material self (ordering) or dissipating?
     pub ordering: bool,

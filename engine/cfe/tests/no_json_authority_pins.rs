@@ -51,5 +51,5 @@ fn state_tlv_wire_round_trips_banks_without_json() {
     let bytes = w.orb().expect("orb").wire_bytes();
     assert!(!bytes.is_empty());
     // Wire is the machine mirror — non-empty without JSON.
-    assert!(bytes.iter().any(|&b| b == 17), "zone entries on wire");
+    assert!(bytes.contains(&17), "zone entries on wire");
 }

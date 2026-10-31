@@ -396,7 +396,7 @@ impl NonNegative {
     }
 }
 
-/// The literal door, same class as [`unit`]/[`positive`].
+/// The literal door, same class as `unit`/[`positive`].
 pub fn non_negative(numer: i64, denom: i64) -> NonNegative {
     NonNegative::new(ratio(numer, denom)).expect("a non-negative literal must be ≥ 0")
 }

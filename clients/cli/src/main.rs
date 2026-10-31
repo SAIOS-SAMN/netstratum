@@ -163,7 +163,7 @@ fn profile_field(text: &str, key: &str) -> Option<String> {
 }
 
 /// The far WORLD (union wiring, 2026-07-30): cross-world deeds load
-/// the partner from its resume carrier (var/worlds/<name>/chronicle.tlv
+/// the partner from its resume carrier (`var/worlds/<name>/chronicle.tlv`
 /// — CLI-saved worlds carry one; polity worlds are export-only and
 /// refuse with the cure named). After a two-legged deed both sides
 /// sync immediately — conservation is never left half-saved.
@@ -253,7 +253,6 @@ fn charted_position(name: &str) -> (Ratio, Ratio, Ratio) {
 
 /// Parse `p/q` or a plain integer (the lens's exact rendering).
 // parse_ratio_text retired with data_field starchart scrape — desk::charted_position owns chart reads.
-
 fn sync_world(world: &World) -> Result<usize, String> {
     let name = world.orb().map(|orb| orb.name.clone()).ok_or("no colony")?;
     sync_world_at(world, &name)

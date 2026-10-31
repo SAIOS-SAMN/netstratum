@@ -1,4 +1,4 @@
-# Status
+# Roadmap
 
 What Netstratum is, what works today, and where each part is heading. This
 page is kept current; where a design document disagrees with it, this page
@@ -15,7 +15,7 @@ verified puzzles, and those solutions fund the in-game economy. External AI
 agents and simulated sandboxes attach through the
 [Mycelium](https://github.com/SAIOS-SAMN/mycelium) hypha mesh and are
 contained in the universe under the same update rule, with the mesh verifying
-their actions ([109_ATTACHMENT.md](109_ATTACHMENT.md)). The ancients' minds
+their actions ([109_ATTACHMENT.md](docs/109_ATTACHMENT.md)). The ancients' minds
 do court work on the network and earn μ.
 
 It is for players, for developers of AI agents and world models, for
@@ -32,7 +32,7 @@ operators of the network.
   `./install.sh run`).
 - **Found and watch a universe**: found an era-1 universe, advance it bell by
   bell and read it (`pulse`, `breathe`, `observe`; see
-  [ARCHITECTURE.md](ARCHITECTURE.md) §3).
+  [ARCHITECTURE.md](docs/ARCHITECTURE.md) §3).
 
 ## Status by area
 

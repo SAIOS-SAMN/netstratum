@@ -28,3 +28,6 @@ scribe = { path = "../../engine/scribe" }
 # upward import (the arrow law constrains the kernel and cfe, not the
 # clients that sit above them).
 solver-verify = { path = "../../engine/solver-verify" }
+
+[lints]
+workspace = true

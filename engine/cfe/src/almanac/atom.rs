@@ -283,8 +283,8 @@ pub fn hold(z: u32) -> u32 {
 /// - no atom has more unpaired than all the others together (its partners
 ///   must be elsewhere);
 /// - the bonds can join every atom (at least one fewer than the atoms).
-/// Exact conditions for a connected bond graph with those counts; nothing
-/// is searched.
+///   Exact conditions for a connected bond graph with those counts; nothing
+///   is searched.
 pub fn closes(zs: &[u32]) -> bool {
     let Some(counts) = zs
         .iter()
@@ -293,12 +293,12 @@ pub fn closes(zs: &[u32]) -> bool {
     else {
         return false;
     };
-    if zs.len() < 2 || counts.iter().any(|&u| u == 0) {
+    if zs.len() < 2 || counts.contains(&0) {
         return false;
     }
     let total: u32 = counts.iter().sum();
     let most = counts.iter().copied().max().unwrap_or(0);
-    total % 2 == 0 && most <= total - most && total / 2 + 1 >= zs.len() as u32
+    total.is_multiple_of(2) && most <= total - most && total / 2 + 1 >= zs.len() as u32
 }
 
 #[cfg(test)]

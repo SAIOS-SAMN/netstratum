@@ -32,3 +32,6 @@ solver-verify = { path = "../solver-verify" }
 # The taxon witness rides the snapshot codec round-trip (dev-only —
 # the runtime stays codec-blind; dev cycles are lawful in cargo).
 codec = { path = "../codec" }
+
+[lints]
+workspace = true

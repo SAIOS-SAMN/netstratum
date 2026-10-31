@@ -7,17 +7,17 @@
 //! - `star G S`               one star: matter, orbit, heartbeat, coupling
 //! - `world G S W`            one world: matter, orbit, what it offers life
 //! - `gas G [bell]`           a galaxy's gas, stretch by stretch: why it
-//!                            does or does not collapse
+//!   does or does not collapse
 //! - `formation`              each galaxy's cut, gas, echo and stars
 //! - `heartbeat`              every star's burn: fuel left, life, light
 //! - `worlds`                 every world "held down to Z" (the planetary
-//!                            cores' cut): how many worlds hold down to each
+//!   cores' cut): how many worlds hold down to each
 //! - `clock`                  the keepers, epicenter to rims; the time
-//!                            inversion through the enclosures
+//!   inversion through the enclosures
 //! - `ledger`                 mass, spin, magnetism, conserved sums
 //! - `recycle [N]`            the recycling circuit (docs/83): the ledger,
-//!                            the media tier by tier, what the last N
-//!                            echo-beats shed, and each galaxy's return
+//!   the media tier by tier, what the last N
+//!   echo-beats shed, and each galaxy's return
 //! - `civs`                   the civilizations: live and collapsed
 //! - `events [N]`             the last N creation/collapse events (journal)
 use cfe::ratio::{ratio, Ratio};
@@ -399,10 +399,7 @@ fn main() {
                 let g = pulse::mass(&all);
                 let state = pulse::core_state(c);
                 let zs = |m: &pulse::Manifest| {
-                    let z: Vec<u32> = m
-                        .keys()
-                        .filter_map(|k| conductor::chem::atom_w(k))
-                        .collect();
+                    let z: Vec<u32> = m.keys().filter_map(conductor::chem::atom_w).collect();
                     (
                         z.iter().min().copied().unwrap_or(0),
                         z.iter().max().copied().unwrap_or(0),
@@ -787,7 +784,7 @@ fn main() {
                 .collect();
             let sum = |v: &[(&conductor::chem::Kind, &Ratio)], k: Option<&str>| {
                 f(&v.iter()
-                    .filter(|(kk, _)| k.map_or(true, |k| kk.to_string() == k))
+                    .filter(|(kk, _)| k.is_none_or(|k| kk.to_string() == k))
                     .fold(ratio(0, 1), |a, (_, x)| a + Ratio::clone(x)))
             };
             let kinds_m: std::collections::BTreeSet<&conductor::chem::Kind> = in_worlds

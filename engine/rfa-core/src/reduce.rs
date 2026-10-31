@@ -192,7 +192,7 @@ pub fn holonomies(delta: &Delta, support: &Support) -> Vec<Holonomy> {
 /// (`C = 0`), the potential explains them entirely; where they do not,
 /// [`holonomies`] carries exactly the irreducible remainder the
 /// potential could not. The two are the two halves of the one resolve,
-/// read off the same [`spanning_forest`] walk.
+/// read off the same `spanning_forest` walk.
 ///
 /// Exact rational throughout; no float, no root. A `None` potential
 /// (isolated vertex) reads as zero — it stands at its own ground,

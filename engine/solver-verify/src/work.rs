@@ -25,7 +25,7 @@
 //!
 //! The op-code vocabulary below is wire law — append-only, one code
 //! one meaning forever: 1 Rotate90 · 2 Rotate180 · 3 Rotate270 ·
-//! 4 FlipH · 5 FlipV · 6 Transpose · 7 Recolor+map[10] ·
+//! 4 FlipH · 5 FlipV · 6 Transpose · 7 Recolor+map\[10\] ·
 //! 8 Object+objop (1 KeepLargest · 2 KeepSmallest · 3 DeleteLargest ·
 //! 4 CropLargest · 5 CropContent · 6 PaintAllLikeLargest ·
 //! 7 PaintAllMajority · 8 GravityDown) · 9 Tile+down,across,odd_row,

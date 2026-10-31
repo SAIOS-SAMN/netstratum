@@ -985,7 +985,7 @@ pub const MIND_ENTRY_BUDGET: usize = 2_400_000;
 /// the parliaments carry the councils' words (docs/70), and the councils are
 /// published for the house (Concordance 3.9). Returns what happened, for the log.
 pub fn year_bounce(
-    worlds: &mut Vec<Polity>,
+    worlds: &mut [Polity],
     book: &Ledger,
     registry: &Registry,
     var_root: &std::path::Path,
@@ -1566,7 +1566,7 @@ pub fn sibling_self_select_beat(sibling: u64, beat: u64, stride: u64) -> bool {
         .wrapping_mul(0x9E37_79B9_7F4A_7C15)
         .wrapping_add(beat)
         .wrapping_mul(0xD1B5_4A32_D192_ED03);
-    seed % stride == 0
+    seed.is_multiple_of(stride)
 }
 
 fn banked(world: &World, resource: Resource) -> Ratio {
@@ -1671,11 +1671,9 @@ impl Polity {
                         orbit,
                         expansion,
                         cited,
-                    } => {
-                        if self.owned_set.insert(*orbit) {
-                            self.owned_words
-                                .push((*orbit, expansion.clone(), cited.clone()));
-                        }
+                    } if self.owned_set.insert(*orbit) => {
+                        self.owned_words
+                            .push((*orbit, expansion.clone(), cited.clone()));
                     }
                     _ => {}
                 }
@@ -2489,9 +2487,7 @@ impl Polity {
                 if self.npc_chem_compound(automaton, primary, /*prefer_survival*/ true) {
                     return;
                 }
-                if self.npc_chem_catalog(automaton, primary) {
-                    return;
-                }
+                if self.npc_chem_catalog(automaton, primary) {}
             }
             _ => {
                 // Expansionist / default: yield first (net utility), then iso, catalog.
@@ -2609,10 +2605,10 @@ impl Polity {
             .unwrap_or_default();
         for i in 0..ids.len() {
             for j in (i + 1)..ids.len() {
-                if cfe::almanac::isomorphic(&ids[i], &ids[j]) {
-                    if self.world.iso_union_as(actor, orb, ids[i], ids[j]).is_ok() {
-                        return true;
-                    }
+                if cfe::almanac::isomorphic(&ids[i], &ids[j])
+                    && self.world.iso_union_as(actor, orb, ids[i], ids[j]).is_ok()
+                {
+                    return true;
                 }
             }
         }
@@ -3100,8 +3096,8 @@ impl Polity {
     ///   seeded Hoard practice already wears (`CHANNEL_DEMURRAGE` < 1), so
     ///   an invented discipline is recognizably the same kind of thing a
     ///   progenitor would have authored, not a foreign mechanic.
-    /// Refuses (no-op) when there is no residual to name a discipline after —
-    /// a covered economy has nothing left to invent a cure for.
+    ///   Refuses (no-op) when there is no residual to name a discipline after —
+    ///   a covered economy has nothing left to invent a cure for.
     fn invent_practice(&mut self, seed: [u8; 32]) {
         let Some(peel) = self.civic_peel() else {
             return;
@@ -4115,7 +4111,7 @@ impl Polity {
                     "ENTITY-ALIGN-1 clock {} {}: orbit={} hardness={} vessels={:?}",
                     self.world.now(),
                     self.spec.civilization.sigil,
-                    hex(&orbit)[..8].to_string(),
+                    &hex(&orbit)[..8],
                     hardness,
                     vessels,
                 );
@@ -4229,7 +4225,7 @@ impl Polity {
             self.world.now(),
             self.spec.civilization.sigil,
             sibling,
-            hex(&seed_digest)[..8].to_string(),
+            &hex(&seed_digest)[..8],
         );
         let difficulty = Difficulty::level(self.level);
         let task = forge_task(seed_digest, difficulty);
@@ -7634,9 +7630,9 @@ pub fn emergent_census(worlds: &[Polity], beat: u64) {
 ///      `reduct::assemble`) against another civ's independently-grown basin.
 ///   3. Control — synthetic words outside the language must not assemble, or the
 ///      census proves nothing. Comprehension >> control is the proof.
-/// Emits COG-PROOF. Bounded: samples up to `SAMPLE` speaking civs so the
-/// O(civs^2 * words) cross-civ pass stays cheap on a 100+ roster. Observation
-/// only — reads basins, writes nothing.
+///      Emits COG-PROOF. Bounded: samples up to `SAMPLE` speaking civs so the
+///      O(civs^2 * words) cross-civ pass stays cheap on a 100+ roster. Observation
+///      only — reads basins, writes nothing.
 pub fn shared_language_census(worlds: &[Polity], beat: u64) {
     const SAMPLE: usize = 8;
     const WORDS: usize = 40; // bounded vocabulary per civ — keeps the pass cheap
@@ -7698,7 +7694,7 @@ pub fn shared_language_census(worlds: &[Polity], beat: u64) {
             }
         }
     }
-    let permille = |n: u64, d: u64| if d > 0 { n * 1000 / d } else { 0 };
+    let permille = |n: u64, d: u64| (n * 1000).checked_div(d).unwrap_or(0);
     eprintln!(
         "COG-PROOF beat {beat}: civs={} shared_words={shared} max_holders={max_holders} comprehension={}permille control={}permille (intelligibility {num}/{den} vs control {cnum}/{cden})",
         vocabs.len(),
@@ -7966,7 +7962,7 @@ pub mod profile {
         }
         let mut book = BOOK.lock().expect("profile book");
         let mut out: Vec<_> = book.drain(..).collect();
-        out.sort_by(|a, b| b.1.cmp(&a.1));
+        out.sort_by_key(|b| std::cmp::Reverse(b.1));
         out
     }
 }

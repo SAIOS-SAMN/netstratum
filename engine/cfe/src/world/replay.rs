@@ -720,8 +720,8 @@ impl Replayer {
                 resource,
                 amount,
             } => {
-                let from_crisis = peek(&orbs, *from_orb).map(in_crisis).unwrap_or(false);
-                let to_crisis = peek(&orbs, *to_orb).map(in_crisis).unwrap_or(false);
+                let from_crisis = peek(orbs, *from_orb).map(in_crisis).unwrap_or(false);
+                let to_crisis = peek(orbs, *to_orb).map(in_crisis).unwrap_or(false);
                 let value = amount.clone() * crate::dop::commensurate_weight(*resource);
                 if let Some(held) = peel(&mut *orbs, *from_orb) {
                     held.bank(*resource, -amount.clone());
@@ -1003,8 +1003,8 @@ impl Replayer {
                 absorber_orb,
                 amount,
             } => {
-                let source_crisis = peek(&orbs, *source_orb).map(in_crisis).unwrap_or(false);
-                let absorber_crisis = peek(&orbs, *absorber_orb).map(in_crisis).unwrap_or(false);
+                let source_crisis = peek(orbs, *source_orb).map(in_crisis).unwrap_or(false);
+                let absorber_crisis = peek(orbs, *absorber_orb).map(in_crisis).unwrap_or(false);
                 let value = amount.clone() * crate::dop::commensurate_weight(Resource::Sink);
                 if let Some(held) = peel(&mut *orbs, *absorber_orb) {
                     held.bank(Resource::Sink, -amount.clone());

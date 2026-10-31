@@ -484,7 +484,7 @@ impl World {
                         ZoneKind::Habitat => crate::almanac::habitat_yield_scale(eco.mode, eco.fit),
                         _ => ratio(1, 1),
                     };
-                    amount = amount * mode_scale;
+                    amount *= mode_scale;
                     let boost = terrain_boost(&terrain, *orb_id, zone, &standing);
                     // The class's mechanism composes with the adopted
                     // practices, never instead of them: identity and

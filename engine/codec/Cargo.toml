@@ -7,3 +7,6 @@ description = "CODEC-1 — the committed state's one canonical encoding (schema-
 
 [dependencies]
 cfe = { path = "../cfe" }
+
+[lints]
+workspace = true

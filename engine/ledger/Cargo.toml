@@ -20,3 +20,6 @@ num-traits.workspace = true
 # The scribe — dev-only: the law tests build their fixtures through
 # the display writers (a lawful cargo dev-cycle, the guard's note).
 scribe = { path = "../scribe" }
+
+[lints]
+workspace = true

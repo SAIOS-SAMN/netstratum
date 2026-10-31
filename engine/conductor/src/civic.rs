@@ -502,8 +502,8 @@ const FRICTION_MARGIN: i64 = 2;
 ///   metabolic exchange), both in the same food-surplus units.
 /// - **ROI**: the expected return is the deficit the geometry targets (`γ`, the
 ///   binding tier's unmet demand) carried over a generation `T_gen`
-///   ([`World::lifespan_of`]); it must exceed the cost by the friction margin
-///   `μ` ([`FRICTION_MARGIN`]). A cheap topology that solves a real deficit
+///   (`World::lifespan_of`); it must exceed the cost by the friction margin
+///   `μ` (`FRICTION_MARGIN`). A cheap topology that solves a real deficit
 ///   clears it; an over-complex one (high `W`) is rejected and the line waits
 ///   for a cheaper configuration.
 /// - **Dynamic reserve** `R(γ) = R_max·(1 − s)`: the buffer collapses with

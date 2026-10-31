@@ -553,10 +553,9 @@ fn the_judged_door_carries_a_verdict_only_from_the_head_it_was_reached_on() {
         arbor.extend_judged(coord(1), &genesis, committed.state),
         Err(ArborRefused::Occupied)
     ));
-    assert!(matches!(
-        arbor.extend_judged(coord(0), &genesis, committed.state),
-        Err(_)
-    ));
+    assert!(arbor
+        .extend_judged(coord(0), &genesis, committed.state)
+        .is_err());
     // and it reloads whole
     drop(arbor);
     let back = Arbor::open(&root).unwrap();

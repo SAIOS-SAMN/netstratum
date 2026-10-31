@@ -22,8 +22,8 @@ fn main() {
             )
         })
         .collect();
-    dirs.sort_by(|x, y| y.0.cmp(&x.0)); // largest first
-                                        // Each family: (head path, head's own-hashes) — kept one at a time.
+    dirs.sort_by_key(|y| std::cmp::Reverse(y.0)); // largest first
+                                                  // Each family: (head path, head's own-hashes) — kept one at a time.
     let mut heads: Vec<(std::path::PathBuf, Vec<[u8; 32]>, usize, String)> = Vec::new();
     for (_, d) in &dirs {
         let c = match cfe::persist::load(&d.join("chronicle.tlv")) {

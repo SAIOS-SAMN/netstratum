@@ -279,7 +279,7 @@ pub fn toward_rest(q: &Ratio, r: &Ratio, h: &Ratio, ell: &Ratio) -> Ratio {
         if then == now || then == std::cmp::Ordering::Equal || now == std::cmp::Ordering::Equal {
             return step;
         }
-        step = step / ratio(2, 1);
+        step /= ratio(2, 1);
     }
     ratio(0, 1)
 }
@@ -1725,7 +1725,7 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
                 .or_default()
                 .extend(beads[i].0.iter().copied());
         }
-        out.extend(braids.into_values().filter_map(|m| judge(m)));
+        out.extend(braids.into_values().filter_map(&judge));
     }
     out
 }
@@ -3431,8 +3431,8 @@ mod passage_tests {
             ratio(1, 1),
         ] {
             let len = ratio(2, 1) * d.clone();
-            ell = ell + p.clone() * d * mean_response(&psi, &len);
-            psi = psi + len;
+            ell += p.clone() * d * mean_response(&psi, &len);
+            psi += len;
             assert_eq!(inv(&ell, &psi), start);
         }
     }

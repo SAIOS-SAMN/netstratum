@@ -40,7 +40,7 @@
 //! So `S` lives on a fixed rational lattice. Regeneration is computed
 //! exactly and then floored to that lattice, which is a deterministic,
 //! replayable operation over exact rationals — never a float, never a
-//! silent rounding. Denominators stay bounded by [`LATTICE`] forever,
+//! silent rounding. Denominators stay bounded by `LATTICE` forever,
 //! and the logistic behaviour survives intact: the curve still
 //! saturates, a tended stock still outgrows a neglected one, and
 //! over-extraction still collapses toward the floor.

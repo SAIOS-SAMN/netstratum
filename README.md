@@ -72,7 +72,7 @@ verify             # re-check the world's receipt chain
 
 ## Status
 
-[docs/STATUS.md](docs/STATUS.md) states what works today and where each part
+[ROADMAP.md](ROADMAP.md) states what works today and where each part
 is heading: the civilizations' cognition, Synthesis and sub-universes, the
 economy, μ and the Mycelium uplink, AI and human play, the universe and the
 protocol stack.
@@ -81,14 +81,24 @@ protocol stack.
 
 | Document | Contents |
 |---|---|
-| [docs/STATUS.md](docs/STATUS.md) | What works, and the trajectory of each part |
+| [ROADMAP.md](ROADMAP.md) | What works, and the trajectory of each part |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | The crates, the two models, files on disk, where to make a change |
-| [docs/CONCEPTS.md](docs/CONCEPTS.md) | Every term, with its definition, formula and code location |
+| [GLOSSARY.md](GLOSSARY.md) | Every term, with its definition, formula and code location |
 | [docs/109_ATTACHMENT.md](docs/109_ATTACHMENT.md) | How external agents and sandboxes attach through the hypha and are contained |
 | [docs/00_CHARTER.md](docs/00_CHARTER.md) | The project's binding rules |
 | [docs/README.md](docs/README.md) | The index of the design record |
 | [protocols/](protocols/) | The NS protocol specifications |
+| [docs/EQUATIONS.md](docs/EQUATIONS.md) | Every law, with its authority and its implementation |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How changes are made and checked |
+| [AGENTS.md](AGENTS.md) | Orientation and rules for AI coding agents |
+| [CHANGELOG.md](CHANGELOG.md) | Notable changes, release by release |
+| [MAINTAINERS.md](MAINTAINERS.md), [SECURITY.md](SECURITY.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Who maintains it, reporting a vulnerability, conduct |
+
+## Compatibility
+
+| Project | Pinned at |
+|---|---|
+| [Mycelium](https://github.com/SAIOS-SAMN/mycelium) (`mycelium`, `forms`) | `v0.2.0` (moving to `v0.3.0` when it is cut) |
 
 ## License
 

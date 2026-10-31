@@ -543,9 +543,7 @@ impl World {
         // The primary larder — the first non-wild source, the one the draw
         // depletes. `None` only where the derivation found no stock (an unsited
         // line), which the guards above have already turned back.
-        let Some(larder) = sources.into_iter().find(|source| !source.is_wild()) else {
-            return None;
-        };
+        let larder = sources.into_iter().find(|source| !source.is_wild())?;
         if available >= demand {
             // Fed — births ride the #28 logistic on people toward K_pop,
             // less the ordinary mortality; the people eat their full demand.

@@ -166,7 +166,7 @@ scored or capped form in them is refused.
 
 ## 6. Governance
 
-[STATUS.md](STATUS.md) states what is built and where each part is heading,
+[ROADMAP.md](../ROADMAP.md) states what is built and where each part is heading,
 and the register in [102_ALIGNMENT.md](102_ALIGNMENT.md) lists every open item
 of the era-1 work with its dependencies. A law is written into its design
 document, with the test that proves it, before it is built

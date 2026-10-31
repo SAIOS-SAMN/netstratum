@@ -86,7 +86,7 @@ fn main() {
     println!("  first pairs: {}", few.join(" "));
     let busiest: Vec<String> = {
         let mut v: Vec<_> = bonding.into_iter().collect();
-        v.sort_by(|x, y| y.1.cmp(&x.1));
+        v.sort_by_key(|y| std::cmp::Reverse(y.1));
         v.into_iter()
             .take(8)
             .map(|(z, n)| format!("Z{z}:{n}"))

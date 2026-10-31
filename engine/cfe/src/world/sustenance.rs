@@ -76,7 +76,7 @@ impl World {
     }
 
     /// `sustenance_sources` on a PRE-resolved ration (the collect-touch memo,
-    /// [`Self::population_touch_delta_with`]).
+    /// `Self::population_touch_delta_with`).
     pub fn sustenance_sources_with(
         &self,
         orb: u64,

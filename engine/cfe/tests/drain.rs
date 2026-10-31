@@ -146,7 +146,7 @@ fn the_annals_keep_what_the_live_world_reads_of_a_drained_prefix() {
         .collect();
     assert_eq!(history, expect);
     assert_eq!(
-        c.history().rev().next().as_deref(),
+        c.history().next_back().as_deref(),
         whole.last(),
         "the history walks backward too"
     );

@@ -570,7 +570,7 @@ pub fn read_entangled(state: &Committed) -> EntangledRead {
 
 /// The cross-book door: the same one-pass read, carrying the count of
 /// pairs the observer could not see. While `unknown > 0` the complex
-/// has holes of unknown shape and [`EntangledRead::capacity_is_defined`]
+/// has holes of unknown shape and `EntangledRead::capacity_is_defined`
 /// refuses — discharge them by [`Resolve::Telescope`] or
 /// [`Resolve::LockOn`] before reading capacity, never by assuming
 /// absence.

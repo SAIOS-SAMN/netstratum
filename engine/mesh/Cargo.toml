@@ -11,3 +11,5 @@ codec = { path = "../codec" }
 kernel = { path = "../kernel" }
 blake3.workspace = true
 
+[lints]
+workspace = true

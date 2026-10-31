@@ -388,11 +388,11 @@ pub fn tunnelling(w: u32) -> Option<Ratio> {
 ///   star is a tiny part of the universe, a large part of its galaxy, the
 ///   greater part of its system), never of the universe's;
 /// - its RHYTHM the heart's coherence c with the echo (a reading of phase).
-/// Each received ring fuses the share `feed = (|Δm|/3Z_p)·τ·s/Q̄·c` of the
-/// fuel that remains, compounding (`crate::compound`): n rings leave
-/// `(1 − feed)^n` of it. The light per received ring is the transduced flux,
-/// `feed × fuel share × |Δm|`. Returns (the share a ring, light a ring);
-/// None where the rung does not run, or its share lies past the whole.
+///   Each received ring fuses the share `feed = (|Δm|/3Z_p)·τ·s/Q̄·c` of the
+///   fuel that remains, compounding (`crate::compound`): n rings leave
+///   `(1 − feed)^n` of it. The light per received ring is the transduced flux,
+///   `feed × fuel share × |Δm|`. Returns (the share a ring, light a ring);
+///   None where the rung does not run, or its share lies past the whole.
 pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option<(Ratio, Ratio)> {
     let fuel = star.get(&crate::chem::Kind::atom(z)?)?.clone();
     let total = mass(star);
@@ -1147,7 +1147,7 @@ fn meetings(
     pairs: &[(usize, usize)],
     meet: &mut dyn FnMut(usize, usize, &Ratio, &mut Vec<Ratio>),
 ) -> (Vec<Ratio>, Vec<Ratio>) {
-    let rt: Vec<Ratio> = ell.iter().map(|l| rate(l)).collect();
+    let rt: Vec<Ratio> = ell.iter().map(rate).collect();
     let mut dl = vec![ratio(0, 1); ell.len()];
     for &(i, j) in pairs {
         // Their contact in each spatial plane over the echo, its mean (docs/95).
@@ -1853,7 +1853,7 @@ pub fn settle_system(
             // standing world keeps its name.
             let m: Ratio = group.iter().fold(ratio(0, 1), |s, g| s + g.1.clone());
             if group.len() == 1 || m.is_zero() {
-                merged.extend(group.drain(..));
+                merged.append(&mut group);
                 rates.clear();
                 continue;
             }

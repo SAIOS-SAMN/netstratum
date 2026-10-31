@@ -46,7 +46,7 @@ impl Kind {
     pub fn cluster(parts: &[(u32, u32)]) -> Option<Kind> {
         let mut merged: Vec<(u32, u32)> = Vec::new();
         let mut sorted: Vec<(u32, u32)> = parts.to_vec();
-        sorted.sort_by(|a, b| b.1.cmp(&a.1));
+        sorted.sort_by_key(|b| std::cmp::Reverse(b.1));
         for (n, z) in sorted {
             atom_of(z)?;
             if n == 0 {
@@ -189,7 +189,7 @@ pub fn tightness(kind: &Kind) -> Ratio {
     kind.atoms()
         .map(|(_, a)| a.tightness)
         .min()
-        .map_or_else(|| ratio(0, 1), |t| t)
+        .unwrap_or_else(|| ratio(0, 1))
 }
 
 /// A cluster's permanent dipole (with Xylarium, atoms::hold's form): what its
@@ -204,7 +204,7 @@ pub fn dipole(kind: &Kind) -> Ratio {
     let zero = ratio(0, 1);
     let atoms: Vec<Atom> = kind
         .atoms()
-        .flat_map(|(n, a)| std::iter::repeat(a).take(n as usize))
+        .flat_map(|(n, a)| std::iter::repeat_n(a, n as usize))
         .collect();
     let (Some(lo), Some(hi)) = (
         atoms.iter().map(|a| a.tightness.clone()).min(),

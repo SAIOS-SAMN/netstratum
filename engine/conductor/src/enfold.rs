@@ -9,8 +9,8 @@
 //! - for a body with none (a mote) it passes to its matter and below the
 //!   atom to the quantum tier, acknowledged and never simulated (the first
 //!   ring, operator 2026-10-08, ruled for this law 2026-10-20).
-//! Nothing a decision reads is lost, and no stored value grows with the
-//! echoes: each is held to a place its own body's state sets.
+//!   Nothing a decision reads is lost, and no stored value grows with the
+//!   echoes: each is held to a place its own body's state sets.
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
@@ -320,8 +320,8 @@ mod tests {
             // The centre of (1 − f) on its mark and f on the next, against the mark.
             let off = |x: &cfe::ratio::Ratio| {
                 let d = x.clone() - held.clone();
-                let d = d.clone() - d.round();
-                d
+
+                d.clone() - d.round()
             };
             assert_eq!(
                 (ratio(1, 1) - f.clone()) * ratio(0, 1) + f * off(&n),

@@ -102,8 +102,8 @@ pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
 ///   less than one whole nucleus arrives (docs/97 §14: no fixed cap; 1612 at
 ///   2^55 grains); every climb a neutron captured.
 /// - The free neutrons left return to the continuum as hydrogen.
-/// Returns the manifest by nuclide, in grains (whole nuclei however few);
-/// nucleons conserved exactly.
+///   Returns the manifest by nuclide, in grains (whole nuclei however few);
+///   nucleons conserved exactly.
 pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     use num_bigint::BigInt;
     let zero = BigInt::from(0);

@@ -373,8 +373,8 @@ impl World {
 
     /// **C1.7 stellar capacity** — star lines as project (14 §8.4).
     ///
-    /// Call-not-copy: [`crate::almanac::lines_of`], [`local_to`],
-    /// [`pressure`], [`refines`] are the authorities.
+    /// Call-not-copy: [`crate::almanac::lines_of`], `local_to`,
+    /// `pressure`, `refines` are the authorities.
     pub fn stellar_capacity_board(&self, orb: u64) -> StellarCapacityBoard {
         use crate::almanac::{lines_of, local_to, periodic_of, pressure, refines, LINES};
         use crate::dop::element_name;
@@ -479,8 +479,9 @@ impl World {
             )
         } else if refinable_now > 0 {
             format!(
-                "{refinable_now} vein(s) refine at pressure {} — assay · refine through ElementRefinery",
-                format!("{}/{}", pressure_now.numer(), pressure_now.denom())
+                "{refinable_now} vein(s) refine at pressure {}/{} — assay · refine through ElementRefinery",
+                pressure_now.numer(),
+                pressure_now.denom()
             )
         } else if deepest_open < work_reach {
             format!(

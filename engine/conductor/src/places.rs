@@ -271,7 +271,7 @@ pub fn core_of(path: &[u64]) -> Option<String> {
 /// ancients' "tiered range close to the core based on the proximity to the
 /// temporal echo", operator 2026-10-22).
 pub fn in_bulge(path: &[u64]) -> Option<bool> {
-    let _ = with(|p| p.systems.get(&(*path.first()?, *path.get(1)?)).map(|_| ()))?;
+    with(|p| p.systems.get(&(*path.first()?, *path.get(1)?)).map(|_| ()))?;
     Some(echo_tier(path).is_some_and(|k| k >= 1))
 }
 

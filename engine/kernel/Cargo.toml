@@ -22,3 +22,6 @@ rfa-core = { path = "../rfa-core" }
 # The prover — dev-only, for the witnesses' honest fixtures (a real
 # solved forge task). The runtime kernel never searches.
 solver = { path = "../solver" }
+
+[lints]
+workspace = true

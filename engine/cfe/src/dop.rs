@@ -124,7 +124,7 @@
 //!         tag-101 additive pattern). The legacy 3-field form decodes
 //!         with the field absent and replays with richness unmoved —
 //!         sealed history exact.)
-//!   72 Orb elements entry (element_id[32] ‖ ratio — banked element
+//!   72 Orb elements entry (element_id\[32\] ‖ ratio — banked element
 //!         stores, element-id-ascending; SEAL A: old readers skip)
 //!   74 ClosureEvent::ElderWarded (WARDEN-1a, 10 §3e — the reverse
 //!         shield seats: the elder star refuses every aperture until
@@ -239,11 +239,11 @@
 //!         mint_bound is sealed shut until Decision Box 1)
 //!   87 The arbor segment blob frame (SPINE-UPLINK, NS-5 §9 — a
 //!         content-addressed geometry carried in a replication
-//!         segment: state[32] ‖ state_bytes; the receiver re-hashes
+//!         segment: state\[32\] ‖ state_bytes; the receiver re-hashes
 //!         on arrival. Segment-only — never stored in arbor.tlv).
 //!   88 The arbor segment step frame (SPINE-UPLINK — the proof a
-//!         judged record's transition was lawful: commit[32] ‖
-//!         actor[8] ‖ stamp[8] ‖ event_bytes; the receiver re-gates
+//!         judged record's transition was lawful: commit\[32\] ‖
+//!         actor\[8\] ‖ stamp\[8\] ‖ event_bytes; the receiver re-gates
 //!         under its own kernel. Segment-only, carried only for
 //!         gated records).
 //!   89 ClosureEvent::StationSeated (the vertical axis, 2026-08-01 —
@@ -384,20 +384,20 @@
 //!    177  ClosureEvent::KnowledgeConverged (38 §5 — cross-line
 //!         consilience: independent lines that resolve their knowledge to
 //!         the same crystallized invariant record a shared axiom, one leg
-//!         per book. signature[32] ‖ mass u32 ‖ hardness u32.)
+//!         per book. signature\[32\] ‖ mass u32 ‖ hardness u32.)
 //!    178  ClosureEvent::KnowledgeLicensed (ARC C — the knowledge market:
 //!         a line licenses a word it lacks from the roster's minted pool;
 //!         the library fold reads it beside SolverWordMinted, so knowledge
-//!         circulates. orbit[32] ‖ cited ‖ opaque expansion, the
+//!         circulates. orbit\[32\] ‖ cited ‖ opaque expansion, the
 //!         SolverWordMinted wire shape.)
 //!    187  ClosureEvent::RegionCharted (GALACTIC-1 — a world's charted
 //!         (X,Y,Z) quantized onto a coarse galactic grid cell, hashed once
-//!         at genesis into a regional resource-weighting seed. seed[32].)
+//!         at genesis into a regional resource-weighting seed. seed\[32\].)
 //!    188  ClosureEvent::ChronicleCheckpointed (CHRONICLE-COMPACT-1 — a
 //!         world folds its history and commits a content hash of its
 //!         Committed state, plus the receipt count at that point. Schema
 //!         only at landing: replay records it, nothing prunes or verifies
-//!         against it yet (CHRONICLE-COMPACT-3). folded_hash[32] ‖
+//!         against it yet (CHRONICLE-COMPACT-3). folded_hash\[32\] ‖
 //!         receipt_count u64 le.)
 //!    189  ClosureEvent::SolverWordHardness (ENTITY-ALIGN-1, docs/56 §3 —
 //!         a separate receipt closed alongside a SolverWordMinted mint,
@@ -406,7 +406,7 @@
 //!         distinct knowledge-readings among the confirming vessels — the
 //!         same algorithm solver::consilience already uses for cross-line
 //!         agreement, read at vessel scope. Recorded only; nothing reads
-//!         it yet. orbit[32] ‖ hardness u32 le.)
+//!         it yet. orbit\[32\] ‖ hardness u32 le.)
 //!    Phase-5 claim ledger: next free **199** (198 CompositionSealed — the
 //!    refactor onto era 1: a world's planet composition, its shares by Z,
 //!    sealed once at founding; its veins are drawn from it; 197 SubstratumOpened — docs/69; 193 CoreDeposited, 194 CoreEmitted, 195 CoreReturned, 196 CoreWordDeposited — the cores design; 190 UniverseFounded, 191 UniverseCited, 192 AncientArose — docs/58; 186 ResourceStocksSwept, 184 VeinRejuvenated —
@@ -445,7 +445,7 @@
 //!    CivilizationCollapsed — 50_WIN_CONDITIONS, 175 TraceConsumed —
 //!    G2 trace elements).
 //!    Seated science labs. E-MKT-1 (2026-08-10): tag **49** OfferPosted
-//!    wire extended in place (Resource 1..=7; Element = 0 ‖ id[32]).
+//!    wire extended in place (Resource 1..=7; Element = 0 ‖ id\[32\]).
 //!    E3.7 (2026-08-10): tags **163–164** ElementWantStruck/Relieved.
 //!    E3.9 (2026-08-12): tag **165** TreatyElementsAllowed.
 //!         Orb TLV: 73 STAMP, 74 scrap. ZoneKind::ShipYard = 10.
@@ -623,7 +623,7 @@ impl Cargo {
             Cargo::Element(_) => None,
         }
     }
-    /// Wire: Resource → code 1..=7; Element → 0 ‖ id[32].
+    /// Wire: Resource → code 1..=7; Element → 0 ‖ id\[32\].
     pub fn encode(&self, out: &mut Vec<u8>) {
         match self {
             Cargo::Resource(r) => out.push(*r as u8),
@@ -4199,7 +4199,7 @@ pub enum ClosureEvent {
     /// elapsed banked in one receipt (the bond-settle shape).
     /// ECO-1 (#40): `richness` is the vein's flow after this deed —
     /// wear from the draw and recovery from the orb's regenerators
-    /// settle in the same receipt ([`vein_wear`], the one home).
+    /// settle in the same receipt (`vein_wear`, the one home).
     /// `None` is the sealed pre-ecology form: richness holds still.
     AssayStruck {
         orb_id: u64,
@@ -8829,7 +8829,7 @@ impl ColonyOrb {
     ///
     /// A zone with no upkeep reads full vigour: nothing is scarce.
     ///
-    /// This reads 0 or 1 today because [`Self::availability`] is
+    /// This reads 0 or 1 today because `Self::availability` is
     /// binary, so it is exactly the old all-or-nothing behaviour — but
     /// the law is now the right one, and it turns fractional the moment
     /// scarcity does.
@@ -8842,7 +8842,7 @@ impl ColonyOrb {
             .unwrap_or_else(|| ratio(1, 1))
     }
 
-    /// Does a zone run at all? The boolean face of [`zone_vigour`],
+    /// Does a zone run at all? The boolean face of `zone_vigour`,
     /// kept for callers that genuinely want a yes/no — the journal
     /// names dormant zones.
     pub fn zone_active(&self, zone: &Zone) -> bool {

@@ -346,7 +346,7 @@ impl World {
     /// never stored: it is a reading of the ledger, not state.
     ///
     /// **Sheared onto the PLANES, never swept** — the standing ruling
-    /// that [`peel`] carries (operator, 2026-07-30): *no cartesian
+    /// that `peel` carries (operator, 2026-07-30): *no cartesian
     /// find-scan repetition; peels and shears where there were
     /// iterations.*
     ///

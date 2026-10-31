@@ -523,7 +523,7 @@ fn small_det(m: &[Vec<RatPoly>]) -> RatPoly {
         }
         for i in 0..n {
             walk(n - 1, perm, m, total);
-            let swap = if n % 2 == 0 { i } else { 0 };
+            let swap = if n.is_multiple_of(2) { i } else { 0 };
             perm.swap(swap, n - 1);
         }
     }

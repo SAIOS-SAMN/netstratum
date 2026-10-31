@@ -16,7 +16,7 @@ pub fn class_ceiling() -> u8 {
 
 /// Lawful clade codes 1..=[`clade_ceiling`] (0 = unrecorded). **u16 — open.**
 pub fn clade_ceiling() -> u16 {
-    CLADE_LEGACY_MAX as u16 + u16::from(class_ceiling()) * u16::from(CLADE_EXPAND_SLOTS)
+    CLADE_LEGACY_MAX + u16::from(class_ceiling()) * u16::from(CLADE_EXPAND_SLOTS)
 }
 
 /// Legacy named clades (imperium 1..=20).

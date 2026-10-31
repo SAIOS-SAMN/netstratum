@@ -1619,7 +1619,7 @@ fn research_craft_bench(
     if matches!(w.as_deref(), Some("forge") | Some("practice") | Some("run")) {
         println!("  {} → {}", style.dim("↳"), style.key("intel research"));
         let rest: Vec<String> = std::iter::once("research".into())
-            .chain(w.into_iter())
+            .chain(w)
             .chain(words)
             .collect();
         intel(world, rest.into_iter(), style, current);

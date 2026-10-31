@@ -209,7 +209,7 @@ pub fn bounce(
         let pick = |scores: &BTreeMap<String, u64>| {
             scores
                 .iter()
-                .filter(|(w, n)| **n > 0 && in_realm(*w))
+                .filter(|(w, n)| **n > 0 && in_realm(w))
                 .max_by(|(wa, na), (wb, nb)| na.cmp(nb).then(wb.cmp(wa)))
                 .map(|(w, _)| w.clone())
         };

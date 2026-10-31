@@ -432,7 +432,7 @@ pub fn step(
             Some(p) => (Some(**p), true),
             // By deed: the keeper's rider, once a full core period is kept.
             None => match (keepers.get(&core), &entry.kept) {
-                (Some(k), Some((_, since))) if bounce >= since + 1 => (
+                (Some(k), Some((_, since))) if bounce > *since => (
                     living
                         .iter()
                         .copied()

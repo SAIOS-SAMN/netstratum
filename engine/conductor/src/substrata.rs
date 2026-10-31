@@ -186,7 +186,7 @@ pub fn tubes(var_root: &Path) -> Vec<Tube> {
             out.push(tube);
         }
     }
-    out.sort_by(|a, b| a.origin.cmp(&b.origin));
+    out.sort_by_key(|a| a.origin);
     out
 }
 

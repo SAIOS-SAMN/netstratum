@@ -3,7 +3,7 @@
 This document describes how the Netstratum workspace is organized: the
 crates and their dependencies, the two models the code contains, where state
 lives, and where to make a change. For the meaning of the terms used here,
-see [CONCEPTS.md](CONCEPTS.md).
+see [GLOSSARY.md](../GLOSSARY.md).
 
 ## 1. Overview
 

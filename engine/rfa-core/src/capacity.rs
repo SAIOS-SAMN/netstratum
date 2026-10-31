@@ -58,7 +58,7 @@
 //! inflate its own capacity by adding a pure coboundary, which is the
 //! forgery this meter exists to refuse. Capacity counts the
 //! gauge-INVARIANT content (circulation) above a floor that is never
-//! zero. The divergence stays a first-class reading ([`egress`]) for
+//! zero. The divergence stays a first-class reading (`egress`) for
 //! the sign law; it is simply not `D`.
 //!
 //! The cosmological naming that once wrapped these two readings is
