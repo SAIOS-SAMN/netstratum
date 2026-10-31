@@ -65,12 +65,12 @@ These are the decisions and the work the defects call for, in the order
 of [PLAN.md](PLAN.md); each is an issue on the project ([GitHub issues](https://github.com/SAIOS-SAMN/netstratum/issues),
 label `cross-project` where Mycelium is involved).
 
-1. **Decide what the court verifies.** Either the era-1 universe states its
-   steps as transitions under Mycelium's laws (its bodies as `Body`, a
-   bell's motion as the transition's rotor), or the court verifies
-   Netstratum's own laws by their declared ids and versions, and the probe
-   is retired. Until one is chosen, the verification code is a diagnostic
-   and is documented as one.
+1. **State the era-1 step as transitions** the court rebuilds under
+   Mycelium's laws: the bounce's reverberation through S^n, each shell's
+   turn a versor carrying its motes, the throat's release and return as
+   fluxes ([113_THE_BOUNCE_ON_THE_COURT.md](113_THE_BOUNCE_ON_THE_COURT.md)).
+   The probe then retires. A Netstratum law is verified by its own id only
+   once Mycelium hosts its form.
 2. **Fix the agreement rule** so an unmeasured law on one side is a
    disagreement, not a match.
 3. **Wire `tongue` or remove it:** the seat speaks its answers through it, or

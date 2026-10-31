@@ -12,6 +12,9 @@ change is named here.
 
 ### Added
 
+- docs/113: the era-1 step stated as Mycelium transitions for the court to
+  rebuild (shells as bodies, the turn as the motion, the throat's release
+  and return as fluxes).
 - `docs/PLAN.md`: the work in order under the v0.1.0 and v0.2.0
   milestones, each step an issue (#27–#38 filed for the consolidation, the
   Mycelium integration and the repository's organization).
