@@ -13,6 +13,9 @@ path = "src/main.rs"
 # Mycelium at the workspace's pinned release (the root Cargo.toml).
 mycelium.workspace = true
 cfe = { path = "../cfe" }
+# The attachment interface (docs/109) and the inbox's directive format.
+attach = { path = "../attach" }
+ledger = { path = "../ledger" }
 codec = { path = "../codec" }
 solver = { path = "../solver" }
 tongue = { path = "../tongue" }

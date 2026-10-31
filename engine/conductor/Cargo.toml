@@ -6,6 +6,8 @@ license.workspace = true
 description = "The heartbeat — autonomous civilizations play their colonies, grind the forge, drain the steward inbox, and keep the ledger; the board lives before the first player arrives"
 
 [dependencies]
+# The attachment interface (docs/109): its constants and file exchange.
+attach = { path = "../attach" }
 libc = "0.2"
 cfe = { path = "../cfe" }
 # A1 — closing the PoUW LOOP (2026-08-01). The conductor is a client of

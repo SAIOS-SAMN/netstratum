@@ -23,6 +23,7 @@ use std::path::Path;
 
 pub use mycelium;
 
+pub mod attached;
 pub mod census;
 pub mod fold;
 pub mod follow;

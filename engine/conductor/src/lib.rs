@@ -80,6 +80,7 @@ pub mod substrata;
 pub mod commissions;
 pub mod parliaments;
 pub mod ascension;
+pub mod attachment;
 pub mod realms;
 pub mod decide;
 pub mod annal;
@@ -3135,7 +3136,43 @@ impl Polity {
         }
     }
 
+    /// Admit an attached mind (docs/109 A2): registered as an agent of this
+    /// world under its sovereign, granted build, raze and collect. A mind
+    /// already registered (a conductor restart) keeps its entity. Its id, or
+    /// `None` where the world refuses the registration.
+    pub fn admit_mind(&mut self, handle: &str) -> Option<u64> {
+        let id = match self.world.entities().iter().find(|e| e.handle == handle) {
+            Some(e) => e.entity_id,
+            None => self.world.register_agent(handle).ok()?,
+        };
+        for scope in [cfe::ipsal::Scope::Build, cfe::ipsal::Scope::Raze, cfe::ipsal::Scope::Collect] {
+            self.world.grant(id, scope).ok()?;
+        }
+        Some(id)
+    }
+
+    /// Detach a mind: its grants are revoked at once; its entity stays on
+    /// record.
+    pub fn release_mind(&mut self, handle: &str) {
+        if let Some(id) = self.world.entities().iter().find(|e| e.handle == handle).map(|e| e.entity_id) {
+            for scope in [cfe::ipsal::Scope::Build, cfe::ipsal::Scope::Raze, cfe::ipsal::Scope::Collect] {
+                let _ = self.world.revoke(id, scope);
+            }
+        }
+    }
+
+    /// The entity a directive acts as: the steward by default, else the
+    /// registered entity whose handle it names (an attached mind, docs/109
+    /// A3). `None` where it names no entity of this world.
+    fn actor_of(&self, directive: &Directive) -> Option<u64> {
+        if directive.acting_as == "steward" || directive.acting_as.is_empty() {
+            return Some(self.steward);
+        }
+        self.world.entities().iter().find(|e| e.handle == directive.acting_as).map(|e| e.entity_id)
+    }
+
     fn apply_directive(&mut self, directive: &Directive) -> bool {
+        let Some(actor) = self.actor_of(directive) else { return false };
         let parse_tile = |word: &str| -> Option<u16> {
             if let Some((r, c)) = word.split_once(':') {
                 let (r, c): (u16, u16) = (r.parse().ok()?, c.parse().ok()?);
@@ -3144,38 +3181,39 @@ impl Polity {
                 word.parse().ok().filter(|t| *t < 64)
             }
         };
+        // A kind by its short name, or by its wire code (an attached call).
         let parse_kind = |word: &str| match word {
             "ext" => Some(ZoneKind::Extractor),
             "hab" => Some(ZoneKind::Habitat),
             "smelt" => Some(ZoneKind::Smelter),
             "synth" => Some(ZoneKind::Synthesizer),
-            _ => None,
+            code => code.parse::<u8>().ok().and_then(ZoneKind::from_wire),
         };
         match (directive.verb.as_str(), directive.args.as_slice()) {
             ("zone", [tile, kind]) => match (parse_tile(tile), parse_kind(kind)) {
                 (Some(tile), Some(kind)) => self
                     .world
-                    .zone_as(self.steward, cfe::world::FIRST_ORB, tile, kind)
+                    .zone_as(actor, cfe::world::FIRST_ORB, tile, kind)
                     .is_ok(),
                 _ => false,
             },
             ("raze", [tile]) => match parse_tile(tile) {
                 Some(tile) => self
                     .world
-                    .raze_as(self.steward, cfe::world::FIRST_ORB, tile)
+                    .raze_as(actor, cfe::world::FIRST_ORB, tile)
                     .is_ok(),
                 None => false,
             },
             ("collect", []) => self
                 .world
-                .collect_as(self.steward, cfe::world::FIRST_ORB)
+                .collect_as(actor, cfe::world::FIRST_ORB)
                 .is_ok(),
             // #40: the t0 gift petition — a receipted grant under
             // steward containment; the crown law holds in the engine.
             ("gift", [condition]) => match condition.parse::<u8>() {
                 Ok(condition) => self
                     .world
-                    .grant_tech_as(self.steward, cfe::world::FIRST_ORB, condition)
+                    .grant_tech_as(actor, cfe::world::FIRST_ORB, condition)
                     .is_ok(),
                 Err(_) => false,
             },

@@ -262,6 +262,20 @@ fn open(var_root: &Path, book: &Ledger, polity: &Polity, core: &str, parent: Opt
     Some(tube)
 }
 
+/// A sandbox (docs/109 A5): a first tube opened by an admitted line at its
+/// galaxy's core, paid from its surplus, its leisure bank, at the first
+/// tube's cost. `None` where the line cannot pay or the tube does not open.
+pub(crate) fn open_for(var_root: &Path, book: &Ledger, polity: &mut Polity, core: &str, stamp: u64) -> Option<Tube> {
+    let cost = crate::attachment::sandbox_cost();
+    let orb = cfe::world::FIRST_ORB;
+    if polity.world.leisure_bank_of(orb) < cost {
+        return None;
+    }
+    let tube = open(var_root, book, polity, core, None, stamp)?;
+    polity.world.settle_leisure(orb, -cost);
+    Some(tube)
+}
+
 /// What a beat of the guild did.
 #[derive(Debug, Clone, Default)]
 pub struct Traversal {
@@ -273,13 +287,20 @@ pub struct Traversal {
 /// traversal (one task) in one tube, and any tube the float now pays for.
 pub fn step(worlds: &mut [Polity], book: &Ledger, var_root: &Path, beat: u64, stamp: u64) -> Traversal {
     let mut done = Traversal::default();
-    let guild = crate::ancients::arisen(var_root);
+    let mut guild = crate::ancients::arisen(var_root);
+    let mut all = tubes(var_root);
+    // The lines that opened a sandbox traverse their own tubes too (docs/109
+    // A5): every opener among the living, beside the arisen ancients.
+    for t in &all {
+        if !guild.iter().any(|(_, s)| *s == t.opener) && worlds.iter().any(|p| p.spec.civilization.sigil == t.opener) {
+            guild.push((t.core.clone(), t.opener.clone()));
+        }
+    }
     if guild.is_empty() {
         return done;
     }
-    let mut all = tubes(var_root);
     // The core's own throat opens the first tube at the ancient's arising.
-    for (core, sigil) in &guild {
+    for (core, sigil) in crate::ancients::arisen(var_root).iter() {
         if all.iter().any(|t| &t.opener == sigil) {
             continue;
         }

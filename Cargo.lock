@@ -112,6 +112,7 @@ dependencies = [
 name = "conductor"
 version = "0.1.0"
 dependencies = [
+ "attach",
  "blake3",
  "cfe",
  "codec",
@@ -467,10 +468,12 @@ dependencies = [
 name = "ns-hypha"
 version = "0.1.0"
 dependencies = [
+ "attach",
  "blake3",
  "cfe",
  "codec",
  "ed25519-dalek",
+ "ledger",
  "mycelium",
  "num-bigint",
  "num-rational",

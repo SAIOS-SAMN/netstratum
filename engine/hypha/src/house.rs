@@ -144,6 +144,12 @@ pub struct House {
     unknown_domain: bool,
     /// The origin the re-founding was last tried under, and the tend.
     refound_tried: Option<(String, u64)>,
+    /// The seats admitted minds hold (docs/109), as last listed.
+    held_seats: Vec<crate::attached::Held>,
+    /// The admissions and call results already reported to their minds
+    /// (persisted, `home/house/reported`).
+    reported: std::collections::BTreeSet<[u8; 32]>,
+    reported_file: PathBuf,
 }
 
 fn hex(b: &[u8]) -> String {
@@ -180,7 +186,16 @@ impl House {
                 }
             }
         }
+        let reported_file = dir.join("reported");
+        let reported = std::fs::read_to_string(&reported_file)
+            .unwrap_or_default()
+            .lines()
+            .filter_map(|l| <[u8; 32]>::try_from(attach::unhex(l.trim())?).ok())
+            .collect();
         Ok(House {
+            held_seats: Vec::new(),
+            reported,
+            reported_file,
             domain,
             key,
             home: home.to_path_buf(),
@@ -256,6 +271,8 @@ impl House {
             // A council seat at an ancient's house (Concordance 3.9).
             seats.push(Seat { seat: *id, role: Role::Ancients, on: line_key(name), beat: beat.clone(), fns: vec![solve.clone(), decline.clone()] });
         }
+        // docs/109: the door, and the seats admitted minds hold.
+        seats.extend(crate::attached::listed(&self.held_seats, &beat));
         Seats { domain: self.domain, sub_origin: None, epoch: self.epoch, seats }
     }
 
@@ -274,6 +291,7 @@ impl House {
             said.push(format!("REFILED seat {s} task {}: {line}", hex(&id[..6])));
         }
         said.extend(self.hand_tasks(seat).unwrap_or_else(|e| vec![format!("tasks not handed: {e}")]));
+        said.extend(self.report_attachments(seat).unwrap_or_else(|e| vec![format!("attachments not reported: {e}")]));
         let Some(var_root) = self.worlds.parent().map(Path::to_path_buf) else { return Ok(said) };
         // docs/72 A4: after the re-founding, the gates the conductor built are
         // mapped as local throats (5.9: no crossing on a private map).
@@ -449,14 +467,17 @@ impl House {
     fn receive_acts(&mut self, seat: &mut crate::seat::Seat) -> io::Result<Vec<String>> {
         let mut said = Vec::new();
         let lines = self.seated()?;
-        if lines != self.lines {
+        let held_now = self.attached_seats()?;
+        if lines != self.lines || held_now != self.held_seats {
+            self.held_seats = held_now;
             // The latest epoch replaces: an epoch is the listing's time.
             let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
             self.epoch = now.max(self.epoch + 1);
             self.lines = lines;
             // A seat whose line is gone is no longer held.
             let n = self.lines.len() as u32;
-            let listed: Vec<u32> = self.lines.iter().map(|(id, _)| *id).collect();
+            let mut listed: Vec<u32> = self.lines.iter().map(|(id, _)| *id).collect();
+            listed.extend(self.held_seats.iter().map(|h| h.seat));
             // Seat 0 is the house's own: no other mind holds it.
             let house = self.key.verifying_key().to_bytes();
             self.held.retain(|s, m| if *s == 0 { *m == house } else { listed.contains(s) });
@@ -465,6 +486,10 @@ impl House {
                 if let Some(m) = self.seated_before.get(name) {
                     self.held.entry(*id).or_insert(*m);
                 }
+            }
+            // An admitted mind holds its own seats, and no other mind may.
+            for h in &self.held_seats {
+                self.held.insert(h.seat, h.mind);
             }
             match seat.session().post_seats(&self.key, self.listing())? {
                 Ok(seq) => said.push(format!("SEATS seq {seq}: domain {}, epoch {}, {} seats (the house and {} lines)", hex(&self.domain), self.epoch, n + 1, n)),
@@ -514,8 +539,17 @@ impl House {
             match piece {
                 HouseMail::Take(seq, t) => {
                     self.after = self.after.max(seq);
-                    let line = self.line_on(t.seat);
-                    let reason = if t.domain != self.domain || t.sub_origin.is_some() || line.is_none() {
+                    let attached = self.held_seats.iter().find(|h| h.seat == t.seat).cloned();
+                    let line = match &attached {
+                        Some(h) => Some(format!("attach:{}", h.world)),
+                        None => self.line_on(t.seat),
+                    };
+                    let reason = if t.seat == attach::DOOR {
+                        // The door is called, never taken.
+                        HOUSE_SEAT
+                    } else if let Some(h) = &attached {
+                        if t.domain == self.domain && t.sub_origin.is_none() && t.mind == h.mind { TAKEN_OK } else { SEAT_HELD }
+                    } else if t.domain != self.domain || t.sub_origin.is_some() || line.is_none() {
                         NO_SEAT
                     } else if t.seat == 0 && t.mind != self.key.verifying_key().to_bytes() {
                         HOUSE_SEAT
@@ -556,7 +590,11 @@ impl House {
                     if self.held.get(&call.seat) == Some(&call.mind) {
                         self.heard.insert(call.seat, self.tends);
                     }
-                    let (reason, deed, what) = if self.held.get(&call.seat) != Some(&call.mind) {
+                    let (reason, deed, what) = if call.seat == attach::DOOR {
+                        self.door_call(&call, reference)
+                    } else if let Some(h) = self.held_seats.iter().find(|h| h.seat == call.seat).cloned() {
+                        self.held_call(&h, &call, reference)
+                    } else if self.held.get(&call.seat) != Some(&call.mind) {
                         (NOT_SEATED, [0u8; 32], "the caller does not hold the seat".to_string())
                     } else if call.fn_id == FN_DECLINE && call.seat != 0 {
                         self.decline(seat, call.seat, &call.args)
@@ -569,6 +607,131 @@ impl House {
                     let answer = seat.session().post_outcome(&self.key, o)?;
                     self.unknown_domain |= answer == Err(Refusal::UnknownDomain);
                     said.push(format!("CALL seq {seq} seat {} fn {}: {what} ({answer:?})", call.seat, call.fn_id));
+                }
+            }
+        }
+        Ok(said)
+    }
+}
+
+/// docs/109 — the house's attachment acts.
+impl House {
+    fn var_root(&self) -> PathBuf {
+        self.worlds.parent().map(Path::to_path_buf).unwrap_or_default()
+    }
+
+    /// The seats admitted minds hold, each with its stable id.
+    fn attached_seats(&mut self) -> io::Result<Vec<crate::attached::Held>> {
+        let admissions = attach::files::admissions(&self.var_root());
+        let mut fresh: Vec<String> = Vec::new();
+        let mut ids = self.ids.clone();
+        let mut id = |name: &str| -> u32 {
+            if let Some(&i) = ids.get(name) {
+                return i;
+            }
+            let i = ids.values().max().map_or(1, |m| m + 1);
+            ids.insert(name.to_string(), i);
+            fresh.push(name.to_string());
+            i
+        };
+        let held = crate::attached::held_seats(&admissions, &mut id);
+        if !fresh.is_empty() {
+            let mut f = std::fs::OpenOptions::new().create(true).append(true).open(&self.ids_file)?;
+            for name in &fresh {
+                writeln!(f, "{} {name}", ids[name])?;
+            }
+            self.ids = ids;
+        }
+        Ok(held)
+    }
+
+    /// A call on the door: an attachment request for the next beat.
+    fn door_call(&mut self, call: &mycelium::anastome::dialogue::seat::Call, reference: [u8; 32]) -> (u16, [u8; 32], String) {
+        if call.fn_id != attach::FN_ATTACH {
+            return (NO_FUNCTION, [0u8; 32], format!("the door lists no fn {}", call.fn_id));
+        }
+        let Some(request) = crate::attached::request_of(&call.args, call.mind) else { return (UNREAD, [0u8; 32], "the argument names no metabolism".into()) };
+        match attach::files::write_request(&self.var_root(), &request) {
+            Ok(()) => (attach::QUEUED, reference, format!("attachment requested ({})", request.metabolism)),
+            Err(e) => (UNREAD, [0u8; 32], format!("the request was not written: {e}")),
+        }
+    }
+
+    /// A call on a seat an admitted mind holds: its act, carried for the next
+    /// beat.
+    fn held_call(&mut self, held: &crate::attached::Held, call: &mycelium::anastome::dialogue::seat::Call, reference: [u8; 32]) -> (u16, [u8; 32], String) {
+        if call.mind != held.mind {
+            return (NOT_SEATED, [0u8; 32], "the caller does not hold the seat".into());
+        }
+        self.heard.insert(call.seat, self.tends);
+        let Some(act) = crate::attached::act_of(call.fn_id, &call.args, &held.handle) else { return (NO_FUNCTION, [0u8; 32], format!("no fn {} with these arguments", call.fn_id)) };
+        match crate::attached::carry(&self.var_root(), &self.worlds, held, &act, &reference) {
+            Ok(()) => (attach::QUEUED, reference, format!("queued for {}", held.world)),
+            Err(e) => (UNREAD, [0u8; 32], format!("not carried: {e}")),
+        }
+    }
+
+    fn mark_reported(&mut self, id: [u8; 32]) {
+        if self.reported.insert(id) {
+            if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(&self.reported_file) {
+                let _ = writeln!(f, "{}", attach::hex(&id));
+            }
+        }
+    }
+
+    fn post_record(&mut self, seat: &crate::seat::Seat, at: u32, mind: [u8; 32], record: Record) -> io::Result<bool> {
+        self.percepts += 1;
+        let p = Percept {
+            sub_origin: None,
+            domain: self.domain,
+            seat: at,
+            mind,
+            local_time: Arg::Q { num: i64::try_from(self.u()).unwrap_or(i64::MAX), den: 1 },
+            seq: self.percepts,
+            records: vec![record],
+            point: seat.tuniversal(),
+        };
+        match seat.session().post_percept(&self.key, p)? {
+            Ok(_) => Ok(true),
+            Err(why) => {
+                self.unknown_domain |= why == Refusal::UnknownDomain;
+                Ok(false)
+            }
+        }
+    }
+
+    /// Report to each mind its admission (or why it was not admitted) and the
+    /// results of its calls, each once.
+    fn report_attachments(&mut self, seat: &mut crate::seat::Seat) -> io::Result<Vec<String>> {
+        let mut said = Vec::new();
+        let var_root = self.var_root();
+        for a in attach::files::admissions(&var_root) {
+            // An admission is reported under the mind's key and its world, a
+            // refusal under the mind's key alone.
+            let tag = *blake3::hash(&[&a.mind[..], a.world.as_bytes()].concat()).as_bytes();
+            if self.reported.contains(&tag) {
+                continue;
+            }
+            let posted = match a.refused {
+                Some(why) => self.post_record(seat, attach::DOOR, a.mind, Record::Plain { kind: attach::KIND_NOT_ADMITTED, args: vec![Arg::Count(u64::from(why))] })?,
+                None => match self.held_seats.iter().find(|h| h.mind == a.mind && h.world == a.world && h.role == Role::Sovereign).map(|h| h.seat) {
+                    Some(at) => self.post_record(seat, at, a.mind, Record::Plain { kind: attach::KIND_ADMITTED, args: vec![Arg::Key(line_key(&a.world)), Arg::Count(u64::from(at))] })?,
+                    None => false,
+                },
+            };
+            if posted {
+                self.mark_reported(tag);
+                said.push(format!("ATTACH {} {}", attach::hex(&a.mind[..4]), if a.refused.is_some() { "not admitted".to_string() } else { format!("admitted to {}", a.world) }));
+            }
+        }
+        let worlds = self.worlds.clone();
+        let sovereign: Vec<crate::attached::Held> = self.held_seats.iter().filter(|h| h.role == Role::Sovereign).cloned().collect();
+        for h in sovereign {
+            let reported = self.reported.clone();
+            for (reference, applied) in crate::attached::results(&var_root, &worlds, &h, &|r| reported.contains(r)) {
+                if self.post_record(seat, h.seat, h.mind, Record::Plain { kind: attach::KIND_RESULT, args: vec![Arg::Key(reference), Arg::Count(u64::from(applied))] })? {
+                    self.mark_reported(reference);
+                    said.push(format!("RESULT {} for {}: {}", attach::hex(&reference[..6]), h.world, if applied { "applied" } else { "refused" }));
                 }
             }
         }

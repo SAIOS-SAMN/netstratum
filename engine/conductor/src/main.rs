@@ -437,6 +437,26 @@ fn main() {
                 worlds.push(Polity::genesis(spec, &registry, &book));
             }
         }
+        // docs/109 — attachment: the minds that asked to attach are placed and
+        // admitted, detachments and sandbox requests carried out, and every
+        // admission published for the house.
+        {
+            let attached = conductor::profile::timed("attachment", || {
+                conductor::attachment::step(&universe, &mut worlds, &registry, &book, std::path::Path::new(&var_root), epoch_base + beat)
+            });
+            for (sigil, world) in &attached.admitted {
+                println!("beat {beat}: A MIND ATTACHES — {sigil} founded on world {world}");
+            }
+            if attached.refused > 0 {
+                println!("beat {beat}: {} attachment request(s) refused: no viable free world", attached.refused);
+            }
+            for sigil in &attached.released {
+                println!("beat {beat}: A MIND DETACHES — {sigil} goes on as the universe's own");
+            }
+            for (sigil, opened) in &attached.sandboxes {
+                println!("beat {beat}: A SANDBOX {} — {sigil}", if *opened { "OPENS" } else { "IS REFUSED" });
+            }
+        }
         conductor::profile::timed("clocks", || {
             for i in 0..universe.cores.len() {
                 // Counted where read; a galaxy whose clock is not read adds

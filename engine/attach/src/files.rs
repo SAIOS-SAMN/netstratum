@@ -200,15 +200,15 @@ pub fn sandbox_done(var_root: &Path, mind: &[u8; 32], reference: &[u8; 32], open
     std::fs::rename(dir(var_root, "sandbox").join(&name), to.join(name))
 }
 
-/// The sandbox requests done, `(call reference, opened)` (the house).
-pub fn sandboxes_done(var_root: &Path) -> Vec<([u8; 32], bool)> {
+/// The sandbox requests done, `(mind, call reference, opened)` (the house).
+pub fn sandboxes_done(var_root: &Path) -> Vec<([u8; 32], [u8; 32], bool)> {
     let mut out = Vec::new();
     for (sub, opened) in [("opened", true), ("refused", false)] {
         if let Ok(d) = std::fs::read_dir(dir(var_root, "sandbox").join(sub)) {
             for e in d.flatten() {
                 let Some(name) = e.file_name().to_str().and_then(|n| n.strip_suffix(".req")).map(str::to_string) else { continue };
-                if let Some(r) = name.split_once('-').and_then(|(_, r)| key32(&unhex(r)?)) {
-                    out.push((r, opened));
+                if let Some((m, r)) = name.split_once('-').and_then(|(m, r)| Some((key32(&unhex(m)?)?, key32(&unhex(r)?)?))) {
+                    out.push((m, r, opened));
                 }
             }
         }
@@ -261,7 +261,7 @@ mod tests {
         assert_eq!(sandboxes(&var), vec![([5; 32], [6; 32])]);
         sandbox_done(&var, &[5; 32], &[6; 32], true).expect("done");
         assert!(sandboxes(&var).is_empty());
-        assert_eq!(sandboxes_done(&var), vec![([6; 32], true)]);
+        assert_eq!(sandboxes_done(&var), vec![([5; 32], [6; 32], true)]);
         let _ = std::fs::remove_dir_all(var);
     }
 }
