@@ -169,3 +169,79 @@ The whole table rests on one statement: under inverse gravity the held share
 is `1 − δ` and the unlocked share is `δ`, and the quantum state's held
 share is the count of §1.1 against the face inverse gravity holds. Confirmed,
 steps 1–7 follow by the map alone.
+
+## 6. The band of a core's held collective
+
+The band is a core's push on the kinds it holds and its pull back on them,
+in spin a bell (`flows::spin_torque`). It sets whether a core's held matter
+stands as a container (the firmament) or drains.
+
+### 6.1 Read at the founding
+
+A fresh 2^40 universe:
+
+- The firmament is 48 kinds of weight 160–208, at reaches 0.40–0.52 throat
+  radii.
+- The live torque passes no band (`heart_push = None`; the galaxies' band is
+  held back as static). The bounce's in-step push acts, and nothing pulls the
+  held matter back.
+- The band as written is forward on both faces: push `q = ½·w̄/w` with no face
+  share, and pull `½·δ·R·H`, with `w̄` the mean weight of all the home's
+  matter (6.27, the zero galaxy's light gas).
+- Its terms are therefore not aligned with the core's own bonds. The push is
+  scaled by matter the core does not hold, and the pull is read on the
+  forward face.
+- Read: the wholly held firmament falls from 48 to 17 to 0 motes over three
+  bounces.
+
+### 6.2 The band on the inverse faces
+
+The pair is read through `I` (§0). With `(g, u) = (1 − δ, δ)` at a mote's
+reach `R` about the hold `H`:
+
+    band(R) = q·u − ½·g·ℓ,     ℓ = R·H,     q = ½·w̄_c / w
+
+- **Push:** the bounce carries a kind on the inverse unlocked face `u`, in
+  inverse proportion to its weight `w`.
+- **Pull:** the core holds it back on the inverse held face `g`, by its spin
+  `ℓ`.
+- **Scale:** `w̄_c` is the mean weight of the collective the core holds: the
+  totality of the weighted bonds inside the core over its grains,
+
+      w̄_c = Σ a·w·h / Σ a·h
+
+  with `a` a mote's grains, `w` its weight (its bonds, `3Z − unpaired`) and
+  `h` its held share (`flows::held`).
+
+### 6.3 The rest point
+
+`band(R) = 0` gives `q·H/(R + H) = ½·R/(R + H)·R·H`. The hold cancels:
+
+    q = ½·R·R     ⇔     R* · R* = w̄_c / w
+
+The rest point does not depend on the order in which the enclosure is
+counted (L5). It is stable:
+- inside `R*` the push wins (`u → 1` as `R → 0`);
+- outside it the pull wins (`g → 1` and `ℓ` grows).
+
+The equator `R = H = 1` separates the two outcomes:
+- a kind heavier than the collective's mean rests inside the throat
+  (`R* < 1`), held;
+- a kind lighter than the mean rests beyond it and leaves by the radial
+  exit (`R ≥ H`, `flows::exits`).
+
+Escape is lightest first. Each departure raises `w̄_c`, which brings the next
+kinds below the mean in turn. The collective tends to its heaviest kind
+alone, which rests on the throat (`w = w̄_c`, `R* = 1`): the sealed residue.
+`τ` then tends to the unsealed share, never 1 (docs/111 §4.5).
+
+### 6.4 Build
+
+1. `flows::face(δ) = (1 − δ, δ)`.
+2. The band in `spin_torque` on the inverse faces (§6.2).
+3. The universal core's torque passes the band with `w̄_c` read from its
+   collective (`pulse::collective_mean`). The galaxies' band stays held back
+   until it is read on the same law.
+4. Read: the firmament's wholly held count and `τ` over bounces. Expected:
+   - kinds heavier than the mean are held;
+   - kinds lighter than it leave, lightest first.
