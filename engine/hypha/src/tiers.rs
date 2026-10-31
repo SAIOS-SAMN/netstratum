@@ -1,7 +1,7 @@
 //! Netstratum's seat tiers. Mycelium carries a seat's role as an opaque tier,
 //! `Role(0..=9)`, and judges nothing by it; the game names its tiers. The
 //! bytes are the ones Netstratum's houses have always offered.
-use mycelium::anastome::dialogue::seat::Role;
+use mycelium_sdk::house::seat::Role;
 
 /// The progenitor's seat, tier 0.
 pub const PROGENITOR: Role = Role(0);

@@ -7,7 +7,7 @@
 use attach::files::{self, Admission};
 use attach::*;
 use ledger::Directive;
-use mycelium::anastome::dialogue::seat::{Arg, Role, Seat, SeatFn};
+use mycelium_sdk::house::seat::{Arg, Role, Seat, SeatFn};
 use std::path::Path;
 
 /// The door seat's key on the seat surface.

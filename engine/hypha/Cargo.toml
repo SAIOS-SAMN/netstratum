@@ -11,7 +11,7 @@ path = "src/main.rs"
 
 [dependencies]
 # Mycelium at the workspace's pinned release (the root Cargo.toml).
-mycelium.workspace = true
+mycelium-sdk.workspace = true
 cfe = { path = "../cfe" }
 # The attachment interface (docs/109) and the inbox's directive format.
 attach = { path = "../attach" }

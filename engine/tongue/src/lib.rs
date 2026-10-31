@@ -5,11 +5,11 @@
 //! words through it, so a line's dialect can be read against the shared
 //! tongue.
 
-pub use mycelium;
+pub use mycelium_sdk;
 
-use mycelium::sdk::rule::{sentence, Step, Symmetry};
-use mycelium::transducer::element::Element;
-use mycelium::transducer::family::{Crystal, NoCrystal};
+use mycelium_sdk::rule::Element;
+use mycelium_sdk::rule::{sentence, Step, Symmetry};
+use mycelium_sdk::rule::{Crystal, NoCrystal};
 use solver::Op;
 
 /// A fleet grid read as a Netstratum grid, or `None` (ragged, empty, or a hue
@@ -79,7 +79,7 @@ pub fn translate(
                     BigRational::from_integer(num_bigint::BigInt::from(*dr)),
                     BigRational::from_integer(num_bigint::BigInt::from(*dc)),
                 ];
-                steps.push(Step::Motion(mycelium::transducer::cga::translator_at(&d)));
+                steps.push(Step::Motion(mycelium_sdk::house::translator_at(&d)));
             }
             // docs/62 L7: a projector is the court's select and a hue step
             // on what it selects (a hue sent to 0 under a selection is erased).
@@ -120,8 +120,8 @@ pub fn translate(
 /// A projector's predicate in the court's select language, where it has one:
 /// size is the body's cell count (the court's Shell); the frame-contact,
 /// twin and exact-shape predicates have no court form yet.
-fn court_pred(select: &solver::percept::Select) -> Option<mycelium::sdk::rule::Pred> {
-    use mycelium::sdk::rule::{Coord, Order, Pred, Tie};
+fn court_pred(select: &solver::percept::Select) -> Option<mycelium_sdk::rule::Pred> {
+    use mycelium_sdk::rule::{Coord, Order, Pred, Tie};
     use solver::percept::Select;
     Some(match select {
         Select::Hue(h) => Pred::Hue(*h),

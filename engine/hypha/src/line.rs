@@ -51,8 +51,8 @@
 //! source commitment would come as a law for every domain, never a
 //! Netstratum field); it is the tier's pointer back to the receipt.
 
-use mycelium::anastome::dialogue::challenge::Entry as CourtEntry;
-use mycelium::anastome::dialogue::uplink::{Net, TierFold};
+use mycelium_sdk::house::challenge::Entry as CourtEntry;
+use mycelium_sdk::house::uplink::{Net, TierFold};
 use std::collections::BTreeMap;
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
@@ -66,7 +66,7 @@ pub fn next_head(prev: &[u8; 32], entry: &[u8]) -> [u8; 32] {
     bytes.extend_from_slice(DOMAIN);
     bytes.extend_from_slice(prev);
     bytes.extend_from_slice(entry);
-    mycelium::chronometry::payload_hash(&bytes)
+    mycelium_sdk::house::payload_hash(&bytes)
 }
 
 /// One record of a tier's line.
@@ -431,7 +431,7 @@ pub fn entry_bytes(mut rows: Vec<Net>, mut declared: Vec<Net>) -> Vec<u8> {
 }
 
 fn take_nets(b: &[u8], p: &mut usize) -> Option<Vec<Net>> {
-    let n = mycelium::transducer::address::take_key_count(b, p)?;
+    let n = mycelium_sdk::house::take_key_count(b, p)?;
     (0..n)
         .map(|_| {
             let who: [u8; 32] = b.get(*p..*p + 32)?.try_into().ok()?;
@@ -705,7 +705,7 @@ mod tests {
 
     #[test]
     fn the_line_steps_exactly_as_the_court_replays_it() {
-        use mycelium::anastome::dialogue::challenge::{line_head, Entry as CourtEntry};
+        use mycelium_sdk::house::challenge::{line_head, Entry as CourtEntry};
         let rows = vec![([2; 32], [5, 0, 0, 0]), ([1; 32], [-5, 0, 0, 0])];
         let declared = vec![([3; 32], [0, 7, 0, 0])];
         let ours = next_head(&[9; 32], &entry_bytes(rows.clone(), declared.clone()));

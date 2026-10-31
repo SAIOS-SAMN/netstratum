@@ -16,11 +16,11 @@ too_many_arguments = "allow"
 needless_range_loop = "allow"
 
 [workspace.dependencies]
-# Mycelium, the network substrate Netstratum's engine speaks through (its
-# clock, atlas and law forms), pinned at a tagged release; bumping it is a
-# deliberate act (CONTRIBUTING.md).
-mycelium = { git = "https://github.com/SAIOS-SAMN/mycelium", tag = "v0.3.0-rc.1" }
-forms = { git = "https://github.com/SAIOS-SAMN/mycelium", tag = "v0.3.0-rc.1" }
+# Mycelium, the network substrate Netstratum's engine speaks through, by its
+# SDK only (`mycelium-sdk`: the session, the house's surface and the law
+# forms), pinned at a tagged release; bumping it is a contract change
+# (CONTRIBUTING.md, "Contracts").
+mycelium-sdk = { git = "https://github.com/SAIOS-SAMN/mycelium", tag = "v0.3.0-rc.2" }
 blake3 = "1.5"
 num-bigint = "0.4"
 num-rational = "0.4"
