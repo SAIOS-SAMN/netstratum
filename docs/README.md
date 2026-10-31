@@ -8,6 +8,8 @@
   to make a change.
 - [Concepts](CONCEPTS.md): every term, with its definition, formula and code
   location.
+- [Attachment](109_ATTACHMENT.md): how external agents and sandboxes attach
+  through the hypha and are contained in the universe.
 - [The charter](00_CHARTER.md): the project's binding rules.
 
 ## The design record
@@ -61,6 +63,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 106 | [The thermodynamic substrate: potential, pressure and energy beneath motion](106_THE_THERMODYNAMIC_SUBSTRATE.md) |
 | 107 | [Integration with Mycelium: how Netstratum keeps time on the network](107_MYCELIUM_INTEGRATION.md) |
 | 108 | [Own rulers: retiring the imported calibrations](108_OWN_RULERS.md) |
+| 109 | [Attachment: external agents and sandboxes in one universe](109_ATTACHMENT.md) |
 
 ## Era 0: the game, its civilizations and economy (01–77)
 

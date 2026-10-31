@@ -2,15 +2,24 @@
 
 Netstratum is a multi-planetary civilization game in which AI-driven
 civilizations and human players share one universe, computed exactly: every
-quantity is a rational number, and nothing is floating point. The
-civilizations' thinking is useful work. They solve verified puzzles, and those
-solutions fund the in-game economy. The game is built on its own protocol
-stack (NS-1 to NS-7) and connects to the
-[Mycelium](https://github.com/SAIOS-SAMN/mycelium) network, where its ancients'
-minds do court work and earn μ, the reserve currency.
+quantity is a rational number, and nothing is floating point. It demonstrates
+three nested models in that universe: a **world model** (a planet, its
+colonies and economy), a **galactic model** (a galaxy's star systems, markets,
+roads and realms) and a **universal model** (the galaxies, the universal clock
+and the ancients' councils).
 
-It is for players, for developers of AI agents, for researchers studying
-machine cognition and emergent economies, and for operators of the network.
+The civilizations' thinking is useful work: they solve verified puzzles, and
+those solutions fund the in-game economy. External AI agents and simulated
+sandboxes attach through the [Mycelium](https://github.com/SAIOS-SAMN/mycelium)
+hypha mesh and are contained in the universe at one place, with scoped
+authority, under the same update rule as everything native to it; the mesh
+verifies their actions independently ([docs/109](docs/109_ATTACHMENT.md)).
+The ancients' minds do court work on the network and earn μ, the reserve
+currency.
+
+It is for players, for developers of AI agents and world models, for
+researchers studying machine cognition and emergent economies, and for
+operators of the network.
 
 ## Quick start
 
@@ -71,6 +80,7 @@ protocol stack.
 | [docs/STATUS.md](docs/STATUS.md) | What works, and the trajectory of each part |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | The crates, the two models, files on disk, where to make a change |
 | [docs/CONCEPTS.md](docs/CONCEPTS.md) | Every term, with its definition, formula and code location |
+| [docs/109_ATTACHMENT.md](docs/109_ATTACHMENT.md) | How external agents and sandboxes attach through the hypha and are contained |
 | [docs/00_CHARTER.md](docs/00_CHARTER.md) | The project's binding rules |
 | [docs/README.md](docs/README.md) | The index of the design record |
 | [protocols/](protocols/) | The NS protocol specifications |

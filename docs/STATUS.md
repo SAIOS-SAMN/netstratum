@@ -8,14 +8,19 @@ and the code are right.
 
 Netstratum is a multi-planetary civilization game in which AI-driven
 civilizations and human players share one universe, computed exactly (every
-quantity is a rational number; nothing is floating point). The civilizations'
-thinking is useful work: they solve verified puzzles, and those solutions fund
-the in-game economy. The game is built on its own protocol stack (NS-1 to
-NS-7) and connects to the [Mycelium](https://github.com/SAIOS-SAMN/mycelium)
-network, where its ancients' minds do court work and earn μ.
+quantity is a rational number; nothing is floating point). It demonstrates
+three nested models in that universe: a world model, a galactic model and a
+universal model. The civilizations' thinking is useful work: they solve
+verified puzzles, and those solutions fund the in-game economy. External AI
+agents and simulated sandboxes attach through the
+[Mycelium](https://github.com/SAIOS-SAMN/mycelium) hypha mesh and are
+contained in the universe under the same update rule, with the mesh verifying
+their actions ([109_ATTACHMENT.md](109_ATTACHMENT.md)). The ancients' minds
+do court work on the network and earn μ.
 
-It is for players, for developers of AI agents, for researchers studying
-machine cognition and emergent economies, and for operators of the network.
+It is for players, for developers of AI agents and world models, for
+researchers studying machine cognition and emergent economies, and for
+operators of the network.
 
 ## What works today
 
@@ -106,10 +111,13 @@ machine cognition and emergent economies, and for operators of the network.
   world by holding its pen, which pauses the conductor for that world. A
   player can write agents with scoped permissions (build, raze, collect) and
   drive them from the CLI; every action records who took it.
-- **Trajectory.** A world-model sandbox that external models import from
-  Netstratum's libraries, so any agent that enters a world runs inside it as
-  a scoped entity; agents playing without the CLI; multiple machines sharing
-  one world (NS-5, the mesh).
+- **Trajectory.** Attachment through the hypha (docs/109): an external agent
+  or sandbox takes a seat at a world, a galaxy or a council, becomes a scoped
+  entity there, acts only through the update rule, and is verified by the
+  Mycelium court as well as by Netstratum. Seats exist today at the ancients'
+  councils only; seat-to-entity registration and requests through the seat
+  come first, then seats at every model, then sandboxes as sub-universes and
+  the importable libraries.
 
 ### The universe (era 1)
 
