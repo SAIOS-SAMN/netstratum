@@ -1,30 +1,36 @@
-//! docs/83 "The derivation": the ring-density law (Xylarium 11.0, shared
-//! form). Every bell (a core, a star, a grain) holds each ring that reaches
-//! it for its own period, then passes it on as its echo. A ring crosses
-//! empty space to a place at r (in light-rings) in r and is held by every
-//! bell inside r for their periods together, `H(<r)`: it arrives after
-//! `r + H(<r)`. Mass is holding (`M = H`); no G, no c, no mass unit.
+//! docs/83 "The derivation" and docs/111: the ring-density law (with
+//! Xylarium, shared form). A core's bounce emits one front, the geodesic
+//! sphere of light-time about it, growing from S^0; a body the front meets
+//! receives it and emits nothing, except as a surface (`surface`), whose
+//! share of the front is its own bounce. The front crosses empty space to a
+//! place at r (in light-rings) in r and is slowed by the holding inside r,
+//! `H(<r)`: it arrives after `r + H(<r)` (`arrival`). Mass is holding
+//! (`M = H`); no G, no c, no mass unit.
 //!
-//! - **The clock:** a place's rate is the rings it receives,
+//! - **The clock:** a place's rate is the fronts it receives,
 //!   `r / (r + H)`.
 //! - **The deficit:** the share of the turn the holding withholds,
 //!   `δ = H / (r + H)`, so `δ < 1`, approaching 1 as `r → 0`; the clock is
 //!   `1 − δ`.
-//! - **The turning** (operator, 2026-10-15): each ring a place receives
-//!   turns it by its deficit, `ω = δ` turns a received ring, so a turn takes
-//!   `P = 1 / δ = 1 + R / H` received rings: linear, no power.
+//! - **The turning:** each front a place receives turns it by its deficit,
+//!   `ω = δ`, so a turn takes `P = 1 / δ = 1 + R / H` received fronts:
+//!   linear, no power.
 //! - **The spin** (reach × holding, with Xylarium): `ℓ = R · H`, a product
 //!   of two distinct readings (the rings of reach and the rings held inside
 //!   it), never the square of one. Conserved; a system adds `Σ m·ℓ`.
 //! - **The balance:** a body of spin ℓ stands at `R = ℓ / H`. Orbits
-//!   breathe (operator): the law fixes no direction; an orbit draws in when
-//!   the holding inside it grows or it loses spin, and moves out when the
-//!   holding falls or it gains spin. The ledger decides which. Escape is
-//!   read at events (the stretch crossing e → 1), never a share of H.
+//!   breathe: the law fixes no direction; an orbit draws in when the holding
+//!   inside it grows or it loses spin, and moves out when the holding falls
+//!   or it gains spin. The ledger decides which. Escape is read at events
+//!   (the stretch crossing e → 1), never a share of H.
+//! - **The throat** (docs/111 §3.1): a surface, never matter. A body of
+//!   holding `H_b` and extent `R_b` has its throat, the mouth of the tube at
+//!   its equator `R = H`, iff `R_b ≤ H_b`; its density share
+//!   `ρ = min(1, H_b / R_b)` is how near it stands to opening one.
 //!
 //! In transition: H is read from the grains' holds in units of the deepest
 //! hole (the core's own state hold is not yet on the ledger, docs/83), and a
-//! received ring is a conductor bell.
+//! received front is a conductor bell.
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
@@ -52,6 +58,43 @@ pub fn period(r: &Ratio, held: &Ratio) -> Ratio {
         return ratio(0, 1);
     }
     ratio(1, 1) + r.clone() / held.clone()
+}
+
+/// The front's arrival at reach r through the holding inside it,
+/// `a(r) = r + H(<r)` (docs/111 §2): its delay through the held medium.
+pub fn arrival(r: &Ratio, held: &Ratio) -> Ratio {
+    r.clone() + held.clone()
+}
+
+/// A body's density share (docs/111 §3.1): `min(1, H_b / R_b)`, 1 where its
+/// extent lies within its equator (its throat is open); 1 at no extent with
+/// any holding, 0 where nothing holds.
+pub fn density(extent: &Ratio, held: &Ratio) -> Ratio {
+    if held.is_zero() {
+        return ratio(0, 1);
+    }
+    if extent <= held {
+        return ratio(1, 1);
+    }
+    held.clone() / extent.clone()
+}
+
+/// Whether a body's throat is open: its extent within its equator,
+/// `R_b ≤ H_b` (the surface deficit `δ_s ≥ ½`).
+pub fn open(extent: &Ratio, held: &Ratio) -> bool {
+    !held.is_zero() && extent <= held
+}
+
+/// A body's share of a front as a surface (docs/111 §3): its density and
+/// its activity each count, `σ = 1 − (1 − ρ)(1 − α)`.
+pub fn surface(density: &Ratio, activity: &Ratio) -> Ratio {
+    let one = ratio(1, 1);
+    one.clone() - (one.clone() - density.clone()) * (one - activity.clone())
+}
+
+/// The front's strength past the surfaces it crossed, `S = Π (1 − σ_j)`.
+pub fn strength(surfaces: &[Ratio]) -> Ratio {
+    surfaces.iter().fold(ratio(1, 1), |s, x| s * (ratio(1, 1) - x.clone()))
 }
 
 /// The specific spin of a body at reach r about the holding H inside it:
@@ -143,6 +186,22 @@ mod tests {
         assert_eq!(whole(&ratio(-1, 2)), None);
         let past = Ratio::from_integer(num_bigint::BigInt::from(2).pow(70));
         assert_eq!(whole(&past), None);
+    }
+
+    #[test]
+    fn a_throat_opens_where_the_extent_lies_within_the_equator() {
+        let h = ratio(2, 1);
+        assert!(open(&ratio(2, 1), &h), "R = H is the equator");
+        assert!(!open(&ratio(3, 1), &h));
+        assert_eq!(density(&ratio(4, 1), &h), ratio(1, 2));
+        assert_eq!(density(&ratio(1, 1), &h), ratio(1, 1));
+        assert_eq!(deficit(&ratio(2, 1), &h), ratio(1, 2), "δ_s = ½ at the throat");
+        // Density and activity each count; an open body is wholly a surface.
+        assert_eq!(surface(&ratio(1, 2), &ratio(1, 2)), ratio(3, 4));
+        assert_eq!(surface(&ratio(1, 1), &ratio(0, 1)), ratio(1, 1));
+        assert_eq!(surface(&ratio(0, 1), &ratio(0, 1)), ratio(0, 1));
+        assert_eq!(strength(&[ratio(1, 2), ratio(1, 3)]), ratio(1, 3));
+        assert_eq!(arrival(&ratio(3, 1), &ratio(1, 1)), ratio(4, 1));
     }
 
     #[test]
