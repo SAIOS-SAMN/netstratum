@@ -77,6 +77,19 @@ is heading: the civilizations' cognition, Synthesis and sub-universes, the
 economy, μ and the Mycelium uplink, AI and human play, the universe and the
 protocol stack.
 
+## Get involved
+
+1. Build it and play a first session (Quick start, above), then read
+   [ROADMAP.md](ROADMAP.md) for where each part stands and
+   [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for where code lives.
+2. Pick an issue: the [v0.1.0 milestone](https://github.com/SAIOS-SAMN/netstratum/milestone/1)
+   is the current work, and [`good first issue`](https://github.com/SAIOS-SAMN/netstratum/labels/good%20first%20issue)
+   marks a place to start. Design questions waiting on a decision carry
+   [`needs-decision`](https://github.com/SAIOS-SAMN/netstratum/labels/needs-decision).
+3. Follow [CONTRIBUTING.md](CONTRIBUTING.md): a branch, `scripts/check`, a
+   pull request. A new law starts as a `proposal` issue and is written in
+   `docs/` before the code.
+
 ## Documentation
 
 | Document | Contents |

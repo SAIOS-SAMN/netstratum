@@ -19,6 +19,9 @@ change is named here.
 - The founding with the whole table of elements in the universal core's
   throat (docs/112 F1), released inside the throat (F2), the band as an
   attractor (F3) and `τ` from the table's books (F5).
+- Getting involved: a README section, issue templates (defect, proposal,
+  track) and a pull request template; open work tracked as GitHub issues
+  under the v0.1.0 milestone.
 - The universal core's band on the inverse faces (docs/104 §6).
 - The firmament's collective: bonds, collections moving as one, its books
   and last phases saved (docs/111 W2, W3).
