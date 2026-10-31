@@ -1724,7 +1724,7 @@ mod tests {
         let star = body(vec![0, 1], ratio(3, 1), [(h(), ratio(1, 4))].into(), Vec::new());
         let home = body(vec![0], ratio(0, 1), Manifest::new(), vec![star]);
         let galaxy = body(vec![1], ratio(5, 1), [(h(), ratio(1, 2))].into(), Vec::new());
-        let mut u = Universe { cores: vec![home, galaxy], ocean: Vec::new(), unit: ratio(1, 1), t_u: 15, densest: 1200 };
+        let mut u = Universe { cores: vec![home, galaxy], ocean: Vec::new(), unit: ratio(1, 1), t_u: 15, densest: 1200, founded: ratio(0, 1), firm_prev: Vec::new() };
         // The star's spin, kept in the home's frame: 2.
         u.cores[0].satellites[0].ell = ratio(2, 1);
         // The home's core is the source: no receiver, no clock.
@@ -1784,7 +1784,7 @@ mod tests {
     fn a_toll_is_heard_after_its_route_through_the_throats() {
         use crate::pulse::{Body, Manifest, Universe};
         let core = |path: Vec<u64>, radius: Ratio| Body { solid: false, coupled: None, ell_orth: ratio(0, 1), path, radius, period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let u = Universe { cores: vec![core(vec![1], ratio(5, 1)), core(vec![2], ratio(9, 1))], ocean: Vec::new(), unit: ratio(1, 1), t_u: 15, densest: 1200 };
+        let u = Universe { cores: vec![core(vec![1], ratio(5, 1)), core(vec![2], ratio(9, 1))], ocean: Vec::new(), unit: ratio(1, 1), t_u: 15, densest: 1200, founded: ratio(0, 1), firm_prev: Vec::new() };
         let t = Toll { star: vec![1, 7], bell: 40, passing: Passing::Spent, strokes: Some(3), returned: ratio(1, 1), spin: ratio(0, 1), star_reach: ratio(2, 1), galaxy_reach: ratio(5, 1) };
         // Its own galaxy hears it after its reach to the core; another after
         // the route through the universal core.

@@ -223,6 +223,17 @@ pub fn open(k: &crate::chem::Kind) -> Ratio {
     ratio(i64::from(crate::chem::unpaired(k)), i64::from(crate::chem::weight(k).max(1)))
 }
 
+/// A phase difference as a signed displacement in `(−½, ½]`.
+pub fn signed(d: &Ratio) -> Ratio {
+    let f = frac(d);
+    if f > ratio(1, 2) { f - ratio(1, 1) } else { f }
+}
+
+/// A phase brought onto the circle, `[0, 1)`.
+pub fn wrap(x: &Ratio) -> Ratio {
+    frac(x)
+}
+
 fn frac(x: &Ratio) -> Ratio {
     x.clone() - x.floor()
 }
@@ -427,7 +438,13 @@ pub fn collections(motes: &[Mote], moves: &[Vec<Ratio>]) -> Vec<Vec<usize>> {
     }
     let mut any = vec![false; n];
     for i in 0..n {
+        if moves[i].is_empty() {
+            continue;
+        }
         for j in i + 1..n {
+            if moves[j].is_empty() {
+                continue;
+            }
             if bonded(&motes[i], &motes[j], &moves[i], &moves[j]) {
                 let (a, b) = (find(&mut root, i), find(&mut root, j));
                 if a != b {

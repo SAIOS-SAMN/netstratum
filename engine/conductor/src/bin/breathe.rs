@@ -366,7 +366,7 @@ fn main() {
         if let Some(last) = read.last() {
             let most = read.iter().map(|c| c.collections).max().unwrap_or(0);
             let share = if last.held == cfe::ratio::ratio(0, 1) { cfe::ratio::ratio(0, 1) } else { last.in_collections.clone() / last.held.clone() };
-            println!("COLLECTIVE — {} bounces read; the last: {} motes, {} collections ({} motes bonded, the largest {}), {} of the holding bonded; at most {} collections", read.len(), last.motes, last.collections, last.bonded, last.largest, conductor::reading::sector(&share), most);
+            println!("COLLECTIVE — {} bounces read; the last: {} motes, {} collections ({} motes bonded, the largest {}), {} of the holding bonded; at most {} collections; the transmission τ {}", read.len(), last.motes, last.collections, last.bonded, last.largest, conductor::reading::sector(&share), most, conductor::reading::sector(&last.tau));
         }
     }
     // The tolls: every star that passed, struck on its own bell.

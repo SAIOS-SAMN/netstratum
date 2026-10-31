@@ -298,7 +298,7 @@ fn main() {
                 let (_, _, c) = pulse::orbit_galaxies(&mut w);
                 if e % step == 0 {
                     read(&w, e);
-                    println!("echo {e:5} collective: {} motes, {} collections ({} bonded, the largest {})", c.motes, c.collections, c.bonded, c.largest);
+                    println!("echo {e:5} collective: {} motes, {} collections ({} bonded, the largest {}), τ {}", c.motes, c.collections, c.bonded, c.largest, conductor::reading::sector(&c.tau));
                 }
             }
         }
