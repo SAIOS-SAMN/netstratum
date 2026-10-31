@@ -128,11 +128,9 @@ was written in response; the crate was removed (d606b01), together with
 followed: verification by opposition requires two records to compare, which
 §11 rule 5 clause 1 forbids.
 
-**Enforcement.** Standing tests hold the rule:
-`recurrence_guard::the_dead_name_stays_dead` (the crate and its workspace
-member stay removed), `recurrence_guard::the_anti_mirror_stays_excised`
-(the reconciler stays removed) and `constitution_lint::no_mirror_in_the_law`
-(the name stays out of the specifications).
+**Enforcement.** The rule is currently held by review (§11 rule 5). The
+standing tests that enforced it (`recurrence_guard` and `constitution_lint`)
+were removed in 56468d0c, and a replacement guard is owed.
 
 ## 4. Protocol-to-mechanic map
 
