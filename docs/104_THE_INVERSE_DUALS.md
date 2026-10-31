@@ -206,12 +206,16 @@ reach `R` about the hold `H`:
 - **Pull:** the core holds it back on the inverse held face `g`, by its spin
   `ℓ`.
 - **Scale:** `w̄_c` is the mean weight of the collective the core holds: the
-  totality of the weighted bonds inside the core over its grains,
+  totality of the weighted bonds of the firmament (the motes the throat holds
+  wholly) over its grains,
 
-      w̄_c = Σ a·w·h / Σ a·h
+      w̄_c = Σ a·w / Σ a
 
-  with `a` a mote's grains, `w` its weight (its bonds, `3Z − unpaired`) and
-  `h` its held share (`flows::held`).
+  with `a` a mote's grains and `w` its weight (its bonds, `3Z − unpaired`).
+  Matter only partly within the throat belongs to the zero galaxy. Weighting
+  every home mote by its held share was read and refused: the zero galaxy's
+  light gas swamps the mean (166 → 21.9 → 8.9 → 7.6 over four bounces), so
+  only the lightest gas would rest beyond the throat.
 
 ### 6.3 The rest point
 

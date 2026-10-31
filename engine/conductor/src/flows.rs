@@ -223,6 +223,20 @@ pub fn open(k: &crate::chem::Kind) -> Ratio {
     ratio(i64::from(crate::chem::unpaired(k)), i64::from(crate::chem::weight(k).max(1)))
 }
 
+/// The two faces at a deficit, read through the inversion (docs/104 §0):
+/// `(held, unlocked) = (1 − δ, δ)`.
+pub fn face(delta: &Ratio) -> (Ratio, Ratio) {
+    (ratio(1, 1) - delta.clone(), delta.clone())
+}
+
+/// The band at reach R about the hold H for a kind carried `q = ½·w̄_c/w`
+/// (docs/104 §6.2): `q·u − ½·g·R·H` on the faces `(g, u)` at
+/// `δ = H/(R + H)`; zero at `R·R = 2q` whatever H holds (§6.3).
+pub fn band(q: &Ratio, r: &Ratio, h: &Ratio) -> Ratio {
+    let (g, u) = face(&(h.clone() / (r.clone() + h.clone())));
+    q.clone() * u - ratio(1, 2) * g * r.clone() * h.clone()
+}
+
 /// A phase difference as a signed displacement in `(−½, ½]`.
 pub fn signed(d: &Ratio) -> Ratio {
     let f = frac(d);
@@ -803,10 +817,10 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
     let heat = p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)));
     let keep = (ratio(1, 1) - open(&x.key).min(ratio(1, 1))) * (ratio(1, 1) - d_o.clone());
     x.agitation = crate::ring::grain(&((x.agitation.clone() + heat) * keep.clone() * keep + scar.clone()));
-    // The band (one grammar: the firmament's, a galaxy's, a star's): the core's bounce pushes each kind out, `q = push/w`
-    // (`push = p·w̄`, the dispersal law's, as at the founding and each
-    // arrival), and its hold returns `½·δ(R)·ℓ` (δ against what is enclosed
-    // at its reach), so the continuum rests in a band. The vacuum feels the
+    // The band (one grammar: the firmament's, a galaxy's, a star's): the
+    // core's bounce pushes each kind out, `q = push/w` (`push = ½·w̄_c`, the
+    // mean weight of the collective the core holds), and its hold returns it,
+    // so its held matter rests in a band (docs/104 §6). The vacuum feels the
     // same law reflected through the throat, which stands at the core's
     // state, R = 1 (the enclosed law's base: throat 1, rim 2 in the
     // enclosure's own units): `R → 2 − R` (`through`). Past the rim the
@@ -814,8 +828,11 @@ pub fn spin_torque(x: &mut Mote, from: &[Ratio], h: &Ratio, r_o: &Ratio, d_o: &R
     let throat = ratio(1, 1);
     let band = match heart_push {
         Some(push) if !h.is_zero() => {
+            // On the inverse faces (docs/104 §6.2): the push on the unlocked
+            // face u, the pull back on the held face g by the spin ℓ = R·H;
+            // at rest where `R·R = w̄_c/w` (§6.3).
             let q = push.clone() / weight(&x.key);
-            let at = |reach: &Ratio| q.clone() - ratio(1, 2) * (h.clone() / (reach.clone() + h.clone())) * reach.clone() * h.clone();
+            let at = |reach: &Ratio| band(&q, reach, h);
             if !x.vacuum {
                 at(r_o)
             } else {
@@ -2086,6 +2103,21 @@ mod passage_tests {
         // Backward: the next mark behind.
         settle(&mut x, &[(0, ratio(0, 1), ratio(1, 4))], Some(&p), &mut cross);
         assert_eq!(true_phase(&x, 0), ratio(1, 60) - ratio(1, 240));
+    }
+
+    #[test]
+    fn the_band_rests_where_the_reach_squared_is_the_collectives_mean_over_the_weight() {
+        // docs/104 §6.3: w̄_c/w = 4/9, so R* = 2/3 at any hold.
+        let q = ratio(1, 2) * ratio(4, 9);
+        for h in [ratio(1, 1), ratio(3, 1), ratio(1, 7)] {
+            assert_eq!(super::band(&q, &ratio(2, 3), &h), ratio(0, 1));
+            assert!(super::band(&q, &ratio(1, 3), &h) > ratio(0, 1), "inside, the push wins");
+            assert!(super::band(&q, &ratio(1, 1), &h) < ratio(0, 1), "outside, the pull wins");
+        }
+        // A kind lighter than the mean rests beyond the throat (R* > 1).
+        let light = ratio(1, 2) * ratio(9, 4);
+        assert!(super::band(&light, &ratio(1, 1), &ratio(1, 1)) > ratio(0, 1));
+        assert_eq!(super::face(&ratio(1, 2)), (ratio(1, 2), ratio(1, 2)), "the faces balance at the ring");
     }
 
     #[test]

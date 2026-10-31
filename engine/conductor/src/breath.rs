@@ -497,6 +497,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // moving holding (`pulse::universal_ledger`).
         let ledger_u = crate::pulse::universal_ledger(u);
         let home_push = if home { crate::pulse::home_push(u, &u.cores[i].total()) } else { None };
+        let collective_push = if home { crate::pulse::collective_mean(u).map(|w| ratio(1, 2) * w) } else { None };
         let centre = centre_state(u, i);
         let core = &mut u.cores[i];
         let mut returned = ratio(0, 1);
@@ -1349,7 +1350,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // back (operator 2026-10-21: "pull it back and make it static").
             let ledger_sum = |core: &Body| core.flows.iter().fold(core.reservoir.clone(), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone() * (x.ell_o.clone() + x.ell_orth.clone()));
             let before = ledger_sum(core);
-            let (given, absorbed) = crate::flows::torque(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit, None, &mut cross);
+            // The universal core's band (docs/104 §6): its held collective
+            // pushed on the unlocked face and pulled back on the held face,
+            // scaled by the collective's own bonds, `½·w̄_c`.
+            let band_push = if home { collective_push.clone() } else { None };
+            let (given, absorbed) = crate::flows::torque(&mut core.flows, enc.as_ref().unwrap_or(&throat), &p, tide, &ledger_unit, band_push.as_ref(), &mut cross);
             // The disc forms: each mote's tilt returns toward its galaxy's spin
             // plane (`flows::settle_disc`).
             core.tilt = crate::flows::settle_disc(&mut core.flows, enc.as_ref().unwrap_or(&throat));

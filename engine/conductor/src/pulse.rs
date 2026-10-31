@@ -1109,6 +1109,9 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
             held: ratio(0, 1),
             in_collections: sets.iter().flatten().fold(ratio(0, 1), |s, &j| s + w(&firm[j])),
             tau: ratio(0, 1),
+            lightest: 0,
+            heaviest: 0,
+            mean: ratio(0, 1),
         };
         let _ = founded;
         // The order (B1): matter pushing matter apart by its open frames
@@ -1123,6 +1126,10 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
         let founded = u.founded.clone();
         collective.tau = if founded.is_zero() || now >= founded { ratio(0, 1) } else { (founded.clone() - now.clone()) / founded };
         collective.held = now;
+        let ws: Vec<u32> = firmament_of(u).iter().map(|&(a, b)| crate::chem::weight(&u.cores[a].flows[b].key)).collect();
+        collective.lightest = ws.iter().copied().min().unwrap_or(0);
+        collective.heaviest = ws.iter().copied().max().unwrap_or(0);
+        collective.mean = collective_mean(u).unwrap_or_else(|| ratio(0, 1));
     }
     // The ocean in transit (operator 2026-10-25: "jetstreams of
     // vacuum/continuum via the ocean of space"; never at rest): the
@@ -1190,6 +1197,11 @@ pub struct Collective {
     pub in_collections: Ratio,
     /// The firmament's transmission, `τ = left / founded` (docs/111 §4.5).
     pub tau: Ratio,
+    /// The lightest and heaviest weights it wholly holds, and the
+    /// collective's mean weight `w̄_c` (docs/104 §6.2).
+    pub lightest: u32,
+    pub heaviest: u32,
+    pub mean: Ratio,
 }
 
 /// Magnetism (operator 2026-10-15, "transduction via magnetism"): an
@@ -1238,6 +1250,18 @@ pub fn firmament_holding(u: &Universe) -> Ratio {
     let Some(enc) = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u)) else { return ratio(0, 1) };
     let push = ratio(1, 2);
     u.cores[i].flows.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key) * crate::flows::held(x, &enc, &push))
+}
+
+/// The mean weight of the collective the universal core holds (docs/104
+/// §6.2): the totality of the weighted bonds of the firmament (the motes its
+/// throat holds wholly) over its grains, `w̄_c = Σ a·w / Σ a`; None where it
+/// holds nothing. Matter only partly within the throat is the zero galaxy's,
+/// not the collective's. On the spin grain.
+pub fn collective_mean(u: &Universe) -> Option<Ratio> {
+    let firm = u.firmament();
+    let grains = firm.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone());
+    // Held on the grain (the carrier, never law).
+    if grains.is_zero() { None } else { Some(crate::ring::grain(&(holding(&firm) / grains))) }
 }
 
 impl Universe {
