@@ -76,7 +76,8 @@ At each place (a mote's reach in its enclosure, a ring, a body):
   inner ring is over-pressured (`s > 0`), inward where it is under (`s < 0`),
   nothing at balance. This replaces the contrast `|P_in − P_out|/(P_in +
   P_out)`, which moved turning outward whichever ring pressed harder and so
-  had no balance to restore to.
+  had no balance to restore to. The same balance is read on each shell's
+  fibre, cell against cell around each plane's circle (docs/110).
 - **Saturation (the flop):** a state that would carry more than SUBSTRATE_C
   per K-step escapes as a typed outcome, the luminal bound's own, never a
   panic (docs/94 §1).

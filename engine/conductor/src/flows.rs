@@ -1632,15 +1632,19 @@ pub fn luminal(motes: &mut [Mote], enc: &Enclosed) -> usize {
 /// share `|M_in − M_out|/(M_in + M_out)` times the rings' gear contrast
 /// `|δ_in − δ_out|/(δ_in + δ_out)`. First degree, L1, saturating shares;
 /// every member of a ring moves alike. Returns (the pressure's spin moved,
-/// the field's spin moved), by holding.
-pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (Ratio, Ratio) {
+/// the field's spin moved, the spin moved around the shells' circles, and the
+/// number of shell planes that parted into cells), by holding.
+pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (Ratio, Ratio, Ratio, usize) {
     if total.is_zero() || motes.len() < 2 {
-        return (ratio(0, 1), ratio(0, 1));
+        return (ratio(0, 1), ratio(0, 1), ratio(0, 1), 0);
     }
     let rings_by_face = beads(motes, enc, p, total, false);
     let share = |x: &Mote| x.amount.clone() * weight(&x.key) / total.clone();
     let mut dl = vec![ratio(0, 1); motes.len()];
     let (mut moved_p, mut moved_b) = (ratio(0, 1), ratio(0, 1));
+    // docs/110: the spin the balance around the shells' circles moved, and
+    // how many shell planes parted into two or more cells.
+    let (mut moved_around, mut parted) = (ratio(0, 1), 0usize);
     for rings in rings_by_face.values() {
         // Each ring read once: (members, m, ℓ̄, R, P, M, δ).
         let mut read: Vec<(Vec<usize>, Ratio, Ratio, Ratio, Ratio, Ratio, Ratio)> = rings.iter().filter_map(|(members, pinch)| {
@@ -1662,14 +1666,16 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
             Some((members.clone(), m, g(&ell), pinch.clone(), g(&pressure), g(&magnet), g(&delta)))
         }).collect();
         read.sort_by(|a, b| a.3.cmp(&b.3));
+        let mut columns: Vec<Ratio> = vec![ratio(0, 1); read.len()];
         // The medium's STATE (docs/103 §4): each ring bears the hold of every
         // ring beyond it on its face, `P_h = Σ m_j·δ_j` (the column's weight,
         // gravity's held share at each), a reading of state beside its
         // thermal and magnetic pressure; the contrast of the whole moves the
         // spin (the coupling into motion).
         let mut column = ratio(0, 1);
-        for r in read.iter_mut().rev() {
+        for (i, r) in read.iter_mut().enumerate().rev() {
             let own = r.1.clone() * r.6.clone();
+            columns[i] = crate::ring::grain(&column);
             r.4 = crate::ring::grain(&(r.4.clone() + column.clone()));
             column += own;
         }
@@ -1704,6 +1710,69 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
                 *moved += if spin < ratio(0, 1) { -spin } else { spin };
             }
         }
+        // docs/110: the balance on each shell's fibre. A shell is the motes of
+        // this face whose bands `R(1 ± p)` overlap (connected by their bands,
+        // the band of `band_pairs`); within it, cell against cell around
+        // each spatial plane's circle.
+        let column_of: std::collections::BTreeMap<usize, Ratio> = read.iter().enumerate().flat_map(|(ri, r)| r.0.iter().map(move |&i| (i, ri))).map(|(i, ri)| (i, columns[ri].clone())).collect();
+        let mut on_face: Vec<(usize, Ratio, Ratio)> = read.iter().flat_map(|r| r.0.iter().copied()).map(|i| { let (r, d) = enc.reach(&motes[i].ell_o); (i, r, d) }).collect();
+        on_face.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
+        let one = ratio(1, 1);
+        let lo = |r: &Ratio| r.clone() * (one.clone() - p.clone());
+        let hi = |r: &Ratio| r.clone() * (one.clone() + p.clone());
+        let mut shells: Vec<Vec<(usize, Ratio, Ratio)>> = Vec::new();
+        let mut reach_hi = ratio(-1, 1);
+        for m in on_face {
+            if shells.is_empty() || lo(&m.1) > reach_hi {
+                shells.push(Vec::new());
+            }
+            if hi(&m.1) > reach_hi {
+                reach_hi = hi(&m.1);
+            }
+            shells.last_mut().expect("a shell").push(m);
+        }
+        for shell in shells.iter().filter(|s| s.len() >= 2) {
+            let width = hi(&shell.iter().map(|m| m.1.clone()).max().expect("members")) - lo(&shell.iter().map(|m| m.1.clone()).min().expect("members"));
+            if width <= ratio(0, 1) {
+                continue;
+            }
+            let members: Vec<usize> = shell.iter().map(|m| m.0).collect();
+            let delta_of: std::collections::BTreeMap<usize, Ratio> = shell.iter().map(|m| (m.0, m.2.clone())).collect();
+            let field_mean = circle_mean(&members.iter().map(|&i| (share(&motes[i]), motes[i].phase.get(LOOP).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>());
+            for (j, &k) in SPACE.iter().enumerate() {
+                let frac = |x: Ratio| x.clone() - x.floor();
+                let on_plane: Vec<(usize, Ratio)> = members.iter().map(|&i| (i, frac(true_phase(&motes[i], k)))).collect();
+                let cells = phase_beads(&on_plane);
+                if cells.len() < 2 {
+                    continue;
+                }
+                parted += 1;
+                let reads: Vec<CellRead> = cells
+                    .iter()
+                    .map(|(idx, arc)| {
+                        let m = idx.iter().fold(ratio(0, 1), |a, &i| a + share(&motes[i]));
+                        let mean = |f: &dyn Fn(usize) -> Ratio| if m.is_zero() { ratio(0, 1) } else { idx.iter().fold(ratio(0, 1), |a, &i| a + share(&motes[i]) * f(i)) / m.clone() };
+                        let ell = mean(&|i| motes[i].ell_o.clone());
+                        let tilt = mean(&|i| tilt_of(&motes[i].tilt)[j].clone());
+                        let phi = one.clone() - mean(&|i| delta_of[&i].clone());
+                        let column = mean(&|i| column_of.get(&i).cloned().unwrap_or_else(|| ratio(0, 1)));
+                        let heat = idx.iter().fold(ratio(0, 1), |a, &i| a + share(&motes[i]) * motes[i].agitation.clone());
+                        let magnet = idx.iter().fold(ratio(0, 1), |a, &i| a + motes[i].amount.clone() * ratio(i64::from(crate::chem::unpaired(&motes[i].key)), 1) / total.clone() * in_step(motes[i].phase.get(1).unwrap_or(&ratio(0, 1)), &field_mean));
+                        let pressure = if arc.is_zero() { column.clone() } else { crate::ring::grain(&((heat + magnet) / (width.clone() * arc.clone()))) + column };
+                        CellRead { m, ell: crate::ring::grain(&ell), pressure, tilt, phi: crate::ring::grain(&phi) }
+                    })
+                    .collect();
+                let (d, spin) = around(&reads);
+                for ((idx, _), inc) in cells.iter().zip(d) {
+                    if !inc.is_zero() {
+                        for &i in idx {
+                            dl[i] += inc.clone();
+                        }
+                    }
+                }
+                moved_around += spin;
+            }
+        }
     }
     for (x, d) in motes.iter_mut().zip(dl) {
         if !d.is_zero() {
@@ -1711,7 +1780,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
             x.ell_o = through_centre(now, &mut x.phase);
         }
     }
-    (moved_p, moved_b)
+    (moved_p, moved_b, moved_around, parted)
 }
 
 /// The hydrostatic balance across a ring pair (docs/106 §2, S3), as a signed
@@ -1727,6 +1796,102 @@ pub fn restoring(p_in: &Ratio, p_out: &Ratio, phi_in: &Ratio, phi_out: &Ratio) -
         return ratio(0, 1);
     }
     p_in.clone() / sp - phi_in.clone() / sf
+}
+
+/// A shell's cells on one plane (docs/110 §2): its members, by index and
+/// phase on that plane in `[0, 1)`, parted wherever the circular gap between
+/// consecutive members is wider than the mean gap `1/n`. Each cell is
+/// returned with its arc, the gaps from its first member to the next cell's
+/// first member, so the arcs sum to 1. An evenly spread shell, or one of a
+/// single member, is one cell of arc 1. No sector count is set: the cells are
+/// the shell's own beads.
+pub fn phase_beads(members: &[(usize, Ratio)]) -> Vec<(Vec<usize>, Ratio)> {
+    let n = members.len();
+    if n == 0 {
+        return Vec::new();
+    }
+    let mut by_phase: Vec<(usize, Ratio)> = members.to_vec();
+    by_phase.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
+    let one = ratio(1, 1);
+    let gaps: Vec<Ratio> = (0..n).map(|i| if i + 1 < n { by_phase[i + 1].1.clone() - by_phase[i].1.clone() } else { by_phase[0].1.clone() + one.clone() - by_phase[i].1.clone() }).collect();
+    let mean = ratio(1, i64::try_from(n).unwrap_or(i64::MAX));
+    let starts: Vec<usize> = (0..n).filter(|&i| gaps[i] > mean).map(|i| (i + 1) % n).collect();
+    if starts.is_empty() {
+        return vec![(by_phase.iter().map(|(i, _)| *i).collect(), one)];
+    }
+    let mut starts = starts;
+    starts.sort_unstable();
+    starts.dedup();
+    let mut cells = Vec::with_capacity(starts.len());
+    for (j, &s) in starts.iter().enumerate() {
+        let next = starts[(j + 1) % starts.len()];
+        let mut idx = Vec::new();
+        let mut arc = ratio(0, 1);
+        let mut at = s;
+        loop {
+            idx.push(by_phase[at].0);
+            arc += gaps[at].clone();
+            at = (at + 1) % n;
+            if at == next {
+                break;
+            }
+        }
+        cells.push((idx, arc));
+    }
+    cells
+}
+
+/// A cell's reading for the balance around a shell's circle (docs/110 §3):
+/// its holding, mean spin, pressure per unit of arc, and tilt share on the
+/// plane.
+#[derive(Debug, Clone)]
+pub struct CellRead {
+    pub m: Ratio,
+    pub ell: Ratio,
+    pub pressure: Ratio,
+    pub tilt: Ratio,
+    /// Its potential, `Φ = 1 − δ̄` (holding-weighted over its members).
+    pub phi: Ratio,
+}
+
+/// The balance around one plane's circle of one shell (docs/110 §3): each
+/// pair of neighbouring cells (the last and the first meeting), the
+/// over-pressured giving turning to the other by S3's share
+/// `s = P_a/(P_a + P_b) − Φ_a/(Φ_a + Φ_b)`, weighted by the pair's tilt share
+/// on the plane. Returns each cell's increment to each of its members' spin,
+/// and the spin moved by holding; `Σ m·Δℓ` is zero.
+pub fn around(cells: &[CellRead]) -> (Vec<Ratio>, Ratio) {
+    let n = cells.len();
+    let mut d = vec![ratio(0, 1); n];
+    let mut moved = ratio(0, 1);
+    if n < 2 {
+        return (d, moved);
+    }
+    let pairs = if n == 2 { 1 } else { n };
+    for a in 0..pairs {
+        let b = (a + 1) % n;
+        let (ca, cb) = (&cells[a], &cells[b]);
+        let m_ab = ca.m.clone() + cb.m.clone();
+        if m_ab.is_zero() {
+            continue;
+        }
+        let s = restoring(&ca.pressure, &cb.pressure, &ca.phi, &cb.phi);
+        if s.is_zero() {
+            continue;
+        }
+        let gap = if ca.ell > cb.ell { ca.ell.clone() - cb.ell.clone() } else { cb.ell.clone() - ca.ell.clone() };
+        let tilt = (ca.m.clone() * ca.tilt.clone() + cb.m.clone() * cb.tilt.clone()) / m_ab.clone();
+        let mag = if s < ratio(0, 1) { -s.clone() } else { s.clone() };
+        let u = crate::ring::grain(&(crate::ring::grain(&mag) * gap * tilt / m_ab));
+        if u.is_zero() {
+            continue;
+        }
+        let (giver, taker) = if s > ratio(0, 1) { (a, b) } else { (b, a) };
+        d[giver] -= u.clone() * cells[taker].m.clone();
+        d[taker] += u.clone() * cells[giver].m.clone();
+        moved += u * cells[giver].m.clone() * cells[taker].m.clone();
+    }
+    (d, moved)
 }
 
 /// The motes' total holding (by weight).
@@ -1817,8 +1982,9 @@ mod reading_tests {
 
 #[cfg(test)]
 mod passage_tests {
-    use super::{blend, mean_response, restoring, rest, space_of, spin_torque, tilt_from, tilt_of, Mote};
-    use cfe::ratio::ratio;
+    use super::{around, blend, mean_response, phase_beads, restoring, rest, space_of, spin_torque, tilt_from, tilt_of, CellRead, Mote};
+    use cfe::ratio::{ratio, Ratio};
+    use num_traits::Zero;
 
     #[test]
     fn the_throats_inversion_exchanges_core_and_rim() {
@@ -1843,6 +2009,36 @@ mod passage_tests {
         // Backward: the next mark behind.
         settle(&mut x, &[(0, ratio(0, 1), ratio(1, 4))], Some(&p), &mut cross);
         assert_eq!(true_phase(&x, 0), ratio(1, 60) - ratio(1, 240));
+    }
+
+    #[test]
+    fn an_even_shell_is_one_cell_and_a_clumped_one_parts_at_its_wide_gaps() {
+        // docs/110 §2: four members a quarter apart are one cell of arc 1.
+        let even: Vec<(usize, Ratio)> = (0..4).map(|i| (i, ratio(i as i64, 4))).collect();
+        let cells = phase_beads(&even);
+        assert_eq!(cells.len(), 1);
+        assert_eq!(cells[0].1, ratio(1, 1));
+        // Two clumps, near 0 and near 1/2: two cells whose arcs sum to 1.
+        let clumped = vec![(0, ratio(0, 1)), (1, ratio(1, 50)), (2, ratio(1, 2)), (3, ratio(26, 50))];
+        let cells = phase_beads(&clumped);
+        assert_eq!(cells.len(), 2, "the shell parts at its two wide gaps");
+        assert_eq!(cells.iter().fold(ratio(0, 1), |s, c| s + c.1.clone()), ratio(1, 1), "the arcs cover the circle once");
+        assert!(cells.iter().any(|c| c.0 == vec![0, 1]) && cells.iter().any(|c| c.0 == vec![2, 3]));
+    }
+
+    #[test]
+    fn a_shell_at_balance_around_its_circle_moves_nothing_and_an_over_pressured_cell_gives_turning() {
+        // docs/110 §3: equal pressures stand still; the over-pressured cell
+        // gives turning to its neighbour, and Σ m·ℓ is unchanged.
+        let cell = |m: i64, ell: i64, p: i64| CellRead { m: ratio(m, 10), ell: ratio(ell, 1), pressure: ratio(p, 1), tilt: ratio(1, 3), phi: ratio(1, 2) };
+        let (d, moved) = around(&[cell(1, 2, 5), cell(2, 3, 5)]);
+        assert!(d.iter().all(|x| x.is_zero()) && moved.is_zero(), "at balance nothing moves");
+        let cells = [cell(1, 2, 9), cell(2, 3, 3), cell(3, 4, 3)];
+        let (d, moved) = around(&cells);
+        assert!(d[0] < ratio(0, 1), "the over-pressured cell gives");
+        assert!(moved > ratio(0, 1));
+        let total = cells.iter().zip(&d).fold(ratio(0, 1), |s, (c, x)| s + c.m.clone() * x.clone());
+        assert_eq!(total, ratio(0, 1), "the exchange keeps Σ m·ℓ exact");
     }
 
     #[test]

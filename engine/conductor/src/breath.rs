@@ -216,7 +216,7 @@ pub struct Event {
     /// outward, the pressure's and the field's, in holding units of the
     /// ledger; the motes the luminal bound turned onto the Möbius leg, and
     /// the motes the stream reads on the vacuum.
-    pub circulation: (Ratio, Ratio, Ratio, usize, usize),
+    pub circulation: (Ratio, Ratio, Ratio, usize, usize, Ratio, usize),
     /// The stars' own bells that rang this echo (each a torque on its whole
     /// system, an outburst's cut, a decoherence front's check), of the stars
     /// read.
@@ -505,7 +505,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut collapse = (ratio(0, 1), ratio(0, 1));
         let mut motes_in = [0usize; 6];
         let mut released = (0usize, ratio(0, 1), ratio(0, 1));
-        let mut circulation = (ratio(0, 1), ratio(0, 1), ratio(0, 1), 0usize, 0usize);
+        let mut circulation = (ratio(0, 1), ratio(0, 1), ratio(0, 1), 0usize, 0usize, ratio(0, 1), 0usize);
         let mut rang_n = (0usize, 0usize);
         let (mut merged, mut encounters) = (0usize, 0usize);
         // The galaxy's holding constant through the echo (its grains only
@@ -1430,9 +1430,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // the vacuum leg, never orbiting faster than a turn a bell.
             let enc_f = galaxy_enc(core);
             crate::profile::mark("breath:fluid");
-            let (by_pressure, by_field) = crate::flows::fluid(&mut core.flows, &enc_f, &p, &ledger_unit);
+            let (by_pressure, by_field, around, parted) = crate::flows::fluid(&mut core.flows, &enc_f, &p, &ledger_unit);
             circulation.1 = by_pressure;
             circulation.2 = by_field;
+            circulation.5 = around;
+            circulation.6 = parted;
             crate::profile::mark("breath:luminal");
             circulation.3 = crate::flows::luminal(&mut core.flows, &enc_f);
             // The exits: the jet (along the axis) and radial escape cross

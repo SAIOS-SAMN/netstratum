@@ -12,6 +12,11 @@ witness.
 | word | meaning | code |
 |---|---|---|
 | **core** | a body that holds matter in its throat and bounces each bell | `pulse::Body` |
+| **wavefront** | the geodesic sphere of light-time `t` about a source in its enclosure; an arrival is a wavefront meeting an orbit (docs/110) | `ring.rs` |
+| **equator** | the fixed hypersurface of the inversion `δ ↦ 1 − δ`, `δ = ½`, where the faces meet (docs/110) | `flows::through` |
+| **shell** | a band of reach on one face, fibred by the phase torus and the R loop; its state a field of cells (docs/110) | `flows::fluid` |
+| **cell** | a shell's bead along one plane's circle, parted at gaps wider than the mean; it owns its arc (docs/110) | `flows::phase_beads` |
+| **orbit torus** | a body's invariant torus, its motion a linear flow `φ_k(n) = φ_k(0) + n·t_k/P` (docs/110) | `motion.rs` |
 | **throat** | what a core holds unreleased | `Body.throat` |
 | **state** | what the throat held at the core's forming; set once, never drained | `Body.state` |
 | **bounce / bell** | a core's re-pulse in full in its own units; one a bell | breath's arrivals |
