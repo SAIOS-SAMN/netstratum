@@ -88,10 +88,13 @@ constraints below. Each is stated as a property of this system:
 3. **Consensus without a central server.** Peers verify each other's state
    by exact measurement (NS-5, proof of convergence). There is no central
    server or global RPC endpoint whose failure stops the world.
-4. **Governed agents.** Automated agents are participants. Every agent,
-   whether written by a player or run as an NPC, executes inside IPSAL-OS
-   containment with dimensional permissions and generation-tagged receipts.
-   Automation is governed, not banned.
+4. **Agents in a world-model sandbox.** Automated agents are participants,
+   and automation is governed, not banned. The aim is that every agent that
+   enters a world runs inside a world-model sandbox: an IPSAL-OS entity with
+   scoped permissions and generation-tagged receipts, provided by libraries
+   that external models can import and build on. Today this holds for agents
+   a player registers through the client; an importable sandbox for outside
+   models is the direction of work.
 5. **Immediate access.** The CLI client starts with one command and needs
    no wallet, gas, invite key or bridge.
 

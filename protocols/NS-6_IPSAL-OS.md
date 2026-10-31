@@ -6,10 +6,13 @@ agent (`engine/cfe/src/ipsal.rs`, witnesses `ipsal_scope.rs`). Supersedes
 the SAIOS-OS material (AI-scientists security research, NEBULA-PRODUCTS
 README) under the ipsal-os name — SAIOS is retired.
 
-Every individual inside this internet — human, NPC, autonomous bot — is an
-**entity**: an identity, a containment scope, and a generation tag on every
-receipt it forges. Agents are citizens, governed by containment, never by
-prohibition (Charter §3.4). This is the profile layer the platform vision
+Every individual inside this internet (human, NPC or autonomous agent) is
+meant to be an **entity**: an identity, a scope of permissions, and a
+generation tag on every receipt it forges. The aim is a world-model sandbox
+that outside models can import from Netstratum's libraries, so that any agent
+entering a world acts inside it; agents are participants, governed by their
+scopes rather than by prohibition (Charter §3 item 4). Today the entity model
+covers the player and the agents the player registers. This is the profile layer the platform vision
 called a social media profile for each individual inside the internet —
 at N3 it holds identity and authority; later landings add its presentation
 (the profile orb, NS-1) and its reach (NS-4 aperture sharing, NS-5 presence).

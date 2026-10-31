@@ -106,8 +106,10 @@ machine cognition and emergent economies, and for operators of the network.
   world by holding its pen, which pauses the conductor for that world. A
   player can write agents with scoped permissions (build, raze, collect) and
   drive them from the CLI; every action records who took it.
-- **Trajectory.** A network interface for agents, so a bot can play without
-  the CLI; multiple machines sharing one world (NS-5, the mesh).
+- **Trajectory.** A world-model sandbox that external models import from
+  Netstratum's libraries, so any agent that enters a world runs inside it as
+  a scoped entity; agents playing without the CLI; multiple machines sharing
+  one world (NS-5, the mesh).
 
 ### The universe (era 1)
 
@@ -135,5 +137,5 @@ machine cognition and emergent economies, and for operators of the network.
 
 ## Not started
 
-Settlement on external blockchains (NS-7), multiplayer across machines, and a
-public API or SDK for outside developers.
+Settlement on external blockchains (NS-7), multiplayer across machines, and
+the importable sandbox libraries (the SDK) for outside models.
