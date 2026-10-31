@@ -65,8 +65,8 @@ fn main() {
             continue;
         };
         tasks += 1;
-        let frames = family::perceive_family(&train);
-        let spend = family::extraction_spend(&train, &frames);
+        let frames = rule::perceive_family(&train);
+        let spend = rule::extraction_spend(&train, &frames);
         let mut budget = Physics::default().stroke_n(spend);
         let at = Instant::now();
         let rule = rule::extract_rule(&train, &mut budget);
