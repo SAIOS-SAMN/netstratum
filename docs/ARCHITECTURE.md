@@ -142,6 +142,9 @@ reference frames, and bounded exact arithmetic.
 
 ### 3.4 Where the derivations are
 
+How the physics is used on the live path, where it is duplicated and what
+it has produced is in [PHYSICS.md](PHYSICS.md).
+
 Each era-1 law is derived in a design document before it is coded, starting
 at [78_SPHERES.md](78_SPHERES.md) and continuing in order through
 [108_OWN_RULERS.md](108_OWN_RULERS.md). The register of what is built and

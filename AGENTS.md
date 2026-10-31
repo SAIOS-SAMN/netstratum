@@ -21,10 +21,12 @@ defined in [GLOSSARY.md](GLOSSARY.md), not by their everyday meaning.
    definition, its formula and its code location.
 2. The crates and their dependencies are mapped in
    [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
-3. Every law, with its authority (document section) and its implementation
+3. How the physics is used, where it is duplicated and what is not yet
+   derived: [docs/PHYSICS.md](docs/PHYSICS.md).
+4. Every law, with its authority (document section) and its implementation
    (`crate::fn`), is a row of [docs/EQUATIONS.md](docs/EQUATIONS.md).
-4. What works and where each part is heading: [ROADMAP.md](ROADMAP.md).
-5. Search by identifier, not by prose: `grep -rn "fn deploy" engine/`.
+5. What works and where each part is heading: [ROADMAP.md](ROADMAP.md).
+6. Search by identifier, not by prose: `grep -rn "fn deploy" engine/`.
 
 ## Rules that must hold
 

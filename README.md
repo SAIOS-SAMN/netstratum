@@ -101,6 +101,7 @@ protocol stack.
 | [docs/00_CHARTER.md](docs/00_CHARTER.md) | The project's binding rules |
 | [docs/README.md](docs/README.md) | The index of the design record |
 | [protocols/](protocols/) | The NS protocol specifications |
+| [docs/PHYSICS.md](docs/PHYSICS.md) | How the computational physics is used: the engines, the live path, what is duplicated, what is not yet derived, and what it has produced |
 | [docs/EQUATIONS.md](docs/EQUATIONS.md) | Every law, with its authority and its implementation |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How changes are made and checked |
 | [AGENTS.md](AGENTS.md) | Orientation and rules for AI coding agents |

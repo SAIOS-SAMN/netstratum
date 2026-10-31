@@ -12,6 +12,10 @@ change is named here.
 
 ### Added
 
+- `docs/PHYSICS.md`: the engines, the era-1 live path, the quantities
+  computed in more than one place, the values not yet derived, the era-0
+  bridges, and a ledger of what the engine's reads have established;
+  EQUATIONS §8.1 adds the live-path laws E12–E30.
 - The open-source layout: `AGENTS.md` (with a `CLAUDE.md` pointer),
   `MAINTAINERS.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, this changelog, and
   `scripts/check` (fmt, clippy `-D warnings`, tests, rustdoc `-D warnings`,
