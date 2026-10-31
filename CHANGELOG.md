@@ -39,6 +39,16 @@ change is named here.
   `-D warnings`; `type_complexity`, `too_many_arguments` and
   `needless_range_loop` are allowed workspace-wide.
 
+### API changes
+
+- Mycelium pinned at `v0.3.0-rc.1` (was `v0.2.0`): `sdk::Kernel` is
+  `sdk::Voice`; `HyphaKey::vk_bytes` is `verifying_bytes`;
+  `forms::xylarium` is `forms::shares`. A seat's role is Mycelium's opaque
+  tier, and Netstratum names its tiers in `ns_hypha::tiers` (progenitor 0,
+  ancients 1, steward 2, sovereign 3, the bytes unchanged). Mycelium's task
+  addresses change at this release; saved test data carrying old addresses
+  is re-founded, never migrated.
+
 ### Layout changes
 
 - `docs/STATUS.md` moved to `ROADMAP.md`, `docs/CONCEPTS.md` to

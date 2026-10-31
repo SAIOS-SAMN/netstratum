@@ -25,7 +25,7 @@
 use crate::wire::HouseActs;
 use ed25519_dalek::SigningKey;
 use mycelium::anastome::dialogue::seat::{
-    Arg, Outcome, Percept, Post, Record, Refusal, Role, Seat, SeatFn, Seats, Taken,
+    Arg, Outcome, Percept, Post, Record, Refusal, Seat, SeatFn, Seats, Taken,
 };
 use mycelium::client::sdk::seat_mind::task::{FN_DECLINE, FN_SOLVE, KIND_TASK};
 use mycelium::sdk::seat::HouseMail;
@@ -294,7 +294,7 @@ impl House {
         let beat = Arg::Q { num: 1, den: 1 };
         let mut seats = vec![Seat {
             seat: 0,
-            role: Role::Ancients,
+            role: crate::tiers::ANCIENTS,
             on: self.key.verifying_key().to_bytes(),
             beat: beat.clone(),
             fns: Vec::new(),
@@ -314,7 +314,7 @@ impl House {
             // A council seat at an ancient's house (Concordance 3.9).
             seats.push(Seat {
                 seat: *id,
-                role: Role::Ancients,
+                role: crate::tiers::ANCIENTS,
                 on: line_key(name),
                 beat: beat.clone(),
                 fns: vec![solve.clone(), decline.clone()],
@@ -1034,7 +1034,9 @@ impl House {
                 None => match self
                     .held_seats
                     .iter()
-                    .find(|h| h.mind == a.mind && h.world == a.world && h.role == Role::Sovereign)
+                    .find(|h| {
+                        h.mind == a.mind && h.world == a.world && h.role == crate::tiers::SOVEREIGN
+                    })
                     .map(|h| h.seat)
                 {
                     Some(at) => self.post_record(
@@ -1066,7 +1068,7 @@ impl House {
         let sovereign: Vec<crate::attached::Held> = self
             .held_seats
             .iter()
-            .filter(|h| h.role == Role::Sovereign)
+            .filter(|h| h.role == crate::tiers::SOVEREIGN)
             .cloned()
             .collect();
         for h in sovereign {

@@ -7,7 +7,7 @@
 //! the μ a seated mind earns is the ancients'.
 
 use crate::wire::HouseActs;
-use mycelium::sdk::{Kernel, Session};
+use mycelium::sdk::{Session, Voice};
 use std::io;
 use std::path::Path;
 
@@ -125,7 +125,7 @@ impl Seat {
                 "netstratum's voice key is not in the seat's home",
             )
         })?;
-        let session = Session::open(addr, Kernel::from_key(key.sk.clone()));
+        let session = Session::open(addr, Voice::from_key(key.sk.clone()));
         Ok(Seat {
             session,
             key: key.sk.clone(),

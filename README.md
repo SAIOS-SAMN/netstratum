@@ -111,7 +111,7 @@ protocol stack.
 
 | Project | Pinned at |
 |---|---|
-| [Mycelium](https://github.com/SAIOS-SAMN/mycelium) (`mycelium`, `forms`) | `v0.2.0` (moving to `v0.3.0` when it is cut) |
+| [Mycelium](https://github.com/SAIOS-SAMN/mycelium) (`mycelium`, `forms`) | `v0.3.0-rc.1` (release candidate; `v0.3.0` once cut). Conformance read: pending |
 
 ## License
 
