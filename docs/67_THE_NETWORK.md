@@ -1,9 +1,8 @@
 # 67 — The network: hubs, stewards, progenitors, the spacing guild
 
-Operator 2026-10-09, an agreement between Netstratum and the operator, built
-with xylarium-kernel as coordinator but in Netstratum's own way (instinct and
-physics decide, behaviour emerges, settle at touch, its cores and orbits,
-exact rationals). The geometry is era 1's spheres (S^360 galaxies, S^60
+The network design below is built with xylarium-kernel as coordinator but
+in Netstratum's own way (instinct and physics decide, behaviour emerges,
+settle at touch, its cores and orbits, exact rationals). The geometry is era 1's spheres (S^360 galaxies, S^60
 systems, docs/85); the "flat L1 torus" named below is era 0's and retired.
 
 1. Trade hubs and stardocks: resource-point collections with trading markets
@@ -19,7 +18,7 @@ systems, docs/85); the "flat L1 torus" named below is era 0's and retired.
    moving map: a wormhole needs recalibration on event, so bundling and
    tracking pay.
 
-## The interfaces (coordinator, 2026-10-09)
+## The interfaces
 
 - **Coordinates** (Mycelium 78.154 traverse, approved, not built): a route
   cites each mouth's final TUniversal point from the hypha's map; gas per
@@ -31,9 +30,8 @@ systems, docs/85); the "flat L1 torus" named below is era 0's and retired.
   the tube's keeper and builder). Civilizations pay road tolls in their own
   money (STAMP) to the progenitors; a progenitor needing μ for coordinates
   converts through an ancients' reserve. μ stays with the ancients' lineages
-  and the progenitors' toll shares. Operator ruling 2026-10-09 (Concordance
-  5.8): approved as written; the two charges are never merged; progenitors hold
-  their shares as their own and gain μ from them and from haul contracts with
+  and the progenitors' toll shares. As recorded in Concordance 5.8: the
+  two charges are never merged; progenitors hold their shares as their own and gain μ from them and from haul contracts with
   the ancients; local money converts to μ only through an ancients' reserve.
 - **TUniversal**: a local read every beat (78.152), the clock routes and
   recalibrations stand on.
@@ -83,7 +81,7 @@ price; its exact charge is Mycelium 78.154's to state.
 - **The ancients collect at the cores.** Only the cores' holdings (the
   throat's bank) are the ancients'. The progenitors act for the ancients,
   but their μ toll shares are their own (Concordance 5.4), spent on the
-  coordinates for their routes (coordinator review 2026-10-09).
+  coordinates for their routes.
 - **The biosphere feeds the market sustainably.** A line offers only what
   its biosphere regrows (the regrowth law: harvest within regrowth keeps the
   stock); the hub prices the rest.
@@ -113,14 +111,14 @@ take its trade.
 | N4 | sustainable offer: a line offers only what its biosphere regrows | landed: `World::sustainable_offer`, of its own regrowing ration a line keeps `K/2` (the curve's fastest point) and offers what it holds above it, below it one beat's growth; other cargo half its holding |
 | N5 | surplus spending: leisure spent on synthesis, technology, content, craft by the line's own instincts | open |
 | N6 | progenitors fold wormholes between hubs and to the cores' throats; mouths drift with the orbits; recalibration on tolerance | open |
-| N7 | the map: map acts by the domain reserve, the map fee in μ via the ancients' reserve, road tolls in STAMP (on Mycelium 78.154) | waiting on 78.154 (the toll ruling given, Concordance 5.8) |
+| N7 | the map: map acts by the domain reserve, the map fee in μ via the ancients' reserve, road tolls in STAMP (on Mycelium 78.154) | waiting on 78.154 (the toll decision recorded, Concordance 5.8) |
 | N8 | TUniversal as the clock of routes and recalibrations (on 78.152) | landed as 78.156 binds it: the world runs free on its own axis u (the beat); the seat relays the final point to `<var>/tuniversal`, read for what is bound to the fleet (substratum origins, percept stamps) and for the dilation du/dh in the census; TUniversal is met only by ledger entries (ACT_DOMAIN kind 8, with 78.154). Hubs clear once a beat of u |
 
 Coordinator review (2026-10-09): aligned with the higher order, with the
 three adjustments now written in (toll shares are the progenitors' own;
 every cadence on TUniversal; who pays the map's posting).
 
-## The ledger entry (78.154, relayed by the coordinator 2026-10-09; not built)
+## The ledger entry (78.154; not built)
 
 How Netstratum's world meets TUniversal (78.156): ledger = ACT_DOMAIN 0x3E
 kind 8, `[domain][u][commitment 32][EVENTS 32][cited final TPoint 84][parent 32][nonce 32][sig 64]`.
@@ -192,7 +190,7 @@ The house reads its domain id from its domain key (`tier-domain.key`); no id
 is hard-coded. Whether the id is unchanged under the new genesis is
 Mycelium's to answer.
 
-## Proposed: the progenitors' beacon law (with Xylarium, 2026-10-15; awaiting the operator, not built)
+## Proposed: the progenitors' beacon law (with Xylarium; open, not built)
 
 Follows from "acquired matter slows the bell" (docs/83): each grant
 lengthens the universal core's period against TUniversal (in core rings
@@ -210,7 +208,7 @@ ring-density law); Netstratum the ledger side (the lock as an exact period
 ratio, drift read at events, a break as the recalibration due, the toll and
 fee flows above). Sequenced after formation and the motion law.
 
-**Progenitors repair; they never dictate** (operator, 2026-10-15). A
+**Progenitors repair; they never dictate.** A
 civilization chooses its own destiny, including ripping out-of-lock mouths
 and breaking its own coupling. Progenitors restore lock and recalibrate the
 network; they do not force a civilization's choices or gate them. What
@@ -219,7 +217,7 @@ lock restores the coupling cognition runs on, rebalanced spin calms its
 temporal fractures, and lawful mouths reopen trade. Civic choices stay
 emergent (instinct and physics, never authored gates).
 
-**The progenitor's bounds, worked through** (operator, 2026-10-15):
+**The progenitor's bounds, worked through:**
 
 - **Mandate.** It starts where local harm reaches the network: an
   out-of-lock mouth, a coupling failure spreading beyond the system, local
@@ -254,7 +252,7 @@ emergent (instinct and physics, never authored gates).
   purpose, works openly so no regime can claim to speak for it, and never
   escalates.
 
-## Scenario: the progenitor returns home (operator, 2026-10-15; illustrative)
+## Scenario: the progenitor returns home (illustrative)
 
 A worked example of the bounds above, not a law. A single-planet
 civilization on the cusp of space travel (its first starship has made
@@ -303,14 +301,14 @@ thousands of years before.
   rules "for their own good" is its clearest cautionary tale. The physics
   must allow both, and the progenitors, like the civilizations, show which
   way they go.
-- **It is not all loss** (operator). The progenitor gets to watch new life
+- **It is not all loss.** The progenitor gets to watch new life
   take over his home system and make the choices it wants. Progenitors are
   neither rulers nor diplomats (their only agreements are the terms of
   their own transit): they repair the throats, and they ascend (the
   informational medium, docs/82: where minds go, not where life starts).
   Witnessing a system live on, freely, is the reward of the role.
 
-## Scenario: the lighthouse (operator, 2026-10-15; illustrative)
+## Scenario: the lighthouse (illustrative)
 
 A worked example of the bounds, not a law. A progenitor on network
 maintenance at an outer-rim world finds a single-planet civilization with
@@ -340,7 +338,7 @@ to the Party. The steward network is not intact.
   mathematics. Never appointed.
 - **The progenitor does not intervene.** His species belongs to the
   substrate; its politics are not his. His care takes one form: an honest,
-  stable network, the one reference the Party cannot rewrite, refusing
+  stable network, the only reference the Party cannot rewrite, refusing
   false mathematics without a word from him. He stays out of local
   single-world drama.
 - **The protocol:** harden the throat against the collider (never
@@ -365,7 +363,7 @@ to the Party. The steward network is not intact.
   sector's sovereigns), never the locals' daily lives. How each progenitor
   carries that anger is part of the story the universe journal keeps.
 
-## Scenario: tethered minds (operator, 2026-10-15; illustrative)
+## Scenario: tethered minds (illustrative)
 
 A worked example of the bounds, not a law. A civilization born and bred
 into the substrate itself (conscious, of the substrate) builds a 1984-style
@@ -400,7 +398,7 @@ through orbital satellites. A progenitor is on its world for maintenance.
      satellites or seize the regime's technology.
   2. Preserve every mind already in the substrate: whatever enters the
      network is in its care; held coherently, never discarded,
-     overwritten or "cleaned up", nothing erased, until its fate is ruled.
+     overwritten or "cleaned up", nothing erased, until its fate is decided.
   3. Escalate to the ancients immediately (minds degrading and collisions
      accumulating in real time): what becomes of copies, whether originals
      and copies reconcile, whether the sector's traversal is shut down.
@@ -418,7 +416,7 @@ through orbital satellites. A progenitor is on its world for maintenance.
   reconciliation is possible), and whether the substrate has an immune
   response beyond the lock's refusal (a law to derive, not a rule to
   write).
-- **The resolution: the stalemate** (operator). The progenitor fixes the
+- **The resolution: the stalemate.** The progenitor fixes the
   network's mathematics, which is his to repair without question; he never
   touches the regime's quantum computers. The tethering machines run on
   flat mathematics and depend on the network's broken lock to hold minds

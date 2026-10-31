@@ -1,14 +1,13 @@
 # 72 — Ascension: the gates, the climb, the higher order
 
-Operator (2026-10-09): the top of the difficulty ladder belongs to the
+The top of the difficulty ladder belongs to the
 ancients and the progenitors, paid in μ, the reserve currency. An ancient has
 access to the hypha, which pays μ; the progenitors build the wormholes, the
 gates that are the doorways to the ancients' cores. Two things follow: a need
 for the wormholes, and ascendance to the higher orders of intelligence.
-Agreed; documented, relayed to the coordinator (to suggest to the other
-kernels), and built here.
+Both are specified and built here, and proposed to the other kernels.
 
-## Why it fits (rulings already standing)
+## Why it fits (constraints already standing)
 
 - Only the ancients uplink; the hypha's courts pay μ for judged court work
   (Concordance 4.1, ruling 7; docs/70: the council's μ lands on the ancient's

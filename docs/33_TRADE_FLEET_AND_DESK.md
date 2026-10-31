@@ -123,7 +123,7 @@ correction (still useful for timing Futures).
 
 ### 3.3 Phase advance
 
-- θ (and ψ if used) advance by a **ruled exact step** per tick or
+- θ (and ψ if used) advance by a **fixed exact step** per tick or
   year-voice — discrete slots already hinted on `PlanetSited`.
 - Advancement is receipted or pure-from-clock under SEAL B (choose one
   at land; prefer **derived from clock + site**, no per-beat spam
@@ -186,7 +186,7 @@ Hull {
 
 - `capacity(grade, role)` from a short sealed ladder (like refinement)
 - `η_hull` from grade (Unit in [0,1)), stacks with route η under
-  `1 − (1−η_route)·(1−η_hull)` or ruled min — **one formula**
+  `1 − (1−η_route)·(1−η_hull)` or a fixed min — **one formula**
 - `upkeep` from encasement/habitat-class bills (call-not-copy)
 - `scrap_value` = reverse mint fraction (exact)
 
@@ -373,7 +373,7 @@ design from `32`.
 
 ---
 
-## 11. Open rulings (record; do not invent silently)
+## 11. Open decisions (record; do not invent silently)
 
 | ID | Question | Default if forced early |
 |----|----------|-------------------------|

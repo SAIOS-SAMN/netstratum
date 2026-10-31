@@ -1,21 +1,21 @@
 # 61 — Orbits: the cores pull
 
-Operator 2026-10-08: the cores carried no gravity; align with barren-realms'
-singularity work (Einstein-Cartan bounce, the field law) where it applies.
-Coordinator rulings relayed the same day: the pitch law
+The cores carried no gravity. This chapter gives them gravity, aligned
+with barren-realms' singularity work (Einstein-Cartan bounce, the field
+law) where it applies. Two constraints hold throughout: the pitch law
 `pitch = core wavelength x (M_hole / M_core)^(1/3)`; turns only by rational
 points of the circle, never a float angle.
 
-## The rulings
+## The laws
 
 1. **Lines orbit their core, in closed form, on sheared ellipses in three
-   dimensions** (direction of 2026-10-08: orbits are sheared into ellipses, on perpendicular axes, in three dimensions).
+   dimensions** (sheared into ellipses, on perpendicular axes).
    A line's place is `centre + M q(s)`, a function of the beat, never
    stepped:
    - `q(s)` is the universe's own circle, an L1 diamond of radius `r` in a
      two-axis parameter plane, at arc `s = s0 + v * t (mod 8r)`, `t` the line's own clock (its proper
      time, from its founding; it persists, so the place is continuous):
-     piecewise linear and exact, its denominators bounded for ever (a
+     piecewise linear and exact, its denominators bounded for all `t` (a
      rational rotor applied n times would grow them without bound: the
      scalar-collapse class, refused);
    - `M` is a fixed rational 3x2 map: the plane's two axes are the two

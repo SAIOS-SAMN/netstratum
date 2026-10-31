@@ -1,21 +1,23 @@
 # 101 — One universal core: the universe tier under TUniversal
 
-Design direction (2026-10-27/28): the core has no step or walk, and "deploy"
-is misaligned; the core is machinery that produces the flow, which is fluid
-rather than linear. Align the core with TUniversal, audit the work so that no
-flat parallel machinery is built, and scope every piece of machinery affected.
-Status: scope. Nothing here is built.
+This document defines the universe tier as a single universal core under
+TUniversal, replacing the four separate structures that carried it and the
+nine ways they were read (§1). The core is machinery that produces a
+continuous flow, which a model of discrete deployment steps does not
+describe. The document audits the code for flat parallel machinery and
+scopes every site affected.
+
+**Status:** scope; nothing here is built.
 
 ## 0. TUniversal, the law this aligns on
 
-**Standing rulings this builds (not new law):**
-- docs/78 "The singularities" (operator 2026-10-15): the universal core is the
-  one singularity uplinked to the hypha; "it has mass: the heavy elements
+**Established results this builds on (not new law):**
+- docs/78 "The singularities": the universal core is the only singularity
+  uplinked to the hypha; "it has mass: the heavy elements
   caught in its accretion disk, continually pulsed and re-pulsed".
-- docs/83 "The closed limit, the founding and the Wellspring" (ruled
-  2026-10-18): "the Wellspring holds its share at the bang ... heaviest
-  deepest, the galaxies getting what it pushes out; its disc is the central
-  galaxy". The home of §2 is that disc.
+- docs/83 "The closed limit, the founding and the Wellspring": "the
+  Wellspring holds its share at the bang ... heaviest deepest, the galaxies
+  getting what it pushes out; its disc is the central galaxy". The home of §2 is that disc.
 - docs/80 "TUniversal from the singularity": TUniversal's origin is the
   singularity's bounce; Mycelium owns TUniversal; the proposed quantum lane
   carries "the bounce's torsion phase advance" (`quantum::twist`, docs/100
@@ -38,10 +40,10 @@ Status: scope. Nothing here is built.
   (`r/(r + M(<r))` a layer, multiplied down the wells; docs/66 N8: "inner
   clocks are branches of TUniversal").
 - **One grammar, coupled tiers, each tier its own mechanism** (design laws,
-  corrected 2026-10-16): the universe tier keeps its own mechanism, in the
+  corrected form): the universe tier keeps its own mechanism, in the
   same grammar as the galaxy tier, coupled to it by the echo; it is not
   forced through the star-forming code.
-- **No leftovers** (operator 2026-10-27): every share by a law; static content
+- **No leftovers:** every share by a law; static content
   is a placeholder for missing physics.
 
 ## 1. The audit: one core held as four things, read nine ways
@@ -105,7 +107,7 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
 - **The universal core is one body** (the root of the tree, path `[]`), its
   throat the founding's nuclides, its state the founding (set at the bounce,
   never drained), its reservoir the universe's spin ledger. One enclosure
-  about it, `Enclosed(state/g, …)`, read by the one `core_state` every core
+  about it, `Enclosed(state/g, …)`, read by the single `core_state` every core
   uses (no `is_home` branch).
 - **Its held cut is the firmament:** the same cut every core's throat reads
   (`push_cut`), twisted by its coupling (docs/100 §3): the node-shell and
@@ -135,7 +137,7 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
 | `pulse::cascade` (its shells, stacks, filter, beads) | `Universe.firmament` → its held cut | `pulse::founding` (the nuclides) |
 | `pulse::deploy` (placement, standing test, whole-mix, home remainder, slight beads, core rings) | `Universe.ocean` → its flows | the breath's galaxy tier (release, luminal, rings, crest, bindings, infall, heart cut) |
 | `orbit_galaxies`' core rings (`inside += 2w`) | core `[0]` → its disc | the nested clocks (`galaxy_rate`, `nested`, `system_clock`) |
-| `core_state`'s 0 for the home; `home_push`; the span branch | the nine readings → one `core_state`, one enclosure | `ocean::swing`, `radial_share` (the landing, read in the one enclosure) |
+| `core_state`'s 0 for the home; `home_push`; the span branch | the nine readings → one `core_state`, one enclosure | `ocean::swing`, `radial_share` (the landing, read in the single enclosure) |
 | `life::home` / `chronometry::keepers`' heaviest-kept home | — | `Universe.unit`, `densest` |
 | `formation::echo_holds` (as a second function) | → the crest's law one tier down | the persisted tags, extended |
 
@@ -173,8 +175,8 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
 - **Outside the crate:** `clients/cli` uses only `conductor::spatial_l1`;
   `engine/hypha` reads tag 17. No other dependency.
 - **Live data:** the G2 universe (var-e2, conductor pinned) is not
-  re-founded by this; the services stay down (operator 2026-10-16); all
-  universe data is throwaway test data (2026-10-14).
+  re-founded by this; the services stay down; all
+  universe data is throwaway test data.
 
 ## 5. Build order (one commit each, its witness read before the next)
 
@@ -185,8 +187,8 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
    every mote's tilt.
 2. **One reading of the universal core's state:** the nine readings fold into
    `core_state` on one universal enclosure, the home's branches removed;
-   proven by re-derivation, never by equal bytes (operator 2026-10-20): every
-   identity exact, and the one reading derived two ways (the folded and the
+   proven by re-derivation, never by equal bytes: every
+   identity exact, and the single reading derived two ways (the folded and the
    former form) agreeing, at N and at 4N bells. Witness: those identities.
 3. **One home:** `life::home` and `chronometry::keepers` read the universal
    core's disc, not the heaviest kept. Witness: the keepers' clocks read the
@@ -215,5 +217,5 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
   binds (the universe's age at its first galaxy), read, never set.
 - **The coupling C** (docs/100 §3), which sets what the throat keeps.
 - **Cost:** the universal core's flows are every grain of the universe in
-  motion; the zoom ruling (2026-10-24: exact under observation, certified
+  motion; the zoom rule (exact under observation, certified
   sectors otherwise) may be needed at this tier first.

@@ -3,8 +3,9 @@
 **Status:** design, proposed 2026-08-13. Two halves: §1 (the food-identity
 law) is **already true in code** and this doc pins it; §2–§5 (the fed
 population, growth-from-surplus, distribution-by-archetype) are the
-**missing law**, spec'd here with the rulings §6 names. Not itself law —
-a work-list ruled section by section, the `40_REJUVENATION` discipline.
+**missing law**, spec'd here with the open decisions §6 names. Not itself
+law — a work-list decided section by section, the `40_REJUVENATION`
+discipline.
 Companion: `42_LIFESPAN.md` (the mortality term of the §3 population).
 
 ---
@@ -76,7 +77,7 @@ section makes it a mouth:
 **Derivation, not dial:** the per-capita rate should derive — the
 cleanest candidate is a fraction of the habitat's own food yield (a
 habitat feeds the people it houses), so demand and supply share one
-number. The exact fraction is a §6 ruling.
+number. The exact fraction is an open decision (§6).
 
 ## 3. Growth from surplus — the population is a logistic on food
 
@@ -89,7 +90,7 @@ food as its carrying input:
   people, so a lush world in the clade's own band sustains a large
   population and a hostile one a small one.
 - **Surplus grows, deficit shrinks.** A fed surplus climbs
-  `labor_force` toward `K_pop` along `grained_logistic` (the ruled
+  `labor_force` toward `K_pop` along `grained_logistic` (the #28
   rational sigmoid — slow near zero, saturating at K); a deficit is the
   quarantine-style decay on the population, starving it down. Same
   exact-rational curve, same lazy settle, now on the headcount.
@@ -119,7 +120,7 @@ read from the disposition axis (expansionist · empiricist · epicurean,
 **Derivation:** these are the same disposition bindings the vocabulary
 already mints over the landed channels — distribution is a factor set
 over a `provision` channel, not a bespoke branch (the practice-channel
-precedent, `28_VOCABULARY`). The exact factors are a §6 ruling, banded
+precedent, `28_VOCABULARY`). The exact factors are an open decision (§6), banded
 by the fourfold law like every chartered factor.
 
 ## 5. What this composes with
@@ -139,12 +140,12 @@ by the fourfold law like every chartered factor.
   progenitor-gated star/planet creation + delegation); provision reads
   the fit (`planet_fit`, `habitability`) but does not create the world.
 
-## 6. The rulings owed
+## 6. The open decisions
 
 1. **The per-capita ration rate** (§2) — the fraction of a habitat's
    food yield one unit of `labor_force` eats. Derived candidate: half
    the habitat harvest (a habitat feeds twice what it houses works),
-   leaving a structural surplus. Ruling picks the fraction.
+   leaving a structural surplus. The fraction is to be decided.
 2. **The starvation target** (§3) — does a deficit shrink `clones`
    first (bio path, reversible), then habitat occupancy, or an explicit
    new population count? Reversible-clones-first is the least invasive

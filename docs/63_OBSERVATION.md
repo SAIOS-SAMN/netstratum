@@ -1,12 +1,13 @@
 # 63 — Observation: compact until watched
 
-Design direction (2026-10-09): consolidate and compact the state so that it
-stays reconstructible and operational, without unobserved worlds holding
-memory. Ruling on time: the deterministic components of the world are set in compact
-state (orbits, times) until an observer is present, a mind is present, or a
-people are present; at that time the world is unrolled and the stochastic
-probabilities unwind until no observers are present. Observing: a
-seated mind, contact, the operator's watch, the progenitor line.
+This document specifies how a world's state is compacted while it is
+unobserved and expanded when it is observed, so that memory is held only for
+worlds being read and every compacted world remains exactly reconstructible.
+
+A world's deterministic components (orbits, times) are held in compact form
+while no observer is present. When an observer is present (a seated mind,
+contact, the operator's watch, or the progenitor line), the world is
+expanded and its stochastic draws are evaluated until no observer remains.
 
 ## Two compactions
 

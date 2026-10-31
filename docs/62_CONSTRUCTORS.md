@@ -1,9 +1,8 @@
 # 62 — Constructors: the language deduced, not named
 
-Operator 2026-10-08: build the constructors so the language is deduced
-from the mathematics of its generators, never from English names; land the
-substantive components first. Coordinator ruling the same day (Mycelium
-78.150): repetition is the orbit of a generator versor (a translator by the
+The constructors are built so the language is deduced from the mathematics
+of its generators, never from English names; the substantive components
+land first. Repetition (Mycelium 78.150) is the orbit of a generator versor (a translator by the
 base's extent, or a screw T·R with an odd-band reflection), counts read off
 the input's structure, no "tile" primitive, two-axis lattices compose two
 translators with commutation checked on the value.
@@ -47,7 +46,7 @@ first. Extending the forge is a wire change of its own.
 | L5 | repetition stated to the court as 78.150's translator orbit (when Mycelium ships it) | waiting on Mycelium 78.150 |
 | L6 | rotations spelled in the seventeen Cayley letters (Mycelium `alphabet::spelling`) | open |
 | L7 | selection as projectors: `Op::Project` (wire code 12) learned from the pairs, carried and replayed by the verifier, stated as the court's select and a hue step | landed; the named ObjOp list retires after a measured overlap |
-| L8 | the forge offers the new generators (a wire change; ruled first) | open |
+| L8 | the forge offers the new generators (a wire change; decided first) | open |
 
 ## Measured at landing (2026-10-09, beats 9000-9030)
 

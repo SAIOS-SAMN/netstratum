@@ -1,10 +1,10 @@
 # 53 — The intelligence port: one reduction, two seats
 
-**The ruling that makes the entities intelligent by design rather than the
+**The decision that makes the entities intelligent by design rather than the
 physics deciding for them. Downstream of `00_CHARTER`, `51_COGNITION`,
 `52_COGNITIVE_METABOLISM`; binding on `iae`, `solver`, `cfe`, and the conductor's
-`research_step` / `build_step`. Operator ruling 2026-08-17 (IPSAL v0.4 /
-`R_SOLVER_DIRECTION` shape, translated — not transcribed).**
+`research_step` / `build_step`. Shaped on IPSAL v0.4 /
+`R_SOLVER_DIRECTION`.**
 
 The port supersedes the half of `51_COGNITION` §1 that calls the Mind a
 *stochastic, float-tolerant proposer that guesses candidate generators*. That

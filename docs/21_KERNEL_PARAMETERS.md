@@ -52,8 +52,8 @@ schedule of the currency.
   reads no prior state at all.
 
 **The defect that makes it #16's first case:** a mint that cannot see
-the ledger cannot respond to it. The price of cognition is fixed
-forever regardless of how much has already been issued, how many nodes
+the ledger cannot respond to it. The price of cognition is constant
+regardless of how much has already been issued, how many nodes
 are working, or what rank stands. That is an issuance schedule with no
 feedback term.
 
@@ -149,7 +149,7 @@ and a red-first witness, not a migration.
 
 That last clause is what makes this landable on a running game.
 
-## §5 What is an operator ruling, not A CODER choice
+## §5 Open policy decisions, not implementation choices
 
 **The policy itself.** Whether the mint softens as supply rises,
 whether decay stiffens, whether rank is a multiplier or a gate — these
@@ -157,7 +157,7 @@ are monetary decisions and are not this document's to make. This document
 defines the parameters, measures their present values, proves the
 readings are available, and stops there.
 
-Four decisions are owed, in the order they bite:
+Four decisions are open, in the order they take effect:
 
 1. **P1's feedback term.** What does the mint respond to — supply,
    rank, node count, or nothing (i.e. is the fixed schedule
@@ -183,15 +183,15 @@ Each lands as: red-first witness → rule change → version bump →
 
 ---
 
-## §7 The monetary ruling — landed, blocked, and what each needs (2026-08-02)
+## §7 The monetary decisions — landed, blocked, and what each needs
 
-The operator ruled all four and cleared `P1`+`P2` to land. **Two of the
+A form was proposed for all four, with `P1`+`P2` cleared to land. **Two of the
 four are discharged; two cannot land in the form given.** Measured
 against the tree, not argued.
 
 ### 7a. `P4` — Discharged, no amendment needed
 
-The ruling asks that the seed *operate strictly at `t = 0` and evaluate
+The proposed form requires that the seed *operate strictly at `t = 0` and evaluate
 to `0` for all `t > 0`*. **That is already true by construction:**
 `world/genesis.rs::found` refuses a second founding outright
 (`ColonyAlreadyFounded`). There is no `t > 0` branch to zero because
@@ -223,10 +223,10 @@ Pinned rather than amended — `kernel/tests/parameter_pins.rs`:
 **The intent survives all three.** A gradient replacing the `== 5`
 cliff is right and is landable as a **rational ramp** over the tech
 condition — exact, monotone, bounded, and continuous at genesis if
-condition 5 still yields `1/2`. That form needs one word of
-confirmation; the sigmoid does not.
+condition 5 still yields `1/2`. That form needs only
+confirmation; the sigmoid cannot be built.
 
-### 7c. `P1` — Direction ruled, form blocked
+### 7c. `P1` — Direction settled, form blocked
 
     P1 = Base(rung) · ( Φ_D / (Σ + ε) )
 
@@ -237,7 +237,7 @@ term and is landed. **Confirmed safe:** `standing` admits only
 `Vacuity::Entangled` (Struck 2026-08-04, the vacuity removal) (`boundary.rs:191`), which requires `D > 0`, so a
 rank-denominated term **can never see a zero denominator** — pinned as
 `p1_capacity_law_refuses_before_any_rank_denominated_term_is_read`.~~
-**That guarantee is withdrawn** (operator ruling 2026-08-04): the
+**That guarantee is withdrawn**: the
 capacity law is struck, so nothing now refuses a deed for reading
 `rank == 0`, and the pin went with it.
 
@@ -258,7 +258,7 @@ the first quiet world.
    without a definition, and an undefined symbol cannot be compiled.
    The obvious reading is `Φ_D := rank`, but that is a substitution,
    not a translation, so it is flagged rather than assumed.
-2. **Genesis continuity fails as stated.** The ruling requires
+2. **Genesis continuity fails as stated.** The proposed form requires
    `P1 → Base(rung)` as `Σ → 0`. **`Σ` is never 0 in a live world** —
    `P4` seeds Iron 20 + Biomass 10 at founding, so supply is 30 before
    any deed is judged. Continuity has to be pinned against the actual
@@ -274,7 +274,7 @@ the first quiet world.
    `world/rules.rs::ease_of` records as *"the 2^1100 denominator lesson."*
    Whatever form lands must be denominator-bounded by construction.
 
-### 7d. `P2` — Direction ruled, form reverses A landed lesson
+### 7d. `P2` — Direction settled, form reverses A landed lesson
 
     P2 = Max( 1/32, 1/32 · (Σ / Φ_D) )
 
@@ -295,7 +295,7 @@ the first quiet world.
    the moment `P2` is read. Division by zero, in the decay path, on a
    live world.
 
-### 7e. What is owed — one ruling, not four
+### 7e. What is open — one decision, not four
 
 `P4` is done. `P3`, `P1` and `P2` all reduce to a single question,
 because the same substitution fixes all three:
@@ -305,12 +305,12 @@ because the same substitution fixes all three:
 > running division — with `Φ_D := rank`, a declared floor and ceiling
 > on every parameter, and no `ε`.**
 
-That preserves every ruled direction — mint softens as supply outruns
+That preserves every settled direction — mint softens as supply outruns
 rank, decay stiffens, the cliff becomes a ramp, rungs 0–2 may be paid —
 while staying exact, denominator-bounded, defined at `D = 0`, and
 continuous at genesis.
 
-**Not landed pending that word.** `P1` and `P2` price the currency and
+**Not landed until that form is confirmed.** `P1` and `P2` price the currency and
 gate the mint on a live game; landing an undefined symbol, an
 unbounded rate and a reachable division by zero would be worse than
 landing nothing. The pins are in place so the amendment is a one-commit
@@ -324,7 +324,7 @@ Capacity-lane is landing a founding economy whose tithe rides the
 demurrage rail. It correctly stopped short of the kernel — as kernel
 surgery on a shared crate, it was left undone — and the lane
 map puts `engine/kernel/` here. This records the collision surface and
-the one economic consequence neither lane has stated.
+an economic consequence that neither lane has stated.
 
 ### 8a. Four shared organs
 
@@ -357,7 +357,7 @@ issuing.
 
 `P2` exists to be the counterweight to `P1`'s issuance (§3). §6a
 weakens that counterweight in proportion to exactly the quantity that
-grows over a world's life. **The two rulings are individually sound and
+grows over a world's life. **The two designs are individually sound and
 jointly divergent**, and neither document says so.
 
 Not a veto — it is a real mechanism and the ward should earn. It needs
@@ -436,12 +436,12 @@ rewriting them again.
 3. **Demurrage stops depending on rank.** `P2` responds to supply
    alone, which `cfe` can compute from its own state without the
    bridge. Loses the rank term; keeps the sink dynamic and keeps the
-   ruled direction (stiffens as supply grows). **Cheapest by a wide
+   settled direction (stiffens as supply grows). **Cheapest by a wide
    margin and needs no schema change.**
 
 Option 3 lands `P2` today. Option 1 is the better architecture and
 costs a schema bump. **Not chosen here — it is a monetary and
-architectural ruling, and capacity-lane's split sink depends on which
+architectural decision, and capacity-lane's split sink depends on which
 way it goes**, since §6a also needs rank readable at the touch and
 inherits the same blocker.
 
@@ -529,11 +529,11 @@ own pins, and is worth re-applying after #30 rather than re-deriving.
 
 ---
 
-## §11 Forward: the unified transition + ruleset epochs (operator, 2026-08-02)
+## §11 Forward: the unified transition + ruleset epochs
 
 The revert in §10 was the wrong instinct — it restored a step function,
 which is maximally discontinuous, to protect a bifurcated engine. The
-operator's ruling is to forward-engineer the engine instead. Two parts,
+engine is forward-engineered instead. Two parts,
 and the second is cheaper than it looks.
 
 ### 11a. Apply wraps judge — one transition, zero parallel logic
@@ -547,7 +547,7 @@ hits the same wall until this lands.
 
 ### 11b. Ruleset epochs — and **no wire amendment is needed**
 
-The ruling asks for a rule-version stamp on the receipt so historical
+The design calls for a rule-version stamp on the receipt so historical
 worlds replay faithfully while new ticks run new physics. **Measured,
 the receipt already carries what that requires:**
 
@@ -585,10 +585,10 @@ hit `1/1` and `1/2` exactly; `P1`'s feedback term no longer has to
 collapse to `Base(rung)` at genesis; `P2` no longer needs `1/32` at zero
 supply. **The constraint that shaped three of the translations is gone.**
 
-### 11d. The one cost, stated plainly
+### 11d. The single cost
 
 Sealed rules become append-only. A rule is never mutated — a new epoch
-is added beside it, and every prior version stays in the tree forever,
+is added beside it, and every prior version stays in the tree permanently,
 because some receipt still needs it. `ease_of` will hold the cliff and
 the gradient permanently.
 
@@ -602,7 +602,7 @@ after.
 
     1. #30 — apply wraps judge; the activation table; sealed rules
              take `at`. Nothing else can land safely first.
-    2. P3 re-inscribed as an epoch (the curve, unconstrained by the
+    2. P3 re-implemented as an epoch (the curve, unconstrained by the
        legacy endpoints).
     3. P2 re-applied from `scratchpad/p2-attempt.patch` — it built and
        passed its own pins; only the epoch plumbing is new.
@@ -625,7 +625,7 @@ divergence forced the §10 revert.
 `cfe::epoch::epoch_at(stamp) -> Genesis | Continuous`, activating at
 `CONTINUOUS_FROM = 100_000`. Every sealed rule takes the stamp it is
 evaluated at and dispatches on it. A deed written under epoch 0 is
-judged by epoch 0 forever, so `replay` and the live proposer cannot
+always judged by epoch 0, so `replay` and the live proposer cannot
 disagree even while the rules move.
 
 **Zero wire change, zero schema change, zero rehashing** — the stamp
@@ -802,7 +802,7 @@ first is unformed and ought to be able to start; the second is
 genuinely vacuous and is what the law was written to refuse. Collapsing
 them is what turns a forgery gate into a bootstrap lock.
 
-### 14c. What is owed — an operator ruling, not a coder choice
+### 14c. What is open — a policy decision, not an implementation choice
 
 **May a world with no standing obligations mint at all?** Three shapes,
 and this lane will not pick one:
@@ -821,7 +821,7 @@ Option 3 is the only one that costs no exemption and no new verdict:
 the ladder's unpaid rungs become the bootstrap path. **Flagged as the
 cheapest, not chosen.**
 
-**Until this is ruled, K4's Phase 3 must not flip.** The gate would
+**Until this is decided, K4's Phase 3 must not flip.** The gate would
 work exactly as designed and stop the economy.
 
 ---
@@ -839,10 +839,10 @@ states and needs a new one. Measured, the law already has both.
         (true,  true)  => Entangled,
     }
 
-**`form.is_non_vacuous()` is `V`.** The ruling's requirement — *add V to
-the equation* — is already satisfied. And `Unframed` is exactly the
-state the ruling proposes under the name Void-Uninitialized (a name
-from the ruling, deliberately not a citation — no such variant exists
+**`form.is_non_vacuous()` is `V`.** The requirement to add `V` to
+the equation is already satisfied. And `Unframed` is exactly the
+state proposed under the name Void-Uninitialized (a name
+from the proposal, deliberately not a citation — no such variant exists
 and none is needed): structure absent, potential present. **No new variant is needed; the existing one is
 unreachable.**
 
@@ -886,7 +886,7 @@ and a bootstrap rung were three ways to work around a misprojection.
 
 ### 15c. The merge is refused, and why
 
-The ruling requires verifying **`D > 0` with `rank = 0`** before
+The merge condition requires verifying **`D > 0` with `rank = 0`** before
 merging. **That is unsatisfiable on this branch**, because here `D` is
 `rank` — `standing` reads `read.rank` and nothing distinguishes
 them.
@@ -937,12 +937,13 @@ from the whole complex and counts what survives. A reduction:
 
 **An induction has both by construction.** It begins at a base and
 every step only adds. **Article IV is an induction law**, and it was
-implemented with the one operation that cannot satisfy it.
+implemented with an operation that cannot satisfy it.
 
-### 16b. The flip (operator ruling, 2026-08-02) — and it is forced
+### 16b. The flip — and it is forced
 
-> flip `D` to induction and apply reduction to `V`, so they balance
-> while creating between syntropy > entropy
+`D` is flipped to induction and reduction is applied to `V`, so that
+the two balance while the gap between them keeps syntropy above
+entropy:
 
     D  induces   base = what occupies (a founded world occupies, so D
                  is never 0 while anything stands); steps only add.
@@ -1032,7 +1033,7 @@ The struck claim follows, kept because the error is instructive:
 2-cells a triangle bounds — it is the boundary of a face and
 contributes nothing to `H₁`. It registered as `1` only because `Delta`
 has no 2-cells to fill it (§2m: *the complex tops out at
-2-simplices*). **The one non-zero reading in §16 measures a missing
+2-simplices*). **The only non-zero reading in §16 measures a missing
 cell, not a present cycle.**
 
 So `0` should be `3` and `1` should be `0`. Neither error is
@@ -1116,8 +1117,8 @@ and every chronicle-seeded derivation downstream moves.
 
 Additive-trailing preserves decoding. It does not preserve derivation.
 Any amendment that seeds from the chronicle must expect the world to be
-redrawn the first time the field is populated, and that is a ruling
-about worlds, not about the wire.
+redrawn the first time the field is populated, and that is a property
+of worlds, not of the wire.
 
 ---
 
@@ -1133,7 +1134,7 @@ Both were true before §14 was written. The error is one substitution:
                     "can never return zero"
 
 Measured on a founded world: `degree = Degree(1)`, `rank = 0`. **`D`
-reads one at the floor.** The operator's standing requirement that
+reads one at the floor.** The standing requirement that
 `D > 0` was satisfied by the landed design; §14–16 diagnosed a
 zero that was never there.
 

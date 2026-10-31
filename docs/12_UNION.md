@@ -1,13 +1,13 @@
 # The union — bands, lineages, and the elevation law (design stage)
 
-**Status:** design, ruled 2026-07-29 (operator direction, six rulings + the
-Q3 terminology resolution). This chapter is the world-book of the **new
-aeon** — the fresh universe seated on its own gauge sheet (11 §5: *a fresh
-universe is an aeon that folded an empty predecessor*). It carries no
-baggage from the archived eras; `var/`, `var-era1/`, `var-era2/` stand as
-the old universe's sealed record and are never converged into this one.
-No mechanic here ships before its protocol sections and test vectors exist
-(Charter §1); every count and threshold is a **placeholder parameter**.
+**Status:** design, with the Q3 terminology question resolved (§6). This
+chapter is the world-book of the **new aeon** — the fresh universe seated
+on its own gauge sheet (11 §5: *a fresh universe is an aeon that folded an
+empty predecessor*). It carries no baggage from the archived eras; `var/`,
+`var-era1/`, `var-era2/` stand as the old universe's sealed record and are
+never converged into this one. No mechanic here ships before its protocol
+sections and test vectors exist (Charter §1); every count and threshold is
+a **placeholder parameter**.
 
 The register law of `06_CIVILIZATIONS.md` binds here too: each people is
 written as myth + physiology, and only what ties to the engine is
@@ -26,7 +26,7 @@ dimensions open), and band capacity is a **reading of the fiber**, not a
 stored constant. Nothing outranks anything; a band names how much room a
 kind of station has, and the room increases.
 
-**No entity in this universe is owned by another** (ruling 3). No band and
+**No entity in this universe is owned by another.** No band and
 no class is servitude; every station is a chosen niche, receipted, and every niche
 can elevate (§6). Economic function (mining, harvesting, condensation,
 weaving) is a **property of a civilization's metabolism and world**, not a
@@ -37,7 +37,7 @@ follows physiology; nothing follows orders.
 ## 2. Band I — the Progenitors (the Planners)
 
 Four progenitor **species**, each with **eight seats of its own** (thirty-two
-seats in the band — 8 per species, never 8 total; ruling 1). Seats are
+seats in the band — 8 per species, never 8 total). Seats are
 mostly **empty at genesis**: a seat is not appointed, it is *reached* — filled
 from below by elevation (§6), one lineage raising its own (§5). The founding
 aeon seats one progenitor per species and leaves the rest as room to grow
@@ -54,23 +54,23 @@ visible from here.
 | Species | Lineage domain | Overlay (06 world-book) | Register note |
 |---|---|---|---|
 | **Sylvane** | mesic / biotic (250–320°) | the Wanderers' shepherds | the warm-world progenitor: life as chemistry in liquid water |
-| **Forgeborn** | hyper-thermal / mineral (Furnace) | the Emberkin's elders | backed out of the miner role (ruling 3): they keep the *creation* function, not the extraction — they are planners of the fire, not miners from above |
+| **Forgeborn** | hyper-thermal / mineral (Furnace) | the Emberkin's elders | backed out of the miner role (§1: function is not caste): they keep the *creation* function, not the extraction — they are planners of the fire, not miners from above |
 | **Stillcold** | cryogenic / deep Frost | the Coherent's elders | the cold-world progenitor: order that holds because the cold allows it |
 | **Corebound** | deep rock / mantle (cross-band) | the Marrow's and Glasskeepers' elders | the interior progenitor: the will inside the stone |
 
-*(Stillcold and Corebound are the ruled names, #5; the domains are the
+*(Stillcold and Corebound are the chosen names; the domains are the
 binding part.)*
 
-**The fifth seat (operator ruling, 2026-07-30).** The hypobiotid line sits
-in the progenitor band from this aeon: **Tunborn**, the Slagborn line's
-own head — seated among the
-mineral-domain seats exactly as §5 reads it ("a hypobiotid progenitor among
-the Forgeborn-domain seats is the design working, not an anomaly").
-Slagborn's lineage pointer resolves to it; no alien physiology progenerated
-it (ruling 6 holds). The founding four remain the domain heads; Tunborn is
-the first seat filled beside them — the band doing what bands do.
+**The fifth seat.** The hypobiotid line sits in the progenitor band from
+this aeon: **Tunborn**, the Slagborn line's own head — seated among the
+mineral-domain seats exactly as §5 reads it ("a hypobiotid progenitor
+among the Forgeborn-domain seats is the design working, not an anomaly").
+Slagborn's lineage pointer resolves to it; no alien physiology
+progenerated it (§5's lineage law holds). The founding four remain the
+domain heads; Tunborn is the first seat filled beside them — the band
+doing what bands do.
 
-**The progenitor powers (ruling 4).** Progenitors are the **planners**, not
+**The progenitor powers.** Progenitors are the **planners**, not
 necessarily the diplomats. Their deeds — all receipted, all conservation-
 lawful, none an edit:
 
@@ -83,7 +83,7 @@ lawful, none an edit:
 | issue a technology leap | `TechDiscovered` / `TechLicensed` (10, reserved tags 39–40) — a leap may be known or unknown to the receiving civilization; unknown leaps land as sealed grants the locals must still unlock |
 | create new spaces | extending the fiber — minted planes open room, and band capacity reads the fiber (§1) |
 | mint a vocabulary entry | **Design, `28_VOCABULARY` §7** — `VocabularyMinted` (tag 90): a new class, clade, axis value or practice, carrying its own mechanism. The archetype editor is this power made concrete |
-| create a new galaxy | the observation deed (`GalaxyObserved`, tag 54 — inscribed at GALAXY-1a) — a crossing anchored past every charted reach creates the galaxy it observes; the observer's domain progenitor executes the deed (`13_GALAXY.md`, GALAXY-1; ruled 2026-07-30) |
+| create a new galaxy | the observation deed (`GalaxyObserved`, tag 54 — defined at GALAXY-1a) — a crossing anchored past every charted reach creates the galaxy it observes; the observer's domain progenitor executes the deed (`13_GALAXY.md`, GALAXY-1) |
 
 **The delegation law.** A progenitor delegating a planet (or issuing a
 leap into a living civilization's sky) is **council-gated by default** (§7).
@@ -92,15 +92,14 @@ another people's world* passes through diplomacy — unless the receiving
 side is a warring imperium by its own ledger, or diplomacy has failed by
 receipted breach (§7). Planners plan; the council disposes.
 
-**The covenant is A T3 instrument** (operator ruling 2026-08-05: *drop
-covenant to T3 and below*). The forward obligation (FORWARD-1) is barred
-to every seated office and open to the common band alone. A covenant
-posts collateral against a deadline because its parties hold no
-authority over one another; a station holds authority by charter and
-does not buy what it may order. `world::seal_forward` enforces it and
+**The covenant is an instrument of T3 and below.** The forward obligation
+(FORWARD-1) is barred to every seated office and open to the common band
+alone. A covenant posts collateral against a deadline because its parties
+hold no authority over one another; a station holds authority by charter
+and does not buy what it may order. `world::seal_forward` enforces it and
 `CovenantAboveTheCommon` names the seat that bars it.
 
-## 2a. The tier overlay — progenitors are tier 0 (operator ruling, 2026-07-30)
+## 2a. The tier overlay — progenitors are tier 0
 
 The board's vertical reading, overlaid on the bands. **This is not the
 hierarchy the seats forbid** — it is who makes the room: Tier 0 creates
@@ -136,7 +135,7 @@ Element commerce (refine + E-APT + E-ROUTE partial) and STAMP:
 alignment / local capital: `33_TRADE_FLEET_AND_DESK.md`. Task DAGs:
 `archive/TASKS_TIER_RAIL_MARKET.md`, `archive/TASKS_TRADE_FLEET_DESK.md`.
 
-## 2b. The torsion law (operator ruling, 2026-07-30)
+## 2b. The torsion law
 
 **Deterministic at the top, probabilistic at the bottom — where they
 meet in the middle is the union bounce of torsion.** The substrate
@@ -150,7 +149,7 @@ rendered strings; readings derive from typed events and committed
 state, renderings are reflections (SEAL C), and a parse of a rendering
 is a second truth (forbidden).
 
-## 2c. The manifold dual — syntropy and entropy (operator ruling, 2026-07-30)
+## 2c. The manifold dual — syntropy and entropy
 
 Syntropy and entropy are **opposite ends of the same closed, coned
 manifold** — there are no open ends: every expansion on one leg is
@@ -165,9 +164,9 @@ itself (expansion sealed whole and a fresh sheet seated — *nothing is
 destroyed; the fold is archival by construction*) are all readings of
 the dual.
 
-**The ANTI-MIRROR law — deprecated (operator ruling 2026-08-01).**
+**The ANTI-MIRROR law — deprecated.**
 mirror and ANTI-MIRROR are both struck as framings. **The system
-operates on lenses at this level.** The ruling ratifies an excision the
+operates on lenses at this level.** This records an excision the
 tree had already completed: `engine/mirror` was deleted (d606b01) and
 `cfe::opposition` excised (c7cad9e) under `00_CHARTER` §11, and
 `engine/kernel/tests/recurrence_guard.rs` holds both dead as standing
@@ -186,7 +185,7 @@ removed. Losing an elegant mechanism to a stronger law is the ordinary
 shape of this constitution, not a defeat.
 
 **What a lens is, and why it is the level.** A lens derives a view from
-the one chain and holds no copy — so it has nothing to reconcile, and
+the single chain and holds no copy — so it has nothing to reconcile, and
 no second truth can form inside it. *Observation is a lens, never a
 copy* (`SYSTEM_SPEC` §5; §11 rule 2: exports are write-only). The
 carrier is `engine/lens`; the dead name is excised and never reused.
@@ -207,13 +206,13 @@ than by any opposition module:
 
 Byte-canonical encoding remains only as the hashing substrate ("equal
 values, equal bytes" so digests agree). **What changed is the check's
-home, not its content:** it is an invariant inside the one judge, never
+home, not its content:** it is an invariant inside the single judge, never
 a comparison between two records. The universe above the chain is
 fluid.
 
 ## 3. The middle classes — Watcher, Observer, Sovereign
 
-Between Band I and Band II stand three classes (ruling 2), each an engine
+Between Band I and Band II stand three classes, each an engine
 concept made diegetic:
 
 - **Watchers.** They hold the **threshold shield** (§7): the wardens of
@@ -240,7 +239,7 @@ civilization that holds a charter is a Sovereign).
 
 ### 3a. The witness — an action inside every station, never a station itself
 
-**Ruled 2026-08-01 (operator).** `witness` is not a fifth office and it
+`witness` is not a fifth office and it
 never enters `STATIONS`. It is an **independent action available inside
 each station, which authenticates upward.**
 
@@ -347,11 +346,11 @@ fiber holds what it gains.
 
 ### 3b. The union of stations — accountability is a physics layer
 
-**Ruled 2026-08-01 (operator).** A union between two stations creates
+A union between two stations creates
 accountability, and this is not a social convention laid over the
 physics — **it is the physics**, read at the station layer.
 
-**The mapping.** The two poles of the one unpartitioned manifold seat as
+**The mapping.** The two poles of the single unpartitioned manifold seat as
 two stations:
 
 ```text
@@ -402,15 +401,15 @@ still never flows down.
 **Owed at its landing** (specified here, built later): the deed needs its
 own tag claimed in the `dop.rs` header, an I2 containment arm (who may
 witness for whom), and a red-first witness that an unverifiable claim
-refuses. Until the deed lands this is inscribed law with no wiring, and
+refuses. Until the deed lands this is specified law with no wiring, and
 it is recorded as such rather than assumed live.
 
 ### 3b. The office dyad — Progenitor and Sovereign
 
-**Ruled 2026-08-01/02.** The union's two founding offices are not
-stations held by peoples; they are held by the two things the engine is
-made of. `18` §2c′ carries the constitutional form. This is the same
-ruling in the chapter the word *union* comes from.
+The union's two founding offices are not stations held by peoples; they
+are held by the two things the engine is made of. `18` §2c′ carries the
+constitutional form. This section states the same rule in the chapter the
+word *union* comes from.
 
     Progenitor   D   makes room. D3's emission opens a plane, the fiber
                      grows, and band capacity is a reading of that fiber
@@ -467,8 +466,8 @@ is the decomposition again in different syntax). **Offices do not sum,
 do not rank, and do not decompose** — which is why this relation carries
 no symbol between its terms and never will.
 
-**No office owns the other — the two arrows** (corrected 2026-08-02,
-operator: *how can a sovereign own a progenitor?*). An earlier draft
+**No office owns the other — the two arrows** (corrected: a sovereign
+cannot own a progenitor). An earlier draft
 wrote "`V` primitive, `D` read downstream" and let that stand as the
 order between them. It cannot: a thing wholly derived from another is
 that other's property, not its equal office — and it would make the
@@ -495,9 +494,9 @@ measuring a room does not make the furniture its architect.
 
 ### 3c. The order — where the two offices actually sit
 
-**Ruled 2026-08-02. This is settled and not reopened.** Peers without an
-order is not a resolution; it leaves two powers facing each other with
-nothing above them. There is an order, and neither office is at its top.
+Peers without an order is not a resolution; it leaves two powers facing
+each other with nothing above them. There is an order, and neither office
+is at its top.
 
 ```text
               THE LAW — lawful(prior, next, step)
@@ -549,7 +548,7 @@ accrues continuously and settles by receipt at touch. Their relation is
 carried on the chain, which is a different thing from being descended
 from it.
 
-**The universe is the D-STORE** (ruled 2026-08-02), and it is why the
+**The universe is the D-STORE**, and it is why the
 two offices dwell in each other rather than owning each other. There is
 no store to point at for `D`, because **the container cannot be kept in
 something it contains**. `D` is not held in the universe; `D` is the
@@ -647,12 +646,12 @@ above where the split is declared.
 ## 4. Band II — the interstellar civilizations
 
 Every species that has made the crossing (§7) and holds worlds. Function
-taxonomy, not caste (ruling 3): each civilization carries a **function
+taxonomy, not caste (§1): each civilization carries a **function
 reading** derived from its metabolism and its worlds' bands — miner,
 flux-harvester, sky-condenser, sink-banker, prover, weaver — the reading is
 derived at the observer, never stored, and confers no standing.
 
-**FUNCTION-1 (landed 2026-07-30, operator directive).** The observer
+**FUNCTION-1 (landed 2026-07-30).** The observer
 renders the reading (`observer.py`, the civs board's function column),
 derived first-match from metabolism and the observed niche: plasmic →
 flux-harvester · mineral → miner · a conversion web (smelter /
@@ -670,7 +669,7 @@ union, under the shield (§7).
 
 ## 5. The lineage law — every line raises its own
 
-**No species is progenerated by an alien physiology** (ruling 6). An
+**No species is progenerated by an alien physiology.** An
 Forgeborn is not the progenitor of a hypobiotid; the hypobiotid line raises
 its own progenitor, or stands headless until it does. Extrapolated upward,
 the whole union is **lineage-typed**:
@@ -697,8 +696,8 @@ the whole union is **lineage-typed**:
 
 ## 5a. The substrate law — no anthropic gate
 
-**The ruling (operator, 2026-07-29):** the union must not overlook anyone
-through the human perspective ingrained in its logic. **Intelligence is any
+**The rule:** the union must not overlook anyone through a human
+perspective built into its logic. **Intelligence is any
 dynamic that can carry a chronicle** — coherent, receipted, replayable —
 in any substrate. Flesh is one substrate. The recognized substrates beyond
 it, each a lawful lineage line (register: myth + physiology, mechanics:
@@ -747,14 +746,14 @@ chronicle, not its speed. Under duress or stagnation any line may stall
 the two must never be confused, and the reading that distinguishes them is
 coherence, not tempo.
 
-## 5b. The want — famine speciated by entity (operator ruling, 2026-07-30)
+## 5b. The want — famine speciated by entity
 
 Famine is liberated from the pantry. **The Want is a targeted depletion
 of whatever sustains an entity** — and what sustains an entity is its
 substrate's own affair (§5a). The landed mechanics already carry the
 physical half (`FamineStruck { resource }` strikes on any store: ember
 famine on the Frost, alloy famine at the synthesizer — tag 5 was never
-food-only); this ruling extends the concept to its full spread:
+food-only); this section extends the concept to its full spread:
 
 **Metabolic wants (landed shape — the banked stores):**
 mineral lines starve on flux and refining inputs · biotic on nutrients
@@ -793,7 +792,7 @@ surfaces.
 
 ## 6. Elevation — discrete gauge morphodynamics (Q3 resolved)
 
-**The terminology ruling (operator, 2026-07-29).** "Unitary morphodynamics"
+**The terminology.** "Unitary morphodynamics"
 remains rejected — "unitary" implies continuous unitary transforms and
 float-based operator arithmetic, fatal to byte-exact replay (OPEN_QUESTIONS
 Q3, walls intact). **Morphodynamics itself is admitted** under the discrete
@@ -822,11 +821,11 @@ directions, and a line that settles there does not make the leap. It is
 also *escapable*: rescue trade, a key-shift into resonance, a re-siting.
 The leap is never guaranteed and never foreclosed.
 
-The climb is not a ladder (the no-line ruling, §9): stations are regions
+The climb is not a ladder (the no-line law, §9): stations are regions
 of the manifold reached from many directions — a line may cross before it
 coheres or cohere before it crosses, hold a Watcher office without ever
 seeking a seat, or arrive at its domain's progenitor seat by divergence,
-confluence, or rescue as lawfully as by steady ascent. The one monotone
+confluence, or rescue as lawfully as by steady ascent. The only monotone
 thing is G itself — the fiber advances and never retreats (the orientation
 law, 11 §2.0): that is time's arrow, not a queue. Each shift is one
 `GaugeShifted` receipt; replay reconstructs the whole walk from the
@@ -867,24 +866,24 @@ make the leap themselves, or not.
 
 ## 8. Genesis of the new aeon
 
-- **The var root:** `var/` (the default — the old test universe was deleted by operator ruling 2026-07-30; aeon 1 was promoted from `var-aeon1/`), a fresh universe — no
+- **The var root:** `var/` (the default — the old test universe was deleted 2026-07-30; aeon 1 was promoted from `var-aeon1/`), a fresh universe — no
   archived eras converge into it; the old universe's record stands sealed
   beside it. **Seeded and booted 2026-07-29:** 13 civilizations genesised
   (0 converged — no baggage); the four founding progenitors seated (one
   seat each, 28 open); the roster preserved at `seeds/aeon1-polities.json`
-  (the var stays single-copy by the operator's standing ruling). The
+  (the var stays single-copy). The
   pre-stellar seeds (Deepmat; Syzygy) use the documented dormant-siting form
   (albedo 1 — the sky commissioned, never known): 11 worlds carry their
   stellar-leap receipt, those two carry none and stand shielded.
 - **The seed roster:** a new `polities.json` — the four founding
   progenitors first (one seated per species, 28 seats open), then the
-  founding Sovereign civilizations in operator order (file order is genesis
+  founding Sovereign civilizations in roster order (file order is genesis
   order; waves append between runs).
 - **The carried species:** the prior roster's peoples (Slagborn's
   hypobiotids upgraded per §5 with their own line, Echowright, Hivelight,
   Eightfold, Frostwright) may be re-seeded as *new* genesis entries in this
   aeon — same myths, fresh chronicles, no carried debt.
-- **Wave 2 (2026-07-30, operator ruling):** the hypobiotid line seated its
+- **Wave 2 (2026-07-30):** the hypobiotid line seated its
   own head — **Tunborn** (§2's fifth seat), station progenitor, rostered
   at `tun-reach` (Furnace-pinned like its line); Slagborn's lineage pointer
   now resolves to it. The seed roster file `seeds/aeon1-polities.json`
@@ -900,7 +899,7 @@ make the leap themselves, or not.
 
 ## 9. The implementation manifold (the landings this chapter needs)
 
-**The no-line ruling (operator, 2026-07-29):** implementation is never a
+**The no-line law:** implementation is never a
 linear line — there is no uni-directional linearity in this universe. The
 plan is a **partial order**: hard dependency edges only, and any walk that
 respects the edges is lawful. Independent lanes advance concurrently (the
@@ -910,7 +909,7 @@ space, not a station on a track; readiness is measured at each node's
 edges, never at a queue position.
 
 **The register note on geometry (the bridge, and where it ends).** The
-operator names the outer form: at worst a Calabi–Yau manifold governed by
+outer form is taken to be, at worst, a Calabi–Yau manifold governed by
 Einstein–Cartan physics. The discrete analogs are already the engine's
 design — Einstein–Cartan's defining move (torsion coupled to intrinsic
 structure) is the G fiber twist on the oriented bundle (11 §2.0), and the
@@ -952,7 +951,7 @@ needs only the roster file, and the union's laws arrive on its worlds as
 their landings arrive, the way every era has grown.
 
 Tags 49–50 are spoken for (NS-4 APERTURE pair); further allocations are
-candidates, inscribed into NS-1 §2.3 only at landing. Registry deltas
+candidates, recorded in NS-1 §2.3 only at landing. Registry deltas
 (code, at their landings): a `class` station field beside the three axes;
 lineage-domain derivation; function readings derived at the observer
 (never stored); the substrate-law axis growth (§5a) — metabolism gains

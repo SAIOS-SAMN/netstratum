@@ -1,6 +1,6 @@
 # The galactic level — one universe, galaxies by observation (GALAXY-1, design stage)
 
-**Status:** design, operator ruling 2026-07-30 (recorded by coder-02). No
+**Status:** design. No
 mechanic ships before its protocol sections and test vectors exist
 (Charter §1); every constant below is a **placeholder parameter**.
 
@@ -16,7 +16,7 @@ or the seed roster mints a second universe, and this chapter binds it so:
 
 ## 2. One galaxy today — and never a static count
 
-As of this ruling the whole charted torus is the one **founding galaxy**:
+At present the whole charted torus is a single **founding galaxy**:
 universe and galaxy coincide, and no structure anywhere pre-seeds a galaxy
 count (verified 2026-07-30 — the concept exists nowhere in code, which is
 the wanted genesis state). The board does not open pre-tiled with dead
@@ -28,8 +28,7 @@ count starts at one and grows only by deed.**
 A galaxy does not pre-exist its observer. When a civilization achieves the
 crossing (THRESHOLD-1 — interstellar flight, receipted) and its traversal
 anchors **past the charted frontier**, the act of observation creates the
-galaxy. **The frontier is a distance, never an outside** (coder-01
-clarification, 2026-07-30): the torus wraps and the manifold is coned
+galaxy. **The frontier is a distance, never an outside**: the torus wraps and the manifold is coned
 (12 §2c — no open ends), so "past every reach" means exactly this — the
 anchor's wrapped-L1 distance to every charted galaxy's center exceeds
 that galaxy's reach (the L1 law: the short way around, no squaring; reach
@@ -44,11 +43,11 @@ obeys (the universe gains dimensions as discoveries land, contract §9).
 
 ## 4. What a galaxy is, mechanically (candidate bindings)
 
-- **A named region of the one torus** — center S (exact rationals), reach
+- **A named region of the single torus** — center S (exact rationals), reach
   (an L1 radius, exact). A new galaxy is a new region, never a new torus
   and never a new universe.
 - **The receipt is the truth.** `GalaxyObserved` (candidate tag 54 —
-  inscribed into NS-1 §2.3 only at landing) appends to the universe ledger
+  added to NS-1 §2.3 only at landing) appends to the universe ledger
   beside `EraAnnexed`/`EraFolded` — a universe-scale event carrying the
   observer (the crossing civilization), the creator (the progenitor seat),
   the center, and the reach. A `galaxies.json` card beside the star-chart

@@ -1,4 +1,4 @@
-# N6 Directives — the mesh working orders (2026-07-30, operator-ruled)
+# N6 Directives — the mesh working orders (2026-07-30)
 
 > **Archived 2026-08-13.** Superseded/dead weight per the doc audit — kept for history, not live spec. See docs/BUILD_ORDER.md, docs/archive/HANDOFF_2026-08-13.md, or the doc it names as its successor for current status.
 
@@ -7,7 +7,7 @@ Supersedes nothing; folds into NS-5 and Pickup when N6 lands whole.
 
 **History — this document's equations are dated, not law** (annotated
 2026-08-01; text unedited per the quoted-never-rewritten rule). Three
-later rulings overtook it: the proportional law (2026-07-31) struck
+later changes overtook it: the proportional law (2026-07-31) struck
 `Σ R²` for `Σ |R|`; the zero-point correction (2026-08-01) struck
 reading `C(Δ) = 0` as sameness — zero means the cocycle condition
 holds, and an irreducible H¹ core survives it untouched; and MESH-1d
@@ -36,13 +36,13 @@ The NS-5 stub is verified against the tree 2026-07-30:
   is sum-of-squares in code, not L1; the reference vector measures
   C = 24, not 8. NS-5's vectors come from Netstratum's code, never the
   predecessor's prose.
-- Tag registry: the next free tag is **64** (dop.rs header, the one
+- Tag registry: the next free tag is **64** (dop.rs header, the single
   authority — Pickup §4's "next is 59" note is stale; 60–63 landed as
   GaugeShiftedAt, GenesisSealed, WantStruck, WantRelieved). NS-2's
   56–58 set the precedent NS-5 follows: protocol records in the
   protocol's own framing, never world-chronicle events.
 - The machinery is ready: `vrp::verify_receipts` is public and names
-  the first break; `persist::load` is the one file door (Broken,
+  the first break; `persist::load` is the only file loader (Broken,
   Malformed, HistoryDiverged refusals landed); `world::replay` is
   public and yields the whole `Committed` projection; `rfa-core`
   carries `Delta`, `coherence_functional`, and the residual iterator,
@@ -51,7 +51,7 @@ The NS-5 stub is verified against the tree 2026-07-30:
   mechanic cannot live in `cfe` without a cycle. It is a new crate,
   `engine/mesh`, depending on both — one module per protocol seam.
 
-## Operator rulings (2026-07-30)
+## Decisions
 
 1. **Identity: blake3/provenance only at N6.** No ed25519, no key-pair
    dependencies enter the wire registry at MESH-1a.
@@ -65,7 +65,7 @@ The NS-5 stub is verified against the tree 2026-07-30:
 3. **Scope: one world.** MESH-1a is two independent engine instances
    converging on one world's chronicle. Universal multi-world
    aggregation belongs to MESH-1c / N7.
-4. **Partition (2026-07-31): the spine stalls; the escape is an open
+4. **Partition: the spine stalls; the escape is an open
    fork.** Authority never moves without a seal — an unreachable
    writer leaves its spine read-only (writes refuse usurped; reads
    and consilience continue). A stranded successor continues only on

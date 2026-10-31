@@ -1,7 +1,8 @@
 # 39 — The PHASE-3 flip (landed)
 
-**Status: landed 2026-08-13.** The operator ruled §3 option A
-(sub-coordinate index) and signed off §4. `mesh::arbor::Coordinate`
+**Status: landed 2026-08-13.** §3 option A (sub-coordinate
+index) was chosen, for the reasons in its recommendation, and §4 was
+signed off. `mesh::arbor::Coordinate`
 gained `sub: u32`, hashed into every commit like every other field —
 several deeds sharing one world tick now address distinctly. §5's
 sequence landed in full: the sub-coordinate wire amendment (with its
@@ -26,12 +27,12 @@ The commitment the conductor writes carries `judged = false`
 (`arbor::extend(.., None)`).
 
 The flip demotes `replay` to a proposer and makes the kernel the live
-gate: a deed the judge refuses **no longer stands**. This is the one
+gate: a deed the judge refuses **no longer stands**. This is the single
 defect between "having a judge" and "having a kernel" (`46_KERNEL`
 §3), and it is the PoUW precondition — a distributed economy cannot
 anchor value on a transition each node defines for itself.
 
-## 2. What is already done (no ruling needed, landed)
+## 2. What is already done (no decision needed, landed)
 
 - **The judge runs live, per deed** — the stepper (task #9) makes
   prior/next a clone of state, O(state), not a prefix replay. The
@@ -48,7 +49,7 @@ anchor value on a transition each node defines for itself.
 So the preconditions the §0 audit named as blocking are all measured
 met. What remains is purely the wire shape below.
 
-## 3. The one ruling — the addressing law (operator)
+## 3. The decision — the addressing law
 
 The arbor addresses one record per coordinate, and the coordinate's
 `t` is the world clock. **Several deeds share one tick**, so a
@@ -56,7 +57,7 @@ per-deed commitment refuses `Occupied` on the second deed of any beat
 (measured). Judgment is per-deed; the commitment is per-beat; the
 `judged` flag cannot honestly straddle them.
 
-Three ways forward — the ruling picks one:
+Three ways forward — the decision picks one:
 
 | Option | Wire cost | What `judged` then means |
 |---|---|---|
@@ -70,18 +71,18 @@ the chronicle already holds; C moves a load-bearing constant nothing
 else asked to move. A is a bounded, reviewed wire amendment — exactly
 the class the tag-claim convention governs.
 
-## 4. The sign-off — what a refusal comes to mean (operator)
+## 4. The sign-off — what a refusal comes to mean
 
 Independently of §3: the day `replay` is demoted, a refused deed stops
 standing on the live board. That changes play — a proposer that
 emitted an unlawful deed now has it rejected mid-beat rather than
 recorded-and-overruled. The live `var/` re-judges clean today, so the
-immediate blast radius is nil; but the semantic is permanent and is
-the operator's to authorize.
+immediate blast radius is nil; but the semantic is permanent, so it is
+a decision of its own, separate from §3.
 
-## 5. The landing, once ruled (sequence)
+## 5. The landing, once decided (sequence)
 
-1. **(ruling A)** the sub-coordinate wire amendment in `mesh::arbor`
+1. **(option A)** the sub-coordinate wire amendment in `mesh::arbor`
    (`Coordinate`, `seal`, `present`'s tag-88 frames) + its round-trip
    pins; spine `SCHEMA` bump.
 2. per-deed commitment in `chain_beat` — the stepper already produces
@@ -94,6 +95,6 @@ the operator's to authorize.
 
 ## 6. What this document does not change
 
-Nothing lands from it without the §3 ruling and §4 sign-off. The
+Nothing lands from it without the §3 decision and §4 sign-off. The
 judge continues to run beside the chain until then, exactly as it
 does today — visible, recorded, and overruled.

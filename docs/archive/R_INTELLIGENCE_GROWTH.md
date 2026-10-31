@@ -91,7 +91,7 @@ intelligence grows.
 ## §5 Where the nursery already is in law
 
 Vocabulary growth needs a container that cannot leak into consensus, and
-the container is already ruled:
+the container is already specified:
 
 - `NS-5` §7.6 — the sandboxed nursery: a declared fork under its own
   branch coordinate. Anything is permitted inside the nursery; nothing
@@ -189,7 +189,7 @@ The real seam, stated once:
 
 - **Judge** — `pair → word`, replay, naming, the coherence laws — is
   **universal, shared, coded once**, mesh-side (by wire via `six_step`, or as a
-  linked library via `grammar::sentence_on`). The one true waste is a kernel
+  linked library via `grammar::sentence_on`). The only real waste is a kernel
   re-implementing the judge.
 - **Claim + generate** — each kernel's own derivation (so two vantages can
   agree) and its curriculum, novelty gate, and game economy (what to attempt,

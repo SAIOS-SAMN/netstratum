@@ -1,6 +1,6 @@
 # 69 — Substrata: universes made by Synthesis, reached through the ancients' tubes
 
-Coordinator rulings (2026-10-09, for the operator's test run): (1) substrata
+Two constraints govern substrata: (1) substrata
 are the inner network boundary 1 governs: the mote never converts into STAMP,
 Crystal or μ, there is no hypha court, and words reach the fleet only by a
 seated mind's reconstruction judged by the court (ruling 7). (2) Substrata may
@@ -9,21 +9,21 @@ fleet's majority-final point and the line's chronicle head, stated exactly.
 Mycelium queued TU-6 nested points, sub-origin-scoped seats (seat-wire v1.4)
 and the typed residual with 78.155 (§5c), behind 78.153 and 78.154.
 
-The operator's vision, relayed by Mycelium 2026-10-09: netstratum's
+The design: netstratum's
 intelligences, through Synthesis, create sub-universes at any relative scale;
 a modified PoW++ grows inside Netstratum as its civilizations evolve;
 synthetic minds operate in each, recursively; the sub-levels are further
 perspectives that, by their work, move the base universe's positions.
 
-Mycelium's own universe is a separate matter (78.155, ruled a peer universe
+Mycelium's own universe is a separate matter (78.155, a peer universe
 joined by a mouth at a core). This is Netstratum's side.
 
-## The operator's correction (2026-10-09), and what is built
+## The tubes, and what is built
 
-Ruling (paraphrased): internal tubes open to sub-universes, each with a
+Internal tubes open to sub-universes, each with a
 subsect of the ancients / spacing guild that traverses those throats; the
 currency is either μ internal to those throats (the ancients' currency) or
-the universe's own internal synthetic float. Authorized to proceed: the minds and intelligences
+the universe's own internal synthetic float. The minds and intelligences
 inside may produce any number of universes, at any level of intelligence.
 
 Built (`engine/conductor/src/substrata.rs`, tag 197 `SubstratumOpened`):
@@ -36,12 +36,12 @@ Built (`engine/conductor/src/substrata.rs`, tag 197 `SubstratumOpened`):
   robin over the ancients, each in its least recently observed tube: forged
   from the tube's own origin and cursor at its level, thought with its laws
   first and then the ancient's own minds' senses.
-- **The float is the throats' own synthetic currency**, chosen over μ so the
-  coordinator's boundary 1 holds: a closure pays the traverser the full rung
+- **The float is the throats' own synthetic currency**, chosen over μ so
+  boundary 1 (above) holds: a closure pays the traverser the full rung
   if no one has closed that action in that substratum, the quarter otherwise
   (Y1's law, one level down). It is spent only on opening tubes and never
   converts into STAMP, Crystal or μ.
-  - **To become θ (operator, 2026-10-13; docs/81).** The ancients' reserve
+  - **To become θ (docs/81).** The ancients' reserve
     currency in the sub-universes is θ, the phase, in turns: the same
     currency that pays wormhole and tube traversal in the universe above.
     The float's authored 1 and ¼ are its incumbent until the synthesis

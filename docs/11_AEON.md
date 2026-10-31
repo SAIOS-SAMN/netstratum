@@ -1,8 +1,8 @@
 # AEON — the polytonic clockwork and the fold (AEON-1 spec, design stage)
 
-**Status:** design — replaces the retracted linear "LIFECYCLE/LIFE-1" draft
-(operator critique, 2026-07-28: single-world linear, destroy-not-fold,
-shell-script slop, unqualified naming). Re-founded on the engine's own
+**Status:** design — replaces the linear "LIFECYCLE/LIFE-1" draft, retracted
+because it was single-world and linear, destroyed rather than folded, was
+built from shell scripts, and used unqualified naming. Re-founded on the engine's own
 n-dimensional machinery — the three sovereign axes, the edgeless torus, the
 **growing** polynomial fiber, and the four C's — as a **polytonic** design.
 Named for Penrose conformal cyclic cosmology: each universe-cycle is an
@@ -20,8 +20,7 @@ triggers on their **interference** — an event fires where voices align, not
 on a lone rollover:
 
 - **tick** (voice 5) — the colony beat (flow, thermal, famine). Landed.
-  **Base-1 — the daily voice** on the TUniversal scale (operator
-  calibration, 2026-07-30).
+  **Base-1 — the daily voice** on the TUniversal scale.
 - **week** = 7t — **Base-7, the weekly voice**: the technology-stack
   rhythm (the base-7 stack — stellar leap + five crystallized conditions
   + the gifted crown — reads against this voice; trigger surface
@@ -43,7 +42,7 @@ TUniversal is **{S, G, T}**. S (space) and T (time) have been played; **G —
 the gauge/fiber phase — has been zero at genesis everywhere** ("G moves with
 the fiber landings," never landed).
 
-### 2.0 The orientation law (operator, 2026-07-28)
+### 2.0 The orientation law
 
 A bare 3-torus is **recurrent and reversal-symmetric**: every S recurs, and
 a loop returns unchanged (flat holonomy, Ω=0 — the property determinism
@@ -123,7 +122,7 @@ Neither mints matter from nothing (conservation holds, the P1 charter law);
 each is a walk to a new point, seeded deterministically from the acting
 chronicle digests (Charter §9).
 
-### 3.1 The bridge law — BRIDGE-1 (ruled 2026-07-30, design stage)
+### 3.1 The bridge law — BRIDGE-1 (design stage)
 
 Confluence is a crossing, and the crossing is priced. The two lines
 stand at a wrapped key gap (GAUGE-N's `key_distance` — L1 across every

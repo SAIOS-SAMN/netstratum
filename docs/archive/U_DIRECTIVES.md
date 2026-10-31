@@ -33,11 +33,11 @@ judges 10 of 64 deed types at that landing; 59 of 64 on main after the W-waves):
 - **U1f (I5)** — the flat decay bound calling the sealed demurrage
   rule; `last_touch` already rode tag 28 (no schema spent).
 - **Docs:** `16_UNIT.md` (the unit law + §4a the singularity law),
-  `EQUATIONS.md` (the one ledger), this file, and
+  `EQUATIONS.md` (the single equations ledger), this file, and
   `AUDIT_2026-07-31.md` (the mesh-second correction + the hole audit).
 
 Open: U2 (I6), the W-waves, #36 spine adoption (mesh-second — §7),
-Phase 3 flip, U3, U4 (operator rulings). Secondary (§10): S1 the
+Phase 3 flip, U3, U4 (open decisions, §8). Secondary (§10): S1 the
 volumetric verifier decision, S2 the worktree prune. The mesh half
 rides directly behind the kernel rungs (audit §1, §7 here).
 
@@ -46,12 +46,12 @@ rides directly behind the kernel rungs (audit §1, §7 here).
 | rung | pays | status |
 |---|---|---|
 | U0 | the seated hand (I2 honored in the spine fixture) | Landed |
-| U1 | **I4's bound** — `mint ≤ f(verify)`, the PoUW anchor, tag 86 | Landed; **unsealed by Ruling Box 1 (2026-08-01)** — f ladder-pinned 0·0·0·1·4·7, kernel version 2 |
+| U1 | **I4's bound** — `mint ≤ f(verify)`, the PoUW anchor, tag 86 | Landed; **unsealed by Decision Box 1** — f ladder-pinned 0·0·0·1·4·7, kernel version 2 |
 | U1f | **I5's bound** — flat decay ≤ rate·ease·elapsed | Landed (no schema spent — `last_touch` already rode tag 28) |
 | U2 | **I6 whole** — orbit_lock, the fold gate, the singularity witness | Open — the live rung (∥ #36, mesh-second) |
 | W-A..W-D | **I1/I2/I3 coverage extension** — the then-54 unjudged deeds, in four waves | parallel, any lane |
 | U3 | UNIT-1 — the deployable boundary + constitution digest | after #36 |
-| U4 | the Ruling Boxes come home (operator words) | **Box 1 ruled 2026-08-01** (the mint opens — §8); Box 2 open |
+| U4 | the Decision Box decisions are made | **Box 1 decided** (the mint opens — §8); Box 2 open |
 | S1 | the volumetric verifier decision (§10 — secondary) | boards with the volumetric tier |
 | S2 | the worktree prune (§10 — housekeeping) | operator go |
 
@@ -113,12 +113,12 @@ first commit (the tag-claim convention; 86 verified next-free).**
                                            // per the OPAQUE-PAYLOAD law above
 
 The receipt carries its proof whole — replay under SEAL B re-verifies
-the work forever. No change to `Step` (the deed is the carrier), no
+the work on every replay. No change to `Step` (the deed is the carrier), no
 schema change (event-only; `banked` is already committed) — U1 touches
 no codec bytes. **v2 corpus work landed 2026-08-04** — see §2a below.
 **v1 work-shape: forge tasks only** (re-derivable from
 the digest, chronicle-seeded). Corpus classes (ARC-2 files) need a
-task-registry ruling — parked in Ruling Box 1.
+task-registry decision — open in Decision Box 1.
 
 **Kernel arms.** `covered()` gains `DiscoveryMinted`; `scope_of` →
 `Collect`; `conservation` lawful_delta = `+amount`; and I4 completes:
@@ -128,18 +128,18 @@ task-registry ruling — parked in Ruling Box 1.
               && amount ≤ mint_bound(difficulty)        (else MintExceedsWork{bound, claimed})
 
     mint_bound(_: &Difficulty) -> Ratio { ratio(0, 1) } // sealed shut —
-    // opens only by Ruling Box 1 amendment (rate, shapes, split),
+    // opens only by Decision Box 1 amendment (rate, shapes, split),
     // bumping kernel::version. Mechanism first, economics by ruling.
 
-**Unsealed (Ruling Box 1, operator 2026-08-01 — the version 1→2
-amendment; evidence: the #17 calibration, 5898351).** `mint_bound`
-now pays the ruled `f` in exact integers on the ladder only —
+**Unsealed (Decision Box 1 — the version 1→2 amendment; evidence: the
+#17 calibration, 5898351).** `mint_bound` now pays the decided `f` in
+exact integers on the ladder only —
 `f(0..=2) = 0` (saturated), `f(3) = 1`, `f(4) = 4`, `f(5) = 7`; an
 off-ladder difficulty earns zero (a payload cannot name its own
 price). Red-first: `the_ruled_rate_pays_the_ladder_exactly` (red
 recorded against the sealed judge), `saturated_and_off_ladder_work_
 earns_zero`; the sealed-shut pin truth-updated (level 1's bound is
-still 0 — ruled, not defaulted); the version pin moved 1→2.
+still 0 — set by the rate, not defaulted); the version pin moved 1→2.
 
 New `Unlawful` arms: `WorkBroken { at_step: usize }` and
 `MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> }` — both
@@ -169,7 +169,7 @@ carry the measurement whole.
 
 ## §2a Work-shapes v2 — the corpus registry (landed 2026-08-04, cognition lane)
 
-Operator ruling 2026-08-04, executing `16_UNIT` §7a's corpus clause.
+This section implements `16_UNIT` §7a's corpus clause.
 Verification landed whole in `solver-verify`; the economics are relayed
 to the kernel lane and corpus work earns zero until they land — the U1
 precedent exactly (mechanism first, price by amendment).
@@ -183,13 +183,13 @@ asked: *is this a real task, or one the miner wrote?*
 **Content-addressing does not answer it.** `task_id = H(content)`
 proves which task was solved, never that the task was admissible. A
 miner may author a trivial task, hash it honestly, solve it honestly,
-seal an intact chain, and mint. The ruling's rationale — "the task's
+seal an intact chain, and mint. The stated rationale — "the task's
 identity is its content, so no forged corpus entry can mint" — holds
 only once an admissible set exists; identity alone is not admission.
 
-**The mechanism — struck 2026-08-04, the same day it landed**
-(operator ruling: the engine must be able to forge new corpus, and no
-merkle trees). Recorded here rather than deleted, because the reasoning
+**The mechanism — struck the same day it landed**, because the engine
+must be able to forge new corpus, and the design uses no Merkle trees
+(*Why it went*, below). Recorded here rather than deleted, because the reasoning
 that produced it was half right and the half that survives is
 load-bearing.
 
@@ -201,7 +201,7 @@ judge recomputed the root from leaf + path. Four legs — re-hash, admit,
 re-apply, re-chain.
 
 *Why it went.* A pinned root is a static enumeration — a finite well,
-where the ruling asks for an open one — and it is an authority, a
+where forging new corpus needs an open one — and it is an authority, a
 constant deciding what counts, which is a second machine-readable truth
 of the kind `00_CHARTER` §11 excised the mirror for. It also cannot move
 at mesh speed: every node must carry the same root, and changing it is a
@@ -247,7 +247,7 @@ judge; it is the actual ARC problem. Measured on this corpus: of 34
 programs that closed training, 33 matched the held-out answer and one
 did not, so **~3% of closures are confidently wrong**. That is the
 fabrication surface a corpus rate would buy, and it is why the rate is
-an economics ruling rather than a mechanical one.
+an economics decision rather than a mechanical one.
 
 **Wire law.** Schema bytes are append-only. v1 is byte-identical and
 untouched: `WORK_SCHEMA_V1 = 1`, `WORK_SCHEMA_V2_CORPUS = 2`, dispatch
@@ -265,21 +265,21 @@ not be known). The certificate needs a name, so both halves derive the
 same canonical one from the task_id — a miner cannot vary it.
 
 **Relayed to the kernel lane (its file, not this lane's):**
-1. `mint_bound` gains an `AdmissibleCorpus` arm — the operator ruled a
+1. `mint_bound` gains an `AdmissibleCorpus` arm — the rate is set as a
    fixed premium rational reflecting the 3.4% solve rate. Until it
    lands, corpus work verifies and earns nothing.
 2. The kernel should call `verify_work_class`, not `verify_work`: only
    the former can express corpus work, whose identity is a task_id and
    not a ladder rung. `verify_work` is unchanged and refuses a corpus
    payload `UnsupportedShape` rather than mispricing it.
-3. **Root placement.** The ruling puts `CORPUS_ROOT` in the kernel; it
+3. **Root placement.** The specification puts `CORPUS_ROOT` in the kernel; it
    is implemented in the sealed tier because the OPAQUE-PAYLOAD law
    forbids the kernel parsing a payload, and the inclusion check needs
    the parsed path. `verify_corpus_work_against(bytes, &root)` exists
    as the seam: hoisting the constant into `engine/kernel` and passing
    it down is a one-parameter change that keeps the kernel
    encoding-blind.
-4. **The hash is BLAKE3; the inscribed text says SHA256.** `16_UNIT`
+4. **The hash is BLAKE3; the specification text says SHA256.** `16_UNIT`
    §7a reads `task_id = SHA256(corpus_input_digest)`. Every other
    digest in this system is BLAKE3 and `solver-verify`'s only hash
    dependency is `blake3`; adding SHA-2 puts a second hash primitive in
@@ -310,13 +310,12 @@ Witnessed in `engine/kernel/tests/decay_pins.rs` (red recorded: the
 sign-only kernel admitted the excess) with one witness truth-update
 in `conservation_pins.rs` (the sign-era "decay of 2 admits" pin sat
 on a starless world — it now refuses with bound 0 carried, and says
-so). `DemurrageSettled`'s wire form untouched (one tag, one meaning,
-forever).
+so). `DemurrageSettled`'s wire form untouched (one tag, one
+meaning).
 
 ## §4 U2 — KERNEL-FOLD (I6 whole; the singularity witnessed)
 
-**The verifier-only boundary (operator ruling 2026-08-01; amends this
-rung).** The kernel's `rfa-core` dependency is the verifier half only.
+**The verifier-only boundary (amends this rung).** The kernel's `rfa-core` dependency is the verifier half only.
 `orbit_lock` runs a search over the operator space (the tunable bound is struck — directive 01);
 the kernel is pure, total and cheap and **must never call it**. The
 split is U1a's, applied to the fold gate:
@@ -348,7 +347,7 @@ convergence-scale `DiscoveryMinted` pays only the emitted residue
 (16_UNIT §4: PoWC decides genuine, PoUW bounds the pay).
 
 **Witnesses:** gauge-only difference folds; torsion-locked refuses with
-the lock named; the refused fold's residue is the one mintable plane;
+the lock named; the refused fold's residue is the only mintable plane;
 **the angle-free witness** (16_UNIT §4a) — the same pair under all
 eight D4 frames and a gauge-coboundary shift yields the identical
 verdict and canonical residue; the C(Δ)=0 pair is the replication
@@ -402,14 +401,14 @@ the unit binary founds, plays, solves (one forge grind → certificate),
 and uplinks against a second copy of itself (extend the
 `ns5_two_nodes` pattern); a forged chain refuses at its break.
 
-## §7 Sequencing (mesh-second — operator ruling 2026-07-31, audit §1)
+## §7 Sequencing (mesh-second — audit §1)
 
 The mesh is secondary to the kernel, not last: its door rises directly
 behind the kernel rungs, ahead of the W-wave tail. Landed this session:
 U0 · PROPORTION-1 · U1a · U1 · U1f (I1–I5 whole).
 
     [Done] U0 · PROPORTION-1 · U1a · U1 (I4) · U1f (I5)
-      → U2 (orbit_lock/I6 + the angle-free witness — the one
+      → U2 (orbit_lock/I6 + the angle-free witness — the only
          research-shaped rung; consult /opt/repos)
       ∥ #36 (spine at TUniversal + adoption — the MESH's promoted
          rung, riding directly behind U1, not behind the W-waves;
@@ -417,10 +416,10 @@ U0 · PROPORTION-1 · U1a · U1 · U1f (I1–I5 whole).
       → W-A..W-D  ∥  (parallel, any lane, disjoint families; W-D's
          fold trio lands with/after U2)
       ∥ the mesh half — Σ_mesh, re-sync, resonance, the verified-work
-         anchor (the rate rides the kernel's mint_bound once ruled)
+         anchor (the rate rides the kernel's mint_bound once set)
       → Phase 3 flip (Unjudged unreachable — all waves + U2 complete
          → the kernel is the door) — **landed 2026-08-13**
-         (`39_PHASE3_FLIP.md`, operator ruling: sub-coordinate
+         (`39_PHASE3_FLIP.md`: sub-coordinate
          addressing + sign-off). `mesh::arbor::Coordinate` gained
          `sub: u32`; `conductor::chain_beat` commits one arbor record
          per deed, gated live; a refused deed gets no commitment.
@@ -428,17 +427,17 @@ U0 · PROPORTION-1 · U1a · U1 · U1f (I1–I5 whole).
          39_PHASE3_FLIP's own §2 audit found coverage already total
          and the live board already re-judging clean, which is the
          precondition this flip actually landed against.
-      → U3 (after #36/#37) → U4 (the rulings open the mint)
+      → U3 (after #36/#37) → U4 (the Decision Box decisions open the mint)
 
 Calibration note: after #36 the whole single-player + NPC economy runs
-chained with certificate-bounded minting refusing until ruled — measure
-the synthetic economics there first, then rule `f` against observation,
-not assumption.
+chained with certificate-bounded minting refusing until `f` is set —
+measure the synthetic economics there first, then set `f` against
+observation, not assumption.
 
-## §8 The Ruling Boxes (operator words — nothing else blocks)
+## §8 The Decision Boxes (open decisions — nothing else blocks)
 
-1. **Box 1 — ruled (operator, 2026-08-01; landed as the kernel
-   version 1→2 amendment).** Evidence: the #17 calibration
+1. **Box 1 — decided (landed as the kernel version 1→2
+   amendment).** Evidence: the #17 calibration
    (`5898351` — hit-rates 100·100·100·97.5·75·42.5% at rungs 0–5).
    - **The rate `f`, ladder-pinned in exact integers (L1/ladder
      terms — no norms, no roots, the proportional law):**
@@ -448,13 +447,13 @@ not assumption.
      Defined on the ladder only — off-ladder difficulty earns zero.
    - **Work-shapes v1: planar forge tasks only** (structural —
      `verify_work` accepts no other form). ARC corpus classes await
-     the task-registry word; the volumetric tier stays decorative
+     the task-registry decision; the volumetric tier stays decorative
      (S1) until then.
    - **Reward split v1: 100% to the solving world** (the deed banks
      on its own orb; no mesh counterparty exists yet). **v2
-     reserved, inscribed for the mesh era:** 40% prover · 40% mesh
-     carriers · 20% protocol reserve — wiring unbuilt, opens with
-     the mesh-era ruling, never before.
+     reserved for the mesh era:** 40% prover · 40% mesh carriers ·
+     20% protocol reserve — wiring unbuilt, opens with the mesh-era
+     decision, not before.
 2. **Box 2:** what verified work earns beyond the mint — pen weight,
    crystallization coupling (kernel-amendment questions now, per
    16_UNIT §1).
@@ -472,8 +471,8 @@ imports sealed math + cfe; nothing imports upward into the kernel) ·
 purity (the proof rides the deed; the kernel reads only prior/next/
 step) · translate-never-transcribe from v0.1 (consult `/opt/repos`,
 port nothing blindly) · the terminology law · exact rationals, no
-floats, roots never taken · read whole files before any edit (operator
-discipline 2026-07-31 — grep locates, never grounds an amendment) ·
+floats, roots never taken · read whole files before any edit (grep
+locates, never grounds an amendment) ·
 commit on explicit operator go.
 
 ## §10 The secondary board (audit-sourced; deliberate, none forgotten)
@@ -486,15 +485,15 @@ commit on explicit operator go.
   with an empty train is vacuously "Solved" by the empty program.
   Non-constitutional today: ARC-AGI-2/3 are planar, volumetric tasks
   are forge-only synthetics, and no volumetric deed can mint (tag 86
-  carries planar work only). **The decision (operator's, rides Ruling
-  Box 1's work-shape word):** if higher-dimensional work becomes a
+  carries planar work only). **The decision (rides Decision Box 1's
+  work-shape decision):** if higher-dimensional work becomes a
   real economic axis, land `verify_volume` mirroring `verify_work`
   (re-forge ∧ re-apply ∧ re-chain + the degenerate-difficulty guard)
   with its own deed; if not, mark `seal_volume` decorative in its
   header and refuse the empty-train solve. Boards with the volumetric
   tier, never before.
   **The deferral is lifted — `verify_volume` landed 2026-08-04**
-  (operator ruling: volumetric work is a real economic axis; the
+  (volumetric work is a real economic axis, and the
   motion's clause 6, *nothing vacuous*, says a decorative seal does not
   stand — it earns a real verifier or it goes). C8's reading below is
   kept as the record of what was true for three days.
@@ -531,7 +530,7 @@ commit on explicit operator go.
   - 10 pins, `solver-verify/tests/volume_verify_pins.rs`. Board
     660/660, clippy zero in both solver crates.
 
-  **Ruled (operator C8, 2026-08-01): decorative — superseded above.**
+  **C8's decision: decorative — superseded above.**
   v1 is forge-only,
   ARC-AGI-2/3 are planar, no volumetric deed mints (tag 86 = planar
   work). `seal_volume` now carries a decorative header
@@ -539,12 +538,12 @@ commit on explicit operator go.
   digest carries no economic weight. `verify_volume` is deferred until
   higher-dimensional work becomes a real economic axis (rides Ruling
   Box 1's work-shape word).
-  **Closed whole 2026-08-03 (cognition lane) — the ruling's second
+  **Closed whole 2026-08-03 (cognition lane) — C8's second
   clause, which had not landed.** C8 said two things: mark the seal
   decorative *and* refuse the empty-train solve. Only the header
   landed; the vacuous solve stood for two days, and the header had
   reframed it ("the empty-train solve is not a mint") rather than
-  obeyed it. Measured red-first, the hole was wider than the audit
+  implemented it. Measured red-first, the hole was wider than the audit
   recorded — two failure modes, not one:
   - `solve_volume` returned `Solved` on an empty train (the vacuity
     the audit named): `train.iter().all(..)` is true over no pairs,
@@ -584,7 +583,7 @@ commit on explicit operator go.
   compared and hashed, never applied. **Work-shapes v2 ends this**: a
   corpus task cannot be re-derived from a digest, so its content must
   ride in the payload — the moment wire-borne grids reach `run`, both
-  panics are reachable inside the judge. Closed ahead of v2 at the one
+  panics are reachable inside the judge. Closed ahead of v2 at a single
   door: `Grid::new` refuses any hue ≥ `HUES` (10). Refuse never guess —
   not clamped, not a grid. 3 pins, `solver-verify/tests/hue_pins.rs`.
   Same sweep, second finding: `forge_task` panics on a degenerate

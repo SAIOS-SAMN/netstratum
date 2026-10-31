@@ -1,7 +1,7 @@
 # 24 — The form: the relational tensor, its boundary, and the sign law
 
-**Status:** law, split out of the retired `18_TORSION.md` on 2026-08-03 by operator
-ruling. It carries §2 the form whole — the Δ/Ω mathematics the engine
+**Status:** law, split out of the retired `18_TORSION.md` on 2026-08-03.
+It carries §2 the form whole — the Δ/Ω mathematics the engine
 computes on.
 
 **Why it moved.** `18_TORSION` was the physics subset that constrained the
@@ -23,12 +23,12 @@ save nothing.
 
 ### 2a. D(Ω) — the progenitor's reading of the totality
 
-**Renotated 2026-08-02** (operator ruling: *`D(Ω) +: V(Ω)`*). This
+**Renotated** (the notation is now *`D(Ω) +: V(Ω)`*). This
 section read `Ω(D)` — *the space indexed by dimensional degrees* — which
 made the totality a function of one office, so `Ω` was at once the thing
 measured and a thing `D` produces. `D(Ω)` reads the other way: `D` of
 the totality, a reading, and a reading never outranks its subject
-(§2c′). `17_CAPACITY` §3 carries the full ruling and the second office
+(§2c′). `17_CAPACITY` §3 carries the full statement and the second office
 reading `V(Ω)` that comes with it.
 
 `Ω` is the totality — one universe, whole, read by both offices and
@@ -36,9 +36,8 @@ owned by neither. `D(Ω)` is the room standing in it: not a scalar and
 not a metric density. `D` is the rank of the relational structure — how
 many independent degrees stand — and `D(Ω)` is the space they span.
 
-**`D` is not A capacity** (operator ruling 2026-08-01: capacity has no
-place in an expanding universe). The
-word names a container and implies a ceiling; there is no ceiling
+**`D` is not A capacity**, because capacity has no place in an
+expanding universe. The word names a container and implies a ceiling; there is no ceiling
 anywhere in this workspace, and `holonomies().len()` rises without
 bound as structure emerges. `PhiK I^(3)` had the right name all along —
 *rank: dim of the relational structure*. Genuine capacities do exist
@@ -57,10 +56,10 @@ constitution names what the algebra already is.
 
 ### 2b. ∂Δ uncaged — no norm, no ceiling
 
-**V takes no operator** (operator ruling 2026-08-01 — *the whole or the
-nothing*). This reading was written `∇V`, then `dV`, then `∂V`; all
-three forms are struck, and they were wrong in the same way: each encloses `V` in an
-operator that returns a part. `D0` says `V` is the committed state read
+**V takes no operator**: `V` is read whole or not at all. This reading
+was written `∇V`, then `dV`, then `∂V`; all three forms are struck,
+and they were wrong in the same way: each encloses `V` in an operator
+that returns a part. `D0` says `V` is the committed state read
 whole — indivisible, unpartitioned, never truncated to a subspace — and
 a gradient is a part, a boundary is a part, a divergence at a vertex is
 a part. Three symbols, one error: the enclosure was the mistake, never
@@ -75,8 +74,8 @@ and neither may be written as one.
 `∂Δ` is a directional operator and stays one. It is never collapsed to
 a scalar magnitude, never bounded above, never reduced to `‖∂Δ‖`.
 
-This extends rather than reverses the proportional law (2026-07-31).
-That ruling barred squares because squares are the mathematics of
+This extends rather than reverses the proportional law.
+That law barred squares because squares are the mathematics of
 minimization — collapsing difference into a scalar to be descended.
 The L1 form was a smaller cage of the same kind. **Any collapse of a
 directional quantity to a scalar aggregate is now barred**; L1 survives
@@ -85,7 +84,7 @@ system computes.
 
 ### 2c. The union — one Δ, two complementary projections
 
-**`U* = D(V) ⊕ V(D)` is struck** (operator ruling 2026-08-01), on the
+**`U* = D(V) ⊕ V(D)` is struck**, on the
 same test that struck §2d and §2e and on one ground they did not carry.
 
 **The Article III half.** Nothing computes `U*`, `D(V)` or `V(D)`. No
@@ -129,7 +128,7 @@ of `Δ`, not of `V`.
 
 ### 2c′. The union proper — D progenitor, V sovereign
 
-**Ruled 2026-08-01.** The section above settles what `D` and `∂Δ` are to
+The section above settles what `D` and `∂Δ` are to
 each other — two projections of one `Δ`. It says nothing about what `D`
 and `V` are to each other, and that relation is the union the name was
 always reaching for. It is not an arithmetic. It is two offices.
@@ -192,8 +191,8 @@ sits at Ground and the room is one degree, itself; `D` rises exactly as
 universe has come from its origin* are one reading, and why the floor
 and the span are the same office.
 
-**Two arrows, and conflating them makes A false hierarchy** (corrected
-2026-08-02, operator: *how can a sovereign own a progenitor?*). An
+**Two arrows, and conflating them makes A false hierarchy** (corrected:
+a sovereign cannot own a progenitor). An
 earlier draft of this section wrote "`V` primitive, `D` read downstream"
 and treated that as the standing order. It is not. It is a measurement
 path, and reading it as ownership destroys the union — a thing wholly
@@ -229,7 +228,7 @@ order, and neither office is at its top:
 
 They are peers as a bonded pair, never as counterparts — different kinds,
 separate origins, and a relation that is complementary rather than
-like-for-like. `09_IDEOLOGY` §2.2 already carries the form and the ruling:
+like-for-like. `09_IDEOLOGY` §2.2 already carries the form and the rule:
 *a symmetric pair of bonds is the marriage form; a single bond is
 patronage. Both are privileged in the pair* — `bond_flow` is the
 source's syntropic book, so each office sources and each carries its
@@ -378,7 +377,7 @@ survives because it computes.
 
 ### 2f. The entanglement — Δ(D) ⋈ ∂Δ
 
-**Ruled 2026-08-01: capacity change and potential gradient are
+**Capacity change and potential gradient are
 entangled, not coupled.** The distinction is the whole force of the
 law. Coupling would be two objects that interact — `Δ(D) = g(∂Δ)`, a
 function, a bound, a product — and two objects can always be attacked
@@ -436,8 +435,8 @@ surface. This binds §6's first build.
 
 ### 2g. Wrap(entanglement) — accounting, not identity
 
-**`==` is struck, and it was the collapse error again** (operator
-correction 2026-08-01). This section first proposed converting the
+**`==` is struck, and it was the collapse error again.**
+This section first proposed converting the
 bounds to identities — `amount == mint_bound(d)` — to remove latitude.
 That is the same failure as gradient descent, one level down: it
 collapses a two-sided relation to a point and discards whatever
@@ -515,10 +514,10 @@ gap below the bound passes silently, and under this law it must be
 dispositioned — so a major `VERSION` bump under the amendment tiers,
 with old history verifying under the old rule.
 
-**Not yet ruled — which pairs are entangled.** I4's mint/work pair is
+**Open — which pairs are entangled.** I4's mint/work pair is
 the clear case. Whether I5's decay bound and the assay bound are
-entangled, and so subject to the same disposition, is an operator
-ruling rather than a derivation: under-paying an owed decay may be a
+entangled, and so subject to the same disposition, is a
+decision rather than a derivation: under-paying an owed decay may be a
 lie of the same kind, or lawful forbearance. **Do not convert them
 silently.**
 
@@ -565,7 +564,7 @@ function of their separation — never by their collision.**
 - `cfe/src/world/mod.rs` — `pair_melt(a, b, distance)` computes
   `gap = key_distance(a.key(), b.key())` then
   `melt = (distance + gap) * MELT_PER_UNIT`. Cost as a function of
-  spatial separation plus key separation, and it is the one producer of
+  spatial separation plus key separation, and it is the only producer of
   the formula.
 - `cfe/src/world/mod.rs` — `key_distance`, wrapped separation across
   keys of any dimensionality.
@@ -625,8 +624,8 @@ sector; what crosses the door is the constraint as an exact quantity.
 
 ### 2m.3 "covenant", defined — and what of it is ceremony
 
-The operator flags the term as carrying inherited ceremonial
-freight. Measured, the mechanism carries none:
+The term may carry inherited ceremonial connotations.
+Measured, the mechanism carries none:
 
     Covenant { obligor, beneficiary, resource, quota,
                delivered, collateral, sealed, window }
@@ -668,7 +667,7 @@ The defensible split, and the one taken here:
                 decision is deliberate rather than forgotten.
 
 
-### 2k–2n moved (operator ruling 2026-08-02)
+### 2k–2n moved
 
 The traversal lane, the path polynomial and the `C` containment thread
 are no longer here. Ten subsections and 796 lines left in one cut:

@@ -1,12 +1,16 @@
 # 108 — Own rulers: retiring the imported calibrations
 
-Ruling of 2026-10-30: no Earth-centric, human-centric or Milky-Way-centric
-component in the code, the functions, the tests, the comments or the
-documentation; each import is derived on Netstratum's own rulers, the
-formula in the documents before the code. Status: scope. Builds on
-docs/78 (design law 1: no table of Earth's measured values), docs/96 (the
-hold law), docs/105 (the polarity equilibria), docs/106 (the substrate),
-docs/102 (the register, items O1–O7 below).
+This document lists every calibration in the era-1 physics that is imported
+from Earth, the Sun, the Milky Way or human measures, and gives each one a
+derivation path on Netstratum's own quantities. An imported value stands in
+for physics that has not been derived (§0); each is replaced by the law it
+stands for, with the formula written here before the code.
+
+**Status:** scope.
+
+**Prerequisites:** docs/78 (design law 1: no table of Earth's measured
+values), docs/96 (the hold law), docs/105 (the polarity equilibria),
+docs/106 (the substrate), docs/102 (the register, items O1–O7 below).
 
 ## 0. The principle
 
@@ -91,9 +95,9 @@ The era-0 game model is built on Earth physics throughout: the joule as its
 energy commodity, kelvin anchors cited to Earth's chemistry, the
 Morgan–Keenan star classes with the Sun as unit, the solar leap, and polity
 and species names taken from the Solar System and from humans. Its names are
-moved to Netstratum's own vocabulary (ruling of 2026-10-30); its values stay
-as era 0's calibration until era 1 replaces each piece (ruling of 2026-10-14: era 0 a
-building set for demolition), and none of them is read by era 1 except
+moved to Netstratum's own vocabulary; its values stay as era 0's
+calibration until era 1 replaces each piece (era 0 is a building set for
+demolition, not a model to refine), and none of them is read by era 1 except
 through O3, O4 and O7.
 
 The native vocabulary (wire codes unchanged):

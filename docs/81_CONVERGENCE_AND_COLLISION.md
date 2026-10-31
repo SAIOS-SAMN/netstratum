@@ -1,6 +1,6 @@
 # 81 — Convergence and collision: the law of playing with time
 
-Operator (2026-10-13): TUniversal is offered as a quantum state; a universe
+TUniversal is offered as a quantum state; a universe
 chains its own ledger to it, perpendicular (orthogonal), as a local quantum
 state. In a universe of potentials and of time as coordinates, where
 timelines meet there are two outcomes, convergence and collision. The
@@ -17,7 +17,7 @@ observers), docs/79 (quantum), docs/75 (realms), docs/74 (the hierarchy).
 
 - **TUniversal** is the shared quantum state, one per fleet: the hypha's
   clock.
-- **A universe's ledger** is chained orthogonally to it. By Mycelium's ruling
+- **A universe's ledger** is chained orthogonally to it. Under MU-RECURSION
   78.152d each ledger entry already pairs the universe's cosmic time `u` with
   TUniversal's point (docs/80).
 - **Each observer's proper time** is a further local axis inside the
@@ -152,7 +152,7 @@ gates.
   and a branch carries the incompatible records.
 - **The split is an event**, at a point on the map, recorded in both annals,
   each append-only.
-- **Ruled (operator, 2026-10-14): no new universe at the parallel level.**
+- **No new universe at the parallel level.**
   A branch is a sub-history inside this universe's domain, held by its
   annals, and it can come back (temporal attraction). It never founds a
   parallel universe. All sub-universes (the substrata, docs/69) are
@@ -244,13 +244,13 @@ place (never a squared chord, which measures through flat space).
   pruned before they carry too much weight; branches within reach are left
   for attraction to bring home.
 
-## What it pays in: θ, the phase (operator, 2026-10-13)
+## What it pays in: θ, the phase
 
 ### The model: coherent universes joined by junctions (no flat norms)
 
-Remediated 2026-10-13 (operator): no quadratic norm, `^2` or modulus squared
-appears here. Those measure correctly only on flat space, and would put the
-box back inside a curved universe.
+No quadratic norm, `^2` or modulus squared appears here, because those
+measure correctly only on flat space, and would put the box back inside a
+curved universe.
 
 - **The state is the phase field θ:** the phase at every place of the
   universe's network, counted in turns. θ is its cosmic time: a coherent
@@ -280,8 +280,8 @@ box back inside a curved universe.
   set by the energy per turn, dθ/dt = −μ/ħ (Josephson). The hypha's μ is
   energy in that sense, which is why it is economically resilient: energy is
   conserved, and cannot be inflated. A universe's own energy per turn of
-  coherence is μ_N. The ratio μ_N / μ is the dilation du/dh that mycelium's
-  ruling 78.152d reads between two core-tube crossings.
+  coherence is μ_N. The ratio μ_N / μ is the dilation du/dh that
+  MU-RECURSION 78.152d reads between two core-tube crossings.
 - **Core tubes are junctions.** Locked phases carry a current
   `I = I_c sin(Δθ)`: convergence, without dissipation. `sin` is computed
   exactly from the rational half-angle parameter `t`, with
@@ -373,7 +373,7 @@ torsion enclosed is Φ.
 | shared space for contested mass (docs/77) | missing |
 | divergence measured between records on the map | missing |
 | each timeline's weight, from the annals | missing |
-| branching as a recorded event; its rule ruled with Mycelium | missing |
+| branching as a recorded event; its rule decided with Mycelium | missing |
 | the escape condition from the cone law | missing (era 1's cone law first) |
 | θ: minted by convergence, lost by collision (phase slips), paying for traversal inside the universe; held by progenitors with μ; melt scaled by coherence | missing |
 
@@ -413,7 +413,7 @@ Within era 1, after docs/80's proper time and events on the map.
    - Done-when: route melt in coherent realms against divergent ones,
      logged; the coherent realms' melt falling toward zero.
 
-## Open, for the operator
+## Open decisions
 
 - **The shutdown threshold's derivation:** from which capacity of the
   network.
@@ -421,7 +421,7 @@ Within era 1, after docs/80's proper time and events on the map.
   per docs/74).
 - **Which events count as a meeting** of timelines: every two-sided record,
   or only records across a wormhole or a realm boundary.
-- **The currency:** θ, the phase, in turns (operator, 2026-10-13); coherence
+- **The currency:** θ, the phase, in turns; coherence
   the windings W on anchor-closed loops; Φ the enclosed torsion.
-- ~~Branches~~: ruled 2026-10-14, sub-histories inside the universe; no
+- ~~Branches~~: decided: sub-histories inside the universe; no
   parallel universes; sub-universes only by synthesis.

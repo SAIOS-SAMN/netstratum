@@ -1,9 +1,14 @@
 # 99 — The binding's dynamics, end to end, with the inverse faces
 
-Design direction (2026-10-27): scope the full dynamics, inverse physics
-included. Status (2026-10-28): §2.1–§2.5 built (32a7dfc, 3400588, bc2d32c); §5
-open. Builds on docs/96 (founding as flow, §7 the galaxy enclosure, §8 the
-hold law), docs/97 (Q, Z, R), docs/98 (the inverse faces).
+This document traces a binding's dynamics end to end, from the founding
+through capture to the formed body, including the inverse faces, and derives
+each misalignment behind the measured break (§0).
+
+**Status (2026-10-28):** §2.1–§2.5 built (32a7dfc, 3400588, bc2d32c); §5
+open.
+
+**Prerequisites:** docs/96 (founding as flow; §7 the galaxy enclosure; §8
+the hold law), docs/97 (Q, Z, R), docs/98 (the inverse faces).
 
 ## 0. The measured break (2^55 grains, bells 0–1500)
 
@@ -49,13 +54,13 @@ matter in transit; the disc leg is where the cut and collapse are read"),
 half a loop from the disc. **Law:** a binding gathers on the disc leg only
 (`on_disc_leg`), as the beads and the cut already do.
 
-### 2.2 No frames: the infall is read in phases (ruling of 2026-10-27: phases, never frames)
+### 2.2 No frames: the infall is read in phases
 
 The infall turns each member's phase offsets into lengths (`r_c·|Δψ_k|`),
 dilates them into a frame (`× g/m`, the binding's "own units") and compares
 them with a heart's extent read in that frame. Both the frame and the
 dilation retire: a member's place in its binding is its phase, and closeness
-is the in-step share, the one measure the chains, the coherence and the
+is the in-step share, the same measure the chains, the coherence and the
 torque already read (S¹'s linear measure, `in_step = 1 − 2|Δψ|`).
 
 - **The binding's phase:** its members' holding-weighted circle mean in each

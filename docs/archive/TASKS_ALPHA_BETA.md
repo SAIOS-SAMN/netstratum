@@ -4,7 +4,7 @@
 sweep (5 parallel agents, one per subsystem cluster, each verifying code
 directly rather than trusting doc prose) plus the standing-law findings
 from this session's `40_REJUVENATION.md` §6 work. Not itself law — a
-work-list to be ruled phase by phase, same discipline as `BUILD_ORDER.md`.
+work-list to be decided phase by phase, same discipline as `BUILD_ORDER.md`.
 
 **Baseline measured, not asserted:** `cargo test --workspace` is green
 except one pre-existing debt (`tuned_constant_ratchet`, 165 literals vs a
@@ -41,8 +41,8 @@ The engine is not broken; the gaps below are missing law, not broken law.
   two-node chronicle replication (`examples/ns5_two_nodes.rs`, forged
   chains refuse at the break) but **no cross-node consensus** —
   reconciliation, resync, and Sybil-resistant peer weighting are all
-  still open, consistent with the standing "mesh-second" ruling.
-  **Ruling: alpha ships single-node (one player or a trusted LAN
+  still open, consistent with the mesh-second build order.
+  **Alpha therefore ships single-node (one player or a trusted LAN
   replica), not networked multiplayer** — the engine underneath is
   ready for that scope, nothing here blocks it.
 - [ ] **The kernel Phase-3 flip (`39_PHASE3_FLIP.md`) — a second,
@@ -50,10 +50,10 @@ The engine is not broken; the gaps below are missing law, not broken law.
   The kernel currently runs beside the chain (judges every deed, 70/71
   types covered, zero refusals measured on a 15-world live sample) but
   is not yet the enforcement gate — deeds still apply regardless of
-  the judge's verdict. Promoting it needs exactly **one operator
+  the judge's verdict. Promoting it needs exactly **one
   decision**: the addressing-law question in `39_PHASE3_FLIP.md` §3.
-  This is unrelated to founding/tithe and can be ruled in parallel,
-  but it should be ruled early — every phase below plays differently
+  This is unrelated to founding/tithe and can be decided in parallel,
+  but it should be decided early — every phase below plays differently
   once refusals are load-bearing instead of advisory.
 
 ## 1. The founding economy — hard blocker, first deed every player hits
@@ -73,9 +73,8 @@ found in the whole sweep, because founding is literally step one.
 - [ ] **Fix the `seat_width()` None-placeholder defect.** 7 call sites
   (`ledger/src/registry.rs:124,132,260,269`; `conductor/lib.rs:1837,1843`;
   `cli/main.rs:1605`) pass `None`, leaving `thermal`/`cryo` domains
-  unreachable by founding — marked a defect by the operator on
-  2026-08-02 and still open.
-- [ ] **Rule the scope of purchase (§2a) and commission (§2b) for
+  unreachable by founding — a recorded defect, still open.
+- [ ] **Decide the scope of purchase (§2a) and commission (§2b) for
   alpha.** Today: `post_offer`/`clear_trade` trade `Resource`s between
   orbs, never a planetary ownership stake — no cross-World share
   purchase exists. `commission_star` (`thermal.rs:17`) is a bare stub:
@@ -102,7 +101,7 @@ and never built:
   `collect_as`, before `touch()` seals demurrage (its mirror),
   `rejuvenation_settle` folds the ration's growth-since-`last_touch`
   into the touch's own `YieldCollected` amount. No separate deed (per
-  the operator's "physics get no deed" design — the §2 digest rides the
+  the "physics get no deed" design — the §2 digest rides the
   collected amount); SEAL-B-safe with no new machinery, because the
   kernel already admits `YieldCollected` as a `+amount` mint and replay
   banks from the receipt. No kernel arm was needed after all. Regression
@@ -125,7 +124,7 @@ lanes at once, not just rejuvenation.
   shipped inaccuracy, not a missing feature — fix the claim even if
   the feature waits.
 - [ ] **E3.9 treaty element allow-lists** — open on the same board;
-  also the direct precedent this session's Medium-ration ruling
+  also the direct precedent the Medium-ration design
   (`40_REJUVENATION.md` §6.2) depends on for its rate-cap annex.
 - [ ] **`element_trade_step` NPC automation** (`31_ELEMENT_COMMERCE.md`)
   — refinery/route/market machinery is landed; the pure-NPC trade loop
@@ -134,7 +133,7 @@ lanes at once, not just rejuvenation.
 ## 4. The progenitor/delegation foundation — unlocks cross-sovereign play
 
 This is new scope this session surfaced, not a pre-existing task-board
-item, so it needs its own ruling before work starts. `12_UNION.md`
+item, so it needs its own decision before work starts. `12_UNION.md`
 §2/§2a (the progenitor `Station` as Tier-0 star/planet creator, planets
 delegated to sovereigns under council-gated diplomacy) is marked
 design and is, independently confirmed by two audits this sweep,
@@ -165,19 +164,19 @@ Phased:
 - [ ] **4d. Only after 4a–4b: land `40_REJUVENATION.md` §6** (the
   Medium ration, public externality, and its four-lever counter-play
   — diplomatic, legal, economic, delegation-gate) exactly as already
-  ruled in that document. Not before — the ruling's own text names
-  this dependency.
+  specified in that document. Not before — that section's own text
+  names this dependency.
 
 ## 5. Defense teeth and remaining design-only law
 
-- [ ] **Rule the kinetic lever.** Confirmed (independently, by this
+- [ ] **Decide the kinetic lever.** Confirmed (independently, by this
   session's Medium-ration counter-play work and by this audit's
   defense sweep): `raze`/`raze_as` is self-service only
   (`Scope::Raze` checks the actor owns the zone); cargo-in-transit
   interdiction exists (`strike_interdiction`) but **no mechanism lets
   one `World` destroy another `World`'s standing zone**. Multiple
   design docs gesture at war having real teeth beyond a trade wall;
-  today it doesn't. Needs its own ruling, referenced but not decided
+  today it doesn't. Needs its own decision, referenced but not decided
   by `40_REJUVENATION.md` §6.2.
 - [ ] Triage the remaining confirmed design-only items into
   needed-for-beta vs. post-beta: `05_THERMAL_BALANCE.md` §1.3–§1.4/§7
@@ -204,7 +203,7 @@ the society that eats it is missing:
   plasmoid founded on a hot world) stays Phase 4 (#34).
 
 These are post-founding depth (beta-facing), independent of Phases 1–3;
-schedule after the founding blocker (§1) unless ruled otherwise.
+schedule after the founding blocker (§1) unless decided otherwise.
 
 ---
 
@@ -216,20 +215,20 @@ Phase 0 (hygiene + the Phase-3 flip decision) ──► Phase 1 (founding/tithe)
                                                         (founding is step one)
 Phase 2 (settle-deed) ──► tasks #29, #30 (already blocked on it, per memory)
 Phase 4a ──► 4b ──► 4c
-                └──► 4d (40_REJUVENATION §6, already ruled, blocked here)
+                └──► 4d (40_REJUVENATION §6, already specified, blocked here)
 Phase 3 and Phase 5 are independent of the others and of each other —
 schedule by priority, not by dependency.
 The kernel Phase-3 flip (§0) is independent of founding/tithe (§1) and
-can be ruled in parallel — it changes how EVERY later phase behaves
-(refusals become load-bearing) so ruling it early, even if it lands
+can be decided in parallel — it changes how EVERY later phase behaves
+(refusals become load-bearing) so deciding it early, even if it lands
 later, avoids re-deriving downstream work against the wrong assumption.
 ```
 
-**Scope ruling this audit makes explicitly:** alpha targets a single
+**Scope decision this audit makes explicitly:** alpha targets a single
 node (one player, or a trusted LAN replica of the same chronicle) —
 the engine's persistence and CLI are alpha-ready today; the mesh's
-cross-node consensus is not, and is correctly out of scope per the
-standing mesh-second ruling. Multiplayer is a beta-or-later target,
+cross-node consensus is not, and is correctly out of scope under the
+mesh-second build order. Multiplayer is a beta-or-later target,
 gated on `engine/mesh` work (§36 spine adoption, Σ_mesh resync, a real
 Sybil-resistant peer weighting) not named further in this list because
 it was already correctly deferred.
@@ -244,7 +243,7 @@ it was already correctly deferred.
 3. Rejuvenation's settle deed lands, unblocking #29/#30.
 4. Every design-status doc this audit touched carries an explicit
    alpha/beta/post-beta triage, not silence.
-5. The kernel Phase-3 flip is ruled (landed or explicitly deferred with
+5. The kernel Phase-3 flip is decided (landed or explicitly deferred with
    a reason) rather than left an ambient assumption.
 6. The progenitor/delegation slice (4a–4c) lands before
-   `40_REJUVENATION.md` §6 is attempted — the ruling already says so.
+   `40_REJUVENATION.md` §6 is attempted — §6 already says so.

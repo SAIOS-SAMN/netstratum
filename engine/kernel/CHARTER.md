@@ -1,6 +1,6 @@
-# The kernel Charter — law for the one validated update function
+# The kernel Charter — law for the single validated update function
 
-**Status:** law (ratified 2026-07-31). Governs `engine/kernel`. Subordinate
+**Status:** law. Governs `engine/kernel`. Subordinate
 to `docs/00_CHARTER.md` §11 (the One-Truth Amendment); this document is its
 Rule 3 made concrete — the invariants, the equations, the algorithms, and
 the order they land.
@@ -100,8 +100,8 @@ default arm of the judge refuses: a deed no invariant covers does not enter
 (`Unlawful::Unjudged`). Coverage grows by amendment — each landing moves an
 event from the default-refuse arm to an explicit judged arm — and the kernel
 wires as the live gate (§11 Phase 3) only when `Unjudged` is unreachable,
-every event covered. The distinction that guards this forever: **SEAL A is a
-reader's law, never the judge's.** Readers skip unknown tags so old software
+every event covered. The distinction that keeps the default arm closed:
+**SEAL A is a reader's law, never the judge's.** Readers skip unknown tags so old software
 survives new content (SEAL A, right and permanent). A judge that skips
 unknown deeds is a hole exactly the size of every future tag. Two different
 laws, one word — "unknown" — and conflating them silently rebuilds
@@ -160,7 +160,7 @@ collapsing them) is lawful only if no orbit-lock binds them (§4).
 the mesh operator's).** I6's emission "mints a new fiber plane," but §11 says
 state-schema changes are amendments — runtime dimension-growth and a sealed
 schema collide unless the schema seals containers, not fixed dimensions.
-Inscribe what the tree already does: the gauge key is a variable-length
+Record what the tree already does: the gauge key is a variable-length
 container inside schema v1, grown only by receipt (`GaugeShiftedAt` opens
 planes); banked elements are likewise a container. So: **the schema seals the
 containers; the fibers grow inside them lawfully at runtime; new container
@@ -179,9 +179,9 @@ Read to know the state; never targets the kernel drives.
 - **Coherence functional** (the cocycle-CONSISTENCY measure; zero iff the
   differences compose — never "iff converged", see the correction below):
 
-        C(Δ) = Σ_i |R_i|        (exact rationals; the proportional law —
-                                 operator ruling 2026-07-31, amending the
-                                 earlier squaring clause: squares are
+        C(Δ) = Σ_i |R_i|        (exact rationals; the proportional law,
+                                 which replaces the earlier
+                                 squaring clause: squares are
                                  barred as aggregators of difference,
                                  on residuals as on torus distance — L1
                                  everywhere, the short way around, each
@@ -189,7 +189,7 @@ Read to know the state; never targets the kernel drives.
                                  its own units; the zero point the law
                                  judges at is unchanged)
 
-  **`C(Δ) = 0` is not "converged"** (operator correction 2026-08-01).
+  **`C(Δ) = 0` is not "converged".**
   Zero says the relations compose — `Δ_ik = Δ_ij + Δ_jk` for every
   triple. That is what the sealed `rfa_core::coherence_functional`
   states, and all it states. It does not say the two states are
@@ -221,9 +221,9 @@ Read to know the state; never targets the kernel drives.
 ## 4. Convergence — dimensional resolution, not gradient descent
 
 Gradient descent minimizes to a point and discards the residual — uni-
-directional, lossy. It is struck entirely (operator ruling 2026-08-01 — a
-failed topology; the earlier "kept only as a direction hint" is withdrawn,
-and the uni-directional linear timeline with it). The foundation is
+directional, lossy. It is struck entirely as a failed topology, since what
+it discards is the residual; the earlier "kept only as a direction hint" is
+withdrawn, and the uni-directional linear timeline with it. The foundation is
 dimensional capacity: `docs/EQUATIONS.md` §1, D0–D4 — capacity grows to
 admit what the universe expresses, and the difference is never reduced to
 fit. Convergence is **emission**, bounded on both
@@ -297,14 +297,14 @@ kernel judges one node, one step; anything spanning two nodes is the mesh's.
   door replays embedded certificates before adopting a spine.
 - **Seam conservation = I1 (kernel) + replay (mesh).** Local: aperture
   legs sum zero within one book — one unconditional line (why the
-  void-share ruling mattered). Cross-node: **`cfe::opposition` is
+  void-share receipt, tag 82, mattered). Cross-node: **`cfe::opposition` is
   excised** (c7cad9e), and the ANTI-MIRROR framing that named it is
-  deprecated (operator ruling 2026-08-01; `12_UNION` §2c). Its checks
+  deprecated (`12_UNION` §2c). Its checks
   are kernel I1/I6 now, and `tests/recurrence_guard.rs` refuses the
   module's return as a standing test. A merging node does not set two
   books against each other — it re-runs this identical kernel over the
   presented chain, so **admission is verification** (§11's nursery
-  law). Any cross-node reading is a lens over the one chain, never a
+  law). Any cross-node reading is a lens over the single chain, never a
   second record: *what cannot diverge needs no reconciliation.*
 - **I3 exactness** is the substrate both axes stand on: `C(Δ)=0` must be
   exactly zero and certificates verify exactly — impossible with floats.
@@ -314,7 +314,7 @@ of `C(Δ)`, `orbit_lock`, and `verify_certificate` belong in the sealed math
 core (§0b) — immutable, version-pinned — from the moment they exist; the
 kernel and mesh call them. What lands later is the wiring: I6 invoking
 `orbit_lock` lands with the spine; I4 invoking `verify_certificate` lands
-on **Ruling Box 1** (what work earns — pen weight, minting rights,
+on **Decision Box 1** (what work earns — pen weight, minting rights,
 receipt-coupled crystallization), and requires first moving the verifier
 from `engine/solver` into the sealed math core (it is math, not runtime).
 Consilience is never invoked by the kernel (cross-node — the kernel is
@@ -336,7 +336,7 @@ node assigns weight by fiat. All exact rational, in the sealed math core:
 
 Operator score reads the component semantics (Equations §3 — congruence,
 coherence, cohesion), which name where capacity is strained and never what
-to shrink; no gradient term survives (the damped-gradient term struck 2026-08-01). At mesh
+to shrink; no gradient term survives (the damped-gradient term is struck). At mesh
 scale the weight
 `ω` becomes the PoW++ ordering weight, and the confidence `confidence_e`
 is anchored to certificate-verified work (§5a) — that is the seam where
@@ -384,7 +384,7 @@ hash-shaped: state-vector hashing, commitment/merkle verification,
 hash-based proofs (stark-family). Matrix/AI compute needs different
 silicon. The choice of work-shape — hash-based vs proof-based vs
 search-based (Netstratum's solver certificates today) — determines what hardware
-participates, and it is a real economics ruling (Ruling Box 1 territory,
+participates, and it is a real economics decision (Decision Box 1 territory,
 what work earns) that the kernel does not make: the kernel only requires
 that whatever the work is, `solver_verify::verify_work` checks it by the
 full replay (re-forge ∧ re-apply ∧ re-chain — U1, landed). The bare
@@ -486,8 +486,8 @@ minimum, nothing wired as the live gate until the spine forms (§11 Phase 3):
 3. I3 exactness.
 4. I4 bounded creation / I5 bounded decay (the value law completes).
 5. The sealed vocabularies + derivation rules + `constitution_digest()`.
-   **Dependency direction (mesh-operator ruling): manifest-with-witness now,
-   invert at Phase 3.** The kernel holds a vocabulary manifest and a witness
+   **Dependency direction: manifest-with-witness now, invert at
+   Phase 3.** The kernel holds a vocabulary manifest and a witness
    proves `cfe`'s enums match it; the enums stay in `cfe` for now. The
    inversion (kernel owns the vocabularies, `cfe` depends up) lands at Phase
    3, when wiring the gate buys its cost back — the constitution digest makes

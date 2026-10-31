@@ -1,6 +1,6 @@
 # 49_TAXATION — The craftable tax system
 
-*Translated from operator directive 2026-08-13. A tax is not a hardcoded
+*A tax is not a hardcoded
 drain — it is a rule a civilization crafts: what it draws, when, from whom,
 at what rate, and where it flows. The engine already has one tax
 (demurrage, a fixed decay on standing stock); this generalises taxation
@@ -21,7 +21,7 @@ So taxation becomes data, one shape over many levies.
 ## 1. A tax is data (the practice / vocabulary precedent)
 
 A levy is a factor-set over the landed channels, exactly as a practice is
-(`28_VOCABULARY`, the practice-channel ruling). One levy declares:
+(`28_VOCABULARY`, the practice channels). One levy declares:
 
 - **base** — what it draws on: `Stock` (like demurrage), `Estate` (banked
   value + standing advantages at turnover), `Knowledge` (crystallized boons
@@ -92,14 +92,15 @@ what it owes on passing it on.
 - A world with no crafted levy pays only demurrage, exactly as today —
   byte-identical. Taxes are additive craft, never a silent new drain.
 
-## 6. Rulings owed
+## 6. Open decisions
 
 1. **The levy data model** — the exact `base` / `trigger` / `rate` / `sink`
    enums, and whether a levy is a minted vocabulary entry or its own deed.
 2. **The crafting gate** — who may mint a levy (a seated sovereign? a T0
    progenitor, like a vocabulary mint?), and its fourfold rate band.
 3. **The continuity decay** (§3) — how fast unconfirmed knowledge lapses and
-   exactly what lapses (which boons/practices), the `42_LIFESPAN §5` ruling.
+   exactly what lapses (which boons/practices), the open `42_LIFESPAN §5`
+   decision.
 4. **The estate base and rate** (§4) — what counts as the taxed estate
    (banked stock only, or advantages too) and the handover rate.
 5. **The workbench scope** — the `Levy` bench this layer, vs a broader

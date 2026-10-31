@@ -1,7 +1,6 @@
 # The world-book, chapter 2 — civilization genesis
 
-**Status:** design, ruled 2026-07-25 (operator direction + coder-01
-substrate mappings). This chapter specifies who plays: entity genesis, the
+**Status:** design (with coder-01's substrate mappings). This chapter specifies who plays: entity genesis, the
 three civilization axes, and the perception mechanics. Every mechanic here
 is stated against a named substrate primitive (`engine/rfa-core`,
 `engine/physics`) per the parallel-node protocol (Charter §10) — cite the
@@ -89,11 +88,10 @@ injections** into the civilization's Delta (contract §5; randomness
 contract §6 — every draw routes through `physics::beacon` with a named
 domain tag). The visible stress gauge is
 `rfa_core::coherence_functional` (`C = Σ |R|` — the sum of residual
-magnitudes; squares were barred as aggregators of difference by the
-proportional law, operator ruling 2026-07-31, and this line's earlier
-"sum of squared residuals" is struck with it). Zero iff the cocycle
-condition holds — the differences compose — never "iff converged"
-(operator correction 2026-08-01): a civilization may read zero and
+magnitudes; the proportional law bars squares as aggregators of
+difference, and this line's earlier "sum of squared residuals" is struck
+with it). Zero iff the cocycle condition holds — the differences compose —
+never "iff converged": a civilization may read zero and
 still carry its whole irreducible H¹ core, which is its genuine
 difference and is never drained as stress. The substrate contract pins
 the true reference values.
@@ -118,7 +116,7 @@ probabilities, exact draws, bit-for-bit replayable.
   the measured loss visible ("harmonic bubble, 3/4 of structure survives a
   planar read — build a resonance array to close the gap").
 
-## 5. The topology (ruled 2026-07-25, all three nodes aligned)
+## 5. The topology (all three nodes aligned)
 
 ```
 CIVILIZATION  who — a species-level identity ("bimaniform", "deep-chorus");
@@ -151,11 +149,10 @@ Three bindings that keep this honest:
 The word "world" is hereby reserved for the container; the struct gets
 renamed at the multi-planet landing (before N6), not before.
 
-## 6a. The swarm register — eusocial and web-weaver lines (ruled 2026-07-30)
+## 6a. The swarm register — eusocial and web-weaver lines
 
-The operator seats the **Klethaxu** (eusocial ant swarms) as a founding
-swarm archetype, with an arachnid web-weaver strain to follow at its own
-wave. The register law (06) binds: myth + physiology here, and only what
+The **Klethaxu** (eusocial ant swarms) are seated as a founding swarm
+archetype, with an arachnid web-weaver strain to follow at its own wave. The register law (06) binds: myth + physiology here, and only what
 ties to the engine is mechanically real.
 
 **The axes carry it unchanged — no new values.** The vocabulary is

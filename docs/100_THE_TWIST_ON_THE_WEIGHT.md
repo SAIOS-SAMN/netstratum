@@ -1,14 +1,19 @@
 # 100 — The twist on the weight: the quantum state the elements flow by
 
-Design direction (2026-10-27): formulate the quantum state properly, so that
-the filament (the ocean) the elements flow through carries the proper twists
-on the weight. Status (2026-10-28): §1, §2, §4, §5, §8, §9.2 built (65348e2,
-4ffd2e7, 2db928e, a12af8c); §3 waits on the operator's ruling on C; §9.1 and
-§9.3 wait on the ruling of R's scale. Builds on docs/94 (the Möbius
-jetstream), docs/96 (founding as flow), docs/97 (Q, Z, R; §14 the densest
-element), docs/99 (phases, never frames); Xylarium kernel 11.0 (8) twist and
-torsion on the jets, (13) the harmonic founding, and its built
-`circuit::axes::antinode`.
+This document defines the quantum state of each kind (its place and its
+harmonic weight) and the twist the bounce gives it, so that the filament
+through which the elements flow (the ocean) carries each kind's twist by its
+weight. It also covers the jets' locked lead, twist as tension in the fibre,
+quantum torsion and sub-atomic phase transitions.
+
+**Status (2026-10-28):** §1, §2, §4, §5, §8 and §9.2 built (65348e2,
+4ffd2e7, 2db928e, a12af8c); §3 waits on the decision on C; §9.1 and §9.3
+wait on the decision on R's scale.
+
+**Prerequisites:** docs/94 (the Möbius jetstream), docs/96 (founding as
+flow), docs/97 (Q, Z, R; §14 the densest element), docs/99 (phases, never
+frames); Xylarium kernel 11.0 (8) twist and torsion on the jets, (13) the
+harmonic founding, and its built `circuit::axes::antinode`.
 
 ## 0. What stands now
 
@@ -62,7 +67,7 @@ that twist in every plane of its place - the product over its planes - so
 the kinds in step ride the jets out far, the out of step stay deep. The
 superheavy kinds (complex high-l shells) are the most out of step."
 
-**The form:** keep the force and the inertia (direction of 2026-10-18: the
+**The form:** keep the force and the inertia (the
 push is agnostic to the element except through the force; inertia stands) and
 add the coupling:
 
@@ -72,9 +77,9 @@ add the coupling:
 deep by inertia and by coupling; light, simple kinds ride out; chemical
 variety from the place, never a draw.
 
-**The coupling (open, for ruling):** Xylarium's built antinode law gives a
+**The coupling (open, to be decided):** Xylarium's built antinode law gives a
 harmonic of order q the share `1/q` for odd q and 0 for even q (a node: its
-two faces cancel). Which order a kind presents is the open ruling (Xylarium:
+two faces cancel). Which order a kind presents is the open decision (Xylarium:
 "how many frames a shell holds ... is open and sets every kind's phases"):
 
 - (a) `q = l(w) + 1`, its outer degree's order: s-shells (`l = 0`) couple
@@ -85,13 +90,13 @@ two faces cancel). Which order a kind presents is the open ruling (Xylarium:
   (a sealed nuclide is whole, `b = 1`): monotone where the twist is small,
   periodic in l.
 
-Xylarium's answer (2026-10-27, a reading of its spec, not a ruling): its
+Xylarium's answer (a reading of its spec, not a decision): its
 atom-band question is closed as the pivot degree on S^11 with its Hopf
-fibres (its 11.0 (14), Netstratum's convergence); it has no ruled C (its circuit never
-computes one); of (a) and (b), (a) is the one consistent with the pivot-degree
-ruling, reading the order straight from the open degree, and non-monotone in
-weight is acceptable ("shells, not weights, set the order"). The choice is
-the operator's.
+fibres (its 11.0 (14), Netstratum's convergence); it defines no C (its circuit
+never computes one); of (a) and (b), (a) is the option consistent with the
+pivot-degree closure, reading the order straight from the open degree, and
+non-monotone in weight is acceptable ("shells, not weights, set the order").
+The choice remains open.
 
 ## 4. The jets' locked lead (the helix)
 
@@ -144,7 +149,7 @@ the inverse universe the open ends are the protons, so a kind whose outer
 degree is unpaired presents its protons to the twist (open, coupling) and a
 sealed kind presents only fibres (whole).
 
-## 8. Quantum torsion (direction of 2026-10-27: add quantum torsion and the sub-atomic phase transitions)
+## 8. Quantum torsion
 
 The bounce is Einstein–Cartan: torsion is real and couples to spin
 (Xylarium (8)). In Netstratum's grammar torsion is the winding a quantum state takes
@@ -168,7 +173,7 @@ from the twist, per plane, and keeps until its own turning relaxes it.
 
 ## 9. Sub-atomic phase transitions
 
-A phase transition is a state crossing a hemisphere boundary (the one
+A phase transition is a state crossing a hemisphere boundary (a single
 measure, `1 − 2|ψ|`, crossing ½): never a threshold set. Three, one per
 sub-atomic state, each read at the body's own pulse phase p (docs/97 §13).
 
@@ -225,7 +230,7 @@ given or taken. Nucleons conserved; weight unchanged; the table unchanged.
    breath now draws nothing): the core's winding `φ_k = ½·t_k`; the galaxy's
    torsion phase accumulated; `quantum::torsion_phase`'s draw retired.
    Witness: the hidden phase reads the same at N and 4N on the closed form.
-3. **Carriage by harmonic** (§3), after Xylarium's ruling on C. Witness: the
+3. **Carriage by harmonic** (§3), once C is decided. Witness: the
    heaviest kinds held at the core; the cascade still conserves nucleons and
    spin.
 4. **The locked lead** (§4) and **the ocean's twist** (§6) (built: a

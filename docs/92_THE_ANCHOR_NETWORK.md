@@ -1,25 +1,20 @@
 # 92 — The anchor network: the core held to its accretion disc, stars chained by gravity
 
-Design directions of 2026-10-25, in order:
+This document specifies the anchor network: each galactic core is held to
+its accretion disc, and stars are chained to it and to each other by
+gravity. It addresses four findings:
 
-- The pull strength was being computed incorrectly.
-- The galactic cores are pulled to their accretion discs.
-- (Relayed by Xylarium the same day.) The galactic core was chained too
-  far: the bounce holds only to the edge of the accretion disc, and the
-  disc in turn offers attachment to the first coordination of stars, which
-  chain down through the order of stars, so that the stars form a network
-  held by gravity.
-- (Xylarium.) The semantics overlapped between throats and the cores of
-  stars, which are reactors; something connects core, reactor and planet.
-- Anchors weaken by distance, and by torque, twist and spin.
-- This document scopes and documents the network.
+- The pull strength was computed incorrectly.
+- The galactic core's hold extended too far. The bounce holds only to the edge of the accretion disc; the disc offers attachment to the first coordination of stars, which chain down through the order of stars, so that the stars form a network held by gravity.
+- One term covered both throats and stellar cores. Stellar cores are reactors, and a distinct link connects core, reactor and planet.
+- Anchors weaken with distance, and with torque, twist and spin.
 
-Status: scoped, not built. Derived with Xylarium (one form for both
+**Status:** scoped, not built. Derived with Xylarium (one form for both
 carriers). The reactor's extent fall (§3.3) is built (12574d0).
 
 ## 1. The finding that forces it
 
-The one pull law, read at every tier, is the deficit `δ = H/(d + H)`: a
+The pull law, the same at every tier, is the deficit `δ = H/(d + H)`: a
 body of hold `h` (its mass share of its parent, 3Z a nucleus since f60beac)
 pulls at distance `d` by `h/(d + h)`; its pull falls as one over distance.
 
@@ -105,8 +100,8 @@ A body at reach `r` anchored to an anchor at `R_p` of hold `H_p` feels
     δ_p = H_p / ((r − R_p) + H_p)
 
 measured across its gap from the anchor, never from the core. The anchor's
-grip on it weakens by distance, torque, twist and spin (operator,
-2026-10-25), each a reading the law already has, each entering once:
+grip on it weakens by distance, torque, twist and spin (the opening
+requirements), each a reading the law already has, each entering once:
 
     g = δ_p · |k| · in_step(ψ_c − ψ_c,p) · d/(d + turned)
 
@@ -160,11 +155,11 @@ is past every tether: it exits to the ocean.
 
 ### 3.7 The planets: the second movement (the lock share)
 
-Operator 2026-10-25: the star's path about its core and the planets' path
-about the star are two movements; a planet's orbit is its tug plus the
+The star's path about its core and the planets' path about the star are
+two movements; a planet's orbit is its tug plus the
 star's spin. The pull of the core on the star is built (1133c7c). The lock
 share is derived, not built: `c = δ(r)`, the held face (the unlocked face
-`½(1 − δ)` is what the tide heats, 2026-10-16), as shared inertia:
+`½(1 − δ)` is what the tide heats), as shared inertia:
 
     ℓ_s = S·unit / (kept + Σ m_i·δ_i),   ℓ_p = ℓ_tug + δ(r)·ℓ_s
 

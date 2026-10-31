@@ -7,7 +7,7 @@ tags 30–38, 41). All rates, windows, weights, and curves remain
 **placeholder parameters** that tune at balance time; the recorded
 deferrals and their reopen paths live at `OPEN_QUESTIONS.md` Q4.
 
-**The founding insight (operator relay, 2026-07-27):** love, compassion,
+**The founding insight:** love, compassion,
 morality, and integrity are tradeable structure, not flavour. Just as
 `T_eq⁴` governs the physical thermodynamics of a sector, the cohesion
 ledger governs its *social* thermodynamics: every environment, resource
@@ -17,7 +17,7 @@ there is no universal home, and there is no universal virtue — only the
 alignment between a civilization's survival strategy and its regime. The
 engine judges nothing and measures everything.
 
-**The form ruling (same relay, recorded):** the "unitary morphodynamics"
+**The form decision:** the "unitary morphodynamics"
 formulation — encoding the four as continuous unitary field dynamics — is
 refused (`OPEN_QUESTIONS.md` Q3): continuous field transforms on floating
 hardware diverge across architectures (the no-float law, Charter §3.2, and
@@ -28,7 +28,7 @@ deeds**.
 
 ---
 
-## 1. The measurement law (the founding ruling)
+## 1. The measurement law (the founding rule)
 
 Ideology is **measured, never declared and never scored**:
 
@@ -41,7 +41,7 @@ Ideology is **measured, never declared and never scored**:
    uplink precedent). The chronicle carries deeds; arithmetic over deeds
    is free and replayable.
 3. **Each axis is read in its own units, and named.** Every consequence
-   attaches through a specific inscribed mechanic (§3) that cites the
+   attaches through a specific mechanic (§3) that cites exactly
    one axis it reads — compassion is consulted as compassion, fidelity
    as fidelity, each in the units it accrued. Four axes, four readings,
    four names. *(Consequently there is no goodness scalar and no oracle:
@@ -69,7 +69,7 @@ Ideology is **measured, never declared and never scored**:
 
 Each axis reads as `syntropic / (syntropic + entropic)` — an exact
 rational in `[0, 1]`, derived, with the empty-books reading a placeholder
-parameter per mechanic (§3.1's ruling: the empty book is not a
+parameter per mechanic (§3.1's rule: the empty book is not a
 credential). All posts are valued in ember-commensurable units (05 §1.4
 made sink commensurable; other resources post through a placeholder
 commensuration table, weight 1 in v1).
@@ -177,7 +177,7 @@ vitrified matrix, release on fulfilment, `BREACH_AND_SLASH` on breach.
 - **`forwards_fulfilled`** += the collateral-at-stake value on release.
 - **`forwards_breached`** += the collateral-at-stake value on slash.
 
-**Value-weighted, never count-weighted (inscribed ruling):** a thousand
+**Value-weighted, never count-weighted:** a thousand
 toy promises must not wash one giant breach — the wash-trading exploit is
 closed at design time by weighting both books in stake value.
 
@@ -204,8 +204,8 @@ closes the loop.
 **Declared vs measured (the composition rule):** a sector's *declared*
 policy is a covenant (§2.3's axis); its *measured* policy is this ratio.
 
-**And this distinction is the covenant ruling, already latent here**
-(operator ruling 2026-08-02). A declaration is a way of living that a
+**And this distinction is the covenant rule, already latent here.**
+A declaration is a way of living that a
 line chooses — so the covenant is civilizational, adopted freely and
 gated at T0/T1/T2. A measurement is what a line did — so this ratio,
 and the friction computed from it (§3.2), are universal and bind
@@ -229,10 +229,10 @@ CLI discipline: "3/2", never 1.5).
 ### 3.1 Collateral scales with fidelity
 
 Escrow collateral requirement is a placeholder curve on the fidelity
-ratio — exact-rational, monotone, with an inscribed **ceiling**: a
+ratio — exact-rational, monotone, with a **ceiling**: a
 zero-fidelity sector pays the maximum collateral, it is never barred
 (01 §5 guardrail 6 — the lawful, costlier path always remains; ostracism
-is never absolute). The empty-book reading is a parameter; the candidate
+is never total). The empty-book reading is a parameter; the candidate
 default is full collateral until a history exists — trust is earned, and
 the empty book is not a credential.
 
@@ -289,9 +289,9 @@ or it pays the inert exactly what it pays the reciprocal.
 
 ### 3.2a Friction vents whole — a landed law it does not obey
 
-**(operator ruling 2026-08-03: where friction creates a force for
-divergence, its energy output must be captured in re-convergence or
-consilience.)**
+**Requirement (from `EQUATIONS` T3, below):** where friction creates a
+force for divergence, its energy output must be captured in
+re-convergence or consilience.
 
 **The gap, verified.** Friction posts its entire amount to the void:
 
@@ -335,11 +335,11 @@ disagree**. Two independent conduct records that could have diverged
 and did not are exactly that. So capture may be measured as
 consilience; it may never be routed through a reconciler.
 
-**Landed 2026-08-03, on the operator's ruling:** *friction is
-mechanical and relational work dissipated into thermal micro-states —
-`ΔQ_friction` and `ΔQ_thermal` are the exact same physical currency, so
-any entropic dissipation within an encased system is subject to capture
-by the encasement sink.* Entropic dissipation is entropic dissipation,
+**Landed 2026-08-03.** The basis: friction is mechanical and
+relational work dissipated into thermal micro-states — `ΔQ_friction`
+and `ΔQ_thermal` are the same physical currency, so any entropic
+dissipation within an encased system is subject to capture by the
+encasement sink. Entropic dissipation is entropic dissipation,
 whether generated by a star or by moving parts.
 
 ```text
@@ -397,7 +397,7 @@ shippable artifact):
 All placeholder terms; each is ordinary FORWARD-1 machinery, no new
 physics.
 
-### 3.4 What is refused here (inscribed)
+### 3.4 What is refused here
 
 1. **The stored score** — any mutable "alignment stat" (the provenance
    refusal; §1 rules the lawful form).
@@ -441,12 +441,12 @@ the outside. The world's physics explains its own ethics.
 ## 6. Binding notes for the landings that implement this
 
 - The mechanic lands under the BUILD_ORDER law: spec sections + test
-  vectors in the same landing, red-first, on explicit operator go — the
+  vectors in the same landing, red-first, on explicit approval — the
   ideology board at `BUILD_ORDER.md` §3 sequences five landings, each
   opening exactly one axis's books. This document is design authority,
   not a landing.
 - Candidate protocol home: deeds are NS-1 events with NS-3 receipts
-  (candidate tags reserved on the board, inscribed into NS-1 §2.3 only at
+  (candidate tags reserved on the board, written into NS-1 §2.3 only at
   landing); the escrow node is an orb; trade *offers* ride NS-4 at N5;
   cross-empire book composition awaits NS-5 (Q2.3's universe audit).
 - Consumers named per landing (Charter §1): `send`, `absorb`,
@@ -456,7 +456,7 @@ the outside. The world's physics explains its own ethics.
   here draws chance
   (Charter §9); exact-rational vocabulary throughout (Charter §8).
 - Cross-territory: observer columns land in `engine/lens` (coder-01) by
-  operator relay — the VENT-1 uplink precedent (Charter §10). (`engine/mirror`
+  cross-territory relay — the VENT-1 uplink precedent (Charter §10). (`engine/mirror`
   is deleted and its name never reused — d606b01, the recurrence guard;
   MIRROR/ANTI-MIRROR deprecated, `12_UNION` §2c.)
 - The Chronicle Feed (08, JOURNAL-1) rightly refused to invent an ideology

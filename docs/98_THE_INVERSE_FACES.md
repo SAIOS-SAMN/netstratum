@@ -1,18 +1,22 @@
 # 98 — The inverse faces: gravity, magnetism and velocity on the other leg
 
-Design direction (2026-10-27): magnetism, gravity and velocity invert, because
-the continuum is in fact the vacuum.
+This document derives the faces of the inverse universe. Xylarium's forward
+frame holds gravity on the continuum face; in Netstratum's inverted frame
+the held and unlocked shares exchange under the inversion `δ ↦ 1 − δ`, so
+gravity, magnetism and velocity are read on the other leg, the vacuum face.
+§3 shows that the inversion is already present in the grammar and, under the
+symmetric luminal bound, is a relabel for motion.
 
 > **Corrected (2026-10-28, docs/103 §5):** §3's "a relabel" holds for motion,
 > not for production: the luminal bound keeps most matter on the vacuum face,
 > inside the ring, while the strip, crest and disc read the continuum face.
 
-Status (2026-10-28): §3–§5 derived; §4 the symmetric luminal bound built
-(fa7378d); §6 read (§7) and carried into docs/99. Open: the leg flag's second
-writer (`flows::stream`, docs/101 §1.6).
+**Status (2026-10-28):** §3–§5 derived; §4, the symmetric luminal bound,
+built (fa7378d); §6 read (§7) and carried into docs/99. Open: the leg flag's
+second writer (`flows::stream`, docs/101 §1.6).
 
-Builds on docs/94 §2 (the Möbius jetstream), docs/96 §7–§8, docs/97 (Q the
-proton, Z the neutron, R the electron's phase; the nucleus as built).
+**Prerequisites:** docs/94 §2 (the Möbius jetstream), docs/96 §7–§8, docs/97
+(Q the proton, Z the neutron, R the electron's phase; the nucleus as built).
 
 ## 1. Xylarium's faces (forward)
 
@@ -32,7 +36,7 @@ push, light and cooling read `δ(R)` where the forward read `1 − δ(R)`.
 ## 3. The inversion is already in the grammar, and the luminal bound makes it a relabel
 
 - **Inversion through the throat**, read on the share (first degree, never a
-  radius squared, design law 2; ruling of 2026-10-28: no squares inside a sphere), keeps every angle and maps
+  radius squared, design law 2: no squares inside a sphere), keeps every angle and maps
   `δ ↦ 1 − δ` (witness: `recycle` tests, fixed at R = H, both ½). A mote
   carries its face (`Mote.vacuum`); on the inverted face it reads its pull
   and turning at `1 − δ`, runs its circulation backward, and reflects its

@@ -4,23 +4,25 @@
 > stand-in heat, beside the established laws. Removed. A world's day is its
 > clock's slip against its star (`life::World.days`); its feed is its star's
 > light through its unlocked face (`breath::shine`). Its shape, spin planes
-> and place on its star's sphere await the ruled geometry (docs/89 step 6).
+> and place on its star's sphere await the geometry still to be decided
+> (docs/89 step 6).
 
 # 88 — The equipotential figure: a body's own sphere, its own spin, its day and its figure
 
-docs/87 step 1, and step 2b. Design direction (2026-10-22): planetary movement
-is across a sphere, and so is space traversal (the sphere being an
-equipotential figure); the days in a year cannot be a constant, but are
-derived from the degrees of the planet's own spin coupled with its orbit
-about its star; derive the body's own spin.
+This document defined a body's own sphere, its spin, its day and its figure
+(docs/87 steps 1 and 2b): movement across a planet and through space on
+spheres, and the days in a year derived from the planet's own spin coupled
+with its orbit about its star rather than held as a constant. It is
+superseded by docs/89 (see the note above).
 
 ## The law (`conductor::geoid`)
 
 In the ring law's grammar (`ring`: mass is holding; a place turns by its
 deficit `δ = H/(r + H)`, two rings a bell on the system's meeting step).
 
-1. **The surface is the throat**, `r = H_b`, where the body's own hold is the
-   ruled half, `δ_b(H_b) = ½`; a satellite skimming it turns at `2·½ = 1`.
+1. **The surface is the throat**, `r = H_b`, where the body's own hold is
+   half, `δ_b(H_b) = H_b/(2H_b) = ½`; a satellite skimming it turns at
+   `2·½ = 1`.
 2. **Own spin** (`Body.own`, tag 20) is the turning against the orbit's
    frame, signed (positive with the orbit). The orbit's own turning is met
    by the star's pull (that is what an orbit is), so only own spin pushes
@@ -48,7 +50,7 @@ deficit `δ = H/(r + H)`, two rings a bell on the system's meeting step).
    world locked to its star (no day) climbs nothing.
 4. **The figure.** The push is own spin's share of the skimming turn,
    `s = |ω_own|`, felt by the mantle, `s_κ = s·(1 − κ)`. At θ degrees from
-   the spin axis it acts by the ruled sine `S(θ) = 1 − |90° − θ|/90°`
+   the spin axis it acts by the sine `S(θ) = 1 − |90° − θ|/90°`
    (docs/85); the surface stands where hold less push is the pole's:
 
    ```text

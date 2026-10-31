@@ -7,7 +7,7 @@ grow when the nodes that use it are distributed and may not agree?**
 
 Subordinate to `00_CHARTER.md`. The tag registry (`dop.rs` header) is
 this document's older counterpart and its precedent — one code, one meaning,
-forever.
+never reassigned.
 
 ---
 
@@ -77,7 +77,7 @@ it drifts silently because nothing forces the copies to agree.
 
   **Exhaustive by construction.** `tier_covers_every_station` walks
   `STATIONS` and fails if any value has no band, so adding a station
-  without ruling on its tier breaks the build. That is the
+  without deciding its tier breaks the build. That is the
   `kernel::layer_of` shape syntropy-inscription named — exhaustive over
   its input with no wildcard, so a new case cannot land without someone
   deciding its reach.
@@ -96,8 +96,7 @@ quietly replaced.**
 2. The second called it ward scope. **Also wrong, and wrong in a way
    worth naming: it promoted a menial mechanic into an axis.**
 
-**The ward is colony-level and stays there** (operator ruling
-2026-08-02). It is one planetary shield — `World::ward_elder`,
+**The ward is colony-level and stays there.** It is one planetary shield — `World::ward_elder`,
 `World::lift_ward`, `World::ward_holds`, all methods on one world, which
 `04` §5 defines as one clock and one chronicle. `ElderWarded` is a
 world-scoped receipt. **The code had it at the right level the whole
@@ -153,7 +152,7 @@ An ancient opens the room.**
 
 Progenitors are already defined as the ones who *make the room everyone
 else moves on* (`12_UNION` §2a, the tier overlay). The ancient is one
-scope further out: **the one who makes the room the progenitors make
+scope further out: **it makes the room the progenitors make
 rooms in.** Nothing is handed down; what changes is how much space
 exists to be earned.
 
@@ -229,7 +228,7 @@ are unreachable through any door.** `mineral` always reads `lithic` and
 `biotic` always reads `mesic`, because those are the `None` arms. Two
 rooms exist in the code and cannot be entered.
 
-**Two corrections to this section's drafts (operator, 2026-08-02).**
+**Two corrections to this section's drafts.**
 Both are struck rather than quietly replaced.
 
 1. *"No path sites a line; every line is unsited forever."* **False.**
@@ -240,8 +239,8 @@ Both are struck rather than quietly replaced.
    **False, and it inverted the law.** The beacon picks among three
    seats; **all three land in the same thermal outcome.** The draw is
    orbital detail. **Metabolism is what places a line, deterministically
-   — and metabolism is on the card.** This is the standing rule (operator,
-   2026-07-31): *orbital mechanics are stochastic, the laws of the land
+   — and metabolism is on the card.** This is the standing rule:
+   *orbital mechanics are stochastic, the laws of the land
    are deterministic.* The drafts read the stochastic half as the law.
 
 **Measured, not quoted** (`cfe/tests/siting_determinism.rs`, both pins
@@ -269,7 +268,7 @@ correct band in every case: biotic reads `mesic` either way, mineral
 genuinely has no band so `lithic` is right, plasmic is metabolism-only.
 **The seven `None` call sites are not wrong at founding.** They are
 wrong only for a world sited outside the default regimes — and
-`PolitySpec` can pin star, albedo and orbit, with pinned fields ruling
+`PolitySpec` can pin star, albedo and orbit, with pinned fields taking precedence
 over derived ones (lib.rs:718-720; `offer_pins.rs:25` does exactly
 this). A pinned hyperthermal world's line should read `thermal` and
 reads `lithic`.
@@ -279,10 +278,10 @@ domains no default founding reaches** — they require a world sited
 outside the two founding regimes, which today means an explicit spec,
 and in the mesh means a world arrived at rather than founded.
 
-**Superseded in part (operator ruling 2026-08-02, `20_FOUNDING` §4).**
-The paragraph above reported this as settled design. **It is ruled a
-defect.** Every type the game offers must have a viable founding site,
-so a bandless furnace seat and an unfoundable `cryo` are both faults to
+**Superseded in part (`20_FOUNDING` §4).**
+The paragraph above reported this as settled design. **It is a
+defect**, because every type the game offers must have a viable founding
+site: a bandless furnace seat and an unfoundable `cryo` are both faults to
 fix, not properties to document. The measurements stand; the verdict
 does not. And because founding becomes an acquisition (`20_FOUNDING`
 §1), lines will routinely stand in bands their metabolism never implied
@@ -308,13 +307,13 @@ ancient's act in its purest form — the room opens because the universe
 got bigger, and the seats in it are still unearned.**
 
 **Deliberately not done here:** siting is a schema change to a stored
-card and to the roster `install.sh` writes before first boot. That is
-the operator's ruling, not a lane's cleanup.
+card and to the roster `install.sh` writes before first boot. It is an
+open decision, not a lane's cleanup.
 
 ## §6 The station law — every mechanic declares its layer
 
-**Operator ruling 2026-08-02, and it is inscribed because the same
-defect landed three times in one day.**
+**This law is stated because the same defect landed three times in one
+day.**
 
 **The failure, measured.** The corpus states what every mechanic does
 and states no mechanic's reach. A rule's layer is therefore inferred
@@ -351,7 +350,7 @@ CIVILIZATIONAL one line's own register: its practices, its creeds, its
                else.
 ```
 
-### 6b. The test, and it is the one that would have caught all three
+### 6b. The test that would have caught all three
 
 **Ask of any mechanic: if a line never uses this, what does it lose?**
 
@@ -403,7 +402,7 @@ AXIS      CONSTITUTIONAL. An axis is a dimension of identity the kernel
           may judge on. Opening one is a charter amendment and a VERSION
           bump — never a local edit. The set of axes IS the totality.
 
-VALUE     CLAIMED, like a wire tag. One code, one meaning, forever;
+VALUE     CLAIMED, like a wire tag. One code, one meaning, never reused;
           append-only; the claim lands in the authority named in §2
           BEFORE any code uses it. A value may never be removed or
           repurposed, only retired.
@@ -431,7 +430,7 @@ visible from where the thing is written down.
 
 **Owed, and named rather than assumed:** the tier axis has no authority
 (§3); seat scope is now opened as law but its operand is cut at seven
-call sites (§4e — *what sites a lineage?* is the one open question);
+call sites (§4e — *what sites a lineage?* is the only open question);
 and no lint yet checks that a value claimed in a doc exists in its
 crate, the way `constitution_lint` checks that a citation resolves.
 That lint is the mechanical form of this whole document.

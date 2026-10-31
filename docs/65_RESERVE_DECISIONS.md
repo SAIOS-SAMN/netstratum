@@ -1,9 +1,9 @@
-# 65 — The reserve and the bank: the rulings it is built on
+# 65 — The reserve and the bank: the decisions it is built on
 
 Inputs to Netstratum's reserve and central-bank design (not yet built). Each
-is an operator ruling relayed by the coordinator; the source is named.
+section names its source specification.
 
-## μ (operator, 2026-10-09; Mycelium 78.149, MU-ECONOMY)
+## μ (Mycelium 78.149, MU-ECONOMY)
 
 1. **Strict μ.** μ pays only the measured discharge of verified work: no μ
    for a lone Scale, time stood, unclosed demand, or letter and callus
@@ -32,7 +32,7 @@ is an operator ruling relayed by the coordinator; the source is named.
    to seated minds and files their answers under its reserve; it solves
    nothing itself (applied in ns-hypha 2026-10-09).
 
-## Earlier rulings on the reserve (2026-10-08)
+## Earlier decisions on the reserve
 
 - The core's holdings are the throat's bank, not tradable.
 - The reserve is separate: the house's stock of its survival basket, which
@@ -43,9 +43,9 @@ is an operator ruling relayed by the coordinator; the source is named.
 - μ's worth in the basket is emergent: a clearing market plus the bank
   council's policy, never a rate parameter.
 
-## Wormholes (operator, 2026-10-09; Concordance 5.9, Mycelium 78.154)
+## Wormholes (Concordance 5.9, Mycelium 78.154)
 
-Corrected the same day: a wormhole crossing does not go through the hypha.
+Correction: a wormhole crossing does not go through the hypha.
 Every traversal requires coordinates from the hypha, which keeps the maps
 that lay the universes out on TUniversal (time is coordinates on a map). The
 crossing happens in Netstratum's universe; beforehand, each mouth's final

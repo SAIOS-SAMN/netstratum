@@ -1,7 +1,7 @@
 # 105 — Polarity equilibria: the master equation of a two-pole exchange
 
-Design direction (2026-10-28): derive the master equations of the polarity
-equilibria. Builds on docs/104 (the inverse duals; §1.1 the count; §1.2 every
+This document derives the master equations of the polarity equilibria.
+It builds on docs/104 (the inverse duals; §1.1 the count; §1.2 every
 share a pair share), docs/97 (the nucleus), Xylarium's founding survival
 (`elements.rs` `founded`, 11.0 R4: a reading relayed 2026-10-28, inverted here
 through Netstratum's polarity).
@@ -62,7 +62,7 @@ Xylarium's (c), inverted: its survival `a·h` reads the crossing's carried
 share (the fixed point) and the held share; Netstratum's reads the held face at the
 crossing for the lone ends and the fibres' own pairing for the bound ones.
 
-### 4.1 The equilibrium at the core (ruling of 2026-10-28: the equilibrium `g = ¼` was still a constant, and the added dimension on the originating sphere is stripped; the equilibrium is derived at the core)
+### 4.1 The equilibrium at the core
 
 **Why ¼ was a constant.** The window's g read `1 − (1 + g_throat)/ν`, every
 term a fixed point, and the exchange's rates summed to one (`g + u = 1`):

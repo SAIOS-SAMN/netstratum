@@ -1,8 +1,8 @@
-# Build order — the one carrier
+# Build order — the single carrier
 
 **Law: the current landing is read here, never inferred.** One landing at a
 time; red-first with recorded output; spec + mechanic + test vectors in the
-same landing (Charter §1); commit on explicit operator go.
+same landing (Charter §1); commit only on explicit approval.
 
 ## 0. The landed ledger
 
@@ -16,13 +16,13 @@ same landing (Charter §1); commit on explicit operator go.
   extracted byte-exact (genesis predecessor zero; chain `Intact`); tamper
   divergence measured (one changed u64 → digest `c86c17aa…` → `366aa785…`).
   Vectors are self-contained in NS-3 §3 — any implementation verifies from
-  the document alone. Ruling carried: the normative TLV event encoding lands
+  the document alone. Decision carried: the normative TLV event encoding lands
   with the first engine implementation at N2 (the event vocabulary cannot
   precede the actions that close).
 - **N2 landed** (2026-07-25): NS-1 DOP first cut + the first playable slice.
   The workspace opened (`engine/cfe`, `clients/cli` — `cargo run -p
-  netstratum-cli` is the one onboarding command). Evidence: clippy zero;
-  **11/11 witnesses green, memory-capped** (NS-3 conformance: the inscribed
+  netstratum-cli` is the only onboarding command). Evidence: clippy zero;
+  **11/11 witnesses green, memory-capped** (NS-3 conformance: the recorded
   v0.4 vectors reproduce on the fresh implementation, tamper vector included;
   the tick law refuses 2-of-3/skip/replay; the orb round-trips byte-exact;
   unknown tags skip — SEAL A measured; replay equals the committed world —
@@ -46,7 +46,7 @@ same landing (Charter §1); commit on explicit operator go.
   arc played end-to-end: agent refused → granted → collected with its tag
   (`by#2` beside the sovereign's `by#1`) → revoked → refused again; chain
   intact (9 receipts), replay matches. NS-1 §3.3 vectors re-extracted
-  (provenance participates in the digest). (2026-07-25, operator playtest feedback — presentation
+  (provenance participates in the digest). (2026-07-25, playtest feedback — presentation
   only, no protocol change): the 8×8 map grid rendered after every build
   (`map`), `row:col` coordinate input beside plain tile numbers, refusals as
   human sentences with the cure named (each of the playtest's three stumbles
@@ -58,7 +58,7 @@ same landing (Charter §1); commit on explicit operator go.
   discipline held: fractions rendered whole ("3/2", never 1.5).
 - **N4 landed** (2026-07-30, coder-03): NS-2 RQP + the scanner — the lens
   beside the mirror. The spec (§1–§4) written from the v0.4 sigil index
-  with vectors extracted from the running engine; the operator's lens law
+  with vectors extracted from the running engine; the lens law
   recorded: a query is a pure read, only the crystal draw receipts
   (tag 55, blind to what was asked). The sigil index
   (`engine/cfe/src/query.rs`): one joint canonical shadow over the eight
@@ -77,9 +77,9 @@ same landing (Charter §1); commit on explicit operator go.
   contained hand with exactly Collect; I2 honored), surfacing the
   board's true count: **285/285 green, clippy zero** (the prior 240 was
   a fail-fast undercount — cargo stops at the first red binary).
-  PROPORTION-1 — the proportional law (operator ruling; the name
-  linear is dead in the workspace, per 12_UNION's no-uni-directional-
-  linearity doctrine): squares are barred as aggregators of difference
+  PROPORTION-1 — the proportional law (the name linear is retired
+  from the workspace, per 12_UNION's no-uni-directional-linearity
+  doctrine): squares are barred as aggregators of difference
   — `coherence_functional` and `conservation_measurement` sum `|R|`,
   `norm_squared` → `magnitude` (‖Δ‖₁), the scanner scalar likewise;
   each difference counts exactly its size in its own units, natively
@@ -87,21 +87,21 @@ same landing (Charter §1); commit on explicit operator go.
   physical law (05's T⁴ discipline). Evidence: red-first honored at
   both flips (witnesses re-pinned 24→12 RFA / 29→7 scanner, red
   recorded, then green); the tag-58 wire vector RE-extracted from the
-  running engine (`ns2_vectors`, byte `1d`→`07`) and inscribed in
+  running engine (`ns2_vectors`, byte `1d`→`07`) and recorded in
   NS-2 §3; law amended in kernel Charter §3, SYSTEM_SPEC §0/§4,
   03_SUBSTRATE_CONTRACT §5; dated records stay quoted (this row's N4
   neighbor speaks 29 as history). 285/285, clippy zero. Design
   authority now also includes `16_UNIT.md` (the unit law + §4a the
-  singularity law), `docs/EQUATIONS.md` (The one ledger — the
+  singularity law), `docs/EQUATIONS.md` (a single ledger — the
   row-claim convention is live), `docs/archive/U_DIRECTIVES.md` (the unit
   work orders; U1 next, tag 86 reserved there).
 - **U1a landed** (2026-07-31, arch-01): the PROVER/VERIFIER split —
-  `engine/solver-verify`, the sealed replay half: grid + the one apply
+  `engine/solver-verify`, the sealed replay half: grid + the single apply
   path, loader, the deterministic forge, the certificate chain, and
   `objects` (discovered at the split: `Op::Object(ObjOp)` makes the
   object ops apply vocabulary — only the search is prover-side).
   `solver` keeps search + volume, re-exports whole; no caller broke.
-  The OPAQUE-PAYLOAD law derived and inscribed (U_DIRECTIVES §2):
+  The OPAQUE-PAYLOAD law derived and recorded (U_DIRECTIVES §2):
   physics' cfe arrow forbids cfe importing the verifier, so the deed
   carries proof bytes under solver-verify's encoding monopoly — the
   kernel calls `verify_work(&bytes)`, never parses. 285/285, clippy
@@ -114,7 +114,7 @@ same landing (Charter §1); commit on explicit operator go.
   (every training pair exactly, the honest-withhold law) ∧ re-chain
   (the certificate re-derives or names its link) — an intact chain
   over a non-solution refuses `TrainingMiss`: the fabricated-render
-  attack is dead. `mint_bound = 0` sealed shut until Ruling Box 1
+  attack is dead. `mint_bound = 0` sealed shut until Decision Box 1
   opens the rate by amendment (the mechanism precedes the economics).
   New refusals `WorkRefused{broken}` + `MintExceedsWork{bound,
   claimed}`, measurements whole. Evidence: red-first honored — seven
@@ -161,7 +161,7 @@ and its game consumer in the landing record.
   for_each_residual, coherence_functional, coboundary_reduce,
   validate_step) + `engine/physics` (FlowState, step_witness,
   exhale/inhale) — the clean-room math substrate, landing from the
-  worktree on operator go, rebased onto N3 (disjoint files). Its
+  worktree on approval, rebased onto N3 (disjoint files). Its
   companion `docs/03_SUBSTRATE_CONTRACT.md` is the mechanic → primitive →
   witness authority. Lore corrections it pins: the convergence-engine's
   coherence is sum-of-squares in code (its README wrongly says L1); the
@@ -200,7 +200,7 @@ N5/N6). Details and sequencing in 04 §6.
   to the new arities + ColonyCharted arm added to the mirror's renderer —
   no semantic changes.
 
-- **P2-PERSIST landed** (2026-07-25, joint ruling with coder-01): the world
+- **P2-PERSIST landed** (2026-07-25, joint landing with coder-01): the world
   remembers. NS-3 §2.4 (the receipt file: tag 20 frames, one append-only
   `chronicle.tlv` per world); `cfe::persist` (load through the
   verification door; sync appends only the tail; divergent history refuses
@@ -213,10 +213,10 @@ N5/N6). Details and sequencing in 04 §6.
   tamper and divergence refusals; resumed agent authority (the grant
   survives the boundary, and only the grant). The real-CLI double boot
   demonstrated end-to-end. Dark Forest constraint #1 (persistence by
-  construction) is now lived, not just inscribed.
+  construction) now holds in code, not only in the specification.
 
 - **CONVERGE-1 landed** (2026-07-27): era convergence — the timelines
-  unify. `07_ERA_CONVERGENCE.md` inscribed and landed whole: TUniversal
+  unify. `07_ERA_CONVERGENCE.md` written and landed whole: TUniversal
   {S,G,T} persisted (universe card at every beat and at convergence);
   boot converges before genesis (conductor main + `run_era`); annex,
   never merge — `EraAnnexed` (permanent tag 21) appends to the universe
@@ -240,8 +240,8 @@ N5/N6). Details and sequencing in 04 §6.
   `cargo run -p mirror --example converge_run -- <var-root>`.
 
 - **THERMAL-1 landed** (2026-07-27): the equilibrium baseline drives the world —
-  with the syntropic encasement (05 §1.2, the operator's expansion ruling:
-  the linear entropic-only design refused). The star commissions
+  with the syntropic encasement (05 §1.2, which refuses the linear
+  entropic-only design). The star commissions
   (StarCommissioned, tag 24; NS-6 §7 StarClass codes fix L); planets site
   their orbits (PlanetSited, tag 25: albedo + orbit r); the tick runs the
   two-armed heat law in exact rationals: stellar load `T_eq⁴/K` + factory
@@ -300,7 +300,7 @@ N5/N6). Details and sequencing in 04 §6.
   **123/123 workspace witnesses green** (7 new pins: regeneration
   byte-identical; famine red-alert names resource + dormancy + want;
   growth exact with the odometer pinned; the surplus/deficit stance flips
-  at exactly banked == need; wall inline-only with the inscribed palette;
+  at exactly banked == need; wall inline-only with the specified palette;
   reflection-only proof; terminology law asserted by code point).
   Deviations recorded in doc-comments: world-local odometer (regeneration
   must not depend on convergence state); two boundary facts witnessed via
@@ -317,7 +317,7 @@ N5/N6). Details and sequencing in 04 §6.
   (09 §2.1): `given_in_crisis` / `drawn_in_crisis` post iff the
   counterparty stands in receipted, uncleared famine/overheat at the
   deed's stamp — a replay fact, never a judgment call; weight-1
-  commensuration (placeholder table inscribed); wire encoding of the
+  commensuration (placeholder table recorded); wire encoding of the
   books deferred to IDEO-1 tag 38 as boarded. A gift covering the
   one-tick bill relieves at the landed law (02 §2.4). One truth-update:
   every settle is a touch — `UpkeepSettled` now anchors `last_touch` on
@@ -380,7 +380,7 @@ N5/N6). Details and sequencing in 04 §6.
   derive from the registry axes (mineral→Furnace seat, biotic→mesic
   seat) through the chronicle beacon seeded by the world's own genesis
   receipt digest (Charter §9 — no wall clock, no ambient entropy; two
-  foundings are byte-identical, witnessed). Recorded ruling: a Frost
+  foundings are byte-identical, witnessed). Recorded decision: a Frost
   seat is never derived — settling the vault is a deliberate act; the
   seeded default file makes one: Frostwright (freeze-tolerant, new founding
   bot) on a red star at unit orbit (the cryogenic vault), Slagborn pinned
@@ -441,7 +441,7 @@ N5/N6). Details and sequencing in 04 §6.
   `bond_notice_window()`, placeholder 8). An orderly end — the bond run
   to its term — posts nothing (leaving is not an offence); a manual sever or
   an insolvent settle posts the load (the default is the mid-winter
-  cut; recorded v1 rulings: the source side cuts; expiry-insolvency
+  cut; recorded v1 decisions: the source side cuts; expiry-insolvency
   posts zero — the term was served; settle sites are collect/sever/
   expiry). Bond settlements post the love book only — the crisis books
   belong to deliberate deeds — but still compensate open ABSORB-1
@@ -478,7 +478,7 @@ N5/N6). Details and sequencing in 04 §6.
   the empty book is not a credential (full collateral), the ceiling is
   guardrail 6 made literal (zero fidelity pays 4×, never barred); the
   priced collateral rides the seal receipt so replay never re-runs the
-  curve. Recorded v1 rulings: collateral denominated in the pact's
+  curve. Recorded v1 decisions: collateral denominated in the pact's
   resource; one open pact per lane; the delivery-quota pact is the
   landed 09 §3.3 template (01 §7.1's own example) — the Compassionate
   and Bond Covenant templates deferred; resolution banners deferred to
@@ -508,13 +508,13 @@ N5/N6). Details and sequencing in 04 §6.
   derived (never stored) axis ratios via the landed `cohesion_ratio`
   helper. (3) Ideological friction: `ΔS_ideo = φ (placeholder 1/8) ×
   abs(reciprocity_A − reciprocity_B) × volume` on transfers only —
-  recorded ruling: bonds and absorptions are exempt by design (the
+  recorded decision: bonds and absorptions are exempt by design (the
   standing loop is the friction-free channel; long-horizon love ducks
   the tax the way it already ducks demurrage); accrues as workspace
   against the mover, seals by `FrictionSettled` (tag 38, the
   VentSettled shape) into `entropy_vented` — real entropy. Friction
   prices divergence, not vice: empty morality books read as 1
-  (placeholder ruling — a fresh orb trades frictionless until
+  (placeholder rule — a fresh orb trades frictionless until
   measured); aligned partners at any alignment generate exactly zero
   and no receipt. (4) CLI `ideology`: the four axes in words + exact
   fractions ("compassion gave 3 · drew 0 — ratio 1"), never matrix
@@ -532,7 +532,7 @@ N5/N6). Details and sequencing in 04 §6.
 
 ## 2. The depth board (02_COLONY_LOOP — game depth before multiplayer)
 
-Ruled 2026-07-25: the world must be worth sharing before N6 shares it. These
+The world must be worth sharing before N6 shares it. These
 interleave with the protocol board; ruleset constants live in 02 §2 and are
 law for replay.
 
@@ -554,7 +554,7 @@ law for replay.
 - **D2 landed** (2026-07-25): the industrial pipeline (02 §5). Materials
   alloy (3) + diamond (4); converter zones smelter (3) + synthesizer (4) —
   a converter's upkeep is its input, its yield its output; multi-resource
-  costs, upkeep, and refunds. **No new event tags** (the §5.3 ruling): the
+  costs, upkeep, and refunds. **No new event tags** (per §5.3): the
   draft's ResourceSmelted/DiamondSynthesized/ProductionDormant refused —
   conversion settles as YieldCollected/UpkeepSettled, input starvation is
   famine (measured: an under-fed synthesizer strikes alloy famine within
@@ -565,7 +565,7 @@ law for replay.
   gate); the tier climb replays from receipts alone; the CLI session played
   the full arc (S/Y glyphs live; the CannotAfford ladder taught the climb:
   "costs 20 alloy, have 4" → "costs 15 biomass, have 10"). Crystals
-  deferred to N4; slag/matrix intermediates dropped (02 §5.1 rulings).
+  deferred to N4; slag/matrix intermediates dropped (02 §5.1).
 
 | # | Landing | Contains | Proven by |
 |---|---|---|---|
@@ -575,7 +575,7 @@ law for replay.
 
 ## 3. The ideology board (09_IDEOLOGY — the dual cohesion ledger)
 
-Ruled 2026-07-27 (operator relay; design authority `09_IDEOLOGY.md`): love,
+Design authority `09_IDEOLOGY.md`: love,
 compassion, morality, and integrity enter the engine as measured dual-entry
 ledgers over receipted deeds — eight cumulative exact-rational counters per
 orb, four ratios derived at read, never a stored score. The "unitary
@@ -585,7 +585,7 @@ measures** — each landing opens exactly one axis's books, and the surface
 lands last, reading what is already receipted. Everything witnesses
 single-world (the P1 archipelago is society enough); cross-empire reading
 composes at N5/N6. Candidate tags 30–38 are reserved here (14–15 stay
-untouched); each is inscribed into NS-1 §2.3 only at its landing.
+untouched); each is written into NS-1 §2.3 only at its landing.
 
 | # | Landing | Contains | Proven by |
 |---|---|---|---|
@@ -614,7 +614,7 @@ facet, priced. Everything is exact-rational, receipted, replayable; the render
 mints no physics (reflection law). Candidate tags 49–51 reserved (the
 original 41–43 reservation collided with the registry — 41 is IDEO-1's
 cohesion entry, 42–46 AEON-1 — and 47–48 landed as the APERTURE pair);
-each is inscribed into NS-1 §2.3 at its landing. Sequencing: MARKET-1 →
+each is written into NS-1 §2.3 at its landing. Sequencing: MARKET-1 →
 OFFER-1 → BOARD-1, one at a time.
 
 **APERTURE-1 landed** (2026-07-29): the cross-world value carrier (NS-4
@@ -635,14 +635,14 @@ The facet machinery (grant depths, permissions, expiry) stays ahead at N5
 | # | Landing | Contains | Proven by |
 |---|---|---|---|
 | **MARKET-1 — landed 2026-07-30** | The exchange rate | tags 49–50 wired: offers as resting receipted intents (no escrow — affordability judges at the fill; the price is the ratio, guardrail 6); `clear_trade` fills at the resting offer's exact price (price-time priority, ties by id), moves as two aperture pairs (deal, deal+1 — shield-checked, conservation-exact both directions), closes both intents; CLI `offer …` / `trade …` verbs; both books replay | witnessed: the 3-iron fill at the resting 1/2 price exactly (the late bidder keeps its surplus); conservation across both resources and both worlds; the unmatched offer rests and replays; NoCrossing moves nothing; the shield guards the fill |
-| **OFFER-1a — landed 2026-07-30 (first slice)** | The automatons trade | `trade_intent` (pure, regime-read): an ember-starving Frost with banked sink offers S_cool for fuel; a Furnace with surplus (> 4 embers, placeholder) offers fuel for S_cool — halves of stock, never the whole (guardrail 1's spirit); v1 price 1:1 (05 §1.4 equilibrium pricing is the open design); `market_step` posts one intent per world (offer id = chronicle length, deterministic) and clears the first crossing per beat; wired into the conductor's heartbeat with the narrator line | **OFFER-1b witnessed 2026-07-30**: the survive-the-freeze arc whole — a shelled Furnace banks surplus and forms its intent; an arrayed Frost freeze-locks in ember famine with banked sink and forms its own; one market beat clears the crossing, the famine relieves through the fill, the thawed world flows again, both books carry OfferCleared, and replay reproduces the rescue from receipts alone. Still open: 05 §1.4 equilibrium pricing (the design doc is unwritten — the 1:1 parity stays a named placeholder until the operator rules the spec) |
+| **OFFER-1a — landed 2026-07-30 (first slice)** | The automatons trade | `trade_intent` (pure, regime-read): an ember-starving Frost with banked sink offers S_cool for fuel; a Furnace with surplus (> 4 embers, placeholder) offers fuel for S_cool — halves of stock, never the whole (guardrail 1's spirit); v1 price 1:1 (05 §1.4 equilibrium pricing is the open design); `market_step` posts one intent per world (offer id = chronicle length, deterministic) and clears the first crossing per beat; wired into the conductor's heartbeat with the narrator line | **OFFER-1b witnessed 2026-07-30**: the survive-the-freeze arc whole — a shelled Furnace banks surplus and forms its intent; an arrayed Frost freeze-locks in ember famine with banked sink and forms its own; one market beat clears the crossing, the famine relieves through the fill, the thawed world flows again, both books carry OfferCleared, and replay reproduces the rescue from receipts alone. Still open: 05 §1.4 equilibrium pricing (the design doc is unwritten — the 1:1 parity stays a named placeholder until the spec is decided) |
 | **BOARD-1 — landed 2026-07-30** | The trade board | the resting offers export to the state uplink as data fields (never prose); the observer gains the `market` view (standing intents per world + crossings-cleared count by event kind) and the observatory gains the trade board panel; the render mints no physics, prices stay ratios. Deferred, recorded: the wall.html journal trade lines (journal voice work) | verified live: a player's resting offer and six autonomous clears render from state alone |
 
 Dependency: the carrier gate is open (APERTURE-1 above). MARKET-1 needs the
 APERTURE deed to price; OFFER-1 needs MARKET-1's matching; BOARD-1 reads
 what OFFER-1 posts; the facet grants (N5) refine but do not gate the board.
 
-## 3a-bis. The development ladder (operator direction, 2026-07-30) — tier 0 down to the opposite pole
+## 3a-bis. The development ladder — tier 0 down to the opposite pole
 
 Four working fronts, walked from the board-makers down to the manifold's
 other cone tip (the exact opposite civilization type):
@@ -665,10 +665,9 @@ other cone tip (the exact opposite civilization type):
   the joint research venture (council + aperture + licensed leap) is
   the co-op endgame — incompatible sciences trading solved outputs to
   advance where neither could alone.
-- **The entropic sheet (layered-wrap ruling, 2026-07-31 — the
-  "opposite pole" chapter is struck; a T∞ appearing anywhere means a
-  manifold layer went unmodeled: infinity is disallowed, the torus
-  wraps finitely).** The entropic boundary is an archived fold sheet
+- **The entropic sheet (layered wrap — the "opposite pole" chapter
+  is struck, because a T∞ appearing anywhere means a manifold layer
+  went unmodeled: infinity is disallowed, the torus wraps finitely).** The entropic boundary is an archived fold sheet
   in the stack (each aeon seats at archived/12, wrapped and finite)
   — not a pole, not a tip, no cone. The unmaker class plays that
   sheet's leg: claiming derelicts, recycling ruins, absorbing vented
@@ -725,14 +724,14 @@ occupancy caps and four-C fold-eligibility remain the recorded open
 half of AEON-1b — expansion is bounded today by seats and the fold,
 not yet by the trajectory reading.
 
-## 3a-quinque. The one G (the alignment seam, 2026-07-30)
+## 3a-quinque. A single G (the alignment seam, 2026-07-30)
 
-The operator's instrument read the board's G as "binary — 0 or 10,
+An observer's instrument read the board's G as "binary — 0 or 10,
 nothing between." The law was never binary; the chart was bilingual:
 genesis entries carried the key (the wrapped exact rational of the
 AEON law — 0 before any climb) while annexed entries carried the
 four-C deposit sum (an event-count projection — ~10 registrations and
-grants), two quantities sharing one axis. Ruled and fixed: the chart's
+grants), two quantities sharing one axis. Fixed: the chart's
 G axis carries the key alone — the world's terminal gauge receipt
 (GaugeShifted · Diverged · Confluent · EraFolded, last stands) plus
 its era's sheet base; the deposit projection keeps its lawful job
@@ -744,8 +743,7 @@ claims a seat and moves no key.
 
 ## 3a-sexies. GAUGE-N (2026-07-30) — from one dial to n planes
 
-The operator's read (paraphrased): key,value is 2D:2D; n dimensions are
-needed. The
+A key,value pair is 2D:2D, and n dimensions are needed. The
 substrate always was (the physics Triple carries graded AxisVectors);
 the world's key was the scalar bottleneck. Landed: the key is a graded
 vector of wrapped exact rationals — `GaugeShiftedAt` (tag 60; moved
@@ -789,7 +787,7 @@ open it.
   a refound; un-receipted ticks honestly do not survive (the
   workspace invariant applies to time itself); zero ruins rotate.
 - **A3 — the role is the gate.** `login <name> as <station>` binds an
-  authority to the profile (passwordless per ruling); the tier-0
+  authority to the profile (passwordless); the tier-0
   verbs (t0 · license · shift · age) check it and refuse with the
   cure named. Save preserves the station.
 
@@ -809,7 +807,7 @@ open it.
 
 ## 3b. The union board (12_UNION — the world-book of the new aeon)
 
-Design authority `12_UNION.md` (eight operator rulings, 2026-07-29). Not a
+Design authority `12_UNION.md` (eight design decisions). Not a
 sequence — the implementation manifold (12_UNION §9): four entry lanes,
 two confluence nodes, any edge-respecting walk lawful. Tags 49–51 stay the
 market board's; union tags allocate from 52 at each landing.
@@ -827,23 +825,23 @@ market board's; union tags allocate from 52 at each landing.
 | **TECH-1a** | D | **Landed 2026-07-29** | the discovery closure (tag 39, byte-exact) + the kernel stellar leap: a world's first thermal opt-in receipts that its people know their star (once per world; the opt-in is the receipt; `knows_its_star()` the gating read); pre-stellar lawful. Evidence: 4 witnesses green (10 §3a) |
 | **TECH-1b** | D | **Landed 2026-07-29** | the crystallized tree (10 §3b): all five conditions weighed exactly at every year boundary from receipts and committed state; seeded-synthesis node ids (BLAKE3 of the chronicle root — replay re-derives at the identical tick); all five modifiers live in the heat law (insulation ×3/4 heating, discipline ×5/4 encasement, deepening ×5/4 sink, doctrine ×5/4 radiator, long-stores ×1/2 demurrage threaded through every touch/affordability read); idempotent per orb per condition. Deferred, recorded: deepening/long-stores end-to-end arc witnesses; throttle-α policy action. Evidence: 3 witnesses green — held pressure crystallizes discipline beside the doctrine while the one-pair world is cured whole (measured survival); survived cold crystallizes insulation at 3/4 exact; replay+resume carry the tree |
 | **Naming (10 §2 law 4)** | D | **Landed 2026-07-30** | node names are never rung labels: `tech_node_name` composes concept (condition-fixed) × voice (node-hash-drawn) — two lines crystallizing the same condition speak of it differently; the hash is the identity, the name is the line's tongue |
-| **NOVEL-1** | D | **Landed 2026-07-30 (coder-03)** | the succession law (10 §3c, tag 59 `LineSucceeded`): a successor line inherits a chronicle, not a tree — the deed refuses pure while any orb stands unfamished (07 §3 triage, v1 cascade law: every orb famished); on the deed the living tree drops to the world's kernel (the star is the world's fact, condition 0 stays) and every discovered node stands in the record forever; the successor's conditions evaluate over the whole inherited history and its node ids seed from roots containing that history + the deed — novel by construction, no new crystallizer code (the deposit sheet and the seeded synthesis already read this way). Deferred, recorded: registry/mirror-side line-identity handoff (the sigil-migration lane); conductor-driven succession for polity worlds; richer 07 §3 triage (interrupted vs collapsed) beyond the v1 law. Evidence: 4 witnesses green (a living line refuses pure and orphans nothing; predecessor node A stands while the successor mints B ≠ A from the inherited famine span — no new famine-years paid after the deed; a second succession mints a third novel node, three insulations standing, no root repeats; tag 59 round-trips byte-exact; replay matches and resume carries the boundary) — 198/198 workspace, clippy zero |
+| **NOVEL-1** | D | **Landed 2026-07-30 (coder-03)** | the succession law (10 §3c, tag 59 `LineSucceeded`): a successor line inherits a chronicle, not a tree — the deed refuses pure while any orb stands unfamished (07 §3 triage, v1 cascade law: every orb famished); on the deed the living tree drops to the world's kernel (the star is the world's fact, condition 0 stays) and every discovered node stays in the append-only record; the successor's conditions evaluate over the whole inherited history and its node ids seed from roots containing that history + the deed — novel by construction, no new crystallizer code (the deposit sheet and the seeded synthesis already read this way). Deferred, recorded: registry/mirror-side line-identity handoff (the sigil-migration lane); conductor-driven succession for polity worlds; richer 07 §3 triage (interrupted vs collapsed) beyond the v1 law. Evidence: 4 witnesses green (a living line refuses pure and orphans nothing; predecessor node A stands while the successor mints B ≠ A from the inherited famine span — no new famine-years paid after the deed; a second succession mints a third novel node, three insulations standing, no root repeats; tag 59 round-trips byte-exact; replay matches and resume carries the boundary) — 198/198 workspace, clippy zero |
 | **Tier overlay (12_UNION §2a)** | — | **Landed 2026-07-30** | progenitors are tier 0, the board-makers — the conductor's operations named as their deeds (seed/expand/contract/overlay/deploy); tiers 1–3 below (architects · archivists · biosphere); the tier is a derived reading from station, rendered on the observer, never stored |
 | **CONSTEL-1** | D | **Landed 2026-07-30** | the constellation reading: `World::constellation(orb)` — per-condition held/progress/threshold derived from the crystallizer's own deposit sheet (never a second bookkeeping); the CLI `tech` card renders the base-7 sky (voice-names, exact tick progress, the crown's gate, the joint-venture prompt). Deferred, recorded: mirror-side export of the progress readings into `state.json` so the observer/web render the same card (mirror is coder-02/03's lane this cadence) |
 | WANT-1 | D | open (specced, 12_UNION §5b) | The want — famine speciated by entity: metabolic wants landed in shape (tag 5 strikes any store); cognitive wants specced (epistemological · resonance · novelty — receipts-derived, per-register voicing, candidate tags from 60) |
-| Sigil rename | — | ruled (06 §2a) | slug → sigil (NS-2's own word), a recorded migration; locality-anchored naming law with the proposed founding renames (Abyssal Vocalis · Vitreous Hex · Mantle Anhydro · Brine Cortex) — applied at the next roster wave, never retroactively |
+| Sigil rename | — | decided (06 §2a) | slug → sigil (NS-2's own word), a recorded migration; locality-anchored naming law with the proposed founding renames (Abyssal Vocalis · Vitreous Hex · Mantle Anhydro · Brine Cortex) — applied at the next roster wave, never retroactively |
 | **WEB-1** | — | **Landed 2026-07-30 (v0)** | the observatory's window: `tools/webserve.py` (read-only file server — there is no API: the mirror's files are the protocol; one synthesized directory index; get only, writes refuse 405) + `tools/observatory.html` (text-first cyber-noir panels + the WebGL torus: wrapped point field, G as hue, additive crowd glow, drag-pan, wrapped-L1 hover). Floats exist only at the pixel (the render boundary, named in-file). Ahead: the push stream speaks NS-1 TLV over a socket (the house wire, never a third format); density heatfields as the board crowds |
-| **MERCHANT-1** | arbitrage (on ROUTE-1) | **Landed 2026-07-31 (core loop)** | The caravan: strictly additive v1 — the merchant bridges only pairs the iceberg has walled (pair_melt ≥ 1 direct), creating trade where none could exist, never front-running the open market. The triangle in one quote (B wants what A sells, pays in what A asks); profit test exact after both legs' melt; the merchant pays its stake, holds inventory when a second leg refuses (the risk is the trade); every leg is an ordinary clear_trade — melt, void share, all books receipted. pair_melt extracted as the one producer of the formula (clear_trade and every profit test read it). Layer-2 policy — SEAM-1 puts the trait boundary here; want-demand bids join post-kernel-Step-1. Witness: 23/16 profit exact on both books; no wall → no caravan |
-| **MARKET-2b** | conform (ruled: option b) | **Landed 2026-07-31** | The void-share receipt (tag 82): zero-sum stays universal — the melt is a first-class receipt on the receiving book, emitted by the same transition that computes the trade (one producer of the number; the judge only sums, never recomputes φ·D); sent = received + void share exactly; banks never move on it; losses receipted, never silent (the house precedent: vents, demurrage, friction). MERCHANT-1 can read melt directly off the receipts. Witness: 13/64 receipted on the 115/64 delivery — legs sum to 2 exactly |
+| **MERCHANT-1** | arbitrage (on ROUTE-1) | **Landed 2026-07-31 (core loop)** | The caravan: strictly additive v1 — the merchant bridges only pairs the iceberg has walled (pair_melt ≥ 1 direct), creating trade where none could exist, never front-running the open market. The triangle in one quote (B wants what A sells, pays in what A asks); profit test exact after both legs' melt; the merchant pays its stake, holds inventory when a second leg refuses (the risk is the trade); every leg is an ordinary clear_trade — melt, void share, all books receipted. pair_melt extracted as the single producer of the formula (clear_trade and every profit test read it). Layer-2 policy — SEAM-1 puts the trait boundary here; want-demand bids join post-kernel-Step-1. Witness: 23/16 profit exact on both books; no wall → no caravan |
+| **MARKET-2b** | conform (decided: option b) | **Landed 2026-07-31** | The void-share receipt (tag 82): zero-sum stays universal — the melt is a first-class receipt on the receiving book, emitted by the same transition that computes the trade (one producer of the number; the judge only sums, never recomputes φ·D); sent = received + void share exactly; banks never move on it; losses receipted, never silent (the house precedent: vents, demurrage, friction). MERCHANT-1 can read melt directly off the receipts. Witness: 13/64 receipted on the 115/64 delivery — legs sum to 2 exactly |
 | **ROUTE-1** | lanes (on MARKET-2) | **Landed 2026-07-31** | the maintained lane: `charter_route` — two-legged (one deal id pairs the books), alloy 4 each side at charter, η ∈ [0,1) from the pair's best instrument grade ((1+g)/8 — built, never granted); clear_trade reads the best lane both books hold: melt × (1−η); `maintain_routes` draws 1/4 ember per lane at the year voice and an unpaid lane lapses by receipt (raw space returns; the pair dies with either leg). Conductor: trade wears the path (a cleared pair with no lane charters one when both can pay); CLI `charter <world> deal <n>`. Tags 79/80. Witness: the lane bends 1/4 → 1/8 exactly, lapse restores, both books replay |
-| **MARKET-2** | iceberg (converts 11 §2.1's trade side-fee) | **Landed 2026-07-31** | Samuelson iceberg transport: delivered = sent × (1 − φ·D), φ = 1/64, D = spatial L1 + wrapped key gap — the cargo itself melts (the void's share = sent − received, derivable from the aperture pair; the receipt speaks what landed); at φ·D ≥ 1 the pair is economically walled by decay physics (refused before movement, no rule needed). Natural price gradients: distant supply is smaller supply. clear_trade takes the transit distance (conductor reads spec positions; CLI reads the starchart; uncharted trades local). Sequence ahead (ruled): ROUTE-1 lane charters (maintenance-backed φ suppression) → MERCHANT-1 arbitrage function → VENUE-1 the bourse (CLOB depth) → FUTURE-1 council-backed beat-bound futures. Witness: the melt pin (whole at zero, 115/64 of 2 at gap 13/128, walled at 64) |
+| **MARKET-2** | iceberg (converts 11 §2.1's trade side-fee) | **Landed 2026-07-31** | Samuelson iceberg transport: delivered = sent × (1 − φ·D), φ = 1/64, D = spatial L1 + wrapped key gap — the cargo itself melts (the void's share = sent − received, derivable from the aperture pair; the receipt speaks what landed); at φ·D ≥ 1 the pair is economically walled by decay physics (refused before movement, no rule needed). Natural price gradients: distant supply is smaller supply. clear_trade takes the transit distance (conductor reads spec positions; CLI reads the starchart; uncharted trades local). Sequence ahead: ROUTE-1 lane charters (maintenance-backed φ suppression) → MERCHANT-1 arbitrage function → VENUE-1 the bourse (CLOB depth) → FUTURE-1 council-backed beat-bound futures. Witness: the melt pin (whole at zero, 115/64 of 2 at gap 13/128, walled at 64) |
 | **MESH-1b #2** | consumer slice (mesh crate landed by coder-03) | **Landed 2026-07-30** | The pen: the receipted handoff wired into both writers. `cfe::vrp` names the hands (conductor = 1; seats derive from their name, `hand_of`); the chronicle funnel stamps every append with the held hand and cites a seal standing last (one point, ~20 deeds covered; the walk stays the only judge); the conductor's `pen_service` seals yields at the beat boundary from `yield <world> <seat>` control lines, pens the world out of beats/saves/market, and polls the carrier for the pen's return (re-resumes from the receipts, SEAL B); the CLI's `pen <world>` / `pen return <world>` verbs ask and yield, and the walk-checked `far_world` retired the founder-heuristic two-writer guard (pre-mesh conductor worlds refuse until their first seal, the refusal naming the door; far saves land in the world dir, not the colony's). NS-5 §7.5. Evidence: `pen_pins` — the full arc on one file, the walk green at every station |
-| **WORLDSHAPE-1** | D | **Landed 2026-07-30** | worldshaping as condition 6, the gifted crown: licenses only onto a complete base-7 stack (stellar leap + five crystallized — `BaseSevenUnfinished` refuses); `World::worldshape` re-seats a sited planet's albedo/orbit (fresh `PlanetSited`, replay takes the last seat, no new tags); CLI `worldshape <A> <r>`; base-1/7/60 TUniversal calibration inscribed at 11 §1. Evidence: the crown witness — unearned orbit refuses, unfinished stack refuses, the gifted crown moves the world across bands, measured in T_eq⁴ |
+| **WORLDSHAPE-1** | D | **Landed 2026-07-30** | worldshaping as condition 6, the gifted crown: licenses only onto a complete base-7 stack (stellar leap + five crystallized — `BaseSevenUnfinished` refuses); `World::worldshape` re-seats a sited planet's albedo/orbit (fresh `PlanetSited`, replay takes the last seat, no new tags); CLI `worldshape <A> <r>`; base-1/7/60 TUniversal calibration recorded at 11 §1. Evidence: the crown witness — unearned orbit refuses, unfinished stack refuses, the gifted crown moves the world across bands, measured in T_eq⁴ |
 | SCIENCE-1 | D | open (specced, 10 §3d) | speciated puzzle science: perception routes the solver (landed); metabolism routes relevance (a plasmic line carries no forge-of-iron); foreign capability by joint research venture — council + aperture + licensed leap composed |
 | **PLANNER-1** | confluence (COUNCIL-1 + TECH-1a) | **Landed 2026-07-29** | the licensed leap (tag 40): `license_tech` issues a technology into another world as a two-legged deal (TechLicensed out / TechDiscovered in — one node, seeded from deal+condition, derived identically on both sides); council-gated (an open council in the granting world — delegation settles inside diplomacy), shield-bounded, receiver must have crossed; **the stellar leap is never licensed** (`StellarLeapNeverLicensed` — the young meet their star themselves); idempotent per deal. The other five planner powers were already receipted deeds: create species (registry+genesis), create stars (`commission_star`), create planets (`chart`), gauge operations (`shift_gauge`), fiber extension (Mint). Deferred, recorded: authorship attribution (which progenitor issued — awaits cross-world identity at N5/N6); unknown-leap unlock mechanics (arrive-sealed) await TECH-1b. Evidence: 3 witnesses green |
-| GALAXY-1 | confluence (THRESHOLD-1 + AEON-1a + PLANNER-1) | **Landed whole 2026-07-30** — 1a (engine slice: tag 54 inscribed, deed + readings + card, 6 witnesses) + 1b (the year-voice observation sweep `observe_crossings` in conductor beat + run_era — creator resolves head-seat → domain founding head → conductor per the lineage law; the `t0 galaxies` verb reads the charted skies with derived membership; trigger witness green: crossing → creation → geometric idempotence → creator receipt) | one universe structurally (one torus, one card, one chart — aeons are G-sheets, never second universes); galaxies are lazy, never a static count — the founding galaxy is the whole charted torus today, and a new galaxy is created by the observation deed (`GalaxyObserved`, tag 54 reserved) when a crossing anchors past every charted reach (L1-wrapped); membership derived at the observer, never stored; the founding galaxy chartered lazily at the landing's first deed; span growth is Mint-class expansion, never contraction. Registry deltas: none — geography, not identity |
+| GALAXY-1 | confluence (THRESHOLD-1 + AEON-1a + PLANNER-1) | **Landed whole 2026-07-30** — 1a (engine slice: tag 54 registered, deed + readings + card, 6 witnesses) + 1b (the year-voice observation sweep `observe_crossings` in conductor beat + run_era — creator resolves head-seat → domain founding head → conductor per the lineage law; the `t0 galaxies` verb reads the charted skies with derived membership; trigger witness green: crossing → creation → geometric idempotence → creator receipt) | one universe structurally (one torus, one card, one chart — aeons are G-sheets, never second universes); galaxies are lazy, never a static count — the founding galaxy is the whole charted torus today, and a new galaxy is created by the observation deed (`GalaxyObserved`, tag 54 reserved) when a crossing anchors past every charted reach (L1-wrapped); membership derived at the observer, never stored; the founding galaxy chartered lazily at the landing's first deed; span growth is Mint-class expansion, never contraction. Registry deltas: none — geography, not identity |
 
-| SURVEY-1 | wiring (N4 + P1 + conductor) | **Landed 2026-07-30** (operator directive — the role loop's top edge) | the Pathfinder directs the drills: a rung-5 colony pays the scan's crystal draw in its cycle (`survey_step`); single-orb worlds Charter the surveyed sector and open its first drill, multi-orb worlds place the next extractor on the scan's first resonant orb with room; unaffordable or starving, the survey idles lawfully (siting draws rule as before); every settled orb now collects each beat. Twin landing FUNCTION-1: the 12_UNION §4 function reading renders on the observer's civs board, derived never stored. Witness: the survey arc — earned crystal chain (heat-balanced), one draw → one charter → the drill on the surveyed sector → the spent lens idles → replay matches |
+| SURVEY-1 | wiring (N4 + P1 + conductor) | **Landed 2026-07-30** (the role loop's top edge) | the Pathfinder directs the drills: a rung-5 colony pays the scan's crystal draw in its cycle (`survey_step`); single-orb worlds Charter the surveyed sector and open its first drill, multi-orb worlds place the next extractor on the scan's first resonant orb with room; unaffordable or starving, the survey idles lawfully (siting draws rule as before); every settled orb now collects each beat. Twin landing FUNCTION-1: the 12_UNION §4 function reading renders on the observer's civs board, derived never stored. Witness: the survey arc — earned crystal chain (heat-balanced), one draw → one charter → the drill on the surveyed sector → the spent lens idles → replay matches |
 
 | LINEAGE-2 + BRIDGE-1 | C (on LINEAGE-1) | **LINEAGE-2 landed 2026-07-30**; BRIDGE-1 open (specced, 11 §3.1) | the DAG de-collapse: the registry lineage pointer is an append-only list (space-joined wire form, byte-identical single-predecessor, old files read unchanged); `resolve_heads` returns every provenance root (cycle-safe, dangling-lawful, deterministic); the observer walks the primary chain and marks confluences. BRIDGE-1: the confluence crossing prices its key gap — venting ∝ wrapped key distance (entropic leg), the resonant remainder encases (syntropic leg); lands with AEON-1b's confluence orchestration. Witnesses: 3 (both-predecessors round-trip + old-form read; both heads resolved; lawful stops) |
 
@@ -857,13 +855,13 @@ deeds judged; board 342/342, clippy zero at `5f80464`.
 | Landing | Seat | Status | Contains |
 |---|---|---|---|
 | **Recurrence guard** | arch-02 | **Landed 2026-07-31** (`c088a7b`) | Charter §11 rule 5 as a standing test (`engine/kernel/tests/recurrence_guard.rs`, 7 witnesses): the dead name stays dead, the anti-mirror stays excised, tag 65 never reused, the arrow law (allowed dep sets grow only by editing the test — amendment made structural), no new read-back path ever (the adopted Tier-A files pinned by name), the uplink law (no JSON in mesh src), the detectors prove their own teeth. Red proven live |
-| **#36 spine, whole** | arch-02 | **Landed 2026-07-31** (`0c10782` + `54cba27`) | schema-truth (the record repeats the blob's leading byte — a fresh-landed defect caught and fixed red-first) · the adoption door (`Spine::adopt` — one truth, one birth; the pre-chain debt stamped `judged=0`, named never hidden) · KERNEL-OBSERVED play (every conductor world walks its own spine each beat at {S,G,T}; the handle held across beats — O(1) appends; the pen stalls the spine). Per-deed threading deferred to phase 3 by operator ruling |
+| **#36 spine, whole** | arch-02 | **Landed 2026-07-31** (`0c10782` + `54cba27`) | schema-truth (the record repeats the blob's leading byte — a fresh-landed defect caught and fixed red-first) · the adoption door (`Spine::adopt` — one truth, one birth; the pre-chain debt stamped `judged=0`, named never hidden) · KERNEL-OBSERVED play (every conductor world walks its own spine each beat at {S,G,T}; the handle held across beats — O(1) appends; the pen stalls the spine). Per-deed threading deferred to phase 3 |
 | **The agreement law** | arch-02 | **Landed 2026-07-31** (`5693ccc`) | `mesh::agree`: Σ_mesh (self seat weight 1 — the predecessor's vacuous zero-denominator arm unrepresentable) · re-sync drift strict at the bound · resonance m=10, the cos-symmetric table taken whole. Not carried, by law: the majority anchor (unanimous-or-refused, NS-5 §1), the sluice formula (ω assigned/advisory until the PoUW anchoring), the σ fixed-point encoding |
-| **#37 opening + renderers** | arch-02 | **Landed 2026-07-31** (`a032ca4` + `f2f4fee`) | `engine/lens`: `committed`/`state_tlv`/`world` projections from the chain only; the renderers + `JsonWriter`/`ratio_str` moved whole to `lens::{render,json}` (ledger's display half calls via temporary shims; the extractor half stays ledger-side as Tier-A law); pins prove state.tlv and state.json re-derive byte-for-byte from spine/chronicle — the display half is deletable. Ahead: the dependency inversion (`scribe` extraction, arch-01, operator directive) |
+| **#37 opening + renderers** | arch-02 | **Landed 2026-07-31** (`a032ca4` + `f2f4fee`) | `engine/lens`: `committed`/`state_tlv`/`world` projections from the chain only; the renderers + `JsonWriter`/`ratio_str` moved whole to `lens::{render,json}` (ledger's display half calls via temporary shims; the extractor half stays ledger-side as Tier-A law); pins prove state.tlv and state.json re-derive byte-for-byte from spine/chronicle — the display half is deletable. Ahead: the dependency inversion (`scribe` extraction, arch-01) |
 | **U2a/U2b + the W-waves** | arch-01 | **Merged 2026-07-31** (`5f80464`) | the RCF conjugacy invariant + `orbit_lock`/fold gate in rfa-core (the PoWC mechanism); three coverage waves ending in the value law wave (`de587cf`): per-resource total conservation, sign guards everywhere (the negative-transfer hole closed), escrow declaration==effect, an empty declaration holds every bank still. Ahead: U2d (fold trio + Δ-bridge + the arrow-law amendment), U2e, then TaxonSealed + AssayStruck close the count |
-| Worktree prune | arch-02 | **Executed 2026-07-31** | 12 of 14 stale worktrees removed (all branches merged; two held lockfile drift only). Kept: `arch01-u2` (live — the scribe branch) and `parallel-agent` (21 uncommitted pre-rename files incl. old `engine/mirror` — the last mirror code on disk; operator decides its fate) |
+| Worktree prune | arch-02 | **Executed 2026-07-31** | 12 of 14 stale worktrees removed (all branches merged; two held lockfile drift only). Kept: `arch01-u2` (live — the scribe branch) and `parallel-agent` (21 uncommitted pre-rename files incl. old `engine/mirror` — the last mirror code on disk; its fate is an open decision) |
 | Spine uplink | arch-02 | open (next) | present/receive for tag-84 commitment segments + blob carriage; the peer re-verifies every record and RE-judges judged steps under its own kernel; `ns5_two_nodes` extended to spine exchange. NS-5's promised spine rewrite lands with it |
-| BOX-1 calibration | arch-02 | open | U_DIRECTIVES §7: the chained economy measured (solves per rung, mint pressure vs the sealed bound, refusals by kind, spine growth) before the operator rules `f` — the measurement Ruling Box 1 waits on |
+| BOX-1 calibration | arch-02 | open | U_DIRECTIVES §7: the chained economy measured (solves per rung, mint pressure vs the sealed bound, refusals by kind, spine growth) before `f` is decided — the measurement Decision Box 1 waits on |
 
 Cross-board: universe-level book
 composition stays Q2.3's N6 mesh audit; on-chain settlement of any cleared
@@ -871,18 +869,17 @@ value stays NS-7 (N7), never here.
 
 ---
 
-## The definition law (lens-lane ruling, 2026-08-05)
+## The definition law
 
 > **A definition compiles. Only a receipt persists.**
 > No file may say what exists; a file may only say what happened.
 
-Issued on the operator's order (paraphrased: no JSON files may linger
-in the Rust codebase; the lane is to rule on it) — and grounded in
-a law the tree already carried: §11 rule 2, *views derive from the
+No JSON file may stay in the Rust codebase. The law is grounded in
+one the tree already carried: §11 rule 2, *views derive from the
 chain, disposable, never read back*, enforced by
 `engine/kernel/tests/recurrence_guard.rs` against an adopted debt list
 that never grows. `conductor/src/polities.rs` was on that list. The
-ruling pays the debt rather than inventing a new rule.
+law pays the debt rather than inventing a new rule.
 
 **Struck.** `var/polities.json` and every path that wrote, seeded,
 adopted, archived, spliced or parsed it: `load_polities`,
@@ -901,14 +898,14 @@ lines ∪ every registered line, with world, planet, colony and placement
 derived from the sigil. `civ new` registers and stops; there is nothing
 left for a file to hold and nothing left to drift.
 
-**Two truths cost a landed ruling before this.** `12_UNION` §2 seated
+**Two truths broke a landed decision before this.** `12_UNION` §2 seated
 the hypobiotid line in the progenitor band; the seed file carried it,
 the built-in defaults did not, and a rebuilt `var` booted the defaults —
 so a board ran five lines, all T3, with the whole progenitor band absent
-from play. That is the failure the ruling exists to make unreachable.
+from play. That is the failure the law exists to make unreachable.
 
-**An archetype is not A doctrine** (operator correction, same day).
-The first cut of this ruling held six lines out of the roster — Sylvane,
+**An archetype is not A doctrine.**
+The first cut of this law held six lines out of the roster — Sylvane,
 Forgeborn, Stillcold, Corebound, Umbrid, Thresholder — reading them as occult
 content. That conflated two different things:
 
@@ -924,7 +921,7 @@ Orion* race — while striking five neighbours on identical reasoning.
 And the six are not decoration, they are the class partition
 (`15_TAXON` §2): class 7 (apex-solitary) is seated by Sylvane and
 Forgeborn and by nobody else, so holding them out emptied a class, and
-clade 19 `draconic` — a landed operator ruling of 2026-08-01 — was
+clade 19 `draconic` — already landed law — was
 orphaned by dropping the only line that wears it. All six are restored
 with their ratified taxa, and the pin now runs the other way: every
 class the partition names as seated must have its occupants in the
@@ -1104,7 +1101,7 @@ on external strand/isthmus/datum crates.
 | Office tiers | **T0–T15** (+6: herald…nexus) · seat width **+25** | `30_OFFICES` |
 | Open clade | **u16** · ceiling **345** = 20 + 25×13 | `fce10e0` · no u8 tax |
 
-### Resume board — **next phase** (operator go)
+### Resume board — **next phase**
 
 1. **E3.9** Treaty allow-lists for element ids  
 2. **I5.x** instrument lifecycle residual (SHARE/NOTE/FUT/PERP)  

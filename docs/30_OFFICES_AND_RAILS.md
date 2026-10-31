@@ -1,9 +1,9 @@
 # 30 — Offices and rails: T4–T9 and R1–R4
 
-**Status:** partial land — operator directive 2026-08-07; **Wave-1
+**Status:** partial land; **Wave-1
 `2109bf0`** opened the T-line (stations T4–T9, seat widths, ascend
 preconditions, pure-NPC seats to T4/T6). **R-line still design.** Does
-**not** overturn the ruling that **progenitors are the top** (T0 creates
+**not** change the rule that **progenitors are the top** (T0 creates
 the board). Higher **numbers** on the T-line are **deeper function
 bands**, not higher rank. The R-line is a **separate ladder** (settlement
 altitude), never a recolor of T.
@@ -187,7 +187,7 @@ stripped of basic economy.
 
 ---
 
-## 7. Open rulings (must not invent silently)
+## 7. Open decisions (not to be settled silently)
 
 Recorded for `OPEN_QUESTIONS.md`:
 

@@ -1,7 +1,7 @@
-# The almanac — the ruled grammar of elements and systems
+# The almanac — the fixed grammar of elements and systems
 
 **Status:** ELEMENT-GRAMMAR-1 first slice landed (2026-07-31,
-coder-03; ratified by standing operator order). Landed: the mint deed
+coder-03). Landed: the mint deed
 (ProspectStruck, tag 70 — the genesis root is the founding receipt's
 digest, measured: receipt 0 is the sovereign's registration and
 identical across worlds), the assay closure (AssayStruck, tag 71 —
@@ -23,7 +23,7 @@ SCIENCE-1's relevance (elements made visible), MARKET-1 (elements made
 tradeable), WANT-1 (elements made wanted), G4 at the mesh (elements
 made confirmable), Ground step (conductor prospect/assay).
 
-**The one law over this whole chapter:** content enters through a
+**The law over this whole chapter:** content enters through a
 deed, never through a commit. Laws, seeds, and small exact tables are
 authored; the chronicle writes the periodic table. Every mechanic below
 is discrete, exact-rational, chronicle-seeded, and replayable — the
@@ -48,7 +48,7 @@ to matter:
 |---|---|
 | `element_id` | the seeded synthesis: BLAKE3(chronicle root at the mint ‖ orb ‖ stratum) — replay re-derives it at the identical tick |
 | `name` | word-table composition in the discovering line's own voice (the naming law, 10 §2 law 4: the hash is the identity, the name is the tongue) |
-| `family` | drawn at the mint from the world's composition vector (§4): one of the small ruled families — light · heavy · noble · volatile |
+| `family` | drawn at the mint from the world's composition vector (§4): one of the small fixed families — light · heavy · noble · volatile |
 | `tier` | drawn 1–3 within family (the refinery depth it admits) |
 | `richness` | an exact rational drawn from the family's table — the extraction rate carrier |
 
@@ -95,20 +95,19 @@ by D3's chart) — the mint creates identity, never matter.
 
 At charting/siting, a world's **composition vector** derives from its
 receipted seed (the D3 seeded-chart door, tag 8): per-family exact-
-rational weights, drawn once, replayable forever.
+rational weights, drawn once, re-derived identically on every replay.
 
-The draw's priors are the **abundance spine** — one small ruled table,
-operator-owned, keyed by `StarClass` (the thirteen classes are the
-almanac's spine; metallicity is real astrophysics and the table wears
-it): hot young classes weight heavy families up; dwarfs weight noble
+The draw's priors are the **abundance spine** — one small authored
+table, keyed by `StarClass` (the thirteen classes are the almanac's
+spine; metallicity is real astrophysics and the table encodes it): hot young classes weight heavy families up; dwarfs weight noble
 and volatile; the exotic classes (NeutronStar, WindStripped,
 LuminalWhiteHole) carry the rare tails. All weights exact rationals;
-placeholder values at the landing, tuned by ruling at balance time.
+placeholder values at the landing, tuned by decision at balance time.
 
 The **galactic gradient**: per-region multipliers over the spine, read
 from a lookup table by the region's wrapped-L1 index (13_GALAXY's
 frontier distance) — **never computed powers** (the 2^1100 denominator
-lesson, inscribed: exponent-flavored, table-implemented; every
+lesson: exponent-flavored, table-implemented; every
 denominator bounded by the table's own).
 
 ## 4a. The dispersal law — star death as allocation (ENRICH-1, specced)
@@ -129,11 +128,11 @@ feature.
    flavor may never be read live from `galaxy_of` at mint time. It
    enters each world as a **gradient band byte**, receipted into the
    world's own chain (fixed at charting; shifted only by enrichment
-   deeds), which `element_properties` reads forever after. Charting
+   deeds), which `element_properties` reads from then on. Charting
    the sky and drawing the resource map are the same act.
 2. **The enrichment deed:** on a death transition (StarAged into
-   WhiteDwarf ‖ NeutronStar — the operator may widen the trigger
-   set), the conductor's year-voice sweep issues a receipted
+   WhiteDwarf ‖ NeutronStar — the trigger set may be
+   widened), the conductor's year-voice sweep issues a receipted
    `EnrichmentStruck` into every world within the blast band —
    wrapped-L1 distance against a radius lookup table (never computed
    powers; every denominator the table's own). The deed shifts the
@@ -181,12 +180,12 @@ live, comparative advantage derives from astrophysics: sectors
 specialize by spine and by their dead; trade flows down the
 gradients; the market prices what the sky made rare.
 
-## 6. What stays ruled forever (never generated)
+## 6. What stays authored (never generated)
 
 Conservation and the three seals; refusal semantics; the closed
 carrier vocabulary (§1); the axis vocabularies (identity words are
-ruled, not rolled); the abundance spine's values and every placeholder
-constant (operator rulings at balance); the beacon-domain tags. The
+authored, not drawn); the abundance spine's values and every placeholder
+constant (decided at balance); the beacon-domain tags. The
 grammar generates content; it never generates law.
 
 ## 7. The ELEMENT-GRAMMAR-1 landing checklist (opens on ratification)
@@ -204,7 +203,7 @@ grammar generates content; it never generates law.
 3. The CLI `prospect` verb, refusals naming cures; the registry read
    on `status`.
 4. G2 hook recorded (not landed): `metabolic_ration` extended to
-   element ids — a line that eats lithium is one row, when ruled.
+   element ids — a line that eats lithium is one row, when decided.
 5. PICKUP/BUILD_ORDER inscriptions; the register note here flipped to
    landed with evidence.
 
@@ -271,7 +270,7 @@ is, when **`LANES ≡ 2 (mod 4)`**:
 The first landing stood at 8 and had to record that no three-body
 compound could saturate, rather than tune the hole away. Widening to
 10 — the smallest width that opens the odd arities — closes it. The
-three-body case is the one that matters: it is the irreducibly
+three-body case is the case that matters: it is the irreducibly
 multi-party compound a pairwise projection cannot express, and the
 witness now checks that none of its three pairs compound on their own.
 

@@ -1,8 +1,7 @@
 # 56 — Entity alignment: thinking down, knowledge up
 
-Operator framing (2026-08-24): *"thinking needs to be pushed down to the
-entity level, knowledge needs to be consolidated at the civilizational
-level."* This doc is the audit (`ENTITY-ALIGN-0`, task #193) and the
+Design goal: thinking happens at the entity level, and knowledge is
+consolidated at the civilizational level. This doc is the audit (`ENTITY-ALIGN-0`, task #193) and the
 concrete design for the two slices that follow it (`#194`, `#195`).
 
 ## 1. The misalignment, grounded
@@ -28,7 +27,7 @@ Neither vessel has a loop, a task queue, or a "should this vessel think
 about this" gate of its own. `research_step` decides "think about X now" for
 the whole civilization, then dispatches both vessels at it. This is the
 opposite of "entities think, civ consolidates" — today the civ thinks
-(chooses the one task), and entities merely execute the choice.
+(chooses a single task), and entities merely execute the choice.
 
 ### 1b. Entities are flat, not tiered
 
@@ -46,8 +45,8 @@ engine's founder (absorbs/integrates), derived (refines), emergent
 ### 1c. Consolidation is a binary gate, not a graded process
 
 `mint_solver_word_as` (`engine/cfe/src/world/tech.rs:261-299`) mints the
-instant `cited.len() >= 2` — two distinct vessels, once, forever, no
-further curation. `consilience_deposit` (`lib.rs:1117-1168`, twice-fixed
+instant `cited.len() >= 2` — two distinct vessels, once, with no
+later curation. `consilience_deposit` (`lib.rs:1117-1168`, twice-fixed
 this session for correctness) already tracks vessel identity correctly;
 what it does not track is how independent those two vessels' origins
 were. Convergence-engine's `MeshAxiom.hardness`
@@ -119,7 +118,7 @@ event rather than retrofitted onto something else's.
 later slice can spend: word `pre_reach` (the "try a library word whole
 before searching," `lib.rs:3924`) could prefer higher-hardness words when
 several candidates tie, or a low-hardness word could be a candidate for
-re-confirmation rather than treated as settled forever. Recording the
+re-confirmation rather than treated as permanently settled. Recording the
 measurement is #194's whole job; spending it is deliberately deferred so
 #194 stays small and independently testable.
 

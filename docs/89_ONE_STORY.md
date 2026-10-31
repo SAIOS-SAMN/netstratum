@@ -1,16 +1,15 @@
 # 89 — One story: from the universal core to a mind, and where it breaks
 
-Design direction (2026-10-22): the working universe is built on the physics
-already established, not on parallel, misaligned machinery; inventory what
-already waters planets, stars, galactic and universe cores, chemistry
-included, and converge it into one coherent story.
+This document inventories what the era-1 universe computes, read from the
+code at head 1459e48, presents it as one sequence from the universal core to
+a mind, and lists every place where the sequence breaks, so that parallel or
+misaligned machinery can be found and converged onto the established
+physics.
 
-This is an inventory of what the universe already computes, read from the
-code (2026-10-22, head 1459e48), told as one story, followed by every place
-the story breaks. ✔ built and live · ◐ ruled in the docs, not built ·
-✘ parallel or stand-in machinery that contradicts the story.
+Markers: ✔ built and live · ◐ specified, not built · ✘ parallel or stand-in
+machinery that contradicts the sequence.
 
-## The one grammar
+## A single grammar
 
 - **One law at every tier** (`ring`): a place's clock is `r/(r + H)`, its
   deficit `δ = H/(r + H)`, its turn `P = 1 + R/H` rings, its spin `ℓ = R·H`,
@@ -25,8 +24,8 @@ the story breaks. ✔ built and live · ◐ ruled in the docs, not built ·
   cluster; water `Z008·4Z001`, closed, hold 36; holding + magnetism conserved
   through bonding). ✔
 - **Places are shares on spheres**: phases per plane (`flows::PLANES = 2`),
-  closeness `in_step = 1 − 2|Δ|`, the round cap, the ruled sine and linear
-  measure in degrees (docs/85). ✔ in part; the 360/60/11 planes ◐.
+  closeness `in_step = 1 − 2|Δ|`, the round cap, the sine and linear
+  measure in degrees of docs/85. ✔ in part; the 360/60/11 planes ◐.
 - **Fates of a residue** (`enfold`): every turning is held to its place, the
   residue drained, weighted (the lever) or cauterized with a scar. ✔
 
@@ -61,7 +60,7 @@ agitation, a lever). Each echo the core's pulse torques its motes (`flows::torqu
 turn (`flows::turn`: `2δ` a bell, the vacuum's inversion `δ → 1 − δ`), pass
 through the centre rather than pile (`through: R → 2H − R`), and settle at rest
 `R* = 2qH/(H² − 2q)` (`flows::rest`). ✔ The galaxy's band push is held back
-(operator, "make it static"). ◐
+(static, because it had suppressed star formation; docs/90 §4). ◐
 
 **Its throat is a furnace** (`recycle`): what falls in is parted (clusters,
 water included, part at the throat's heat), then pressed `z + z → 2z` or
@@ -161,7 +160,7 @@ tiers undilated; `galaxy_rate` reads a radius in bells against H in unit
 mass; `Toll::heard_after` adds arcs of different tiers; docs/85 §7‴'s map
 `φ = kψ` is not built.
 
-**B7. Planes** ◐: two planes in code (S^360 and S^60 ruled); `ell_c` is
+**B7. Planes** ◐: two planes in code (S^360 and S^60 specified); `ell_c` is
 set only by ocean arrivals and never torqued by the pulse, so the tilt
 `χ = 90°·ℓ_c/(ℓ_o + ℓ_c)` reads 0 almost everywhere.
 
@@ -192,13 +191,13 @@ already speaks.
    phases), distance `enclosure::route` with the tier map (B6), cores
    `places`, melt and gate spans on routes; the box, `site_of` and the
    thermal stand-ins retire.
-6. **The ruled, unbuilt geometry (B6, B7)**, each for the operator to rule
+6. **The specified, unbuilt geometry (B6, B7)**, each to be decided
    before it is built: the tier map, more planes and `ell_c` driven, S^60
    bodies and the double cones (Ψ_w, the world's feed and lock, its tilt, its
    day, a people's place on it).
 7. Then docs/87's knowledge steps on top of a story that holds.
 
-## Convergence, pass 1 (2026-10-22, direction to converge)
+## Convergence, pass 1 (2026-10-22)
 
 Done, read on play3 (the same universe before and after):
 
@@ -226,8 +225,8 @@ Done, read on play3 (the same universe before and after):
 Not yet converged: B4 (the economy on the box), the rest of B5 (one phase
 law, one home), B6–B8 (the tier map, planes, the tiers' readings).
 
-## Rulings asked
+## Open decisions
 
 - R1. Steps 1–5 converge existing laws only; may they proceed in that order?
-- R2. Step 6 is new geometry ruled in principle (docs/78, 82, 85) but not
+- R2. Step 6 is new geometry specified in principle (docs/78, 82, 85) but not
   derived in form; which first: the tier map, the planes, or the double cone?

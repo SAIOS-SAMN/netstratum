@@ -1,6 +1,6 @@
 # 51 — Cognition: the universe and the mind
 
-**The ruling that separates physics from thought. Downstream of `00_CHARTER`;
+**The rule that separates physics from thought. Downstream of `00_CHARTER`;
 binding on the intelligence arc (`iae`, `substrate`) and everything that mints.**
 
 The engine grows real intelligence, not a brute-force search wearing a
@@ -11,10 +11,11 @@ with a single exact seam between them. This document is the law of that split.
 
 ## 1. The two tiers (binding)
 
-> **Amended by `53_INTELLIGENCE_PORT` (operator ruling 2026-08-17).** The
-> Universe half of this section stands, absolute and unchanged. The Mind half —
-> "stochastic, float-tolerant, proposes/guesses candidate generators" — is
-> retired: it was the facade. The Mind does not sample; it observes. See §1a.
+> **Amended by `53_INTELLIGENCE_PORT`.** The Universe half of this section
+> stands unchanged. The Mind half — "stochastic, float-tolerant,
+> proposes/guesses candidate generators" — is retired: it described the
+> search the opening paragraph rejects. The Mind does not sample; it
+> observes. See §1a.
 
 > **The Universe is exact and deterministic; it commits. The Mind is exact and
 > observational; it reduces. Nothing the Mind reduces enters the Universe except

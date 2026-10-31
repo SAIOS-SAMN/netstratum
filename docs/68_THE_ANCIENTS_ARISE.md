@@ -1,8 +1,8 @@
 # 68 — The ancients arise
 
-Ruling (operator-authorized, coordinator 2026-10-09; Concordance 3.1), built
-on docs/58 §6 and docs/61 G3. Code: `engine/conductor/src/ancients.rs`, run
-once a bounce in the conductor's year voice, after `core_bounce`.
+Built on docs/58 §6 and docs/61 G3 (Concordance 3.1). Code:
+`engine/conductor/src/ancients.rs`, run once a bounce in the conductor's year
+voice, after `core_bounce`.
 
 ## The readings it rests on, derived
 
@@ -69,4 +69,4 @@ bloomcall-sky-14.
 | A1 | ancients by birth | landed |
 | A2 | ancients by deed | landed (fires where a core's bulge holds no living line) |
 | A3 | the trust ends; reserve basket stated | landed as a record; key custody unchanged on disk |
-| A4 | Map acts at the ancient's core; hosting 78.155's mouth | waiting on 78.154 and the 78.155 ruling |
+| A4 | Map acts at the ancient's core; hosting 78.155's mouth | waiting on 78.154 and the 78.155 decision |

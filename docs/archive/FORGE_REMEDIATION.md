@@ -45,9 +45,9 @@ And one fact that closes the economic question:
 > **Conclusion.** R1, R3, R4 and R5 change *how long* the same answer
 > takes and *which of several equally valid programs* is returned.
 > They change neither what verifies nor what mints. **They do not need
-> Ruling Box 1.** `REMEDIATIONS.md` §8 said otherwise; §6 corrects it.
+> Decision Box 1.** `REMEDIATIONS.md` §8 said otherwise; §6 corrects it.
 
-The one genuine economic lever in the forge is untouched here: the
+The only economic lever in the forge is untouched here: the
 `level → Difficulty` ladder (`forge.rs:41`) and the rung→reward table.
 Those stay exactly as they are.
 
@@ -142,14 +142,14 @@ Two costs, and the second is the one that matters:
    producing no work, and the line cannot tell the difference between
    an insufficient attempt and an empty draw (nothing there to find).
 
-Owed, and it is an operator question because it moves the difficulty
-surface: should the forge emit only tasks its own vocabulary can close,
+Open, and it is a design decision rather than an optimisation because it
+moves the difficulty surface: should the forge emit only tasks its own vocabulary can close,
 should the derived-operator coverage be widened to match the generative
 families, or is an unsolvable draw a lawful part of the ladder?
 
 ## R1b — Buffer reuse: landed (2026-08-02)
 >
-> Operator finding: the heap on the Vec is too small. Correct, and it is
+> Finding: the heap on the Vec is too small. Correct, and it is
 > what R1 was missing.
 >
 > A grid at live difficulty is 9–16 bytes. `Op::apply` allocated a fresh
@@ -322,7 +322,7 @@ Once `from_key`'s `word_len` 4 is wired, it stops being neutral.
 several programs close a task, a different (equally valid) one may be
 returned — see §1.2.
 
-**Risk.** This is the one change that alters the returned program, so
+**Risk.** This is the only change that alters the returned program, so
 R1/R3's byte-identity pin cannot cover it. Land R1+R3 **first**, prove
 identity, **then** R4 as a deliberate order change with its own pin
 (same task still solved; candidates-tested recorded).
@@ -379,7 +379,7 @@ wiring at N6.
 | 3 | **R5** measure repeat rate | after 2 | yes | build only if the rate justifies it |
 | 4 | **R2** canonical form | N6 / `from_key` wiring | yes | ~4 % now, more at depth 4+ |
 
-**Nothing here is gated on Ruling Box 1.** §1 is the argument. Ruling
+**Nothing here is gated on Decision Box 1.** §1 is the argument. Ruling
 Box 1 still governs the `level → Difficulty` ladder and the rung→reward
 table, and this plan touches neither.
 
@@ -405,13 +405,13 @@ beside the old.
   deterministic, and there is no reason to spend that licence on a
   phase that has a clean 3× available.
 - **The volumetric path.** `solve_volume` is the decorative tier
-  (operator C8); it cannot mint and is out of scope.
+  (C8); it cannot mint and is out of scope.
 
 ---
 
 ## §6 Correction to `REMEDIATIONS.md` §8
 
-That section sequenced R1–R3 as **blocked on Ruling Box 1**, reasoning
+That section sequenced R1–R3 as **blocked on Decision Box 1**, reasoning
 that the forge is the proof-of-work so making it cheaper re-prices a
 mint. Having since read `verify_work` (`work.rs:266`), `mint_bound`
 (`kernel/src/lib.rs:845`) and `research_step`

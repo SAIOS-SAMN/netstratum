@@ -1,9 +1,11 @@
 # 102 — Alignment: one vocabulary, one register of what is owed
 
-Design direction (2026-10-28): state the coherent picture, with aligned
-semantics, for implementation, and align every topic identified as needing
-remediation or forward development. Status: register, kept current; each item
-closes with its commit and witness.
+This document holds the vocabulary used at every tier and the register of
+every item built or owed across the era-1 documents, with each item's
+source, dependencies and open decision.
+
+**Status:** register, kept current; each item closes with its commit and
+witness.
 
 ## 1. The vocabulary (one meaning a word, every tier)
 
@@ -50,7 +52,7 @@ docs before code; witnesses by re-derivation, never equal bytes.
 
 ### A. Remediation (misaligned machinery; no new physics)
 
-| # | item | where | depends | ruling |
+| # | item | where | depends | decision |
 |---|---|---|---|---|
 | A1 (closed e4b74a9) | the leg flag's two writers: `stream` undoes `luminal` | `flows::stream`, breath | — | — |
 | A2 (closed e4b74a9) | tilt dropped on save for firmament and ocean motes | `pulse::write` tags 19/24 | — | — |
@@ -63,31 +65,31 @@ docs before code; witnesses by re-derivation, never equal bytes.
 
 ### B. Forward development (new physics, in order)
 
-| # | item | doc | depends | ruling |
+| # | item | doc | depends | decision |
 |---|---|---|---|---|
 | B1 | the universal core as one body: firmament, home core, ocean fold into its held cut, its disc, its flows | docs/101 §2 | A1, A2, A5, A6 | — |
 | B2 | the founding as its throat; `cascade` and `deploy` retire; `T_u` its echo (hypha reads tag 17) | docs/101 §2, §6 | B1 | **mycelium** (owner of TUniversal), `T_u` |
 | B3 | galaxies formed from its flow (the universe tier's mechanism, the crest's grammar); `orbit_galaxies`' rings retire | docs/101 §2 | B2 | — |
 | B4 | the home as its disc, unique by elements; the firmament the heavy base | docs/78, 83, 101 | B3, B5 | — |
-| B5 | carriage by harmonic, the coupling C | docs/100 §3 | — | **operator**: C ((a) `q = l + 1` per Xylarium's reading) |
-| B6 | the electrons' transition (R = 0) on the light and chemistry ledgers; the poles' transition | docs/100 §9.1, §9.3 | — | **operator**: R's scale |
+| B5 | carriage by harmonic, the coupling C | docs/100 §3 | — | **open**: C ((a) `q = l + 1` per Xylarium's reading) |
+| B6 | the electrons' transition (R = 0) on the light and chemistry ledgers; the poles' transition | docs/100 §9.1, §9.3 | — | **open**: R's scale |
 | B7 | the founding's slight beads stop standing at rest | docs/100 §6 | B2 | — |
-| B8 | cost at the universe tier: every grain in motion; the zoom ruling (certified sectors, exact under observation) | ruling 2026-10-24 | B1 | — |
+| B8 | cost at the universe tier: every grain in motion; the zoom rule (certified sectors, exact under observation) | — | B1 | — |
 
 ### B′. The layers (docs/103)
 
-| # | item | doc | depends | ruling |
+| # | item | doc | depends | decision |
 |---|---|---|---|---|
-| L5 | production read on the matter's own face (the inverted strip) | docs/103 §5 | — | **operator**: both faces or the whole frame |
+| L5 | production read on the matter's own face (the inverted strip) | docs/103 §5 | — | **open**: both faces or the whole frame |
 | L4 | pressure restated as the medium's state (hydrostatic, thermal, magnetic); the gradient's push the coupling | docs/103 §4 | — | — |
 | L2 | chemistry of the medium: frames pair in step where R holds them | docs/103 §2 | B6 | — |
-| L6 | the bond composed through the layers (nuclear, chemical, magnetic, torsional, gravitational) | docs/103 §6 | L2, L4 | **operator**: additive or nested |
+| L6 | the bond composed through the layers (nuclear, chemical, magnetic, torsional, gravitational) | docs/103 §6 | L2, L4 | **open**: additive or nested |
 
 ### B″. The inverse duals (docs/104)
 
-| # | item | doc | depends | ruling |
+| # | item | doc | depends | decision |
 |---|---|---|---|---|
-| D1 | the face map in one place (`held = 1 − δ`, `unlocked = δ`) | docs/104 §4 | — | **operator**: confirm the map (§5) |
+| D1 | the face map in one place (`held = 1 − δ`, `unlocked = δ`) | docs/104 §4 | — | **open**: confirm the map (§5) |
 | D2 | heating, cooling and the counterweight on a heat ledger | docs/104 §1–§2 | D1 | — |
 | D3 | push and release on the unlocked face | docs/104 §1 | D1 | — |
 | D4 | twist and its release by the held share | docs/104 §1 | D1 | — |
@@ -95,7 +97,7 @@ docs before code; witnesses by re-derivation, never equal bytes.
 
 ### B‴. The substrate (docs/106), beneath every layer
 
-| # | item | doc | depends | ruling |
+| # | item | doc | depends | decision |
 |---|---|---|---|---|
 | S1 | the energy ledger (heat, motion, potential, both faces), read | docs/106 §6 | — | — |
 | S2 | heat as state with its counterweight | docs/106 §2 | S1 | — |
@@ -105,7 +107,7 @@ docs before code; witnesses by re-derivation, never equal bytes.
 
 ### B⁗. Own rulers (docs/108): the imported calibrations retired
 
-| # | item | doc | depends | ruling |
+| # | item | doc | depends | decision |
 |---|---|---|---|---|
 | O1 | heat read in grips (the lightest kind's τ), `HYDROGEN_K` retires | docs/108 §2 | — | — |
 | O2 | the bell in home years (`1/P_home`), `BELL_YEARS` retires | docs/108 §2 | — | — |
@@ -137,7 +139,7 @@ locked lead, torsion, twist in the bond and the fibres (65348e2, 4ffd2e7,
 
 1. **A1–A4, A7** (no physics change; each with its witness).
 2. **A5–A6 fold into B1** (2026-10-28): folding nine readings over four holders now is rewritten when they become one body; pointing the homes at today's empty home core would break the home year until B4.
-3. **Rulings in hand:** C (B5), R's scale (B6), `T_u` with Mycelium (B2).
+3. **Open decisions:** C (B5), R's scale (B6), `T_u` with Mycelium (B2).
 4. **B1 → B2 → B3 → B4 with B5, B7**, then **B8** as the cost demands.
 5. **O1 → O2**, then **O3, O4, O7** with S2, **O5** with S1, **O6** with S2–S3 (docs/108 §4).
 6. **C1**, then **C2–C4**.

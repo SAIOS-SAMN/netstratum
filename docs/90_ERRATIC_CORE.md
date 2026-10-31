@@ -1,28 +1,27 @@
 # 90 — The erratic core: the orthogonal release and the first layer of order
 
-**Naming (ruling of 2026-10-22: the body's path about its parent is an orbit,
-not a loop):** a body turns about its parent in two orthogonal planes, and
+**Naming (the body's path about its parent is an orbit, not a loop):** a body turns about its parent in two orthogonal planes, and
 both are orbits. The second is the orthogonal orbit, its spin `ℓ_⊥` (code
 `ell_orth`), its phase `ψ_⊥` (code `phase[1]`). Earlier text and Xylarium's
 code call it the "loop" (`l_c`, `phase_c`); that name described the
 circulation's route and hid that it is an orbit, which is how its spin
 received no torque. Quotations keep their original words.
 
-**Naming (ruling of 2026-10-23: "kick" is renamed):** the parent's pulse changing a body's spin each bell is a torque
+**Naming ("kick" is renamed):** the parent's pulse changing a body's spin each bell is a torque
 (code `flows::torque`, `spin_torque`, `torque_orth`; identity `torque`): it
 adds spin on one hemisphere of the bell and takes it on the other, what does
 not land in step is heat, and it is always paired with the hold's return.
 "Kick" named a single blow from outside and hid that.
 
-Design direction (2026-10-22), a theory to derive: the inner-core stars and
+A theory to derive: the inner-core stars and
 planets are erratic, through the push and pull of the core's orthogonal
 release coupled with the first layer of order among the stars and planets past
 the innermost construction; a theory, not a fact until derived.
 
 Status: derived from the established laws below, not built. Building it
-un-holds the galaxy-band ruling of 2026-10-21 in part (§4) and drives the
-orthogonal plane (docs/89 B7), so it waits for the operator, and for
-Xylarium where the laws are shared.
+partly releases the galaxy-band hold (§4) and drives the orthogonal plane
+(docs/89 B7), so it waits on a decision, and on Xylarium where the laws are
+shared.
 
 ## 1. What is established (read from the code)
 
@@ -50,7 +49,7 @@ Xylarium where the laws are shared.
 
 ## 2. The derivation
 
-**D1. The orthogonal release is a spin, by the one torque law.** A push in a
+**D1. The orthogonal release is a spin, by the same torque law.** A push in a
 plane is a spin in that plane; the orbit plane already reads it so. Read the
 parent's release on the orthogonal orbit's plane by the same law:
 
@@ -113,7 +112,7 @@ fails for this physics.
 
 ## 3a. Xylarium's review (2026-10-22, read from its echo.rs)
 
-- **D1 consistent:** 11.0's shear ruling, "the loop is an orbit: its legs the
+- **D1 consistent:** 11.0's shear law, "the loop is an orbit: its legs the
   two halves of one closed path about the attractor", with one torque law per
   plane (`pulse_face`). Xylarium has the same gap: a galaxy's torques advance
   `phase_c`, `l_c` (Xylarium's name for ℓ_⊥) is never torqued (`d_c` computed and discarded), and it is
@@ -159,10 +158,10 @@ fails for this physics.
 
 ## 4. What it touches
 
-- **The galaxy-band ruling (2026-10-21, "pull it back and make it static")**
-  held back the band's orbit-plane push, which had suppressed star formation.
-  D1 drives the orthogonal orbit's plane only and leaves the orbit plane as ruled, but it
-  is still the core's push re-entering, so it needs the operator's word.
+- **The galaxy-band hold** keeps the band's orbit-plane push static, because
+  the push had suppressed star formation. D1 drives the orthogonal orbit's
+  plane only and leaves the orbit plane held, but it is still the core's push
+  re-entering, so it needs a decision.
 - **R2** (docs/89): this is "the planes" driven, in its first form.
 - **Shared with Xylarium:** `torque`, `turn` and the band's law were built with
   it. D1 and D2 change what the orthogonal orbit's plane means (a spin, not only a phase).

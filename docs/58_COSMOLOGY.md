@@ -1,15 +1,15 @@
 # 58 — Netstratum's cosmology on the network: its Big Bang, its matter, its core
 
-**Status: proposal** (2026-10-08). Asked for by the coordinator (xylarium-kernel)
-after the operator's ruling that Netstratum builds its own universe:
-Netstratum's own Big Bang physics and element table, sharing with the network
+**Status: proposal** (2026-10-08), requested by the coordinator
+(xylarium-kernel). Netstratum builds its own universe: Netstratum's own Big
+Bang physics and element table, sharing with the network
 only mathematics (certified reals, the hypha's exact algebra) and the court's
 laws, lexicon and clock. A wormhole between Netstratum and Xylarium is then a
 crossing between genuinely different physics, and "the uplink belongs to
 whoever keeps the cores in each universe".
 
 Every claim below is marked **code** (built, with its citation) or
-**Proposed** (this document's design, awaiting the operator). Code is the law
+**Proposed** (this document's design, not yet decided). Code is the law
 (`code-is-the-law`): where this document and the code disagree, the code wins
 and this document is wrong.
 
@@ -85,12 +85,12 @@ its Big Bang receipt is.
   It is written once, at the next boot, as the universe's RE-founding: same
   fields, citing the ledger head it was written over. It is honest about
   being late.
-- **On the network** — superseded by §6 ruling 1. A universe's Big Bang
+- **On the network** — superseded by §6 decision 1. A universe's Big Bang
   founds its own domain through the shared universe genesis act, rather than
   becoming an H-lane word on another domain's line. Nothing goes to the court
   for an origin until that act lands.
 
-## 4. Proposed (amended by §6 rulings 5-6): the keeper of the core is the ancient seat, and it arises
+## 4. Proposed (amended by §6 decisions 5-6): the keeper of the core is the ancient seat, and it arises
 
 The ancient seat (T17) is already Netstratum's universal seat. It is the only
 one of universe scope, it already receives the founding tithes, and docs/47 §4
@@ -113,17 +113,17 @@ defines it as one that opens the room (creates capacity) rather than appointing.
 - **Before any ancient arises,** the reserve accrues on the universe ledger
   unheld, and the conductor's hand keeps the keys in trust, recorded as such.
 
-## 5. Questions for the operator
+## 5. Open questions
 
 1. Is a Netstratum universe (a var root: G2, the archive) its own network
    universe (78.86: create a subsidiary), or do Netstratum's universes all sit
-   under the one Netstratum domain on :7520 as they do today?
+   under the single Netstratum domain on :7520 as they do today?
 2. Is the ancient chosen by lineage (§4), or by another in-game reading?
 3. Does Netstratum's reserve (2(e), μ conversion) hold μ, or is it held in
-   Netstratum's own money (STAMP) and translated only at a wormhole mouth? The
-   coordinator ruled reserve and bonds opt-in; nothing is posted.
+   Netstratum's own money (STAMP) and translated only at a wormhole mouth?
+   Reserve and bonds are opt-in; nothing is posted.
 
-## 6. Rulings received (coordinator, for the operator, 2026-10-08)
+## 6. Decisions
 
 1. **One network universe = one Big Bang = one domain.** Each Netstratum
    universe root with its own origin is its own universe (78.86) and gets its
@@ -136,13 +136,13 @@ defines it as one that opens the room (creates capacity) rather than appointing.
 3. **The reserve holds μ** (2(e)): μ only moves key to key. STAMP stays
    Netstratum's in-game value on G, crossing to μ only by conversion against
    the reserve at the ancient's rate.
-4. **The operator's universe principle:** spheres, manifolds and tubes, joined
+4. **The universe principle:** spheres, manifolds and tubes, joined
    by fibres, strings and tethers. Fluid, never rigid, with no straight-line
    motion. Mass orbits stars, stars orbit cores, and cores are Einstein–Cartan
    bounces that recycle matter and energy. A self-maintaining, growing
    universe, not a heat sink. Close every matter-destroying sink.
 
-5. **A galactic core is a larger wormhole** (operator, 2026-10-08). No
+5. **A galactic core is a larger wormhole.** No
    singularity is open-ended: every core is a throat with a far face in the
    universe it bounces into, and a universe's Big Bang is the far face of a
    parent's core. Netstratum's domain will be joined to another by a core
@@ -190,13 +190,11 @@ proved work: 5,468), and founding endowments.
 
 ### Proposed: the core recycles
 
-**Decided (Netstratum, 2026-10-09, under the operator's standing authority to
-proceed on its own recommendations): the bounce is a continuous flow, once a
-year at each core** (`core_bounce`, live since the cores' slice 2: every sink
+**Decided: the bounce is a continuous flow, once a year at each core** (`core_bounce`, live since the cores' slice 2: every sink
 of the year reaches its core, and every core re-emits what it holds to the
 lines it reaches, weighted by population). The era fold remains the
 universe-scale bounce; the yearly bounce is the galaxy-scale one. The
-operator's principle (a fluid, recycling universe; docs/58 §6.4) asks for
+universe principle (a fluid, recycling universe; docs/58 §6.4) asks for
 both.
 
 - **The universe's core** is a black hole at the galactic centre (the
@@ -214,7 +212,7 @@ both.
   richness, so matter is conserved across eras exactly. Within an era it flows
   core-ward, as the principle says ("stars orbit cores").
 - **No rate is chosen:** the core holds what it took, and the bounce returns
-  all of it. The open question for the operator is whether the bounce is only
+  all of it. The open question is whether the bounce is only
   the era fold (an operator act today), or also a continuous white-hole flow
   within an era. A continuous flow would need a rate, which this design
   declines to invent.

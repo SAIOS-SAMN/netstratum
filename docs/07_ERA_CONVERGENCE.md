@@ -8,7 +8,7 @@ time; everything marked *law* binds.
 > Zero hits in `engine/` for `TUniversal`, `convergence_pass`, or era
 > annexation — the "landing spec" label was never made good on.
 
-**The problem (operator, 2026-07-27).** Three archive eras exist
+**The problem.** Three archive eras exist
 (`var-era1`: 22 worlds, `var-era2`: 38, `var`: prior runs of the current
 root) whose receipts carry only local stamps — era1's `stamp 65` and era2's
 `stamp 52` are incomparable numbers on unrelated timelines, and no era ever
@@ -17,8 +17,8 @@ archive: nothing reads the archives, every run mints fresh founding
 reserves, and any naive merge would interleave same-stamp receipts from
 different timelines — corruption by converging timelines.
 
-**The resolution:** persist **TUniversal{S, G, T}** (the lens's inscribed
-coordinate: S the spatial triple on the 3-torus, G the gauge fiber phase, T
+**The resolution:** persist **TUniversal{S, G, T}** (the coordinate the lens
+records: S the spatial triple on the 3-torus, G the gauge fiber phase, T
 the universal tick odometer `00:00:00:00:00:00`), and replace blind genesis
 with a boot-time **convergence pass** that adopts every intact archived
 world onto one timeline and one chart — by annexation, never by merge.
@@ -94,7 +94,7 @@ reads the trajectory, per the house verdict vocabulary:
   lands ahead of its endpoint; a collapsed one lands where the collapse
   was taking it.
 
-The chart projection (*law — inscribed so placement is reproducible*):
+The chart projection (*law — fixed so placement is reproducible*):
 `x = Σ` spatial even grades, `y = Σ` spatial odd grades, `z = Σ` temporal,
 `g = Σ` gauge — each plus its terminal-window net, wrapped mod span by
 `chart_world` (L1 torus; no squaring).

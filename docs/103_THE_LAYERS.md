@@ -1,13 +1,18 @@
 # 103 — The layers: each its own mechanism, coupled by stated laws
 
-Design direction (2026-10-28): the bonding formula is too weak, or sub-layers
-beneath the known states are missing; pressure is treated kinematically and
-should be formulaic; the universe is to be inverted in order to produce;
-kinematics and hydrofluids are distinct layers of physics with distinct
-mechanisms. This document scopes each layer. Status: scope. Builds on docs/94
-(fluid, MHD, UMD), docs/96 (the enclosure, the hold law), docs/97 (Q, Z, R),
-docs/98 (the faces), docs/99 (phases), docs/100 (twist, torsion, transitions),
-docs/101 (one universal core), docs/102 (vocabulary, register).
+This document separates the era-1 physics into layers, each with its own
+state and mechanism, and states the laws that couple them. It addresses
+three problems: the bond is computed from a single layer, with nothing
+beneath the known states; pressure is derived from motion instead of held as
+the medium's state; and production is read on the face where matter does not
+stand.
+
+**Status:** scope.
+
+**Prerequisites:** docs/94 (fluid, MHD, UMD), docs/96 (the enclosure, the
+hold law), docs/97 (Q, Z, R), docs/98 (the faces), docs/99 (phases),
+docs/100 (twist, torsion, transitions), docs/101 (the universal core),
+docs/102 (vocabulary, register).
 
 > **Re-stacked (2026-10-28, docs/106):** these layers stand on a thermodynamic
 > substrate (potential, pressure, energy) that kinematics is propagated from;
@@ -37,7 +42,7 @@ the face where the matter actually stands (docs/98, the luminal bound).
 - **Laws (built):** grip `κ_w·h`, survival `κ + (1 − κ)·h`, captures to the
   densest, release where `a + τ > κ_w·h`, the burn's barrier by charge.
 - **Owed:** the electrons' transition (R = 0) and the poles' (docs/100 §9.1,
-  §9.3; R's scale for ruling), the coupling C (docs/100 §3, for ruling).
+  §9.3; R's scale to be decided), the coupling C (docs/100 §3, to be decided).
 - **What it gives up:** each nuclide's grip (its fibres' bond) and its open
   frames at its pulse phase (R bound: its electrons hold; R free: open).
 
@@ -108,7 +113,7 @@ the face where the matter actually stands (docs/98, the luminal bound).
 - **State:** each core's enclosure (base, hold within, whole), δ at each reach.
 - **Laws (built):** `Enclosed`, the ring law, band pairs on the strip,
   the tide's contrast.
-- **Misaligned (the operator's 3):** the strip (`1 < R ≤ 2`), the band pairs,
+- **Misaligned:** the strip (`1 < R ≤ 2`), the band pairs,
   the crest and the disc read matter on the continuum face, outside the ring,
   while the luminal bound now keeps most matter on the vacuum face, inside the
   ring (47,577 passes by bell 1700). Production is read where matter does not
@@ -119,16 +124,16 @@ the face where the matter actually stands (docs/98, the luminal bound).
   (first degree; never a radius squared), so the vacuum's strip is the
   continuum's read on the other face (`½ < δ ≤ ⅔`), its band pairs, crest and
   disc read there by the same laws at the share's other face.
-  **For ruling:** production on each face at its own inverted strip (both
+  **The options:** production on each face at its own inverted strip (both
   faces produce), or the universe's whole frame inverted (what is read as outside
   is inside, every tier).
 
-  **Ruled (2026-10-28): invert the whole frame.** Derived, its meaning, stated
-  on the share (per the ruling of 2026-10-28, no squares inside a sphere: `R →
-  H²/R` is a square and retires; the inversion is `δ ↦ 1 − δ`, first degree):
+  **Decision: invert the whole frame.** Its meaning, derived and stated on
+  the share (no squares stand inside a sphere, so `R → H²/R`, a square,
+  retires; the inversion is `δ ↦ 1 − δ`, first degree):
   inverting every reading together (turning, the luminal bound, the release's
   placement, the strip, the rim) leaves the dynamics unchanged, the laws being
-  symmetric under the share's inversion: a relabel. The one reading not
+  symmetric under the share's inversion: a relabel. The only reading not
   symmetric is the enclosure's order: the hold at a place counts the core's
   state and every body whose share is larger (deeper, `δ_j > δ`). In the frame
   inverted whole it counts every body whose share is smaller (farther out,
@@ -138,8 +143,8 @@ the face where the matter actually stands (docs/98, the luminal bound).
   116/117, the deepest, inside the universal core's throat; the universal core
   encloses every galaxy with no sphere enlarged (the question was whether the
   enclosing universe's sphere must grow: no). That is the inversion's physics.
-  **Owed before build:** the operator's confirmation that the enclosure counts
-  from the outside in.
+  **Open before build:** confirmation that the enclosure counts from the
+  outside in.
 
 ## 6. L6 — the bond, composed through the layers
 
@@ -155,9 +160,9 @@ the face where the matter actually stands (docs/98, the luminal bound).
     step (the field, L4);
   - **torsional** `τ`: the members' net lead (L3, built);
   - **gravitational** `m`: the holding (L5).
-- **The rule, ruled (operator 2026-10-28): additive.**
+- **The rule: additive.**
   `λ = 2(m + ν + χ + μ_open + τ)/R`, each layer a share of the same reach.
-- **The rule, as it stood for ruling:**
+- **The options considered:**
   - (a) the layers add to the line density, `λ = 2(m + ν + χ + μ_open + τ)/R`,
     each a share of the same reach;
   - (b) the layers nest, each holding what the one beneath leaves free,
@@ -177,27 +182,27 @@ the face where the matter actually stands (docs/98, the luminal bound).
 | L4 → L3 | pressure gradient pushes bodies | owed (§4) |
 | L4 → L6 | pressure supports against collapse | owed (§4, §6) |
 | L5 → L3 | turning `2δ`, by face | built |
-| L5 → production | strip, crest, disc on the matter's own face | owed, for ruling (§5) |
+| L5 → production | strip, crest, disc on the matter's own face | owed (§5, the whole frame inverted) |
 | light (L1 burn, L2 pairing) → L4 heat | the light ledger warms the medium | built in part |
 
 ## 8. Build order (each with its witness)
 
-1. **L5 on the matter's face** (§5), after the ruling (both faces, or the
-   whole frame). Witness: bindings formed on the vacuum face; the ring fixed
+1. **L5 on the matter's face** (§5), with the whole frame inverted (the
+   decision of §5). Witness: bindings formed on the vacuum face; the ring fixed
    (½ both faces).
 2. **L4 restated** (§4): hydrostatic, thermal, magnetic pressure as state;
    the gradient's push as the coupling. Witness: the spin ledger exact; a
    medium at rest in its own pressure moves nothing.
 3. **L2 in the medium** (§2): frames pair in step where R holds them.
    Witness: nucleons conserved; light booked; a cold in-step medium pairs.
-4. **L6 composed** (§6), after the rule's ruling. Witness: a binding of
+4. **L6 composed** (§6), by the additive rule. Witness: a binding of
    sealed nuclei and paired frames holds where the one-layer bond did not.
 5. **L1's owed transitions** (§1), after R's scale.
 6. **Read:** re-found, breathe to bell 1700 and past 7000.
 
-## 9. For ruling
+## 9. Decisions
 
-- **§5:** ruled, the whole frame inverted; its meaning (the enclosure counts
-  from the outside in) owed confirmation.
-- **§6:** ruled, additive.
-- Standing: the coupling C (docs/100 §3); R's scale (docs/100 §9).
+- **§5:** decided, the whole frame inverted; its meaning (the enclosure
+  counts from the outside in) awaits confirmation.
+- **§6:** decided, additive.
+- Open: the coupling C (docs/100 §3); R's scale (docs/100 §9).

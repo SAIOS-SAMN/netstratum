@@ -2,10 +2,10 @@
 
 **Status:** research / not law. Everything here is an *open* direction,
 recorded so a good idea is not lost and a rejected one is not silently
-revived as if settled. Nothing in this file is inscribed law; a vector leaves
+revived as if settled. Nothing in this file is landed law; a vector leaves
 this file only by landing under the BUILD_ORDER process, or by being formally
-closed with its verdict. If a proposal here conflicts with an inscribed law
-(Charter, the SEALs, an NS spec), the inscribed law wins until a landing says
+closed with its verdict. If a proposal here conflicts with a landed law
+(Charter, the SEALs, an NS spec), the landed law wins until a landing says
 otherwise.
 
 ---
@@ -22,7 +22,7 @@ sheaf-cohomology" checks over sector boundaries instead of succinct proofs
 over a trace.
 
 **Verdict: rejected as an architecture replacement; kernels salvaged
-elsewhere.** It cannot replace the inscribed stack, for reasons that are
+elsewhere.** It cannot replace the landed stack, for reasons that are
 load-bearing, not tunable:
 
 1. **GPU float breaks exact-rational determinism (Charter §3.2) and SEAL B.**
@@ -53,13 +53,13 @@ load-bearing, not tunable:
    cheaply verifiable and hard to fake, which leads back to needing a
    succinct proof. Boundary-stitching does not close this.
 
-**Kernels kept (already inscribed):**
+**Kernels kept (already landed):**
 
 - Domain decomposition — sectors to nodes, exchange boundary data — is
   standard and already the spirit of NS-5. Kept as engineering, not as
   "holography" or free consensus.
 - Succinct settlement proofs over exact-rational inequalities (`A/B ≥ C/D`) via a
-  real stark / multilinear prover (Lasso, Jolt, HyperPlonk) — inscribed at
+  real stark / multilinear prover (Lasso, Jolt, HyperPlonk) — specified at
   `05_THERMAL_BALANCE.md` §7.3 as the buildable version of the "topological
   proof" idea.
 
@@ -96,13 +96,13 @@ recorded so a flat "no" doesn't bury a good tuning lever.
 
 Closed for good: un-receipted anything (SEAL B — spills are workspace
 until `VentSettled` seals them, which is already the design); the
-terminology rulings (charter §8); section numbering (mechanical).
+terminology decisions (charter §8); section numbering (mechanical).
 
 ---
 
 ## Q3. Unitary morphodynamics for the ideology axes
 
-**The proposal (operator relay, 2026-07-27).** "Upgrade to unitary
+**The proposal.** "Upgrade to unitary
 morphodynamics" so that love, compassion, morality, and integrity live as
 continuous unitary field transformations over civilization state.
 
@@ -121,12 +121,12 @@ verdict's shape:
    arbitrary physics — the scalar/scored provenance refusal returning as a
    field.
 
-**Kernels kept (inscribed at 09):** the four concepts themselves —
+**Kernels kept (landed at 09):** the four concepts themselves —
 dual-entry receipted ledgers with ratios derived at read (09 §1); friction
 as real entropy riding the landed VENT-1 machinery (09 §3.2); ideology
 export as ordinary covenant state machines (09 §3.3).
 
-**Addendum — the terminology resolution (operator ruling, 2026-07-29).**
+**Addendum — the terminology resolution.**
 The reopening path below was taken, and the vector is resolved without
 re-litigating the verdict: "unitary" stays rejected (continuous unitary
 transforms imply float operator arithmetic — wall 1 stands), but
@@ -164,7 +164,7 @@ carries its lawful way back in.
    The table stays exact-rational and lands as a ruleset revision, law
    for replay under a version bump — never a silent retune.
 2. **Recency weighting on the books.** The eight counters are cumulative
-   forever; an ancient breach never fades. Reopen path: per-era or
+   and never reset; an ancient breach never fades. Reopen path: per-era or
    windowed readings derived at the observer (the derived-never-stored
    law holds — the counters stay cumulative; only the reading windows).
    Reopen trigger: balance wants redemption arcs.
@@ -198,7 +198,7 @@ carries its lawful way back in.
 **Raised by the lens lane, 2026-08-02, as a relay — not a proposal to
 rename anything.** Recorded here so the collision is visible before it
 produces a real defect, and so the lens lane's own handling of it is not
-mistaken for a ruling on anyone else's.
+mistaken for a decision about anyone else's.
 
 ### The three senses standing in the tree today
 
@@ -208,7 +208,7 @@ mistaken for a ruling on anyone else's.
      "annex the archived timelines" — a world is CONVERGED when it has
      been adopted into the universe timeline. A COMPLETED ACTION.
 
-  2. rfa-core's strike                     1 ruling    LANDED
+  2. rfa-core's strike                     1 decision  LANDED
      "the word `converged` is struck from this crate — zero says the
      relations compose, never that anything was finished or emptied."
      The word was removed because it wrongly implied FINISHED.
@@ -263,8 +263,7 @@ lens's own vocabulary and reach nothing in `ledger` or `conductor`.
   correct in its own domain: timelines genuinely do converge onto one
   axis, and that convergence genuinely does complete.
 - **`Motion::Converging` should not be renamed.** The Diverging/Converging
-  pair was ruled directly by the operator (*"invert to convergence"*,
-  2026-08-02) and deliberately mirrors `Flux { sources, sinks }` in
+  pair (the inversion to convergence) deliberately mirrors `Flux { sources, sinks }` in
   `rfa-core::capacity`. Renaming it would break the parallel that
   correction was made to create.
 
@@ -290,7 +289,7 @@ under BUILD_ORDER rather than fixed in passing.
 ## Q-T / Q-R / Q-S — Offices, rails, STAMP (opened 2026-08-07)
 
 Recorded from `30_OFFICES_AND_RAILS`, `31_ELEMENT_COMMERCE`, `32_STAMP_MARKET`.
-Not law until ruled and landed — except **coded defaults** below.
+Not law until decided and landed — except **coded defaults** below.
 
 | ID | Question | Default / land status |
 |----|----------|------------------------|
@@ -307,7 +306,7 @@ Not law until ruled and landed — except **coded defaults** below.
 
 ## Q-D — Defense axioms · covert worldshape · espionage (opened 2026-08-08)
 
-Recorded from `36_DEFENSE_AXIOMS.md`. Not law until ruled and landed.
+Recorded from `36_DEFENSE_AXIOMS.md`. Not law until decided and landed.
 
 | ID | Question | Lean / default |
 |----|----------|----------------|
@@ -319,8 +318,8 @@ Recorded from `36_DEFENSE_AXIOMS.md`. Not law until ruled and landed.
 | **Q-D6** | Elder as combat? | Keep warden puzzle-only (no combat) |
 | **Q-D7** | Digital vs cyber split in wire? | One CYB domain, two sub-channels |
 | **Q-D8** | Clade as mechanic or voice? | Voice + residual priority only (15_TAXON law) |
-| **Q-D9** | MKT as 7th domain vs CYB sub-channel? | **Ruled:** first-class **MKT** domain (`36` §1.3, §10) |
-| **Q-D10** | Mini-games separate currency? | **Ruled:** suites only; no shadow score (`36` §10.3–10.4) |
+| **Q-D9** | MKT as 7th domain vs CYB sub-channel? | **Decided:** first-class **MKT** domain (`36` §1.3, §10) |
+| **Q-D10** | Mini-games separate currency? | **Decided:** suites only; no shadow score (`36` §10.3–10.4) |
 | **Q-D11** | N for clear seal before mark? | Compose Q-S4 (default 8) at P5.32 land |
 | **Q-D12** | Circuit breaker duration? | Year-voice (60) or until explicit resume — *open* |
 
@@ -330,9 +329,9 @@ Authority: `36_DEFENSE_AXIOMS.md`. Board: `TASKS_TRADE_FLEET_DESK` P5.*
 
 ## Q-F — Trade desk · fleets · alignment (opened 2026-08-07)
 
-Recorded from `33_TRADE_FLEET_AND_DESK.md`. Not law until ruled and
+Recorded from `33_TRADE_FLEET_AND_DESK.md`. Not law until decided and
 landed — defaults below are **implementation defaults** if a phase must
-ship before a full ruling.
+ship before a full decision.
 
 | ID | Question | Default if forced early |
 |----|----------|-------------------------|

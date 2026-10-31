@@ -10,7 +10,7 @@ tree against it. Subordinate to `00_CHARTER.md` §11 and
 
 ## §1 The test
 
-A kernel is **the one function that defines a lawful transition.** Not
+A kernel is **the single function that defines a lawful transition.** Not
 a checker beside the thing that transitions — *the* definition. Pure,
 total, no I/O, encoding-blind, network-blind.
 
@@ -118,7 +118,7 @@ Read as a miner, the core is already complete in shape:
     verify it        solver_verify::verify_work — re-forge ∧ re-apply
                      ∧ re-chain; an intact chain over a non-solution
                      refuses
-    bound the pay    mint_bound — the ruled ladder f, exact integers
+    bound the pay    mint_bound — the ladder f, exact integers
     require standing standing — D > 0 and dV ≠ 0, or no mint
 
     commit           the arbor: one record, parent-linked, the judging
@@ -126,8 +126,8 @@ Read as a miner, the core is already complete in shape:
 
 The ladder once carried a fifth rung between the bound and the commit —
 `require standing: capacity_law — D > 0 and dV ≠ 0, or no mint`. It is
-removed (operator ruling 2026-08-04, kernel version 3 → 4): *identity is
-pegged to entity, and identity gets recycled without bonds*, so a
+removed (kernel version 3 → 4) because identity is
+pegged to entity and is recycled without bonds, so a
 standing test read off relational structure refused the lawful recycled
 line by construction. Verified work remains the mint's one anchor, which
 is what the first two rungs already are.
@@ -138,20 +138,19 @@ weight costly to fake, so the mesh will govern cooperating nodes only
 until it lands (`KERNEL_RELAY` §7.1). That is a mesh-lane rung, and it
 is the honest reason the kernel is *mineable* but not yet *contested*.
 
-**This gap is where a nonce would enter, and it is ruled shut**
-(`23_TRAVERSAL` §2k, operator 2026-08-02). Hashcash is the reflexive fix
+**This gap is where a nonce would enter, and a nonce is excluded**
+(`23_TRAVERSAL` §2k). Hashcash is the reflexive fix
 for exactly this hole. The anchor must be paid in structure that
-survives reduction, not in energy spent — and that ruling supplies the
-criterion without yet supplying the mechanism, so the gap stays open
-with one door now closed.
+survives reduction, not in energy spent — a criterion stated without
+yet a mechanism, so the gap stays open with one candidate fix (the
+nonce) excluded.
 
-## §5a The shape PoW++ actually has (operator, 2026-08-02)
+## §5a The shape PoW++ actually has
 
-§5 read the miner as a line. It is not one.
-
-> two 2D chains running across one n-dimensional chain — a polynomial
-> made of chains, or a CY manifold made of individual overlapping Venn
-> diagrams
+§5 read the miner as a line. It is not one. The shape proposed for it:
+two 2D chains running across one n-dimensional chain — a polynomial
+made of chains, or a CY manifold made of individual overlapping Venn
+diagrams.
 
 Unpacked against what is landed:
 
@@ -190,20 +189,20 @@ mesh." It is:
    exposes `extend`, `branch`, `adopt`, `append` and no merge, and
    `Commitment.parent` is a single `[u8; 32]`. A join needs two, and
    the coordinate is hashed into every commit, so this is a wire
-   amendment to tag 84 plus an operator ruling — not a coder change;
+   amendment to tag 84 plus an explicit design decision — not a coder change;
 3. the overlap law — what two charts must agree on where they meet,
    which is where `orbit_lock` finally gets its caller (#10);
 4. the cross-node halves.
 
-Step 2 is the one nothing can route around. Compactness maps onto the
+Step 2 is the step nothing can route around. Compactness maps onto the
 standing T∞ purge — the torus wraps finitely, infinity is disallowed —
 so that constraint is already law. What is missing is the meeting.
 
 ### §5a.1 The bond at the overlap — why a two-parent link is not enough
 
 The minimal join is a record with two parents: git's merge commit, and
-the obvious first answer. **The operator's ruling is that this is a
-paperchain and insufficient, and the reason holds up.**
+the obvious first answer. **It is insufficient — a paper chain — for
+the following reason.**
 
 A two-parent hash link records that two branches met. It records
 nothing about what the meeting preserved. For a ledger that only ever
@@ -241,7 +240,7 @@ here in a way it was not in
 drove nothing. **Struck there for driving nothing; earned here because
 the join has no mechanism and this supplies one.**
 
-**What keeps the throat open is ruled in `23_TRAVERSAL` §2k** — the
+**What keeps the throat open is specified in `23_TRAVERSAL` §2k** — the
 Einstein–Cartan half of the pair. A throat held open by accumulated
 weight pinches to a point; one held open by structure no frame explains
 stays traversable. That section also carries the consequence for
@@ -270,11 +269,11 @@ Venn overlap, and exactly where the shared class, the two residues and
 the transition function have room to live.
 
 **Not derived, flagged rather than guessed:** the number. "3D/5D" is
-the operator's reading and this document does not derive 3 or 5.
+a proposed reading and this document does not derive 3 or 5.
 Usefully, though, it is not arbitrary either — the dimension is a
 consequence of which interior coordinates the projection admits, so it
-becomes measurable the moment that ruling is made rather than needing
-to be picked. Naming a number now, ahead of the ruling, would be the
+becomes measurable the moment that decision is made rather than needing
+to be picked. Naming a number now, ahead of the decision, would be the
 §2d failure repeating.
 
 **Not derived, flagged:** whether the overlap condition is Ricci-flatness
@@ -312,7 +311,7 @@ document does not make it.
 Steps 1–3 are what make the word "kernel" true. Step 4 is what makes it
 load-bearing.
 
-## §3a Why judging exists at all — and why `-> Committed` is still linear (operator, 2026-08-02)
+## §3a Why judging exists at all — and why `-> Committed` is still linear
 
 ### 3a.1 The judge exists because the transition is defined twice
 
@@ -408,7 +407,7 @@ exists."* Measured, it is worse than a missing mapping.
 exists — `(orb, channel)` — and everything else is a scalar. The
 mapping capacity-lane wanted has nothing on the other side.
 
-### 3b.1 Three rulings, in order, each a decision rather than a derivation
+### 3b.1 Three decisions, in order, none of them a derivation
 
 1. **Does `tile` have geometry?** Give it `(x, y)` and a bound, or
    declare it a bare label. Cheapest step, and it decides whether an orb
@@ -435,7 +434,7 @@ decisions with different costs — 1 is a type change, 2 is a wire
 amendment, 3 is an architecture. Doing 3 without 2 stratifies a space
 in which nothing can meet.
 
-## §3c Relay answers — R-D2, the channel arity, and two corrections to the spatial ruling (2026-08-02)
+## §3c Relay answers — R-D2, the channel arity, and two corrections to the spatial decisions
 
 ### 3c.1 R-D2 · the quorum — **strike**
 
@@ -444,7 +443,7 @@ three seated timekeepers return one answer counted three times.
 `Attestation::Refuses` is constructed only in a test; `QuorumOpen` is
 unreachable.
 
-**Ruled strike, by this document's own law 8** — *a term that computes
+**Struck, by this document's own law 8** — *a term that computes
 is kept; a term that only resonates is excised*. The quorum resonates
 (it reads as consensus) and computes nothing. One writer per clock is
 already NS-5 §7 law, so nothing is lost.
@@ -455,8 +454,8 @@ exist is exactly what law 8 bars. It returns when a second attester
 does.
 
 Execution touches `vrp.rs`, `genesis.rs` and `ns3_conformance.rs` in
-`cfe` — shared, and days after a three-way merge. **Ruled here, not
-executed; say the word and it is one commit.**
+`cfe` — shared, and days after a three-way merge. **Decided here, not
+executed; the execution is one commit.**
 
 ### 3c.2 The channel arity — approved, with one pin added
 

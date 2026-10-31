@@ -1,8 +1,7 @@
 # 26 — The articles: what a law in this engine must be
 
-**Status:** law. The last split out of the retired `18_TORSION.md`, 2026-08-05, on
-the operator's order to break that file into correctly-named documents
-and delete it. It carries §1, Articles I, II and IV, §4 and §5.
+**Status:** law. The last split out of the retired `18_TORSION.md`, 2026-08-05, when
+that file was broken into correctly-named documents and deleted. It carries §1, Articles I, II and IV, §4 and §5.
 
 **Why these travel together.** They are all constraints on the form a
 law may take — coordinate-free (I), non-vacuous (II), non-retreating
@@ -20,7 +19,7 @@ still resolves against the same section names.
 
 ---
 
-## §1 The ruling (paraphrased)
+## §1 The requirement (paraphrased)
 
 > None of these components is limited to tensors — this is torsion
 > only — and that must be regulated in constitutional law … Ω(D) as
@@ -62,7 +61,7 @@ ground (`D > GROUND`), carrying circulation, claims allocation and
 operational authorization.*
 
 **Standing is not this article's to grant** (the sovereignty amendment,
-operator ruling 2026-08-01; §2c′). A committed state's standing comes
+§2c′). A committed state's standing comes
 from admission — it passed `admits()`, it carries receipts, it is in the
 chain — and that was granted by the judge, upstream of every reading.
 `D` is a rank: testimony about what `V` expresses. Testimony prices
@@ -71,9 +70,9 @@ testifies about, because a reading that outranks its own source runs
 backwards through the judge. This article gates what a state is paid and
 what it may operate; it does not gate whether it stands.
 
-**The owed amendment, paid** (operator ruling 2026-08-01). This article
+**The owed amendment, paid.** This article
 read *"a state yielding a vacuous set (`V = 0` or `D = 0`)"*. The
-D-IS-NEVER-ZERO ruling struck that operand and said an amendment was
+D-IS-NEVER-ZERO rule struck that operand and said an amendment was
 owed here; this is it. `D = 0` is not a state this system can express,
 so an article keyed on it was keyed on nothing.
 
@@ -112,8 +111,7 @@ computes nothing" failure law 8 excises. It is now consumed by
 readings: `capacity_pins::no_reading_of_any_shape_ever_falls_below_the_ground`
 and `bridge_pins::no_committed_world_ever_reads_below_the_ground`.
 
-**The article is asked of the orb, not only of the world** (SYN-4/SYN-5,
-operator ruling 2026-08-02). This article says *a state carrying
+**The article is asked of the orb, not only of the world** (SYN-4/SYN-5). This article says *a state carrying
 circulation claims allocation* — and until now nothing could say who.
 `standing` read `read_entangled(prior).verdict()`, a reading of the
 whole with no orb anywhere in it, so the article could only ever refuse,
@@ -150,12 +148,11 @@ where an orb holding nothing is refused, takes a place in the
 circulation, and passes. (Both pins are since struck with the article —
 see the record below.)
 
-> **Struck — the article, its refusal and both pins** (operator ruling
-> 2026-08-04). `capacity_law`, `MintWithoutOwnStanding` and
+> **Struck — the article, its refusal and both pins** (2026-08-04). `capacity_law`, `MintWithoutOwnStanding` and
 > `capacity_law_pins` are removed; the two citations above no longer
-> resolve and are kept as the record of what was witnessed. The ruling:
-> *identity is pegged to entity, and identity gets recycled without
-> bonds*. Article II asked an orb what relations it held, and a
+> resolve and are kept as the record of what was witnessed. The reason:
+> identity is pegged to entity, and identity is recycled without
+> bonds. Article II asked an orb what relations it held, and a
 > recycled identity lawfully holds none — so the floor it offered as
 > "the way up" was unreachable for exactly the lines that most needed
 > it. What survives untouched is the mint's real anchor: `verify_work`
@@ -190,7 +187,7 @@ approaches luminal capacity.*
 **Exact realization — three clauses, and the second rules out a
 misreading.**
 
-1. **The floor is occupancy** (operator ruling 2026-08-02). `GROUND`
+1. **The floor is occupancy.** `GROUND`
    floors an empty universe at one tone. A universe holding structure
    that needs `k` tones is floored at `k` — **a universe cannot have
    less room than it is using.** Enforced today by absence: no deed closes a
@@ -198,7 +195,7 @@ misreading.**
    container law makes structure in an unopened plane unrepresentable.
    **The fold, guarded** (2026-08-02; `kernel::bridge::fold_guard`,
    pinned in `bridge_pins`). A fold does not shrink `D` — it seats a new
-   store — so it is the one operation that could route around the floor:
+   store — so it is the only operation that could route around the floor:
    a selective carry could land structure in a universe with fewer tones
    than it occupies, with no plane ever closed and the floor still
    breached. The fold as built is total and therefore already safe (the
@@ -216,7 +213,7 @@ misreading.**
    the chord never loses a note, never that the universe stays
    single-toned.* The axial law is that **capacity never retreats** — monotone non-decreasing in `D`. It is not descent along
    a gradient toward a minimum; gradient descent stands struck (a
-   failed topology, operator ruling 2026-08-01) and nothing in this
+   failed topology) and nothing in this
    article revives it. This is `ELEVATE-1`'s "the fiber never retreats"
    (the `Positive` door on the climb's delta — 29_CONSTRUCTION)
    generalized from the gauge climb to capacity itself.
@@ -253,7 +250,7 @@ station or tradition alters any row.
 - `kernel/CHARTER.md` §3/§4 — the gradient stands struck; §5b's
   operator score reads component semantics.
 - `SYSTEM_SPEC.md` §0 — the foundation is capacity.
-- **Reconciled (operator ruling 2026-08-01).** `D` is **the structure
+- **Reconciled.** `D` is **the structure
   surviving `Π_G(Δ(V))`** — `17_CAPACITY.md` §4b's reading stands as
   law. The competing index-set reading (D as the extents of
   `(i,j,k,l)`) is struck from `EQUATIONS.md` §1 and `SYSTEM_SPEC.md`

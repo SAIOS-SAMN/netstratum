@@ -1,6 +1,6 @@
 # 75 — Realms: how stewards' boundaries emerge
 
-Operator (2026-10-13): stewards govern realms, the boundaries between
+Stewards govern realms, the boundaries between
 civilizations, and control diplomacy, trade and sovereign disputes (docs/74,
 the tiered hierarchy). The boundaries must be derived, as emergent as
 possible. Any constant is a placeholder for undefined physics.
@@ -30,7 +30,7 @@ possible. Any constant is a placeholder for undefined physics.
   them (spying, sabotage, raids, notes, escorts) remain, for the decisions
   below.
 
-## The derivation (operator, 2026-10-13: no realm by default)
+## The derivation (no realm by default)
 
 Realms do not divide the known universe. A realm forms only where an
 ancient's progenitors have deployed a passage network, and passage actually
@@ -65,17 +65,17 @@ Nothing outside a network is written: no realm of one, no partition. Realms
 appear as progenitors deploy and passage uses them, and shrink or vanish when
 it stops.
 
-## Open, for the operator: passage over inner-galaxy wormholes
+## Open: passage over inner-galaxy wormholes
 
 Most live gates run from a galaxy's hub to its own core
 (`from == core`). The hub step routes trade only through gates between
 galaxies (`stamp_market_step`, the gates' roads), so over an inner-galaxy gate
 only envoys pass, and those realms stay nearly empty. What rides an
 inner-galaxy wormhole, and why, is physics not yet defined. The ancients
-design these wormholes (docs/74), so their passage rules are to be ruled, not
-invented here.
+design these wormholes (docs/74), so their passage rules are to be decided with that
+design, not invented here.
 
-## The ladder: positions measured from physics (operator, 2026-10-13)
+## The ladder: positions measured from physics
 
 Roles are positions read from the physics, never checklists or milestones
 (docs/76: the physics defines, the story emerges).
@@ -89,8 +89,8 @@ Roles are positions read from the physics, never checklists or milestones
   physics today (docs/76); it is defined first, then sovereignty is read from
   it. A line that controls no system is a captain: it acts from what it holds
   and carries.
-- **Stewards are promoted by the progenitors from a realm's sovereigns**
-  (operator ruling), as a decide kind (docs/73), `promote`:
+- **Stewards are promoted by the progenitors from a realm's sovereigns**,
+  as a decide kind (docs/73), `promote`:
   - rows: the realm's sovereigns;
   - loss: the realm's measured outcomes under that steward (unmet trade,
     contested mass);

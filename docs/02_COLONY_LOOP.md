@@ -1,6 +1,6 @@
 # The world-book, chapter 1 — the colony loop
 
-**Status:** design, ruled — this chapter locks the first depth ruleset. It
+**Status:** design, fixed — this chapter locks the first depth ruleset. It
 lands in four increments (D1–D4, boarded in BUILD_ORDER). Numbers here are
 the ruleset v1 constants: exact ratios, tuned for tension, changeable only by
 a new ruleset version (never silently — replay depends on them).
@@ -73,7 +73,7 @@ is `survey` (engine `chart_terrain`, tag 8 `WorldCharted`, Build
 scope): it charts a star once, and the seed is the founding receipt's
 digest (chronicle-seeded, Charter §9 — no wall clock, no dice). Opt-in
 per the THERMAL-1 precedent: a star without the receipt reads all
-Standard forever, so no landed witness or live world shifts under the
+Standard permanently, so no landed witness or live world shifts under the
 ruleset law. v1 multiplies extraction and agriculture (extractor,
 habitat) only; converters and heat-law zones are untouched. `terrain`
 renders the map (· ▲ ░, zones lettered). Auto-chart at founding and
@@ -160,7 +160,7 @@ cases: the 2E+1H zero-net equilibrium, the famine trigger at exactly −1/n,
 the raze refund, the smelter's exact conversion, the starved synthesizer,
 terrain determinism from the seed, spoilage flooring at 0.
 
-## 5. The industrial pipeline (D2 addendum, ruled 2026-07-25)
+## 5. The industrial pipeline (D2 addendum)
 
 The mid-game: raw ore is bulky and cheap; refined matter is dense and
 valuable. Mine → smelt → synthesize is the progression arc from outpost to
@@ -176,7 +176,7 @@ along hyperlanes (the economy board) and finding with the scanner (N4).
 | refined alloy | 3 | smelted | smelters |
 | synthetic diamond | 4 | ultra-refined | synthesizers |
 
-**Rulings against the first draft:** the draft's *resonance crystals* are
+**Changes from the first draft:** the draft's *resonance crystals* are
 deferred to the N4 scanner landing, where the name earns its meaning
 (crystals as the scanner's power source); its *regolith slag / carboniferous
 matrix* intermediate materials are dropped (they appeared once each and fed
@@ -202,7 +202,7 @@ synthesizer consumes four smelters' output. The full one-synthesizer colony
 (≈6E + 4S + 1Syn + 6H) lands biomass on the knife edge again at a
 seventeen-zone build — the early-game tension recurs at industrial scale.
 
-### 5.3 No new event vocabulary (the ruling that matters)
+### 5.3 No new event vocabulary (the decision that matters)
 
 The draft proposed `ResourceSmelted` / `DiamondSynthesized` /
 `ProductionDormant` tags. **Refused — the existing vocabulary already

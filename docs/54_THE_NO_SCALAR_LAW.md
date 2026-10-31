@@ -1,6 +1,6 @@
 # 54 - the no-scalar law and the ocular re-founding
 
-Operator ruling 2026-08-20. Standing law, no exception.
+Standing law, no exception.
 
 ## 1 The law
 
@@ -110,9 +110,9 @@ because they stop being rounded. Each slice commits green with its witness.
 
 ## 6 The complementary law — every ledger declares its grain at its fill site
 
-Operator ruling 2026-08-20 (the third occurrence of one disease: leisure banks, the
+This law answers the third occurrence of one failure (leisure banks, the
 d_orbit hypothesis, now element stocks). The no-scalar law above governs cognition,
-where exactness is unbounded and protected forever. Its complement governs the
+where exactness is unbounded and never rounded. Its complement governs the
 world:
 
 **Every conserved world-physics ledger declares its grain at its fill site.

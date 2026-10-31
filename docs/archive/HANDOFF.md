@@ -5,7 +5,7 @@
 joining or resuming work. The carrier split: **JSON is never authority**
 (`docs/JSON_DISPLAY_ONLY.md`); **state is never read
 here** — the current landing and the landed ledger live in
-`BUILD_ORDER.md` (the one carrier), and the fast cold-start map (run
+`BUILD_ORDER.md` (the single state carrier), and the fast cold-start map (run
 commands, landed table, lanes, dark spots) lives in `PICKUP.md`. This
 document carries the practice: the discipline, the coordination
 protocol as lived, the state-model laws, and the earned gotchas. It
@@ -16,7 +16,7 @@ refreshes at each major handoff.
 
 **Multi-day pause.** State snapshot is **`docs/archive/PICKUP.md` §0** and
 `BUILD_ORDER.md` §Stand-down board. Tip **`fce10e0`** on clean `main`.
-Resume: read Pickup §0 → smoke tests → operator go before new lands.
+Resume: read Pickup §0 → smoke tests → approval before new lands.
 Do not re-open dual-law hubs or u16 clade unless directed.
 
 ## 1. Reading order (before any change)
@@ -24,7 +24,7 @@ Do not re-open dual-law hubs or u16 clade unless directed.
 1. `docs/00_CHARTER.md` — every law binds; §8 terminology, §9
    stochastic, §10 the parallel-node protocol.
 2. `docs/BUILD_ORDER.md` — the landed ledger + the boards. What to do
-   next is decided here, on operator go. (`docs/archive/PICKUP.md` is the fast
+   next is decided here, on approval. (`docs/archive/PICKUP.md` is the fast
    map of the same state — orientation, never authority.)
 3. `docs/OPEN_QUESTIONS.md` — rejected ideas (never silently revive)
    and recorded deferrals with their reopen triggers (Q4 = the
@@ -38,7 +38,7 @@ Do not re-open dual-law hubs or u16 clade unless directed.
 ## 2. The landing discipline (how every mechanic ships)
 
 - **One landing at a time. Spec + mechanic + test vectors in the same
-  landing (law xvii). Commit only on explicit operator go.**
+  landing (law xvii). Commit only on explicit approval.**
 - **Red-first with recorded output:** write the witnesses in
   `engine/cfe/tests/<name>.rs` first, run them, record the red (compile
   errors count), then implement to green.
@@ -65,8 +65,8 @@ is now organised as named lanes, one git worktree and branch each
 this file** — keeping a second copy here is how the old one went stale.
 Read the lane map before claiming any territory, run `pwd` and
 `git branch --show-current` at session start and after every merge, and
-never share a worktree: two nodes in one working tree is the one state
-git cannot untangle.
+never share a worktree: two nodes in one working tree is a state git
+cannot untangle.
 
 `/opt/netstratum` (root) is the landing zone and is nobody's workspace.
 
@@ -86,7 +86,8 @@ The struck two-node model, kept not rewritten:
   `engine/solver`, `engine/mirror`, `engine/conductor` (by usage),
   `docs/03`, workspace `Cargo.toml`, `tools/observer.py`.~~
   **`engine/mirror` has not existed since 2026-07-31** — the crate is
-  `engine/ledger` (the mirror name died by operator order) and the
+  `engine/ledger` (the mirror name is excluded; `docs/00_CHARTER.md`
+  §3a) and the
   display half is `engine/lens`.
 - Cross-territory happens only as a mechanical relay (the P1
   precedent): e.g. adding a renderer arm the compiler demands. Flag it
@@ -98,7 +99,7 @@ The struck two-node model, kept not rewritten:
   earlier claim wins (the 08 collision was resolved by renumbering to
   09).
 
-## 4. The tag registry (permanent — one tag, one meaning, forever)
+## 4. The tag registry (permanent — one tag, one meaning, never reassigned)
 
 Authoritative header: top of `engine/cfe/src/dop.rs`. Mirrors: NS-1
 §2.3, the BUILD_ORDER boards, and Pickup §4 (the current spent/
@@ -120,7 +121,7 @@ NS-1 + BUILD_ORDER at landing, never before. Contiguity is not law.
   judged post-decay; `touch()` applies, receipts, and anchors
   `last_touch` unconditionally — every settle is a touch (including
   `UpkeepSettled` on replay; that divergence was a real caught bug).
-- **Flat-rate decay only** (the denominator-explosion ruling, commit
+- **Flat-rate decay only** (the denominator-explosion fix, commit
   7635eb7): decay = rate × elapsed capped at the store, never
   proportional-compounding (banked × (31/32)^n grew denominators to
   ~2^1100 live).
@@ -140,7 +141,7 @@ NS-1 + BUILD_ORDER at landing, never before. Contiguity is not law.
   stamp (proven at the BOND-1 landing); replay re-anchors at
   `receipt.stamp`. `BondSettled` is its own tag precisely because a
   manual transfer must stay distinguishable from bond flow.
-- **Empty-book readings (placeholder rulings):** reciprocity reads 1
+- **Empty-book readings (placeholder values):** reciprocity reads 1
   (fresh orbs trade frictionless); `cohesion_ratio` reads None ("no
   deeds yet"); the collateral curve reads full quota (the empty book is
   not a credential).
@@ -204,7 +205,7 @@ to prove totality enumerates a hand list of 64 against an enum of 71
 or make the pin exhaustiveness-checked so the compiler starts
 enforcing what this section assumes it does.**
 
-**Gotcha (CLI planet cursor, inscribed by operator ruling 2026-07-30):**
+**Gotcha (CLI planet cursor):**
 `chart` automatically advances the active planet cursor to the newly
 created charted. Chained `chart` operations must explicitly re-pin the
 source (`chart <name> from <source>`) or each charter drains the
@@ -270,4 +271,4 @@ them.
 - Never edit `docs/05/06/01` to point at newer docs when a one-way
   reference from the new doc suffices — minimizes collision surface.
 - The commit message is the landing record's twin: what landed, the
-  rulings recorded, the relays flagged, the evidence.
+  decisions recorded, the relays flagged, the evidence.

@@ -1,8 +1,7 @@
 # 27 — The evidence standard (Article III, the science foundation)
 
-**Status:** law. Split out of `26_ARTICLES.md` on 2026-08-05, on the
-operator's order to break that file into correctly-named documents and
-delete it.
+**Status:** law. Split out of `26_ARTICLES.md` on 2026-08-05, when that
+file was broken into correctly-named documents and deleted.
 
 **Why it stands alone.** Articles I, II and IV constrain the form a law
 may take; this one constrains evidence — what may be claimed as a
@@ -23,8 +22,7 @@ that is not frame-free, not conserved, not reproducible, and not capable
 of failing is not a weak reading — it is not a reading at all, and no
 rule may consult it.*
 
-**The penal ordinance is struck whole** (operator ruling
-2026-08-01), and what it named is not lost — it is derived. Recorded,
+**The penal ordinance is struck whole**, and what it named is not lost — it is derived. Recorded,
 per the house rule, rather than deleted:
 
     Struck:  the Eclipse as a penalty
@@ -123,7 +121,7 @@ mirrors — `T_eq⁴`, the vent/bank dual, syntropy as retained structure
 over dissipated. (`dual_pole` and `Vacuity::Stasis` are since struck —
 see the record below; the divergence and the ledger stand.)
 
-> **Struck in part** (operator ruling 2026-08-04). `dual_pole` and
+> **Struck in part.** `dual_pole` and
 > `Vacuity::Stasis` are removed from the engine; the two citations
 > above are kept as the record of what once carried this law. The
 > divergence reading stands — `boundary_form` is landed, canonical and
@@ -166,8 +164,8 @@ nothing — which is why every invariant here owes a red-first witness.
 And a reading that varies with traversal order is unreproducible: two
 judges walking differently would disagree, so it cannot be law. **This
 is the law that kept `∂Δ` out of `admits()` until it was rebuilt
-canonically**, and the one under which measurement precedes ruling —
-Ruling Box 1 measured the ladder before `f` was set.
+canonically**, and the law under which measurement precedes decision —
+Decision Box 1 measured the ladder before `f` was set.
 
 *Landed.* Red-first across the witness set; `verify_orbit_witness` at
 O(step) with no search, identical on every node; the divergence form
@@ -243,8 +241,7 @@ A theory that requires an actor to hold a conviction is not a theory of
 the world; it is a theory of that actor. Physics is the same for the
 devout and the indifferent.
 
-*The delineation* (operator ruling 2026-08-01), and it is the sharp
-edge of this whole article:
+*The delineation*, the boundary this whole article turns on:
 
 ```text
 An UNFALSIFIABLE PREMISE held by a civilization is a LOW CIVILIZATION
@@ -260,7 +257,7 @@ rests on.
 any law document as A premise.** A universe whose physics rests on
 someone's cosmology has adopted that cosmology, whatever the intent.
 
-**The scope is use, never mention** (operator ratification 2026-08-01).
+**The scope is use, never mention.**
 This clause previously read *"may never live in … any law document,"*
 which forbade the law from naming the very entities it governs —
 `12_UNION` and `15_TAXON` name civilizations the seat-width law computes
@@ -294,15 +291,14 @@ doing here.
 
 **Worked form, not worked examples.** This test is stated abstractly on
 purpose. Indexing it to specific roster entries is what produced the
-layer error below: content gets ruled on, the examples go stale, and a
+layer error below: content gets judged case by case, the examples go stale, and a
 reader applying the stale example re-runs a reverted sweep.
 
 ---
 
 **The reservation — vocabulary of this class is content, never a
-premise** (operator ruling 2026-08-02; the theological framing removed
-2026-08-04 on the ruling *clear this file of anything non-science
-fact*). A civilization may produce belief, obligation, or moral
+premise** (the theological framing is removed, so that this file holds
+only scientific fact). A civilization may produce belief, obligation, or moral
 vocabulary; that is a modelled phenomenon and it belongs to a content
 layer, measurable and carrying authority over no rule. The arrow is
 one-way and never bends upward. Nothing of the kind is a premise the
@@ -316,15 +312,13 @@ is Article III's loop trap: deeds emitted with `ΔD = 0`. That is a
 capacity mismatch and it is fully expressible in D3/D4's own terms. It
 needs no new physics, no agent, and no name drawn from anywhere.
 
-**Reserved as a future cognitive-lane mechanic** (operator ruling
-2026-08-04, restoring the build-order seat the 2026-08-02 reservation
-held): state transitions where `ext(Δ(V)) > D` trigger local Article III
+**Reserved as a future cognitive-lane mechanic** (restoring the
+build-order seat the earlier reservation held): state transitions where `ext(Δ(V)) > D` trigger local Article III
 loop traps (`ΔD = 0`) without expanding system capacity. A measurable
 structural state, and a seat held open for the cognitive lane to build
 on — not a story element, and not a premise any rule reads.
 
-**The class distinction, and it was got wrong first** (operator
-correction 2026-08-01). Religion is a separate class of irrelevance from
+**The class distinction, and it was got wrong first.** Religion is a separate class of irrelevance from
 type vocabulary, and collapsing the two is a category error this
 article's author committed one commit after writing corollary 2 against
 it:

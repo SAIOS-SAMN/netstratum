@@ -1,7 +1,7 @@
 # 25 — Standing: build debt, the decision surface, and the D > 0 proof
 
-**Status:** law, split out of the retired `18_TORSION.md` on 2026-08-03 by operator
-ruling. It carries §6, §7 and §8 — what the engine cannot yet express,
+**Status:** law, split out of the retired `18_TORSION.md` on 2026-08-03.
+It carries §6, §7 and §8 — what the engine cannot yet express,
 what of the law enters the kernel, and the measured proof.
 
 **Why these three travel together.** Each is a statement about the law's
@@ -38,7 +38,7 @@ computation, hiding one behind vocabulary is cosmetic.
    displayed; that is `lens::standing` (`19_LENS` §12).
 
    **Corrected 2026-08-13 (doc audit):** both citations above are dead.
-   `dual_pole` / `Vacuity` were struck by operator ruling 2026-08-04
+   `dual_pole` / `Vacuity` were struck 2026-08-04
    (`engine/rfa-core/src/boundary.rs:36-45` — "The dual-pole lock is
    struck... both the type and its verdict are removed"; measured
    60 beats / 374 solves / 0 mints / 124 withheld before the strike).
@@ -68,14 +68,13 @@ computation, hiding one behind vocabulary is cosmetic.
    have no exact-rational form. (`det U* → ∞` was the fourth entry and
    is removed with §2c's strike — `U*` no longer names anything, and a
    realization owed to a struck object is a debt owed to nobody.) Infinity is
-   already barred by standing ruling (the T∞ purge: the torus wraps
-   finitely). These land as: finite differences over the committed
+   already barred (the T∞ purge: the torus wraps finitely), since it
+   has no exact-rational form either. These land as: finite differences over the committed
    index set; max over a finite committed set; a wrapped finite locus;
    and the SNF invariant-factor axis of Article I. **The articles bind
    as written; these are the realizations that satisfy them.**
 
-5. **The unwired sealed layer — the registry** (operator ratification
-   2026-08-01). Eleven public items in the sealed math and the bridge
+5. **The unwired sealed layer — the registry** Eleven public items in the sealed math and the bridge
    are landed, witnessed by pins, and consumed by no `src/` caller.
    They are not the `GROUND` fault — that was a constant declared and
    never computed, and these compute and are tested. They are
@@ -111,7 +110,7 @@ computation, hiding one behind vocabulary is cosmetic.
 ## §7 The decision surface — what of this law enters the kernel
 
 This section exists to be read before anything is built. It sorts every
-claim in this document by the one test that decides kernel membership,
+claim in this document by the single test that decides kernel membership,
 and it is the intended reading order for that decision.
 
 **The test** (kernel Charter §1, KERNEL_RELAY §9 — the trap everyone
@@ -173,7 +172,7 @@ It is one caller over the landed `rfa_core::coboundary_reduce`, and
 happen in one pass over one prior state**, or the entanglement is
 broken before it is built.
 
-The remaining open rulings, none of which the author may decide:
+The remaining open decisions:
 whether `I5`'s decay and the assay bound are entangled seams (§2g);
 what congruence relation `α ≅ Ω` uses (§2e); and whether the breaking
 `VERSION` bump for gap disposition lands alone or with the ARC corpus

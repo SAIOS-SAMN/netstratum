@@ -12,7 +12,7 @@ query is a structure; a hit is a resonance (sigil-address lookup,
 O(bucket), never a scan of the population); a near-miss refuses with its
 delta whole.
 
-**The lens law (operator ruling 2026-07-30, recorded here):** SEAL B
+**The lens law:** SEAL B
 replay is the reproduction — byte-identical rebuilding of the committed
 world. RQP is the lens — a pure structural read of the same receipted
 truth. A query mutates nothing, orphans nothing, and never enters the
@@ -57,9 +57,9 @@ marginals computed apart drop the cross-terms):
 **T is not in the address.** The world clock, the receipt stamps, the
 orb's touch history — none of it keys the lookup. T rides the hit as a
 ledger-side annotation (§1.3): the stamp of the reading's own power
-draw, the one chronicle trace a query leaves.
+draw, the only chronicle trace a query leaves.
 
-*(Ruled 2026-07-30 (merge sign-off, ruling 2): this v1 queryable
+*(This v1 queryable
 structure — zone geometry as S, banked signature + thermal class as
 G — stands as drafted. Extension law in §4.)*
 
@@ -102,10 +102,10 @@ carries, per candidate:
   side);
 - the **thermal pair** when the classes differ (impossible in v1 — the
   band is in the address — carried in the record so the surface never
-  changes when a later ruling widens the bucket);
+  changes when a later extension widens the bucket);
 - the summary scalar `C(Δ) = Σ |R|` over the banked residuals (the
   coherence-functional shape — exact rational, zero iff the ledgers
-  agree; the proportional law, operator ruling 2026-07-31: each residual
+  agree; the proportional law: each residual
   counts exactly its size, in its own units — squares are barred as
   aggregators of difference). **The scalar is the summary, never the
   payload**: a consumer that reads only C(Δ) has not read the refusal.
@@ -126,7 +126,7 @@ scanner's power source). The draw law, the SINK-1 touch shape:
   crystal), the scan refuses typed (`CannotAfford`), draws nothing,
   reads nothing, orphans nothing.
 - A funded scan debits `scan_draw()` from the probing orb's bank and
-  closes `CrystalDrawn` (tag 55) — the one chronicle event of this
+  closes `CrystalDrawn` (tag 55) — the only chronicle event of this
   protocol. The receipt carries the probing orb and the amount,
   **deliberately blind to what was asked and what was seen**: the lens
   law in wire form. Replay replays the debit; it cannot replay the
@@ -149,15 +149,15 @@ v1 scans the local world's orb population. Cross-world resonance
 composes at N5/N6 (the mesh carries addresses, never worlds);
 scanner-by-galaxy-region is post-GALAXY-1a and post-N4 (N4_DIRECTIVES
 coordination note). G3 (perception frames, translation loss) reads
-through this same lens when it lands — after G1, per the pending
-operator ruling (N4_DIRECTIVES ruling 1).
+through this same lens when it lands — after G1; the ordering is an
+open decision (N4_DIRECTIVES ruling 1).
 
 ---
 
 ## 2. Wire format
 
 Additive TLV under SEAL A, tags from the permanent registry (dop.rs
-header — the one tag authority). **Records 56–58 are NS-2 protocol
+header — the sole tag authority). **Records 56–58 are NS-2 protocol
 records in NS-2's own framing: they never enter the world chronicle.**
 Only tag 55 is a chronicle event.
 
@@ -268,16 +268,15 @@ exemplar, B the rot90 twin, C the kind swap, D the once-collected.
 
 ---
 
-## 4. The queryable structure (ruled 2026-07-30; the extension law)
+## 4. The queryable structure (the extension law)
 
 ### 4.1 The v1 cut, ratified
 
-The operator ruled at merge sign-off (ruling 2): the v1 structure
-stands as drafted in §1.1 —
+The v1 structure stands as drafted in §1.1 —
 
 | facet | projection | joint (the exactness) |
 |---|---|---|
-| S | zone geometry, lex-min over the eight grid symmetries | (row, col, kind) tuples under the one winning transform |
+| S | zone geometry, lex-min over the eight grid symmetries | (row, col, kind) tuples under the single winning transform |
 | G | nonzero banked resource set + thermal class | the full banked ledger, ratio-for-ratio + the class |
 | T | **never in the key** | rides the hit as the draw receipt's stamp |
 
@@ -288,9 +287,9 @@ address: a new facet appends to the end of the query record (§2.2) and
 to the joint; it never reorders or reinterprets an existing byte. An
 implementation that predates a facet still buckets correctly on the
 prefix it knows — it reports coarser resonance, never wrong resonance.
-Every extension is an operator ruling recorded here, one row per facet,
+Every extension is a decision recorded here, one row per facet,
 with its landing named. The dimensional-collapse warning binds every
-facet forever: projections derive from one joint shadow, never from
+facet without exception: projections derive from one joint shadow, never from
 independent canonicalizations.
 
 ### 4.2a The translation law (G3, landed 2026-07-30) — a correction recorded

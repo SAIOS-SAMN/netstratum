@@ -1,18 +1,20 @@
 # 82 — Life: the ladder each world climbs
 
-Operator, 2026-10-14: a universe cannot be empty. Era 1 deploys galaxies,
-star systems and planets (docs/78), and life must arise in it from its own
-physics. Netstratum had dropped every species when it stopped carrying era 0's
-founding lines. xylarium-kernel's practice, adopted here: **laws carry,
-records do not.** Named species are records; life is drawn per world from the
-world's own physics, and the hierarchy is a reading of who wakes where and
-when. This document states the ladder in Netstratum's laws (docs/78's design
-laws: exact, square-free, a construction, no tables of Earth's world).
+This document defines how life arises on era-1 worlds from each world's own
+physics, and the ladder each world climbs. Era 1 deploys galaxies, star
+systems and planets (docs/78), but Netstratum dropped every species when it
+stopped carrying era 0's founding lines. Following xylarium-kernel's
+practice, laws carry and records do not: named species are records, so life
+is drawn per world from the world's own physics, and the hierarchy of
+peoples is a reading of who wakes where and when. The ladder is stated under
+docs/78's design laws (exact, square-free, a construction, no tables of
+Earth's measured values).
 
-Status: designed 2026-10-14, reviewed by xylarium-kernel the same day (its
-changes taken in below); not built.
+**Status:** designed 2026-10-14 and reviewed by xylarium-kernel, whose
+changes are incorporated below. Steps 2 and 3 are built (see their
+sections).
 
-## Assume nothing (operator, 2026-10-14)
+## Assume nothing
 
 Life is emergent from the quantum state between A planet and its star,
 shaped by the planet's elements, its atmosphere and the core of its mass.
@@ -65,7 +67,7 @@ noise can carry life, and a world may carry several forms at once.
      the phase between planet and star.
    A world with no chemistry is not lifeless: a plasma world, a world of
    bare rock, may carry life in another medium.
-4. **Pressure: the coupling compressed** (operator, 2026-10-14: life is the
+4. **Pressure: the coupling compressed** (life is the
    compression of the quantum state as gravity pressurises it through the
    atmosphere; pressure is a physics component of its own). From what the
    world holds, with no table:
@@ -101,8 +103,8 @@ noise can carry life, and a world may carry several forms at once.
      with gas keeps nearly all of it: the stand-in's gases are mostly heavy,
      and its gravity barely varied (3.19 to 5.33): with sizes packed
      linearly, `g = M/R` depended on a world's composition, not its mass.
-   - **Compression** (operator, 2026-10-14: change it; and no caps on heat,
-     a cap is undefined physics). Linear homology made every body a scaled
+   - **Compression** (revised; heat carries no cap, because a cap is
+     undefined physics). Linear homology made every body a scaled
      copy: gravity fixed by composition, and every star's innermost world at
      one heat (1,000 K, so no plasma anywhere). A body's own weight squeezes
      it: `R = R_loose / (1 + M / M_a)`, `M_a` its tier's compression scale
@@ -162,8 +164,8 @@ noise can carry life, and a world may carry several forms at once.
    500 individuals). It is an event, written to the annals at the bell it
    happens: a perpendicular write up, from the world to its galaxy. The run
    is the draw: each world climbs once, by its own seed (Xylarium estimates
-   by independent replays; here no estimate is needed, the one history is
-   lived).
+   by independent replays; here no estimate is needed, the single history is
+   the run).
 
 ## Step 2, built (2026-10-14): the climb and the wakings
 
@@ -216,7 +218,7 @@ off the inverted galaxy layer (docs/83, "Corrections") until it is rebuilt.
   (lithic) and 193 (plasmic) of 5,716, about 2% to 7%, near xylarium's
   2%; the first at bell 62,460, in the galaxy nearest the universal core.
   The body rungs are the bottleneck, as Xylarium found.
-- **Ruled (operator, 2026-10-14; starts, to be measured and tuned):**
+- **Decided (starting points, to be measured and tuned):**
   - **The informational medium is where minds go, not where life starts.**
     No pattern is written into a phase without something to write it from:
     it takes a mind already woken in a material medium (chemical, lithic,
@@ -241,7 +243,7 @@ off the inverted galaxy layer (docs/83, "Corrections") until it is rebuilt.
   its place its system's. The first mind of each galaxy takes a progenitor
   seat; every other people is a sovereign. Each waking is counted in the
   universe journal (tag 57).
-- **Step 3b (operator, 2026-10-14): wakings come from the system's
+- **Step 3b: wakings come from the system's
   activity, never a boot-time schedule.** Each world's climb is state
   (`<var>/climbs.bin`: the share written, its recoherence count, its last
   and next recoherence). At each recoherence of its coupling a world reads
@@ -284,30 +286,30 @@ from its galaxy and system and marked in docs/78's flat-site table for
 replacement. Its star class is read from its star's mass, its orbit from its
 radius.
 
-## Consciousness: coherence, the lock between a world and its star (operator 2026-10-17; proposed, to be tested)
+## Consciousness: coherence, the lock between a world and its star (proposed, to be tested)
 
 Consciousness is tied to coherence, the inverse of decoherence: the lock
 between a planet and its star, fed by the star's coherent output. It is
 local: a star and what orbits it. There is no network of consciousness
 toward a galaxy's centre and no traversal of black holes (not now).
 
-**The geometry (operator).** A star's reach is its S^360: the sphere its
+**The geometry.** A star's reach is its S^360: the sphere its
 release fills. The star and everything that orbits it live on its S^60.
 Each orbiting mass is joined to the higher mass it orbits by its own
 non-euclidean double-cone manifold (a moon to its planet, a planet to its
 star). The release travels through these manifolds, which refract it; it
 does not fall off with distance.
 
-**The law, in the forms already ruled (shares and pair shares, products
+**The law, in the forms already established (shares and pair shares, products
 across tiers, no squares, no gates, no habitable zone drawn):**
 
 1. **The source:** `L_s`, the star's coherent output, its light: the flux
-   of magnetism transduced into holding through the continuum face (the
-   2026-10-15 ruling; Xylarium builds the flux per star). A star that
+   of magnetism transduced into holding through the continuum face
+   (Xylarium builds the flux per star). A star that
    decoheres breaks it.
 2. **Refraction into an orbit:** a world on the star's crest `p/q` (the
    orbits whose period is a whole ratio of the star's bell) receives the
-   release coupled `a_q = 1/q` for odd q, 0 for even (the ruled harmonic
+   release coupled `a_q = 1/q` for odd q, 0 for even (the harmonic
    coupling, one tier down); crossing into the world's own enclosure,
    down its double cone, only the received share passes (the restart
    rule: products across tiers).
@@ -331,7 +333,7 @@ across tiers, no squares, no gates, no habitable zone drawn):**
    a death foreseen: the species' own future deficit represented and reasoned over by the reduce
    engine) runs the σ share.
 
-**Agency (operator 2026-10-17).** Agency is the stretching of the plasma
+**Agency.** Agency is the stretching of the plasma
 bond between the gravitational tug on the planet and the star, through
 consciousness. In the forms: the bond is `Ψ_w`; its antipoles are the
 star's tug on the world (the face its hold locks, `δ_s`) and the world's

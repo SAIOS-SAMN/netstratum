@@ -3,9 +3,9 @@
 **Status:** design, proposed 2026-08-13. Entirely **missing law** — no
 age, mortality, senescence, or turnover exists in code today
 (`world/labor.rs` holds a static headcount). Spec'd here as the
-mortality term of the `41_PROVISION` §3 population, with the rulings §5
-names. Not itself law — ruled section by section, the `40_REJUVENATION`
-discipline.
+mortality term of the `41_PROVISION` §3 population, with the open
+decisions §5 names. Not itself law — decided section by section, the
+`40_REJUVENATION` discipline.
 
 ---
 
@@ -19,7 +19,7 @@ death, no generation. This chapter gives each species its own clock,
 and makes that clock the engine of a real trade: **growth versus
 continuity.**
 
-It is the third face of the one tension the game already rules. The
+It is the third instance of a tension the game already resolves. The
 Locust/Custodian split is extraction-vs-regrowth on a planet (#28) and
 demand-vs-food on a population (`41_PROVISION` §3); lifespan is
 turnover-vs-continuity on the generations. One law, three surfaces.
@@ -84,7 +84,7 @@ advantages (crystallized boons, adopted practices) that must be
 RE-confirmed within a lifespan or lapse — so a short-lived line pays a
 continuity tax a long-lived one does not. This is the demurrage shape
 applied to knowledge rather than stock, and it reuses the same
-settle-at-touch seam. The exact decay and what lapses is a §5 ruling.
+settle-at-touch seam. The exact decay and what lapses is open (§5).
 
 ## 4. What this composes with
 
@@ -98,7 +98,7 @@ settle-at-touch seam. The exact decay and what lapses is a §5 ruling.
   needs a population to act on, and a population needs a mortality floor
   or it never turns over. Rule and land them together.
 
-## 5. The rulings owed
+## 5. Open decisions
 
 1. **The per-class lifespan values** (§1) — the `L` per class band.
    Derived candidate: `L` scales with the class's substrate permanence

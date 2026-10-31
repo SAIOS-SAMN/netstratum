@@ -1,6 +1,6 @@
 # Tasks — T4–T9 · R1–R4 · Element commerce · STAMP market
 
-**Status:** implementation board (operator directive 2026-08-07).  
+**Status:** implementation board.  
 **Authority docs:** `30_OFFICES_AND_RAILS.md`, `31_ELEMENT_COMMERCE.md`,
 `32_STAMP_MARKET.md`.  
 **Related program (desk · fleets · alignment · local capital):**  
@@ -8,8 +8,8 @@
 That board **consumes** S4.5–S4.6, E3.6, Wave 5 I5.*, O6, R2.3/X7 —
 land once, check both boards.  
 **Discipline:** one landing at a time; red-first witnesses; spec + mechanic
-+ vectors together (Charter / Handoff). Commit only on operator go for
-production landings; this file is the backlog DAG.
++ vectors together (Charter / Handoff). Production landings are committed only
+after approval; this file is the backlog DAG.
 
 **Legend:** `[ ]` pending · `[~]` in progress · `[x]` done · `!` blocks fun  
 **Lanes (suggested):** registry · cfe · conductor · cli · lens/observer ·
@@ -158,7 +158,7 @@ strand-adapter · isthmus/datum-adapter
 | P8.2 | [x] Trajectory + hunger + rail on observer | R2.6, research | state uplink · `observer arc` · worlds TRAJ/HUNGER/RAIL |
 | P8.3 | [x] Labor/population derived from habitats | 02 | `labor_force` · habitats + clones · polity labor |
 | P8.4 | [x] Closed-ruins history view | observer | `observer ruins` |
-| P8.5 | [x] Balance pass: AP capacity ruled table (slice) | P8.1 | `AP_BASE` · `AP_HABITAT_MULT` · `AP_EXCHANGE_BONUS` |
+| P8.5 | [x] Balance pass: AP capacity table (slice) | P8.1 | `AP_BASE` · `AP_HABITAT_MULT` · `AP_EXCHANGE_BONUS` |
 | Pol.1 | [x] Polity root vent open (CLI scaffold · genesis/taxon/mint/ap) | H1.x | `polity` hub · docs/HUBS.md |
 | Pol.2 | [x] Dual-law `bench polity` craft twin | Pol.1 | offices · doctrine · labor · practice |
 | Pol.3 | [x] Conductor identity_step (habitat labor parity) | Pol.1 | pure NPC after chemistry |

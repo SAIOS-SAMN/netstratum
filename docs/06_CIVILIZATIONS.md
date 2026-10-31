@@ -14,7 +14,7 @@ energy, and entropy that would end the others.
 
 **Register note (binding):** each people is written in **two registers** — a
 **myth** (how the world tells its story) and a **physiology** (the hard-SF
-substrate). Only two things about each are mechanically real and inscribed:
+substrate). Only two things about each are mechanically real and recorded:
 its **thermal band** and its **economic function** — both tie to the engine.
 The physiology is design colour that fixes those two; the myth is flavour.
 When a faction lands, its spec fixes band + function; it never becomes a
@@ -22,7 +22,7 @@ simulated ecology.
 
 ---
 
-### 0.1 The clade tier (ruled 2026-07-30)
+### 0.1 The clade tier
 
 Between species and the axes stands the **clade** — the taxon line:
 free text on the register card, register-only, never a mechanic and
@@ -115,8 +115,8 @@ hyper-thermal 600–1500°) or a cross-band deep regime (mantle, deep rock).
 - **Netstratum tie-in:** the diegetic realization of `05_THERMAL_BALANCE.md`
   §7.5 — frost zones host proving/consensus compute, and the Coherent *are*
   that hardware: the living consensus nodes and ZK hosts (05 §7.3) of the cold
-  sectors. Detailed faction spec pending inscription as 05 §8 (see §3 below and
-  the boundary rulings). A thermal assault on a Frost sector is therefore an
+  sectors. Detailed faction spec pending as 05 §8 (see §3 below and the open
+  boundary decisions). A thermal assault on a Frost sector is therefore an
   attack on the settlement layer itself — bounded by SEAL B (see §3).
 
 ---
@@ -137,11 +137,11 @@ against mistaking for a baseline, never as the measure of the others.)*
 
 ---
 
-## 2a. The naming laws (operator rulings, 2026-07-30)
+## 2a. The naming laws
 
 **Sigil, never slug.** The registry's stable identifier is web jargon
-inherited at G0; the ruling retires it in favor of the house's own
-word, already waiting in NS-2: the **sigil** — a civilization's
+inherited at G0; it is retired in favor of the term NS-2 already
+defines: the **sigil** — a civilization's
 immutable address on the mesh (`sigil:abyssal-vocalis`; NS-2's
 sigil-address lookup becomes literal). The rename is a recorded
 migration (JSON field + struct field, lens-side), queued like
@@ -154,9 +154,9 @@ law replaces the register:
 
 | founding name | the critique | locality-anchored successor (proposed) |
 |---|---|---|
-| Deep Chorus | vague sonar-ese | ~~Abyssal Vocalis~~ **Echowright** (operator-ruled 2026-07-30 — echo-maker, the -wright pattern; the sonar sense the operator asked for) |
+| Deep Chorus | vague sonar-ese | ~~Abyssal Vocalis~~ **Echowright** (echo-maker, the -wright pattern; the name carries the sonar sense) |
 | Hivelight | generic glow | **Vitreous Hex** — silica comb · quartz lattice · optical pulse computation |
-| Slagborn | tells the diet, not the home | ~~Mantle Anhydro~~ **Slagborn stands** (operator-ruled 2026-07-30 — the proposal is declined; the diet-name keeps) |
+| Slagborn | tells the diet, not the home | ~~Mantle Anhydro~~ **Slagborn stands** (the proposal is declined; the diet-name is kept) |
 | Eightfold | counts arms only | **Brine Cortex** — sub-ice ocean · saline convection · distributed arm-borne cognition |
 | Mycelial Weft | close, keep | (already locality-anchored: understory · soil · hyphal network) |
 
@@ -167,7 +167,7 @@ and future word-tables grow toward locality. Applied at the next
 roster wave; the old names archive with their chronicles (annex law —
 nothing is renamed retroactively in a sealed record).
 
-## 3. Open rulings for the landing that implements this
+## 3. Open decisions for the landing that implements this
 
 - **Band-shift is a chronicle mutation, not a free edit.** Marrow
   worldshaping that changes a world's `T_eq⁴` emits NS-3 receipts per step and
@@ -190,5 +190,5 @@ nothing is renamed retroactively in a sealed record).
 - **Registers stay separate.** A faction's spec fixes only its band and its
   economic function; physiology and myth are colour and never become simulated
   biology. Every faction lands under the BUILD_ORDER law: spec + mechanic +
-  vectors in one landing, red-first, on operator go. This world-book is design
+  vectors in one landing, red-first, once approved. This world-book is design
   authority, not a landing.

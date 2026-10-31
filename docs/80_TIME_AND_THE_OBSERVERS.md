@@ -1,6 +1,6 @@
 # 80 — Time, the observers, and TUniversal from the singularity
 
-Operator (2026-10-13): in a deterministic universe time is a coordinate on
+In a deterministic universe time is a coordinate on
 the map: to traverse space and time is to produce the value of time as a
 coordinate, and the separation between two times is a distance. Observers
 must be ordered by the hierarchy so the universe has one unified timeline.
@@ -8,7 +8,7 @@ TUniversal is the quantum drive of the universe's core singularity, which
 provides the uplink to the hypha, with a dedicated lane for netstratum's
 quantum state, aligned on the epicenter of the spherical universe.
 
-Status: scoped 2026-10-13; ruled by Mycelium the same day (MU-RECURSION
+Status: scoped 2026-10-13; specified by Mycelium the same day (MU-RECURSION
 78.152d, below); not built. It belongs to era 1 (docs/78) with the quantum
 layer (docs/79).
 
@@ -96,7 +96,7 @@ the outer rim cannot imagine" (docs/76). The rim ages faster than the core.
   lanes);
 - the lane's measure and unit.
 
-## In Netstratum, once ruled
+## In Netstratum, once specified
 
 - **The beat** is the bell's count of turns: units of cosmic time at the core,
   never a global step.
@@ -126,7 +126,8 @@ mantle; point None (the house unlinked while the courts are down).
 
 ## Build order and done-when (the live log, before → after)
 
-Within era 1, after A1/A2, on Mycelium's ruling of the proposal.
+Within era 1, after A1/A2, on Mycelium's specification of the proposal
+(below).
 
 1. **Proper time.**
    - Done-when: worlds with a proper-time rate from their depth, 0 → all;
@@ -146,7 +147,7 @@ Within era 1, after A1/A2, on Mycelium's ruling of the proposal.
   - Agreed on the frame: it matches Xylarium's "time is the bell".
   - (1) A universe's own origin, but kept out of TPoint. Its cosmic time runs
     from its bounce, carried in era 1's v2 origin. The fleet's TPoint stays
-    single-origin (the operator's one-ledgered-clock ruling). The two meet at
+    single-origin, so the fleet keeps one ledgered clock. The two meet at
     the core tube: each crossing records the pair (local cosmic t, TUniversal
     point), held by the ancients.
   - (2)/(3) Against a Q lane: it changes `TPoint::LEN` and every reader, its
@@ -154,16 +155,16 @@ Within era 1, after A1/A2, on Mycelium's ruling of the proposal.
     measured discharge. Instead, the torsion phase advance and the
     measurement count go in a field of the universe's ledger entries
     (ACT_DOMAIN ledger sub-kind) through its core tube; pricing later would
-    be a mode ruling.
+    be a decision about a mode.
   - The hidden variable is Netstratum's worldbuilding; keep it deterministic
     and recorded.
-- 2026-10-13: the operator's proposal and the coordinator's note relayed
+- 2026-10-13: the proposal and the coordinator's note relayed
   together to Mycelium (mycelium-v0-1-0-84).
 
-## Mycelium's ruling (MU-RECURSION 78.152d, commit 6f23618d, 2026-10-13)
+## Mycelium's specification (MU-RECURSION 78.152d, commit 6f23618d)
 
-Under Mycelium's clock-binding authority. The operator's frame stands as
-stated.
+Mycelium owns TUniversal and its clock binding, so the binding is specified
+there. The frame at the top of this document stands as stated.
 
 - **(a) Origin: crossing pairs, not in the point.** TPoint's origin is the
   mesh's (TU-5), and points of two origins are never compared; an origin in
@@ -179,8 +180,8 @@ stated.
   hyperbolic, G the hue map, T parabolic, H elliptic. A torsion phase is
   elliptic: where it is measured flux it already lands on H. A fifth lane
   would be a lane of no kind. A count of measurement events is a ledger
-  coordinate (like K), never a lane. Pricing torsion later is a mode ruling
-  on H.
+  coordinate (like K), never a lane. Pricing torsion later is a decision
+  about the mode on H.
 - **(c) Superseded (commit 821841cf): no new statement kind.** Kind 12 is
   already ACT_DOMAIN's ledger. Netstratum's ledger entry (sub-kind 12) already
   carries the crossing pair: the universe's committed cycle `u` (its cosmic

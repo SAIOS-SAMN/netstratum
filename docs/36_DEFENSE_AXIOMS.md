@@ -27,7 +27,7 @@ only the **kinetic/logistics surface** of a deeper law:
 > For a hypobiotid-clade biotic line, “itself” is not the same as for a
 > plasmic current-sheet or a lithic lattice mind.
 
-The operator charge (session):
+The scope of this document:
 
 1. Defense from the **entity itself** outward — neural/cognitive, cyber/
    digital, atmospheric, cellular — each extrapolated as an **axiom of
@@ -95,12 +95,12 @@ refuse and receipt.
 | **Informational / veil** | `INF` | What others may *lawfully read* about an actor | SIGINT, OPSEC | MASK-1 veil, registry cloud, false assay surface |
 | **Kinetic / logistics** | `KIN` | Hulls, escorts, interdiction of cargo in transit | Fleet combat, convoy | Escort hull role (P3 inert → P5 active); route risk |
 
-**Seven domains** after the market-warfare ruling (2026-08-08): MKT is
+**Seven domains**, because market warfare is its own domain: MKT is
 **not** optional flavour. A civilization that only “wins” kinetics while
 its STAMP book and last-clears are poisoned has **not** preserved the
 capacity to continue as a commercial self.
 
-**Digital vs cyber vs market (operator language):**  
+**Digital vs cyber vs market (terms):**  
 - **Digital defense** = integrity of *instruments and readings* (MANU-1 grade, scan truth) → `CYB-instrument`.  
 - **Cyber defense** = integrity of *cross-world messages* (aperture, treaty legs) → `CYB-mesh`.  
 - **Market defense** = integrity of *local capital books and marks* (offers, Note/Fut/Share/Perp, last-clear) → **`MKT`**.
@@ -396,7 +396,7 @@ without free dials (§12); P5-G never blocks R1–R2 fun.
 
 ---
 
-## 10. Market defense & in-game suites (ruling 2026-08-08)
+## 10. Market defense & in-game suites
 
 ### 10.1 Why markets need defense
 
@@ -519,7 +519,7 @@ schism. Atmospheric attack hits shared brood medium. Espionage is
 
 | ID | Question | Lean |
 |----|----------|------|
-| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | **Ruled:** pressure scalar + TamperDetected at unit threshold; **P5.19:** never rewrites thermal; terra dual-use tax 2× crystal; overt worldshape clears pressure |
+| Q-D1 | Is CovertTamper a new PlanetSited half-state or pure pressure scalar? | **Decided:** pressure scalar + TamperDetected at unit threshold; **P5.19:** never rewrites thermal; terra dual-use tax 2× crystal; overt worldshape clears pressure |
 | Q-D2 | Multi-actor tamper stack (who is blamed)? | Last unveiled actor + INF witness (later) |
 | Q-D3 | Plasmic ATM = thermal site fields only? | Compose thermal + new field TLV later |
 | Q-D4 | Share of espionage with mask toll | Compose VeilToll |
@@ -628,7 +628,7 @@ Readings first (P5-B / P5.20); no free armor HP.
 | P5-D | CovertTamper + MediumReinforce + TamperDetected |
 | P5-K2 / C / E / B | matrix remainder per land unit rule |
 
-Full 5×10 prose for operator colour lives in session design notes;
+Full 5×10 prose (design colour) lives in session design notes;
 **this §11 is the charter crosswalk.** Implementation rows on
 `TASKS_TRADE_FLEET_DESK`.
 

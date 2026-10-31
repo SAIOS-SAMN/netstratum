@@ -1,8 +1,8 @@
 # The taxon vocabularies — class and clade enter the kernel (KERNEL-TAXON, draft for ratification)
 
-**Status:** ratified 2026-07-31 (operator — all three of §6 in one
-ruling: the boundary, the class partition with its seventh class and
-every seating, the clade table). The vocabularies below are law at the
+**Status:** ratified 2026-07-31 (all three of §6 together: the
+boundary, the class partition with its seventh class and every seating,
+the clade table). The vocabularies below are law at the
 register tier; they enter the constitution at coder-03's amendment.
 The ratified machine mapping for the migration wave stands at
 `seeds/taxon-map.json` (33 lines, branches inheriting the root class
@@ -23,13 +23,13 @@ couplings land inside `admits()` after the I-invariants seal.
 |---|---|---|
 | **class** | Moves into the kernel (closed u8 vocabulary) | identity fact; mechanics may lawfully key on it |
 | **clade** | Moves into the kernel (closed u8 vocabulary) | identity fact; the taxon tier between species and axes |
-| **creed** | Stays derived | operator-ruled generative (14 §2.6) — enumerating belief is barred; its kernel hook is the practice deed, already landed |
+| **creed** | Stays derived | generative (14 §2.6) — enumerating belief is barred; its kernel hook is the practice deed, already landed |
 | **function** | Stays derived | a niche reading over state (12 §4), never stored |
-| **names / species / motto** | Stay register-side forever | names are the line's own tongue; the kernel sees only codes |
+| **names / species / motto** | Stay register-side (never enter the kernel) | names are the line's own tongue; the kernel sees only codes |
 
 ## 2. The class vocabulary (proposed, code 0 lawful-unclassed)
 
-Append-only; one code, one meaning, forever. The six archetype classes
+Append-only; one code, one meaning, never reassigned. The six archetype classes
 (14 §1) plus a seventh the spectrum lacked — the solitary apex lines a
 partition needs:
 
@@ -84,8 +84,7 @@ See `almanac::taxon_table::expansion_clade`.
 **Clade ceiling: 345 (`u16`)** — further growth is a constant raise, not a
 type width fight. *(Legacy English aliases still parse.)*
 
-**19 draconic — a sub-archetype, not a peer line** (operator ruling
-2026-08-01). The draconic clade seats inside class 4
+**19 draconic — a sub-archetype, not a peer line.** The draconic clade seats inside class 4
 (telepathic-resonant), the same class the Stillcold line holds. That is
 what "entangled" means here and it is the structural claim, not a
 flavour note: **one archetype, two expressions.** Class is the shared

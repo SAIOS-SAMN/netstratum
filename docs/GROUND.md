@@ -18,7 +18,7 @@ authority it already is.
 sealed math core   rfa-core (Δ, C(Δ), Π_G, orbit_lock) · cfe::ratio · verify_certificate
 physics            reversible kinematics · beacon ξ_k
 the judge          kernel::admits — I1..I6 + the two proofs
-the spine + codec  the chain (tag 84) · the one encoding
+the spine + codec  the chain (tag 84) · a single encoding
 state semantics    cfe (deeds, orbs, the world)
 control plane      steward seam · authority walk · the uplink door
 ```
@@ -127,7 +127,7 @@ state reached without a receipt.
 
 ```text
 engine/cfe/src/world/
-  mod.rs        the ONE surface — re-exports so no caller's import changes
+  mod.rs        the single surface — re-exports so no caller's import changes
   state.rs      World, ColonyOrb, the committed shape
   refusal.rs    ActionRefused                                    (142 lines today)
   deeds/        the ~55 distinct deeds, by the §4a groups
@@ -159,7 +159,7 @@ standing work**, so this is not a lane-local decision.
 3. **Then cut**, starting with `rules.rs`, along a seam that by then
    exists rather than one this document guessed at.
 
-**The one piece worth doing sooner:** if `rules.rs` is extracted before
+**The piece worth doing sooner:** if `rules.rs` is extracted before
 #30, it helps #30 rather than competing with it — the shared surface is
 what #30 has to reason about. It conflicts with P2 only as a move of
 `demurrage_due`, which reconciles more cheaply than a restructure. **That

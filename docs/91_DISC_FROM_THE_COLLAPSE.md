@@ -1,10 +1,12 @@
 # 91 — The disc from the collapse, the wind from the heart
 
-Direction (2026-10-23): derive the disc ruling. The question put (2026-10-23):
-a newborn star's disc comes from the collapsing cloud, at the spin each part
-already had, and only what falls into the heart is cut and thrown out as wind.
+This document derives the origin of a newborn star's disc and wind. The
+hypothesis tested: the disc comes from the collapsing cloud at the spin each
+part already had, and only the matter that falls into the core is cut and
+ejected as wind.
 
-Status: built in its second form (§5); the first form (C1–C3 by spin) was refuted by its read (§4).
+**Status:** built in its second form (§5); the first form (C1–C3, by spin)
+was refuted by its reading (§4).
 
 ## 1. What the reads showed (2^55, 340 bells)
 
@@ -28,7 +30,7 @@ all. What is missing is the matter that never reaches the heart.
   that binds by the filament law (`λ/(1 + λ) ≥ a + face`). Each member is a
   share of one mote: its holding `w`, its spin about the galaxy's core
   `ℓ_j`, its phases.
-- **The star's own spin** (ruling with Xylarium, `breath`): the members'
+- **The star's own spin** (shared with Xylarium, `breath`): the members'
   holding-weighted spread of spin about their own mean, `ℓ_s = Σ w|ℓ_j − ℓ̄|/Σ w`.
   The mean `ℓ̄` is the binding's common orbit about the galaxy's core; the
   spread is spin about the binding's own centre.
@@ -43,7 +45,7 @@ all. What is missing is the matter that never reaches the heart.
 
 ## 3. The derivation
 
-**C1. A member's own spin.** By the ruling that gives a star its spin, the
+**C1. A member's own spin.** By the definition of a star's spin (§2), the
 part of a member's spin that is not the binding's common orbit is its spin
 about the binding's centre: `Δ_j = ℓ_j − ℓ̄`. Each member carries its own; the
 star's spin is their spread.

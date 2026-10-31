@@ -1,12 +1,19 @@
 # 106 — The thermodynamic substrate: potential, pressure and energy beneath motion
 
-Design direction (2026-10-28): the obstacle to stability and equilibrium is a
-missing substrate; this document scopes it. Status: scope. Read against
-ipsal-autic
-`docs/implementation/phase_24_5_kinematic_substrate_layer_discipline.md` (the
-operator-named stack, 2026-05-17), as docs/94 was. Builds on docs/94 (UMD,
-SUBSTRATE_C), docs/103 (the layers), docs/104 (the inverse duals), docs/105
-(polarity equilibria).
+This document defines the thermodynamic substrate beneath era 1's motion:
+potential, pressure and energy as state at each place, with kinematics
+derived from them. In the current physics motion is the base layer, and heat
+and pressure are residues of it, so there is no restoring force and no
+stable equilibrium; the substrate supplies the restoring force (hydrostatic
+balance).
+
+**Status:** scope.
+
+**Prerequisites:** docs/94 (UMD, SUBSTRATE_C), docs/103 (the layers),
+docs/104 (the inverse duals), docs/105 (the polarity equilibria). Read
+against ipsal-autic
+`docs/implementation/phase_24_5_kinematic_substrate_layer_discipline.md`
+(the three-tier stack of §0), as docs/94 was.
 
 ## 0. The stack, and how Netstratum's stands inverted
 
@@ -20,8 +27,8 @@ Netstratum's runs upside down. Motion is the floor: torques give spin (`flows::t
 `spin_torque`), and heat and pressure are read off afterwards as its residue
 (agitation the torque's undelivered share; pressure `ρ·ā` of that residue;
 cooling a share that leaves no book). Nothing holds potential or energy as
-state, and nothing propagates motion from it. That one gap is the main
-problem with stability (operator, 2026-10-28):
+state, and nothing propagates motion from it. That gap is the main
+obstacle to stability:
 
 - **No restoring force:** equilibrium lives in the substrate (pressure
   against the pull), and there is no potential or energy state to restore to.
@@ -43,7 +50,7 @@ At each place (a mote's reach in its enclosure, a ring, a body):
   - magnetic: its open frames in step over its width (built).
 - **Energy, three forms, one book:** heat `a·m` (the substrate's own),
   motion `m·ℓ` (the spin the kinematics carries), potential `m·Φ` (where it
-  stands). In grains of holding, on the one ledger unit (`universal_ledger`).
+  stands). In grains of holding, on a single ledger unit (`universal_ledger`).
 
 ## 2. Its laws
 
@@ -74,7 +81,7 @@ At each place (a mote's reach in its enclosure, a ring, a body):
   re-pulsed (its state against its throat, docs/105 §4.1), and what the torque
   gives is what the substrate's potential pays.
 - **Heat is never a residue:** what the transport does not deliver in step is
-  energy moved from motion to heat, booked on the one ledger (it was a share
+  energy moved from motion to heat, booked on the same ledger (it was a share
   computed and dropped into agitation).
 - **The coupling up to form:** a binding holds where its bond (docs/103 §6)
   meets the substrate's pressure across it (its thermal and magnetic pressure

@@ -1,15 +1,14 @@
 # 29 — The constructive law: how the judge and the constants both leave
 
-**Status:** **law — ratified by the operator, 2026-08-06.** The ruling,
-verbatim: *"full forward advancement on provable not policed — that is
-the absolute truth."* What was drafted as a design is now the organizing
-principle of all forward work: every rule the engine carries is either
-proven at construction — a type, a derivation, a fold of the chain — or
+**Status:** **law.** The principle: forward work advances on what is
+provable, not on what is policed. What was drafted as a design is now the
+organizing principle of all forward work: every rule the engine carries is
+either proven at construction — a type, a derivation, a fold of the chain — or
 it is a debt with a count, and the count only falls. Policing (checking
 after the fact what construction could have made impossible) is the
 defect class this law exists to eliminate.
 
-Originally drafted 2026-08-05 on the operator's question of how to
+Originally drafted 2026-08-05 on the question of how to
 remove "judge" and constants from the codebase.
 
 Subordinate to `00_CHARTER.md`, `26_ARTICLES.md`, `27_EVIDENCE.md`.
@@ -60,7 +59,7 @@ construction** — private fields, one door, the door returns the proof
 **Fact refusals (~23)** guard contingent state: `CannotAfford`,
 `NoSuchOrb`, `SeatFull`, `MintNotNovel`. These are not judgments of
 form — they are readings of what the chain currently holds, and they
-belong at the door forever. Refusing to sell what is not held is not
+belong at the door permanently. Refusing to sell what is not held is not
 an authority; it is arithmetic.
 
 **The end state is therefore not zero refusals. It is zero shape
@@ -74,10 +73,10 @@ Precedents already landed, each one a dead judge arm:
 - the siting triple — one `Option<(star, albedo, orbit)>`; half-sited is
   unrepresentable.
 - `Delta` — antisymmetry enforced by its only writer `set_antisym`.
-- `Field::new` / `Shell::new` — the one door; a malformed carrier never
+- `Field::new` / `Shell::new` — the only constructor; a malformed carrier never
   exists past it.
 - `refinement_tier` — no catch-all arm; a new resource breaks the build
-  until ruled, instead of defaulting into an answer.
+  until its arm is written, instead of defaulting into an answer.
 
 ---
 
@@ -85,7 +84,7 @@ Precedents already landed, each one a dead judge arm:
 
 A constant is a frozen decision. Unfreezing it means finding where the
 decision actually lives. There are exactly three lawful homes, and which
-one applies is a per-cluster ruling, not a refactor:
+one applies is decided per cluster, not by a refactor:
 
 1. **Derivation** — the law was already in the numbers.
    The refinement ladder (`2^(t−1)` / `4^(2−t)`), the ring
@@ -109,7 +108,7 @@ one applies is a per-cluster ruling, not a refactor:
 
 What remains after the three sweeps is **physics with a named ground**
 (T⁴ bands cite thermodynamics) and **placeholder parameters explicitly
-marked for a balance ruling** — and the census pin keeps the count
+marked for a balance decision** — and the census pin keeps the count
 honest so "placeholder" cannot quietly become "permanent."
 
 ---
@@ -122,11 +121,11 @@ honest so "placeholder" cannot quietly become "permanent."
 2. **The conductor's pacing constants** — flagged in `archive/PICKUP.md` §8c as
    *"no cited law"* already; convert to measurements of the board.
 3. **The roster siting** — derive from the sigil unless
-   operator-pinned; the pinned seats (Furnace, Frost) are deliberate
+   explicitly pinned; the pinned seats (Furnace, Frost) are deliberate
    physics fixtures and stay.
 4. **The judge's bounds** (`mint_bound`, the ladder) — last, because
    they price the mint and the mesh's measurement layer (N6) is their
-   ruled destination; moving them before the mesh exists would be
+   destination; moving them before the mesh exists would be
    inventing the measurement.
 
 The census is the progress meter: `const` declarations and `ratio`
@@ -134,13 +133,12 @@ literals in `src/`, counted by pin, expected to fall monotonically.
 
 ---
 
-## §5 The semantics ruling — machinery speaks machine words
+## §5 Semantics — machinery speaks machine words
 
-**Operator, 2026-08-05** (paraphrased): "judging" and "lawful" are not
-mechanical states of machinery; they are esotericism, with bias
-leaking into the semantics.
+"Judging" and "lawful" are not mechanical states of machinery; used as
+identifiers, they carry a bias into the semantics.
 
-Correct, and the defect ran deeper than the functions: the vocabulary
+The defect ran deeper than the functions: the vocabulary
 itself imported an authority frame. A judge has discretion; a verdict is
 pronounced; "lawful" appeals to an order outside the machine. A machine
 has none of those — a transition is defined or undefined, a shape
@@ -164,7 +162,7 @@ discretion), `Refused` (a lock refuses a key), `Reading`/`Read` (the
 tree's own measurement vocabulary, already everywhere).
 
 **The boundary:** the document layer keeps "law" as a genre word — a
-charter is a document, and the operator's own workflow names charter-law
+charter is a document, and the project's workflow names charter-law
 docs. What is retired is the courtroom as a description of machine
 state. The doc layer's own prose sweep ("the judge" as a character in
-chapter prose) is the doc lane's follow-on, not this ruling's scope.
+chapter prose) is the doc lane's follow-on, not this section's scope.

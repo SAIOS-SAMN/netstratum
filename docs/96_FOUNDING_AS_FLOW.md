@@ -1,15 +1,18 @@
 # 96 — The founding as flow: bounce, push, tide, release, the void
 
-Design direction (2026-10-26): a bounce from the core does not throw, it
-pushes; the push is the incremental flow of tidal forces between the vacuum
-and the continuum, which release the elements into the void, and the void
-distributes them. A walk is forward and linear, not multi-axial, and loses
-capacity. This document scopes the meanings and aligns them on the topology
-for implementation.
+This document defines the founding as a flow. A core's bounce is a push, not
+a single throw: the push is the incremental flow of tidal forces between the
+vacuum and the continuum, which releases the elements into the void, and the
+void distributes them. A forward step model ("walk") is linear and
+single-axis, and it loses the capacity a multi-axial flow carries. The
+document derives the meanings of bounce, push, tide, release and the void,
+aligns them on the topology, and scopes their implementation. It replaces
+the founding's one-step throw and the board's placement.
 
-Status: steps 1–5 built (2026-10-26); §7 the galaxy enclosure's master
-algorithm, the law the code follows. Builds on docs/95 (three spatial planes and the R
-loop). Replaces the founding's one-step throw and the board's placement.
+**Status:** steps 1–5 built; §7, the galaxy enclosure's master algorithm, is
+the law the code follows.
+
+**Prerequisites:** docs/95 (the three spatial planes and the R loop).
 
 ## 1. The meanings, derived
 
@@ -23,7 +26,7 @@ Each term in plain words, then what it is in Netstratum's laws.
   (the isoclinic pulse). It is an increment per bell, never a displacement.
 - **The tide.** The flow between vacuum and continuum at a place: the vacuum
   holds `δ = H/(R + H)`, the continuum's face leaves `½(1 − δ)` unlocked
-  (ruled 2026-10-16: the tide works on the unlocked face, never the held).
+  (the tide works on the unlocked face, never the held).
 - **The release.** Each bounce, the push on the unlocked face passes a share
   of what the throat still holds from held to free. Of kind k at its reach,
   the share released at a bounce is `s_k = ½(1 − δ(R_k))` (D1 below). What
@@ -33,7 +36,7 @@ Each term in plain words, then what it is in Netstratum's laws.
   (`(δ, ψ, s) ↦ (1 − δ, ψ + ½, −s)`, docs/94 §2): R's sign turns, time's
   sense with it (docs/95 §2).
 - **The void.** The vacuum leg: not empty space but the medium of motes
-  (direction of 2026-10-25: the ocean of space is made of continuously interlinked motes). At the universe tier it is the ocean
+  (the ocean of space is made of continuously interlinked motes). At the universe tier it is the ocean
   (`Universe.ocean`); at a galaxy's, its gas on the vacuum stream; at a
   system's, its belts.
 - **The void distributes.** Released motes travel about their core, each
@@ -44,7 +47,7 @@ Each term in plain words, then what it is in Netstratum's laws.
   that bell, in each plane. Successive releases leave at successive phases,
   so the void fills the sphere because the core turns between bounces. No
   draw and no offset: the angular spread is the release's own history.
-- **A binding** (direction of 2026-10-27: "clumps" are the bonding of elements, renamed bindings): elements on one
+- **A binding** (formerly "clumps": the bonding of elements): elements on one
   ring of the disc bound into one body by their holding and their open
   frames together (`λ = 2(m + μ)/R`, m gravity's share, μ the electrons'),
   where that bond, `λ/(1 + λ)`, meets their heat and the tide across them.
@@ -103,10 +106,10 @@ below gathers from.
   sectors when zoomed out). The cost of a read is the cohorts in motion, not
   the bells passed.
 
-## 5. Decisions for the operator
+## 5. Decisions
 
 - **D1, the release share.** Proposed `s = ½(1 − δ)`, the unlocked face (the
-  tide's face as ruled). Alternative: `p·½(1 − δ)`, the push on that face
+  tide's face, §1). Alternative: `p·½(1 − δ)`, the push on that face
   (slower where the push is weak).
 - **D2, the galaxy's void.** Proposed: a galaxy's own vacuum leg (its gas)
   distributes its releases, and only what passes its rim reaches the ocean.
@@ -141,7 +144,7 @@ below gathers from.
 7. **Read.** The founding through D3's end: counts, worlds per star, every
    identity, cost per echo.
 
-## 7. The galaxy enclosure: the master algorithm (operator 2026-10-26)
+## 7. The galaxy enclosure: the master algorithm
 
 Every galaxy reading (its frame, the echo's, the flows', the merge's, its
 exits) is one enclosure:
@@ -174,8 +177,8 @@ Each echo, in order:
 - **Rings.** Band pairs on the strip `ρ = R/ring − 1 ∈ (0, 1]`, images at
   `−ρ`, each stepping by `k(ρ) = (S/G)·(1 + ρ)/(1 − ρ)`, `S = base/whole +`
   the matter within `|ρ'| < ρ`, `G = 1 − S`.
-- **Fragments, read in the binding's own enclosure** (the 2026-10-16 ruling,
-  "shares read in the body's own enclosure"). A binding of arc w on a ring at R
+- **Fragments, read in the binding's own enclosure** (shares are
+  read in the body's own enclosure). A binding of arc w on a ring at R
   (about the galaxy's hold H, carrying m of its holding and μ of its
   magnetism, at heat a) binds by its own deficit
   `λ/(1 + λ)`, `λ = 2(m + μ)/R` (its half-width `w/2` dilated once by its
@@ -192,10 +195,10 @@ Each echo, in order:
 Retired: the throat's unreleased hold in the enclosure's base (built
 2026-10-26, `89dcadd`), and the release read against the push's own hold.
 
-## 8. The unlocked face heats; it is never a barrier (direction of 2026-10-27: find the underlying problem, and apply formulas where constants or static variables stood)
+## 8. The unlocked face heats; it is never a barrier
 
-The unlocked face `½(1 − δ)` was ruled a heating law (2026-10-16: "the face
-the core does not lock heats"). Its heat already reaches the motes and worlds
+The unlocked face `½(1 − δ)` is a heating law: the face the core does not
+lock heats. Its heat already reaches the motes and worlds
 as agitation: the light a core sends warms each body by the share its face
 leaves unlocked at its reach (`breath::shine`, `l·(1 − δ)/whole`). Every hold
 test also subtracted it as a barrier, so it was counted twice, and against
@@ -221,7 +224,7 @@ heat and the tide across it,
 
 Retired: the face as a barrier in every hold test.
 
-### 8.1 The double-pass inversion of the encounters (direction of 2026-10-27: the missing component is the manifold chain's inversion on the star's gravitational lock)
+### 8.1 The double-pass inversion of the encounters
 
 `formation::crossed` reads whether two neighbouring worlds, meeting
 `N = a·|Δω|` times over their system's age, are turned across their gap. Their
@@ -231,7 +234,7 @@ but for one residual, `c = in_step(q·ψ₀)` at the pair's phase offset ψ₀ (
 star's own phase common to both cancels, so the offset is read against the
 star's lock).
 
-The residual was summed with one sign forever, `⌊N/q⌋·c`, growing with the
+The residual was always summed with one sign, `⌊N/q⌋·c`, growing with the
 age, so every pair eventually joined: 78 worlds standing at bell 704 fell to
 5 at 880 (1363 joins; measured 2026-10-27, 2^55 grains).
 
@@ -255,7 +258,7 @@ excursion is the same at 2q meetings and at any later count.
 Open (not changed here): within a period the encounters are counted raw (`ρ`,
 `q − 1`), a ceiling; the hemisphere responses also cancel inside the period.
 
-### 8.2 Only forming orbits meet; neighbours exchange echoes, never impulses (ruling of 2026-10-27: pulses and echoes, never impulses; only bodies still forming their orbits collide)
+### 8.2 Only forming orbits meet; neighbours exchange echoes, never impulses
 
 Measured (2^55 grains, NETSTRATUM_DIAG, bells 704–880): 746 joins in one
 system, 742 of them at the pair's first meeting, the impulse `ε·R` exceeding

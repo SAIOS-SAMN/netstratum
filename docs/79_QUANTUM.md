@@ -1,22 +1,22 @@
 # 79 — Quantum in Netstratum
 
-Operator (2026-10-13): Netstratum has no quantum layer; it should have one,
-defined so it fits the physics, built from the physics and not from what has
-been stated elsewhere. The universe answers to its annals, not to replay
-exactness. The operator's hypothesis, unproven and labelled so: the
-singularity's bounce is quantum torsion, compactified in a Calabi–Yau
-manifold.
+This document defines a quantum layer for Netstratum, derived from the
+existing physics rather than from external formulations. Its working
+hypothesis, unproven and marked as such, is that the singularity's bounce is
+quantum torsion compactified in a Calabi–Yau manifold. The universe answers
+to its annals, not to replay exactness.
 
-Status: scoped 2026-10-13; not built. It belongs to era 1 (docs/78). Time
-is docs/80's: a measurement is an event on the map (a place and its cosmic
-time); the hidden phase is read there; the annals record its map coordinate
-and the observer's proper time. The singularity's bounce, which drives this
-layer, keeps the universe's own cosmic time (its returns). Per mycelium's
-ruling (78.152d, docs/80) there is no quantum lane: the universe's ledger
-entry (sub-kind 12) already pairs its cosmic time u with the TUniversal
-point, and will carry the torsion's exact coordinates and the measurement
-count n as an optional trailing field (superseding commit 821841cf); the
-court re-derives the phase advance from them.
+**Status:** scoped 2026-10-13; not built; part of era 1 (docs/78).
+
+**Time** follows docs/80: a measurement is an event on the map (a place and
+its cosmic time); the hidden phase is read there, and the annals record its
+map coordinate and the observer's proper time. The singularity's bounce,
+which drives this layer, keeps the universe's own cosmic time (its returns).
+There is no separate quantum lane (Mycelium 78.152d, docs/80): the
+universe's ledger entry (sub-kind 12) already pairs its cosmic time u with
+the TUniversal point, and will carry the torsion's exact coordinates and the
+measurement count n as an optional trailing field (superseding commit
+821841cf), from which the court re-derives the phase advance.
 
 ## Facts (read from the code)
 
@@ -65,8 +65,8 @@ court re-derives the phase advance from them.
   resonance of the compact space.
 - **A state is a point of the curved state space** over the modes (the
   projective space of states, positively curved), never a vector normalised
-  by a flat square. Remediated 2026-10-13 (operator): no quadratic norm,
-  `^2` or modulus squared defines a state or its outcomes.
+  by a flat square: no quadratic norm, `^2` or modulus squared defines a
+  state or its outcomes (docs/78, design law 2).
   - **Intrinsic coordinates.** For each mode i, the state carries:
     - `β_i`, its geodesic angle to the mode on the curved state space;
     - `φ_i`, the mode's own phase, so that states can interfere.
@@ -130,7 +130,7 @@ court re-derives the phase advance from them.
   universe's one choice of vacuum. They are recorded in its origin, and every
   consequence is derived from them.
 
-## Wavefronts set matter moving (operator, 2026-10-14)
+## Wavefronts set matter moving
 
 The quantum state is where motion starts. Its wavefronts pulse the atoms
 into their orbits and spins, and that motion expands upward: atoms, bodies,
@@ -168,7 +168,7 @@ Within era 1 (docs/78), after its geometry library (Mycelium A1).
    - Done-when: the universe's reads take history from the annals, with no
      universe-side replay of quantum outcomes.
 
-## Ruled: quantum in matter (operator, 2026-10-14, option B)
+## Quantum in matter (option B)
 
 - **Matter carries the quantum modes.** An atom's electrons (docs/78, the
   atom tier) hold their frames and senses undecided until they interact.
@@ -184,7 +184,7 @@ Within era 1 (docs/78), after its geometry library (Mycelium A1).
   gives it. Not designed yet; every law built now must leave room for it
   (a star's spin and field are carried, not discarded).
 
-## The torsion phase is the tilt of a core's disk (operator, 2026-10-15)
+## The torsion phase is the tilt of a core's disk
 
 Built today (`conductor::quantum`): the hidden phase where a world
 interacts at bell b is `u = frac(φ_galaxy + b / P_world)`, and a
@@ -243,7 +243,7 @@ shared library laws):
     elements' unpaired senses summed into K_disc's plane. No draw.
 - **Reviewed by Xylarium (2026-10-15):** the precession form agreed (it
   keeps the tilt separate from the bell's strength). The walk gains a first
-  stop, from the Xylarium operator's formation model: the core comes first,
+  stop, from Xylarium's formation model: the core comes first,
   filled heaviest-first until its holding equals its reach (`R = H`, deficit
   ½, where the clock runs at half: the inbound and outbound shares equal);
   the disc walk then starts from the core's holding. Open: what fixes the
@@ -253,13 +253,13 @@ shared library laws):
   and the propulsion exactly; the lean is held as a pair and read as turns
   (for the hidden phase) only at events.
 
-## Open, for the operator
+## Open
 
-- ~~What is quantum; coupling~~: ruled 2026-10-14 (below).
-- **The vacuum** (answered in part, operator 2026-10-15): the vacuum is the
+- ~~What is quantum; coupling~~: decided (option B, above).
+- **The vacuum** (answered in part): the vacuum is the
   black face of the throat ring (S^1 at d = 1; its faces an S^0), the
   continuum its white face inside it (docs/78, "The bounce on S^1"). Still
   open below: the compact manifold's integers.
-- **The vacuum's integers.** The compact manifold's integers for era 1: chosen once, by
-  whom (the operator, or derived from the Big Bang's seed)? The same choice
+- **The vacuum's integers.** The compact manifold's integers for era 1: chosen once, but
+  how (set as a founding parameter, or derived from the Big Bang's seed)? The same choice
   sets the pulse's spectrum, which deploys every mass (docs/78, "The bounce").

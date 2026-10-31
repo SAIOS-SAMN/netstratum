@@ -108,7 +108,7 @@ expand.
 | both poles of the reading | `dual_pole`, `Flux { sources, sinks, balanced }` | `rfa-core` |
 | a projection from state to `Δ` | `bridge::project_complex` | `kernel` |
 
-The one thing missing is a projection **from a grid pair to a `Δ`** —
+The only thing missing is a projection **from a grid pair to a `Δ`** —
 `saios-arc`'s `pair_encoding` / `cells_to_runtime_delta`. Everything the
 convergence cycle needs downstream of that is built, witnessed, and in
 the solver's dependency graph already.

@@ -1,19 +1,19 @@
 # 66 — Synthesis: Netstratum's synthetic PoW++
 
-Operator 2026-10-09: the in-game kernel's "puzzle solving" is renamed (the
-name is Netstratum's to choose) and designed as a more robust system.
+The in-game kernel's "puzzle solving" is renamed (the name is Netstratum's
+to choose) and designed as a more robust system.
 Netstratum in effect holds a synthetic PoW++ network that powers its
 internal systems, and that network should be a model of the higher
 puzzle-solving PoW++ network that hooks into the hypha mycelium-client
-minds. Implementation was authorized, with the coordinator kept in the
-loop so that the higher-order universes stay aligned.
+minds. The coordinator is kept in the loop so that the higher-order
+universes stay aligned.
 
 ## The name
 
 **Synthesis.** A line's minds synthesize a rule for a task its world forged;
 a closed synthesis mints a word and banks the universe's own value, judged
 by Netstratum's own gate. The fleet has solving (the court's tasks, by the
-seated Mycelium minds, for μ, ruling 7); Netstratum has synthesis (its
+seated Mycelium minds, for μ, docs/64); Netstratum has synthesis (its
 civilizations' own work, for its own economy). The two never share a
 reward; they meet only through the seats.
 
@@ -35,9 +35,9 @@ reward; they meet only through the seats.
 |---|---|---|
 | Y0 | the name: Synthesis in what people read (logs, docs, new modules); long-standing identifiers stay | landed |
 | Y1 | first-closure bounty, as the court pays: a synthesis that mints a word no line in the universe holds earns the full rung (`mint_bound`); one that mints a word some line already holds (an independent re-derivation) earns the floor, the rung's quarter (the declared sibling dial, docs/59) | landed: live from beat 10591, years 177-179 closed clean |
-| Y2 | commissions: the universe's real needs as tasks, each with its own judge, bountied by the lines that need them; a commission declares its judge's measure as a generator (operator 2026-10-09, option 2) | slice 1 built: hub siting (`conductor/src/commissions.rs`), generator `Select::Central` (wire select code 9) |
+| Y2 | commissions: the universe's real needs as tasks, each with its own judge, bountied by the lines that need them; a commission declares its judge's measure as a generator (option 2 below) | slice 1 built: hub siting (`conductor/src/commissions.rs`), generator `Select::Central` (wire select code 9) |
 | Y3 | the higher order reaches the lower: a court closure a seated mind files for a line's seat is announced to that line as a higher-order word it may reconstruct (the cores' inheritance-by-reconstruction door) | open |
-| Y4 | the lower order reaches the higher: what a line knows of its world (its words as perception, its world's records) offered to its seated mind as world records in its percepts. Never a candidate rule or output for a court task before the mind: that would be solving by proxy, which ruling 7 forbids (coordinator review 2026-10-09). The mind does its own solving; counsel feeds its perception | open |
+| Y4 | the lower order reaches the higher: what a line knows of its world (its words as perception, its world's records) offered to its seated mind as world records in its percepts. Never a candidate rule or output for a court task before the mind: that would be solving by proxy, and a kernel solves no court task itself (docs/64). The mind does its own solving; counsel feeds its perception | open |
 
 Coordinator review (2026-10-09): aligned with the higher order; Y1 judged a
 faithful model of the court's bounty and floor in in-universe value.
@@ -61,7 +61,7 @@ put to the minds in that form would never close. Two ways forward:
    the judge's exact answer on the need's pairs. The need teaches the
    language the word it lacks, and the word then serves every line.
 
-**Ruled (operator 2026-10-09): option 2.** Slice 1, hub siting, as built:
+**Chosen: option 2**, because few real needs have option 1's form. Slice 1, hub siting, as built:
 the need is read off the world (a galaxy's open lines on its disc plane, one
 hue-1 body a line, spaced so none touch); the judge marks the central bodies
 (`Select::Central`: least summed L1 distance to the others) in hue 2; the
@@ -75,9 +75,9 @@ and from then on the hub stands where that word marks while it still holds
 (`<var>/commissions.bin`).
 
 **The audit and the faculty (coordinator, 2026-10-09).** All 11 first
-closures were the one supplied word `Select::Central`: commission bodies are
+closures were the single supplied word `Select::Central`: commission bodies are
 alike in hue, size and shape, and no predicate read a position or a relation,
-so the minds could not have deduced it. Ruled: keep it, marked supplied, and
+so the minds could not have deduced it. Decision: keep it, marked supplied, and
 build two pieces Netstratum's way. Built:
 - **The sense**: each body's raw L1 relations to every other body, sorted,
   never pre-summed (`project::relations`).
@@ -111,10 +111,9 @@ pairs; otherwise the commission stays open (`COMMISSION OPEN` in the log).
 
 ## The inner network (a test run under consideration, not built)
 
-The operator is considering Netstratum as the test run for synthetic in-game
+Netstratum is under consideration as the test run for synthetic in-game
 universes, with a subordinate in-game hypha network running on Synthesis
-under its own name. Three boundaries (coordinator 2026-10-09; the operator may
-amend):
+under its own name. Three boundaries (proposed, open to amendment):
 
 1. **No inner value becomes μ.** The inner network mints its own token,
    distinct from STAMP and from Crystal-as-money, and that token never

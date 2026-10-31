@@ -236,7 +236,7 @@
 //!         output, certificate); the receipt carries its proof whole,
 //!         replay re-verifies forever. Gated by I4's bound arm:
 //!         verify_work(work) = Ok(d) ∧ amount ≤ mint_bound(d);
-//!         mint_bound is sealed shut until Ruling Box 1)
+//!         mint_bound is sealed shut until Decision Box 1)
 //!   87 The arbor segment blob frame (SPINE-UPLINK, NS-5 §9 — a
 //!         content-addressed geometry carried in a replication
 //!         segment: state[32] ‖ state_bytes; the receiver re-hashes

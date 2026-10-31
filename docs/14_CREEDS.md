@@ -1,8 +1,8 @@
 # The creed manifold — archetypes, denominations, the friction gate (design stage)
 
-**Status:** design, ruled 2026-07-30 (operator direction from the Master
-of Orion overlay and the 54-denomination exploration; the source's law
-violations corrected below and never carried). No mechanic ships before
+**Status:** design, drawn from the Master of Orion overlay and the
+54-denomination exploration (the source's law violations corrected below
+and never carried). No mechanic ships before
 its protocol sections and test vectors exist (Charter §1); every
 constant is a placeholder parameter. The register law (06) binds: myth +
 physiology, and only what ties to the engine is mechanically real.
@@ -61,13 +61,13 @@ The friction-gated ascent/descent it proposes is the landed law:
    receipted structure or not at all — and floats never enter the
    universe). Its lawful core lands as FORGE-2 (§4): the engine's
    discrete moduli already exist — the graded gauge key.
-6. **No fixed 54.** The operator's own framing — thousands of creeds,
-   new ones born daily — is the generative law: creeds derive,
+6. **No fixed 54.** The design target — thousands of creeds, new ones
+   arising daily — is the generative law: creeds derive,
    chronicle-seeded, the 10 §2 naming discipline applied to belief
    (the hash is the identity, the creed is the line's tongue). The
    6/18/54 tables stand as register examples for seeding waves, never
    as the taxonomy. Enumerating belief would collapse exactly the
-   individuality the operator asked for.
+   individuality that target requires.
 
 ## 3. The creed manifold
 
@@ -100,8 +100,8 @@ walks — exactly the way function and tier read today.
   observer renders each line's creed, derived at read time: concept
   from the dominant receipted tendency (doctrine · hardship ·
   communion · schism · passage — precedence order breaks ties;
-  hardship holds tier 2 by operator ruling). The hardship word grades
-  by endured weight (operator-ruled 2026-07-30): **tempering** supports
+  hardship holds tier 2). The hardship word grades by endured weight:
+  **tempering** supports
   the base, **anneal** aligns the middle, **hardening** crowns the deep
   end — floors are placeholder parameters; "crucible" is retired from
   the creed vocabulary (the Furnace rename law's shadow). Voice drawn from
@@ -117,19 +117,19 @@ walks — exactly the way function and tier read today.
   Restraint (scan draw ×1/2 / +1/8 friction per transfer) · 4 the Hoard
   (demurrage ×1/2 / converter yields ×3/4) · 5 the Overdrive (all yields
   and upkeep ×5/4; adoption gated on eight hardship receipts — the
-  deep end takes only the tempered). Operator rulings inscribed:
+  deep end takes only the tempered). Decided:
   Release is A rediscovery — barred until new doctrine lands after the
   adoption, and a lawful release emits the RE-emergence node
   (condition 7, seeded from the moment — divergent and novel per line)
   whose window-ease boon (×3/4) runs while alignment holds; alignment
   is the syntropy ratio ≥ 1/2 (the engine read of 09 §2.5 — the
-  operator's "intelligence alignment", flagged as this chapter's
-  proxy, re-rulable). The climb gains its fourth gate: a practiced
+  design's "intelligence alignment", flagged as this chapter's
+  proxy, open to revision). The climb gains its fourth gate: a practiced
   line elevates only aligned (ElevationBarred names it). NPCs adopt at
   genesis by disposition (expansionist→Restraint, epicurean→Showpiece,
   empiricist→Austerity; the Hoard and Overdrive are earned, never seeded);
   the sovereign hand adopts by the `practice`/`release` verbs. All
-  constants placeholder; names operator-renameable. Five witnesses.
+  constants placeholder; names renameable. Five witnesses.
 - **MASK-1a — landed 2026-07-31** (tags 76/77): the veil deed and its
   standing ember toll (1/4 at every collect, settled as receipted
   upkeep; an unpayable toll lifts the veil by receipt, starved-flagged
@@ -177,6 +177,6 @@ walks — exactly the way function and tier read today.
 
 CREED-1 first (pure derivation, cheapest, makes the manifold visible);
 CREED-2 couplings one at a time behind it; MASK-1/INCURSION-1/WARDEN-1
-by operator priority. Nothing here blocks any open lane; everything
+in an order still to be set. Nothing here blocks any open lane; everything
 composes with divergence/confluence, BRIDGE-1, LINEAGE-2, and the
 ideology board as already landed.

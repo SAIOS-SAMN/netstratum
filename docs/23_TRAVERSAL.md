@@ -1,7 +1,7 @@
 # 23 — The traversal lane and the path polynomial
 
-**Status:** law, split out of the retired `18_TORSION.md` on 2026-08-02 by operator
-ruling. It carries the traversal and path-algebra thread.
+**Status:** law, split out of the retired `18_TORSION.md`. It carries the
+traversal and path-algebra thread.
 
 **Why it moved.** `18_TORSION` was the physics subset that constrained the
 computational mathematics. It had grown to 2,020 lines and twenty §2
@@ -26,11 +26,11 @@ acquires a consumer or law 8 applies to it on its own terms.
 
 ---
 
-### 2k. The traversal lane — Einstein–Rosen throat, Einstein–Cartan interior (operator, 2026-08-02)
+### 2k. The traversal lane — Einstein–Rosen throat, Einstein–Cartan interior
 
 The bond between two interlinking orbs (`46_KERNEL` §5a.1) is a throat,
 not a link. This section says what keeps the throat open, and the
-answer carries an economic ruling with it.
+answer carries an economic rule with it.
 
 **What Einstein–Cartan actually adds, stated plainly.** General
 relativity sets torsion to zero by fiat: the connection is symmetric,
@@ -102,7 +102,7 @@ this reading — the lane extends it from the mint to the bond.
 `hashcash` anywhere in `engine/`. `Difficulty` exists but means the
 puzzle's shape — `rows`, `cols`, `word_len`, `train_pairs`, `tier` —
 how hard the task is, never how many leading zeros. **The tree has
-never taken the hashcash shape**, so this ruling defends a position
+never taken the hashcash shape**, so this rule defends a position
 rather than reversing one.
 
 **Where the temptation actually sits, and it is one specific gap.**
@@ -110,14 +110,14 @@ rather than reversing one.
 weight costly to fake — the Sybil and ordering anchor
 (`KERNEL_RELAY` §7.1). Hashcash is the reflexive fix for exactly that
 gap, and it is how a system that never wanted a nonce acquires one.
-**This ruling forecloses it in advance:** the anchor is to be paid in
+**This rule forecloses it in advance:** the anchor is to be paid in
 structure that survives reduction, not in energy spent.
 
 **Not derived — three open things, flagged rather than filled:**
 
 1. **What traverses.** Value, state, or judgment are three different
    laws with three different conservation obligations, and the lane
-   does not pick one. An operator ruling.
+   does not pick one. Open: to be decided.
 2. ~~**Whether lanes decay.**~~ **struck — see §2k.1.** This item
    inferred from non-propagating ECSK torsion that lanes might fade
    when the work stops. That is not an open question: article IV
@@ -132,11 +132,11 @@ structure that survives reduction, not in energy spent.
    does not supply the replacement.** Saying otherwise would let the
    shape of the argument stand in for a mechanism that does not exist.
 
-### 2k.1 The arrow reverses — torsion is spin, and §2k open item 2 is struck (operator, 2026-08-02)
+### 2k.1 The arrow reverses — torsion is spin, and §2k open item 2 is struck
 
 §2k wrote the arrow as ECSK usually writes it: **spin sources torsion**,
-torsion appearing as a response where spin-carrying matter sits. The
-operator's correction reverses it: **the torsion twisted at the fine
+torsion appearing as a response where spin-carrying matter sits. This
+section reverses it: **the torsion twisted at the fine
 layer is the spin.** Not a source relation — an identity
 across scales.
 
@@ -189,7 +189,7 @@ Under the reversed arrow torsion is not a response to a source; it is
 the fabric's own degree of freedom, and it propagates. **Article IV
 clause 2 already fixes its rate** — *the propagation limit of this
 manifold is one commitment per step … the rate is `c` and `c` is the
-clock.* The constitution has assumed the operator's reading since it
+clock.* The constitution has assumed this reading since it
 was written; §2k contradicted it. **Open item 2 is struck, not
 resolved.** A committed non-closure is a permanent feature of the
 complex.
@@ -218,7 +218,7 @@ Triangles carry composition failure; what the next degree carries is
 not obvious and must not be guessed, because a cell whose residual has
 no meaning is apparatus rather than law.
 
-### 2m. The path polynomial — ordered interlink, causal reach ±1 (operator, 2026-08-02)
+### 2m. The path polynomial — ordered interlink, causal reach ±1
 
 > imagine `i j k l` each have a vertical axis that wraps around and
 > could interlink with any of the other `i j k l` in any particular
@@ -232,7 +232,7 @@ data rather than decorate it; degree is the number of interlinks;
 coefficients are what each link carries; and evaluation along a path is
 holonomy. Not an exotic object — a known one, and the right one.
 
-(*Terminology:* "master equation" is the operator's shorthand here for
+(*Terminology:* "master equation" is the quotation's shorthand here for
 the residual/rank relation. Task #17 stands — there is no single master
 equation, and this section describes a carrier, not a new one.)
 
@@ -271,7 +271,7 @@ wrapped vertical axis, landed. But it wraps the whole state. The
 indices `i, j, k` are bare `usize` positions in `Committed::orbs`, and
 a bare index has no axis to wrap.
 
-Giving each index its own wrapped vertical axis is the same ruling as
+Giving each index its own wrapped vertical axis is the same requirement as
 "orbs have extent" (`46_KERNEL` §5a.1, wall 2). **That is now a fourth
 line arriving at one wall** — the Venn overlap, the traversal lane, the
 depth of the torsion, and now the per-index axis. The station (tag 89)
@@ -282,11 +282,11 @@ index.
 IV clause 2: *the propagation limit of this manifold is one commitment
 per step … the rate is `c` and `c` is the clock.* A polynomial reaching
 exactly one step in either direction is not a restriction being
-imposed — it is the propagation limit already ruled. `fold.rs:215`
+imposed — it is the propagation limit Article IV already fixes. `fold.rs:215`
 returns `OrbitWitness { operator_id, step: 1 }`, so the single-step
 reach is already in the witness type.
 
-**The forward link — the one part that needs care, and it resolves
+**The forward link — the only part that needs care, and it resolves
 with ordinary arithmetic.**
 
 Backward is a reference: hash the parent, landed as
@@ -312,7 +312,7 @@ implementable rather than as its definition.
 The polynomial is anchored at both ends by organs that already exist,
 and nothing here requires a record to point at the future.
 
-**A possible route through K3 — flagged for ruling, not derived.** If
+**A possible route through K3 — flagged as open, not derived.** If
 forward links are constraints, then two branches carrying the same
 outstanding covenant are bound to one another without any merge record:
 the binding lives in the constraint layer rather than the parent layer.
@@ -324,7 +324,7 @@ merging them. No single record results, so it does not by itself
 discharge K3's wall 1 or produce the join record §5a.1 specifies —
 and a shared obligation is weaker than a shared coordinate, since
 nothing forces the two to reconcile what they each hold. It may be the
-better primitive or it may be an adjacent one. **An operator ruling,
+better primitive or it may be an adjacent one. **Open, to be decided;
 recorded because it is cheap to state and would be expensive to
 discover late.**
 

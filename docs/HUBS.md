@@ -192,7 +192,7 @@ Dual:    polity  ←activity→  bench polity
 | E3.9 | Treaty allow-lists for element ids |
 | I5.x | SHARE/NOTE/FUT/PERP instrument lifecycle residual |
 | Court | Rename Earth-culture line names (operator only) |
-| Deep deeds | more domain leaves still status+verb (partial: planetary prospect/assay/refine fire; **diplomatic local seal/renounce/fence fire**, 2026-08-12 — `diplomatic local <treaty grammar>` delegates to the one home) |
+| Deep deeds | more domain leaves still status+verb (partial: planetary prospect/assay/refine fire; **diplomatic local seal/renounce/fence fire**, 2026-08-12 — `diplomatic local <treaty grammar>` delegates to its single home) |
 
 ### Landed this pass
 
@@ -204,7 +204,7 @@ Dual:    polity  ←activity→  bench polity
 | **P8.2** | Trajectory · hunger · rail on observer (`arc` view · state uplink) |
 | **P8.3** | Labor force from habitats + clones |
 | **P8.4** | Closed-ruins history (`observer ruins`) |
-| **P8.5** | AP capacity ruled table constants |
+| **P8.5** | AP capacity table constants |
 | **Pol.1–3** | Polity root · `bench polity` dual law · NPC `identity_step` |
 | **Deep** | `bench planetary prospect|assay|refine` fire deeds |
 

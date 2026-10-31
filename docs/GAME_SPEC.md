@@ -33,7 +33,7 @@ cognition; the proof feeds an in-game economy that overlays real-world
 cryptocurrency. "Dual-headed" = Proof of Useful Work + Proof of
 Work-Convergence, each with a kernel half (local) and a mesh half
 (cross-node) — `engine/kernel/CHARTER.md` §5a. The kernel is playable now;
-the mesh is deliberately built second (operator ruling 2026-07-31).
+the mesh is deliberately built second, after the playable kernel.
 
 The player-facing shape is closer to a Cities:Skylines-style civilization
 builder than to the mesh/consensus machinery underneath it: found a
@@ -75,11 +75,11 @@ code disagrees (corrected in this pass, see §5).
 | Element economy | **Partial** | `31_ELEMENT_COMMERCE.md` | REFINE-1 landed Wave-1; `#29` (element-eater ration settle) still open, on the 44_LINEAGES sequence as item 4 |
 | Economy / money (STAMP, tariffs, escrow) | **Design (mostly)** | `01_ECONOMY.md` | thermodynamic physics (`T_eq⁴`) real; domain/leasing/tariffs zero code; generic escrow exists, nothing Litho-Chalcogen-specific |
 | Vocabulary / novelty mint | **Live (deed) / partial (fold)** | `28_VOCABULARY.md` | `VocabularyMinted` tag 96 real; `class_ceiling`/`clade_ceiling`/`axis_valid` are still hardcoded, not yet readings of the minted fold (doc corrected 2026-08-13) |
-| Standing / vacuity | **Struck** | `25_STANDING.md` | `dual_pole`/`Vacuity` removed by operator ruling 2026-08-04 — doc had dead citations, corrected 2026-08-13 |
+| Standing / vacuity | **Struck** | `25_STANDING.md` | `dual_pole`/`Vacuity` removed 2026-08-04 — doc had dead citations, corrected 2026-08-13 |
 | Taxation (craftable levies) | **Live** | `49_TAXATION.md` (renumbered 2026-08-13, was `45_TAXATION` — collided with `45_ALMANAC`) | levy model + continuity tax landed `#54/#55`; a levy is minted data (base/trigger/rate/sink) over the vocabulary precedent, not a hardcoded drain |
 | Civic engine (stability/welfare) | **Live** | (no dedicated doc yet — see `world/taxation.rs`, `world/distribution.rs::stability_of`) | `GovernmentOffice`/`WelfareHub` zones + the welfare→stability loop landed `#56/#57` |
 | Zone build costs | **Live** | `02_COLONY_LOOP.md` (cost table), this session's fix | `ZoneKind::cost()` now follows the same metabolism-substitution rule `zone_upkeep`/`zone_yield` already had — a Habitat's build price reads the civ's own ration, gated on a nonzero harvest rate so plasmic (rate 0) isn't priced in Embers it can't hold at founding |
-| Win condition / game closure | **Design, proposal only** | `50_WIN_CONDITIONS.md` (new, 2026-08-13) | zero hits anywhere for win/loss/victory/game-over — a playthrough currently cannot conclude. Candidates drafted for an operator ruling; nothing implemented |
+| Win condition / game closure | **Design, proposal only** | `50_WIN_CONDITIONS.md` (new, 2026-08-13) | zero hits anywhere for win/loss/victory/game-over — a playthrough currently cannot conclude. Candidates drafted for a decision; nothing implemented |
 | Autonomous play / beta-run capability | **Live, undocumented until now** | `BETA_RUNBOOK.md` (new, 2026-08-13) | `engine/conductor` already plays every registered civilization autonomously (no human input); `tools/observer.py` watches read-only. Verified live 2026-08-13: 22 civilizations, 5 beats, zero errors |
 
 ## 3. The civilization-design frontier (44_LINEAGES build sequence)
@@ -129,8 +129,8 @@ again later the same session as `#32` and other items landed:
    last open item in the 44_LINEAGES sequence (§3).
 5. **`#30` relief** — `PressureEbbed` deed, tag 168 (reserved).
 5. Then the 44_LINEAGES sequence in §3, plus `#33`/`#34`/`#35`/`#5` per
-   `rulings-2026-08-13` (demote market claim, progenitor delegation,
-   kinetic war teeth, court rename).
+   the open design items: demote the market claim, progenitor delegation,
+   kinetic war teeth, and the court rename.
 
 ## 5. Doc hygiene — what changed in the 2026-08-13 audit
 
@@ -151,7 +151,7 @@ repeatable failure modes across `docs/`:
   against `dop.rs`'s header before trusting it (was 168 at audit time,
   is 170 as of `#51`'s tag 169 claim — see the merge in this branch).
 - **Accretion docs**: `17_CAPACITY.md` (2248 lines, chronological
-  self-correcting ruling log) split like `18_TORSION` was — core stays at
+  self-correcting decision log) split like `18_TORSION` was — core stays at
   17, cage mechanics folded into `22_CONTAINMENT`, threat model extracted
   to `48_CAPACITY_THREAT_MODEL.md`. Section numbers preserved across the
   move, so old citations still resolve.

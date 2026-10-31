@@ -3,9 +3,10 @@
 **Refined by docs/88:** the land is read at the people's latitude on its
 turning world, `u` of T in place of `1 − 2^(−⌊h⌋)` at the mean.
 
-Direction (2026-10-21): proceed with the derivations (after the 600-beat read:
-every line founded with a band of one, no shipyard, no trade, no gate in 600
-beats).
+This document derives what a world provides as wild land, the base its
+people feed on. A 600-beat reading motivated it: every line was founded
+with a band of one, and in 600 beats no line built a shipyard, traded or
+opened a gate.
 
 ## What was wrong
 

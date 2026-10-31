@@ -1,10 +1,10 @@
 # 44_LINEAGES — The civilization-design framework
 
-*Translated from operator directives 2026-08-13 (the named lineages). The
+*Translated from the design notes on the named lineages. The
 thesis: a civilization is not a preset picked from a short list — it is a
 coordinate in an open, combinatorial axis space, given depth by four
 dimensions, two of which the engine already realizes and two of which are
-the build frontier. The flavor the operator writes (evolutionary arcs,
+the build frontier. The flavor of those notes (evolutionary arcs,
 planet-fit, environment-coupled demographics, castes) maps onto engine
 mechanics; where it does not yet, this doc names the mechanic owed.*
 
@@ -44,7 +44,7 @@ tapers with distance from the home band. A lithovore on cold rock, a
 plasmoid on a scorching close-orbit world, an abyssal line in a deep
 pressured band — each reads its own fit. **This is the "high-gravity rocky
 world / ice-crusted ocean / gas giant / volcanic world" matching the
-operator names, already in code.** What is not yet built: the player
+notes name, already in code.** What is not yet built: the player
 creating a fitted world for a founding — that is the progenitor-gated
 star/planet creation, `TASKS_ALPHA_BETA` Phase 4 (#34).
 
@@ -57,7 +57,7 @@ the environment's own ceiling, and the logistic population (#40–42) chases
 it — growing when the world can bear more, culling when it cannot. A hostile
 world holds few; a prime one many; a barren rock none (pinned,
 `world_rejuvenation.rs`). **The demographic-tracks-environment mechanic the
-operator describes is the population loop already shipped.** Richer, named
+notes describe is the population loop already shipped.** Richer, named
 couplings (a cooling-cycle that ratchets K down over eras; a jet-stream that
 moves the habitable footprint) are per-clade extensions on this base, not
 new foundations.

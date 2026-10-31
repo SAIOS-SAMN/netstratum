@@ -1,12 +1,11 @@
-# 50_WIN_CONDITIONS — Closing a playthrough (ruled)
+# 50_WIN_CONDITIONS — Closing a playthrough (decided)
 
-**Status: ruled, 2026-08-13 (operator).** *"There is no win state —
-there is a failure state — otherwise the game should just continue in
-perpetuity."* This settles §2 below: **option E (no win condition) +
+**Status: decided.** There is no win state; there is a failure state,
+and otherwise the game continues in perpetuity. This settles §2 below: **option E (no win condition) +
 option A (a loss/collapse condition) is the law.** Options B, C, D are
 struck — not deferred, not "later," struck — a "number go up" or
-"reach a threshold" win closes exactly the perpetual-play structure the
-ruling names as the point. The game has a way to fail and no way to
+"reach a threshold" win closes exactly the perpetual-play structure that
+is the point of the game. The game has a way to fail and no way to
 "beat" it.
 
 **Built (corrected 2026-10-08, measured in G2).** Option A's population
@@ -46,7 +45,7 @@ and a closure receipt:
   property of that coordinate's trajectory (where a line has traveled),
   not favor one axis over another by construction.
 
-## 2. The ruled shape — option A, alone
+## 2. The chosen shape — option A, alone
 
 ### A. Collapse / loss condition — the law
 `stability_of` and the population logistic already model failure paths
@@ -59,14 +58,14 @@ population/stability touch, `world/rejuvenation.rs` / `distribution.rs`).
 **This is the entire closure mechanic the game gets.**
 
 ### ~~B. Economic closure — the purse crosses a threshold~~ struck
-~~`purse()` already sums a line's whole economy...~~ **struck by the
-2026-08-13 ruling.** A "number go up" win is exactly the kind of
-artificial stopping point the ruling rejects — the economy keeps
+~~`purse()` already sums a line's whole economy...~~ **struck.** A
+"number go up" win is exactly the kind of artificial stopping point
+that perpetual play excludes — the economy keeps
 running after any threshold, same as before it.
 
 ### ~~C. Evolutionary/civilizational maturity — the arc completes~~ struck
 ~~`evolution_stage()`...~~ **struck.** The evolutionary arc
-(`44_LINEAGES §2c`) stays open-ended by the same ruling — a line keeps
+(`44_LINEAGES §2c`) stays open-ended for the same reason — a line keeps
 advancing for as long as it's played, with no "final stage" that ends
 anything. `evolution_stage()` remains a live reading, just never a
 closure trigger.
@@ -76,8 +75,8 @@ closure trigger.
 Cohesion stays a standing to maintain (or lose), not a target to hit
 and stop at.
 
-### E. No win condition — ruled, this is why A stands alone
-Confirmed by the operator directly: some strategy/builder games (the
+### E. No win condition — this is why A stands alone
+Some strategy/builder games (the
 genre this project explicitly targets, per the "Cities:Skylines-style
 civilization builder" framing this session opened with) have no win
 state at all — only a standing to maintain and a collapse to avoid.
@@ -89,10 +88,10 @@ that end a chronicle.
 ## 3. What this doc does not decide
 
 - The exact thresholds (population 0? stability below what, for how
-  long?) — these are balance rulings, deferred the
+  long?) — these are balance decisions, deferred the
   same way every other numeric constant in this codebase is (see the
   `tuned_constant_ratchet` discipline — do not add a threshold literal
-  without an operator sign-off).
+  without a recorded sign-off).
 - Whether an ended game is replayable past its close (does the
   chronicle keep accepting deeds after a win/loss receipt, the way
   `ColonyAlreadyFounded` blocks re-founding, or does closure freeze the
@@ -100,7 +99,7 @@ that end a chronicle.
 
 ## 4. What ships (tracked implementation task)
 
-Only the loss condition (A). No further ruling is owed before building
+Only the loss condition (A). No further decision is owed before building
 it — the open questions in §3 (thresholds, replayability) are
 implementation-detail decisions the builder can make and pin, not
 another round of "which end-state." Land it, pin it, done.

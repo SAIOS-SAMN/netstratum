@@ -1,7 +1,7 @@
 # 22 — The containment sector — C, its bound, and the path algebra
 
-**Status:** law, split out of the retired `18_TORSION.md` on 2026-08-02 by operator
-ruling. It carries the `C` definition thread and the containment law.
+**Status:** law, split out of the retired `18_TORSION.md` on 2026-08-02.
+It carries the `C` definition thread and the containment law.
 
 **Why it moved.** `18_TORSION` was the physics subset that constrained the
 computational mathematics. It had grown to 2,020 lines and twenty §2
@@ -40,7 +40,7 @@ consultant/defender. Read together, not redundantly.
 
 ---
 
-### 2m.1 The path algebra is A containment sector (operator, 2026-08-02)
+### 2m.1 The path algebra is A containment sector
 
 §2m left one question open — whether the path algebra is free (every
 ordering admissible, unbounded) or carries relations (some orderings
@@ -79,7 +79,7 @@ algebra forbids, when the answer is that the algebra forbids nothing
 and the door admits little.
 
 **And the door is the layer boundary.** This is the second half of the
-operator's ruling, and it corrects §2m's own error — see §2m.2.
+sector's definition, and it corrects §2m's own error — see §2m.2.
 
 ### 2n. `C` defined — and the collision audit (2026-08-02)
 
@@ -98,7 +98,7 @@ every residual, over exact rationals, returned wrapped in `Lens`. The
 `Lens` wrapper is the same containment discipline as §2m.1's sector: the
 type marks it as a reading, not a rule.
 
-`rfa-core/src/lib.rs:16` states the ruling plainly: ***C has no
+`rfa-core/src/lib.rs:16` states the rule plainly: ***C has no
 operational function** — it is not a score, not a gauge, not a gate, and
 no engine path consults it.* `C(Δ) = 0` says the cocycle condition
 holds and **nothing more**; "converged" is struck from the crate.
@@ -109,8 +109,8 @@ failure, carried with its indices and its sign. `bridge.rs:104` states
 the consequence: *"Summing them destroys them."* `C` is exactly that
 sum. An L1 aggregate discards order, discards sign, and discards the
 triple that produced each term, so **`C` cannot see torsion in
-principle** — the one quantity the engine now organises around is
-precisely the one `C` collapses. Its demotion is not a preference; it
+principle** — the quantity the engine now organises around is
+precisely the quantity `C` collapses. Its demotion is not a preference; it
 is a consequence, and it is why `D` replaced it as the organising
 quantity.
 
@@ -121,15 +121,15 @@ quantity.
 | `C(Δ)` | coherence functional, `Σ\|R\|` | `delta.rs:190` | Lens only, no operational role |
 | `c` | the propagation limit — one commitment per step | Article IV cl. 2 | Law. Lowercase, a rate not a quantity |
 | `C4`, `C5`, `C7` | algorithm labels in the equations ledger | `EQUATIONS` §C5 | a namespace prefix, unrelated to `C(Δ)` |
-| "C in its own 2×2" | the operator's containment ruling | operator, 2026-08-01 | see below |
+| "C in its own 2×2" | the containment requirement | §2n.2, §2n.3 | see below |
 | `c_is_consulted…` | a cage test name | `cage_pins.rs` | probable stale reference to `C(Δ)` |
 
-**On "C is contained to its own 2×2 matrix"** (operator, 2026-08-01):
+**On "C is contained to its own 2×2 matrix":**
 read against what landed, this is satisfied — the curvature is computed
 as `plaquette_curvature(a, b) = a.commutator(b)` returning a
 `MatrixFiber2x2` (`fiber.rs:168`), so the quantity lives in the fiber
 rather than as a global scalar. **Flagged, not asserted:** whether the
-ruling meant the coherence `C(Δ)` or the curvature. They are different
+requirement meant the coherence `C(Δ)` or the curvature. They are different
 objects that share a letter, and the code letters curvature `F` by
 convention while naming the functional `coherence_functional`.
 
@@ -152,12 +152,11 @@ outliving the quantity it was minted for.** `C` is now demoted, `D` is
 now the organising quantity, and the documents still carry the old
 letters in the old roles.
 
-### 2n.1 Where `C` lives — the fiber as workshop, and the one correction (operator, 2026-08-02)
+### 2n.1 Where `C` lives — the fiber as workshop, and the single correction
 
-Ruling (paraphrased): C is to be contained in the 2×2 matrix fibre
-bundle defined as the place where "anything goes" — the place for
-approximations, floats, and everything not to be used in a
-deterministic system.
+Requirement: C is contained in the 2×2 matrix fibre bundle defined as
+the place where anything goes — the place for approximations, floats,
+and everything not to be used in a deterministic system.
 
 **The quarantine is right and `C` is the correct resident. One
 distinction has to be drawn or it breaks consensus.**
@@ -175,7 +174,7 @@ compute different `D` from identical state and consensus would fail.**
 That is not a stylistic objection; it is a hard break, and it is
 precisely the class of thing the cage exists to prevent.
 
-**The distinction that makes the ruling work — two roles, one object:**
+**The distinction that makes the requirement work — two roles, one object:**
 
     The fiber as A committed type
       [[Ratio; 2]; 2], exact, deterministic, reproducible by every
@@ -195,12 +194,12 @@ precisely the class of thing the cage exists to prevent.
 gate is a prover/verifier split today: `orbit_lock` searches for the
 conjugator (*"the prover finds the conjugator"*, `fold_pins.rs:170`)
 and `verify_orbit_witness` *"re-walks the one path it claims"*
-(`fold.rs:224`). The operator's structure has a working precedent
+(`fold.rs:224`). This structure has a working precedent
 inside the exact organ it applies to.
 
 **What this gives `C` — a job it did not have.** §2n established that
 `C` gates nothing and cannot see torsion in principle. Placed inside
-the sector, it acquires the one role it is actually fit for: **a search
+the sector, it acquires the only role it is actually fit for: **a search
 heuristic.** `KERNEL_RELAY` §5.2 struck gradient descent on `C` as a
 convergence method, and that strike stands — but a heuristic guiding a
 prover produces nothing authoritative, so the objection does not reach
@@ -221,7 +220,7 @@ a one-line addition, and `cage_arrow.rs:118` audits every `Exact for`
 impl, which makes granting one a deliberate witnessed act rather than a
 slip. **Correctly guarded; simply not yet done.**
 
-**Consequence for K5 (#32), recorded so the two rulings do not
+**Consequence for K5 (#32), recorded so the two decisions do not
 collide.** K5 stands: `Holonomy.value` becomes a `MatrixFiber2x2` and
 that value is exact. What this section adds is that the search which
 finds fiber elements belongs in the sector. Same object, two roles,
@@ -235,9 +234,9 @@ anything-goes region into committed state.
 > two-roles distinction (exact committed value, approximate search)
 > survives and is correct. Its placement does not.
 
-### 2n.2 The sector is one matrix, not every matrix (operator correction, 2026-08-02)
+### 2n.2 The sector is one matrix, not every matrix
 
-Correction (paraphrased): the "matrix" of §2n.1 is at the wrong
+Correction: the "matrix" of §2n.1 is at the wrong
 level, and the contained sector has become the entire sector.
 
 **Both claims land. §2n.1 sited the quarantine wrongly, and the
@@ -248,7 +247,7 @@ specific error is a conflation of two different 2×2s.**
       feeds rank D, gates the mint. Its level is the edge and that is
       correct — a connection lives on an edge and belongs nowhere else.
 
-    C's containment matrix        the operator's 2026-08-01 ruling
+    C's containment matrix        the containment requirement (§2n)
       one, singular, for the whole reading. Approximate, quarantined,
       diagnostic, gating nothing.
 
@@ -263,8 +262,8 @@ earlier.** §2n named it for letters: *a letter outliving the quantity
 it was minted for*. Here it is a shape — `2×2` read as an identity
 rather than as a dimension two unrelated objects happen to share.
 
-**RE-read of the original ruling.** The operator wrote *"C is contained
-to **its own** 2×2 matrix"* (2026-08-01). *Its own* is the operative
+**RE-read of the original requirement.** It states that C is contained
+to **its own** 2×2 matrix. *Its own* is the operative
 phrase and §2n.1 read straight past it. C does not move into the
 connection fiber; **C gets a separate, single 2×2 of its own.** That is
 already a bounded containment sector by construction:
@@ -291,17 +290,17 @@ already a bounded containment sector by construction:
 carry. `C(Δ)` is a scalar today (`Σ|R|`), so a 2×2 residence has four
 positions and three of them are unassigned. Inventing meanings for
 them to justify the shape would be the §2d failure exactly — apparatus
-built to fit a container. **The arity is the operator's; the contents
-are an open ruling.** What is settled is the containment: one object,
+built to fit a container. **The arity is given; the contents
+are an open decision.** What is settled is the containment: one object,
 one door, nothing authoritative inside.
 
-**Resolved — see §2n.3.** The contents were ruled the same day; the
+**Resolved — see §2n.3.** The contents were decided the same day; the
 "not derived" note above records only that they were not invented here.
 
-### 2n.3 The containment law — `C_bound` inscribed (operator ruling, 2026-08-02)
+### 2n.3 The containment law — `C_bound` defined
 
-§2n.2 established the separation. This inscribes it as law, with the
-slot allocation ruled and three corrections made in translation.
+§2n.2 established the separation. This states it as law, with the slot
+allocation fixed and three corrections to the proposal as received.
 
 **The two structures, held apart by law:**
 
@@ -314,7 +313,7 @@ slot allocation ruled and three corrections made in translation.
       quarantined · gates nothing · footprint independent of |E| and
       |V| · isolated from every connection fiber
 
-**The slot allocation — ruled, and deliberately un-padded:**
+**The slot allocation — fixed, and deliberately un-padded:**
 
     C_bound = ⎡ C(Δ)        δ_search  ⎤
               ⎣ λ_proposed  0         ⎦
@@ -333,7 +332,7 @@ computes is kept; a term that only resonates is excised*). An
 unassigned fourth slot is an invitation to invent apparatus to fill it;
 a declared ground is a refusal to.
 
-**Correction 1 — `C(Δ)` is not A capacity reading.** The relayed ruling
+**Correction 1 — `C(Δ)` is not A capacity reading.** The received proposal
 named slot (0,0) *"the primary scalar capacity reading."* Two faults:
 `capacity` is struck vocabulary, replaced by `rank` and carried on the
 currency pass (#14); and the reading is wrong on the merits — capacity
@@ -364,7 +363,7 @@ closure failure carried with its indices. The relay used "residual" for
 *the error of an unadmitted proposal*, which is a different thing
 living on the other side of the door. After §2j's two `D`s and §2n's
 five `C`s, this document does not need a third collision, and the
-proposal-side name is the one that must yield.
+proposal-side name is the name that must yield.
 
 **Clarification — `C_bound` is A register, not A group element.** No
 `matmul`, no `commutator`, no holonomy is taken over it; it is four
@@ -385,8 +384,7 @@ is exact-typed and still unverified. **Exactness is a representation
 property; authority is a door property.** `C_bound` holds exact numbers
 that nothing has yet admitted.
 
-**The general invariant — boundedness, carried per-axis (operator
-correction, 2026-08-02).**
+**The general invariant — boundedness, carried per-axis.**
 
 An earlier draft wrote this as `O(1)`. **That is a scalar collapse of a
 multi-axis quantity, in a document whose whole thesis is that scalar
@@ -406,8 +404,7 @@ as one symbol:**
     δ    depth — path length, search budget, walk degree
     τ    steps — ticks over which the footprint persists
 
-**Two different quantities were being named by one symbol** (operator,
-2026-08-02). The collapse was not `O(1)` being wrong; it was `O(1)`
+**Two different quantities were being named by one symbol.** The collapse was not `O(1)` being wrong; it was `O(1)`
 answering a question about storage while being read as a bound on
 execution:
 
@@ -424,8 +421,7 @@ execution:
       is not a search. This is where the dimensionality actually lives,
       and it must stay free.
 
-**`O(n^D)`, not a flat budget** (operator ruling 2026-08-02, replacing
-an earlier `O(x)` reading that named a single axis and so collapsed the
+**`O(n^D)`, not a flat budget** (replacing an earlier `O(x)` reading that named a single axis and so collapsed the
 others). A constant work budget rations independently of how much
 structure stands — the same flattening as `C(Δ) = Σ|R|`, applied to
 cost. `D` independent axes of extent `n` enclose `n^D`, and **the
@@ -470,12 +466,12 @@ clean — it was never about `C`. The per-edge fibers remain pure.
 
 ## §10bis The isolation of C — containment, and C's own V
 
-**Law (operator rulings 2026-08-01).**
+**Law.**
 
-> put all of the things that tried to be universal into a little box so
-> it does not leak out, spread into other parts and break the determinism
+> Everything that claims universal scope is put into a bounded box, so
+> that it cannot leak out, spread into other parts and break determinism.
 >
-> C cannot leak into D and needs to find his own V — cage it, wrap it
+> C cannot leak into D and needs its own V: it is caged and wrapped.
 
 **The containment law: a claim of universality is the warning, not the
 credential.** Everything that leaked into the deterministic core
@@ -536,9 +532,7 @@ that has already failed twice.
 
 ## §10ter What the cage is for — and why V is never a candidate
 
-**Law (operator ruling 2026-08-01).**
-
-Ruling (paraphrased): the cage is for the expansion of variables that
+**Law.** The cage is for the expansion of variables that
 must not affect the totality of the mathematics of the universe —
 floats, approximations, dogma and the like.
 
@@ -584,7 +578,7 @@ avoid scalars — it is to forbid ordering them and keep them as identity.
 
 ### §10ter.a The door — the cage as workshop, and C as its defence
 
-**Law (operator ruling 2026-08-01).** The cage is not only a quarantine,
+**Law.** The cage is not only a quarantine,
 it is a workshop. Worlds and civilizations may call into it to run
 algorithmic potentials — float pipelines, GPU kernels, heuristics,
 sampling — and withdraw answers and functions, without the approximation
@@ -632,14 +626,13 @@ box.**
 
 ### §10ter.b C is consulted — the resident, not the prisoner
 
-**Law (operator ruling 2026-08-01).**
+**Law.**
 
 > C is the culmination of congruence / coherence / cohesion /
-> conversation / communication / comingling / consilience — he might
-> need the tools inside the containment sector, so he should be
-> consulted, which is why C(Δ) exists: it can use any tool in the
-> toolbox to perform those actions without them impacting the external
-> determinism.
+> conversation / communication / comingling / consilience. It may need
+> the tools inside the containment sector, so it is consulted, which is
+> why C(Δ) exists: it can use any tool in the toolbox to perform those
+> actions without affecting the external determinism.
 
 **This reframes the containment entirely, and correctly.** Every member
 of that family is a reconciliation — *are these the same? does this hold
@@ -676,9 +669,8 @@ consultant.
 
 ### §10ter.c The ACCESS/AUTHORITY trade — how C is protected, and how C protects
 
-**The claim, measured rather than asserted** (operator 2026-08-01: *C is
-the strongest on the board; every major event is a word starting with
-C*). Checked against the corpus:
+**The claim, measured rather than asserted:** C is the strongest on the
+board, and every major event is a word starting with C. Checked against the corpus:
 
 - At the deed level it is 9 of 64 — `ColonyFounded`, `ColonyCharted`,
   `ForwardSealed/Released/Slashed`, `Confluent`, `CouncilSealed/Closed`,

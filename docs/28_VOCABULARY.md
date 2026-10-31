@@ -1,10 +1,9 @@
 # 28 — The minted vocabulary: how a class of entity comes into being
 
-**Status:** **law — landed 2026-08-05** on the operator's order *execute
-on V0–V4*, which is the amendment ruling §7 was waiting for. Drafted the
-same day from the order *open this up to an end user with permissions;
-eliminate the hardcoding of these classes while still letting the engine
-create NPCs.*
+**Status:** **law — landed 2026-08-05** with V0–V4 executed, which is
+the amendment §7 was waiting for. Its aim: open these classes to an end
+user with permissions, and remove their hardcoding while the engine still
+creates NPCs.
 
 All five slices are built and witnessed in
 `engine/cfe/tests/vocabulary_pins.rs` (14 pins):
@@ -29,7 +28,7 @@ Governs `15_TAXON` §2/§3 (the class and clade vocabularies),
 > It is never filed.**
 
 This extends the definition law (`conductor::polities`, 2026-08-05)
-rather than reversing it. That ruling struck `polities.json` on three
+rather than reversing it. That law struck `polities.json` on three
 measured grounds, and it is worth being precise about them, because the
 extension lives exactly where all three fail to bite:
 
@@ -39,7 +38,7 @@ extension lives exactly where all three fail to bite:
 | a file is not consensus-safe — two nodes, two universes | **No.** Every node replays the same receipts and folds the same vocabulary. |
 | the parser failed silently | **No.** A receipt is decoded by the codec, and a malformed one refuses at the door. |
 
-The chain is the one place where *what exists* and *what happened*
+The chain is the only place where *what exists* and *what happened*
 legitimately coincide, because a minting is something that happened. A
 file could never say that; a receipt says nothing else.
 
@@ -68,7 +67,7 @@ The two are one problem wearing two hats.
 | practice | 5 | in-value codes, append-only | a coder (cheaply) |
 | station (office) | 10 | `registry::STATIONS` (T0–T2 band + T4–T9 economic; Wave-1) | **see §10 — not mintable** |
 
-Every row says "a coder". That is the hardcoding the order names, and it
+Every row says "a coder". That is the hardcoding this law removes, and it
 means the board's imaginative surface is bounded by whoever holds the
 repository rather than by whoever holds a progenitor seat.
 
@@ -259,7 +258,7 @@ The compiled ceilings stop being constants and become readings:
     axis_valid(a, c)  ⟶   c ≤ ceiling(a)
 ```
 
-Same chain, same vocabulary, on every node, forever. This is the
+Same chain, same vocabulary, on every node and every replay. This is the
 property `polities.json` could never have and the reason the extension
 is safe.
 
@@ -299,8 +298,8 @@ a new rule.
 sovereign — are chartered by `12_UNION` §3 as *stations of function, not
 steps of rank*. Minting a new office would be a change to the
 constitution of the union, not to its vocabulary, and it would let a T0
-seat manufacture the seat that judges it. Offices change by amendment,
-by operator ruling, and by nothing else.
+seat manufacture the seat that judges it. Offices change by amendment
+and by nothing else.
 
 **Channels.** A mint selects from the channel table; it cannot add a
 row. A new channel is engine work.
@@ -316,7 +315,7 @@ here as everywhere in this tree.
 
 ## §11 Where "covenant" lands
 
-The operator asks whether *covenant* is a civilization sub-type and
+The question is whether *covenant* is a civilization sub-type and
 which family it belongs to. Measured against the partition:
 
 **The eight classes are all substrate** — biotic-swarm, geodic-
@@ -339,8 +338,7 @@ a collateralized forward delivery obligation. A covenant practice would
 bind a line to obligations with one benefit and one friction (§4a); a
 covenant clade would say the line is constituted by them.
 
-**The tier ruling (operator, 2026-08-05): *drop covenant to T3 and
-below*.** The covenant is a **COMMON-BAND instrument** and `seal_forward`
+**The tier decision: covenant sits at T3 and below.** The covenant is a **COMMON-BAND instrument** and `seal_forward`
 now refuses any line holding a chartered office.
 
 The reason is in the mechanism rather than in the hierarchy. A covenant
@@ -361,15 +359,14 @@ seat, so it is common by construction, which is the same reading
 
 **Recommendation for the name: the practice.** A practice is adopted and released by
 receipt, which is exactly the shape of an obligation people, and it
-costs no wire change at all. The clade reading is available if the
-operator wants covenant to be inherited rather than chosen — and note
+costs no wire change at all. The clade reading is available if
+covenant is to be inherited rather than chosen — and note
 the two are not exclusive.
 
 *(Unrelated to the term's other use: `24_FORM` §2m.3 rules that as a
 kernel primitive the plain word is **Obligation**, and the code rename
 stays a deferred wire amendment. A civilization sub-type named covenant
-is game content and is lawful under the archetype/law distinction the
-operator drew on 2026-08-05.)*
+is game content and is lawful under the archetype/law distinction.)*
 
 ---
 

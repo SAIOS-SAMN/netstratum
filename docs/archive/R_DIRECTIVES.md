@@ -1,11 +1,11 @@
 # R_DIRECTIVES — the remediation lane's work orders
 
 **Lane:** `remediations-lane`. **Opened:** 2026-08-02.
-**Authority:** the code and the operator's word. **Not the tests.**
+**Authority:** the code. **Not the tests.**
 
-> Operator ruling 2026-08-02: the tests are not the authority; the code and
-> the operator's directives are. Where they disagree, the likelier fault is
-> a test asserting what the code does not do.
+> The tests are not the authority; the code is. Where they disagree, the
+> likelier fault is a test asserting what the code does not do: a test can
+> pass on a mechanism no production path reaches (R-D2 is such a case).
 
 A directive names an owner, a cure, and how the cure is checked. It is
 discharged by landing or by being struck — never by a test going green,
@@ -46,7 +46,7 @@ clippy-green.
 
 ## R-D2 · the quorum is a facade — the clock never asks anyone
 
-**Status:** open · **Owner:** operator ruling required (strike or build)
+**Status:** open · **Owner:** open decision (strike or build)
 · **Severity:** a constitutional mechanism that does not exist.
 
 **The code, whole** (`cfe/src/vrp.rs:25-31`):
@@ -89,7 +89,7 @@ lying around.
 unreachable"*). It has survived at least one audit because the test is
 green.
 
-**The cure is a ruling, and there are exactly two honest ones:**
+**The cure is a decision between exactly two honest options:**
 
 - **Strike it.** One writer per clock is already the mesh's law
   (NS-5 §7, `HandoffSealed`). If the clock is not a quorum, delete
@@ -104,7 +104,7 @@ green.
 mechanism that is not there. Deleting the assertion would hide the
 finding, and strengthening it would pin a fiction harder.
 
-**Check (either ruling):** `Attestation::Refuses` must be constructible
+**Check (either option):** `Attestation::Refuses` must be constructible
 by production code, or must not exist.
 
 ---
@@ -132,7 +132,7 @@ for retired vocabulary — and caught this lane twice in one session.
 **Proposed:** a lint that enumerates public enum variants and fails any
 that appear in `src/` **only** at their declaration and their match
 arms, while being constructed only under `tests/`. Seed the allow-list
-with anything ruled deliberately-latent, by name, so the list is the
+with anything declared deliberately latent, by name, so the list is the
 review conversation.
 
 **And it must have teeth before it is trusted** — `recurrence_guard`'s
@@ -146,8 +146,8 @@ that cannot bite is the vacuous check this directive exists to eliminate.
 **Status:** open, survey not started · **Owner:** this lane, against the
 element frame (PToE / syntropy) · **Severity:** design.
 
-Operator reframe 2026-08-02: rather than plugging specific items such as
-iron, ask why iron alone exists, and remediate so that expansion is gated on
+The question, reframed: rather than plugging specific items such as iron,
+ask why iron alone exists, and remediate so that expansion is gated on
 capabilities.
 
 This lane's alloy finding (task #19) was resource plumbing — one rung

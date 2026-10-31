@@ -4,7 +4,7 @@
 and test vectors exist (Charter §1), and no settlement mechanic opens before
 landing N7 seals (the anchor bridge is the only lawful money boundary).
 All percentages and prices in this document are **placeholder parameters**,
-not inscribed law — they tune at balance time.
+not fixed law — they tune at balance time.
 
 **2026-08-07 expansion (in-game money + element commerce):** the playable
 unit of account is **STAMP** (`32_STAMP_MARKET.md`) — exact-rational,
@@ -98,7 +98,7 @@ players ──(domain leases, tariffs, rents)──► treasury + node-host pool
              WWW3 settlement rails
 ```
 
-## 5. Inscribed guardrails (these are law, not parameters)
+## 5. Binding guardrails (these are law, not parameters)
 
 1. **Fun-first (Charter §2):** the core loop — explore, zone, build, trade —
    is fully playable with zero real-money involvement. Monetization attaches
@@ -128,8 +128,8 @@ players ──(domain leases, tariffs, rents)──► treasury + node-host pool
 ## 6. Thermodynamic currency & settlement architecture
 
 The physical substrate of this economy is the thermal balance loop —
-inscribed whole in `05_THERMAL_BALANCE.md`, crypto ruling at its §7. This
-section holds the economic mechanics; the physics and the crypto boundary
+specified in full in `05_THERMAL_BALANCE.md`, the crypto boundary at its
+§7. This section holds the economic mechanics; the physics and the crypto boundary
 rules live there.
 
 ### 6.1 Energy as native commodity money
@@ -214,7 +214,7 @@ Litho-Chalcogen escrow node rather than a mutable surface store.
   heat-dump threshold) → `BREACH_AND_SLASH`, collateral forfeits to the
   aggrieved party.
 
-### 7.2 The two inscribed guardrails (these bind the mechanic)
+### 7.2 The two binding guardrails (these bind the mechanic)
 
 The escrow is powerful enough to break two charter walls if built naively;
 both are closed here:
@@ -253,7 +253,7 @@ inescapable monopolies.
 ## 8. Coolant arbitrage & sink capacity export (design stage)
 
 The cold half of the thermal axis, dual to §6.1's ember minting — physics
-inscribed at `05_THERMAL_BALANCE.md` §1.4; lands with the VENT-1/ECON-E
+specified at `05_THERMAL_BALANCE.md` §1.4; lands with the VENT-1/ECON-E
 landing.
 
 - **The commodity:** a dim-star system's export is **Banked Sink**

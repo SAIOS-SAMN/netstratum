@@ -16,7 +16,7 @@ red-first here (the NS-3 precedent). No sandbox code imported.
 
 ## 0. The foundation — D and V (capacity, not descent)
 
-**Operator ruling 2026-08-01 — the foundation is dimensional capacity.**
+**The foundation is dimensional capacity.**
 Gradient descent is a failed topology: uni-directional, and it discards
 the information the economy is made of. It is struck whole, not demoted
 to a hint, and the uni-directional linear timeline is struck with it.
@@ -27,8 +27,8 @@ system runs many algorithms at many scales. The standing law is
     V     = the committed state, read whole (indivisible; the totality law)
             — the substance. Δ(V) is the relation it expresses.
     D(Ω)  = the space D spans — the room, and D's own side.
-            Ω ≢ V: a room is not its furniture      ruled 2026-08-02
-    D     = the structure surviving Π_G( Δ(V) )        ruled 2026-08-01
+            Ω ≢ V: a room is not its furniture
+    D     = the structure surviving Π_G( Δ(V) )
 
     measured:     D is a reading, never a quota — nothing is shrunk to fit
     growth:       orbit_lock ≠ ∅ → the fold refuses, the residue emits,
@@ -78,7 +78,7 @@ Magnitude bound (validation ceiling, v0.1 C7):
 
     | ‖Δ_{k+1}‖₁ − ‖F̄‖₁ |  ≤  ε_mag · ‖F̄‖₁      (F̄ = the pre-projection sum)
 
-(The proportional law — operator ruling 2026-07-31: the v0.1 squared forms
+(The proportional law: the v0.1 squared forms
 are carried into Netstratum as L1 — squares are barred as aggregators
 of difference; every zero-set is unchanged. Squares survive only as
 physical law — the T⁴ discipline of 05.)
@@ -123,14 +123,14 @@ identical kernel; there is no local-vs-network mode.
 (ξ), and the commitment (SPINE-1 + #36, 2026-07-31 — `mesh::spine::seal`
 binds schema ‖ kernel::version ‖ state ‖ predecessor ‖ coordinate; the record
 repeats the blob's leading byte, never a constant). Build: `advance` as
-the kernel-gated step (Phase 3 — per-deed threading rides the flip by
-operator ruling).
+the kernel-gated step (Phase 3 — per-deed threading rides the flip,
+docs/39).
 
 ---
 
 ## 2. Validator — the kernel, the judge
 
-**Responsibility.** The one sealed function every node runs to admit or refuse
+**Responsibility.** The single sealed function every node runs to admit or refuse
 a step. Pure, total, no I/O, encoding-blind. The full law is
 `engine/kernel/CHARTER.md`; this is its role in the equation.
 
@@ -154,7 +154,7 @@ effective weight and the disagreement entropy:
     entropy H = 1 - (ω_winner / Σ_ω)          // v0.1 mdc_entropy
     stasis  = H ≥ threshold                    // default threshold = 1/2
 
-**Struck 2026-08-01** (operator ruling; `48_CAPACITY_THREAT_MODEL` §10 AV-1, §11):
+**Struck 2026-08-01** (`48_CAPACITY_THREAT_MODEL` §10 AV-1, §11):
 
     Struck:  Operators are scored by how much they reduce C(Δ).
     Struck:  the damped-gradient term as a damping term.
@@ -188,7 +188,7 @@ struck is its use as a selection objective.
 (2026-07-31): I1 conservation (moves + aperture legs + mints/decays),
 I2 containment, I3 exactness, I4 complete with the PoUW anchor —
 `verify_work` the replay-complete judge, `mint_bound` sealed shut
-until Ruling Box 1 (U1, tag 86) — and I5 complete with the flat decay
+until Decision Box 1 (U1, tag 86) — and I5 complete with the flat decay
 bound calling the sealed demurrage rule (U1f). Coverage: 59 of 64
 deed types judged; the rest refuse `Unjudged` (the W-waves,
 U_DIRECTIVES §5). Build: I6 (U2), the echelon scoring, the sealed
@@ -231,11 +231,11 @@ wall, and journals rebuild as lens projections before the ledger's display
 half deletes (the observation-continuity rule — the operator's window never
 goes dark).
 
-**The lens is the level (operator ruling 2026-08-01).** Mirror and
+**The lens is the level** (the reasoning is `00_CHARTER` §3a). Mirror and
 ANTI-MIRROR are deprecated as framings whole; `12_UNION` §2c carries the
-ruling and what survives it. `engine/mirror` is already deleted (d606b01)
+decision and what survives it. `engine/mirror` is already deleted (d606b01)
 and `cfe::opposition` excised (c7cad9e), both held by standing tests in
-`engine/kernel/tests/recurrence_guard.rs`. A lens derives from the one
+`engine/kernel/tests/recurrence_guard.rs`. A lens derives from the single
 chain and holds no copy, so it has nothing to reconcile — which is why it,
 and not opposition, is what §11 leaves standing.
 
@@ -257,7 +257,7 @@ descent-and-emission, bounded both ends.
     coboundary reduce:     Π_G(Δ) = H¹ projection (strip the frame; the
                                                core survives)
 
-**`C(Δ) = 0` never means "converged"** (operator correction 2026-08-01).
+**`C(Δ) = 0` never means "converged".**
 Zero says the relations compose, not that the states are identical and
 not that difference was spent. The genuine difference is the H¹ class:
 `Π_G` strips only the coboundary — the coordinate-frame artifact that
@@ -365,8 +365,8 @@ Per §11: the kernel seals first (I1→I6 + vocabularies + digest); the spine
 gives it the chain; the client routes through it. Nothing replicates upward
 until this universe is lawful — that is a trust dependency, and it holds.
 
-**The build queue is not this order** (operator ruling, mesh-second,
-2026-07-31; `docs/AUDIT_2026-07-31.md` §1). The game is live, so the
+**The build queue is not this order** (mesh-second;
+`docs/AUDIT_2026-07-31.md` §1). The game is live, so the
 mesh is secondary to the kernel, not last in line:
 
     1. Kernel — seal the judge (I1–I5 landed; I6 = U2; the W-waves)
@@ -392,12 +392,12 @@ they touch new transition semantics or committed fields.
   verified-work anchor (proof-of-useful-work): the kernel half is
   built (U1, 2026-07-31 — `verify_work` replay-complete, the mint
   bounded, sealed shut at rate zero); the rate and the mesh half
-  (weight earned not assigned) await Ruling Box 1 and the mesh era —
-  still the load-bearing gap for real value, but now one ruling and
+  (weight earned not assigned) await Decision Box 1 and the mesh era —
+  still the load-bearing gap for real value, but now one decision and
   one wiring, not a build. Stick — the alignment covenant (Charter
   §11): open divergence lawful, covert divergence slashed (pen/work/
   stake forfeit, reusing `ForwardSlashed`). Carrot and stick are one
-  economy; their three price rulings sit together with the operator.
+  economy; their three price decisions are open and are made together.
 - **Node/mesh:** identity binding — hands are self-declared integers (N7).
   No consensus weight is canonicalizing before it binds (kernel Charter §1).
 - **Convergence:** the mint rate + reward split (monetary policy, measured);
@@ -412,7 +412,7 @@ under the two-node harness — one honest (genuine solver certificates), one
 adversary (fabricated-difference puppets merge-farming the mint) — measuring
 whether the verified-work anchor refuses or pays. It composes from pieces
 that mostly do not exist yet (the anchor itself is unbuilt, §7). Recorded
-here as the shape of the future test, but deferred and unboarded (operator
-ruling): an attacker experiment before the kernel is sealed, the spine
+here as the shape of the future test, but deferred and unboarded, because
+an attacker experiment before the kernel is sealed, the spine
 lands, the mesh replicates, and the anchor exists has nothing to test. It revives
 only when those prerequisites stand.

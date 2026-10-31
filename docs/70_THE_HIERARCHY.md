@@ -1,6 +1,6 @@
 # 70 — The hierarchy: councils, parliaments, realms
 
-Operator ruling (2026-10-09; Concordance 3.9), relayed by the coordinator:
+The hierarchy (Concordance 3.9) has three tiers:
 the council of the ancients (client minds seat there and nowhere else; it
 earns μ by court work, holds the reserves, and produces consciousness), the
 parliaments of progenitors (build and keep the tubes, hold toll shares, haul
@@ -40,7 +40,7 @@ Toll shares and hauling wait on N7 (the map, 78.154, now live).
 | P2 | tolls and hauling: the parliament's toll shares in STAMP, hauls for the ancients (N7) | open |
 | R1 | realms receive and trade (the hubs, docs/67) | standing |
 
-## The embedded mind (operator ruling and coordinator rulings, 2026-10-09)
+## The embedded mind
 
 mycelium-client becomes pure cognition, dual-loaded: as the client binary on
 the hyphae, and embedded in-game as the game's minds, each keeping its own

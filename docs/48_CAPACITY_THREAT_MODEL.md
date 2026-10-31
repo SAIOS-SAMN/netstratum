@@ -7,7 +7,7 @@ Where any disagree, the order is `00_CHARTER` → `26_ARTICLES` →
 
 **Split out of `17_CAPACITY.md` §10–§13 on 2026-08-13 (docs audit).**
 `17_CAPACITY` had grown to 2,248 lines reading as a chronological
-operator-ruling log; §10–§13 is one continuous economic-security
+log of decisions; §10–§13 is one continuous economic-security
 argument — §10 names the descent-re-entry attack surface, §11 corrects
 §10 (the bifurcation law), §12 draws a withdrawal-boundary conclusion
 from §11, and §13 corrects §12 (polytonic value, the honeypot, altitude)
@@ -26,20 +26,20 @@ own close). Read §10→§13 in sequence, not as independent entries.
 
 ## §10 The descent RE-entry vectors — attack surface and standing defenses
 
-**Law (operator ruling 2026-08-01).**
+**Law.**
 
-> "cocycle failure δΔ ≠ 0" — this is gradient descent that keeps
-> sneaking back in.
+> Treating cocycle failure, `δΔ ≠ 0`, as a quantity to reduce is
+> gradient descent re-entering the law.
 
-**The ruling, stated exactly.** The cocycle condition is a refusal
+**The law, stated exactly.** The cocycle condition is a refusal
 predicate. A state composes or it is refused. It is **never a quantity
 to be reduced, resolved, approached, scored, or improved toward.** There
 is no lawful path the system walks from `δΔ ≠ 0` toward `δΔ = 0`;
 "reducing cocycle failure" is a descent objective wearing the
 vocabulary of well-formedness, and it is barred.
 
-**Syntropy stands (operator ruling 2026-08-01).** A rename of this term
-was drafted the same day and is withdrawn; `24_FORM` §2i carries the
+**Syntropy stands.** A rename of this term
+was drafted and is withdrawn; `24_FORM` §2i carries the
 full reasoning and the definition. In short: syntropy here is **the
 exact inverse arm of entropy in one conserved partition** —
 `syntropy = syntropic / (syntropic + entropic)`, so
@@ -57,7 +57,7 @@ reading stands on its own without it.)
 It is not a second primitive and never gets its own quantity (two
 authorities for one measurement is the drift `EQUATIONS.md` §0 exists to
 prevent). **Any definition of syntropy containing the words reduce,
-resolve, minimize, or converge is void by this ruling.**
+resolve, minimize, or converge is void by this law.**
 
 ### 10a. Why this is a threat model and not a list of corrections
 
@@ -190,8 +190,8 @@ Before a quantity enters the law, it answers all four:
 2. Does health mean it rises or falls? Falling health on a paid quantity
    is AV-2.
 3. Does the definition contain a reduction word? If yes, AV-1.
-4. Can the judge compute it today? If no, it is inscribed, never
-   invariant, and no `VERSION` moves.
+4. Can the judge compute it today? If no, it is stated in the text but
+   is not an invariant, and no `VERSION` moves.
 
 **§10 is itself amended by §11.** Where §10 says the cocycle condition
 is a "refusal predicate," read §11: a predicate that discards its false
@@ -210,17 +210,17 @@ longer exists — physics needs none.
 
 ## §11 The bifurcation law — both sides of the coin become roots
 
-**Law (operator ruling 2026-08-01).**
+**Law.**
 
 > A conditional (`if`, `iff`, `eq` or `!eq`) is linear decision-making that
-> keeps one side. The law takes both sides of the coin and grows them into
-> n-dimensional roots, a foundation of stone rather than sand.
+> keeps one side. The law keeps both outcomes and grows each into an
+> n-dimensional root.
 
 ### 11a. What was wrong with the predicate
 
 `if a == b { A } else { B }` evaluates one dimension, yields two
 outcomes, and **keeps one**. The other is discarded. That discard is the
-sand: every branch not taken is difference that died without account,
+defect: every branch not taken is difference lost without account,
 which is the exact prohibition of I6.
 
 Descent and boolean refusal are therefore the same failure at different
@@ -241,9 +241,8 @@ A gate does not select. It routes, and both routes persist:
 The `!eq` branch is not a rejection. It is a **root of the next
 dimension** — the point from which structure grows that the current
 degree could not hold. A tree of such roots is n-dimensional by
-construction, and nothing in it was ever thrown away. That is the
-concrete and stone: the foundation is made of what a selecting engine
-would have discarded.
+construction, and nothing in it was ever thrown away. The foundation is
+therefore made of what a selecting engine would have discarded.
 
 ### 11c. This is already landed three times
 
@@ -315,13 +314,13 @@ and the claim is vacated.
 and **none is measured** (`25_STANDING` §6). Until `orbit_lock` has a
 caller, AV-11 has no enforcement — it is the first attack vector this
 constitution opens faster than it can close, and that ordering should be
-deliberate rather than discovered. §12 makes that ordering a ruling.
+deliberate rather than discovered. §12 makes that ordering explicit.
 
 ---
 
 ## §12 The withdrawal boundary — where monotone value becomes extractable
 
-**Law (operator ruling 2026-08-01, restated).**
+**Law (restated).**
 
 > Economic value increases on every step until value benefits the
 > withdrawal function, as judged by what is classed as attack/defense.
@@ -390,13 +389,13 @@ denies standing to a state resting on the Ground — never by calling it
 zero, which `Degree` cannot express (`26_ARTICLES` §3 Article II). Internal transfers conserve (I1),
 so value moving between units is not withdrawal at all.
 
-**The one true exit is N7.** `NS-7_ANCHOR.md` is a 26-line stub, every
+**N7 is the only exit.** `NS-7_ANCHOR.md` is a 26-line stub, every
 section `(unwritten)`, gated by charter §7 and economy guardrail 5, with
 nothing on any chain. **Today the system has no withdrawal function, so
 §12a's crossing is theoretical.** It becomes real the moment N7 opens,
 and not before.
 
-### 12e. The sequencing ruling **[derived — ratify or strike]**
+### 12e. The sequencing constraint **[derived — ratify or strike]**
 
 From 12b and 12d together, one hard ordering constraint follows, and it
 is the practical content of this section:
@@ -410,7 +409,7 @@ extracting farmed value are creation-side; the creation-side defenses are
 leave are unbuilt converts every unmeasured attack vector into an
 externally realizable one at the same instant.
 
-This ruling also settles the ordering AV-11 left open. `orbit_lock`
+This constraint also settles the ordering AV-11 left open. `orbit_lock`
 needing a caller stopped being a completeness gap the moment §11 landed;
 under §12 it is the precondition for the anchor.
 
@@ -421,7 +420,7 @@ growth, waits for the crossing of §12a, and extracts through N7 —
 without ever violating a rule, because the rules that would have
 qualified the value were never running.
 
-*Defense:* the sequencing ruling (§12e) removes the exit until the gates
+*Defense:* the sequencing constraint (§12e) removes the exit until the gates
 exist; §12c re-verifies provenance at the boundary once it does;
 demurrage and Article III make waiting expensive in the meantime.
 
@@ -438,18 +437,17 @@ and withdrawn (§13b).
 
 ## §13 The levels — polytonic value, the honeypot, inversion, and altitude
 
-**Law (operator ruling 2026-08-01, restated), four clauses.**
+**Law (restated), four clauses.**
 
-> 1 — upgrade value creation to polytonic.
+> 1 — value creation is polytonic.
 > 2 — defense can live at an exit; in a honeypot scenario, a player
 > appears to be getting the gold until trying to exit the game.
-> 3 — invert the logic and examine what answers it gives to the
-> methodology and questions themselves.
+> 3 — the logic is inverted, and the answers the inversion gives are
+> examined against the methodology and the questions themselves.
 > 4 — orbit_lock does not belong at this level: orbital
-> mechanics themselves should be stochastic, but the laws of the land
-> are deterministic. A common error is to assume that in a
-> deterministic universe everything is deterministic — it operates
-> at different levels.
+> mechanics are stochastic, while the laws of the land are
+> deterministic. A deterministic universe does not make everything in
+> it deterministic; determinism operates at different levels.
 
 ### 13a. Polytonic, not monotone — and the error was this document's
 
@@ -495,7 +493,7 @@ weaker:
    property `KERNEL_RELAY` §7.1 names as the standing open problem and
    Article III claims for the Eclipse.
 
-**Consequence for §12e.** The sequencing ruling weakens from *N7 must
+**Consequence for §12e.** The sequencing constraint weakens from *N7 must
 not open before the meter runs* to: **N7 may open only with exhaustive
 provenance re-verification at the boundary** — every unit's creating
 work replays, or it does not leave. The honeypot is the meter's
@@ -520,7 +518,7 @@ alive.
 
 ### 13d. The levels — stochastic dynamics, deterministic law
 
-**The general principle, which is the ruling's fourth clause: a
+**The general principle, which is the law's fourth clause: a
 deterministic universe does not make every level deterministic.** Law is
 deterministic; the dynamics inside it are not. Conflating the two is how
 a search ends up inside a judge.
@@ -561,7 +559,7 @@ at all.
 ### 13e. Defect found — the orbit_lock polarity is contradicted across authorities
 
 Verifying 13d's claim surfaced a live contradiction in the mint's own
-trigger condition. Inscribed per `EQUATIONS.md` §0.1 (a disagreement
+trigger condition. Recorded per `EQUATIONS.md` §0.1 (a disagreement
 between authorities is a defect, never shrugged).
 
 **First reported as "law vs sealed code." That was wrong, and reading

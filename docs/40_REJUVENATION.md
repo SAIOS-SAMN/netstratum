@@ -1,6 +1,6 @@
 # 40 — Planetary rejuvenation (the regrowth law)
 
-**Era 1 (operator 2026-10-16), proposed:** rejuvenation becomes the return
+**Era 1, proposed:** rejuvenation becomes the return
 leg of the recycling circuit: shed matter recycles into the enclosing
 medium, the regenerated pulse drives it along the resonant crests
 (recyclotronic propulsion), and what it carries back to a world is its
@@ -9,17 +9,17 @@ K its own holding; rejuvenation mints no matter. See docs/83, "Recycling and
 recyclotronic propulsion". The era-0 law below stands until that is
 derived and tested.
 
-**Status:** design, ruled 2026-08-12 (operator, Gemini relay). Growth
-form ruled: **(B) rational sigmoid on a grain** (§4) — preserve the
-S-curve so collapse from near-zero is genuinely expensive to recover.
-Charter-law translation of the relayed design; **not** a transcription.
+**Status:** design. Growth form: **(B) rational sigmoid on a grain**
+(§4) — preserve the S-curve so collapse from near-zero is genuinely
+expensive to recover. Charter-law translation of an external design;
+**not** a transcription.
 Task #28.
 
-**§6 addendum, 2026-08-13** (operator, direct): the ration this law
+**§6 addendum, 2026-08-13:** the ration this law
 governs is generalized off biomass (landed, commit `f467876` — `K`/`r`/
 `habitability` now read the sitting line's own metabolism and clade,
-not a hardcoded biomass/Mesic pair). §6 below is a proposed ruling,
-five pillars pre-authorized, extending the same law to a ration that is
+not a hardcoded biomass/Mesic pair). §6 below is a proposed design,
+with five pillars fixed in advance, extending the same law to a ration that is
 not privately banked but belongs to the planet itself — with the
 public-externality and counter-play consequences that implies. §6.2's
 counter-play was revised the same day: struck an ad-hoc mesh-layer
@@ -50,7 +50,7 @@ The mechanic must produce this split without a single tuned constant
 outside the derivations below, and without breaking the exact-rational,
 byte-exact-replay engine.
 
-## 1. The one law over this chapter — deterministic physics get no deed
+## 1. The governing law of this chapter — deterministic physics get no deed
 
 The ledger records **decisions** — a player action, a treaty, an
 extraction — never the passage of time. Logistic regrowth is a
@@ -150,7 +150,7 @@ Two netstratum-legal translations, each a permanent SEAL-B choice:
   expensive to recover from. **Cost:** more design and more witnesses;
   the surrogate's shape is a chosen approximation.
 
-**Ruled (B), 2026-08-12** — the S-curve is the whole point of the
+**Chosen: (B)**, because the S-curve is the whole point of the
 Locust/Custodian tension (slow recovery from collapse is what forces
 the jump), and the grain precedent shows exact arithmetic can carry it
 bounded. The rational surrogate and its grain are to be designed as the
@@ -192,9 +192,9 @@ solitaire optimization into the union's actual political axis —
 treaties, embargoes, and wars fought over extraction rates, not only
 territorial borders.
 
-### 6.1 Ruled pillars — operator-authorized 2026-08-13
+### 6.1 The fixed pillars
 
-Five architectural pillars, pre-authorized before the counter-play
+Five architectural pillars, fixed before the counter-play
 question was resolved (§6.2) and before any code lands:
 
 1. **The Medium ration.** A new ration carrier — a peer to
@@ -241,7 +241,7 @@ the mesh layer for want of a home. That was reading only
 one `World`, set by a self-service `commission_star()` with no other
 actor in the loop — and mistaking that prototype's narrowness for the
 law's narrowness. It is struck under `20_FOUNDING.md` §0 (the document
-yields to the standing ruling, not the reverse).
+yields to the standing law, not the reverse).
 
 **What actually stands, in `12_UNION.md` §2/§2a — the correct anchor.**
 The station axis (`ledger/src/registry.rs::STATIONS`) is `progenitor ·
@@ -256,7 +256,7 @@ progenitor delegating a planet... is council-gated by default... The
 power to create is sovereign; the power to hand what was created into
 another people's world passes through diplomacy."*
 
-**Ruled: a shared star is a progenitor's domain object; sovereigns hold
+**A shared star is therefore a progenitor's domain object; sovereigns hold
 delegated planets (orbits) under it — never peers who co-own it.** A
 Medium strip on one delegated orbit contributes to a shared system
 perturbation term (dust, radiation, magnetospheric disruption — the ATM
@@ -274,13 +274,13 @@ authority the drift answers to — the progenitor is.
 still design-status: nothing in `engine/` implements a progenitor
 creating a star and delegating distinct orbits to distinct sovereigns.
 `cfe::World::commission_star` is the only star-creation path today and
-it is sovereign-private. **This ruling cannot be simulated across
+it is sovereign-private. **This design cannot be simulated across
 multiple sovereigns while that remains true** — §6.1's pillars can land
 as single-sovereign mechanics (a world striking its own Medium, its own
 `ThermalRegion` drifting) without this dependency, but the cross-
 sovereign externality that is this section's entire point cannot, until
 at least a minimal slice of progenitor-mediated, multi-delegated star
-ownership exists in code. That slice is not authorized by this ruling
+ownership exists in code. That slice is not part of this design
 and needs its own task.
 
 Once a shared star has a real progenitor owner, the counter-play
@@ -299,7 +299,7 @@ composes from precedent already standing, four levers deep:
   nothing; war walls everything, the `element_barred`/displacement
   shape). That alone is real teeth: the offender loses market access to
   everyone it angered.
-- **The delegation gate (new, authorized this revision) — the
+- **The delegation gate (new in this revision) — the
   structural check, above the other three.** Because the star is the
   progenitor's creation and every orbit on it is only ever delegated,
   not owned, the grant itself is a lever no sovereign-to-sovereign
@@ -315,14 +315,14 @@ composes from precedent already standing, four levers deep:
   counterpart to the bottom-up diplomatic/legal/economic levers above —
   a Locust who out-negotiates or out-wars every neighbor still answers
   to the seat that made the room it is standing on.
-- **Kinetic — still open, not ruled here.** Whether a declared war
+- **Kinetic — still open, not decided here.** Whether a declared war
   should unlock a mechanic to strike an enemy's Medium-extraction zones
   directly (extending `strike_interdiction`'s cargo-in-transit
   precedent, `defense.rs`, to standing infrastructure) is separate
   scope: today `raze`/`raze_as` (`world/core.rs`) is self-service only.
-  Left for its own ruling.
+  Left for its own decision.
 
-### 6.3 What is not ruled yet — open forks before code
+### 6.3 What is not decided yet — open forks before code
 
 - **The progenitor-delegation slice itself.** The hard dependency named
   above: a progenitor entity that creates a star and delegates distinct
@@ -343,10 +343,10 @@ composes from precedent already standing, four levers deep:
   new `Ration`/`TreatyKind` wire codes are shared registers (the
   numbered manifest at the top of `dop.rs`) and must be claimed there
   before landing, per standing register-claim discipline.
-- **The kinetic escalation** flagged in §6.2 — its own ruling.
+- **The kinetic escalation** flagged in §6.2 — its own decision.
 - **`r`'s exact near-zero value.** "Effectively zero" needs a cited
   anchor (`cfe::anchor`, typed, no bare `measured()`), not a hand-picked
-  fraction — per the anchor-provenance ruling, every number derives,
+  fraction — per the anchor-provenance rule, every number derives,
   measures, or mints; this one still needs to pick which.
 
 ### 6.4 What this composes with (in addition to §5)
@@ -356,13 +356,13 @@ composes from precedent already standing, four levers deep:
   delegation-gate counter-play lever.
 - `36_DEFENSE_AXIOMS` §3.3 and the ATM domain table — the
   species-relative "atmosphere" and the "vacuum strip → band shift"
-  consequence this ruling implements in engine terms.
+  consequence this design implements in engine terms.
 - `37_IMPERIUM_TAXON` — `habitability(clade, region)` is the read-through
   channel for §6.1 pillar 5; no new cross-wiring needed, it already
   reads region generically.
 - `world/diplomacy.rs` (`treaty_elements`/`element_barred`) — the direct
   precedent for the rate-cap annex in §6.2.
 - `world_quarantined` (`science_lab.rs`) — the self-scoped-signal
-  precedent this ruling extends into a genuinely public one.
-- The tuned-constant ratchet and the anchor-provenance ruling — gate
+  precedent this design extends into a genuinely public one.
+- The tuned-constant ratchet and the anchor-provenance rule — gate
   every literal §6.3 still owes.

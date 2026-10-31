@@ -1,6 +1,6 @@
 # Tasks — Trade desk · fleets · alignment · local capital (5 phases)
 
-**Status:** implementation board — operator directive 2026-08-07.  
+**Status:** implementation board.  
 **Authority doc:** `33_TRADE_FLEET_AND_DESK.md`.  
 **Matter loop:** `34_MATTER_BALANCE.md` (elements · alchemy · fleets ·
 entropy∥syntropy — partial land with Phase 3 fleets).  
@@ -234,7 +234,7 @@ NPC routing re-colour from sealed axes / thermal / taxon / doctrine.
 
 ### P5-M — Market defense (MKT) + optional suites (`36` §10)
 
-**Ruling:** economic warfare is first-class. Suites are **UI over deeds**,
+Economic warfare is first-class. Suites are **UI over deeds**,
 not a second physics. NPC must war without opening a suite.
 
 | ID | Task | Depends | Exit |

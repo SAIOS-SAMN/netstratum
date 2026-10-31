@@ -91,7 +91,7 @@ for free.
 
 **Why it is load-bearing, not decoration:** the forge is a finite
 well (measured: ~30 % of draws unsolvable by the fixed vocabulary),
-so without the mint the civilizations are forever exactly as clever
+so without the mint the civilizations stay exactly as clever
 as the language they were given. With it, the language grows from its
 own failures.
 
@@ -127,7 +127,7 @@ divergent cells, reports exact-rational consensus, and flags a
 systematic gap when residual-bearing views agree on the count. Delete
 any caller and no path changes (the no-hardcoding law).
 
-**Owed (the orchestration), operator-sequenced with the mesh lane
+**Owed (the orchestration), sequenced with the mesh lane
 (#19)** — the two policy decisions the algebra deliberately does not
 make, because they are mesh-coupled and touch the second head:
 
@@ -146,7 +146,7 @@ make, because they are mesh-coupled and touch the second head:
    single-world chain. It lands when the escalation does.
 
 The split is deliberate and matches the house pattern: the algebra is
-pure and testable now; the orchestration is a ruling-shaped design
+pure and testable now; the orchestration is an open design decision
 that sequences with the mesh.
 
 ## 6. Landing: orbit-directed hunger (task #15)
@@ -159,12 +159,12 @@ unsolved orbit class — the measured frontier. The reach law holds
 unchanged: hunger reorders the walk; the observation still supplies
 every candidate; the door still re-derives everything.
 
-## 7. What this document does not rule
+## 7. What this document does not decide
 
 - The forge-coverage question (emit-closable vs widen vs lawful
-  famine) is an **operator ruling** (task #20), recorded in
+  famine) is an **open decision** (task #20), recorded in
   `FORGE_BUDGET`; §4 narrows it from one side but does not decide it.
 - The mesh-lane wiring (`orbit_lock`, `f_fold_star`, Σ_mesh, PoUW
   weight) is task #19, sequenced after the Phase-3 flip (#16).
 - Nothing here alters the difficulty ladder, `mint_bound`, or any
-  Ruling Box 1 word.
+  Decision Box 1 word.

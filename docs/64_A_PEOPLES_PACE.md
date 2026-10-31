@@ -1,11 +1,11 @@
 # 64 — A people's pace: settle at touch
 
-Operator 2026-10-09, on Concordance 1.12 ("a living people is always observed
-(its own life reads its world); a world no one reads is carried compact; its
-people's state worked out in closed form or by spans whose result does not
-depend on how coarsely time was stepped"): the fix belongs in how Netstratum
-represents a people, not in the universal law. "Write the arc and start
-building it."
+Concordance 1.12 states: "a living people is always observed (its own life
+reads its world); a world no one reads is carried compact; its people's
+state worked out in closed form or by spans whose result does not depend on
+how coarsely time was stepped". The universal law already allows that, so
+the fix belongs in how Netstratum represents a people, not in the law. This
+document scopes the fix and builds it.
 
 ## The finding
 
@@ -34,7 +34,7 @@ folded into a receipt that is written: settle at touch.
 | AssayStruck, ApertureSent/Received, StampAperture legs | ~75-90k each | ~9-11 MB each | the year's tail |
 | LeisureSettled | 45,820 | 5 MB | the year's tail |
 
-## The rulings
+## The decisions
 
 1. **A quiet flow accrues as pending and is receipted at touch.** Per-beat
    accruals (leisure, the population carry) add to a pending sum held by
@@ -70,11 +70,11 @@ folded into a receipt that is written: settle at touch.
 | P5 | aperture legs: contact by arrival | open |
 | P6 | a people's own pace for research and civic steps | open |
 
-## Operator ruling 7 (2026-10-09, relayed by the coordinator)
+## Court tasks go to seated minds
 
-"All puzzle solving is the mycelium-client minds'. A kernel relays court
-tasks to seated minds and files their fn 1 answers under its reserve; it
-solves nothing itself." The seat stops thinking court tasks: every task it
+All puzzle solving belongs to the mycelium-client minds. A kernel relays
+court tasks to seated minds and files their fn 1 answers under its reserve;
+it solves nothing itself. The seat stops thinking court tasks: every task it
 pulls goes before a seated mind, and the house files the answers.
 
 ## Measured at landing (2026-10-09, all 70 lines live)
@@ -83,5 +83,5 @@ pulls goes before a seated mind, and the house files the answers.
 |---|---|---|---|
 | before the day's fixes | 2.46 GB | 2.78 GB, ~19 MB a beat | froze at the 3 GB ceiling (twice) |
 | history compaction (docs/63 O1-O4) | 1.84 GB | 2.98 GB | spun for minutes |
-| + P0 bell set, P1 leisure, ruling 7 | 1.89 GB | 2.26 GB, ~6 MB a beat | 3.08 GB, stalled (the leg-pairing quadratic) |
+| + P0 bell set, P1 leisure, court tasks to seated minds | 1.89 GB | 2.26 GB, ~6 MB a beat | 3.08 GB, stalled (the leg-pairing quadratic) |
 | + P0 leg pairing, P2, P2b | 2.00 GB | 2.33 GB | passed in under 30 s, down to 1.69 GB |

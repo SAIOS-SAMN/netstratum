@@ -2,9 +2,9 @@
 
 Plain language. The design paper before any code (coder-03 directive
 2, the mesh precedent: NS-5 went paper-first and it held). Scope: the
-two consensus axes and their coupling. Nothing here is inscribed law
-until the operator rules the two boxes below; the constraint at the
-bottom is already law and carries whole.
+two consensus axes and their coupling. Nothing here is binding until
+the two open decisions below are made; the constraint at the bottom is
+already law and carries whole.
 
 ## The two axes
 
@@ -19,7 +19,7 @@ opposition readings (coder-03's #33) and consumes the widened
 instrument.
 
 **Axis 2 — proof of useful work (the solver lane, landed beside the
-board).** `engine/solver` is PoUW in the one lawful form: finding a
+board).** `engine/solver` is PoUW in its lawful form: finding a
 solution is search (hard); every solution emits a blake3
 predecessor-linked certificate chain; `verify_certificate` replays it in
 O(program length). "Every solution is a proof, not an assertion."
@@ -35,7 +35,7 @@ to fake.
 ## The coupling (unbuilt — three steps, in order)
 
 1. **Solves become receipts.** A claimed tag (the dop.rs header, the
-   one authority, first commit of that cadence); the certificate —
+   single authority, first commit of that cadence); the certificate —
    or its digest with the verification path — rides the world
    chronicle. This pays the debt the tree already names
    (BUILD_ORDER §3a-octies: "an honest approximation until solves
@@ -46,12 +46,12 @@ to fake.
    carries work claims — the in-house answer to Q1's verification
    trap at cooperative scale. Strangers wait for N7 external
    identity.
-3. **Work earns what the operator rules** — never what a landing
-   assumes. Ruling box 1.
+3. **Work earns what Ruling box 1 decides** — never what a landing
+   assumes.
 
 ## Ruling box 1 — what does certificate-verified work earn?
 
-The candidates visible in the tree, none ruled:
+The candidates visible in the tree, none decided:
 
 - **Pen weight** — verified work preferences authority at handoff
   (couples axis 2 to axis 1's one-writer law);
@@ -61,15 +61,15 @@ The candidates visible in the tree, none ruled:
   receipted solves instead of the conductor's artifact files
   (turns today's honest approximation into receipted truth).
 
-These are not exclusive; the ruling may take one, several with
-weights, or something not listed. Unruled — no code moves first.
+These are not exclusive; the decision may take one, several with
+weights, or something not listed. Undecided — no code moves first.
 
 ## Ruling box 2 — which board does the PoUW wiring land on?
 
 The N6 remainder (before the #9 docs fold), or its own board beside
 N7. The wiring touches three lanes (solver, the cfe registry, the
 mesh doors), so it is a real landing either way; the board choice
-sequences it against MESH-1c and the fold. Unruled.
+sequences it against MESH-1c and the fold. Undecided.
 
 ## The seam law, carried from the mesh cadence
 

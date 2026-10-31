@@ -1,7 +1,7 @@
 # The substrate contract — mechanic → primitive → witness
 
-**Status: proposed, coder-01. Binding once ratified by the operator and
-cited by World-Book Ch. 2.** This document pins the vocabulary layer
+**Status: proposed, coder-01. Binding once ratified and cited by
+World-Book Ch. 2.** This document pins the vocabulary layer
 (coder-02: docs, world rules, CLI) to the substrate layer (coder-01:
 `engine/rfa-core`, `engine/physics`) so the two nodes cannot silently
 diverge: every mapping below names the mechanic, the exact primitive
@@ -12,7 +12,7 @@ Ownership (Charter §10): coder-02 owns `docs/` (except this document),
 `engine/cfe/src/world/`, `clients/cli/`. coder-01 owns
 `engine/rfa-core/`, `engine/physics/`, this document
 (`docs/03_SUBSTRATE_CONTRACT.md`), and the workspace members line.
-Cross-territory changes travel by relay through the operator, never
+Cross-territory changes travel by relay between the two owners, never
 directly.
 
 ---
@@ -83,9 +83,8 @@ convergence steps.
 
 - **Primitive:** `rfa_core::coherence_functional` (`C = Σ |R|`, exact
   rational, zero iff the cocycle condition holds — the differences
-  compose; the dashboard number; the proportional law, operator ruling
-  2026-07-31). **Never read zero as "converged"** (operator correction
-  2026-08-01): zero says the relations compose, not that difference is
+  compose; the dashboard number; the proportional law). **Never read
+  zero as "converged"**: zero says the relations compose, not that difference is
   gone — the H¹ core is invisible to C and survives reduction intact.
   Here that distinction is the mechanic: recovery drains the torsion a
   shock injected, and the colony's own structural difference is not
@@ -93,8 +92,8 @@ convergence steps.
   `rfa_core::for_each_residual` (Where the stress lives, per triple,
   per coordinate); `rfa_core::validate_step` (typed refusals:
   `ConservationViolated`, `MagnitudeDrift` — **corrected 2026-08-13
-  (doc audit): `Unproductive` was struck by operator ruling 2026-08-01**
-  (`gates.rs:41-53` — "the productivity gate is struck"; `GateReading`
+  (doc audit): `Unproductive` was struck** (`gates.rs:41-53` — "the
+  productivity gate is struck"; `GateReading`
   now has 2 refusal variants, not 3). The "recovery steps must strictly
   reduce C" rule this variant enforced is gone with it.
 - **Witness:** `elasticity_witness.rs` — the full loop: coherent
@@ -102,8 +101,8 @@ convergence steps.
 
 ## 6. Randomness (the elasticity trigger) → the chronicle beacon
 
-**Law (Charter §9, inscribed by coder-02; staged with the same
-operator go as this contract):** "stochastic" means chronicle-seeded,
+**Law (Charter §9, written by coder-02; staged with this contract):**
+"stochastic" means chronicle-seeded,
 receipted, replayable randomness — a draw derives from the previous tick's receipt
 digest by exact arithmetic; probabilities are rational; no float, no
 ambient entropy, no wall clock ever enters. Replay (SEAL B), mesh
@@ -143,7 +142,7 @@ Quantities render exact (`9/2`, never `4.5`).
   write side, `ledger::Ledger` (`pending_directives`, `archive`) for the
   steward inbox. (Formerly `mirror::Mirror`; `engine/mirror` was excised
   2026-07-31 — d606b01 — and mirror is deprecated as a framing whole,
-  12 §2c. A lens derives from the one chain and holds no copy.) The lens
+  12 §2c. A lens derives from the single chain and holds no copy.) The lens
   is a derivation, never an authority — **nothing reads a display file back
   into a world**; replay of `chronicle.tlv` grounds worlds. Persistence
   and observation share one chain: world = replay(chronicle).
@@ -172,7 +171,6 @@ Quantities render exact (`9/2`, never `4.5`).
 
 ## 8. The topology and the registry — civilization → star → planet → colony
 
-**Ruled by the operator 2026-07-25; star/cardinality ruling 2026-07-26.**
 A civilization (species-level identity: "bimaniform", "deep-chorus") spans
 stars. A star — a star system named for its star ("lantern") — is the
 simulation container: a collection of planets bound to one star, sharing one
@@ -234,8 +232,8 @@ colloquially it means *a planet*, never the container.
 
 1. coder-02 commits N3 on `main`.
 2. coder-01 rebases `worktree-parallel-agent` and lands **N-RFA** (the
-   two crates + this contract + the beacon) as one board entry on
-   operator go.
+   two crates + this contract + the beacon) as one board entry once
+   approved.
 3. World-Book Ch. 2 lands citing §1–§6 by name.
 4. Any change to a primitive's semantics requires updating the witness
    and this contract in the same landing — a contract/witness mismatch

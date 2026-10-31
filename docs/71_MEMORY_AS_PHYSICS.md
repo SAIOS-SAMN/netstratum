@@ -1,16 +1,18 @@
 # 71 — Memory bounded by physics
 
-Operator question (2026-10-09): the machinery was serving as the guarantor;
-was the system unable to handle that role on its own? It was: the minds'
-basins were live workspace outside the ledger, so the kernel's invariants
-never saw their growth, and the only bound was a byte cap (the leak of 2026-10-09 was a count
-cap that physics never priced). This arc makes the universe's own law the
-guarantor and demotes the caps to witnesses.
+This document bounds the memory of Netstratum's minds by the universe's own
+law instead of by byte caps. The minds' basins were working state held
+outside the ledger, so the kernel's invariants never saw their growth, and
+the only bound was a byte cap; the leak found on 2026-10-09 came from a
+count cap that the physics never priced. Here each line's memory is a share
+of the universe's memory, priced and paid like any other use of its money,
+and the caps remain only as witnesses.
 
-Coordinator (2026-10-09), proceed with three conditions: (1) Netstratum's own
-minds only (the embedded Mycelium minds stay under Mycelium's byte caps and
-their own process MemoryMax); (2) the memory share is a declared dial until a
-law derives it; (3) upkeep is paid in the universe's own money, never μ.
+Scope:
+
+1. Netstratum's own minds only. The embedded Mycelium minds stay under Mycelium's byte caps and their own process `MemoryMax`.
+2. The memory share is a declared dial until a law derives it (M3).
+3. Upkeep is paid in the universe's own money, never in μ.
 
 | id | slice | status |
 |---|---|---|
@@ -18,9 +20,9 @@ law derives it; (3) upkeep is paid in the universe's own money, never μ.
 | M2 | The cost: upkeep for what is kept, settled at touch as demurrage, paid in STAMP by a receipted deed (a tag claimed in the register), checked by the kernel's bounded-decay invariant (I5); memory then competes with every other use of a line's money | open |
 | M3 | The share derived: the budget read off the substrate the universe runs on (the host's capacity), so the dial gives way to a law | open |
 
-## Rescoped (operator 2026-10-09): agnostic progenitors, freedom of choice
+## Rescoped: agnostic progenitors, freedom of choice
 
-"Scarcity drives evolution, syntropy balances the force"; the progenitors
+Scarcity drives evolution and syntropy balances that force. The progenitors
 stay agnostic: they build both forces into the physics, the civilizations
 choose their own balance, and selection shows what thrives. Determinism is
 kept: every choice is a hash-seeded draw from the chronicle (replayable), so

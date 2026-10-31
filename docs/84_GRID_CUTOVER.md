@@ -1,9 +1,10 @@
 # 84 — The grid cut-over
 
-Design direction (2026-10-20): dimensionality is never lost; commit to the
-grid cut-over and proceed with Xylarium. Netstratum leaves every lattice in
-its era-1 state, in parallel with Xylarium, under the protocol both shells
-agreed (concordance 2.10, nested shells):
+This document records the cut-over of Netstratum's gridded carriers to span,
+turning and reading, carried out in parallel with Xylarium under the
+protocol both agreed (concordance 2.10, nested shells). A grid floors a
+quantity to a lattice and discards its finer detail; the cut-over keeps
+every dimension. Each lattice stays in its era-1 state until it is replaced:
 
 1. **Freeze.** No new physics on a gridded carrier.
 2. **Forms land in `forms`** (Mycelium's innermost shell): `Remaining`
@@ -16,9 +17,9 @@ agreed (concordance 2.10, nested shells):
    `READING`.
 
 No lattice is deleted until span states what a checkpoint stores for
-path-dependent state and its size reads bounded at N and 4N echoes. Under
-"never lose dimensionality", detail finer than a tier's places is handed
-down to the tier inside it, never floored away.
+path-dependent state and its size reads bounded at N and 4N echoes. Because
+no dimension is discarded, detail finer than a tier's places is handed down
+to the tier inside it, never floored away.
 
 ## Outside the gate: counts and readings
 

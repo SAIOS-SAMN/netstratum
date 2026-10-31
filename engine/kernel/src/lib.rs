@@ -361,7 +361,7 @@ pub enum Refused {
     WorkRefused { broken: WorkBroken },
     /// I4 — the mint exceeds what verified work earns. Both sides
     /// carried whole (the bound the law allows, the amount claimed).
-    /// The bound is the ruled emission rate `f` (Ruling Box 1,
+    /// The bound is the emission rate `f` (Decision Box 1,
     /// 2026-08-01 — see [`mint_bound`]): ladder-pinned, zero on the
     /// saturated rungs and on every off-ladder shape.
     MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> },
@@ -2282,7 +2282,7 @@ fn total_conserved(state: &Committed, resource: Resource) -> Ratio {
 /// conservation (the world total rose by exactly the declared amount);
 /// I4 adds the sign. Named seam: at convergence scale the mint is bounded
 /// by verified work — `mint ≤ verify_certificate(work)` — the PoUW anchor
-/// (Kernel Charter §5a), which fills on Ruling Box 1. No fiat (05 §1.2).
+/// (Kernel Charter §5a), which fills on Decision Box 1. No fiat (05 §1.2).
 fn creation(step: &Step) -> Result<(), Refused> {
     match &step.event {
         ClosureEvent::YieldCollected { resource, amount, .. } if *amount < ratio(0, 1) => {
@@ -2315,7 +2315,7 @@ fn creation(step: &Step) -> Result<(), Refused> {
     }
 }
 
-/// The mint bound — ruled (Ruling Box 1, operator 2026-08-01; the
+/// The mint bound — ruled (Decision Box 1, operator 2026-08-01; the
 /// VERSION 1→2 amendment). The emission rate `f` is pinned against
 /// the #17 calibration's measured hit-rates (evidence commit
 /// 5898351: 100% · 100% · 100% · 97.5% · 75% · 42.5%), in exact

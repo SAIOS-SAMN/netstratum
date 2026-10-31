@@ -28,7 +28,7 @@ the ledger block is the register, not the constant.
 
 **`eaff186` — the ecological loop (#40), kernel 0.16.0.** Extraction
 was free at the ground; a vein now wears. `cfe::dop::vein_wear` is the
-one home: wear is the draw priced against the spring's hash-derived
+single home: wear is the draw priced against the spring's hash-derived
 natural flow, recovery is the Regenerator's second arm running the same
 form on the gap. Tag 71 widened by the additive-trailing pattern (a
 trailing after-richness), so every sealed pre-ecology receipt decodes to
@@ -83,7 +83,7 @@ was not touched. (c) the novelty predicate for player-authored tasks.
 
 **`d4d94d5` + `56532d1` — the zone vocabulary (#41), kernel 0.18.0.** A
 world mints its own building kinds. The base a minted kind modulates
-resolves by the operator's three-way ladder (declared > inferred from
+resolves by a three-way ladder (declared > inferred from
 channel family > unresolved, which is lawful vocabulary that never
 builds). `ZoneKind::Minted(u8)` rides one wire byte, so `ZoneBuilt`'s
 shape is untouched — but `*kind as u8` stops compiling; use
@@ -107,7 +107,7 @@ and is judged identically. The door adds no authority.
 ledger; it now shears onto the `(shell, phase)` planes. 7.32s -> 0.04s,
 equivalence proven against the old sweep as a reference oracle.
 
-## A contradiction for the operator (#38c)
+## An open contradiction (#38c)
 
 `solver-verify/src/corpus.rs` still states the motion clause 4 —
 *imported content is a benchmark and never a mint source* — and
@@ -118,18 +118,17 @@ bench mints against it. Either the Carrier Switch superseded clause 4
 the bench should measure without minting. Recorded in the task; not
 resolved by code.
 
-## To the operator
+## Open decisions
 
 - **#41 (minted zone kinds) turns on one design decision** and it was
   not invented by the kernel lane. A minted zone's economics must derive
   from something, and the binding alone is scale factors with nothing to
   scale. The kernel lane's recommendation is in the task: the mint names A base kind and the
   binding modulates it, which makes `TradingBinding`'s one-benefit-one-
-  friction law do exactly what the operator asked — a dominant building becomes
-  unmintable by construction. It costs an additive field on
+  friction law make a dominant building unmintable by construction. It costs an additive field on
   `VocabularyMinted`. Two alternatives are recorded with their faults.
-- **Still standing from before:** the seed census-class ruling, the η
-  native ruling, and the IS-3 deed grant (Netstratum tags 64/66 stand
+- **Still standing from before:** the seed census-class decision, the η
+  native decision, and the IS-3 deed grant (Netstratum tags 64/66 stand
   until granted).
 
 ## Boards

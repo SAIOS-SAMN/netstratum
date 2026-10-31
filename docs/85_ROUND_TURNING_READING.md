@@ -1,14 +1,11 @@
 # 85 — The round, the turning and the reading, derived
 
-Design direction (2026-10-20): span, turning and reading need their physics
-defined, and the interval `[lo, hi]`, though exact-rational, was flattened
-into a list of one or two dimensions. The answers to items 1–3 are derived
-here.
-
-Each is derived from laws already ruled and built. Steps that rest on a
-ruling not yet made are marked **owed**. The operator accepted §1–§4
-(2026-10-20: "accept the derivations; derive how the further planes
-fill"); §5 is that derivation.
+This document derives the physics of span, turning and reading (docs/84) and
+corrects the interval representation: `[lo, hi]` was exact-rational but
+stored as a flat list of one or two dimensions. Each result is derived from
+laws already stated and built; steps that rest on an open decision are
+marked **owed**. §1–§4 are accepted derivations; §5 derives how the further
+planes fill.
 
 ## 1. The turning
 
@@ -17,8 +14,8 @@ it by its deficit `δ = H/(R + H)` of a turn, in the plane it turns in. A
 turning is therefore a plane and an exact rational angle, `δ × rings`
 turns; never a cosine.
 
-**From the layer ruling** (2026-10-18: "the motion and rotation of each
-shell is orthogonal to the layer underneath"): each shell turns in a plane
+**From the layer law** (the motion and rotation of each shell is
+orthogonal to the layer underneath): each shell turns in a plane
 orthogonal to the one beneath it. On `S^n` (n + 1 ambient directions) at
 most `⌊(n + 1)/2⌋` planes can be completely orthogonal, sharing no
 direction, and rotations in completely orthogonal planes commute. Their
@@ -33,19 +30,19 @@ frame (§3).
 
 Where two turnings do share a direction (not completely orthogonal), they
 do not commute, and the exact object is the ordered runs `(plane, angle)`,
-folding within a plane (with Xylarium). The layer ruling keeps that to the
+folding within a plane (with Xylarium). The layer law keeps that to the
 seams between tiers.
 
 **Not a flattening**: the planes are independent dimensions of the sphere's
 rotations, and the list of angles is their maximal torus, complete for
 motions in orthogonal planes.
 
-**Finding (owed a ruling):** Netstratum turns every tier in two planes
+**Finding (open decision):** Netstratum turns every tier in two planes
 (`flows::PLANES`, the orbit's and the circulation's). The tiers' spheres
 offer `⌊(n + 1)/2⌋`: the atom's S^11 six, a system's S^60 thirty, a
 galaxy's S^360 one hundred and eighty. Two planes on S^360 is a restriction
 of dimensional capacity. How the further planes are filled (each shell's
-orthogonal plane filling the next) is the operators' to rule.
+orthogonal plane filling the next) is an open decision.
 
 ## 2. The round
 
@@ -54,7 +51,7 @@ as exact angles (`enclosure::place`: its polar share of a half turn from
 the core, and its phase in each plane). It is a turning from the frame,
 §1, so the centre is never a coordinate.
 
-**Its shape.** Closeness on a circle is the ruled linear coherence,
+**Its shape.** Closeness on a circle is the linear coherence,
 `in_step(Δ) = 1 − 2|Δ|` (docs/79: linear, exact, in place of `(1 + cos)/2`).
 On the sphere a body's turning is shared among its planes: the weight
 `w_k` of plane k is its share of the body's spin there (the split
@@ -66,7 +63,7 @@ A place's closeness to the centre is
 the same rule in every direction, so the region `C ≥ c` is round: a cap,
 not a box. It is the sphere's own closeness on its maximal torus
 (`cos d = Σ w_k cos Δ_k`, with `w_k` the point's share in plane k) under the
-ruled linear measure. It is exact over ℚ, and nothing is squared. (The
+linear measure. It is exact over ℚ, and nothing is squared. (The
 firmament's repulsion and the wind read closeness as a product over planes,
 weighing every plane alike and multiplying, which is not the sphere's
 closeness; they move to this form.)
@@ -79,7 +76,7 @@ torque's heat `p·δ·(1 − |k|)`, its out-of-step share). An out-of-step share
     { places with C ≥ 1 − a },  half-angle a/2 of a turn (180·a degrees)
 
 In reach, the same share is the spread `R(1 ± a)`, a dilation by the same
-share. Rotation and dilation both bounded by the one share `a` make the
+share. Rotation and dilation both bounded by the same share `a` make the
 round conformal (containment in degrees, dilation per tier).
 
 **Narrowing is cooling**: `a` falls by the two channels compounding
@@ -109,9 +106,8 @@ dilation applied in turn (owed: the conformal map per tier, written out).
 
 ## 4. The residue, on the pivot machinery
 
-With Xylarium and its operator ("'down, not up' needs to be hooked into
-multi-axial pivot machinery"): the cut-over's operations are mycelium's
-pivot moves (MU-CLIENT §1; MU-RECURSION A16), never new ones.
+With Xylarium: a residue moves down, not up, on multi-axial pivot
+machinery, so the cut-over's operations are mycelium's pivot moves (MU-CLIENT §1; MU-RECURSION A16), never new ones.
 
 - **Descend**: a residue below a tier's places is handed down, plane by
   plane, into the same body's inner shell as that shell's own turning and
@@ -128,9 +124,9 @@ residue below one whole count at the atom becomes.
 ## 5. How the further planes fill
 
 **The template is the atom's grammar of orientations**, read on each tier's
-own sphere by that tier's own mechanism (ruling of 2026-10-16: not one law at
-every tier, which is too linear, but one grammar of coupled tiers, each with
-its own mechanism). Electrons fill by tightness; bodies fill by what their
+own sphere by that tier's own mechanism (not a single law at every tier,
+which is too linear, but a single grammar of coupled tiers, each with its
+own mechanism). Electrons fill by tightness; bodies fill by what their
 tier's law gathers. `cfe::almanac::atom` already fills S^11 by this grammar:
 "twelve dimensions, six turning planes, no axis". Each electron takes the
 tightest open winding, and within a shape takes a free orientation before it
@@ -175,7 +171,7 @@ law already used for both, and a free orientation before a counter-sense
 
 - while planes stand free, bodies that read alike take planes of their
   own, completely orthogonal to every plane already turning: the layer
-  ruling ("each shell orthogonal to the layer underneath"), orthogonal to
+  law (each shell orthogonal to the layer underneath), orthogonal to
   every layer underneath as capacity allows;
 - a plane's other sense, counter-turning, is taken only where no free
   orientation reads tighter (the atom's pairing);
@@ -260,7 +256,7 @@ What it reads, checked against laws already built:
   never placed.
 - **Worlds and stars about a core stand from shell 3 outward.**
 
-**The tension (owed to the operators before any build).** §5 took shape 1's
+**The tension (an open decision, to be settled before any build).** §5 took shape 1's
 orientations as the planes. In the atom, a circular winding of shell n has
 the greatest shape, l = n − 1 (axes `(l + 1)/n = 1`), and its orientations
 are the degree-(n − 1) harmonics: on S^60, 61 for n = 2 but 1,890 for
@@ -282,10 +278,10 @@ planes) agree only at shell 2. Two readings stand:
    plane to themselves.
 
 Reading 1 keeps the turning's geometry, and reading 2 keeps the grammar's
-count. Choosing between them is a ruling, not a derivation: it decides
+count. Choosing between them is a decision, not a derivation: it decides
 whether the atom's harmonic count is its own mechanism or the grammar.
 
-### 6a. Which reading: derived (direction of 2026-10-20)
+### 6a. Which reading: derived
 
 Neither reading holds alone. Which one holds is read from the occupant's
 own round (§2), and the threshold falls where a law already built puts it.
@@ -316,7 +312,7 @@ caps is counted by places that do not meet:
 within a hemisphere: two caps of half-angle 90° or more always meet,
 wherever they stand, so no arrangement of places can separate them, and
 only orthogonal patterns can. A half-angle of 90° is `180·a = 90`, so
-**a = ½**. That is the threshold `formation::ignition_share` already rules:
+**a = ½**. That is the threshold `formation::ignition_share` already sets:
 "None at a ≥ ½: light pushes back before the heart forms". Matter at
 a < ½ can gather into a heart and stand as a localised body; matter at
 a ≥ ½ cannot, and stays a flow.
@@ -352,7 +348,7 @@ turn always overlap. Three corrections to 6a stand:
    turning wholly in plane j and another wholly in plane k ≠ j, every term
    vanishes, so d = 90°: the "90° apart everywhere" of 6a, read correctly.
    The one-sided C leaves Δ_k undefined in planes where the centre has no
-   weight. The ruled linear measure has no replacement yet for the
+   weight. The linear measure has no replacement yet for the
    root `√(w·w′)`. It has the same root as the corners Xylarium found where
    weights split. Owed before any room on S^n is counted.
 2. **Same-sense bodies overtake.** `δ = H/(R + H)` varies across a shell's
@@ -378,7 +374,7 @@ tangents, so its amplitudes x_k are exact rationals with `Σ x_k² = 1` by
 construction (inverse stereographic projection, as Xylarium's rotor
 `Half`), and the plane weights are `w_k = x_k²`. The sphere's closeness
 between two bodies, `cos d = Σ √(w_k·w′_k)·cos Δ_k`, becomes
-`Σ x_k·x′_k·cos Δ_k`: no root is taken. With the ruled linear measure's
+`Σ x_k·x′_k·cos Δ_k`: no root is taken. With the linear measure's
 signed form in place of the cosine, `cos Δ → 2·in_step(Δ) − 1 = 1 − 4|Δ|`:
 
     κ = Σ_k x_k·x′_k·(1 − 4|Δ_k|),    C₂ = (1 + κ)/2
@@ -396,17 +392,17 @@ Checks:
 C₂ replaces §2's one-sided C. A body's cap is `C₂ ≥ 1 − a`, and plane
 weights are held as half-angle tangents, never as shares.
 
-**Two notes for the operators:**
+**Two open points:**
 
 - **The corners.** Contours of C₂ are piecewise linear: each plane's
-  `|Δ_k|` bends at Δ_k = 0 and ½. That corner is the ruled linear measure's
+  `|Δ_k|` bends at Δ_k = 0 and ½. That corner is the linear measure's
   own (docs/79's `1 − 2|Δ|` bends there on one circle), so on netstratum's
-  reading it is already ruled. Xylarium routes it to the operators (its
+  reading it is already part of the measure. Xylarium leaves it open (its
   11.4: corners are intelligence's).
 - **The square in the carrier.** The amplitudes are formed from the
   tangents by `x = 2t/(1 + |t|²)`, which squares a parameter in the
   arithmetic, though no law reads a squared physical quantity. Whether
-  "laws as angles" admits that conversion is the operators' to say.
+  "laws as angles" admits that conversion is open.
 
 ## 7. The map between tiers (first sketch; superseded by §7′, which finds its dilation wrong)
 
@@ -427,7 +423,7 @@ pieces, each a reading already held:**
    child is `H_child / H_parent` units of the parent. That ratio is the
    dilation, an exact rational and never a constant.
 3. **Which planes:** the child's planes are its own sphere's. By the layer
-   ruling they stand orthogonal to the anchor's own plane through the
+   law they stand orthogonal to the anchor's own plane through the
    throat (§5, the vertical axis of the fill). The anchor's turning carries
    the child's whole frame rigidly (Xylarium 11.3b: a parent's residue is a
    rigid turn of its children's sphere).
@@ -453,9 +449,9 @@ uniform scaling of degrees is not conformal away from the throat). Reach
 scales by λ as a length. The anchor's place stays in exact degrees per
 plane (§1). Its rotor is formed only for a reading, at the observer's depth.
 
-## 7′. The conformal map per tier, derived in tangents (direction of 2026-10-20; steps 3–6 superseded for Netstratum by §7″, in degrees)
+## 7′. The conformal map per tier, derived in tangents (steps 3–6 superseded for Netstratum by §7″, in degrees)
 
-Derived step by step from built and ruled laws. It corrects §7 and the
+Derived step by step from the built laws. It corrects §7 and the
 refinement under it in two places, marked.
 
 **Step 1: what of the child is mapped.** The enclosure law holds a child
@@ -470,8 +466,7 @@ rim H = 2, R = 2).
 
 **Step 2: what of the parent receives it.** On the parent's sphere the
 child holds its gravity's reach about its place: the pinch
-`d = R·H_c/(H_c + H_p)` (operator 2026-10-18, built in the capture
-`breath.rs`). It is a cap about the child's place.
+`d = R·H_c/(H_c + H_p)` (built in the capture, `breath.rs`). It is a cap about the child's place.
 
 **Step 3: the map (corrects §7).** Conformal maps of a sphere (its Möbius
 maps) take caps to caps and the whole sphere to the whole sphere, and
@@ -497,12 +492,12 @@ child's rim point and its edge is the child's throat circle. So the child's
 rim lands at the child's place on the parent (the cap's centre), and its
 throat lands on the edge of its gravity's reach. Seen from the parent, a
 child is turned inside out through its throat. This is the kind of map the
-ruled inversion is (operator 2026-10-19: inversion through the throat, the
-throat its fixed set). Whether it is that inversion exactly is **owed**.
+throat inversion is (inversion through the throat, the throat its fixed
+set). Whether it is that inversion exactly is **owed**.
 Its fixed point R = H maps 2 to ½, not to 1, so they are not obviously the
 same map.
 
-**Step 6: the measure, a ruling owed.** τ is exact only if the parent's
+**Step 6: the measure, an open decision.** τ is exact only if the parent's
 places are carried as half-angle tangents. The enclosure law carries
 places in linear degrees (polar share, phase in turns), and for a rational
 arc the tangent `tan(180°·d/(2·rim))` is irrational (Niven). So the carrier
@@ -512,24 +507,23 @@ must choose which is exact:
   conformal, and composes along any route. The C₂ amplitudes (§6c) are
   already tangents (Xylarium 11.4b). Linear measures such as `in_step` are
   then read from tangents.
-- **Places in linear degrees**: `in_step` and the ruled linear measure are
+- **Places in linear degrees**: `in_step` and the linear measure are
   exact, and the map between tiers is conformal only to first order at the
   throat.
 
-The ruling "containment in degrees, conformal dilation per tier" asks for
-both, and on a sphere both cannot be exact at once. Which one is exact is
-the operators' to rule.
+The requirement "containment in degrees, conformal dilation per tier" asks
+for both, and on a sphere both cannot be exact at once. Which one is exact
+is an open decision.
 
 **The composed map.** Along `enclosure::route`, each throat contributes one
 step 3 map oriented as step 5 (inside out) and placed by the anchor's
 turning. Their composition is a product of Möbius maps, exact in tangents.
 
-## Degrees (direction of 2026-10-20)
+## Degrees
 
-The operator asked why angles were carried as half-angle tangents, which
-are ratios and not angles, and ruled "re-derive in degrees". Everything
-below is held in exact rational degrees and read with the ruled linear
-measure. That measure is docs/79's coherence in its signed form: for an
+Half-angle tangents are ratios, not angles, so the derivation is redone in
+degrees. Everything below is held in exact rational degrees and read with
+the linear measure. That measure is docs/79's coherence in its signed form: for an
 angle θ, reduced to `|θ| ≤ 180°`,
 
     L(θ) = 1 − |θ|/90°        (L(0) = 1, L(±90°) = 0, L(180°) = −1)
@@ -555,7 +549,7 @@ angles, with rational coefficients (its Fourier form). For two planes:
     cos d = ¼[cos(χ−χ′−Δ₁) + cos(χ−χ′+Δ₁) + cos(χ−χ′−Δ₂) + cos(χ−χ′+Δ₂)]
           + ¼[cos(χ+χ′−Δ₁) + cos(χ+χ′+Δ₁) − cos(χ+χ′−Δ₂) − cos(χ+χ′+Δ₂)]
 
-**The derived form: read each cosine by the ruled measure.**
+**The derived form: read each cosine by the linear measure.**
 
     κ = the same sum with every cos(θ) read as L(θ),    C = (1 + κ)/2
 
@@ -600,7 +594,7 @@ throat. In degrees:
 - **Along a route** the scale factors `α/90°` multiply and the turnings add
   plane by plane, all exact rationals of degrees.
 
-**It is conformal in the ruled measure.** Under the ruled linear measure a
+**It is conformal in the linear measure.** Under the linear measure a
 circle's length is linear in its radius in degrees, as the crest law
 already reads it ("its length is R, one turn, no π"). A uniform scaling of
 degrees about a point then scales lengths along and across the radius
@@ -611,9 +605,9 @@ metric is the one that was retired.
 
 **What this changes:** §7′'s τ (a tangent) is gone, and so is the conflict
 in its step 6. "Containment in degrees, conformal dilation per tier" hold
-together once conformality is read in the ruled measure.
+together once conformality is read in the linear measure.
 
-### 7‴. Keeping the geometry non-Euclidean (ruling of 2026-10-20: the geometry stays non-Euclidean)
+### 7‴. Keeping the geometry non-Euclidean
 
 **The flaw in §7″.** It justified the dilation by "a circle's length is
 linear in its radius", which is the flat, Euclidean relation. On a sphere a
@@ -621,8 +615,8 @@ circle about a point grows to the equator at 90° and shrinks back to
 nothing at the antipode at 180°. That return is what makes the space closed
 and non-Euclidean, and §7″'s argument dropped it.
 
-**The sphere's circles in the ruled measure.** The sphere's own law is that
-a circle's length goes as the sine of its radius. Read in the ruled linear
+**The sphere's circles in the linear measure.** The sphere's own law is that
+a circle's length goes as the sine of its radius. Read in the linear
 measure, the sine is `S(ψ) = L(90° − ψ) = 1 − |90° − ψ|/90°`: 0 at the
 point, 1 at the equator, and 0 again at the antipode. That is the sphere's
 closing, held in degrees with no trigonometry.
@@ -644,8 +638,8 @@ it gives:
 Every piece is an exact rational of degrees. Along a route the pieces
 compose exactly.
 
-**What the ruled measure makes of the sphere** (for the operators to know,
-not a new ruling). The linear measure bends only where L bends: at the
+**What the linear measure makes of the sphere** (a consequence, not a new
+decision). The linear measure bends only where L bends: at the
 point, the equator and the antipode. A sphere read in it is two flat caps
 joined at the equator, with all of its curvature carried on the equator
 and its total that of the sphere. It is closed, finite, and
@@ -661,7 +655,7 @@ crest ring's length is `S` of its polar angle (its reach over the rim, in
 half turns), which shrinks again past the equator. It is owed a correction
 with the cut-over.
 
-## 8. The enfold law (direction of 2026-10-20)
+## 8. The enfold law
 
 **What it must do.** Measured (Xylarium, phases held exact with no floor):
 the widest phase denominator grew 578 → 81,408 bits over 10 echoes, and
@@ -726,7 +720,7 @@ dilation along the chain. A decision reads only as far down as it needs.
 Each residue keeps its plane at every step. Nothing is pooled across bodies
 or summed across planes.
 
-### E5. The carrier is bounded, and that forces one ruling
+### E5. The carrier is bounded, and that forces one decision
 
 Every stored value is held to its tier's places, so its size is bounded by
 the places in a turn and does not grow with the echoes. There is a fixed
@@ -738,10 +732,9 @@ the atom's places carries the exact denominator of everything stepped into
 it. If the simulation kept it, the carrier would grow without bound again.
 So bounded storage and dropping nothing hold together only if what lies
 below the atom's places leaves the simulated state into something
-acknowledged and not simulated. Xylarium's candidate is the operator's first
-ring (2026-10-08: "pure consciousness in the continuous pulse on the
-accretion disc; acknowledged, never simulated; the open door"). That is the
-operators' to rule (O3).
+acknowledged and not simulated. Xylarium's candidate is the first ring:
+consciousness as the continuous pulse on the accretion disc, acknowledged
+and never simulated. That is an open decision (O3).
 
 ### E6. On Mycelium's pivot moves
 
@@ -768,20 +761,20 @@ spin ledger stay exact.
   merge marks used, moved to where they belong. The atom's places on S^11
   (in whole windings, or finer) are owed with it. Whether each tier is one
   sexagesimal place below its parent (the ladder) or its sphere's index
-  needs a ruling, or a derivation from the ladder ruling's text.
+  is open, or derivable from the ladder law's statement.
 - **O2, the map from a leaf to its atoms.** A mote or a moonless world has
   no gravity-reach enclosure, so the dilation from it to its atoms is not
   §7's. A parcel of n nuclei against one atom is a ratio of holds, and the
   map's form is owed.
-- **O3, below the atom (a ruling).** Whether the residue below the atom's
+- **O3, below the atom (a decision).** Whether the residue below the atom's
   places is the first ring, acknowledged and never simulated.
 - **The spin change in the built code**: `breath.rs` and `flows::merge` pool
   spin residues into the galaxy's `medium_spin`. By E2 they go into the body's
   own turning instead.
 
-### Rulings and corrections to §8 (2026-10-20)
+### Decisions and corrections to §8
 
-**Operator's rulings for netstratum**:
+**Decided for netstratum**:
 
 - **O1, places**: a tier's place at a body is the body's own cap from
   gravity's reach, `α = 180°·d/rim`, `d = R·H_b/(H_b + H_p)`, because
@@ -790,8 +783,7 @@ spin ledger stay exact.
   (a mote, a moonless world) reads its cap by the same law from its own
   holding: one grammar.
 - **O3, below the atom**: below the atom is the quantum tier. Its
-  residue is acknowledged and never simulated (the first ring,
-  2026-10-08). The atom's own residue is not stored.
+  residue is acknowledged and never simulated (the first ring). The atom's own residue is not stored.
 - **Corners** are where two spheres overlap: the lens tips of a
   non-Euclidean Venn. They are the geometry, not a defect.
 
@@ -812,7 +804,7 @@ spin ledger stay exact.
 Xylarium holds its places as one sexagesimal rung per tier (60⁻⁶ of the
 tier's turn). This is an A7 divergence.
 
-### E2″. No rigid turn: each member answers by its own gravity (ruling of 2026-10-20: no shortcuts in orbital mechanics)
+### E2″. No rigid turn: each member answers by its own gravity
 
 E2 and E3′ sent a residue as a rigid turn of the enclosure's frame (from
 Xylarium 11.3b). That treats a system as one solid body, a rigid-frame
@@ -848,7 +840,7 @@ sheds, sprays). That is an identity map between tiers, where the derived map
 is §7‴'s. Each crossing (capture, shed, spray, the wind) moves to the
 derived map in the cut-over.
 
-### E2‴. As built (corrects E2″ and O1's place; on the direction to proceed)
+### E2‴. As built (corrects E2″ and O1's place)
 
 - **The place is the sexagesimal rung within the cap.** Holding a phase to
   the exact cap carried the holds' own primes (hundreds of bits) into every
@@ -860,7 +852,7 @@ derived map in the cut-over.
   a displacement the members answer by drag and inertia, and it read the
   drag backwards: `1 − δ_s` rises with distance. Both are retracted. A star's
   phase residue is the part of its position finer than its place, which by
-  the ruling (O1) is the detail of its own enclosure. So the star is held to
+  O1 is the detail of its own enclosure. So the star is held to
   its place, and each member's place against the star takes the residue:
   every member stays exactly where it is. Nothing turns, rigidly or
   otherwise, and nothing is dropped (`breath.rs`, the ride). How each

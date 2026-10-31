@@ -1,7 +1,7 @@
 # NS-5 — MESH: two nodes, one world
 
-> **Superseded in part — Charter §11, the ONE-TRUTH amendment
-> (2026-07-31).** The consilience instruments of §2 and the
+> **Superseded in part — Charter §11, the ONE-TRUTH amendment.**
+> The consilience instruments of §2 and the
 > reconciliation records of §3 (tag 65; refusal kinds 3–4) are
 > retired and their code excised: a reconciling check between copies
 > is unlawful. The lawful remainder of this document: the carrier
@@ -34,7 +34,7 @@ from the landed machinery (the N1 spec-from-working-code discipline).
 The consilience first slice (§2) is landed: mechanic `engine/mesh`,
 witnesses `engine/mesh/tests/mesh_consilience.rs`, 5 green, red-first
 honored.
-Working orders and the three operator rulings of 2026-07-30:
+Working orders and the three N6 design decisions:
 `docs/N6_DIRECTIVES.md`. Supersedes the stub and
 `/opt/repos/convergence-engine/DIMENSIONAL_BLOCKCHAIN.md` +
 HOW_TO_USE.md — carrying independent work, exact measurement, and
@@ -48,10 +48,10 @@ by trusting each other, and not by copying each other — by
 measuring each other. Convergence is the proof; opposition is the
 check; the fold is the merge that never merges.
 
-**The identity ruling (2026-07-30):** at N6 the mesh is blake3 and
-provenance only. Consilience-of-independent-computation over
-exact-rational state reduction is the claim — no key-pair signatures
-enter the registry here. External cryptographic identity arrives at
+**Identity at N6.** At N6 the mesh is blake3 and provenance only,
+because the claim is consilience-of-independent-computation over
+exact-rational state reduction, and that claim needs no key-pair
+signatures; none enter the registry here. External cryptographic identity arrives at
 N7 (anchor), where the mesh meets parties it cannot re-compute.
 
 ## 1. The three laws
@@ -88,10 +88,10 @@ N7 (anchor), where the mesh meets parties it cannot re-compute.
 
 ### 2.1 The measured manifold (v2) and the structural census — struck
 
-> **The census kernel is out** (operator ruling 2026-08-04):
-> incompatible with the architecture (paraphrased: the build stands on a
-> higher dimensional plane of multi-axial PoW++ with two algorithms, PoUW
-> and PoWC, both converging on n-dimensional polynomials).
+> **The census kernel is out**: it is incompatible with the
+> architecture, which stands on a higher dimensional plane of
+> multi-axial PoW++ with two algorithms, PoUW and PoWC, both converging
+> on n-dimensional polynomials.
 >
 > **The code excised it four days before this text was struck.**
 > `engine/mesh/src/lib.rs` records it: the reconciliation instruments —
@@ -104,7 +104,7 @@ N7 (anchor), where the mesh meets parties it cannot re-compute.
 > **Two independent reasons, and the second is the general one.** The
 > one-truth amendment struck it because *what cannot diverge needs
 > no reconciliation, and agreement between copies was never a
-> measurement*. The ruling above strikes it again for its shape: a
+> measurement*. The architecture above strikes it again for its shape: a
 > census is a flat enumeration — committed fields sorted into
 > seventeen named families plus a tripwire code — and an enumeration
 > cannot describe a state whose capacity is a polynomial fiber that
@@ -146,7 +146,7 @@ span of the two states (an absent coordinate reads exactly 0):
 1. the graded gauge key, grade-ascending (grade 0 first);
 2. per orb ascending by orb id: the banked ledger over resource codes
    1–7 in code order; cumulative vented entropy; the eight ideology
-   books in the inscribed order (given_in_crisis, drawn_in_crisis,
+   books in their declared order (given_in_crisis, drawn_in_crisis,
    returned_across, extracted_across, bond_flow, severance_load,
    forwards_fulfilled, forwards_breached); then the element stores
    over the union of that orb's element ids, id-ascending.
@@ -212,8 +212,8 @@ Unanimity is the geometry.
    is cured by carrying the tail (§3.3) — never by re-voting history.
 4. **Equal spines → the replication witness.** Both sides replay
    independently; the triangle closes; C(Δ) measures; zero issues the
-   tag-65 receipt. Named honestly (the coder-04 audit, ruled into the
-   text 2026-07-31): on an equal spine the zero witnesses byte-exact
+   tag-65 receipt. Named precisely (from the coder-04 audit): on an
+   equal spine the zero witnesses byte-exact
    replication and independent replay determinism (SEAL B) — it is
    not convergence, because the inputs could not disagree.
    "Consilience" is reserved for measurements whose inputs could:
@@ -231,7 +231,8 @@ All refusals are typed and carried whole (§3.2):
 - **Forged** — a chain that does not re-verify from its own content
   (side, first broken sequence). Verification is NS-3
   `verify_receipts`: recomputed digests, walked parent links. A
-  chronicle in hand is intact by construction (the one-door law);
+  chronicle in hand is intact by construction (NS-3: loading
+  re-verifies every link);
   forgery is caught at the boundary, in `receive`.
 - **Drift** — same history, less of it (behind side, missing range).
 - **Diverged** — forked history: fork sequence, residuals whole, C,
@@ -239,8 +240,7 @@ All refusals are typed and carried whole (§3.2):
 
 ### 2.5 Scope
 
-MESH-1a is one world's chronicle between two nodes (operator ruling
-2026-07-30). Multi-world aggregation — the §3.4 session's
+MESH-1a is one world's chronicle between two nodes. Multi-world aggregation — the §3.4 session's
 universe-span sweep — belongs to MESH-1c / N7. Consilience is a read:
 no receipt enters any world chronicle; mesh records live in the
 mesh's own framing (§3), beside the world, never inside it.
@@ -248,10 +248,10 @@ mesh's own framing (§3), beside the world, never inside it.
 ## 3. The wire
 
 NS-1 TLV frames — the house wire, never a third format (CBOR/BSON
-refused on record, 2026-07-30). SEAL A carries across nodes: unknown
+are refused). SEAL A carries across nodes: unknown
 event tags sync and verify without decoding (the digest law needs
 bytes, not meanings). Tags 64–66, claimed in the dop.rs registry
-header — the one authority. Ratios ride the canonical NS-1 carrier
+header, the single authoritative register. Ratios ride the canonical NS-1 carrier
 (`ratio::encode`). Side codes: 1 = A, 2 = B.
 
 ### 3.1 Tag 64 — the mesh head announcement
@@ -292,7 +292,7 @@ The residual list is the payload, whole; C is the trailing summary.
 Kinds are additive (the SEAL A instinct): a reader meeting a kind it
 does not know skips the record, never crashes.
 
-### 3.3 The carrier (the transport ruling, 2026-07-30)
+### 3.3 The carrier
 
 Peers exchange `chronicle.tlv` segments — the NS-3 §2.4 on-disk
 framing is the wire; there is no second encoding of history. A passive
@@ -364,9 +364,9 @@ its vectors from the first two-node session, per the N1 law.
 ## 6. Deferred, recorded
 
 Transport security (this is a prototype: the mesh trusts its LAN);
-node identity beyond a name (blake3/provenance only at N6 by ruling —
-ties to NS-6 operator profiles and enters at N7 with anchor). The
-handoff under partition was ruled 2026-07-31 — §7.5 carries the law.
+node identity beyond a name (blake3/provenance only at N6, as stated
+above — ties to NS-6 operator profiles and enters at N7 with anchor).
+The handoff under partition is specified in §7.5.
 
 ## 7. The receipted handoff (MESH-1b)
 
@@ -468,7 +468,7 @@ its first seal, but the refusal now names the door.
 full arc on one file, the walk green at every station.
 
 
-### 7.5 The partition law (operator ruling 2026-07-31)
+### 7.5 The partition law
 
 Authority on one spine never moves without its seal. An unreachable
 writer stalls the spine: writes refuse (usurped, the lawful hand
@@ -487,7 +487,7 @@ distance confluences (`Confluent { partner, gauge }`); nonzero
 distance stands preserved as typed divergence for the annex path —
 never discarded, never overwritten.
 
-### 7.6 The sandboxed nursery (operator ruling 2026-07-31)
+### 7.6 The sandboxed nursery
 
 **Open divergence is lawful; covert divergence is slashed.** A
 declared fork is a nursery: a sandboxed branch under its own branch
@@ -510,7 +510,7 @@ dies, the stake dies). The lie is punished, never the disagreement.
 Play in a nursery is free; no nursery can tear a hole in the galaxy
 from inside it.
 
-## 8. The bridge entity (ruled 2026-07-31 — spec, lands with MESH-1c)
+## 8. The bridge entity (spec, lands with MESH-1c)
 
 Cross-world communication is a lawful, scope-bounded boundary — never
 an un-sandboxed socket. At genesis every world instantiates its own
@@ -519,8 +519,8 @@ generation_tag }` — tag claimed at the landing cadence). The MESH-1c
 TCP adapter is passive transport only (SEAL C); every remote handshake
 and cross-world interaction terminates at the bridge, which enforces
 containment: read and consile open by default; yield/handoff require
-explicit grant receipts. The bridge is the world's one comms door
-into the shared exchange — the per-world uplink the operator named.
+explicit grant receipts. The bridge is the world's only communication
+boundary into the shared exchange: the per-world uplink.
 Seeding is conductor-genesis work (coder-01); the session handshake
 naming the bridge is adapter work (coder-03). One seam, two sides.
 
@@ -532,11 +532,11 @@ record, mechanized in `engine/mesh::spine`.
 
 ### 9.1 The coordinate and the record (tag 84)
 
-A position on the one clock: `{branch ‖ S ‖ G ‖ T}` — `branch` the
+A position on the single clock: `{branch ‖ S ‖ G ‖ T}` — `branch` the
 nursery name ("" is the mainline, §7.6), `S` the wrapped torus triple
 (three ratios; zeros until charted), `G` the gauge sheet (a wrapped
 ratio), `T` the attested tick. The spine commitment record binds one
-state to one position, forever:
+state to one position:
 
     commit = BLAKE3( branch ‖ S ‖ G ‖ T ‖ schema ‖ kernel ‖ judged ‖
                      state_digest ‖ parent )
@@ -562,7 +562,7 @@ not recompute refuses on load.
 
 The verbs: `resolve(coordinate)` — where the universe stands;
 `fetch(state_digest)` — the geometry, verified on arrival;
-`extend(coordinate, state_bytes, step?)` — the one write, §9.3;
+`extend(coordinate, state_bytes, step?)` — the only write, §9.3;
 `branch(from, name)` — the nursery opens: a genesis-copy record at
 the fork position under the new branch name, parent-linked to the
 mainline commitment (the same state entering a new address space —

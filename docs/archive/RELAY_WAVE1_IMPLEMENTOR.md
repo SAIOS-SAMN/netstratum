@@ -97,7 +97,7 @@ compiler-enforced** and have been missed before.
 | **`kernel::covered()`** | **No — by hand** |
 | **`taxon_pins::every_deed()` + its count** | **No — by hand** |
 
-A deed missing from `covered()` refuses `Unjudged` forever. A deed
+A deed missing from `covered()` is refused `Unjudged` on every submission. A deed
 missing from `every_deed()` makes the totality pin pass while proving
 less than it claims. Coverage currently stands at **67 deeds, total**.
 
@@ -109,7 +109,7 @@ less than it claims. Coverage currently stands at **67 deeds, total**.
 
 If a refusal is decidable **from the value alone**, it dies at a
 constructor and the verb never asks again. If it depends on the
-**chain**, it stays a fact at the verb forever, because what the chain
+**chain**, it stays a fact at the verb permanently, because what the chain
 holds grows by receipt.
 
 Worked example to copy: `almanac::Compoundable::new` proves matter
@@ -174,7 +174,7 @@ which consequence.
 
 ### 5.6 No cartesian sweeps — peel and shear
 
-Operator ruling 2026-07-30, carried in `peel`'s own doc: *no cartesian
+The rule, carried in `peel`'s own doc: *no cartesian
 find-scan repetition; peels and shears where there were iterations.*
 
 - **Peel** — lift one thing out by key.
@@ -220,7 +220,7 @@ way: kernel → sealed math, nothing upward.
 
 ### 5.9 Verify-time search is prohibited
 
-Operator directive 2026-08-07. A mint request carries its **complete
+A mint request carries its **complete
 resolution path**; the gate re-applies it in time linear in the path.
 Nothing searches. Absent path → `WorkBroken::PathAbsent`, refused
 ungranted. Applies to any new mint source introduced, including
@@ -258,7 +258,7 @@ a short timeout.
 
 ---
 
-## 7. Rulings and defaults in force
+## 7. Decisions and defaults in force
 
 All of `Q-T1…Q-S4` are codeable as written (`OPEN_QUESTIONS.md`).
 Notable:
@@ -270,8 +270,8 @@ Notable:
 - **Q-S1** — linear placeholder curve; **see §5.7, it will not pass the
   ratchet as a literal.**
 
-Standing, unresolved, and outside this brief's remit: the seed
-census-class ruling, the η native ruling, and the IS-3 deed grant.
+Open, unresolved, and outside this brief's remit: the seed
+census-class decision, the η native decision, and the IS-3 deed grant.
 
 ---
 

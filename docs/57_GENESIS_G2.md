@@ -1,7 +1,7 @@
 # 57 — Genesis G2: the trajectory a fresh universe must show
 
-**Status:** ruled by the operator 2026-10-07 ("a new genesis and start from
-scratch to verify growth trajectory as anticipated"). The old universe
+**Status:** a new genesis, started from scratch to verify that the growth
+trajectory matches the expectations below. The old universe
 (`var/`, 67 worlds, last beat 1127 on 2026-09-15) stays untouched as the
 archive. G2 lives in its own var root, `var-g2/`, founded by the compiled
 22-seat roster (`engine/conductor/src/polities.rs`). There is no seeds
@@ -25,7 +25,7 @@ implement; G2 does not test those.
   point, under that temperament. Before the fix, a restart founded it a
   second time as `<sigil>-hearth` at a derived position (`bloom-call` vs
   `bloomcall-hearth` in the archive).
-- **Founding is a choice (fixed for G2, direction of 2026-10-07: give the lines options, freedom and agency).** A pinned seat is the line's
+- **Founding is a choice (fixed for G2: the lines are given options, freedom and agency).** A pinned seat is the line's
   compiled home: one option, not an order. Beside it stand the regime's
   continuous draws and the open orbits (every twelfth of `k` out to 3)
   around every main-sequence star, about 365 options. The physics scores

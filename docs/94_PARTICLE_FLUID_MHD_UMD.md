@@ -1,13 +1,13 @@
 # 94 — Particles in flow: fluid-MHD under the UMD overlay
 
-Design direction (2026-10-25): derive the missing components, fluid MHD and
-the UMD overlay, so that the flow carries the parcels as particles; unitary
-morphodynamics (UMD) is documented in ipsal-autic; earlier the same day:
-no hard exponents of flat squares (second-degree exponents), which create
-rigidity, and the vacuum–continuum inversion is a Möbius inversion through
-the ocean as a jetstream current.
+This document derives fluid MHD and the unitary morphodynamics (UMD) overlay
+for era 1's motes, so that the flow carries them as particles with pressure,
+density, drag, field and current. Two constraints apply: no second-degree
+exponents (squares), which make the medium rigid, and the vacuum–continuum
+inversion is a Möbius inversion through the ocean as a jetstream current.
+UMD is specified in ipsal-autic.
 
-Status: derived, not built. Read against: ipsal-autic
+**Status:** derived, not built. Read against: ipsal-autic
 `docs/implementation/phase_24_5_kinematic_substrate_layer_discipline.md`
 (the thermodynamics → kinematics → UMD stack, K-step discreteness,
 SUBSTRATE_C, rotor transport, the refused patterns) and

@@ -1,6 +1,6 @@
 # 77 — The physics to define (docs/76's undefined rows)
 
-Operator (2026-10-13): the physics is defined, and the story emerges from it
+The physics is defined first, and the story emerges from it
 (docs/76). These are the rows docs/76 found undefined, each derived on its own
 terms. Facts were read from the code on 2026-10-13.
 
@@ -20,7 +20,7 @@ cannot emerge as the physics stands. Every story element about territory
 (colonizing several planets, faltering, realms over mass, wars over it)
 needs shared space first.
 
-## 1. Shared space: stars no line holds (needs the operator's ruling)
+## 1. Shared space: stars no line holds (open decision)
 
 - **Derivation.** The bounce distributes elements into stars and planets
   (docs/76); civilizations arise only where a planet's physics allows life
@@ -89,7 +89,7 @@ where disputes start and where a realm's steward has something to rule; war
    at each bounce.
    - Done-when: a gate account line per gate, no reading → a reading.
    - Witness: the builders' STAMP receipts.
-2. **Shared space (1)**, on the operator's ruling.
+2. **Shared space (1)**, once decided.
    - Done-when: stars without lines 0 → > 0; orbs charted around stars not a
      line's own 0 → > 0.
 3. **Control and contest (2, 3)**, readings once 2 stands.

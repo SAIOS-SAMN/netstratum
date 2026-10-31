@@ -1,6 +1,6 @@
 # 20 — The founding market
 
-**Status:** law (operator ruling, 2026-08-02). Subordinate to
+**Status:** law. Subordinate to
 `00_CHARTER.md`. Supersedes the founding half of
 `04_CIVILIZATION_GENESIS.md` §4 and extends `01_ECONOMY.md` §2.
 
@@ -14,28 +14,29 @@
 
 ---
 
-## §0 The supremacy clause
+## §0 The precedence clause
 
-> **The operator's ruling stands above any written law: where written
-> rules violate the ruling's trajectory, the written rules are wrong.**
+> **A standing design decision takes precedence over written text:
+> where written rules contradict the decision's direction, the written
+> rules are wrong.**
 
-Inscribed law is a record of rulings, never a source of authority
-against one. Where a document contradicts a standing ruling, **the
-document yields and is struck** — it is not weighed against the ruling
-and it does not get to argue from seniority. Charter §11's one-truth
+Written law is a record of decisions, not a source of authority against
+one. Where a document contradicts a standing decision, **the document
+is corrected and the old text struck** — it is not weighed against the
+decision, and its age gives it no precedence. Charter §11's one-truth
 discipline still binds the correction: the old text is struck in place
 with its reason, never silently rewritten.
 
-**This clause does not suspend the kernel.** A ruling changes what the
-game is; it does not change what a receipt means, and `lawful` still
-refuses an unlawful step from anybody. The operator directs the world;
-the operator does not get a bypass on arithmetic. That is the same
-constraint `47_REGISTRY` §4d puts on the ancient's seat, applied to the
-seat that writes the rulings.
+**This clause does not suspend the kernel.** A design decision changes
+what the game is; it does not change what a receipt means, and `lawful`
+still refuses an unlawful step from anybody. Whoever sets the design
+gets no bypass on arithmetic. That is the same constraint `47_REGISTRY`
+§4d puts on the ancient's seat, applied to the seat that sets the
+design.
 
 ## §1 Founding is an acquisition, never A derivation
 
-**The flow, as ruled:**
+**The flow:**
 
 ```text
 1. new user spins up the code
@@ -104,9 +105,8 @@ first economic event in a civilization's life and the point at which the
 baseline economy starts turning.
 
 **Who receives it follows the seat-scope ladder** (`47_REGISTRY` §4a).
-**Not the ward** — warding is a colony-level shield an elder happens to
-hold on its own planet, and it names no scope (operator ruling
-2026-08-02). The tithe goes to the seat whose standing covers where the
+**Not the ward**, because warding is a colony-level shield an elder
+happens to hold on its own planet, and it names no scope. The tithe goes to the seat whose standing covers where the
 founding lands:
 
 ```text
@@ -130,18 +130,18 @@ in-game-currency leases, which *never touch the chain*. **A new player
 still needs no wallet, and the tithe is not pay-to-win** — it buys a
 place to stand, never a rule advantage (`01_ECONOMY` §5.1, §5.2, intact).
 
-**This draft's own line here is struck** (operator, 2026-08-02). It held
-"the tithe rate, whether one-time or recurring, who sets it" for an
-operator ruling. **There is no rate to rule.** The tithe is not a
+**This draft's own line here is struck.** It held "the tithe rate,
+whether one-time or recurring, who sets it" as an open decision.
+**There is no rate to set.** The tithe is not a
 percentage anybody sets — it is a continuous accrual against real
 holdings, derived at the touch. See §6a, which builds the algorithm
 instead of asking for the number.
 
 ## §4 The viability law — every offered type must be able to flourish
 
-> **"Any civ that can be brought online — new or recurrent — must be
-> accounted for: hot, cold, thermal, plasma. These all need capacity to
-> grow and flourish."**
+> **Every civilization that can be brought online, new or recurrent,
+> must be accounted for — hot, cold, thermal, plasma — and each needs
+> the capacity to grow and flourish.**
 
 **If a type appears on the founding list of §1, a viable founding site
 for it must exist and be reachable by §2.** A type the game offers and
@@ -184,7 +184,7 @@ somewhere it can live.
 
 ## §5 The purse — a civilization's economy, held together
 
-**Ruled 2026-08-02.** A new player needs no wallet (external, deferred —
+A new player needs no wallet (external, deferred —
 §8), but a civilization needs a **purse**: the thing that holds its
 economy together across everything it owns.
 
@@ -204,8 +204,8 @@ purse(line) = the aggregate read across the orbs that line holds,
               with each orb's due settled at the read's stamp
 ```
 
-**The purse is A projection, not A touch** (ruled 2026-08-02; this
-document's first draft said the opposite and is struck):
+**The purse is A projection, not A touch** (this document's first draft
+said the opposite and is struck; the reason follows the formula):
 
 ```text
 purse(line) = Σ over the line's orbs of ( store − demurrage_due(orb, …) )
@@ -226,20 +226,20 @@ possible until a line's economy adds up to one number.
 
 ## §6 The algorithms — nothing here is a constant
 
-**Operator rulings, 2026-08-02 (relayed spec + this lane's audit against
-the tree).** §6 formerly listed five "open questions" awaiting a number.
-**That was the wrong shape** — each was a constant standing in for an
-algorithm. The rulings below give the functions. **Two of the four do
-not compute against the engine as specified, and are inscribed with the
-defect named rather than transcribed.**
+**Specification, with this lane's audit against the tree.** §6 formerly
+listed five "open questions" awaiting a number. **That was the wrong
+shape** — each was a constant standing in for an algorithm. The
+subsections below give the functions. **Two of the four do not compute
+against the engine as specified, and are recorded with the defect named
+rather than transcribed.**
 
 This is FUNCTION-1 (`12_UNION` §4) applied where the drafts forgot it:
 **readings stay derived, never declared.**
 
 ### 6a. The tithe — capture, and decay as its residual
 
-**Rewritten syntropic (operator ruling 2026-08-02). Every prior draft of
-this section is struck.** They built the tithe as a share of
+**Rewritten in the syntropic form. Every prior draft of this section is
+struck.** They built the tithe as a share of
 destruction: decay split into a skim and a burn. **That is negentropic —
 it makes loss the primary object and the ward's income its shadow — and
 Charter §2a rules it out in terms this section ignored:** *the
@@ -328,8 +328,7 @@ without a receipt rather than at a value derived twice.
 
 ### 6a-bis. No absolutes — the threshold is the defect
 
-**Operator ruling 2026-08-02, and it generalises a defect the kernel
-lane already paid for.** `ease_of` tested `condition == 5`: four fifths
+**This generalises a defect the kernel lane already paid for.** `ease_of` tested `condition == 5`: four fifths
 of the tech tree bought nothing and condition 5 became a strategy
 target. P3 replaced that cliff with a gradient. **The same defect is
 present wherever this document tests a hard boundary**, and it is struck
@@ -383,7 +382,7 @@ scale, and §7 binds it to become a reading when one exists.
 **Still uncovered, and named:** this prices an orbit change only. A
 commission that changes albedo, commissions a different star class, or
 raises a system where none stood has no price under this formula. The
-paid service of §2b is broader than the ruling covers.
+paid service of §2b is broader than the specification covers.
 
 ### 6c. Substrate coverage — a reading defined everywhere
 
@@ -452,7 +451,7 @@ nears hyperthermal. The first pin written for this assumed monotone in
 temperature and failed; the correction is recorded in the test.
 
 **The recurring value.** Coverage is not a habitability score sitting on
-its own — it prices what a deposit yields forever:
+its own — it prices what a deposit yields indefinitely:
 
 ```text
 recurring_value(stock, world) = regeneration(S) × coverage(T)
@@ -524,12 +523,12 @@ world/tick.rs:403   gates the accrued-ember leak
 temperature.** `in_vault = t4 <= cryo_vault_max4()`. A cold world is
 lossless because it is cold.
 
-**The asymmetry, which is the actual finding.** The one deed that
+**The asymmetry, which is the actual finding.** The only deed that
 captures thermal headroom — the cryo-lattice array — is itself gated on
 already being cold (`tick.rs:274`: `t_eq4 <= cryo_vault_max4()`). **So a
 warm world has no deed available to improve its retention. Not an
 expensive one. None.** Cold worlds inherit losslessness; warm worlds
-leak forever and may do nothing about it. That is a verdict, not a game,
+leak without end and have no deed to change it. That is a verdict, not a game,
 and it fails §4's viability law by leaving a whole class of world with
 no path.
 
@@ -576,8 +575,7 @@ world something that does not yet do anything.
 
 ### 6f. The two-sided law — every reading needs its inverse
 
-**Operator ruling 2026-08-02, and it generalises §6a, §6c and §6e into
-one defect.** Each of those was a reading that named a lack and had no
+**This generalises §6a, §6c and §6e into one defect.** Each of those was a reading that named a lack and had no
 term for its opposite. The pattern is systemic and it is visible in one
 struct.
 
@@ -641,8 +639,8 @@ region of that reading rather than a boolean recomputed every tick.
 
 ### 6f.3 Expansion three — famine requires flourish
 
-**This is the one that builds capacity, and it is the reason the other
-two matter.**
+**This expansion builds capacity, and it is the reason the other two
+matter.**
 
 `famine` names which resources a colony lacks. Nothing names which it
 holds in abundance. So the state can express contraction and cannot
@@ -680,8 +678,8 @@ type system instead of through prose.
 
 ### 6g. The regenerating asset — the economy has no capital, only faucets
 
-**Operator ruling 2026-08-02.** *"How does the underlying asset
-regenerate itself?"* **Measured answer: there is no underlying asset.**
+**The question:** how does the underlying asset regenerate itself?
+**Measured answer: there is no underlying asset.**
 
 **Nothing in the engine depletes, and nothing regenerates.** A scan for
 depletion, regeneration, replenishment or exhaustion across `engine/`
@@ -701,8 +699,8 @@ VEINS   an assay mints richness × elapsed. `richness` is set once at
         confirmed across every site that touches it.
 ```
 
-**So extraction draws on nothing.** An extractor produces iron forever;
-a vein yields forever at a fixed richness. **"Unbounded extraction"
+**So extraction draws on nothing.** An extractor produces iron without limit;
+a vein yields indefinitely at a fixed richness. **"Unbounded extraction"
 is exact, and its consequence is not exhaustion — it is that value
 without scarcity is not an asset.** There is nothing to own, nothing to
 improve, nothing whose condition can change, and therefore nothing worth
@@ -761,7 +759,7 @@ FLOURISH     surplus (§6f.3) reinvests into stock or into regeneration,
 **Why research must act on regeneration rather than on yield.** A
 multiplier on a flow is a one-time step: it lifts the line and stops.
 **A rise in the regeneration rate raises the ceiling itself**, so the
-same research pays forever and pays more the larger the stock it acts
+same research pays on every later tick and pays more the larger the stock it acts
 on. That is a growth mechanism rather than a bonus, and it is the
 difference between a tech tree and a list of upgrades.
 
@@ -777,18 +775,18 @@ operand, and it is capital.**
 It does not say extraction should be punished, or that scarcity should
 be imposed as a brake. **A stock that regenerates is a more generous
 economy than a faucet, not a meaner one** — a faucet is capped at its
-setting forever, while a stock a civilization tends can grow without
+setting permanently, while a stock a civilization tends can grow without
 bound. The generative side leads here too (Charter §2a): the law names
 what renews, and depletion is what happens when renewal is outrun.
 
-**Held for the operator, since these set the economy's whole shape:**
+**Open decisions, since these set the economy's whole shape:**
 whether stocks are per-orb, per-vein or per-world; whether regeneration
 is linear or proportional to the remaining stock; and whether a stock
 can be driven to zero at all, or only asymptotically toward it.
 
 ### 6h. Diversification — the periodic table, and the three scales
 
-**Operator ruling 2026-08-02.** Stocks (§6g) are one quantity per
+Stocks (§6g) are one quantity per
 resource, and the resource vocabulary is seven names. That is not an
 economy with assets in it; it is an economy with seven faucets that now
 regenerate.
@@ -829,8 +827,8 @@ Red · BrownDwarf                  [1, 0, 2, 1]      cool, small
 remnants (WD/RG/NS/WS)            [0, 2, 1, 2]      the forges
 ```
 
-**A world's matter is drawn from its own star's bands**, exactly as the
-operator's "distribute at world creation" asks — seeded by the star
+**A world's matter is drawn from its own star's bands**, exactly as
+distributing matter at world creation requires — seeded by the star
 class and the element hash, deterministic, replayable, no oracle. Four
 families × three tiers is twelve classes standing today. **The expansion
 is to give those classes real periodic identity — group and period, with
@@ -884,7 +882,7 @@ moment one deposit moves. The purse already runs this correctly: it is a
 projection, not a vault. **GDP inherits that discipline or it inherits
 the drift.**
 
-**Held for the operator, since these set the table's shape:** how many
+**Open decisions, since these set the table's shape:** how many
 families and tiers the expanded table carries; whether a claim can be
 partial (a share of a deposit) or whole only; and whether GDP reads
 sustainable draw, actual draw, or both — the gap between them being
@@ -893,7 +891,7 @@ regeneration.
 
 ### 6i. The consumer — transducers, and the derivative suite already half-built
 
-**Operator ruling 2026-08-02.** §6h found elements banked and consumed
+§6h found elements banked and consumed
 by nothing. **Two consumers are owed, and they are different in kind:**
 industry must consume matter, and a market must consume claims.
 
@@ -926,7 +924,7 @@ multiplier (§6g).
 
 ### 6i.1b The name is struck — covenant was a layer confusion
 
-**Operator ruling 2026-08-02, landed.** *Covenant* named a commercial
+**Landed.** *Covenant* named a commercial
 delivery contract, which put a collateralized margin position over
 physical resources in the vocabulary of moral and relational commitment.
 **Two layers, one word.**
@@ -953,8 +951,8 @@ only the symbol changed. A tag registry entry may never be repurposed
 code was always called. 534 workspace tests green including the wire
 round-trips, clippy clean, zero `Covenant` occurrences left in code.
 
-**And the name is contained, not reserved** (operator ruling
-2026-08-02, correcting this section's first draft). The draft said the
+**And the name is contained, not reserved** (correcting this section's
+first draft). The draft said the
 name was "free for the relational layer to take when it lands." **That
 was wrong in the same way the original naming was.**
 
@@ -1045,8 +1043,7 @@ without carrying its usual pathology** — not by capping leverage, but by
 requiring that every position can state, exactly and in matter, what it
 is a claim on.
 
-**RE-hypothecation: bounded, never banned** (operator ruling
-2026-08-02). A claim may back a secondary claim, subject to two
+**RE-hypothecation: bounded, never banned.** A claim may back a secondary claim, subject to two
 conditions that are both checkable at the door:
 
 ```text
@@ -1064,7 +1061,7 @@ would let through.
 
 ### 6j. The harvest law — two clocks, and only one forgives
 
-**Operator ruling 2026-08-03. Landed with the bounds measured.**
+**Landed with the bounds measured.**
 
 ### 6j.1 The bounds
 
@@ -1093,7 +1090,7 @@ substrate takes **both** terms, so the ceiling falls by the square of
 the loss:
 
 ```text
-substrate down 10%  →  81.0% of the recurring ceiling, FOREVER
+substrate down 10%  →  81.0% of the recurring ceiling, PERMANENTLY
 substrate down 25%  →  56.2%
 substrate down 50%  →  25.0%
 ```
@@ -1102,9 +1099,9 @@ substrate down 50%  →  25.0%
 take again, squared.**
 
 **No penalty is levied and none is needed.** This is the arithmetic of
-the logistic, not a judgement about greed — Charter §2a's ruling that
-physics needs no penalty, holding exactly where a moral frame would
-otherwise have been reached for.
+the logistic, not a judgement about greed. It follows Charter §2a rule 1:
+the constructive rule (the logistic) carries the outcome, and no penalty
+is added to it.
 
 ### 6j.3 Clean and unclean, defined without A moral term
 
@@ -1163,9 +1160,9 @@ the encasement shell captures stellar heat into embers, and embers mint
 *only* by capture and never by fiat. **"Harvest the star, not the world"
 is not a moral; it is the shape of the bounds.**
 
-### 6j.7 Relay corrections (2026-08-03)
+### 6j.7 Corrections against the tree
 
-**Three rulings arrived against a file that no longer exists.** The
+**Three specified items referred to a file that no longer exists.** The
 bounds were reported as "locked into `world.rs`"; `world.rs` was
 decomposed into a fifteen-file organ on 2026-08-02. Where they actually
 live:
@@ -1178,7 +1175,7 @@ yield × location              cfe/src/world/stock.rs   recurring_value
 the location multiplier       cfe/src/thermal.rs       coverage
 ```
 
-**One ruling contradicts its own derivation and the derivation is
+**One item contradicts its own derivation, and the derivation is
 right.** It gives the degradation term as `r_effective = r − δ`
 (subtractive) in prose, and as `(1−δ)r · (1−δ)S_max` in the formula
 immediately above it. **The multiplicative form is the one implemented**,
@@ -1186,7 +1183,7 @@ because it is the one that yields the quadratic collapse both agree on,
 and because a subtractive rate can go negative — a stock that regenerates
 backwards is not a degraded world, it is a broken invariant.
 
-**Adopted as ruled:**
+**Adopted:**
 
 1. **Clean draws never touch the substrate.** Pinned: 500 ticks of
    sustained over-draw move `current` alone; `rate`, `ceiling` and the
@@ -1211,8 +1208,8 @@ declines.
 
 ## §7 The base-level accounting law
 
-> **"Everything needs accounting for at the microscopic/base level, with
-> algorithms that breathe with the system."**
+> **Everything is accounted for at the base level, by algorithms that
+> move with the system.**
 
 **Every quantity this economy uses is derived from measured state at the
 finest grain the engine holds, and no quantity is a policy number.** A

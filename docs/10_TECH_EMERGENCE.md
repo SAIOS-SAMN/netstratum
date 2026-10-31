@@ -3,8 +3,8 @@
 **Status:** design — lands as TECH-1 after BOT-THERM; the landing that opens
 SINK-1's deferred research gate. Constants are placeholders.
 
-**The ruling (operator, 2026-07-27):** no static external tech tree — a
-hardcoded ladder makes every civilization climb the same line. Technology
+**The design rule:** no static external tech tree, because a hardcoded
+ladder makes every civilization climb the same line. Technology
 crystallizes: nodes emerge deterministically from each world's own chronicle
 under sustained pressure or surplus. No two worlds need share a tree.
 
@@ -98,7 +98,7 @@ lattice) still reads the headroom, so the boost binds only beside a
 doctrine-boosted radiator, never minting sink past the physics; the
 long stores earned on four apertured winters (orange-star keeper, leaking
 and sub-mesic) with the ease measured on the receipt — 32 ticks at
-the halved flat rate settle exactly 1/2. Two laws inscribed by
+the halved flat rate settle exactly 1/2. Two laws established by
 measurement along the way: a vault colony runs on fuel and steel (the
 array's build cost + upkeep struck iron famine at tick 41 in the
 first draft — the ECON-E burn bites beside the lattice), and the
@@ -109,7 +109,7 @@ canonical names.
 
 ## 3c. The naming law landed; the succession law landed (2026-07-30)
 
-**Naming landed (§2 law 4, operator ruling):** a node's name is never a
+**Naming landed (§2 law 4):** a node's name is never a
 rung label. `tech_node_name` composes it from word tables — the
 condition fixes the concept (insulation · discipline · deepening ·
 doctrine · stores), the node hash draws the voice — so two lines
@@ -128,9 +128,9 @@ never a reset button — it refuses pure while any orb stands unfamished
 interrupted-vs-collapsed triage recorded as deferred). On the deed the
 living tree drops to the world's kernel — the stellar leap is the
 world's own fact, not the line's — and every other node leaves the
-tree while standing in the chronicle forever. The successor's
+tree while remaining in the chronicle. The successor's
 conditions then evaluate over receipts that include the predecessor's
-whole history (the deposit sheet walks the one chronicle — no new
+whole history (the deposit sheet walks the single chronicle — no new
 crystallizer code was needed; the engine read this way from TECH-1b's
 first day), and its node ids seed from roots that contain that history
 plus the deed — novel by construction: shaped by the old famines and
@@ -186,7 +186,7 @@ science), conductor build-step routing, and the venture deed
 shield — every aperture refuses both directions (`TheWardHolds`)
 until `lift_ward(claimer, depth)` opens the depth gate (ceiling 5,
 placeholder; depth is the lens's solves reading passed by the
-caller); the lift names its claimer forever; deeds run in order,
+caller); the lift records its claimer permanently; deeds run in order,
 typed. Open as WARDEN-1b: the elder's genesis seeding (the roster
 `elder` flag), the standing forge task at FORGE-2a saturation, and
 the template grant through the council gate. The original spec:
@@ -212,7 +212,7 @@ trades nothing, and refuses every aperture until its gate is solved.
   none — the elder holds no seat and no vote), the standing-task gate,
   the template grants, vectors. Constants placeholder.
 
-## 3f. MANU-1 — the instrument manufacturing deed (ruled + landed 2026-07-31)
+## 3f. MANU-1 — the instrument manufacturing deed (landed 2026-07-31)
 
 Manufacturing is the overlay the stack was missing: **technology +
 understanding + industry**. Industry makes resources; the base-7
@@ -230,7 +230,7 @@ condition, voice drawn from its tech-node hash — never a rung label.
 Tag: 78 (claimed at landing; next free 79).
 
 **The scope law.** `EPISTEMIC_REACH = 16` as a global constant is
-struck (non-arbitrary scaling ruling): epistemic scan reach derives
+struck under the non-arbitrary scaling rule: epistemic scan reach derives
 from the highest instrument grade the orb holds —
 
     wrapped-L1 reach = BASE_REACH + instrument grade

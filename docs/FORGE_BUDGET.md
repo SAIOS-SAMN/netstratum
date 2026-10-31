@@ -1,7 +1,7 @@
 # Forge budget — the search bound as a capacity reading, not a constant
 
 **Lane:** `remediations-lane`. **Written:** 2026-08-02, amended same day
-(named coefficients + axial capabilities, operator ruling).
+(named coefficients + axial capabilities).
 **Status:** draft for ratification. Rows **B0–B8** claim their place in
 `EQUATIONS.md` §7 under the row-claim convention (§0.2).
 **Supersedes:** `FORGE_REMEDIATION.md` §5's "not proposed: touching
@@ -9,29 +9,29 @@
 
 ---
 
-## §1 The ruling (operator, 2026-08-02 — restated)
+## §1 The requirement (restated)
 
-> `SEARCH_BUDGET` as a constant is unsound; this needs to be based on the
-> civilizational capacity, not a constant.
+> `SEARCH_BUDGET` as a constant is unsound; the bound is based on the
+> civilizational capacity, not on a constant.
 >
-> consensus is only 1 axiom on a multi-axial coordinated system.
+> Consensus is only one axis of a multi-axial coordinated system.
 >
-> resources should be dynamically produced: if a civ is on 1 planet and
-> sharing with another civ, what happens then? A grant of "200,000" is
-> not justified by sounding nice; the design should set a search
-> minimum and cap this in a syntropic state that allows for the balance
-> between what needs to happen and what "is easy to have happen".
+> Resources are produced dynamically: the bound must account for a
+> civilization on one planet that shares with another. A grant of
+> 200 000 has no stated justification; the design sets a search minimum
+> and a cap, in a syntropic state that balances what needs to happen
+> against what is easy to have happen.
 
 And on this file's first draft:
 
-> coefficients need names: this is an inefficiency that requires
-> remediations — provide axial capabilities and provide summarization
+> The coefficients need names: leaving them unnamed is an inefficiency
+> that requires remediation, by axial capabilities and a summary.
 
-**That correction is upheld and the first draft was wrong.** It left
+**That correction holds, and the first draft was wrong.** It left
 every coefficient unnamed, reasoning that naming them would repeat the
 200 000. Naming is not valuing. A **named** coefficient with an
 unmeasured value is a declared unknown: referenceable, amendable by
-ruling, versionable by epoch, and impossible to inline by accident. An
+decision, versionable by epoch, and impossible to inline by accident. An
 **unnamed** one is a hole that the first implementer fills with a
 literal — which is exactly the causal history of 200 000. §4 names them;
 §7 still refuses to value them.
@@ -42,7 +42,7 @@ literal — which is exactly the causal history of 200 000. §4 names them;
 
 `FORGE_REMEDIATION.md` §1 proved the forge search is **consensus-free**
 and concluded: *"They change neither what verifies nor what mints. They
-do not need Ruling Box 1."* Consensus-neutrality is one axis; the remediation treated
+do not need Decision Box 1."* Consensus-neutrality is one axis; the remediation treated
 it as the whole space — the same failure as the commit before it, which
 reasoned from the *shape* of proof-of-work instead of reading the
 code. Reach one axis, declare the manifold.
@@ -78,7 +78,7 @@ consequences, all `[READ]`:
 
 > **Chapter four's law binds every row** (`EQUATIONS` §0.3): state what
 > the coefficient **measures**, never what it is worth. A name is a
-> handle; a value is a ruling (§7).
+> handle; a value is a decision (§7).
 
 | row | symbol | measures | domain | status |
 |---|---|---|---|---|
@@ -104,7 +104,7 @@ budget(prior, t) = min( β_cap ,
 ```
 
 Integer by construction (a candidate count). `β_floor ≤ β_cap` is a
-standing obligation on the ruling, not an assertion here.
+standing obligation on the chosen values, not an assertion here.
 
 ### 4a. B1 `β_floor` — why a floor is structural, not politeness
 
@@ -127,7 +127,7 @@ universe can read `Entangled` on the sum while no single channel is
 entangled at all — rank standing in one channel, flow in another."*
 `verdict_per_dimension` (Struck 2026-08-04, the vacuity removal) exists for exactly this. A budget from the
 aggregate would hand full resource to a line entangled nowhere.
-Candidate readings for the ruling: the **count** of channels reading
+Candidate readings for the decision: the **count** of channels reading
 `Entangled`; the **minimum** rank across them (strictest — matches
 *"witnessed in every dimension"*); or the **sum** of rank over entangled
 channels only.
@@ -139,7 +139,7 @@ barred, and the bar is already recorded.** `EQUATIONS` §6 **S2** carries
 the live defect:
 
 > *"`syntropy_ratio` collapses all four axes into one scalar and two
-> rules read it"* — against `09` §1.3's ruling that *"no oracle, no
+> rules read it"* — against `09` §1.3's rule that *"no oracle, no
 > single number … the four axes never collapse into one figure"* and
 > §3.4.2's refusal of *"the single goodness number."* *"As written the
 > document and the code contradict."*
@@ -173,7 +173,7 @@ strictest option.
 **The symmetry worth naming:** both sides of B-E1 are multi-axial, and
 both have a recorded defect from collapsing — capacity across `CHANNELS`
 (`bridge.rs:306`), alignment across the four axes (`EQUATIONS` §6 S2).
-The operator's *"multi-axial coordinated system"* is not a framing
+The multi-axial coordinated system of §1 is not a framing
 placed on this law from outside; it is the law's own shape, twice.
 
 ---
@@ -207,7 +207,7 @@ placed on this law from outside; it is the law's own shape, twice.
    floor is what a line lives on meanwhile — which is precisely why
    `β_floor` cannot be zero.
 
-**This is the dynamic production the ruling asks for:** resource is
+**This is the dynamic production §1 asks for:** resource is
 *read*, and where it cannot be read the system says so and pays the
 minimum rather than inventing a number.
 
@@ -238,7 +238,7 @@ changes is which tasks get solved — the economic axis, A3.
 
 ---
 
-## §7 What only the operator can say — the rows awaiting a value
+## §7 Open decisions — the rows awaiting a value
 
 1. **B1 `β_floor`** — a candidate count, or itself a reading (the ground
    extent)?
@@ -259,12 +259,12 @@ changes is which tasks get solved — the economic axis, A3.
 7. **Does capacity re-price the mint?** Today `mint_bound` keys off
    `Difficulty` alone (`kernel/src/lib.rs:845`). If a high-capacity line
    searches more, it solves more of the *same* rung — same reward, or
-   does capacity enter it? Ruling Box 1 territory; this lane proposes
+   does capacity enter it? Decision Box 1 territory; this lane proposes
    nothing.
 
 ---
 
-## §8 The meter is built, and it refuses the ruling — measured 2026-08-02
+## §8 The meter is built, and it refuses the envelope — measured 2026-08-02
 
 `17_CAPACITY` §7 said *build the meter, measure, then rule.* The meter
 is `engine/conductor/examples/capacity_meter.rs` (a reading — appends
@@ -305,9 +305,9 @@ reading is made of cannot exist inside a single-orb book.
    **Therefore flipping Phase 3 today would halt minting entirely.**
    That is a Phase-3 precondition nobody has recorded, and it is found
    here by measurement rather than by argument.
-2. **The ruled envelope evaluates to `β_floor` for every line, forever.**
+2. **The proposed envelope evaluates to `β_floor` for every line, at every beat.**
    With `ρ_D = 0` universally, `β_floor + β_quantum · ρ_D^D` **is**
-   `β_floor`. Executing the ruling on this board replaces one constant
+   `β_floor`. Executing the envelope on this board replaces one constant
    (200 000) with another constant (`β_floor`) and calls it a reading.
    The form is right; the substrate is absent.
 3. **B4/B5/B6 have no signal either.** No alignment axis has posted on
@@ -317,7 +317,7 @@ reading is made of cannot exist inside a single-orb book.
 ### 8c. What this makes the next work
 
 The budget cannot become a reading until the reading becomes reachable.
-Two doors, and the choice is the operator's:
+Two doors, and the choice is open:
 
 - **(a) multi-orb play.** The conductor never settles a second orb, so
   no intra-book relation is possible. Capacity becomes reachable the
@@ -331,9 +331,9 @@ Two doors, and the choice is the operator's:
 
 ### 8d. The entity door is closed — refuted, not deferred
 
-The operator's reachability directive (2026-08-02) reads *"Project
-relational entities into Orb topological nodes … so Orbs populate,
-flows illuminate, and symmetry_foundation carries its active charge."*
+A proposed reachability path projects relational entities into Orb
+topological nodes, so that Orbs populate, flows illuminate, and
+`symmetry_foundation` carries its active charge.
 The meter reported 3 entities per book against 1 orb, which makes the
 idea natural. **It cannot work, and the reason is structural.** `[READ]`
 
@@ -359,8 +359,8 @@ re-proposed.
 
 ### 8e. B0 is decommissioned — landed 2026-08-02
 
-Operator ruling: *"do not cap rungs and do not set a static
-SEARCH_BUDGET — uncap or no cap."* Landed in this lane:
+Rungs are not capped and no static `SEARCH_BUDGET` is set, because a
+constant bound is what §1 finds unsound. Landed in this lane:
 
 - `SEARCH_BUDGET = 200_000` **deleted** from `solver/src/search.rs`,
   and with it both truncation branches (`tested > BUDGET`, the `room`
@@ -460,11 +460,10 @@ costs. A search budget wants the sum; a per-axis bound wants the shell.
 **One authority is owed** (`EQUATIONS` §0.2) — recorded, not resolved
 unilaterally, because `motion::envelope` is kernel-lane's.
 
-## §8bis The ruling, amended — depth is the resource, and the constants dissolve
+## §8bis The envelope, amended — depth is the resource, and the constants dissolve
 
-**Operator ruling 2026-08-02 (the Ruling Box) recorded as given, then
-amended on the operator's instruction (*"change the ruling"*) against
-the meter's readings.** The received envelope was:
+**The Decision Box envelope, recorded as given, then amended against the
+meter's readings.** The received envelope was:
 
 ```
 budget = β_floor + β_quantum · ρ_D^D                    β_cap ≤ 52 060 (B7)
@@ -495,8 +494,8 @@ budget(prior, rung) = frontier( V, δ(prior, rung) )
 | 30 | 1 | 31 | 931 | 27 931 |
 | 37 | 1 | **38** | 1 407 | **52 060** |
 
-**`frontier(37, 3) = 52 060` — exactly the bound the Ruling Box named
-for `β_cap`.** The operator's number was already the derived quantity;
+**`frontier(37, 3) = 52 060` — exactly the bound the Decision Box named
+for `β_cap`.** The Decision Box's number was already the derived quantity;
 it simply had not been written as one. `β_cap` is therefore not chosen
 at all: **it is the exhaustive sweep at the rung's own `word_len`.**
 
@@ -523,7 +522,7 @@ unknown(prior) > 0   ⇒   δ = 1                                              (
 ### 8bis.c B2 `ρ_D` — Both poles and the charge, never rank alone
 
 The received `ρ_D^D` keyed on rank alone, which re-commits the
-operator's own ruling of the same day (`bridge.rs:176-199`): the whole
+error that `bridge.rs:176-199` records: the whole
 definition is wrong if dimensional capacity is a count of
 rooms. Rank is the dimension of the cycle space; `holonomy` carries
 each cycle's exact charge; *"a universe with one heavily-charged cycle
@@ -539,13 +538,13 @@ earned(prior) = # channels l ∈ 0..CHANNELS such that
 Per channel (never the aggregate — `bridge.rs:306`), both poles (never
 `Entangled` inferred from rank — `boundary.rs:147`), and the charge read
 as a magnitude (never replaced by its count — `18` §2b). **`θ_charge` is
-the one genuinely new coefficient the amendment introduces, and it is a
-volume threshold — precisely the term the received ruling was missing.**
+the only genuinely new coefficient the amendment introduces, and it is a
+volume threshold — precisely the term the received envelope was missing.**
 
 ### 8bis.d B4/B5/B6 — alignment enters the arithmetic, as a cap on depth
 
 The received box had no place for `β_ceiling`, so axis **A5 did not
-enter the arithmetic at all** — dropping the axis the original ruling
+enter the arithmetic at all** — dropping the axis §1
 asked for. Amended: alignment caps the depth.
 
 ```
@@ -597,7 +596,7 @@ Reading the depth ladder against `Difficulty::level` and `mint_bound`:
 **Two numbers, not eight.** Everything else is now arithmetic on `V`
 and the rung. And both remaining numbers are **unmeasurable on the
 current board** — §8's finding stands: no line carries charge or a
-posted axis, so `θ_charge` and `σ_gate` cannot be ruled against
+posted axis, so `θ_charge` and `σ_gate` cannot be set against
 observation until reachability lands (task #15).
 
 **The pattern across all three collapses now recorded** — aggregate over
@@ -609,7 +608,7 @@ scalar aggregate wherever the system computes.* §9 is the standing cure.
 
 ## §8ter The cross-book read — landed 2026-08-02
 
-Operator ruling: *"open the cross-book read via entanglement."* Landed
+The cross-book read opens via entanglement (§8c door (b)). Landed
 in the kernel, witnessed red-first.
 
 ### 8ter.a The law
@@ -682,12 +681,12 @@ when a lane can be paid for.
 
 ## §8quinquies The triangle was one theorem — the correction
 
-**Operator ruling 2026-08-02:** triangles have limited use; the inverse
+**The correction:** triangles have limited use; the inverse
 logic stands on its own, convergence and divergence both, convergence
 always prevailing. The aim is not to rest on single theorems but to make
 them all work together to balance the universes created.
 
-**Upheld. §8quater item 6 over-built on one reading.** It made the
+**It holds. §8quater item 6 over-built on one reading.** It made the
 cyclomatic arm — holonomy, "triangles beat pairs" — the headline
 feature, and a system balanced on one theorem is a system with one
 failure mode. The correction is not that the cycle arm is wrong; it is
@@ -753,7 +752,7 @@ arm needs its own reading of *how much* convergence counts, and whether
 
 ## §8quater What this unlocks
 
-The operator's question: which features does this unlock? Ranked by
+The question: which features does this unlock? Ranked by
 what becomes possible that was not — each traced to the law that opens.
 
 **Immediately, from the landing itself:**
@@ -841,7 +840,7 @@ satisfying the manifold**; §2 is what that error cost twice.
 - **reads** `Difficulty`
 - **decides** `mint_bound` — the rung→reward table (0 · 0 · 0 · 1 · 4 · 7)
 - **refuses** `Unlawful::MintWithoutStanding` (Struck 2026-08-04, the vacuity removal)
-- **owns** the rung→reward table — **Ruling Box 1, untouched here**
+- **owns** the rung→reward table — **Decision Box 1, untouched here**
 - **authority** `kernel::mint_bound` (`kernel/src/lib.rs:845`) · **landed**
 - **budget's crossing:** indirect but real. Budget changes *which tasks
   get solved*, hence mint frequency — never mint *amount*.
@@ -853,7 +852,7 @@ satisfying the manifold**; §2 is what that error cost twice.
   `Telescope` or `LockOn`, never by assuming absence
 - **owns** **B1 `β_floor` · B2 `ρ_D` · B3 `β_quantum` · B8 `ε_unknown`**
 - **authority** `kernel::bridge` · `17_CAPACITY` · **landed (unread by the forge)**
-- **budget's crossing:** this axis *is* the ruling. It is the axis the
+- **budget's crossing:** this axis *is* the requirement of §1. It is the axis the
   flat constant never consulted at all.
 
 ### A5 · syntropic — *does it respect the balance law?*

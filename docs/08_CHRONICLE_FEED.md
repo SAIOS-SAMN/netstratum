@@ -5,7 +5,7 @@ course-correction problem is solved by going diegetic: no WebGL, no render
 ambiguity. Civilizations speak — one journal entry per year — and the feed
 is the observation surface.
 
-**The premise (operator):** the player should be able to see what a
+**The premise:** the player should be able to see what a
 civilization is doing and find entertainment in it — whether it is building
 spaceships or harvesting honeydew, which otherwise no one knows. Growth, stagnation, needs, and leisure
 become readable — and therefore economically actionable intelligence.
@@ -15,7 +15,7 @@ become readable — and therefore economically actionable intelligence.
 1. **The journal is a rendering, never state.** No new chronicle events, no
    receipts, no simulation reads. It generates lens-side from the
    chronicle + committed state (the lens law — MIRROR/ANTI-MIRROR
-   deprecated, 12 §2c; a lens derives from the one chain and holds no
+   deprecated, 12 §2c; a lens derives from the single chain and holds no
    copy). Deleting every journal changes nothing; regenerating
    reproduces it byte-identically.
 2. **Deterministic narrative.** Same chronicle ⇒ same journal. Flavor

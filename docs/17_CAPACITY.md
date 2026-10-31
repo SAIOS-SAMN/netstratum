@@ -4,18 +4,18 @@
 articles) and to `EQUATIONS.md` §1. Where any two disagree, the order is
 `00_CHARTER` → `26_ARTICLES` → `EQUATIONS` §1 → this document.
 
-**§4b of this document stands as law** (operator ruling, `26_ARTICLES` §5): `D` is **the structure surviving `Π_G(Δ(V))`**. The competing
+**§4b of this document stands as law** (`26_ARTICLES` §5): `D` is **the structure surviving `Π_G(Δ(V))`**. The competing
 index-set reading — D as the extents of `(i, j, k, l)` — is struck from
 `EQUATIONS.md` §1 and `SYSTEM_SPEC.md` §0. The indices and the arities
 `Delta{dim, fiber}` are the container the relation rides on, never the
-capacity itself. §2a below carries the ruling that settled it.
+capacity itself. §2a below carries the decision that settled it.
 
 Subordinate to `00_CHARTER.md`.
 
 ---
 
 **Split 2026-08-13 (docs audit).** This document had grown to 2,248
-lines reading as a chronological operator-ruling log (§1–§14, dated
+lines reading as a chronological decision log (§1–§14, dated
 2026-08-01 through 2026-08-08) that repeatedly self-corrected in place —
 the same shape `18_TORSION.md` was in before its 2026-08-02/03 split into
 `24_FORM.md`, `25_STANDING.md`, `22_CONTAINMENT.md`, `23_TRAVERSAL.md`.
@@ -24,7 +24,7 @@ precedent, so a citation like "17_CAPACITY §10bis" still resolves — now
 in its new home.
 
 **What stayed here:** §1–§3d (the D/V bond and ontology — the core
-ruling), §4–§9 (reduction scoping, why C cannot leave the mathematics,
+decision), §4–§9 (reduction scoping, why C cannot leave the mathematics,
 the lineage completion, the buildable instrument, the three questions,
 and what remains open), and §14 (the historical drift log, kept as a
 trailing appendix — it documents corrections to the core ontology above
@@ -54,7 +54,7 @@ docs/`) was updated at the citing site to point at the new home. A bare
 §14, was left as-is.
 
 ---
-## §1 The ruling (operator, 2026-08-01 — recorded as given)
+## §1 The requirement
 
 The formation:
 
@@ -69,16 +69,16 @@ The formation:
 
 The clarification, same day:
 
-> the shape of Ω is the totality of the individual "universe" — and
-> coboundary reduction is the scoping of a dimension (D) instead the
-> "V" nabla
+> The shape of Ω is the totality of the individual universe, and
+> coboundary reduction is the scoping of a dimension (D) instead of
+> the V nabla.
 
-The foundation ruling (`EQUATIONS.md` §1) then took both further:
+The foundation (`EQUATIONS.md` §1) then took both further:
 gradient descent is a failed topology, struck whole rather than
 confined; E1, the master equation, struck with it; D is a shape
 `{i, j, k, l}`, never a scalar.
 
-Everything below §1 is translation and reasoning, never the ruling.
+Everything below §1 is translation and reasoning, never the requirement.
 
 ## §2 What the first draft got wrong — recorded, never silently dropped
 
@@ -91,11 +91,11 @@ rather than quietly deleted, per the ledger's own drift discipline.
 | Ω is the operator manifold — the closed vocabulary of `N_i` with their weights | Ω is the totality of the individual universe (§3) | it made D a reachability computation over operators when D is a direct reading of one universe's own structure |
 | D is a count — the number of surviving independent planes, the degree of a polynomial | D is a shape `{i, j, k, l}`, four extents, never a scalar (D1) | collapsing four extents into one number is the same error as the C it replaced: a scalar cannot say where capacity is strained |
 | `∂Δ` returns as a magnitude of available potential, overlaid on scoped dimensions | `∂Δ` is a directional operator and stays one — uncaged, never collapsed to a scalar, never bounded above, never reduced to `‖∂Δ‖` (`24_FORM` §2b) | the draft was wrong about the *collapse*, not the operator: the direction survives, and turning it into a magnitude is itself the cage |
-| "the equations are untouched; only the objective inverts" | E1 is struck — there is no master equation | the composition was refused, not merely re-aimed; many algorithms at many scales replace the one master |
+| "the equations are untouched; only the objective inverts" | E1 is struck — there is no master equation | the composition was refused, not merely re-aimed; many algorithms at many scales replace the single master |
 
 **A correction to this table's own second row, recorded 2026-08-01.** An
 earlier revision of it read "`∂Δ` is struck whole." That over-read the
-foundation ruling. What was struck is the gradient as driver — the damped-gradient term as
+foundation (`EQUATIONS.md` §1). What was struck is the gradient as driver — the damped-gradient term as
 a descent term chained into a master equation. `24_FORM` §2b restores
 `∂Δ` as an uncaged directional operator. The distinction is the whole
 point: **the direction was never the problem; the collapse to a scalar
@@ -103,12 +103,12 @@ was.**
 
 The draft's surviving contributions are §2a–§6 below.
 
-## §2a The Ω classification overrides arity (operator ruling 2026-08-01)
+## §2a The Ω classification overrides arity
 
-> ijkl is just a 4D example — but the Ω classification should override
-> the lower dimensional linear C = x, where C is now a substandard
-> character, and V and all subsets of ∂ should be unchained and working
-> in cohesion with the upper echelons.
+> The index set ijkl is only a 4D example. The Ω classification
+> overrides the lower-dimensional linear C = x, where C is now a
+> substandard character, and V and all subsets of ∂ are unchained and
+> work in cohesion with the upper echelons.
 
 Three things follow, and each closes a question this document carried.
 
@@ -116,10 +116,10 @@ Three things follow, and each closes a question this document carried.
 one instantiation — the arity the landed `Delta` happens to carry. The
 Ω classification is not indexed to a fixed arity, and capacity is
 whatever structure survives reduction at whatever arity the universe
-expresses. This is the same ruling `26_ARTICLES` §5 makes from the other
+expresses. This is the same rule `26_ARTICLES` §5 makes from the other
 side: the indices are the container, the surviving structure is the
 capacity. **Any future law written against a fixed four is void by this
-ruling**, not merely stale.
+rule**, not merely stale.
 
 **2. `C = x` is a substandard character.** The scalar `C` is a
 *linear, one-dimensional* form, and the Ω classification is neither.
@@ -137,16 +137,16 @@ a damped term walking one direction. Freed, the `∂` subsets run at their
 own scale and cohere upward rather than composing into a single driver.
 This is the positive statement of what the strike of E1 left standing:
 "there is no one master, the system runs many algorithms at many
-scales." The strike removed the chain; this ruling says what is free.
+scales." The strike removed the chain; this section says what is free.
 
 ## §3 Ω ≢ V — the room is not the substance
 
-**Corrected 2026-08-02 (operator ruling: *Ω(D) persists and Ω ≠ V*).**
+**Corrected 2026-08-02 (*Ω(D) persists and Ω ≠ V*).**
 This section read `Ω ≡ V` and called them *the same object under two
 names*. They are not, and the identity did real damage in two places
 before it was caught.
 
-The reasoning that produced it was sound-looking: the operator's
+The reasoning that produced it was sound-looking: §1's
 clarification says `Ω` is **the totality of the individual universe**,
 and D0 says `V` is **the committed state read whole — indivisible,
 unpartitioned, never truncated to a subspace**. Two totalities, so one
@@ -181,8 +181,8 @@ arrived by substitution, without anyone ever writing it down. Separating
 the two readings dissolves it: the source is `V`, the space is the
 progenitor's own reading, and they were never the same object.
 
-**The ruling, inscribed** — extended the same day by the operator's
-second ruling, *`D(Ω) +: V(Ω)`*. `Ω` is **the totality**: the universe
+**The definition** — extended the same day by a second correction,
+*`D(Ω) +: V(Ω)`*. `Ω` is **the totality**: the universe
 entire. It is not a reading, and it belongs to no office. Both offices
 read it, each returning its own aspect:
 
@@ -223,7 +223,7 @@ nowhere to form. This is the lawful shape the strike left room for — and
 it is expressible only because `Ω ≢ V`. Were `Ω` still `V`, then `V(Ω)`
 would read `V(V)` and `D(Ω)` would read `D(V)`: the struck symbol,
 returned by substitution, exactly as `Ω(D)` returned `V(D)` above. The
-two rulings of this day are one ruling.
+two corrections of this day are one correction.
 
 **`Ω ≢ V`, restated and strengthened.** `V` is a reading of `Ω`, and a
 reading is not its subject. That is now true by the shape of the
@@ -250,9 +250,9 @@ computation was right.
 `α` the origin pole, `Ω` the totality pole, `D` rising exactly as they
 separate (`18` §2e, `12_UNION` §3). `Ω` sits there as the totality, in
 the same sense this section gives it, so the span needed no correction
-in either ruling.
+in either correction.
 
-**Nodes(V, D) are the bond** (operator ruling 2026-08-02). The pair is
+**Nodes(V, D) are the bond.** The pair is
 `Node(V) ++ Node(D)` — a join of two nodes that stay two — never a term
 with addressable halves. This is D5's no operator clause, and the
 correction is what makes it expressible: a bond between an object and
@@ -262,8 +262,8 @@ they say different things. See `EQUATIONS` D5 and `12_UNION` §3c.
 
 ## §3a The solidification — the phase transition into state
 
-**(operator ruling 2026-08-02: *solidify phase transition to current
-"state"*.)**
+**(Requirement: the phase transition into the current state is
+solidified.)**
 
 `18` §4 already carries the phase law in its general form: *a point
 constraint cannot cross a phase boundary; it can only state the value on
@@ -292,9 +292,9 @@ solidification and no half-committed deed: a claim is admitted and
 becomes state, or it is refused and does not. `kernel::admits` returns
 admission or refusal and has no third answer, so no value strictly
 between claimed and committed exists to be occupied. This is the
-operator's standing rule that *there is no "half used" — that is an
-open-ended thread without closure* (2026-08-02), read at the foundation
-rather than at the ledger.
+standing rule that nothing is half used, because a half-used value is an
+open-ended thread without closure, read at the foundation rather than at
+the ledger.
 
 **Room precedes state, and cannot be skipped.** Substance never
 solidifies into a plane that was never opened. That is `+:` made
@@ -315,7 +315,7 @@ transition of `Ω`.
 
 ## §3b The restriction law — an orb evaluates, it does not own
 
-**(operator relay 2026-08-02, the manifold field couple.)**
+**(The manifold field couple.)**
 
 ```text
     D(o)  =  D(Ω)|_o      an orb reads a RESTRICTION of the
@@ -374,7 +374,7 @@ reading personal without making it local.
 ### §3b.1 The formalization refused — recorded, never silently dropped
 
 The relay carried the restriction law inside a continuum formalization.
-The intent lands and is inscribed above; the formalism cannot, and every
+The intent lands and is stated above; the formalism cannot, and every
 refusal below rests on an already-landed clause rather than on taste.
 
 **1. `D(Ω) = ∫_Ω H_D(x) dΩ` — Refused.** There is no measure on `Ω` and
@@ -429,8 +429,8 @@ since it was sealed.
 
 ## §3c The lineage law — the union carries on in peers, and forges nothing
 
-**(operator ruling 2026-08-02: *the union carries on in children not
-child; there is no bond for forged existence*.)**
+**(Requirement: the union carries on in children, not in a single
+child; there is no bond for forged existence.)**
 
 **The RE-creation, and it is a pair — never a product:**
 
@@ -469,7 +469,7 @@ arrive, so none needs closing.
   *cleaves into two peer branches: no parent, no child*, and the lineage
   pointer records line membership, never parenthood.
 
-**The ruling was already landed, and the code never received it.** This
+**The rule was already landed, and the code never received it.** This
 is not a new law. `11_AEON` §3 retired the word on 2026-07-30, and gave
 the reason in full:
 
@@ -479,9 +479,9 @@ the reason in full:
 and named that second half — **confluence** (`Confluent`, tag 44), *two
 civilizations held by a landed bond combine their chronicle-vectors into
 a hybrid* — **reproduction with both halves present**, and *earned,
-gated on a sustained bond, not free*. That is precisely *both sons and
-charted colonies, to re-balance* (operator, 2026-08-02), and precisely *there
-is no bond for forged existence*: confluence is the one generative act
+gated on a sustained bond, not free*. That is precisely the rebalancing of both sons
+and charted colonies that §3c requires, and precisely *there is no bond
+for forged existence*: confluence is the only generative act
 in the system that requires a standing bond, and without the bond it
 does not happen.
 
@@ -503,8 +503,8 @@ for *mutate one axis*, and `conductor_pins` still asserts
 `mutations == 1`, *"exactly one axis mutates per cleave"*, over a draw
 that picks one of `{disposition, metabolism, perception}`. The retired
 model is not merely described in the code — it is held in place by A
-test. This is the same shape the operator's *multi-axial on vertices
-towards uplift* names, and it is the conductor's own instance of the
+test. This is the same shape that multi-axial growth on vertices towards
+uplift names, and it is the conductor's own instance of the
 scalar collapse `18` §2b bars: growth on one axis is a direction, and
 one direction is not a manifold walk.
 
@@ -517,21 +517,21 @@ half that balances it built but unreachable. Confluence is where *both
 halves present* and *earned, gated on a bond* actually live, so until it
 is driven, the union has no generative act that requires a bond at all.
 
-**(a) is now corrected** (operator ruling 2026-08-02: *unpin unary, and
-make it multi-axis — pin the correction*). The cleave draws a nonempty
+**(a) is now corrected:** the unary pin is removed, the cleave is
+multi-axis, and the correction is pinned. The cleave draws a nonempty
 subset of the three axes (`1..=7` over three bits), so it always
 diverges and may move on any combination; one axis is one case among
 seven rather than the only case. The pin asserts the corrected law —
 `1..=3` axes move — instead of holding the retired model in place.
 
-**(b) remains** and is owed a ruling: adding a generative act is a
+**(b) remains** an open decision: adding a generative act is a
 larger change than renaming one, and confluence is the half that
 carries the bond requirement.
 
 ### §3c.2 The triangle and the polynomial — measured
 
-**(operator directive 2026-08-02: upgrade the triangle to a polynomial
-so that the syntropic state increases.)**
+**(Proposal: upgrade the triangle to a polynomial so that the
+syntropic state increases.)**
 
 The cocycle residual is degree 3 — `R_ijk,l = Δ_ik,l − Δ_ij,l − Δ_jk,l`
 over filled triangles only. The question is what a higher degree would
@@ -575,12 +575,12 @@ edge. That is a real gap and it belongs to the composition law, not to
 So the upgrade is **not landed**, and the reason is measurement rather
 than difficulty: raising the degree to increase the syntropic state
 would increase nothing, because the state it targets is already whole.
-The generator question is the one worth ruling on.
+The generator question is the open decision worth taking up.
 
 ## §3d The layer law — universal, world, civilizational
 
-**(operator question 2026-08-02: at what layer does each law operate,
-and which is a universal law vs world law vs civilizational law?)**
+**(The question: at what layer does each law operate, and which is a
+universal law vs world law vs civilizational law?)**
 
 **The answer today is that nothing says.** Searched the whole corpus:
 there is no universal/world/civilizational taxonomy anywhere. Every law
@@ -638,14 +638,13 @@ mapping is worth keeping in view. But mapping is not derivation: a
 universal remainder can be named for an ideological axis without being
 that ideology's property.
 
-### §3d.1a The ruling — the covenant is civilizational
+### §3d.1a The decision — the covenant is civilizational
 
-**(operator ruling 2026-08-02: *covenant is civilizational — the
-civilization may adopt it if they choose to live that lifestyle, or
-blend in with it — drop it to lower tier orders, block on tier
-0, 1, 2*.)**
+**(The covenant is civilizational: a civilization may adopt it if it
+chooses to live that way, or blend in with it; it drops to the lower
+tier orders and is blocked at tiers 0, 1 and 2.)**
 
-**The ruling and the rename compose, and each needs the other.** Split
+**The decision and the rename compose, and each needs the other.** Split
 cleanly:
 
 ```text
@@ -666,10 +665,10 @@ cleanly:
 Without the rename, *"the covenant is civilizational"* would have meant
 tearing a third of the capacity meter out. With it, the universal
 mechanism keeps its place under an honest name and the civilizational
-instrument is free to be gated. **Neither ruling is safe alone.**
+instrument is free to be gated. **Neither change is safe alone.**
 
 **And the gate cannot be built today.** `47_REGISTRY` §5 already found
-why, and this ruling is the first thing that needs it fixed:
+why, and this decision is the first thing that needs it fixed:
 
 > **Tier (T0–T3) has no engine authority at all.** The station→tier law
 > is implemented in `tools/observer.py` (`TIER_OF_STATION`), again in
@@ -682,22 +681,22 @@ and today the only mapping lives in a Python tool that anyone with a
 shell can edit. What makes it buildable now is `StationSeated`
 (tag 89) — `{ line, station: u8 }` — which put the station into the
 chain. Tier becomes derivable from a receipted station rather than from
-a file, and the one authority belongs where `47_REGISTRY` §5 already
+a file, and the single authority belongs where `47_REGISTRY` §5 already
 put it. **Relayed to capacity-lane, not taken from here.**
 
 **A note on what is being gated.** After the rename there is no
 separate ceremonial covenant in the code — `Covenant` is the forward,
-and it is being renamed to say so. So this ruling does not restrict an
+and it is being renamed to say so. So this decision does not restrict an
 existing mechanic; it defines one that does not yet exist: a
 Glasskeeper-seated instrument, distinct from the forward, that a line
-may adopt. Recorded plainly so nobody later reads the ruling as having
+may adopt. Recorded plainly so nobody later reads the decision as having
 removed something.
 
 ### §3d.2 What is not done here, and why
 
 **The meter is unchanged, and reading (1) is what the code supports.**
-Three readings were recorded here for the ruling; the first is the one
-that survived contact with the source. The channels are universal — the
+Three readings were recorded here for the decision; the first is the
+reading the source supports. The channels are universal — the
 instrument is a directed obligation with collateral inside a window,
 ordinary finance available to any line, and the Glasskeeper seat is
 register, not requirement. Nothing about `D` changes and nothing
@@ -706,7 +705,7 @@ mechanism never made (§3d.1).
 
 Readings (2) and (3) are recorded as refused rather than dropped.
 (2) *the covenant is civilizational, so `D` must not read it* — the
-ruling adopts this for the ceremonial instrument and it does not touch
+decision adopts this for the ceremonial instrument and it does not touch
 the forward, because they are two different things (§3d.1a).
 (3) *per-line channel sets* — refused: `D` would stop being comparable
 across lines unless the rank were invariant to the channel set, which
@@ -758,7 +757,7 @@ opts out and nobody is advantaged by opting in:
     TechDiscovered · TechLicensed
 ```
 
-**Universal by mechanism, under the ruled precedent (§3d.1a):** the
+**Universal by mechanism, under the precedent of §3d.1a:** the
 obligation instruments. Each is ordinary finance — a directed
 obligation with terms — open to any line, and each feeds a `D` channel:
 
@@ -770,14 +769,14 @@ obligation with terms — open to any line, and each feeds a `D` channel:
     RouteChartered · RouteLapsed · VoidShare
 ```
 
-The ruling applies to the ceremony, never to the remainder: a line that
+The decision applies to the ceremony, never to the remainder: a line that
 wishes to live by the vitrified word adopts the covenant and is gated
 at T0/T1/T2; a line that merely owes a delivery uses the forward and is
 gated by nothing.
 
 **Contested — not assigned, and named rather than guessed:**
 
-- **`FrictionSettled` — Ruled universal 2026-08-02, by reading the
+- **`FrictionSettled` — universal, by reading the
   projection.** It was contested on the guess that it computed from
   `09`'s ideology axes. It does not. The chain, in full:
 
@@ -800,9 +799,9 @@ gated by nothing.
   costing nothing is not the same as earning something. "The reward for
   convergence is the absence of a penalty" is precisely the negentropic
   shape struck at the top of this work: good defined as the absence of
-  bad. Whether convergence should pay is an economic ruling that mints
+  bad. Whether convergence should pay is an economic decision that mints
   value, and it is not taken from this lane.
-- **`WantStruck` / `WantRelieved` — Ruled civilizational.** The whole
+- **`WantStruck` / `WantRelieved` — civilizational.** The whole
   block is gated on a sealed genesis — *no seal, no entity type, no
   want; pre-G1 worlds are pre-identity, lawfully neutral* — and each
   kind on a specific axis: resonance needs `perception == 3`
@@ -810,7 +809,7 @@ gated by nothing.
   with different axes never experiences the mechanic at all**, which is
   civilizational by the exact criterion.
 
-- **`IncursionStruck` — Ruled universal, and it sharpened the
+- **`IncursionStruck` — universal, and it sharpened the
   criterion.** It looked like it spanned all three layers, carrying
   `era`, `world` and `line`. It does not, and the puzzle dissolves on a
   better question: **A layer is what A deed binds, not what it
@@ -844,10 +843,10 @@ honest home that does not require widening the signature under
 pressure, which is exactly the moment a default gets invented.
 
 **The table above is not the authority — `kernel::layer_of` is**
-(operator refusal 2026-08-02: a layer recorded only in prose cannot
-hold in a distributed game with a distributed economy).
+(a layer recorded only in prose cannot hold in a distributed game with
+a distributed economy).
 
-The refusal was correct. This section first
+That objection was correct. This section first
 ended with a standing rule saying *a new law declares its layer when it
 lands* — an honour system. In a distributed economy every node
 validates independently, so a reach recorded only in prose is a reach
@@ -864,7 +863,7 @@ identical on every node, and part of the judge rather than of the
 documentation. The table above is now a reading of that function, and
 if the two disagree the function is right.
 
-**`None` means not yet ruled, and is never a default.** The three
+**`None` means not yet decided, and is never a default.** The three
 contested deeds answer `None`, and a gate consulting the layer must
 refuse on it rather than assume a reach — the same discipline
 `scope_of` uses for a deed with no actor scope and `covered()` uses for
@@ -883,7 +882,7 @@ instead of building it.
 
 **The windowed reading is A perspective — relayed to `lens-lane`.**
 `CrystalDeposit`'s `vented_entries` / `encased_entries` are windowed and
-pruned each boundary, while the orb's own books are cumulative forever.
+pruned each boundary, while the orb's own books are cumulative and never pruned.
 A window is a point of view over a permanent record, and this tree
 already has a lane for exactly that: `lens` reads and reports and never
 gates (lane map, 2026-08-02). The cumulative arms belong to the
@@ -960,7 +959,7 @@ already forbids exactly what the sweep was meant to find:
 The fold seats the successor at `GROUND`, and the cleave founds each
 branch's own world. There is nothing to excise. **Recorded rather than
 performed** — reporting a sweep that removed nothing would be a false
-report, and this was the one instruction in the relay that could have
+report, and this was the only instruction in the relay that could have
 been "carried out" while changing nothing at all.
 
 **What does not change: the totality law.** "In union with V as a
@@ -983,8 +982,8 @@ V has no halves to guard.
 
 ## §4 Why the reduction scopes, and why ∂Δ could not have
 
-The operator ruled that coboundary reduction is the scoping of a
-dimension, not `∂Δ`. The sealed code already performs exactly that
+§1's clarification states that coboundary reduction is the scoping of
+a dimension, not `∂Δ`. The sealed code already performs exactly that
 scoping, in two phases, and both are scoping acts
 (`engine/rfa-core/src/reduce.rs`):
 
@@ -1025,14 +1024,14 @@ over `(i,j,k)` is non-zero, `Δ ∉ Z¹`, so `Δ` has no cohomology class —
 and D4's floor `ext_x(Π_G(Δ(V)))` is then reading a reduction of
 something that has no well-defined class to reduce to.
 
-**This section's original claim is struck (operator ruling 2026-08-01).**
+**This section's original claim is struck.**
 It said the coherence reading is "the well-formedness condition that
 makes the capacity floor meaningful" — that it gates. **That is still
 giving `C` a pseudo-function, and it was a regression.** A gatekeeper is
 an agent; `C` has no agency of any kind.
 
-> `C` has zero operational function. It isn't a gauge, it isn't a score,
-> and it doesn't get to act as a gatekeeper.
+> `C` has zero operational function. It is not a gauge, it is not a
+> score, and it does not act as a gatekeeper.
 
 **What actually holds the ground — three primitives, no `C` anywhere:**
 
@@ -1085,10 +1084,10 @@ collapse; `for_each_residual` is the predicate.** Wherever this document
 or the ledger says "the coherence reading gates," the predicate is meant
 — never the sum.
 
-This is the kernel's own philosophy applied to the one place a score had
+This is the kernel's own philosophy applied to the only place a score had
 crept in: the kernel admits or refuses, it never optimizes.
 
-**The code caught up (directive 03, operator ruling 2026-08-01).** This
+**The code caught up (directive 03).** This
 section struck the `C`-gate on 2026-08-01 — and the same day
 `kernel/src/bridge.rs` landed `rank_is_defined()`, a predicate
 asserting that `D` is meaningless wherever the defect is non-zero, with
@@ -1122,7 +1121,7 @@ recorded, and `lib.rs:777` states plainly that the predicate *"stood
 unused since it was written"* before being wired back in. So the method
 was deleted, then reintroduced under the same name eleven days later to
 close a gap this very section's reasoning left open — the reasoning
-above is kept as the record of why the first deletion was ruled, not as
+above is kept as the record of why the first deletion was made, not as
 a description of the code as it stands now.
 
 Standing (Article II) was governed exclusively by non-zero post-reduction
@@ -1130,9 +1129,9 @@ extent, `D > 0`, in the interval between the deletion and the reinstatement.
 The gate is back in the standing path today; consult `bridge.rs:304` and
 `lib.rs:660,777,783` for its current shape rather than this section.
 
-## §6 The lineage — this completes a ruling, it does not reverse one
+## §6 The lineage — this completes a rule, it does not reverse one
 
-The proportional law (2026-07-31) barred squares as aggregators, and the
+The proportional law barred squares as aggregators, and the
 sealed reason sits in `coherence_functional`'s own header:
 
 > *"Squares are the mathematics of minimization — a loss shaped to be
@@ -1141,13 +1140,13 @@ sealed reason sits in `coherence_functional`'s own header:
 Descent was already outlawed at the level of the aggregator in July. It
 survived at the level of the formation — in `SYSTEM_SPEC` §2's sentence
 scoring operators by how much they reduce C, and in E1's the damped-gradient term term.
-The foundation ruling finishes the same ruling one level up. Three
+The foundation (`EQUATIONS.md` §1) finishes the same rule one level up. Three
 strikes, one law, seven months apart.
 
 ## §7 What this makes buildable — the instrument
 
 D is the measurement whole families of placeholders have been waiting
-on. The method is the one Ruling Box 1 proved: build the meter, measure,
+on. This is the method Decision Box 1 proved: build the meter, measure,
 then rule — never rule a placeholder blind.
 
 **The capacity meter is small, and every piece exists.** D is
@@ -1179,7 +1178,7 @@ Building it:
 
 ## §8 The three questions — resolved 2026-08-01
 
-**Closed by the ruling and its clarification (recorded):** Ω's shape
+**Closed by §1's requirement and its clarification (recorded):** Ω's shape
 (§3), the scoping question (§4), D's arity — a shape, not a scalar
 (D1) — and `∂Δ`'s fate (struck whole, D0).
 
@@ -1217,7 +1216,7 @@ held still)." That clause is **unsatisfiable for `i`/`j`/`k`**: no deed
 can raise `i` while holding `j` and `k` still, because all three read one
 bound.
 
-**Strengthened by the §2a ruling, and reframed.** The finding above is
+**Strengthened by §2a, and reframed.** The finding above is
 true of the container — `Delta{dim, fiber}` — and the container is not
 the capacity (`26_ARTICLES` §5). So the conclusion no longer rests on an
 arity argument at all, and holds more simply: **indices are not capacity,
@@ -1326,7 +1325,7 @@ per-step L1 mass — a separate constant, still unnamed.
    (`dim` for i/j/k, `fiber` for l), so `∀x ∈ {i,j,k,l}` in D2 is two
    independent constraints, not four.
 
-## §9 Open — still needs the operator's word
+## §9 Open decisions
 
 1. **`ε_mag` itself** (E4, unchanged by §8c): the per-step L1 mass bound
    has never been named.
@@ -1345,7 +1344,7 @@ law leaves no evidence it ever misled.
 
 ### 14a. `D = 0` — the absolute that could not exist
 
-**Struck 2026-08-01 (operator ruling); Article II rebuilt on the
+**Struck 2026-08-01; Article II rebuilt on the
 elevation by the `ground-floor` landing.**
 
 | where | the struck wording |
@@ -1355,9 +1354,8 @@ elevation by the `ground-floor` landing.**
 | `18` §7a kernel-eligible table | *"**Art. II non-vacuous** — `D = 0` holds no standing"* |
 | `rfa-core` | `Extent::is_vacuous()`, testing `coordinates == 0` |
 
-**The ruling** (paraphrased): D can never equal 0 in this system —
-that is an absolute the system should never have held — otherwise
-there are no dimensions.
+**The rule:** D can never equal 0 in this system, because with D = 0
+there are no dimensions; zero is an absolute the system does not hold.
 
 Zero capacity is an absolute and this constitution carries none: the
 T∞ purge already barred the reciprocal pole. It also made Article II a
@@ -1398,12 +1396,12 @@ the syntropic lane means.
 **And the correction needed a second pass**, recorded because it is the
 subtler half: the first rewrite stated the new law by narrating the old
 one — *"inverted from…", "the old wording levelled down…", "never
-cancelled"* — so a syntropic ruling was itself written negentropically.
+cancelled"* — so a syntropic rule was itself written negentropically.
 The law states what is; the record of what it replaced belongs here.
 
 ### 14c. `V` is not floored, and that is deliberate
 
-The same ruling was read as *"neither pole reads zero"* and extended to
+The same rule (14a) was read as *"neither pole reads zero"* and extended to
 `V`. **That extension is withdrawn.** The floor is a property of
 extent, never a universal:
 
@@ -1422,13 +1420,13 @@ both `Void` and `Stasis` vanish, collapsing four rows to two.
 (The four rows are since struck — see the record below; the reasoning
 about the floor stands, its row names no longer resolve to code.)
 
-> **The four rows are struck** (operator ruling 2026-08-04). `Vacuity`,
+> **The four rows are struck** (2026-08-04). `Vacuity`,
 > `dual_pole` and the capacity law they gated are removed from the
 > engine; the paragraph above is kept as the record of why the floor
 > was reasoned about that way, and its row names no longer resolve to
 > code. The reasoning about `D`'s floor and `V`'s rest stands — it was
-> never about the classification. The ruling: *identity is pegged to
-> entity, and identity gets recycled without bonds*, so a standing test
+> never about the classification. The reason: identity is pegged to
+> entity, and identity is recycled without bonds, so a standing test
 > read off relational structure refused the lawful recycled line by
 > construction (NOVEL-1 succession, INCURSION-1a). Measured before the
 > strike: a succeeded world read `Void` before and after, and 60 beats
@@ -1443,7 +1441,7 @@ loop-trap reading detects. Do not sweep it out with `D = 0`.
 
 ### 14e. `§2e`'s traverse test — no target left
 
-The ruling also asked that `18` §2e's vacuous test be amended. §2e's
+The rule of 14a also required that `18` §2e's vacuous test be amended. §2e's
 traverse formalism and the `α ≅ Ω` congruence test had already been
 struck under Article III applied to that document; the `ground-floor`
 landing then recorded `α ≅ Ω` as the Ground — a traverse with no extent

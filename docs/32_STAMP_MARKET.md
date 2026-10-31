@@ -1,6 +1,6 @@
 # 32 — STAMP: unit of account, books, and self-sustaining markets
 
-**Status:** partial land — operator directive 2026-08-07. **Wave-4
+**Status:** partial land. **Wave-4
 minimal:** orb STAMP (TLV 73), crystal→STAMP mint (111), apertures
 (112–113), `stamp_market_step` green. **Phase-4 complete:** note · FUT ·
 share · PERP (tags 120–131), SCHEMA_V9, `instrument_step`, desk EXCH,
@@ -47,9 +47,9 @@ With STAMP:
 1. **Exact rational only** — numer/denom; no floats (Charter).
 2. **Mint is a deed**, never a faucet. Initial sources (§2).
 3. **Conservation in transfer** — STAMP moves by receipt; no silent
-   inflation outside ruled mints.
+   inflation outside the lawful mints (§2.1).
 4. **Dual with crystal:** crystal remains **PoUW work product**; STAMP
-   is **account**. A ruled mint may exchange crystal→STAMP at a
+   is **account**. A lawful mint (§2.1) may exchange crystal→STAMP at a
    published schedule (placeholder curve), never free.
 5. **Local play first:** R1 STAMP books work with conductor alone.
 6. **External trade optional:** R3 strand / R4 court are exits, not
@@ -73,7 +73,7 @@ With STAMP:
 |------|------|
 | Route upkeep / melt settlements priced in STAMP | Routes stay costly |
 | Instrument settlement fees (exact, small) | Books stay solvent |
-| Demurrage on **unbacked** STAMP (optional ruling) | Idle money not free if unbacked |
+| Demurrage on **unbacked** STAMP (optional; open, Q-S2) | Idle money not free if unbacked |
 | Slash on false assay / custody breach | Integrity couples to money |
 
 ### 2.3 NPC sustainability
@@ -269,7 +269,7 @@ All refuse with cure named.
 
 ---
 
-## 9. Open rulings
+## 9. Open decisions
 
 - Q-S1: crystal→STAMP conversion schedule.
 - Q-S2: demurrage on unbacked STAMP on/off.

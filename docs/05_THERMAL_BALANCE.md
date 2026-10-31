@@ -2,10 +2,10 @@
 
 **Status:** design — no thermal mechanic ships before its protocol sections
 and test vectors exist (Charter §1). All thresholds, constants, and yields in
-this document are **placeholder parameters**, not inscribed law — they tune at
-balance time. Inscribed here so the founding physics ruling is never lost.
+this document are **placeholder parameters**, not fixed law — they tune at
+balance time. The founding physics is recorded here in full.
 
-**The founding insight (operator, 2026-07-26):** the single most important
+**The founding insight:** the single most important
 unifying variable for the engine is the balance between heat and cold from the
 star, driven by star density/size. Vacuum is an insulator: too close to a
 dense star and a node cooks; too far and it freezes out its atmosphere and
@@ -43,7 +43,7 @@ radiation balance:
   • Atmosphere Freezes        • Optimal Population       • Structural Distortion
 ```
 
-### 1.1 The exact-rational ruling (RFA semantics — binding on the CFE)
+### 1.1 The exact-rational rule (RFA semantics — binding on the CFE)
 
 The fourth root and the physical constants π, σ are irrational; the CFE
 computes in exact rationals and refuses rounding drift (Charter §8). The
@@ -51,10 +51,10 @@ lawful formulation therefore never takes the root:
 
 - **Work in flux space.** The canonical engine quantity is
   `T_eq⁴ = L(1−A) / (16πσr²)` — with `L`, `A`, `r` rational and the combined
-  constant `K = 1/(16πσ)` inscribed as a single rational placeholder
+  constant `K = 1/(16πσ)` stored as a single rational placeholder
   parameter, `T_eq⁴` is exact. `T_eq` itself is display-only.
 - **Compare in fourth powers.** Every band threshold is stored as `T⁴`
-  (e.g. the mesic band `[250°, 320°]` is inscribed as
+  (e.g. the mesic band `[250°, 320°]` is stored as
   `[250⁴, 320⁴] = [3906250000, 10485760000]` in degrees⁴). Band membership is an
   exact rational comparison; no root is ever evaluated.
 - Degree readouts shown to players are a client-side rendering; the chronicle
@@ -97,10 +97,10 @@ Where local industry adds heat on top of stellar flux:
 All terms are exact rationals per tick; the ledger accrues like yield (no
 float, no drift).
 
-**The linear (entropic-only) reading is refused (operator ruling
-2026-07-27).** A design in which every excess ember vents to the void
-discards the residual — against the house law that the residual is
-structured information, measured and kept. The complete loop has two arms:
+**The linear (entropic-only) reading is refused,** because a design in
+which every excess ember vents to the void discards the residual, and the
+residual is structured information, measured and kept. The complete loop
+has two arms:
 
 - **The syntropic arm — encasement (first):** excess heat is captured into
   ordered store before anything vents. Each tick,
@@ -169,7 +169,7 @@ commensurable units as the energy side. Two export mechanisms:
   returns; the cold system sheds the imported heat to the void through its
   deep-space arrays and re-arms the coolant.
 - **Protocol:** radiator-headroom allocations — the thermal entropy rights
-  already inscribed (01 §6.2) — leased to Furnace sectors.
+  already specified (01 §6.2) — leased to Furnace sectors.
 
 **The symmetric ledger (the VENT-1 sheet, both sides):**
 
@@ -185,7 +185,7 @@ absorbing a neighbour's waste consumes sink and, once shed to the void,
 settles into the absorber's `entropy_vented` ledger. No fuzzy net: each
 side balances in its own books.
 
-**The earned-state law (operator ruling, 2026-07-27):** neither side is an
+**The earned-state law:** neither side is an
 environmental passive. Raw flux and raw void are worthless until a sector
 passes three gates, symmetric for energy and sink:
 
@@ -214,7 +214,7 @@ death of the Furnace. Placeholder pricing; tunes at balance.
 
 ---
 
-## 2. Terminology ruling: no "Goldilocks"
+## 2. Terminology: no "Goldilocks"
 
 The term "Goldilocks Zone" is **refused vocabulary** (in the spirit of
 Charter §8). It is anthropocentric chauvinism: it assumes carbon-based,
@@ -228,7 +228,7 @@ the stellar flux hitting its hull.
 The lawful concept is the **Substrate-Specific Equilibrium Band**: every
 entity — organic population, quantum compute cluster, high-energy foundry —
 has its own optimal operating band `T_opt` and tolerance window `ΔT`
-(inscribed, per §1.1, as fourth-power bounds).
+(stored, per §1.1, as fourth-power bounds).
 
 ```
                        SUBSTRATE THERMAL ENVELOPES
@@ -370,7 +370,7 @@ puzzle, and creates organic trade routes between thermal opposites.
 ## 6. Binding notes for the landing that implements this
 
 - The mechanic lands under the BUILD_ORDER law: spec sections + test vectors
-  in the same landing, red-first, on explicit operator go. This document is
+  in the same landing, red-first, on explicit approval. This document is
   design authority, not a landing.
 - `T_eq⁴`, `Heat_Net`, and band thresholds are exact rationals in the CFE
   (§1.1); any stochastic thermal event (flares, venting) draws through the
@@ -383,7 +383,7 @@ puzzle, and creates organic trade routes between thermal opposites.
 
 ---
 
-## 7. The crypto ruling (thermal value at the settlement boundary)
+## 7. The crypto rule (thermal value at the settlement boundary)
 
 **The boundary is the charter's, restated:** game logic never touches
 contract bytecode; chains settle, never simulate (Charter §7). Crypto cannot
@@ -458,10 +458,10 @@ holographic" proposal (see `docs/OPEN_QUESTIONS.md` Q1):
 The chain still never computes physics (§7.3); it verifies one succinct proof
 derived from the chronicle root and acts on the verdict.
 
-### 7.4 The chain ruling: existing chain, never a new one
+### 7.4 The chain rule: existing chain, never a new one
 
-No new chain is spun up for settlement — inscribed here as a ruling, per
-Charter §7's definition of WWW3 as *existing* EVM/UTXO chains:
+No new chain is spun up for settlement, because Charter §7 defines WWW3 as
+*existing* EVM/UTXO chains:
 
 - **The mesh is the sovereign ledger.** The NS-3 chronicle is append-only
   ground truth (SEAL B); NS-5 proof-of-convergence is the consensus. A

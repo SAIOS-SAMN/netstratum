@@ -75,7 +75,7 @@ memory emergent-economy-arc).
 The `offer` kind replaces docs/73's `amount` kind (which was written in
 STAMP); `hull`, `envoy` and `gate` stay.
 
-## Roles: the ancients think, the progenitors act (operator, 2026-10-13)
+## Roles: the ancients think, the progenitors act
 
 Free markets, with no intervention by decree. No class holds a market power
 the others lack: every participant trades under the same laws, and influence
@@ -99,7 +99,7 @@ comes from position and holdings, never from a rule.
   for it. An ancient line drops out of the hub's buyers and sellers. Both are
   changes to build, each with a done-when (below).
 
-## The tiered hierarchy (operator, 2026-10-13; proposed for the Concordance)
+## The tiered hierarchy (proposed for the Concordance)
 
 One shared ladder of tiers for every universe the nodes create, so that a tier
 can bridge between universes, and any two games can be interlinked through
@@ -167,7 +167,7 @@ in docs/59.
 | Window 64 | docs/73 | declared; a memory bound |
 | the float's 1 and ¼ | `substrata` | learned, when a population lives below |
 
-## θ, μ and the free market (operator, 2026-10-13; docs/81)
+## θ, μ and the free market (docs/81)
 
 - **Traversal inside the universe** (wormholes and tubes, the ancients'
   folding of space and time) is paid in θ, the phase, in turns. Galactic

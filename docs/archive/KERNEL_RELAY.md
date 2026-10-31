@@ -47,7 +47,7 @@ replay grounds worlds." It was lawful **because it was powerless.** A window.
 
 ### 1.2 How it became load-bearing — promotion by accretion
 
-No single ruling made the mirror authoritative. It collected duties one
+No single change made the mirror authoritative. It collected duties one
 useful landing at a time: a second display-format copy of the chronicle
 (`chronicle.jsonl`), then the registry, journals, the galaxy card, then
 MIRROR-TLV (committed state as canonical bytes), then the mesh built its
@@ -117,8 +117,8 @@ chartered.
 
 ### 2.2 The five rules (plain), and their vocabulary
 
-§11 rewrote itself to the plain register by ruling (the first draft's "one
-truth" framing was rejected). The five normative rules:
+§11 was rewritten in the plain register (the first draft's "one truth"
+framing was dropped). The five normative rules:
 1. **Single source of truth** — one hash-chained sequence of state snapshots.
 2. **Exports are write-only** — JSON/dashboards are display; nothing parses
    them back in.
@@ -172,13 +172,13 @@ The whole system speaks one word: the coordinate `TUniversal{S, G, T}`.
 
 So chaining the state and sealing the kernel are not two systems: they are
 the path and the step of one walk. `S` and `G` are bound: the vertical axis
-of a nursery (its private progression) **binds to the G-fiber** (operator
-ruling) — the twisted-torus law already gives each walker its own sheet;
+of a nursery (its private progression) **binds to the G-fiber**, because
+the twisted-torus law already gives each walker its own sheet;
 the split column renders G rather than standing beside it. One law, not two.
 
 ### 3.1 The kernel is individual; nursery links to mesh
 
-Every running binary carries its own copy of the one small judge. There is
+Every running binary carries its own copy of the same small judge. There is
 no "local mode" and "network mode" — the judge is pure and encoding-blind,
 so it cannot tell whether a step came from local play or a peer's chain. A
 world is born and raised on one node (the **nursery**); because its
@@ -307,9 +307,8 @@ a minimum: the minimizer is kept and the residual discarded. It is
 uni-directional and lossy — convergence-as-projection manufactures agreement
 by destroying difference. That is entropy wearing a syntropy mask, and it
 violates the whole thesis. **Rejected as the convergence method** (kept only
-as a direction hint — and struck entirely by the operator's 2026-08-01
-foundation ruling, which took the hint with it: no gradient term survives
-anywhere, and the engine is built on dimensional capacity, Equations §1
+as a direction hint — and later struck entirely, hint included: no
+gradient term survives anywhere, and the engine is built on dimensional capacity, Equations §1
 D0–D4). The critical realization: the irreducible residual is
 not error — it is the genuine difference, which the discovery law says is the
 source of value. It must be promoted, not discarded.
@@ -416,7 +415,7 @@ AEON fold; NS-5 mesh consilience; `cfe::opposition` (the seam-conservation).
    into a new generator — the "forms the symmetry" claim's missing spec.
 5. **Byzantine consensus / fork resolution.** Stasis preserves disagreement;
    the mechanism that resolves two genuinely divergent branches (confluence
-   at exact zero, or annex) is specced (partition ruling) but unbuilt.
+   at exact zero, or annex) is specced (the partition rule) but unbuilt.
 6. **Taxonomy vs assignment across the vertical axis.** The rules (stations,
    tiers, axes, families) seal into the kernel as law; the assignments (who
    holds which seat, the roster) become chained deeds. The species field is

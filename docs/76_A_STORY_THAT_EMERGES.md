@@ -1,7 +1,6 @@
 # 76 — A story that emerges: the reference narrative
 
-Operator (2026-10-13): one narrative for one universe, as an example of how
-such stories emerge. It is not a script. Nothing below is written into the
+One narrative for one universe, as an example of how such stories emerge. It is not a script. Nothing below is written into the
 universe; each element must come out of the physics, and the test is that a
 story like this can be read off a universe's chronicle after the fact.
 

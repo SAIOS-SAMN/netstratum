@@ -1,13 +1,12 @@
 # Netstratum documentation
 
-The documents are the design record: each states a law (or a ruling) before
+The documents are the design record: each states a law (or a decision) before
 the code that builds it, and records what was read once built. Read the
 charter first; for the universe, read era 1 in order; for what is built and
 what is owed, read the register.
 
-**Conventions.** The *operator* is the project's maintainer; a *ruling* or
-*design direction* is a dated decision of the operator, cited by date. Codes
-in capitals are names: work items (`TRADE-1`, `NS-5`), spec and seal names
+**Conventions.** The *operator* is the project's maintainer. Codes in
+capitals are names: work items (`TRADE-1`, `NS-5`), spec and seal names
 (SEAL A, STAMP, the currency), technology families (KIN, ATM, COG) and
 acronyms (CLI, RFA, MHD, UMD). Commit hashes cite where a law was built.
 Documents under [archive/](archive/) are superseded working notes, kept for
@@ -115,7 +114,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 47 | [The registry: one authority per axis, and the expansion law](47_REGISTRY.md) |
 | 48 | [The capacity threat model: descent re-entry, bifurcation, and the withdrawal boundary](48_CAPACITY_THREAT_MODEL.md) |
 | 49 | [49_TAXATION — the craftable tax system](49_TAXATION.md) |
-| 50 | [50_WIN_CONDITIONS — closing a playthrough (ruled)](50_WIN_CONDITIONS.md) |
+| 50 | [50_WIN_CONDITIONS — closing a playthrough (decided)](50_WIN_CONDITIONS.md) |
 | 51 | [Cognition: the universe and the mind](51_COGNITION.md) |
 | 52 | [The cognitive metabolism](52_COGNITIVE_METABOLISM.md) |
 | 53 | [The intelligence port: one reduction, two seats](53_INTELLIGENCE_PORT.md) |
@@ -130,7 +129,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 62 | [Constructors: the language deduced, not named](62_CONSTRUCTORS.md) |
 | 63 | [Observation: compact until watched](63_OBSERVATION.md) |
 | 64 | [A people's pace: settle at touch](64_A_PEOPLES_PACE.md) |
-| 65 | [The reserve and the bank: the rulings it is built on](65_RESERVE_RULINGS.md) |
+| 65 | [The reserve and the bank: the decisions it is built on](65_RESERVE_DECISIONS.md) |
 | 66 | [Synthesis: Netstratum's synthetic PoW++](66_SYNTHESIS.md) |
 | 67 | [The network: hubs, stewards, progenitors, the spacing guild](67_THE_NETWORK.md) |
 | 68 | [The ancients arise](68_THE_ANCIENTS_ARISE.md) |

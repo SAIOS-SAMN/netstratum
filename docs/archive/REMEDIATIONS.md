@@ -28,7 +28,7 @@ this is where they were never applied.
 | **`FORGE_REMEDIATION.md`** | the plan for the 94 % — R1+R3 (≈3×, outcome-neutral), R4, R5, R2 |
 | **`FORGE_BUDGET.md`** | `SEARCH_BUDGET` as a capacity reading — rows **B0–B8**, the six **axial capabilities** |
 
-**What lands without A ruling.** R1+R3 behind one byte-identity pin
+**What lands without a pending decision.** R1+R3 behind one byte-identity pin
 (≈3×); then R4; then the find-scans and re-derivations (R7–R13, R17–R18).
 None carry economic content.
 
@@ -37,7 +37,7 @@ None carry economic content.
 - **R6** (stepping replay) rides `kernel-lane` **11a** — the same
   refactor as its #30. Do not design a second.
 - **B0–B8** (the budget law) need `kernel-lane` **11a/11b** for the
-  replay axis, and operator words for every value (`FORGE_BUDGET` §7).
+  replay axis, and a decided value for every entry (`FORGE_BUDGET` §7).
 - **R2** waits on the `from_key` wiring at N6 (~4 % today).
 
 **The standing lesson of this lane.** Three times a conclusion was
@@ -52,17 +52,17 @@ satisfying the rest.
 **Two collapses already recorded as defects, both inherited by the
 budget law:** capacity read on the aggregate instead of per channel
 (`bridge.rs:306`), and the four ideology axes collapsed into
-`syntropy_ratio` (`EQUATIONS` §6 **S2**, against `09` §1.3). The
-operator's *"multi-axial coordinated system"* is not a framing applied
+`syntropy_ratio` (`EQUATIONS` §6 **S2**, against `09` §1.3). A
+multi-axial coordinated system is not a framing applied
 from outside — it is the law's own shape, twice.
 
 ---
 
 ## §0 What this file is
 
-The operator's standing question, in the operator's words: find the
-**cartesian crud** — *iterative loops around n-dimensional objects that
-operate on every potential of potential* — and every other place the
+The standing question: find the **cartesian crud** (iterative loops
+around n-dimensional objects that operate on every potential of
+potential) and every other place the
 system pays a whole-history or whole-product price for an incremental
 answer. `peel` (address one thing directly instead of scanning for it)
 and `shear` (carry a cursor forward instead of re-sweeping) are the
@@ -75,12 +75,12 @@ in §1 produced this session), `[READ]` (verified at the cited line, not
 timed), or `[INFERRED]`.
 
 **Status legend:** `[ ]` open · `[~]` in flight · `[x]` landed · `[!]`
-blocked on a named ruling.
+blocked on a named decision.
 
 **Do not treat cost as the only axis.** §8 is load-bearing: this is a
 proof-of-work system, and several of the largest wins below *reduce the
 work performed per beat*. That is an economic change, not a free
-optimization, and it is an operator ruling.
+optimization, so it needs an explicit decision.
 
 ## §1 The measurement
 
@@ -132,7 +132,7 @@ growing, because the roster plateaus and the chronicle does not.
 
 > **Superseded in part by `docs/FORGE_REMEDIATION.md` (2026-08-02).**
 > That file is the working plan for R1–R5 and corrects three things
-> read wrong here: R1/R3/R4/R5 are **not** blocked on Ruling Box 1
+> read wrong here: R1/R3/R4/R5 are **not** blocked on Decision Box 1
 > (the search is never re-run by a verifier, `mint_bound` keys off
 > `Difficulty` alone, and the search runs once per world per beat — so
 > speed has no path to the mint rate); **R4 is inert today** because
@@ -144,8 +144,8 @@ growing, because the roster plateaus and the chronicle does not.
 
 `engine/solver/src/search.rs:124` `solve()` is a breadth-first
 enumeration over the **cartesian product of the vocabulary with
-itself, `word_len` deep**. This is precisely the shape the operator
-named: every potential of every potential.
+itself, `word_len` deep**. This is precisely the shape named in §0:
+every potential of every potential.
 
 The space, measured from the source:
 
@@ -271,7 +271,7 @@ The space, measured from the source:
 - [ ] **R12 — `verify_orbit_witness` linear-finds the operator.**
   `rfa-core/src/fold.rs:249` — `operators.iter().find(|op| op.id == …)`
   inside the judge's half. Small today (operator tables are short) and
-  it is the one scan sitting on a constitutional path, so it should be
+  it is the only scan sitting on a constitutional path, so it should be
   a keyed lookup on principle. `[READ]`
 
 ## §5 The full RE-derivations
@@ -281,7 +281,7 @@ The space, measured from the source:
   correct #41 incremental shear) and `crystal_deposits` (`:1094`,
   a full chronicle rescan that opens `let _ = now;` and never prunes
   the window). `constellation()` (`:1182`) calls **the full-rescan
-  twin.** So the one read a player hits most often pays the whole
+  twin.** So the read a player hits most often pays the whole
   history every call, and — separately — diverges from what actually
   crystallizes. Pickup §8e already records the divergence as a bug;
   it is also the cost item. One cure closes both: delete the twin and
@@ -356,7 +356,7 @@ Recorded so they are not "fixed" by a later reader:
 
 **This section originally read: "This is a proof-of-work system. R1–R5
 make the forge cheaper, and the forge is the work" — and concluded that
-R1–R3 were blocked on Ruling Box 1. That conclusion was wrong, and it
+R1–R3 were blocked on Decision Box 1. That conclusion was wrong, and it
 was wrong because it reasoned from the shape of the system instead of
 reading the consensus path.** Struck rather than rewritten (the history
 law); the correction and its evidence are `docs/FORGE_REMEDIATION.md`
@@ -372,15 +372,15 @@ law); the correction and its evidence are `docs/FORGE_REMEDIATION.md`
   per world per beat** and mints at most once, so a faster search
   yields the same solve sooner, never more solves.
 
-- [x] **R19 — struck.** There is no forge-cost ruling to wait on.
+- [x] **R19 — struck.** There is no forge-cost decision to wait on.
   R1, R3, R4 and R5 are **unblocked** and sequenced in
   `FORGE_REMEDIATION.md` §4; R2 is held for the `from_key` wiring at
-  N6 on its own (small) merits. Ruling Box 1 still governs the
+  N6 on its own (small) merits. Decision Box 1 still governs the
   `level → Difficulty` ladder and the rung→reward table — this lane
   proposes no change to either.
 
   §3–§6 (R6–R18) carry **no** economic content — they are pure
-  overhead around the work, and none of them need a ruling. That part
+  overhead around the work, and none of them need a decision. That part
   of the original reading stands.
 
 ## §9 Cross-lane alignment — verified 2026-08-02
@@ -470,13 +470,13 @@ Measured per file (census parser identical to the ratchet's own):
 
 **Sequencing (proposed, not begun):** (1) `parameter.rs` seeds —
 these are already the chartered-parameter mechanism's seed values;
-they likely convert to APPROVED-SEED or anchor citations by one
-operator word (the polities.rs precedent). (2) `taxon_economy.rs` +
+they likely convert to APPROVED-SEED or anchor citations by a
+single approval (the polities.rs precedent). (2) `taxon_economy.rs` +
 `vocabulary.rs` — balance choices; need either measured anchors from
-live-board play or an operator approval marker. (3) `dop.rs` — the
+live-board play or an approval marker. (3) `dop.rs` — the
 big cluster; walk by family (zone costs · yields · refinement ·
 endowment), asking per family whether the number derives from a law
-already expressed elsewhere (call-not-copy) or needs a ruling.
+already expressed elsewhere (call-not-copy) or needs a decision.
 (4) conductor thresholds last — policy, not physics, and several are
 already named in BALANCE_NOTES.
 
@@ -499,8 +499,8 @@ Live dial count **170 → 163**; sealed-class pin **3 → 10**. The ratchet
 stays red (163 > 112 ceiling): the remaining **51 excess dials** are
 the balance clusters — `dop.rs` (zone economics · yields · refinement ·
 endowments), `vocabulary.rs` (practice bindings), conductor thresholds
-— whose conversion needs measured anchors or operator approval per
+— whose conversion needs measured anchors or an approval per
 cluster. Deriving them by fiat is the laundering the census bars, so
-they wait on rulings. The next free move is `dop.rs`'s endowment kit
+they wait on decisions. The next free move is `dop.rs`'s endowment kit
 (a candidate APPROVED-SEED class like the founding roster) — one
-operator word, the polities.rs precedent.
+approval, the polities.rs precedent.

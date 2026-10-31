@@ -1,11 +1,11 @@
 # 60 — Dialects: senses, speech, and the shared tongue
 
-Operator ruling 2026-10-08: adopt all proposals from the convergence-engine
+Netstratum adopts all proposals from the convergence-engine
 review (its thinking, perception, entity and alphabet modules; mycelium's
 seventeen-letter Cayley alphabet). Substantive work first; test only what
 moves the cadence.
 
-## The rulings
+## The decisions
 
 1. **No third alphabet.** Netstratum's minds do not get a custom fixed
    alphabet. The shared alphabet is Mycelium's seventeen immutable Cayley
@@ -94,8 +94,8 @@ at 1.62-1.66 GB over six minutes.
 ## Measured at D10b (2026-10-08)
 
 One line's 350 words (spore-march), each stated on the ramp probe: 339
-carry a tiling (no form in the court's language until Mycelium 78.150, the
-coordinator's ruling: repetition as the orbit of a translator or screw), 4
+carry a tiling (no form in the court's language until Mycelium 78.150, which
+defines repetition as the orbit of a translator or screw), 4
 stated, 7 refused at the mint (`MintVertexNotCarried`, sent to Mycelium to
 reproduce). The low `autic=` count is the missing repetition form, not the
 translator.

@@ -1,13 +1,14 @@
 # 95 — The spatial dimension: three planes of 3Z/3Q and R
 
-Design direction (2026-10-26): re-volumize what was flattened, since nothing
-runs in two dimensions; `flows::planes = 2` was undefined sub-physics; the
-spatial dimension is derived as 3D through 3Z/3Q and R coordinates, positive R
-denoting forward in linear time.
+This document derives Netstratum's spatial dimension as three planes of
+3Z/3Q with the R coordinate, positive R denoting forward in linear time. It
+replaces `flows::PLANES = 2`, which ran the physics on two planes without a
+derivation, and the hand-built source of `flows::founding_phases` (a sphere
+of radius 4, the point (2,0,0) and the generator ½e₁e₂, typed in and read on
+two planes sharing e₁).
 
-Status: step 1 built (three spatial planes and the R loop on every phase; the hand-built source retired). Retires `flows::PLANES = 2` and the hand-built
-source of `flows::founding_phases` (a sphere of radius 4, the point (2,0,0)
-and the generator ½e₁e₂, typed in, read on two planes sharing e₁).
+**Status:** step 1 built (three spatial planes and the R loop on every
+phase; the hand-built source retired).
 
 ## 1. The axes
 
@@ -95,7 +96,7 @@ coherence as products over the planes (their present form for two).
 - The jet on the circulation plane's phase leg `[½, 1)`: outbound and
   return are R's sign.
 
-## 6. Open, for ruling
+## 6. Open decisions
 
 1. **How a kind's frames part among the three axes.** Proposed: evenly,
    `z_k = (3Z − u)/3`, `q_k = u/3` (exact rationals; an atom names no axis,
@@ -115,7 +116,7 @@ coherence as products over the planes (their present form for two).
 5. The board on the new state (stars and worlds each in their own planes).
 6. Read: identities exact, worlds placed and kept, cost per echo measured.
 
-## 8. Z and Q together (operator 2026-10-26)
+## 8. Z and Q together
 
 Q and Z must work together on the same axis, or R diverges; the forward
 trajectory is realigned on that bond.
@@ -124,7 +125,7 @@ trajectory is realigned on that bond.
   frame from the Q pole to the Z pole within its plane.
 - Every law reads the two as shares of their sum, the whole weight
   `A + Q = 3Z`, never one pole over the other. R is their span, `A − Q`
-  (the number grammar, 2026-10-17: ℝ the span between the ℤ and ℚ poles),
+  (the number grammar: ℝ the span between the ℤ and ℚ poles),
   bounded by the whole.
 - Built: a body's push is `½·Q/(A + Q)` (`pulse::push_of`), at most ½, the
   luminal bound itself (it was `½·Q/A`, past ½ wherever the open outweighed

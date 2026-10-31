@@ -7,7 +7,7 @@ extended for orbital + stratum holdings (this session).
 (slot type), `33_TRADE_FLEET_AND_DESK` §3, E5b estate chain (tags
 97–100), `ENDOWMENTS`.  
 **Does not** invent float ephemeris, undervied dials, or a second melt
-formula. `D_eff` remains the one transit distance producer.
+formula. `D_eff` remains the only transit distance producer.
 
 ---
 
@@ -17,8 +17,9 @@ Phase-2 alignment advanced every world's θ as `floor(now / 60)`. That
 made **all orbits the same clockwork** — relative phase froze after
 siting, and the desk's CHEAP/FAIR/DEAR band was static drama.
 
-The operator ruling (session): *all orbits should not be the same; take
-magnetism of cores, offset by polity of the star and class of the star.*
+Orbits therefore differ: each takes the magnetism of its core, offset by
+the polity of its star and the class of its star, so relative phase moves
+after siting.
 
 Separately, the estate chain (survey → appraise → convey) valued
 **buildings and banked matter** but not **place** (sited rings under a

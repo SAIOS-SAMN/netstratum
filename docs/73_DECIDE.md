@@ -86,7 +86,7 @@ economy on this step.
 **The book** is a binary checkpoint per (kind, scope): its triples, pending
 decisions, the acting and probation words with records and closers, and
 persistence's record. **Window = 64**, declared in docs/59 with the build; it
-is the one dial.
+is the only dial.
 
 ## The council (step 6)
 

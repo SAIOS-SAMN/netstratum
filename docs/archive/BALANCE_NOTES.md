@@ -4,7 +4,7 @@
 
 **Status:** measurement, not tuning. Every retune is a law change for
 replay (version-bumped, never silent — the Q4 discipline); the dials
-turn only on playtest + the 05 §1.4 pricing ruling. This memo is the
+turn only on playtest + the 05 §1.4 pricing decision. This memo is the
 instrument panel the tuning session reads.
 
 ## The board as measured (31 worlds, deepest chronicle 261 receipts)
@@ -13,7 +13,7 @@ instrument panel the tuning session reads.
 |---|---|---|
 | famine-struck planets | 13 / 31 (42%) | famine clocks + relief economics — high; the want is the dominant experience of the board |
 | venting planets | 8 / 31 | radiator_base 2 vs factory heat 1/4 per zone; the doctrine (×5/4) cures heat_net ≤ 1/2 exactly |
-| offers posted / pairs cleared | 28 / 12 | pre-ratio-synthesis baseline; ratios are emergent now (ruled 2026-07-31) — remeasure |
+| offers posted / pairs cleared | 28 / 12 | pre-ratio-synthesis baseline; ratios are emergent now (item 3 below) — remeasure |
 | cognitive wants struck | 0 | windows 240/480 have not yet elapsed on sealed lines — re-measure after longer eras |
 | tech nodes | 30 (incl. gifted) | crystallization paces well at the year voice |
 | divergences | 13 | one-per-era is producing a doubling-flavored spread — the bounded-occupancy half of AEON-1b is not yet pressed, but 31 worlds from 16 seeds in a few eras says the fold will be needed on schedule |
@@ -38,14 +38,14 @@ instrument panel the tuning session reads.
 2. **Rung-5 forge cost** — SEARCH_BUDGET 200k is an engine law; the
    difficulty table (word_len/grids per rung) is the lawful dial if
    beats must cheapen.
-3. **Ratio synthesis** (ruled 2026-07-31): price is an emergent
+3. **Ratio synthesis:** price is an emergent
    ratio, never a system property — there is no base price and none
    will exist. Intents derive their ratio from state: a famished
    line bids steep (want = give/(1+severity)); a surplus line asks
    its reserve-fraction premium (want = give×(2·reserve−target)/
    reserve, inside 2×). Unmatched ratios rest lawfully — a resting
    book is a lawful market state, never a bug.
-4. **The iceberg (MARKET-2, ruled + landed 2026-07-31)** — trade's
+4. **The iceberg (MARKET-2, landed 2026-07-31)** — trade's
    side-fee friction converted to cargo melt: delivered = sent ×
    (1 − φ·D), φ = 1/64 per unit of manifold L1 (spatial + key gap);
    isolation walls at φ·D ≥ 1. φ is the new hot dial: the roster's
@@ -76,7 +76,7 @@ the baseline.
 
 ---
 
-## P8.5 Ruled table slice (2026-08-09) — AP capacity
+## P8.5 table slice — AP capacity
 
 Placeholder-free **shared AP** capacity (anti click-to-win). Constants live
 in `cfe::world::ap_budget` and are the only lawful knobs:

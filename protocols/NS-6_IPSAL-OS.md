@@ -119,7 +119,7 @@ self-consistency is the design principle."** NS-6 keeps it exactly: a
 sovereign contains, it does not command; an agent acts only inside the scopes
 its principal opened (§1.2). Netstratum **collapses** CCL's three creation
 tiers into one recursive relation (sovereign ▷ agent ▷ agent…) — the tier
-*count* is not inscribed, but the seeds-not-commands principle and the
+*count* is not kept, but the seeds-not-commands principle and the
 upward-authority / downward-grant flow are. CCL's naming-discipline half lives
 separately, as the Charter §8 Terminology Law.
 
@@ -155,7 +155,7 @@ that answers to a principal is a contained **agent**, never sovereign.
 
 ### 5.2 "Polity" and "automaton" — the autonomous-civilization vocabulary
 
-"Bot" is retired (operator ruling, 2026-07-27): it imports *mechanical
+"Bot" is retired because it imports *mechanical
 servant of a scripter*, false under the citizenship doctrine ("agents are
 citizens; automation on a leash"). The lawful pair, each importing only true
 invariants:
@@ -246,12 +246,12 @@ never itself a game rule in bytecode (SEAL C).
 
 What grew on this protocol without changing it — the first cut held:
 
-- **Scopes stand at the three inscribed** (`Build`/`Raze`/`Collect`),
+- **Scopes stand at the three defined** (`Build`/`Raze`/`Collect`),
   and ten mutating verbs now pass their gates (chart, zone, raze,
   collect, transfer, seal_bond, sever_bond, seal_forward, absorb,
   scan — audited 2026-07-30: ten verbs, ten `permitted` checks, zero
-  ungated). The scanner rides Collect; a dedicated scan scope awaits
-  an operator ruling (the N4 deferral).
+  ungated). The scanner rides Collect; a dedicated scan scope is an open
+  decision (the N4 deferral).
 - **The sovereign's face at the terminal:** profiles under
   `var/operators/` — `login <name>` mints or switches, bare `login`
   lists with the active marked, `whoami`, `continue` resumes the
@@ -263,9 +263,9 @@ What grew on this protocol without changing it — the first cut held:
   every live star, every beat.
 - **Cross-star identity stays deferred** to N5/N6; PLANNER-1's
   authorship-attribution deferral rides it.
-- **Open, awaiting operator ruling** (recorded 2026-07-30): whether
+- **Open decision** (recorded 2026-07-30): whether
   IPSAL additionally names the translation bridge — today translation
   is G3's territory (frames as coboundaries, measured loss) and
-  presence is NS-5's; nothing in this protocol claims them. If ruled,
+  presence is NS-5's; nothing in this protocol claims them. If adopted,
   the binding lands here and in those chapters together.
 

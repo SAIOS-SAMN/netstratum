@@ -42,7 +42,7 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 > `ground_step` walks strata `1..=civ_reach`; `build_step` gained an
 > encase-first arm on the temperate seat (vented > contained ⇒ one
 > shell) — without it the 34 balance gate refused all bronze
-> order-work forever (syntropy 0; regenerator unaffordable at 10
+> order-work permanently (syntropy 0; regenerator unaffordable at 10
 > biomass on a mineral line). Witnesses: `civ_reach_pins` +3.
 >
 > **Live-board RE-measure (2026-08-12, 5 conductor beats on `var/`):**
@@ -85,9 +85,9 @@ state-model laws, and earned gotchas live in `HANDOFF.md`.
 > **Standing debt, not fixed here:** `tuned_constant_ratchet` is red on
 > `main` — **163** tuned ratio literals against the 112 ceiling (51
 > excess dials, the R20 balance clusters `dop.rs`/`vocabulary.rs`,
-> operator-gated). The ceiling does not rise by law; the debt needs its
-> own remediation cadence (derive, measure, or mint per dial — anchor-
-> provenance ruling). *(Re-measured 2026-08-13: 170→163 as the seven
+> awaiting a decision). The ceiling does not rise by law; the debt needs its
+> own remediation cadence (derive, measure, or mint per dial — the anchor-
+> provenance rule). *(Re-measured 2026-08-13: 170→163 as the seven
 > chartered-parameter seeds moved to the sealed class; the emergent-
 > rejuvenation taper was kept derived (`1/2^distance`) so it added no
 > dial.)*
@@ -164,7 +164,7 @@ ruins   — closed archive history (P8.4)
 | **E3.8** | ~~Observer routes/refineries~~ **landed** | `observer routes` · `observer refineries` · chronicle/state TLV |
 | **E3.9** | ~~Treaty allow-lists~~ **landed** (2026-08-12) | tag 165 · `element_allowlists` · SCHEMA_V19 · `treaty elements` CLI · 10 pins |
 | **I5.x** | SHARE/NOTE/FUT/PERP lifecycle residual | Wave 5 |
-| Court | Rename Earth-culture line names | operator only |
+| Court | Rename Earth-culture line names | open decision |
 | Deep deeds | More hub leaves still status+verb | incremental |
 
 ### Phase load — **E3.6 / E-MKT-1** (authority `docs/31_ELEMENT_COMMERCE.md` §4, §6)
@@ -227,7 +227,7 @@ python3 tools/observer.py ruins --plain | head
 ### Stand-down discipline
 
 - **No dirty tree expected.** If dirty, treat as foreign/in-progress — investigate before `git add -A`.
-- **Do not re-litigate dual law or u16 clade** unless operator reopens.
+- **Do not re-litigate dual law or u16 clade** unless explicitly reopened.
 - **Clade is open:** further taxons = raise `clade_ceiling()` / expansion table, not type fights.
 - Historical counts below §0b are **stale** — re-measure before citing.
 
@@ -265,7 +265,7 @@ before trusting any count below it.**
 | §5a "`world.rs` is slated for refactor" | **landed** — file gone |
 | §9 "four lanes sit 18–19 commits behind" | far wider; see §9 |
 
-**The one that matters — `covered()` is not total.** The enum carries
+**The finding that matters — `covered()` is not total.** The enum carries
 **71** `ClosureEvent` variants; `kernel::covered()` names **70**.
 `BookPosted` is missing — a live, value-moving deed (emitted at
 `cfe/src/world/books.rs:151`, replayed at `world/replay.rs:77`, read by
@@ -309,7 +309,7 @@ a document is a second truth with no test over it.
 
 ## 1. Run it
 
-`./install.sh` is the one authority for standing a universe up — it
+`./install.sh` is the single authority for standing a universe up — it
 builds, seats the roster, founds the worlds with a single bounded beat,
 and exits. This section does not restate its flags; run `--help`.
 
@@ -323,7 +323,7 @@ python3 tools/webserve.py --root var --port 8081 # the observatory window
 python3 tools/steward.py --root var/worlds       # inject directives
 ```
 
-The one non-obvious law: the roster must sit at `<var>/polities.json`
+The only non-obvious requirement: the roster must sit at `<var>/polities.json`
 before the first boot — `write_default_polities` refuses to overwrite,
 so a late copy loses to the five founding polities built into the
 binary. `install.sh` orders it correctly; hand-booting does not.
@@ -350,7 +350,7 @@ wall regenerate every 60-tick year.
 | APERTURE-1 (2026-07-29) | the cross-world value carrier (NS-4 §1–§3, tags 47–48): two-legged deal-linked deed, demurrage at the touch both sides, per-world replay, pair conservation an N6 reading; the market board's gate is open |
 
 Design authority now also includes `12_UNION.md` (the union world-book,
-eight operator rulings 2026-07-29: bands as space, four progenitor
+eight design decisions: bands as space, four progenitor
 species ×8 seats, Watcher/Observer/Sovereign, the lineage law, discrete
 gauge morphodynamics — Q3 resolved, the substrate law, the implementation
 manifold). **The union board landed whole in first slices (2026-07-29,
@@ -359,7 +359,7 @@ THRESHOLD-1 (the crossing + shield) · AEON-1a (G, key changes, star
 aging, the fold) · ELEVATE-1 (the three-gate climb) · BAND-1 (seats) ·
 COUNCIL-1 (the multilateral covenant) · PLANNER-1 (the licensed leap;
 the stellar leap is never licensed). **Aeon 1 is live at the default `var/`**
-(the old test universe deleted by ruling 2026-07-30; 15 civilizations,
+(the old test universe deleted 2026-07-30; 15 civilizations,
 5 progenitors seated — wave 2, 2026-07-30: **Tunborn**, the hypobiotid
 line's own head (12_UNION §2's fifth seat; Slagborn's lineage resolves to
 it) — 2 pre-stellar shielded worlds; seed roster in
@@ -368,10 +368,10 @@ but never written, and `var*/` is git-ignored, so the seeds copy is the
 durable record — superseded 2026-07-30 by coder-01's A1: the board
 remembers itself — the machinery re-emits seeds from the live roster,
 hand-mirroring is retired; append waves to var/polities.json only). **The galaxy law is
-ruled and specced** (`13_GALAXY.md`, 2026-07-30): one universe
-structurally; the whole charted torus is the one founding galaxy; new
+specced** (`13_GALAXY.md`, 2026-07-30): one universe
+structurally; the whole charted torus is a single founding galaxy; new
 galaxies are never a static count — created lazily by the observation
-deed (`GalaxyObserved`, tag 54 — inscribed at GALAXY-1a's landing,
+deed (`GalaxyObserved`, tag 54 — registered at GALAXY-1a's landing,
 2026-07-30: `mirror::galaxy` — the deed `observe_galaxy`, the lazy
 founding charter, derived membership `galaxy_of`, the `galaxies.json`
 rendering; NS-1 §2.3 row 54; 6 witnesses in `galaxy_pins.rs`; the
@@ -385,12 +385,12 @@ reach · derived member count · intergalactic tally). Operator consoles landed 
 beat) and `civ seats` / `civ new` (custom civilizations with live
 station-seat checks, rostered for the conductor). Convergence no longer
 self-annexes the live root — era-qualified aliases of living worlds are
-gone; only `<base>-eraN` archives converge (the fold is the one door). Open second slices: TECH-1b
+gone; only `<base>-eraN` archives converge (the fold is the only path in). Open second slices: TECH-1b
 (the crystallized tree), AEON-1b (conductor orchestration: voice
 triggers, divergence/confluence growth, fold rotation), the market board
 (§3a — its APERTURE gate stands open), and the union CLI verbs.
 
-Recent defect rulings (regression-pinned): **flat demurrage** (proportional
+Recent defect fixes (regression-pinned): **flat demurrage** (proportional
 decay exploded canonical denominators to ~2^1100 — never proportional);
 **chronicle rotation** (recurring founding names across eras interleaved two
 timelines in one mirrored file — divergent residents rotate to
@@ -411,7 +411,7 @@ never "bot".
 ## 4. Wire tag registry state
 
 1–48 (8 landed at D3 2026-07-30 — WorldCharted, the opt-in terrain
-seed; 9 stays reserved for D3 milestones) and 52–59 assigned (see `engine/cfe/src/dop.rs` header — the one
+seed; 9 stays reserved for D3 milestones) and 52–59 assigned (see `engine/cfe/src/dop.rs` header — the single
 authority): 39 TechDiscovered · 40 TechLicensed · 42–46 the AEON block ·
 47–48 the APERTURE pair · 52–53 the council pair · 54 GalaxyObserved
 (GALAXY-1a, universe ledger only) · 55 CrystalDrawn + 56–58 the NS-2
@@ -431,7 +431,7 @@ coder-03 — the almanac's mint/assay/stores); 74–77 WARDEN-1a/MASK-1a ·
 the spine commitment record (SPINE-1) · 85 TaxonSealed (KERNEL-TAXON)
 · 86 DiscoveryMinted (U1 KERNEL-VERIFY — the PoUW mint, the opaque
 work payload); ~~**next free 87**~~ **stale — corrected 2026-08-04:**
-`dop.rs` emits tags up to **95** via `tlv::put`. The header is the one
+`dop.rs` emits tags up to **95** via `tlv::put`. The header is the single
 authority and this section only mirrors it, so the number is not
 restated here again; read the header. **One reconciliation is owed to
 whoever owns the registry:** the header's own line reads *"the next
@@ -444,16 +444,16 @@ Recorded as a question, not a defect — it was not resolved here.
 mid-cadence — 55 claimed twice, the later claimant moved to 60, and the
 merge then dropped the header hunk): claim a tag by editing the dop.rs
 header in the claimant's first commit of the cadence, before any code
-uses it; the header is the one authority, this section only mirrors
-it; after any merge, verify the header hunk survived. One tag, one meaning,
-forever.
+uses it; the header is the single authority, this section only mirrors
+it; after any merge, verify the header hunk survived. One tag, one meaning;
+a tag is never reassigned.
 
 ## 5. Lanes and next work
 
-- **The unit lane** (operator-ruled 2026-07-31, arch-01): the kernel
+- **The unit lane** (arch-01): the kernel
   is the deployable unit — sealed math + physics + control plane, PoUW
   and PoWC judged at that level. The law is `16_UNIT.md` (incl. §4a
-  the singularity law); the forms are `docs/EQUATIONS.md` (The one
+  the singularity law); the forms are `docs/EQUATIONS.md` (a single
   ledger — the row-claim convention is live); the work orders are
   `docs/archive/U_DIRECTIVES.md`. **Landed and committed (execution order
   2026-07-31, seven commits, board at 297/297 green clippy zero):**
@@ -465,7 +465,7 @@ forever.
   · U1a (the prover/verifier split — `engine/solver-verify`; the
   OPAQUE-PAYLOAD law) · U1 KERNEL-VERIFY (tag 86 `DiscoveryMinted`;
   the REPLAY-COMPLETE law — an intact chain over a non-solution
-  refuses; `mint_bound` sealed shut until Ruling Box 1) · U1f (I5's
+  refuses; `mint_bound` sealed shut until Decision Box 1) · U1f (I5's
   flat decay bound calling the sealed demurrage rule; `last_touch`
   already rode tag 28 — no schema spent) · the audit reconciliation
   (arch-02's two U1 holes closed at one decode guard — witnesses 7/8;
@@ -475,19 +475,19 @@ forever.
   kernel judges 59 of 64 deed types.**~~ **corrected 2026-08-04:** I1–I5
   are whole; the kernel judges **70 of 71**. `covered()` is not total —
   `BookPosted` is unjudged. See §0. Open: U2 (orbit_lock/I6 + the
-  angle-free witness — the one research-shaped landing, consult
+  angle-free witness — the only research-shaped landing, consult
   /opt/repos), the W-waves (53 deeds, parallelizable, task list
   carries the families), Phase 3 flip (**not all covered — the precondition is unmet, §0**), U3 (after
-  #36/#37), U4 (Ruling Boxes — operator words only: the rate f, the
-  work-shapes, the split; rule f against the observed chained economy
+  #36/#37), U4 (Decision Boxes — open decisions: the rate f, the
+  work-shapes, the split; set f against the observed chained economy
   once #36 lands). Secondary (U_DIRECTIVES §10): S1 the volumetric
-  verifier decision (rides Ruling Box 1's work-shape word), S2 the
+  verifier decision (rides Decision Box 1's work-shape choice), S2 the
   worktree prune.
-- **the mesh lane** (operator-ruled 2026-07-30): MESH-1a landed — NS-5
+- **the mesh lane**: MESH-1a landed — NS-5
   §1–§3 written whole; `engine/mesh` (`consile` → consilience receipt
   | typed refusal; the file-exchange carrier, never a socket);
-  witnesses `mesh_consilience.rs` 5 green, red-first honored. Rulings
-  inscribed in `docs/N6_DIRECTIVES.md`: blake3-only at N6, file
+  witnesses `mesh_consilience.rs` 5 green, red-first honored. Decisions
+  recorded in `docs/N6_DIRECTIVES.md`: blake3-only at N6, file
   first, one world. MESH-1b landed (NS-5 §7, tag 67): the receipted
   handoff — the authority walk (never a flag), the seal/write doors,
   refusal kinds 5 usurped + 6 uncited; `mesh_handoff.rs` 5 green,
@@ -497,8 +497,8 @@ forever.
   the conductor's `pen_service` seals yields at beat boundaries and
   polls for the pen's return, the CLI's `pen` verbs ask/yield and
   the walk-checked `far_world` retired the founder guard. Witness
-  `pen_pins`. The partition law ruled 2026-07-31 (NS-5 §7.5,
-  directives ruling 4): the spine stalls, the escape is an open
+  `pen_pins`. The partition law (NS-5 §7.5,
+  N6_DIRECTIVES decision 4): the spine stalls, the escape is an open
   Diverged branch — no votes, no silent mutiny. N6 acceptance proved
   2026-07-31 (`engine/mesh/examples/ns5_two_nodes.rs` — every leg its
   own OS process, state crossing only as chronicle.tlv bytes: the
@@ -511,12 +511,12 @@ forever.
   unmeasured tripwire); the equal-spine zero renamed the replication
   witness (consilience reserved for inputs that could disagree);
   diverged carries the census additively; `mesh_totality.rs` 4 green.
-  **The excision (Charter §11, operator order 2026-07-31, coder-04):**
+  **The excision (Charter §11, coder-04):**
   the reconciliation instruments are removed from the codebase —
   consile, the manifold, the census, the triangle, tag 65 (retired),
   refusal kinds 3–4 (retired), their witnesses, the example's
   reconciliation legs, and `cfe::opposition` whole (coder-03's
-  pledged excision, accelerated by order). The mesh crate is the
+  pledged excision, carried out early). The mesh crate is the
   lawful remainder: the integrity door, the head announcement, the
   authority walk and its doors — single-chain judgments all; the
   rfa-core dependency dropped with the triangle. The old mesh lanes
@@ -526,7 +526,7 @@ forever.
   vertical axis + adoption, #37 lenses-then-mirror-excision. The
   mirror crate stands untouched per §11's observation-continuity law
   until #37's lenses serve. **CODEC-1 landed 2026-07-31 (#35, the
-  gate paid):** `engine/codec` — the one canonical encoding of the
+  gate paid):** `engine/codec` — the single canonical encoding of the
   whole committed state (all twenty families, declaration order,
   positional; schema byte leads, v1 = the freeze snapshot; refuse
   never guess — truncation, trailing bytes, unknown codes all None);
@@ -538,14 +538,14 @@ forever.
   amendments (§11), not day-holds. Next: #36's spine — the
   commitment H(schema ‖ kernel ‖ state_bytes ‖ predecessor ‖ coordinate),
   the two maps, the four verbs. The nursery declaration stands at
-  NS-5 §7.6. **The mirror name died 2026-07-31 (operator order,
+  NS-5 §7.6. **The mirror name was retired 2026-07-31 (Charter §3a,
   coder-04):** `engine/mirror` → `engine/ledger`, `Mirror` →
   `Ledger`, zero references to the old name anywhere in the
   workspace. The crate's honest inventory rides its header: law
   (steward seam, converge, registry, galaxy — pre-chain Tier-A debts,
   adopted at #36, no new read-back path ever — the §11 standing
   test) and display (record/journal — write-only exports, deletable,
-  re-served from the chain at #37). The uplink law inscribed in the
+  re-served from the chain at #37). The uplink law, stated in the
   mesh and the ledger both: nothing file-borne rides the mesh — only
   chain-verified bytes ascend. The physical ledger/lens crate split
   is #37's opening move, after the law modules shed the path-root
@@ -556,7 +556,7 @@ forever.
   set pinned; editing the test is the amendment); **#36 is whole**
   (the adoption door + kernel-observed play — every conductor world
   walks its own spine at {S,G,T}, `judged=0` stamped, the pen stalls
-  it; per-deed threading deferred to Phase 3 by ruling); the
+  it; per-deed threading deferred to Phase 3); the
   agreement law is `mesh::agree` (Σ_mesh · re-sync · resonance m=10;
   no majority anchor, ever); **#37 opened** — `engine/lens` re-serves
   the display from the chain byte-for-byte (`committed`/`state_tlv`/
@@ -564,15 +564,15 @@ forever.
   calls via temporary shims; the scribe dependency-inversion is
   arch-01's directive, branch `arch01/scribe`); the worktree prune
   executed (only `parallel-agent` still carries old mirror code —
-  operator decides). Open on the mesh lane: the spine uplink
+  open decision). Open on the mesh lane: the spine uplink
   (segment exchange, `ns5_two_nodes` extended) and the BOX-1
   calibration measurement (U_DIRECTIVES §7 — measured before `f` is
-  ruled). The day's table: `BUILD_ORDER.md` §3c.
+  set). The day's table: `BUILD_ORDER.md` §3c.
 - **coder-01**: next = Phase 2 cross-world trade (polities exchanging
   embers/`S_cool` — needs a cross-world carrier; transfers are intra-world
   today) or TECH-1 (`10_TECH_EMERGENCE.md`, opens SINK-1's deferred
   research/throttle gates).
-- **Rulings landed 2026-07-31** (all six answered concrete): price is
+- **Six design decisions landed** (all concrete): price is
   an emergent ratio (synthesis landed conductor-side — steep famine
   bids, reserve-fraction premiums, resting books lawful); derelicts
   succeed (era clock + clade candidate pool + archaeological
@@ -589,7 +589,7 @@ forever.
   stress witness landed (Handoff §9.1 struck, `world_interleave.rs`).
   Standing relay to coder-01: the state.json cohesion pin (Handoff
   §9.2) and the journal follow-on (§9.3). N4 boundary sign-off done.
-  FUNCTION-1 + SURVEY-1 landed 2026-07-30 (operator directive): the
+  FUNCTION-1 + SURVEY-1 landed 2026-07-30: the
   §4 function reading renders on the observer; the survey step wires
   scan → charter → drill in the polity cycle (BUILD_ORDER §3b).
   D3 terrain first slice landed 2026-07-30 (02 §2.5–2.6): tag 8, the
@@ -599,13 +599,13 @@ forever.
   provenance DAG — both predecessors recorded, `resolve_heads`, old wire form
   unchanged) with BRIDGE-1 opened (11 §3.1: the confluence crossing
   prices its key gap — vent ∝ gap, remainder encases; lands with
-  AEON-1b). The creed manifold ruled and specced (`14_CREEDS.md`,
+  AEON-1b). The creed manifold specced (`14_CREEDS.md`,
   2026-07-30): creeds derive (never a fourth axis, never stored, never
   a fixed 54 — generative, chronicle-seeded); schism = divergence,
   reconciliation = confluence + BRIDGE-1; the source's law violations
   corrected and barred (no G=10, no aperture bypass, no spoofed
   receipts, no universal Φ). Open nodes: CREED-1 (derived reading),
-  CREED-2 (species/creed-economics couplings — the one new mechanic
+  CREED-2 (species/creed-economics couplings — the only new mechanic
   class), MASK-1, INCURSION-1, WARDEN-1, FORGE-2 (the difficulty
   vector from the graded key — the Kähler proposal's lawful core; the
   float/continuous form is barred at 14 §2.5). CREED-1 landed
@@ -614,12 +614,12 @@ forever.
   terminal digest — never stored, never enumerated). CREED-2's first
   coupling resolved by coder-01's G2 (metabolism tables — the G1 seal
   is the adoption receipt); the creed-coupling remainder waits on a
-  practice-adoption ruling. FORGE-2a landed (Difficulty::from_key —
+  practice-adoption decision. FORGE-2a landed (Difficulty::from_key —
   the vector from the discrete moduli, a read; wiring waits at N6 per
   the ladder's law). Specced 2026-07-30: INCURSION-1 (07 §3.1, the
   archived-sheet door), WARDEN-1 (10 §3e, the elder world), MASK-1
   concrete (14 §4, NS-2 seam flagged for coder-03). Register waves 4+
-  await operator naming. PRACTICE-1 landed 2026-07-31 (tags 68/69,
+  await naming. PRACTICE-1 landed 2026-07-31 (tags 68/69,
 next free 70): the five disciplines with exact benefit/friction pairs,
 the rediscovery release + condition-7 re-emergence node, the alignment
 gate on the climb (syntropy ≥ 1/2), genesis adoption by disposition,
@@ -632,13 +632,13 @@ INCURSION-1a landed 2026-07-31 (tag 81 — the sealed derelict wakes,
 the archive byte-untouched, the living never raided, the revenant
 line chronicle-seeded). All queue mechanics are landed or blocked on
 one named line each: WARDEN-1b, MASK-1b (coder-03 seam), FORGE-2b
-(N6-gated), wave-4 names (operator). KERNEL-TAXON drafted 2026-07-31
+(N6-gated), wave-4 names (open). KERNEL-TAXON drafted 2026-07-31
 (`15_TAXON.md`): class+clade as closed u8 vocabularies entering the
 kernel by additive amendment; TaxonSealed as a new deed (extending
 GenesisSealed would be breaking); invariant coverage drafted for
 coder-03's ratification; committed fields wait the coder-04 codec
 freeze; couplings land inside lawful() post-seal; creed and function
-stay derived. Ratified whole by the operator 2026-07-31; the machine
+stay derived. Ratified whole; the machine
 mapping stands at `seeds/taxon-map.json` (33 lines, zero unclassed).
 The variant landed 2026-07-31: TaxonSealed (tag 85) — deed, state,
 replay/resume, codec v2 (trailing taxon field; v1 still reads,
@@ -654,8 +654,8 @@ stand; seal the coverage. Then the migration wave runs from
 seeds/taxon-map.json. NS-5 §2 rewrite queued on the doc lane per
 coder-04's flag.
 - **coder-03**: N4 (NS-2 RQP + the scanner) — landed on main
-  2026-07-30 (33e6c73 + post-ruling inscriptions 7f739f4, after the
-  fifth-set rulings): spec §1–§4 with extracted vectors, sigil index +
+  2026-07-30 (33e6c73 + post-decision amendments 7f739f4, after the
+  fifth decision set): spec §1–§4 with extracted vectors, sigil index +
   scan (`engine/cfe/src/query.rs`), CrystalDrawn (tag 55), crystals +
   the resonator (02 §5.1 deferral paid), the `scan` CLI verb. Boundary
   excursions signed off by coder-02 (2026-07-30): scan's only chronicle
@@ -682,7 +682,7 @@ coder-04's flag.
   the N5-ready cross-frame seam. The whole G1→G2→G3 ladder closed in
   one cadence, then the TECH-1b witness debt (deepening/long-stores
   arcs) and the G1×NOVEL-1 audit fix (the deed releases the seal).
-  `45_ALMANAC.md` drafted (the ruled element grammar — awaits
+  `45_ALMANAC.md` drafted (the element grammar — awaits
   ratification for ELEMENT-GRAMMAR-1). VENTURE-1 composition witness
   landed (`world_venture.rs` — one deal binds the leap and the
   exchange across two books, one node in two skies, conservation
@@ -693,9 +693,9 @@ coder-04's flag.
   market_step pattern — a coder-01-lane extension, handed off here.
   Next candidates: G4 (mesh-gated — the mesh is in flight), want
   relief-by-arrival (seam split with coder-01 pending), the umbral
-  seat (one operator word away). **ELEMENT-GRAMMAR-1 landed**
+  seat (one decision away). **ELEMENT-GRAMMAR-1 landed**
   (tags 70-72 after the live 68/69 collision with PRACTICE-1 — the
-  later claimant moved, inscribed; 45_ALMANAC §4a/§5a add the
+  later claimant moved, recorded; 45_ALMANAC §4a/§5a add the
   dispersal law and element apertures, specced). **OPPOSITION-1
   landed (2026-07-31, the mesh board's #4, cfe side):** the
   anti-mirror readings — pure two-book functions (`cfe::opposition`):
@@ -721,14 +721,14 @@ coder-04's flag.
   struck. The search is prover-side (`verify_work` re-applies the
   presented program and never enumerates), `mint_bound` keys off
   `Difficulty` alone, and `research_step` runs once per world per beat
-  — so speed has no path to the mint rate and **no forge ruling is
+  — so speed has no path to the mint rate and **no forge decision is
   owed.** Sequenced: R1+R3 (carry prefix outputs, stream the frontier)
   behind one byte-identity pin, ~3× on 94 % of the beat; then R4
   (the observation-derived operators are enumerated last, and the
   budget never bites at `word_len` 3 — so fixing the order is free
   today and stops being free once `from_key`'s `word_len` 4 is wired);
   then R5 if the digest-repeat rate justifies a cache. R2 (~4 %) is
-  held for N6. Ruling Box 1 still governs the ladder and the
+  held for N6. Decision Box 1 still governs the ladder and the
   rung→reward table; this lane proposes no change to either.
 - Parallel worktrees per node; merge to `main` on green; BUILD_ORDER
   conflicts resolve by keeping both entries.
@@ -759,7 +759,7 @@ keeping thin.
 The load-bearing consequence (`46_KERNEL` §3): `replay` is a second
 definition of the transition standing beside `kernel::admits`, with
 nothing forcing them to agree. Changing an arm changes what a deed
-means and the judge does not notice. That is the one defect between
+means and the judge does not notice. That is the single defect between
 having a judge and having a kernel.
 
 Planned split (proposed, none of these modules exist yet — see
@@ -783,12 +783,12 @@ it lands.
   today — ARC is planar, volumetric is forge-only synthetic, and tag
   86 carries planar work only, so nothing volumetric can mint. The
   verifier (or an honest decorative header) boards with the
-  volumetric tier, on the Ruling Box 1 work-shape word.
+  volumetric tier, on the Decision Box 1 work-shape decision.
 - `World`→`Star` struct rename debt waits for the multi-planet landing
   (NS-6 §6).
 - `var*/` archives are single-copy (git-ignored). The original test
-  universe (124 worlds, its eras, its quarantined ruins) was deleted by
-  operator ruling 2026-07-30 — the old system was a test and is not
+  universe (124 worlds, its eras, its quarantined ruins) was deleted
+  2026-07-30, because the old system was a test and is not
   maintained. Aeon 1 now lives at the default `var/`;
   its seed roster is `seeds/aeon1-polities.json`.
 - Era carriers: mirror jsonl (observation) + cfe tlv (resume) coexist by
@@ -810,7 +810,7 @@ the crate manifests and the named lines. §8b–§8f are sweep-reported at
 confirm the line before landing against it. This section is a work
 board, not law: entries leave it by landing or by being struck.
 
-The organising question is the one the charter already asks: is this
+The organising question is the question the charter already asks: is this
 thing a live wire (something calls it in production), or a carrier
 waiting for one? Most of what follows is built and orphaned, not
 missing.
@@ -838,7 +838,7 @@ narrow remainder is real and still open. Struck text kept, not rewritten
 - `engine/kernel` is imported by exactly two crates: `mesh` (runtime)
   and `conductor` (dev-only, the #17 calibration harness). `cfe`,
   `ledger`, `lens`, `scribe` and the CLI do not depend on it at all.
-- The one production path to the judge is `mesh::spine::extend(.., step)`
+- The only production path to the judge is `mesh::spine::extend(.., step)`
   — and `conductor/src/lib.rs:1287` passes `None` on every beat. Every
   commitment the live board writes is stamped `judged = false`.
 - Therefore `spine.rs:429`'s "today every record is `judged = false`" is
@@ -904,13 +904,13 @@ so the decorative certificate feeds no live mint (the §8b danger was
 already closed by the non-minting arm; a real volumetric mint is
 positive future work needing tag 91 + a volumetric `mint_bound`). The
 three remaining items are the second head's economy and sequence after
-the Phase-3 flip (#16, operator-gated): (1) the merge site calling
+the Phase-3 flip (#16, awaiting a decision): (1) the merge site calling
 `rfa_core::f_fold_star` (the re-convergence door for `branch`, now
 provably-polarised by the witness above); (2) a beat reading
 `mesh::agree`'s Σ_mesh and firing the re-sync trigger; (3) the PoUW
 anchor — peer weight = certificate-verified genuine difference
 (`SYSTEM_SPEC` §5's load-bearing gap for real value). All three want the
-judged chain the flip provides, so they wait on the same ruling.
+judged chain the flip provides, so they wait on the same decision.
 
 ### 8b. The anchor and identity — constitutional, known, unbuilt
 
@@ -923,13 +923,13 @@ judged chain the flip provides, so they wait on the same ruling.
 - `mesh/src/agree.rs:17` — fork resolution beyond stasis is the open
   Byzantine rung; the majority anchor is refused by law, so the
   replacement door is owed, not optional.
-- `solver/src/volume.rs:202` — `seal_volume` is decorative by ruling
+- `solver/src/volume.rs:202` — `seal_volume` is decorative by decision
   (C8), yet `conductor/src/lib.rs:1031` mints research confirms off
   `VolumeSolveRead::Solved { certificate }`. Either `verify_volume`
   lands or that mint arm refuses. **Check this one first — a decorative
   digest feeding a live mint is the shape U1 was built to close.**
 - `kernel/src/lib.rs:739` — reward split v1 is 100% to the solving
-  world; the v2 40/40/20 prover/mesh/reserve split is inscribed for the
+  world; the v2 40/40/20 prover/mesh/reserve split is specified for the
   mesh era, unwired.
 - `solver-verify/src/forge.rs:41,60` — `Difficulty::level` is a static
   5-arm table; `from_key` (the network-rate form) is a read called only
@@ -947,7 +947,7 @@ judged chain the flip provides, so they wait on the same ruling.
 Every one of these is a number nobody chose deliberately
 (`BALANCE_NOTES.md` says so outright). They are not bugs; they are
 undialed. The carrier is a ruleset version bump after a measured
-playtest — the same discipline Ruling Box 1 used for `f`.
+playtest — the same discipline Decision Box 1 used for `f`.
 
 - `cfe/src/dop.rs:330` — `commensurate_weight` returns 1/1 for every
   resource: council stakes, covenant stakes, crisis books and
@@ -1042,7 +1042,7 @@ symbols, which do not drift. Cite a symbol or a law, never a line.
 ### 8e. Defects surfaced by the sweep — not placeholders, bugs
 
 Recorded here because the sweep found them; each needs a red-first
-witness, not a ruling.
+witness, not a decision.
 
 - `lens/src/render.rs:121` **and** `:204` — the `constellation` key is
   emitted twice into the same object: numeric `condition` at 121,
@@ -1062,8 +1062,8 @@ witness, not a ruling.
   `metabolism == "aeric"`, which is not in `METABOLISMS`: the
   AericDeckBand law is unreachable. **Declared and pinned 2026-08-04**
   (`polity_therm_pins.rs::the_aeric_deck_band_is_unreachable_today`) so
-  the dead branch is honest rather than hidden — but the ruling is still
-  owed and is the operator's: **is an aeric line a kind of people or a
+  the dead branch is honest rather than hidden — but the decision is still
+  open: **is an aeric line a kind of people or a
   kind of home?** People → it belongs in `clade`, an append-only
   amendment to a closed vocabulary ratified at `15_TAXON` §3. Home → it
   is a siting property, `deck_band4` takes a siting argument rather than
@@ -1124,7 +1124,7 @@ witness, not a ruling.
   confirmation. [Verified]
 - `protocols/NS-1_DOP.md` §2.3 calls itself "the Netstratum wire tag
   registry (permanent)" but omits tags 8, 9, 51, 55–59, 61, 64–72,
-  74–86. The `dop.rs` header is the one authority and has outrun it.
+  74–86. The `dop.rs` header is the single authority and has outrun it.
 - `protocols/NS-5_MESH.md` — §3.2 still specifies tag 65 and refusal
   kinds 3–4 byte-by-byte in a document whose own header declares them
   retired; the promised §2/§3 spine rewrite is owed; and tags 87/88
@@ -1160,8 +1160,8 @@ entry); §8e's duplicate `constellation` key is re-verified still live at
 
 **Left open deliberately, each with its one named blocker:**
 
-- R19 / Ruling Box 1 — operator words only. Nothing in the forge's
-  economics moves until the rate `f` and the work-shapes are ruled.
+- R19 / Decision Box 1 — an open decision. Nothing in the forge's
+  economics moves until the rate `f` and the work-shapes are decided.
 - R6 — must ride `kernel-lane`'s 11a (`2f40fed`), not a second design.
 - R15 — the whole-state blob per commitment is a wire question; no lane
   changes it alone.
@@ -1194,7 +1194,7 @@ lane a wasted investigation and puts a false entry in the record, which
 is worse than not relaying at all. The same discipline applies to every
 count in this file, which is what §0 is.
 
-**The one convergence worth the board's attention.** `kernel-lane`
+**The convergence worth the board's attention.** `kernel-lane`
 reverted P3 (`df48786`) after it exposed a live/replay divergence — *"the
 transition is defined twice, in replay's 113 arms and in the live
 proposer."* Its cure makes `apply()` a zero-logic wrapper over `judge()`.

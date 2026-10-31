@@ -1,9 +1,12 @@
 # 87 — Knowledge, movement and the economy: one physics
 
-Operator 2026-10-22: accepted ("proceed with development") after "cut it
-over so that the economy is not just a spreadsheet or card catalogue",
-planetary movement is across a sphere, and space traversal is also in a
-sphere (a body's equipotential figure), for both economy and movement.
+This document defines knowledge, land, movement, hulls, matter and markets
+as one physics on the era-1 spheres, replacing an economy represented as
+tables. Movement on a world is movement across its sphere, and travel
+through space is movement on a sphere (a body's equipotential figure), so
+the economy and movement share the same geometry.
+
+**Status:** accepted for development.
 
 ## The principle
 

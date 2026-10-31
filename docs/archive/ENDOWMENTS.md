@@ -8,11 +8,11 @@
 > its registry card, not through a file. The E1/E4 drift this chapter
 > inventories cannot recur, because there is no second roster to drift
 > from. The measurements and the reasoning are kept as the record of why
-> the ruling was made.
+> the decision was made.
 
 # Endowments — standing that is due and has not been claimed
 
-**Status:** live register (record lane, opened 2026-08-03). Operator
+**Status:** live register (record lane, opened 2026-08-03). The
 charge: find the endowments still unclaimed, keep the
 civilizations' records in order, and claim every resource they are entitled
 to.
@@ -34,7 +34,7 @@ command that measured it.
 
 **Register discipline.** Plain engineering English. Every claim dated and
 measured. A row leaves this register by being claimed (the entitlement
-taken) or by being struck (ruled not owed) — never by going quiet.
+taken) or by being struck (found not owed) — never by going quiet.
 
 ---
 
@@ -138,8 +138,8 @@ live universe was founded and last run. The roster is seated at genesis
 and `write_default_polities` refuses to overwrite (`PICKUP.md` §1), so
 nothing has ever seated them.
 
-**This is the endowment running the other way, and it is the one the
-charge names most literally.** E1 is value the live universe holds and
+**This is the endowment running the other way, and it is the endowment
+the charge names most literally.** E1 is value the live universe holds and
 the record has never claimed. E3 is standing the record grants and the
 live universe has never taken: three chartered lines — an `observer`
 seat (Draco), a `watcher` seat (Pleiadian), and an unstationed
@@ -147,8 +147,8 @@ seat (Draco), a `watcher` seat (Pleiadian), and an unstationed
 been re-seated since they were written.
 
 **Owed:** seating the three, which is a universe operation and not a
-document edit. Booked separately from the claim path; it needs the
-operator's word on whether the live universe is re-seated or the three
+document edit. Booked separately from the claim path; it needs a
+decision on whether the live universe is re-seated or the three
 wait for the next genesis.
 
 ## §4 E4 — the claim path is inoperable, and destructive if repaired naively
@@ -221,7 +221,7 @@ was an invisible one, pinned empirically at the time by
 2026-08-05). The failure mode is gone with them: siting is no longer
 carried by a file that can omit it, it is derived from the sigil, so
 there is no missing-field path left to drop a line silently. The
-paragraph is kept because the reasoning is what justified the ruling —
+paragraph is kept because the reasoning is what justified the decision —
 a silent drop is worse than a refusal, and the fix was to remove the
 thing that could drop.
 
@@ -256,13 +256,13 @@ three refused lines, and the tool reports the coincidence without acting
 on it. The slug-to-world name pattern is not reliable in general —
 `cairnborn` sits on `cairn-field`, `aerie` on `windward-spire`, `hadal`
 on `trench-hold` — so adopting it here would be a guess dressed as a
-measurement. Booked for a ruling, not resolved by inference.
+measurement. Booked as an open decision, not resolved by inference.
 
 ## §5 E5 — the cleave's possibility space is constant, and landed law says it should compound
 
-**Operator, 2026-08-05:** every divergent line should have a
-multiplicative event where the possibilities of possibilities grows as
-the upper line compounds on the lower lines — these are endowments.
+**The requirement:** every divergent line has a multiplicative event,
+where the space of possibilities grows as the upper line compounds on
+the lower lines; these are endowments.
 
 This is the register's own definition exactly: standing landed law
 already grants, which no code path has ever claimed.
@@ -300,7 +300,7 @@ compound on the lower; there is no multiplicative event.
    engine's own compounding surface, and **nothing autonomous claims
    it**: `shift_gauge_at` has three callers — the CLI verb (the
    operator's hand), one `cfe` test, and `Polity::unfold`, which `cycle`
-   does not call. Every autonomous line sits at genesis `[0]` forever
+   does not call. Every autonomous line never leaves genesis `[0]`
    while its earned mints pile up unspent. The era fold runs every era;
    the unfold runs never.
 
@@ -331,7 +331,7 @@ that is unexplained (`conductor::Polity::unfold`'s own note). **A
 proposer that breaks SEAL B is worse than one that never expands**, so
 the 7-crystal divergence is the first thing owed, not the last.
 
-Both halves are rulings, not refactors: the mask's domain is a law about
+Both halves are design decisions, not refactors: the mask's domain is a law about
 what a cleave may move, and the unfold's wiring changes what every
 autonomous line does every beat.
 
@@ -363,10 +363,10 @@ findings.**
 
 ## §8 Claimed 2026-08-07 — orbit dynamo + estate place (35)
 
-**Operator charge (session):** *all orbits should not be the same —
-magnetism of cores, offset by polity of the star and class of the star;
-document and build to spec; endowments and estates with deeds for real
-estate to expose exploration and expansion economics.*
+**Charge:** orbits are not all the same: each takes the magnetism of
+its core, offset by the polity of its star and the class of its star;
+documented and built to spec, with endowments and estates carrying deeds
+for real estate, to expose exploration and expansion economics.
 
 | Entitlement | Standing that existed | Claim path landed |
 |-------------|----------------------|-------------------|
@@ -390,10 +390,10 @@ Q-O3 landlord lease of slots · Q-O4 multi-star period × chart.
 Per the lane map (shared memory, read 2026-08-03) this register is the
 record lane's. Territory: `00_CHARTER.md`, `BUILD_ORDER.md`, `PICKUP.md`,
 `HANDOFF.md`, `SYSTEM_SPEC.md`, `protocols/NS-*.md`, this file, and — by
-operator reassignment 2026-08-03 — the scribe and the pen.
+reassignment on 2026-08-03 — the scribe and the pen.
 
 **`engine/scribe/` was the lens lane's territory in the map.** The
-reassignment is the operator's and is recorded here and in the shared
+reassignment is recorded here and in the shared
 lane map so the lens node is not walked into. Nothing has been landed in
 `engine/scribe/` on this lane yet.
 

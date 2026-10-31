@@ -1,21 +1,25 @@
 # 104 — The inverse duals: heating and cooling, push and pull, twist and release
 
-Design direction (2026-10-28): the cooling is likely the inversion's heat, and
-it needs a counterweight to balance the flow; because the nucleus is inverted,
-the quantum state beneath it is inverted by inverse gravity, so the formulas
-are extrapolated to give heating and cooling, push and pull, twist and release
-one aligned semantics. Status: building (direction of 2026-10-28: update the
-documentation, scope it and build it). Builds on docs/97 (the inverse
-nucleus), docs/98 (faces), docs/100 (twist, torsion), docs/103 (the layers; §5
-the whole frame inverted, its enclosure by share from the outside in).
+This document maps each dual pair of the inverse universe (heating and
+cooling, push and pull, twist and release) onto the inverse nucleus and the
+inverse faces, and requires every pair to conserve across the two faces, so
+that heating is balanced by a counterweight. Because the nucleus is
+inverted, the state beneath it is inverted with it, and each formula is read
+on the inverse face.
 
-## 0. The one map
+**Status:** building.
+
+**Prerequisites:** docs/97 (the inverse nucleus), docs/98 (the faces),
+docs/100 (twist, torsion), docs/103 (the layers; §5 the whole frame
+inverted, its enclosure read by share from the outside in).
+
+## 0. A single map
 
 Netstratum is Xylarium's universe inverted at both ends:
 
 - **Its nucleus (built, docs/97):** the open lone end is the proton (Q), the
   fibred end the neutron (Z); the electrons (R) follow the protons.
-- **Its gravity (ruled, docs/103 §5):** the frame inverted whole; the hold at
+- **Its gravity (decided, docs/103 §5):** the frame inverted whole; the hold at
   a place counts what stands beyond it (by share, from the outside in).
 
 The inversion is one first-degree map on every face-reading:
@@ -41,7 +45,7 @@ inverse held share (inverse gravity); `u = δ` the inverse unlocked share;
 |---|---|---|---|---|
 | **pull** (gravity's hold) | `δ` | `g = 1 − δ` | `Enclosed::reach`, heart cut `H/(R + H) ≥ p` | the enclosure by share from the outside in (docs/103 §5); the cut held where `g ≥ p` |
 | **push** (the bounce's carriage) | on the unlocked face `1 − δ` | on the inverse unlocked face `u = δ` | release `s = ½·c/(c + base)` (`breath`) | `s = p·c/(c + base)`, `p = S/(S + T)` the core's pair share (§1.2) |
-| **heating** (the face not locked heats; ruled 2026-10-16) | `½(1 − δ)` | `u·e` (§1.2) | the light warms bodies by `1 − δ` (`breath::shine`); torque heat `p·δ·(1 − |k|)` | warmth by `u·e`; torque heat by the face pushed, `p·u·(1 − |k|)` |
+| **heating** (the face not locked heats) | `½(1 − δ)` | `u·e` (§1.2) | the light warms bodies by `1 − δ` (`breath::shine`); torque heat `p·δ·(1 − |k|)` | warmth by `u·e`; torque heat by the face pushed, `p·u·(1 − |k|)` |
 | **cooling** (heat leaves) | light `e` and the vacuum's pull back `δ`, keep `(1 − e)(1 − δ)` a ring | light `e` and the inverse pull back `g`, keep `(1 − e)(1 − g) = (1 − e)·δ` | keep `(1 − e)(1 − δ)` (`flows::spin_torque`) | keep `(1 − e)·u`, and the counterweight (§2) |
 | **twist** (winding per turn) | the core's deficit at its ring, `½·t_k` | the same: the fixed point where it holds (§1.2) | `quantum::twist`, a body through its own planes | stands |
 | **release** (untwisting; the tide letting go) | by the unlocked face | by the inverse unlocked face `u` | torsion relaxes by the attractor `turned/(d + turned)`, `d = 1 − δ` | `d = u` |
@@ -52,7 +56,7 @@ inverse held share (inverse gravity); `u = δ` the inverse unlocked share;
 Fixed points: at the ring `δ = ½`, so `g = u = ½` and every pair balances
 there (both faces equal).
 
-### 1.1 The held share is a count, never a halving (ruling of 2026-10-28: `(1 − R)/2` is a halving, not a formula)
+### 1.1 The held share is a count, never a halving
 
 `(1 ± R)/2` maps R's range onto a share by halving: a normalisation, not a
 measure. The held share is measured from the state itself. A nuclide's Q
@@ -77,7 +81,7 @@ founding's phase (`frac(p) = ½`) stands on the hemisphere's boundary, where
 `in_step` reads 0 forward and 1 inverted. The founding is re-derived on the
 count, never carried over.
 
-### 1.2 Every share is a pair share of read quantities (ruling of 2026-10-28: ½ may not stand as a static constant; the formula it stands for is owed)
+### 1.2 Every share is a pair share of read quantities
 
 ½ is not a constant: it is the inversion's fixed point (δ = 1 − δ only at
 δ = ½: the throat, R = H, both faces equal). Every true ½ is that reading

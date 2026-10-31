@@ -37,7 +37,7 @@ an incidental number.
 - **No leftovers, no statics.** Every share of matter is placed by a law; a
   constant is a placeholder for missing physics and is named as such.
 - **The register** ([`docs/102_ALIGNMENT.md`](docs/102_ALIGNMENT.md)) keeps
-  the one vocabulary and every owed item, closed with its commit.
+  the single vocabulary and every owed item, closed with its commit.
 
 ## Mycelium
 
@@ -50,9 +50,9 @@ re-run every check, and record it.
 ## Commits
 
 - **Author:** commits are authored and committed under the project's
-  identity, `netstratum contributor <two.cats7701@gmail.com>` (the published
-  set's ruling, 2026-10-30: one email for every repository, each under its
-  own name: `mycelium contributor`, `xylarium contributor`). Personal names
+  identity, `netstratum contributor <two.cats7701@gmail.com>` (one email
+  for every repository in the published set, each under its own name:
+  `mycelium contributor`, `xylarium contributor`). Personal names
   appear only in the copyright line (README, notice).
 - **Message:** a subject line of at most 72 characters in the imperative
   ("Pin Mycelium v0.2.0 from GitHub"), a blank line, then a body that says

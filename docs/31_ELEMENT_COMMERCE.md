@@ -1,6 +1,6 @@
 # 31 — Element commerce: routes, refineries, distribution
 
-**Status:** partial land — operator directive 2026-08-07; **Wave-1
+**Status:** partial land; **Wave-1
 `2109bf0`** REFINE-1; **Wave-2** E-APT-1 (tags 108–109) +
 `element_trade_step`; **Wave-3** ElementRouteChartered (tag 110) +
 SCHEMA_V6 + rail on charter; **E-MKT-1 landed** — MARKET-1 offers carry
@@ -43,8 +43,8 @@ price discovery**, with NPCs sustaining the loop without a player click.
    carriers; elements never become Resource enum members.
 3. **Conservation exact** across every transfer (SEAL B).
 4. **Elements are matter, not heat-ledger:** element aperture demurrage
-   is **off** by default (14 §5a); STAMP demurrage is a separate ruling
-   (32).
+   is **off** by default (14 §5a); STAMP demurrage is a separate open
+   decision (32, Q-S2).
 5. **Comparative advantage from sky + history** (spine, enrichment),
    not designer fiat prices.
 

@@ -31,7 +31,7 @@ under human editorial direction.
 | [docs/GAME_SPEC.md](docs/GAME_SPEC.md), [docs/SYSTEM_SPEC.md](docs/SYSTEM_SPEC.md) | The game and the system as specified |
 | [docs/EQUATIONS.md](docs/EQUATIONS.md) | The equations in one place |
 | [docs/BUILD_ORDER.md](docs/BUILD_ORDER.md), [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md) | The build sequence and the open questions |
-| [engine/kernel/CHARTER.md](engine/kernel/CHARTER.md) | The kernel's charter: the one validated update function |
+| [engine/kernel/CHARTER.md](engine/kernel/CHARTER.md) | The kernel's charter: the single validated update function |
 | [protocols/](protocols/) | The NS protocol stack, NS-1 to NS-7 |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Checks, the design record and the commit standard |
 
@@ -44,7 +44,7 @@ under human editorial direction.
 | [engine/rfa-core](engine/rfa-core) | Rational Field Algebra: relational deltas, cocycles, coherence |
 | [engine/cfe](engine/cfe) | The Canonical Field Engine: state transitions over RFA |
 | [engine/codec](engine/codec) | The committed state's one canonical encoding |
-| [engine/kernel](engine/kernel) | The one validated update function, `lawful(prior, next, step)` |
+| [engine/kernel](engine/kernel) | The single validated update function, `lawful(prior, next, step)` |
 | [engine/ledger](engine/ledger) | The pre-chain ledger of record |
 | [engine/lens](engine/lens) | Read-only projections from the chain |
 | [engine/scribe](engine/scribe) | The display writers: journals, the Terminal Wall, exports |

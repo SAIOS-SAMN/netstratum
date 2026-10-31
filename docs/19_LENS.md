@@ -10,7 +10,7 @@ amends no other lane's law.
 
 ---
 
-## §1 What A lens is, and the one rule
+## §1 What A lens is, and its single rule
 
 A lens **reads and reports**. It never gates.
 
@@ -24,8 +24,8 @@ judge. The worst a lens defect does is misreport.
 
 ### 1.0 The operator display bound — no privileged seat
 
-**Ruled 2026-08-02: the word "human" is struck from the law and the
-code, and replaced by operator everywhere it named a seat.**
+**The word "human" is struck from the law and the code, and replaced by
+operator everywhere it named a seat.**
 
 The corpus carried an exception phrased as *"only where a reading is
 reported to a human lens."* That phrasing was a hazard, not a courtesy:
@@ -60,8 +60,8 @@ seat.
 **What was not struck, and the distinction is the same layer discipline
 that reverted the roster sweep.** `humans` as a civilization name, the
 `humanoid` clade, `human-readable`, `Human Capital` — all content, all
-untouched (the native-vocabulary ruling of 2026-10-30 has since retired
-`humans`, `humanoid` and `Human Capital` as Earth-centric content). A
+untouched (the native-vocabulary rule has since retired `humans`,
+`humanoid` and `Human Capital` as Earth-centric content). A
 species in the roster is not a privileged seat, and renaming it would be
 the layer error, not the cure. What was struck is every place "human"
 named a seat or licensed an exception.
@@ -82,7 +82,7 @@ excised ***was born a read-only dashboard and was safe while that was
 all it was — it became load-bearing one useful change at a time, and no
 rule existed to stop it.*** That is a description of a lens lane going
 wrong, so this section is the rule that stops it. The excised name is
-not reproduced here: §3a is the one article licensed to say it, because
+not reproduced here: §3a is the only article licensed to say it, because
 the article defining a ban must be able to name what it bans.
 
 **The two signatures of A mirror**, from §3a:
@@ -125,7 +125,7 @@ lens only if it passes all three:
   peel nobody is looking through. It is never memoisation.
 - **No private history.** Readings that span steps (§2a kinematics) read
   two points from the chain. They never accumulate their own buffer —
-  the chain is the one record (§11 rule 1), and a lens keeping its own
+  the chain is the only record (§11 rule 1), and a lens keeping its own
   timeline is a second one.
 - **No tallies.** A counter that accumulates is a record. Where a
   frequency is wanted, it derives from receipted deeds, or it is
@@ -156,8 +156,8 @@ state and `L` the lens execution:
 `W \ L ≡ W` is the whole lane in one line: **remove the lens and the
 world is unchanged.**
 
-**Held by A standing test, never by memory** (operator ruling
-2026-08-02, `test_lens_deletability`). Rule 5 as prose is worth nothing
+**Held by A standing test, never by memory**
+(`test_lens_deletability`). Rule 5 as prose is worth nothing
 — prose failed twice in one day in this tree, which is what law 8 and
 `constitution_lint` exist to say. The invariant is mechanical:
 
@@ -172,7 +172,7 @@ first run:**
 |---|---|
 | `no_sealed_crate_depends_on_a_lens` | the judge, the sealed math, cfe, codec, mesh, physics and both solver crates name no lens crate in any dependency table — dev included, since a law test that renders cannot run once the lens is gone |
 | `the_ledger_never_depends_on_a_lens_at_runtime` | `#37`'s split holds: the ledger may build fixtures through the display writers in dev only, never at runtime |
-| `the_conductor_renders_but_never_decides_on_a_reading` | the one lawful edge, pinned by shape rather than absence |
+| `the_conductor_renders_but_never_decides_on_a_reading` | the only lawful edge, pinned by shape rather than absence |
 
 **The direction is the law, not the dependency.** A client may render —
 that is what a client is for, and `16_UNIT` §2 names the conductor a
@@ -194,7 +194,7 @@ question and not a mirror.
 **Why the outward test passes here.** Every reading below is turned on
 an object: the peel resolves a relation `Δ`; resonance compares an
 entity against a manifold; the `Vacuity` surface reads a world. None
-inspects the lens. The one reading that could point inward — a lens
+inspects the lens. The only reading that could point inward — a lens
 reporting on its own rendering — is not built and is barred by this
 section.
 
@@ -202,9 +202,9 @@ section.
 
 ## §2 The thermodynamic reading is not enough
 
-**Operator ruling 2026-08-02:** *thermodynamics is unguided entropy —
-how fast to infinity, how fast to so small its information density
-explodes.* It says a system will run down. It does not say how a system
+Thermodynamics describes unguided entropy: how fast a system runs to
+infinity, and how fast to a scale so small that its information density
+explodes. It says a system will run down. It does not say how a system
 moves.
 
 Article III law 4 (the Second Law) is correct and stays: work requires a
@@ -294,8 +294,7 @@ see.
 
 ## §5 Resonance — propagation, not a matching threshold
 
-**The correction (operator, 2026-08-02), and it reaches the whole
-section.** Resonance is not a static match against a threshold. It is
+**This applies to the whole section.** Resonance is not a static match against a threshold. It is
 the dynamic rate and boundary function governing how an originating
 volume expands, contracts, degrades and accelerates over time through
 the medium surrounding it.
@@ -307,8 +306,7 @@ the medium surrounding it.
     DECAY       degradation across the separation, over elapsed steps
 ```
 
-**Both poles are named** (operator correction 2026-08-02, *invert to
-convergence*). This section first read the motion as `expansion`, a
+**Both poles are named.** This section first read the motion as `expansion`, a
 signed scalar with the direction taken from its sign — which named a
 two-pole reading after one pole and carried the same fact twice.
 Convergence arrived as *negative expansion*.
@@ -408,7 +406,7 @@ guarantee no matter how carefully it was documented.
 
 ### 5c. Why no tolerance constant survives
 
-The earlier draft here proposed a fixed ruled tolerance, then a
+The earlier draft here proposed a fixed tolerance, then a
 depth-derived one. **Both are superseded**: under propagation there is no
 threshold at all to set. A reading of resonance reports a pace, a
 direction and a degradation — three quantities carried whole — and never
@@ -569,10 +567,10 @@ keeping its own timeline is a second timeline (§1a).
 
 This section specified `lens::standing`, a surface rendering which of
 four rows (`Void` / `Unframed` / `Stasis` / `Entangled`) a structure
-occupied. Both the surface and the law it explained are struck by
-operator ruling: *identity is pegged to entity, and identity gets
-recycled without bonds*, so a standing test read off relational
-structure refused the lawful recycled line by construction.
+occupied. Both the surface and the law it explained are struck, because
+identity is pegged to entity and is recycled without bonds, so a
+standing test read off relational structure refused the lawful recycled
+line by construction.
 
 The section's own justification is why it could not outlive the law. As
 written: *the kernel refuses a work-anchored mint unless the prior state
@@ -648,12 +646,11 @@ loss, so it is neither lens nor mirror.
 
 ## §15 Reading is not UNI-directional — the observation is a position
 
-**Operator correction 2026-08-02.** This lane's first shape was one
-arrow: chain → arm → display, with each arm wired separately toward the
-same linear end. **That is a journal** — digital paper, written once and
-read front to back. A functioning system does not read that way.
-
-> *Readings will come from any of the arms, not a single linear journal.*
+This lane's first shape was one arrow: chain → arm → display, with each
+arm wired separately toward the same linear end. **That is a journal** —
+digital paper, written once and read front to back. A functioning system
+does not read that way: readings come from any of the arms, not from a
+single linear journal.
 
 So an observation is not a record produced one way. It is a **position**
 — a depth, a phase, an aperture and a standing, held together — and from
@@ -712,7 +709,7 @@ header is worth fixing even when the code is fine.
 
 ## §16 The books are open — civilizations mint and archive them
 
-*(operator correction 2026-08-02, superseding this section's first cut)*
+*(supersedes this section's first cut)*
 
 §6 established the aperture as per-observer sensitivity without belief
 and left the question it could not answer: where does a particular
@@ -788,7 +785,7 @@ bare identifier.
 
 ### 16d. BOOK-1 — the registry, built
 
-*(operator directive 2026-08-02: take the cfe side)*
+*(built on the cfe side, in committed state)*
 
 The committed-state half is landed. `cfe::books` holds the identity and
 the dual account; `cfe::world::books` holds three deeds and no fourth:
@@ -898,8 +895,8 @@ converged, held by `a_still_volume_is_not_called_converged` and
 nothing outside `engine/lens`.
 
 **Nothing is renamed.** CONVERGE-1 is landed law with its own spec and
-is correct in its own domain; the Diverging/Converging pair was ruled
-directly and deliberately mirrors `Flux { sources, sinks }`. Two correct
+is correct in its own domain; the Diverging/Converging pair was named
+deliberately to match `Flux { sources, sinks }`. Two correct
 uses of one word in two domains is not a defect — a third use that
 conflates them would be, and Q5 exists to keep one from appearing.
 
@@ -912,8 +909,6 @@ values.
 ---
 
 ## §18 LIT-1 — literature, and the display rule
-
-*(operator directive 2026-08-02)*
 
 BOOK-1 gave a line accounts of its own making. **Literature is the tier
 above: works a line aspires to, and may claim only with chain receipts
@@ -936,9 +931,9 @@ Literacy needs no slot in the stack: it is already implied by receipts
 that exist, and a derived reading cannot go stale. It is the doorway to
 the upper tier, not a node in it.
 
-**The stack is now BASE-11** (operator ruling 2026-08-02, *uplift to
-base-11*). An earlier draft of this section treated base-7 being full as
-a constraint to design around. It was a constraint to lift:
+**The stack is now BASE-11.** An earlier draft of this section treated
+base-7 being full as a constraint to design around. The stack is widened
+instead, so that each chartered work has a node of its own:
 
 ```text
     0        the stellar leap
@@ -970,8 +965,8 @@ cannot advance the crown by a single step. Pinned in
 
 **A deed is the node.** The uplift tier is never granted into `techs`. A
 work is held exactly when it has been claimed on chain receipts, so the
-evidence is the upgrade: *deeds are accomplishments and civilizational
-upgrades* (operator, 2026-08-02). Reaching for a work is not holding it.
+evidence is the upgrade: a deed is an accomplishment and a
+civilizational upgrade. Reaching for a work is not holding it.
 
 `base_eleven_complete` reads the full stack — the base tier done and
 every deed witnessed. Deeds do not substitute for the base beneath them.
@@ -1009,14 +1004,12 @@ that this manifold is *one commitment per step*, and `Commitment.parent`
 is the chain's backward reference. That is the governing layer; a work a
 civilization aspires to is content — the same distinction that kept the
 `humans` civilization, the `humanoid` clade and `Human Capital` from
-being renamed when "human" was struck as a seat (§1.0; the 2026-10-30
-native-vocabulary ruling retired them later, on other grounds), and the same
+being renamed when "human" was struck as a seat (§1.0; the
+native-vocabulary rule retired them later as Earth-centric content), and the same
 verdict Q5 reached for `converged`. Two correct uses in two layers is
 not a defect; a third that conflated them would be.
 
 ### 18d. Emoji are outlawed; ansi colour is not
-
-*(operator ruling 2026-08-02)*
 
 Colour is a property of the terminal and carries no glyph — it degrades
 to plain text and costs a reader nothing. An emoji is a glyph whose
@@ -1031,7 +1024,7 @@ rendering, all three introduced by this lane — and are struck, replaced with `
 
 The BMP dingbats and geometric symbols the CLI has always used are not
 emoji and are untouched: `✓ ✗ ⚑ ⛏ ☉ ✍ ▤ ◉` and the box-drawing set.
-They are single-width, font-stable, and predate this ruling.
+They are single-width, font-stable, and predate this rule.
 
 ### 18e. The space is the point
 
@@ -1070,15 +1063,15 @@ schema §16e records as absent.
 
 ## §19 A gate may read A window — the test is viewpoint-dependence
 
-*(relayed by syntropy-inscription 2026-08-02; ruling: windowing may belong to
-the lens lane, as a perspective to account for)*
+*(open question: whether windowing belongs to the lens lane, as a
+perspective to account for)*
 
 The question put to this lane: **does a gate get to read a windowed
 quantity at all?** `tech.rs` condition 4 is a live tech unlock reading
 `vented_entries` and `encased_entries` over a window, and if a window is
 a perspective then an unlock depends on a viewpoint.
 
-**The ruling: the axis is not windowed-vs-cumulative. It is
+**The answer: the axis is not windowed-vs-cumulative. It is
 viewpoint-dependent vs record-determined.**
 
 A perspective in this lane's sense is chosen by the observer. Two
@@ -1097,7 +1090,7 @@ Condition 4's window is picked by nobody:
 Every node replaying the same chronicle to the same height computes the
 same floor and reaches the same verdict. **That is a recency predicate,
 and recency is a fact about the record rather than a view of it.** The
-relay's own parenthetical is the right instinct: recent venting should
+question's own premise is the right instinct: recent venting should
 mean something different from ancient venting, and saying so in law is
 lawful.
 
@@ -1112,19 +1105,17 @@ the ordinary business of law.
 
 ### 19a. Two findings while answering, both outside this lane
 
-Neither changes the ruling. The first turned out to be the intent; the
+Neither changes the answer. The first turned out to be the intent; the
 second stands, and is relayed rather than fixed here since
 `world/tech.rs` and `world/survey.rs` are not this lane's territory.
 
-**1. The window length is world-state-dependent — and that is the
-direction, not a hazard** (operator ruling 2026-08-03). `deposit_window`
+**1. The window length is world-state-dependent — and that is
+intended, not a hazard.** `deposit_window`
 returns 180 instead of 240 when a re-emergence lesson is held and the
 syntropy reading is at or above `1/2`, so condition 4's verdict can move
 because a neighbouring deed landed. This lane first flagged that as a
-coupling to examine. It is the intent:
-
-> Constants, absolutes and statics are being eliminated in favour of
-> deterministic throughput driven by dynamism (morphodynamics).
+coupling to examine. It is the intent: constants and statics are
+replaced by deterministic throughput driven by dynamism (morphodynamics).
 
 A window that changes with the world is not a leak in a static rule — it
 is a rule that has stopped pretending to be static while staying exactly
@@ -1159,8 +1150,8 @@ reconciliation, not on design.
 
 ## §20 GROWTH-1 — the six mechanisms, and the anti-leap test
 
-*(ruling of 2026-08-03: practice, wisdom, knowledge, expertise, locality and
-triviality are defined as growth mechanisms)*
+*(practice, wisdom, knowledge, expertise, locality and triviality are
+defined as growth mechanisms)*
 
 The question they answer: *how does a line go from primordialism to
 significant civilization without leaps and bounds and skipping
@@ -1198,7 +1189,7 @@ uplift tier was built from declarations. That was the whole gap.
     TRIVIALITY   EMPTINESS  how much of it moved nothing?
 ```
 
-**Wisdom is the one worth explaining.** It reads the share of accounts
+**Wisdom is the axis most worth explaining.** It reads the share of accounts
 carrying both sides — kept and lost. *A line that has only ever posted
 wins has recorded a great deal and learned nothing.* The dual ledger is
 what makes that measurable, and it is why BOOK-1 made both sides
@@ -1212,8 +1203,8 @@ practice, breadth and depth alike.
 
 Every axis is an exact rational or a count, derived and reported whole.
 Nothing in GROWTH-1 compares against a number, so there is nothing to
-dial (ruling 2026-08-03: constants and statics give way to deterministic
-throughput driven by dynamism).
+dial (constants and statics give way to deterministic throughput driven
+by dynamism, §19a).
 
 Where a gate needs one, it compares against zero — the difference
 between *happened* and *did not*, which is not a dial. `literate` is the
