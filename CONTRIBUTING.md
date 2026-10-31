@@ -38,6 +38,28 @@ reads are time-boxed and are not part of the check.
 - Design questions and cross-project proposals are issues; an accepted
   decision is recorded in the design documents and the changelog.
 
+## Contracts
+
+Netstratum is aligned with Mycelium and Xylarium through contracts, not by
+reviewing every pull request. Netstratum is aligned when, at its pinned
+Mycelium tag, it passes Mycelium's client conformance read and its
+[EQUATIONS.md](docs/EQUATIONS.md) rows declare the shared law ids and
+versions it implements. Each release states its Mycelium pin and its
+conformance result.
+
+A change that touches a contract is labelled `cross-project` and waits for
+the coordinator's review ([MAINTAINERS.md](MAINTAINERS.md)) before it is
+merged. Contract changes are:
+
+- the Mycelium pin;
+- a shared law's id or version (for example LAW-WAVEFRONT);
+- Netstratum's use of the wire;
+- the conformance read;
+- the shared standard itself.
+
+Durable decisions live in GitHub: in `cross-project` issues, milestones and
+[ROADMAP.md](ROADMAP.md), never only in a session's messages.
+
 A physics change also carries its witness: a test that proves the law it
 builds (an identity, a conservation, a fixed point), never a test that pins
 an incidental number.

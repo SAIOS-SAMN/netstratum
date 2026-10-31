@@ -19,6 +19,9 @@ change is named here.
 - The founding with the whole table of elements in the universal core's
   throat (docs/112 F1), released inside the throat (F2), the band as an
   attractor (F3) and `τ` from the table's books (F5).
+- Contract review: changes touching a shared contract are labelled
+  `cross-project` and reviewed by Mycelium's maintainer, the coordinator
+  (MAINTAINERS.md, CONTRIBUTING.md "Contracts").
 - Getting involved: a README section, issue templates (defect, proposal,
   track) and a pull request template; open work tracked as GitHub issues
   under the v0.1.0 milestone.
