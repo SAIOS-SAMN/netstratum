@@ -51,11 +51,15 @@ mod tests {
         // A ring of the exchange leaves the equilibrium standing, the two
         // poles' sum exact.
         let (a, b) = (ratio(1, 1) - star.clone(), star.clone());
-        let (a1, b1) = (a.clone() * (ratio(1, 1) - alpha.clone()) + b.clone() * beta.clone(), b.clone() * (ratio(1, 1) - beta.clone()) + a.clone() * alpha.clone());
+        let (a1, b1) = (
+            a.clone() * (ratio(1, 1) - alpha.clone()) + b.clone() * beta.clone(),
+            b.clone() * (ratio(1, 1) - beta.clone()) + a.clone() * alpha.clone(),
+        );
         assert_eq!(a1.clone() + b1.clone(), ratio(1, 1));
         assert_eq!(b1, star);
         // The closed form agrees with stepping, at N and at 4N rings.
-        let step = |x: Ratio| x.clone() * (ratio(1, 1) - beta.clone()) + (ratio(1, 1) - x) * alpha.clone();
+        let step =
+            |x: Ratio| x.clone() * (ratio(1, 1) - beta.clone()) + (ratio(1, 1) - x) * alpha.clone();
         for n in [4u32, 16] {
             let stepped = (0..n).fold(ratio(1, 10), |x, _| step(x));
             assert_eq!(after(&ratio(1, 10), &alpha, &beta, n), Some(stepped));
@@ -63,6 +67,9 @@ mod tests {
         // The faces pair; at the throat they meet at the fixed point.
         let (g, u) = faces(&ratio(1, 4));
         assert_eq!(g + u, ratio(1, 1));
-        assert_eq!(throat_held(), faces(&crate::ring::deficit(&ratio(1, 1), &ratio(1, 1))).1);
+        assert_eq!(
+            throat_held(),
+            faces(&crate::ring::deficit(&ratio(1, 1), &ratio(1, 1))).1
+        );
     }
 }

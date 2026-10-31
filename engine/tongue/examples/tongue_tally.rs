@@ -5,11 +5,14 @@ use solver::Op;
 
 fn main() {
     let dir = std::env::args().nth(1).expect("a world dir");
-    let chronicle = cfe::persist::load(&std::path::Path::new(&dir).join("chronicle.tlv")).expect("chronicle");
+    let chronicle =
+        cfe::persist::load(&std::path::Path::new(&dir).join("chronicle.tlv")).expect("chronicle");
     let mut tally: std::collections::BTreeMap<String, usize> = Default::default();
     let mut shown = 0;
     for (_, bytes, _) in cfe::vocabulary::solver_words(&chronicle) {
-        let Some(word) = solver_verify::program_from_bytes(&bytes) else { continue };
+        let Some(word) = solver_verify::program_from_bytes(&bytes) else {
+            continue;
+        };
         let shape = if word.iter().any(|o| matches!(o, Op::Object(_))) {
             "has-object"
         } else if word.iter().any(|o| matches!(o, Op::Tile { .. })) {
@@ -19,14 +22,28 @@ fn main() {
         };
         let probe = solver::Grid::new(3, 4, (0..12u8).map(|k| k % 10).collect()).unwrap();
         let said = solver::grid::run(&word, &probe);
-        let rows = |g: &solver::Grid| g.cells.chunks(g.cols).map(|r| r.to_vec()).collect::<Vec<_>>();
-        let verdict = match tongue::translate(&word, &[(rows(&probe), rows(&said))], &tongue::mycelium::transducer::family::NoCrystal) {
+        let rows = |g: &solver::Grid| {
+            g.cells
+                .chunks(g.cols)
+                .map(|r| r.to_vec())
+                .collect::<Vec<_>>()
+        };
+        let verdict = match tongue::translate(
+            &word,
+            &[(rows(&probe), rows(&said))],
+            &tongue::mycelium::transducer::family::NoCrystal,
+        ) {
             Ok(_) => "stated".to_string(),
             Err(tongue::Untranslated::Refused(why)) => {
                 if shape == "motion+hue" && shown < 3 {
                     shown += 1;
                     let ops: Vec<String> = word.iter().map(|o| o.describe()).collect();
-                    println!("REFUSED {why}\n  word {}\n  in  {:?}\n  out {:?}", ops.join(" -> "), rows(&probe), rows(&said));
+                    println!(
+                        "REFUSED {why}\n  word {}\n  in  {:?}\n  out {:?}",
+                        ops.join(" -> "),
+                        rows(&probe),
+                        rows(&said)
+                    );
                 }
                 format!("refused:{}", why.chars().take(60).collect::<String>())
             }

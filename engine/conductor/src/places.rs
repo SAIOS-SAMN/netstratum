@@ -56,19 +56,31 @@ pub struct Places {
 impl Places {
     /// Read the universe against the ledger's charted cores.
     pub fn read(u: &Universe, book: &ledger::Ledger) -> Places {
-        let worlds: BTreeMap<Vec<u64>, crate::life::World> = crate::life::worlds(u).into_iter().map(|w| (w.path.clone(), w)).collect();
-        let mut out = Places { sites: crate::seating::sites(u, &worlds), ..Places::default() };
+        let worlds: BTreeMap<Vec<u64>, crate::life::World> = crate::life::worlds(u)
+            .into_iter()
+            .map(|w| (w.path.clone(), w))
+            .collect();
+        let mut out = Places {
+            sites: crate::seating::sites(u, &worlds),
+            ..Places::default()
+        };
         let mut order: Vec<usize> = (0..u.cores.len()).collect();
         order.sort_by(|a, b| u.cores[*a].radius.cmp(&u.cores[*b].radius).then(a.cmp(b)));
         let unit = crate::breath::unit_mass(u);
         let whole = mass(&u.total());
         for (k, &i) in order.iter().enumerate() {
             let core = &u.cores[i];
-            let Some(&g) = core.path.first() else { continue };
+            let Some(&g) = core.path.first() else {
+                continue;
+            };
             if let Some(name) = crate::seating::charted_core(book, k) {
                 out.cores.insert(g, name);
             }
-            let held = if crate::pulse::is_home(core) { whole.clone() } else { mass(&core.total()) };
+            let held = if crate::pulse::is_home(core) {
+                whole.clone()
+            } else {
+                mass(&core.total())
+            };
             if unit.is_zero() || held.is_zero() {
                 continue;
             }
@@ -87,7 +99,10 @@ impl Places {
                 for orb in &sys.satellites {
                     out.clock.insert(orb.path.clone(), core_clock.clone());
                 }
-                out.systems.insert((g, s), (sys.radius.clone() / scale.clone(), sys.radius.clone()));
+                out.systems.insert(
+                    (g, s),
+                    (sys.radius.clone() / scale.clone(), sys.radius.clone()),
+                );
             }
         }
         out
@@ -116,7 +131,10 @@ pub fn set(u: &Universe, book: &ledger::Ledger) {
 pub fn sky(path: &[u64]) -> usize {
     with(|p| {
         let (g, s) = (*path.first()?, *path.get(1)?);
-        Some(p.worlds_in.get(&(g, s)).copied().unwrap_or(1).max(1) + p.stars_in.get(&g).copied().unwrap_or(0))
+        Some(
+            p.worlds_in.get(&(g, s)).copied().unwrap_or(1).max(1)
+                + p.stars_in.get(&g).copied().unwrap_or(0),
+        )
     })
     .unwrap_or(0)
 }
@@ -153,10 +171,19 @@ pub fn site(path: &[u64]) -> Option<crate::seating::Site> {
 pub fn unsettled(parent: &[u64]) -> String {
     with(|p| {
         let g = *parent.first()?;
-        let free = p.sites.keys().filter(|k| k.first() == Some(&g) && !p.claimed.contains(*k)).count();
+        let free = p
+            .sites
+            .keys()
+            .filter(|k| k.first() == Some(&g) && !p.claimed.contains(*k))
+            .count();
         let sites = p.sites.keys().filter(|k| k.first() == Some(&g)).count();
-        let stands = parent.get(1).is_some_and(|s| p.systems.contains_key(&(g, *s)));
-        Some(format!("{free} of {sites} worlds free in galaxy {g}; the parent's system {}", if stands { "stands" } else { "is gone" }))
+        let stands = parent
+            .get(1)
+            .is_some_and(|s| p.systems.contains_key(&(g, *s)));
+        Some(format!(
+            "{free} of {sites} worlds free in galaxy {g}; the parent's system {}",
+            if stands { "stands" } else { "is gone" }
+        ))
     })
     .unwrap_or_else(|| "no reading".into())
 }
@@ -179,7 +206,11 @@ pub fn claimed(path: &[u64]) -> bool {
 /// first, then in its galaxy by the nearest reach to its own system's (to
 /// the core's, where the breath re-anchored its system), then by path. None
 /// when its galaxy has no free world.
-pub fn nearest<'a>(parent: &[u64], free: impl Iterator<Item = &'a Vec<u64>>, reach: &BTreeMap<(u64, u64), Ratio>) -> Option<Vec<u64>> {
+pub fn nearest<'a>(
+    parent: &[u64],
+    free: impl Iterator<Item = &'a Vec<u64>>,
+    reach: &BTreeMap<(u64, u64), Ratio>,
+) -> Option<Vec<u64>> {
     let (&g, &s) = (parent.first()?, parent.get(1)?);
     // A parent whose system the breath has since re-anchored stands, for
     // the reading, at its galaxy's core: the systems nearest the core first.
@@ -188,7 +219,11 @@ pub fn nearest<'a>(parent: &[u64], free: impl Iterator<Item = &'a Vec<u64>>, rea
     free.filter(|p| p.first() == Some(&g) && p.len() > 1)
         .filter_map(|p| {
             let r = reach.get(&(g, p[1]))?;
-            let apart = if r > home { r.clone() - home.clone() } else { home.clone() - r.clone() };
+            let apart = if r > home {
+                r.clone() - home.clone()
+            } else {
+                home.clone() - r.clone()
+            };
             Some(((p[1] != s, apart, (*p).clone()), (*p).clone()))
         })
         .min_by(|a, b| a.0.cmp(&b.0))
@@ -200,10 +235,21 @@ pub fn nearest<'a>(parent: &[u64], free: impl Iterator<Item = &'a Vec<u64>>, rea
 pub fn settle(parent: &[u64], metabolism: &str) -> Option<crate::seating::Site> {
     let mut g = now().lock().ok()?;
     let p = g.as_mut()?;
-    let reach: BTreeMap<(u64, u64), Ratio> = p.systems.iter().map(|(k, (_, d))| (*k, d.clone())).collect();
+    let reach: BTreeMap<(u64, u64), Ratio> = p
+        .systems
+        .iter()
+        .map(|(k, (_, d))| (*k, d.clone()))
+        .collect();
     let path = {
         let (sites, claimed) = (&p.sites, &p.claimed);
-        let free = |livable: bool| sites.iter().filter(move |(k, s)| !claimed.contains(*k) && (!livable || s.wild_for(metabolism) > ratio(0, 1))).map(|(k, _)| k);
+        let free = |livable: bool| {
+            sites
+                .iter()
+                .filter(move |(k, s)| {
+                    !claimed.contains(*k) && (!livable || s.wild_for(metabolism) > ratio(0, 1))
+                })
+                .map(|(k, _)| k)
+        };
         nearest(parent, free(true), &reach).or_else(|| nearest(parent, free(false), &reach))?
     };
     let site = p.sites.get(&path)?.clone();
@@ -231,7 +277,11 @@ pub fn in_bulge(path: &[u64]) -> Option<bool> {
 
 /// The world at `path`'s distance from its core: its star's reach.
 pub fn distance(path: &[u64]) -> Option<Ratio> {
-    with(|p| p.systems.get(&(*path.first()?, *path.get(1)?)).map(|(_, d)| d.clone()))
+    with(|p| {
+        p.systems
+            .get(&(*path.first()?, *path.get(1)?))
+            .map(|(_, d)| d.clone())
+    })
 }
 
 #[cfg(test)]
@@ -248,7 +298,11 @@ mod tests {
         p.cores.insert(21, "core-a".into());
         p.systems.insert((21, 7), (ratio(1, 2), ratio(5, 1)));
         p.systems.insert((21, 9), (ratio(3, 2), ratio(15, 1)));
-        let bulge = |path: &[u64]| p.systems.get(&(path[0], path[1])).map(|(r, _)| *r <= ratio(1, 1));
+        let bulge = |path: &[u64]| {
+            p.systems
+                .get(&(path[0], path[1]))
+                .map(|(r, _)| *r <= ratio(1, 1))
+        };
         assert_eq!(bulge(&[21, 7, 1]), Some(true));
         assert_eq!(bulge(&[21, 9, 1]), Some(false));
         assert_eq!(p.cores.get(&21).cloned(), Some("core-a".to_string()));
@@ -262,11 +316,25 @@ mod tests {
         reach.insert((21, 8), ratio(6, 1));
         reach.insert((21, 9), ratio(15, 1));
         reach.insert((22, 1), ratio(5, 1));
-        let free = [vec![21, 9, 0], vec![21, 8, 0], vec![22, 1, 0], vec![21, 7, 3]];
-        assert_eq!(super::nearest(&[21, 7, 1], free.iter(), &reach), Some(vec![21, 7, 3]));
-        assert_eq!(super::nearest(&[21, 7, 1], free[..3].iter(), &reach), Some(vec![21, 8, 0]));
+        let free = [
+            vec![21, 9, 0],
+            vec![21, 8, 0],
+            vec![22, 1, 0],
+            vec![21, 7, 3],
+        ];
+        assert_eq!(
+            super::nearest(&[21, 7, 1], free.iter(), &reach),
+            Some(vec![21, 7, 3])
+        );
+        assert_eq!(
+            super::nearest(&[21, 7, 1], free[..3].iter(), &reach),
+            Some(vec![21, 8, 0])
+        );
         assert_eq!(super::nearest(&[21, 7, 1], free[2..3].iter(), &reach), None);
         // A parent whose system is gone reads from its galaxy's core.
-        assert_eq!(super::nearest(&[21, 4, 1], free[..3].iter(), &reach), Some(vec![21, 8, 0]));
+        assert_eq!(
+            super::nearest(&[21, 4, 1], free[..3].iter(), &reach),
+            Some(vec![21, 8, 0])
+        );
     }
 }

@@ -62,7 +62,13 @@ impl World {
             self.gauge.resize(at + 1, ratio(0, 1));
         }
         self.gauge[at] = wrapped.clone();
-        self.close(ClosureEvent::GaugeShiftedAt { grade, gauge: wrapped }, SOVEREIGN);
+        self.close(
+            ClosureEvent::GaugeShiftedAt {
+                grade,
+                gauge: wrapped,
+            },
+            SOVEREIGN,
+        );
         Ok(())
     }
     /// AEON-1a (11 §2.1): move the key. The value wraps onto [0, 1) —
@@ -81,7 +87,10 @@ impl World {
         let gauge = wrap_gauge(self.gauge[0].clone() + delta);
         self.gauge[0] = gauge.clone();
         self.close(
-            ClosureEvent::Diverged { branch: branch.into(), gauge },
+            ClosureEvent::Diverged {
+                branch: branch.into(),
+                gauge,
+            },
             SOVEREIGN,
         );
     }

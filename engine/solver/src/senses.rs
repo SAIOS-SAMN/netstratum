@@ -36,7 +36,12 @@ impl Senses {
     /// The channel one op acts in.
     pub fn of_op(op: &Op) -> Senses {
         Senses(match op {
-            Op::Rotate90 | Op::Rotate180 | Op::Rotate270 | Op::FlipH | Op::FlipV | Op::Transpose => SIGHT,
+            Op::Rotate90
+            | Op::Rotate180
+            | Op::Rotate270
+            | Op::FlipH
+            | Op::FlipV
+            | Op::Transpose => SIGHT,
             Op::Recolor(_) => HUE,
             Op::Tile { .. } | Op::Dilate { .. } => RHYTHM,
             Op::Shift { .. } => SIGHT,

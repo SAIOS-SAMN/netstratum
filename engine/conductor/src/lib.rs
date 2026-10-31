@@ -66,48 +66,48 @@ pub mod civic;
 // docs/61 G1 — a line's place about its core, in closed form.
 pub mod orbit;
 // docs/63 — a world is unrolled only while it is observed.
-pub mod observe;
 pub mod lookahead;
+pub mod observe;
 pub mod ocular;
 mod polities;
 // DIO-1 (operator-ruled 2026-08-16): planetary siting on exact rational
 // Diophantine tracks (r = M·k², P = M·k³ off the (M,M) base). See siting.rs.
-mod siting;
-pub mod snapshot;
-pub mod cores;
 pub mod ancients;
-pub mod substrata;
-pub mod commissions;
-pub mod parliaments;
+pub mod annal;
 pub mod ascension;
 pub mod attachment;
-pub mod realms;
-pub mod decide;
-pub mod annal;
-pub mod pulse;
-pub mod chem;
-pub mod nuclides;
-pub mod polarity;
-pub mod motion;
 pub mod breath;
-pub mod ring;
-pub mod compound;
-pub mod enfold;
-pub mod gauges;
-pub mod places;
-pub mod tiers;
-pub mod enclosure;
-pub mod formation;
-pub mod ocean;
-pub mod flows;
-pub mod recycle;
-pub mod reading;
-pub mod clocks;
-pub mod seating;
-pub mod life;
-pub mod waking;
+pub mod chem;
 pub mod chronometry;
+pub mod clocks;
+pub mod commissions;
+pub mod compound;
+pub mod cores;
+pub mod decide;
+pub mod enclosure;
+pub mod enfold;
+pub mod flows;
+pub mod formation;
+pub mod gauges;
+pub mod life;
+pub mod motion;
+pub mod nuclides;
+pub mod ocean;
+pub mod parliaments;
+pub mod places;
+pub mod polarity;
+pub mod pulse;
 pub mod quantum;
+pub mod reading;
+pub mod realms;
+pub mod recycle;
+pub mod ring;
+pub mod seating;
+mod siting;
+pub mod snapshot;
+pub mod substrata;
+pub mod tiers;
+pub mod waking;
 // SOC-1 (operator directive 2026-08-16): the open build workbench — the surplus
 // phase of `build_step` draws its next building from a disposition-weighted
 // partition function seeded by the chronicle digest, in place of the fixed
@@ -118,7 +118,9 @@ pub mod soc;
 // discovered against a deficit and gated by topological reach, never a ZoneKind
 // enum variant or an integer level. See recipe.rs.
 pub mod recipe;
-pub use polities::{founding_polities, registered_polities, roster, roster_digest, world_name_taken};
+pub use polities::{
+    founding_polities, registered_polities, roster, roster_digest, world_name_taken,
+};
 
 /// AEON-1b (11 §5): the fold — seal the live era and rotate it into
 /// the archive sequence. `EraFolded` (tag 46) appends to the universe
@@ -172,14 +174,14 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
     // waits for one. The keys stay in trust.
     let ancient: Option<(String, u64)> = None;
     let living: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
-    let stamp = ledger
-        .history()
-        .map(|r| r.stamp())
-        .max()
-        .unwrap_or(0);
+    let stamp = ledger.history().map(|r| r.stamp()).max().unwrap_or(0);
     if let Some((sigil, tree)) = ancient {
         ledger.append(
-            cfe::dop::ClosureEvent::AncientArose { sigil, tree, living: living.len() as u64 },
+            cfe::dop::ClosureEvent::AncientArose {
+                sigil,
+                tree,
+                living: living.len() as u64,
+            },
             stamp,
             vec![],
         );
@@ -220,9 +222,15 @@ pub fn fold(var_root: &str) -> std::io::Result<(u64, Ratio)> {
 /// cores do not exist yet. The strongest surface lineage is the natural
 /// progenitor candidate: the ancients' partner, who builds the highways and
 /// wormholes. That is what this reads.
-pub fn largest_lineage(registry: &Registry, living: &std::collections::BTreeSet<String>) -> Option<(String, u64)> {
-    let parents: std::collections::BTreeMap<String, Vec<String>> =
-        registry.list().into_iter().map(|c| (c.sigil, c.lineage)).collect();
+pub fn largest_lineage(
+    registry: &Registry,
+    living: &std::collections::BTreeSet<String>,
+) -> Option<(String, u64)> {
+    let parents: std::collections::BTreeMap<String, Vec<String>> = registry
+        .list()
+        .into_iter()
+        .map(|c| (c.sigil, c.lineage))
+        .collect();
     let mut tree: std::collections::BTreeMap<String, u64> = std::collections::BTreeMap::new();
     for line in living {
         // Every ancestor of a living line (and the line itself) counts it once.
@@ -340,7 +348,10 @@ pub fn founding_band(world: &World) -> i64 {
     if world.per_capita_ration() <= ratio(0, 1) {
         return FOUNDING_BAND;
     }
-    let k = world.population_ceiling(cfe::world::FIRST_ORB).floor().to_integer();
+    let k = world
+        .population_ceiling(cfe::world::FIRST_ORB)
+        .floor()
+        .to_integer();
     k.to_i64().unwrap_or(FOUNDING_BAND).clamp(1, FOUNDING_BAND)
 }
 
@@ -698,7 +709,9 @@ pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Strin
         }
         // MARKET-2: the transit's spatial L1 — supply melts with
         // distance; the engine refuses walled pairs itself.
-        let distance = profile::timed("market:distance", || spatial_l1(&one.spec.position, &two.spec.position, span));
+        let distance = profile::timed("market:distance", || {
+            spatial_l1(&one.spec.position, &two.spec.position, span)
+        });
         let offers_a: Vec<u64> = one.world.offers().iter().map(|o| o.offer).collect();
         let offers_b: Vec<u64> = two.world.offers().iter().map(|o| o.offer).collect();
         let mut crossed_here = false;
@@ -971,25 +984,69 @@ pub const MIND_ENTRY_BUDGET: usize = 2_400_000;
 /// (docs/68), ascension advances (docs/72: gates, envoys, ascension by deed),
 /// the parliaments carry the councils' words (docs/70), and the councils are
 /// published for the house (Concordance 3.9). Returns what happened, for the log.
-pub fn year_bounce(worlds: &mut Vec<Polity>, book: &Ledger, registry: &Registry, var_root: &std::path::Path, beat: u64, epoch_base: u64) -> Vec<String> {
+pub fn year_bounce(
+    worlds: &mut Vec<Polity>,
+    book: &Ledger,
+    registry: &Registry,
+    var_root: &std::path::Path,
+    beat: u64,
+    epoch_base: u64,
+) -> Vec<String> {
     let mut said = Vec::new();
-    let deposits = profile::timed("year:core_step", || core_step(worlds, book, epoch_base + beat));
+    let deposits = profile::timed("year:core_step", || {
+        core_step(worlds, book, epoch_base + beat)
+    });
     if !deposits.is_empty() {
-        said.push(format!("{} worlds' sinks reached their cores", deposits.len()));
+        said.push(format!(
+            "{} worlds' sinks reached their cores",
+            deposits.len()
+        ));
     }
-    for (core, world) in profile::timed("year:core_bounce", || core_bounce(worlds, book, epoch_base + beat)) {
+    for (core, world) in profile::timed("year:core_bounce", || {
+        core_bounce(worlds, book, epoch_base + beat)
+    }) {
         said.push(format!("the core {core} returns a pulse to {world}"));
     }
     let bounce = beat / scribe::journal::YEAR_TICKS;
     // docs/72: the bounce's one reading of the throats' keepers (G3, the
     // envoys counted), passed to the ancients, ascension and the parliaments.
-    let keepers = profile::timed("year:keepers", || ancients::keepers(worlds, book, registry, var_root));
+    let keepers = profile::timed("year:keepers", || {
+        ancients::keepers(worlds, book, registry, var_root)
+    });
     said.push(format!("KEEPERS — {} cores kept", keepers.len()));
-    for a in profile::timed("year:ancients", || ancients::step(worlds, book, registry, var_root, &keepers, bounce, epoch_base + beat)) {
-        said.push(format!("AN ANCIENT ARISES at {} — {} of {} (by {})", a.core, a.sigil, a.world, if a.by_birth { "birth" } else { "deed" }));
+    for a in profile::timed("year:ancients", || {
+        ancients::step(
+            worlds,
+            book,
+            registry,
+            var_root,
+            &keepers,
+            bounce,
+            epoch_base + beat,
+        )
+    }) {
+        said.push(format!(
+            "AN ANCIENT ARISES at {} — {} of {} (by {})",
+            a.core,
+            a.sigil,
+            a.world,
+            if a.by_birth { "birth" } else { "deed" }
+        ));
     }
-    said.extend(profile::timed("year:ascension", || ascension::step(worlds, book, registry, var_root, &keepers, bounce, epoch_base + beat)));
-    for (core, line, reached, heard) in profile::timed("year:parliaments", || parliaments::carry(worlds, book, registry, var_root, &keepers)) {
+    said.extend(profile::timed("year:ascension", || {
+        ascension::step(
+            worlds,
+            book,
+            registry,
+            var_root,
+            &keepers,
+            bounce,
+            epoch_base + beat,
+        )
+    }));
+    for (core, line, reached, heard) in profile::timed("year:parliaments", || {
+        parliaments::carry(worlds, book, registry, var_root, &keepers)
+    }) {
         said.push(format!("PARLIAMENT — {line} at {core} carries the council's words to {reached} lines ({heard} heard)"));
     }
     let _ = ancients::write_council(worlds, var_root);
@@ -1014,8 +1071,14 @@ pub fn assign_memory(worlds: &mut [Polity]) {
     let total = wealth.iter().fold(ratio(0, 1), |t, w| t + w.clone());
     let n = worlds.iter().filter(|p| !p.penned).count().max(1);
     for (p, w) in worlds.iter_mut().zip(wealth) {
-        let share = if total > ratio(0, 1) { w / total.clone() } else { ratio(1, n as i64) };
-        let entries = (share * ratio(MIND_ENTRY_BUDGET as i64, 1)).floor().to_integer();
+        let share = if total > ratio(0, 1) {
+            w / total.clone()
+        } else {
+            ratio(1, n as i64)
+        };
+        let entries = (share * ratio(MIND_ENTRY_BUDGET as i64, 1))
+            .floor()
+            .to_integer();
         p.memory_budget = Some(num_traits::ToPrimitive::to_usize(&entries).unwrap_or(0));
     }
 }
@@ -1465,11 +1528,16 @@ pub fn confirmation_hardness(
     fn same_basin_knowledge(a: &[reduct::ChainDelta], b: &[reduct::ChainDelta]) -> bool {
         a.len() == b.len() && a.iter().all(|c| b.contains(c))
     }
-    let readings: Vec<Vec<reduct::ChainDelta>> =
-        vessels.iter().map(|&v| basin_classes_of(grown, v)).collect();
+    let readings: Vec<Vec<reduct::ChainDelta>> = vessels
+        .iter()
+        .map(|&v| basin_classes_of(grown, v))
+        .collect();
     let mut distinct: Vec<&Vec<reduct::ChainDelta>> = Vec::new();
     for reading in &readings {
-        if !distinct.iter().any(|held| same_basin_knowledge(held, reading)) {
+        if !distinct
+            .iter()
+            .any(|held| same_basin_knowledge(held, reading))
+        {
             distinct.push(reading);
         }
     }
@@ -1588,12 +1656,25 @@ impl Polity {
                 }
             }
         } else {
-            for receipt in chronicle.receipts().iter().skip((self.word_cursor - base) as usize) {
+            for receipt in chronicle
+                .receipts()
+                .iter()
+                .skip((self.word_cursor - base) as usize)
+            {
                 match receipt.event() {
-                    cfe::dop::ClosureEvent::SolverWordMinted { orbit, expansion, cited }
-                    | cfe::dop::ClosureEvent::KnowledgeLicensed { orbit, expansion, cited } => {
+                    cfe::dop::ClosureEvent::SolverWordMinted {
+                        orbit,
+                        expansion,
+                        cited,
+                    }
+                    | cfe::dop::ClosureEvent::KnowledgeLicensed {
+                        orbit,
+                        expansion,
+                        cited,
+                    } => {
                         if self.owned_set.insert(*orbit) {
-                            self.owned_words.push((*orbit, expansion.clone(), cited.clone()));
+                            self.owned_words
+                                .push((*orbit, expansion.clone(), cited.clone()));
                         }
                     }
                     _ => {}
@@ -1608,14 +1689,29 @@ impl Polity {
     /// when a drain carried receipts past the cursor unread).
     fn office_evidence_now(&mut self) -> OfficeEvidence {
         use cfe::dop::ClosureEvent;
-        let (total, base) = (self.world.chronicle().total(), self.world.chronicle().base());
+        let (total, base) = (
+            self.world.chronicle().total(),
+            self.world.chronicle().base(),
+        );
         if self.office_cursor == 0 || self.office_cursor < base {
             let whole = office_evidence(&self.world);
-            self.office_tally = (whole.assays_struck, whole.routes_chartered, whole.market_clears);
+            self.office_tally = (
+                whole.assays_struck,
+                whole.routes_chartered,
+                whole.market_clears,
+            );
         } else {
-            for receipt in self.world.chronicle().receipts().iter().skip((self.office_cursor - base) as usize) {
+            for receipt in self
+                .world
+                .chronicle()
+                .receipts()
+                .iter()
+                .skip((self.office_cursor - base) as usize)
+            {
                 match receipt.event() {
-                    ClosureEvent::AssayStruck { .. } | ClosureEvent::StapleMined { .. } => self.office_tally.0 += 1,
+                    ClosureEvent::AssayStruck { .. } | ClosureEvent::StapleMined { .. } => {
+                        self.office_tally.0 += 1
+                    }
                     ClosureEvent::RouteChartered { .. } => self.office_tally.1 += 1,
                     ClosureEvent::OfferCleared { .. } => self.office_tally.2 += 1,
                     _ => {}
@@ -1638,9 +1734,14 @@ impl Polity {
     /// it is unrolled, on its own clock, which stood while it was unwatched).
     pub fn compact(mut self, book: &Ledger) -> PolitySpec {
         if let Err(e) = self.carry(book) {
-            eprintln!("{} was not carried before compacting: {e}", self.spec.world_name);
+            eprintln!(
+                "{} was not carried before compacting: {e}",
+                self.spec.world_name
+            );
         }
-        let _ = self.core_pending.write(&book.world_dir(&self.spec.world_name));
+        let _ = self
+            .core_pending
+            .write(&book.world_dir(&self.spec.world_name));
         if let Some(Some(orbit)) = &self.orbit {
             self.spec.position = orbit.at(0, &book.universe_span());
         }
@@ -1684,7 +1785,11 @@ impl Polity {
 
     /// docs/71: the chain entries this line's minds hold now.
     pub fn memory_held(&self) -> usize {
-        self.grown.values().flatten().map(|c| c.class.entries.len()).sum()
+        self.grown
+            .values()
+            .flatten()
+            .map(|c| c.class.entries.len())
+            .sum()
     }
 
     /// The sizes of what this line holds in memory that can grow, for the
@@ -1700,7 +1805,8 @@ impl Polity {
             self.owned_words.len(),
             self.stated.len(),
             self.word_pending.len(),
-            self.grown.values().map(Vec::len).sum::<usize>() + self.held.values().map(Vec::len).sum::<usize>(),
+            self.grown.values().map(Vec::len).sum::<usize>()
+                + self.held.values().map(Vec::len).sum::<usize>(),
             self.arriving.len() + self.questions_arriving.len(),
         ]
     }
@@ -1727,7 +1833,9 @@ impl Polity {
         // written after it — never replayed from genesis once a snapshot
         // stands, and only the chronicle tail it names read into memory
         // (`snapshot::boot`).
-        if let Some((world, _resumed, sync_cursor)) = snapshot::boot(&book.world_dir(&spec.world_name)) {
+        if let Some((world, _resumed, sync_cursor)) =
+            snapshot::boot(&book.world_dir(&spec.world_name))
+        {
             if world.orb().is_some() {
                 let handle = format!("{}-conductor", spec.civilization.sigil);
                 let by_handle = |name: &str| {
@@ -1868,7 +1976,11 @@ impl Polity {
         // founding digest, and every matter identity derived from it)
         // descends from the universe's origin.
         if let Some(universe) = book.universe_seed() {
-            world.chronicle_mut().append(cfe::dop::ClosureEvent::UniverseCited { universe }, 0, vec![cfe::world::SOVEREIGN]);
+            world.chronicle_mut().append(
+                cfe::dop::ClosureEvent::UniverseCited { universe },
+                0,
+                vec![cfe::world::SOVEREIGN],
+            );
         }
         world.found(&spec.colony).expect("a fresh world founds");
         // GALACTIC-1: seal the regional resource-weighting seed from the
@@ -1936,20 +2048,37 @@ impl Polity {
         // no world (a cleave, until it settles one) draws from the derived
         // sites.
         let chosen = match home {
-            Some((class, albedo, orbit)) => siting::SiteOption { class, albedo, orbit, viability: ratio(0, 1), home: true },
+            Some((class, albedo, orbit)) => siting::SiteOption {
+                class,
+                albedo,
+                orbit,
+                viability: ratio(0, 1),
+                home: true,
+            },
             None => {
                 let (options, _) = siting::founding_options(&spec.civilization, &beacon, None);
                 let pick = siting::choose_site(&options, digest).unwrap_or(0);
                 options.get(pick).cloned().unwrap_or_else(|| {
-                    let (class, albedo, orbit) = siting::diophantine_siting(&spec.civilization, &beacon);
-                    siting::SiteOption { class, albedo, orbit, viability: ratio(0, 1), home: false }
+                    let (class, albedo, orbit) =
+                        siting::diophantine_siting(&spec.civilization, &beacon);
+                    siting::SiteOption {
+                        class,
+                        albedo,
+                        orbit,
+                        viability: ratio(0, 1),
+                        home: false,
+                    }
                 })
             }
         };
         eprintln!(
             "genesis {}: the band settles {} — {:?} orbit {} albedo {}",
             spec.civilization.sigil,
-            if chosen.home { "its era-1 world" } else { "a derived site" },
+            if chosen.home {
+                "its era-1 world"
+            } else {
+                "a derived site"
+            },
             chosen.class,
             chosen.orbit,
             chosen.albedo,
@@ -1986,7 +2115,10 @@ impl Polity {
         // veins are drawn from it as canonical elements.
         if let Some(composition) = spec.composition.clone() {
             if let Err(refusal) = world.seal_composition(composition) {
-                eprintln!("genesis {}: the composition was NOT sealed — {refusal:?}", spec.civilization.sigil);
+                eprintln!(
+                    "genesis {}: the composition was NOT sealed — {refusal:?}",
+                    spec.civilization.sigil
+                );
             }
         }
         // **DIO-3a: SEAL the CLADE AT GENESIS** (operator ruling 2026-08-16). Until
@@ -2021,7 +2153,10 @@ impl Polity {
         eprintln!(
             "genesis {}: a founding band of {band} settles{}",
             spec.civilization.sigil,
-            spec.wild.as_ref().map(|w| format!(" (its land feeds {} wild)", w.floor())).unwrap_or_default()
+            spec.wild
+                .as_ref()
+                .map(|w| format!(" (its land feeds {} wild)", w.floor()))
+                .unwrap_or_default()
         );
         let world_name_for_level = spec.world_name.clone();
         Polity {
@@ -2451,7 +2586,9 @@ impl Polity {
                     // The founding band arrived with the colony at genesis
                     // (`founding_band`); a first Habitat raises living
                     // capacity, it does not seed people.
-                    let _ = self.world.zone_as(self.automaton, primary, tile, ZoneKind::Habitat);
+                    let _ = self
+                        .world
+                        .zone_as(self.automaton, primary, tile, ZoneKind::Habitat);
                 }
             }
         }
@@ -3145,7 +3282,11 @@ impl Polity {
             Some(e) => e.entity_id,
             None => self.world.register_agent(handle).ok()?,
         };
-        for scope in [cfe::ipsal::Scope::Build, cfe::ipsal::Scope::Raze, cfe::ipsal::Scope::Collect] {
+        for scope in [
+            cfe::ipsal::Scope::Build,
+            cfe::ipsal::Scope::Raze,
+            cfe::ipsal::Scope::Collect,
+        ] {
             self.world.grant(id, scope).ok()?;
         }
         Some(id)
@@ -3154,8 +3295,18 @@ impl Polity {
     /// Detach a mind: its grants are revoked at once; its entity stays on
     /// record.
     pub fn release_mind(&mut self, handle: &str) {
-        if let Some(id) = self.world.entities().iter().find(|e| e.handle == handle).map(|e| e.entity_id) {
-            for scope in [cfe::ipsal::Scope::Build, cfe::ipsal::Scope::Raze, cfe::ipsal::Scope::Collect] {
+        if let Some(id) = self
+            .world
+            .entities()
+            .iter()
+            .find(|e| e.handle == handle)
+            .map(|e| e.entity_id)
+        {
+            for scope in [
+                cfe::ipsal::Scope::Build,
+                cfe::ipsal::Scope::Raze,
+                cfe::ipsal::Scope::Collect,
+            ] {
                 let _ = self.world.revoke(id, scope);
             }
         }
@@ -3168,11 +3319,17 @@ impl Polity {
         if directive.acting_as == "steward" || directive.acting_as.is_empty() {
             return Some(self.steward);
         }
-        self.world.entities().iter().find(|e| e.handle == directive.acting_as).map(|e| e.entity_id)
+        self.world
+            .entities()
+            .iter()
+            .find(|e| e.handle == directive.acting_as)
+            .map(|e| e.entity_id)
     }
 
     fn apply_directive(&mut self, directive: &Directive) -> bool {
-        let Some(actor) = self.actor_of(directive) else { return false };
+        let Some(actor) = self.actor_of(directive) else {
+            return false;
+        };
         let parse_tile = |word: &str| -> Option<u16> {
             if let Some((r, c)) = word.split_once(':') {
                 let (r, c): (u16, u16) = (r.parse().ok()?, c.parse().ok()?);
@@ -3204,10 +3361,7 @@ impl Polity {
                     .is_ok(),
                 None => false,
             },
-            ("collect", []) => self
-                .world
-                .collect_as(actor, cfe::world::FIRST_ORB)
-                .is_ok(),
+            ("collect", []) => self.world.collect_as(actor, cfe::world::FIRST_ORB).is_ok(),
             // #40: the t0 gift petition — a receipted grant under
             // steward containment; the crown law holds in the engine.
             ("gift", [condition]) => match condition.parse::<u8>() {
@@ -3552,7 +3706,10 @@ impl Polity {
         seed.update(b"netstratum.pin-g.proportional.v1");
         seed.update(self.spec.world_name.as_bytes());
         seed.update(&self.world.now().to_le_bytes());
-        soc::partition_draw(&[fed, mouths.saturating_sub(fed)], *seed.finalize().as_bytes()) == Some(0)
+        soc::partition_draw(
+            &[fed, mouths.saturating_sub(fed)],
+            *seed.finalize().as_bytes(),
+        ) == Some(0)
     }
 
     /// How many of the line's working mouths the larder feeds this beat, and
@@ -4000,7 +4157,12 @@ impl Polity {
         self.world.settle_leisure(orb, -price);
         let sibling = self.sibling;
         let senses = self.senses();
-        let read = solver::think_task_sensing(task, self.grown.entry(sibling).or_default(), self.held.entry(sibling).or_default(), senses);
+        let read = solver::think_task_sensing(
+            task,
+            self.grown.entry(sibling).or_default(),
+            self.held.entry(sibling).or_default(),
+            senses,
+        );
         if let SolveRead::Solved {
             program,
             matches_expected: Some(true),
@@ -4072,7 +4234,12 @@ impl Polity {
         let difficulty = Difficulty::level(self.level);
         let task = forge_task(seed_digest, difficulty);
         let senses = self.senses();
-        let read = solver::think_task_sensing(&task, self.grown.entry(sibling).or_default(), self.held.entry(sibling).or_default(), senses);
+        let read = solver::think_task_sensing(
+            &task,
+            self.grown.entry(sibling).or_default(),
+            self.held.entry(sibling).or_default(),
+            senses,
+        );
         if let SolveRead::Solved {
             program,
             matches_expected: Some(true),
@@ -4080,7 +4247,8 @@ impl Polity {
         } = read
         {
             if program.len() >= 2 {
-                let standing = solver::mint::standing_orbits(&solver::mint::sweep_vocabulary(&task));
+                let standing =
+                    solver::mint::standing_orbits(&solver::mint::sweep_vocabulary(&task));
                 if let Some(orbit) = solver::mint::consider(&program, &self.library, &standing) {
                     self.deposit_toward_word(orbit, &program, sibling, seed_digest);
                 }
@@ -4217,7 +4385,10 @@ impl Polity {
             let mut entries: usize = basin.iter().map(|c| c.class.entries.len()).sum();
             // docs/71 M1: the line's share, split among its vessels; the byte
             // witness above it, counted whenever it would be the one to bind.
-            let share = self.memory_budget.map(|b| b / vessels).unwrap_or(BASIN_ENTRY_CAP);
+            let share = self
+                .memory_budget
+                .map(|b| b / vessels)
+                .unwrap_or(BASIN_ENTRY_CAP);
             if share > BASIN_ENTRY_CAP && entries > BASIN_ENTRY_CAP {
                 self.memory_witness_hits += 1;
             }
@@ -4247,7 +4418,8 @@ impl Polity {
             .map(|w| (w.orbit, w.expansion.clone()))
             .collect();
         for (orbit, expansion) in unstated {
-            self.stated.insert(orbit, tongue::state_word(&expansion).is_some());
+            self.stated
+                .insert(orbit, tongue::state_word(&expansion).is_some());
         }
         // Captured before the BEAT moves anything. Promotion reads both,
         // and reading either afterwards would be vacuous: a close always
@@ -4505,9 +4677,20 @@ impl Polity {
                 let vdifficulty = VolDifficulty::level(self.level);
                 let vtask = forge_volume(digest, vdifficulty);
                 match think_volume_task(&vtask, self.grown.entry(vessel).or_default()) {
-                    solver::VolumeSolveRead::Solved { program, matches_expected: Some(true), certificate, .. } => {
+                    solver::VolumeSolveRead::Solved {
+                        program,
+                        matches_expected: Some(true),
+                        certificate,
+                        ..
+                    } => {
                         let word: Vec<String> = program.iter().map(|op| op.describe()).collect();
-                        Some((vtask.name.clone(), word.join(" → "), hex(&certificate.output), None, Vec::new()))
+                        Some((
+                            vtask.name.clone(),
+                            word.join(" → "),
+                            hex(&certificate.output),
+                            None,
+                            Vec::new(),
+                        ))
                     }
                     _ => None,
                 }
@@ -4548,10 +4731,19 @@ impl Polity {
             }
             let reached = own.or_else(|| {
                 let expansion = solver::mint::pre_reach(&task, &self.inherited)?;
-                let word = self.inherited.words().iter().find(|w| w.expansion == expansion)?.clone();
+                let word = self
+                    .inherited
+                    .words()
+                    .iter()
+                    .find(|w| w.expansion == expansion)?
+                    .clone();
                 let bytes = solver_verify::program_bytes(&expansion)?;
                 // Licensed citing the dead line's own proofs: its derivation.
-                if self.world.license_knowledge_as(self.automaton, word.orbit, bytes, word.cited.clone()).is_ok() {
+                if self
+                    .world
+                    .license_knowledge_as(self.automaton, word.orbit, bytes, word.cited.clone())
+                    .is_ok()
+                {
                     self.library.adopt(word);
                 }
                 Some(expansion)
@@ -4604,7 +4796,12 @@ impl Polity {
                         // N-I·vessel — drain this vessel's mouth, not the line pool.
                         let vessel = self.automaton;
                         let senses = self.senses();
-                        solver::think_task_sensing(&task, self.grown.entry(vessel).or_default(), self.held.entry(vessel).or_default(), senses)
+                        solver::think_task_sensing(
+                            &task,
+                            self.grown.entry(vessel).or_default(),
+                            self.held.entry(vessel).or_default(),
+                            senses,
+                        )
                     } else {
                         SolveRead::Unsolved // the bank cannot pay the look — fast this beat
                     }
@@ -4689,11 +4886,8 @@ impl Polity {
             // confirming when self-select declines (no basin yet, or cannot
             // afford even the discounted look), so this is additive: no
             // beat that used to confirm loses its confirmation entirely.
-            let self_select_beat = sibling_self_select_beat(
-                self.sibling,
-                self.world.now(),
-                SIBLING_AUTONOMY_STRIDE,
-            );
+            let self_select_beat =
+                sibling_self_select_beat(self.sibling, self.world.now(), SIBLING_AUTONOMY_STRIDE);
             if !self_select_beat || !self.sibling_self_select() {
                 self.sibling_deposit(&task, digest);
             }
@@ -4727,13 +4921,18 @@ impl Polity {
                     // Within the gate's bound either way.
                     let first = match self.closing.take() {
                         Some(orbit) => {
-                            let first = !self.universe_closed.contains(&orbit) && !self.fresh_closed.contains(&orbit);
+                            let first = !self.universe_closed.contains(&orbit)
+                                && !self.fresh_closed.contains(&orbit);
                             self.fresh_closed.push(orbit);
                             first
                         }
                         None => true,
                     };
-                    let earned = if first { bound } else { bound * cfe::ratio::ratio(1, 4) };
+                    let earned = if first {
+                        bound
+                    } else {
+                        bound * cfe::ratio::ratio(1, 4)
+                    };
                     if earned > cfe::ratio::ratio(0, 1) {
                         // The bound is the kernel's own reading and is
                         // non-negative by its ladder; the door proves it
@@ -4956,7 +5155,9 @@ impl Polity {
             let sigil = format!("{head}{tail}");
             // Both the line and its world must be new: a world directory
             // belongs to one line (`polities::world_name_taken`).
-            if registry.load(&sigil).is_none() && !polities::world_name_taken(registry, &format!("{head}-{tail}")) {
+            if registry.load(&sigil).is_none()
+                && !polities::world_name_taken(registry, &format!("{head}-{tail}"))
+            {
                 chosen = Some((sigil, head, tail));
                 break;
             }
@@ -5048,7 +5249,10 @@ impl Polity {
             policy: spec.policy.describe().to_string(),
         };
         if let Err(e) = registry.write_founded_at(&spec.civilization.sigil, &seat) {
-            eprintln!("divergence: {} seated without a seat card ({e}); a restart would found it again", spec.civilization.sigil);
+            eprintln!(
+                "divergence: {} seated without a seat card ({e}); a restart would found it again",
+                spec.civilization.sigil
+            );
         }
         Some(spec)
     }
@@ -5252,8 +5456,12 @@ impl Polity {
         let dir = book.world_dir(&self.spec.world_name);
         // docs/64 P1: the leisure books are receipted before the snapshot.
         self.world.flush_leisure();
-        cfe::persist::sync_from(self.world.chronicle(), &dir.join("chronicle.tlv"), &mut self.sync_cursor)
-            .map_err(|e| std::io::Error::other(format!("{e:?}")))?;
+        cfe::persist::sync_from(
+            self.world.chronicle(),
+            &dir.join("chronicle.tlv"),
+            &mut self.sync_cursor,
+        )
+        .map_err(|e| std::io::Error::other(format!("{e:?}")))?;
         // The memory bound: what the snapshot now carries leaves memory —
         // every receipt the judge has walked (`chained`), short of the head,
         // drains to the annals; its record stays whole on disk.
@@ -5362,9 +5570,11 @@ impl Polity {
             let snap = match self.chained == total {
                 true => None,
                 // State only: the annals are not re-read (the memory bound).
-                false => snapshot::read_state(&book.world_dir(&self.spec.world_name)).filter(|(at, head, _)| {
-                    *at > base && *at <= total && receipts[*at - 1 - base].own().0 == *head
-                }),
+                false => snapshot::read_state(&book.world_dir(&self.spec.world_name)).filter(
+                    |(at, head, _)| {
+                        *at > base && *at <= total && receipts[*at - 1 - base].own().0 == *head
+                    },
+                ),
             };
             let stepper = match snap {
                 Some((at, _, state)) => {
@@ -5428,8 +5638,16 @@ impl Polity {
             // The cores (slice 1): what this deed unmade, read from the world's
             // own holdings around it — once, past what the pending record
             // already counts.
-            if receipt.sequence() as usize >= self.core_pending.through && cores::reaches(receipt.event()) {
-                let sunk = profile::timed("chain:cores", || cores::sunk(receipt.event(), &cores::holdings(&prior), &cores::holdings(next)));
+            if receipt.sequence() as usize >= self.core_pending.through
+                && cores::reaches(receipt.event())
+            {
+                let sunk = profile::timed("chain:cores", || {
+                    cores::sunk(
+                        receipt.event(),
+                        &cores::holdings(&prior),
+                        &cores::holdings(next),
+                    )
+                });
                 core_moved |= self.core_pending.take(sunk);
             }
             match profile::timed("chain:admit", || kernel::admits(&prior, next, &step)) {
@@ -5450,10 +5668,14 @@ impl Polity {
                         };
                         let prior = match prior_digest {
                             Some(held) => held,
-                            None => profile::timed("chain:encode", || *blake3::hash(&codec::state_bytes(&prior)).as_bytes()),
+                            None => profile::timed("chain:encode", || {
+                                *blake3::hash(&codec::state_bytes(&prior)).as_bytes()
+                            }),
                         };
                         let bytes = profile::timed("chain:encode", || codec::state_bytes(next));
-                        match profile::timed("chain:extend", || arbor.extend_judged(coordinate, &bytes, prior)) {
+                        match profile::timed("chain:extend", || {
+                            arbor.extend_judged(coordinate, &bytes, prior)
+                        }) {
                             Ok(_) => {
                                 self.arbor_committed += 1;
                                 prior_digest = Some(*blake3::hash(&bytes).as_bytes());
@@ -5485,9 +5707,15 @@ impl Polity {
         profile::timed("chain:writes", || {
             if core_moved || self.core_pending.through < total {
                 self.core_pending.through = total;
-                let _ = self.core_pending.write(&book.world_dir(&self.spec.world_name));
+                let _ = self
+                    .core_pending
+                    .write(&book.world_dir(&self.spec.world_name));
             }
-            write_judged_sidecar(&book.world_dir(&self.spec.world_name), self.chained, &self.refused);
+            write_judged_sidecar(
+                &book.world_dir(&self.spec.world_name),
+                self.chained,
+                &self.refused,
+            );
         });
         Ok(())
     }
@@ -5527,7 +5755,8 @@ impl Polity {
 /// for every deposit made.
 pub fn core_step(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(String, String)> {
     let melts = {
-        let mut pending: Vec<&mut cores::Pending> = worlds.iter_mut().map(|p| &mut p.core_pending).collect();
+        let mut pending: Vec<&mut cores::Pending> =
+            worlds.iter_mut().map(|p| &mut p.core_pending).collect();
         cores::pair_legs(&mut pending)
     };
     for (sender, holding, melt) in melts {
@@ -5540,7 +5769,9 @@ pub fn core_step(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Strin
         if polity.core_pending.lost.is_empty() {
             continue;
         }
-        let Some(core) = book.core_of(&polity.spec.position) else { continue };
+        let Some(core) = book.core_of(&polity.spec.position) else {
+            continue;
+        };
         for (resource, amount) in &polity.core_pending.lost {
             events.push(cfe::dop::ClosureEvent::CoreDeposited {
                 core: core.clone(),
@@ -5557,12 +5788,16 @@ pub fn core_step(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Strin
     let mut out = Vec::new();
     for (i, core) in deposited {
         worlds[i].core_pending.deposited();
-        let _ = worlds[i].core_pending.write(&book.world_dir(&worlds[i].spec.world_name));
+        let _ = worlds[i]
+            .core_pending
+            .write(&book.world_dir(&worlds[i].spec.world_name));
         out.push((worlds[i].spec.world_name.clone(), core));
     }
     // Paired legs left every pending set: write the ones that held only legs.
     for polity in worlds.iter() {
-        let _ = polity.core_pending.write(&book.world_dir(&polity.spec.world_name));
+        let _ = polity
+            .core_pending
+            .write(&book.world_dir(&polity.spec.world_name));
     }
     out
 }
@@ -5578,7 +5813,10 @@ pub fn core_step(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Strin
 /// core never emits what it does not hold. Returns (core, world) per pulse.
 pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(String, String)> {
     let grain = ratio(1, cfe::world::RESOURCE_LEDGER_GRAIN);
-    let reached: Vec<Option<String>> = worlds.iter().map(|p| book.core_of(&p.spec.position)).collect();
+    let reached: Vec<Option<String>> = worlds
+        .iter()
+        .map(|p| book.core_of(&p.spec.position))
+        .collect();
     // Cores slice 3 — the core's bell carries the WORDS (ruling: time as the
     // bell, not a yearly timer). Each dead word rides the core's pulse out at
     // one cell a beat (a declared carrier speed, docs/59): a line hears it
@@ -5591,10 +5829,15 @@ pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Str
     let span = book.universe_span();
     for (polity, core) in worlds.iter_mut().zip(&reached) {
         let Some(core) = core else { continue };
-        let Some(galaxy) = galaxies.iter().find(|g| &g.name == core) else { continue };
-        let Some(entries) = libraries.get(core) else { continue };
+        let Some(galaxy) = galaxies.iter().find(|g| &g.name == core) else {
+            continue;
+        };
+        let Some(entries) = libraries.get(core) else {
+            continue;
+        };
         let distance = ledger::torus_distance(&polity.spec.position, &galaxy.center, &span);
-        let cells = num_traits::ToPrimitive::to_u64(&distance.ceil().to_integer()).unwrap_or(u64::MAX);
+        let cells =
+            num_traits::ToPrimitive::to_u64(&distance.ceil().to_integer()).unwrap_or(u64::MAX);
         let beyond = distance > galaxy.reach;
         // docs/64 P0: what the line already heard or has in flight, as a set
         // (was a scan of both per dead word: lines x words x words a year).
@@ -5610,54 +5853,84 @@ pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Str
                 continue;
             }
             if beyond {
-                let reach = num_traits::ToPrimitive::to_u64(&galaxy.reach.floor().to_integer()).unwrap_or(0);
+                let reach = num_traits::ToPrimitive::to_u64(&galaxy.reach.floor().to_integer())
+                    .unwrap_or(0);
                 let mut seed = blake3::Hasher::new();
                 seed.update(b"netstratum.core.bell.v1");
                 seed.update(polity.spec.world_name.as_bytes());
                 seed.update(&entry.orbit);
-                if soc::partition_draw(&[reach, cells.saturating_sub(reach)], *seed.finalize().as_bytes()) != Some(0) {
+                if soc::partition_draw(
+                    &[reach, cells.saturating_sub(reach)],
+                    *seed.finalize().as_bytes(),
+                ) != Some(0)
+                {
                     continue; // too faint to hear at this distance
                 }
             }
-            let Some(expansion) = solver_verify::program_from_bytes(&entry.expansion) else { continue };
-            let word = solver::mint::MintedWord { orbit: entry.orbit, expansion, cited: entry.cited.clone() };
-            polity.arriving.push((entry.stamp.saturating_add(cells), word));
+            let Some(expansion) = solver_verify::program_from_bytes(&entry.expansion) else {
+                continue;
+            };
+            let word = solver::mint::MintedWord {
+                orbit: entry.orbit,
+                expansion,
+                cited: entry.cited.clone(),
+            };
+            polity
+                .arriving
+                .push((entry.stamp.saturating_add(cells), word));
         }
     }
     let mut pulses = Vec::new();
     for ((core, resource), held) in book.core_holdings() {
         // On the grain: whole grains only; the dust stays at the core.
-        let Some(pulse) = cfe::dop::Positive::new((held / grain.clone()).floor() * grain.clone()) else { continue };
+        let Some(pulse) = cfe::dop::Positive::new((held / grain.clone()).floor() * grain.clone())
+        else {
+            continue;
+        };
         let candidates: Vec<usize> = (0..worlds.len())
-            .filter(|&i| !worlds[i].penned && worlds[i].world.orb().is_some() && reached[i].as_deref() == Some(core.as_str()))
+            .filter(|&i| {
+                !worlds[i].penned
+                    && worlds[i].world.orb().is_some()
+                    && reached[i].as_deref() == Some(core.as_str())
+            })
             .collect();
-        let weights: Vec<u64> =
-            candidates.iter().map(|&i| worlds[i].world.population_of(cfe::world::FIRST_ORB)).collect();
+        let weights: Vec<u64> = candidates
+            .iter()
+            .map(|&i| worlds[i].world.population_of(cfe::world::FIRST_ORB))
+            .collect();
         let mut seed = blake3::Hasher::new();
         seed.update(b"netstratum.core.bounce.v1");
         seed.update(core.as_bytes());
         seed.update(&[resource.map_or(0, |r| r as u8)]);
         seed.update(&stamp.to_le_bytes());
-        let Some(drawn) = soc::partition_draw(&weights, *seed.finalize().as_bytes()) else { continue };
+        let Some(drawn) = soc::partition_draw(&weights, *seed.finalize().as_bytes()) else {
+            continue;
+        };
         pulses.push((candidates[drawn], core, resource, pulse));
     }
     // The core's side is sealed first: a pulse the ledger did not record is
     // never credited, so a core can never emit the same holding twice.
     let emitted = pulses
         .iter()
-        .map(|(i, core, resource, pulse)| cfe::dop::ClosureEvent::CoreEmitted {
-            core: core.clone(),
-            world: worlds[*i].spec.world_name.clone(),
-            resource: *resource,
-            amount: pulse.value().clone(),
-        })
+        .map(
+            |(i, core, resource, pulse)| cfe::dop::ClosureEvent::CoreEmitted {
+                core: core.clone(),
+                world: worlds[*i].spec.world_name.clone(),
+                resource: *resource,
+                amount: pulse.value().clone(),
+            },
+        )
         .collect();
     if book.append_universe(emitted, stamp).is_err() {
         return Vec::new();
     }
     let mut out = Vec::new();
     for (i, core, resource, pulse) in pulses {
-        if worlds[i].world.receive_from_core(&core, resource, pulse).is_ok() {
+        if worlds[i]
+            .world
+            .receive_from_core(&core, resource, pulse)
+            .is_ok()
+        {
             out.push((core, worlds[i].spec.world_name.clone()));
         }
     }
@@ -5670,7 +5943,8 @@ pub fn core_bounce(worlds: &mut [Polity], book: &Ledger, stamp: u64) -> Vec<(Str
 pub fn inheritance_step(worlds: &mut [Polity], stamp: u64) -> usize {
     let mut arrived = 0;
     for polity in worlds.iter_mut() {
-        let (now, later): (Vec<_>, Vec<_>) = polity.arriving.drain(..).partition(|(at, _)| *at <= stamp);
+        let (now, later): (Vec<_>, Vec<_>) =
+            polity.arriving.drain(..).partition(|(at, _)| *at <= stamp);
         polity.arriving = later;
         for (_, word) in now {
             polity.inherited.adopt(word);
@@ -5679,19 +5953,29 @@ pub fn inheritance_step(worlds: &mut [Polity], stamp: u64) -> usize {
         }
         // docs/60 D9: the dead's open questions join the automaton's held
         // conjectures, tried first on its next tasks.
-        let (now, later): (Vec<_>, Vec<_>) = polity.questions_arriving.drain(..).partition(|(at, _)| *at <= stamp);
+        let (now, later): (Vec<_>, Vec<_>) = polity
+            .questions_arriving
+            .drain(..)
+            .partition(|(at, _)| *at <= stamp);
         polity.questions_arriving = later;
         if !now.is_empty() {
             let vessel = polity.automaton;
-            solver::hold_conjectures(polity.held.entry(vessel).or_default(), now.into_iter().map(|(_, c)| c).collect());
+            solver::hold_conjectures(
+                polity.held.entry(vessel).or_default(),
+                now.into_iter().map(|(_, c)| c).collect(),
+            );
         }
     }
     arrived
 }
 
 /// The living lines of each galaxy, by its core.
-pub fn galaxy_members(worlds: &[Polity], book: &Ledger) -> std::collections::BTreeMap<String, Vec<usize>> {
-    let mut galaxies: std::collections::BTreeMap<String, Vec<usize>> = std::collections::BTreeMap::new();
+pub fn galaxy_members(
+    worlds: &[Polity],
+    book: &Ledger,
+) -> std::collections::BTreeMap<String, Vec<usize>> {
+    let mut galaxies: std::collections::BTreeMap<String, Vec<usize>> =
+        std::collections::BTreeMap::new();
     for (i, polity) in worlds.iter().enumerate() {
         if polity.penned {
             continue;
@@ -5707,14 +5991,28 @@ pub fn galaxy_members(worlds: &[Polity], book: &Ledger) -> std::collections::BTr
 /// galaxy's commission the hub stands where the word marks; otherwise the
 /// medoid line (the one nearest, by the torus's L1, to all the others). The
 /// hub clearing and the gates (docs/72) read this one hub.
-pub fn galaxy_hub(worlds: &[Polity], book: &Ledger, var_root: &std::path::Path, core: &str, members: &[usize], span: &Ratio) -> Option<usize> {
-    let centre = book.galaxies().into_iter().find(|g| g.name == core).map(|g| g.center);
-    centre.and_then(|c| commissions::hub_of(worlds, var_root, core, members, &c, span)).or_else(|| {
-        members
-            .iter()
-            .copied()
-            .min_by_key(|&i| members.iter().fold(ratio(0, 1), |sum, &j| sum + spatial_l1(&worlds[i].spec.position, &worlds[j].spec.position, span)))
-    })
+pub fn galaxy_hub(
+    worlds: &[Polity],
+    book: &Ledger,
+    var_root: &std::path::Path,
+    core: &str,
+    members: &[usize],
+    span: &Ratio,
+) -> Option<usize> {
+    let centre = book
+        .galaxies()
+        .into_iter()
+        .find(|g| g.name == core)
+        .map(|g| g.center);
+    centre
+        .and_then(|c| commissions::hub_of(worlds, var_root, core, members, &c, span))
+        .or_else(|| {
+            members.iter().copied().min_by_key(|&i| {
+                members.iter().fold(ratio(0, 1), |sum, &j| {
+                    sum + spatial_l1(&worlds[i].spec.position, &worlds[j].spec.position, span)
+                })
+            })
+        })
 }
 
 /// MARKET-2: the transit distance the iceberg law melts against — the
@@ -5823,8 +6121,12 @@ pub fn element_trade_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec
             let Some(amount) = cfe::dop::Positive::new(ship) else {
                 continue;
             };
-            let distance = profile::timed("element_trade:distance", || spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position, span));
-            let melt = profile::timed("element_trade:melt", || cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &distance));
+            let distance = profile::timed("element_trade:distance", || {
+                spatial_l1(&worlds[a].spec.position, &worlds[b].spec.position, span)
+            });
+            let melt = profile::timed("element_trade:melt", || {
+                cfe::world::route_melt(&worlds[a].world, &worlds[b].world, &distance)
+            });
             if melt >= ratio(1, 1) {
                 continue; // walled direct — merchant territory, not element haul
             }
@@ -5981,14 +6283,26 @@ pub fn stamp_market_step(
         }
         None
     };
-    let stamp_of = |p: &Polity| p.world.orb().map(|o| o.stamp_amount()).unwrap_or_else(|| ratio(0, 1));
-    let banked_of = |p: &Polity, r: Resource| p.world.orb().map(|o| o.banked_amount(r)).unwrap_or_else(|| ratio(0, 1));
+    let stamp_of = |p: &Polity| {
+        p.world
+            .orb()
+            .map(|o| o.stamp_amount())
+            .unwrap_or_else(|| ratio(0, 1))
+    };
+    let banked_of = |p: &Polity, r: Resource| {
+        p.world
+            .orb()
+            .map(|o| o.banked_amount(r))
+            .unwrap_or_else(|| ratio(0, 1))
+    };
     let one = || ratio(1, 1);
     let galaxies = galaxy_members(worlds, book);
     let hubs: std::collections::BTreeMap<String, usize> = profile::timed("hub:choose", || {
         galaxies
             .iter()
-            .filter_map(|(core, members)| galaxy_hub(worlds, book, var_root, core, members, span).map(|h| (core.clone(), h)))
+            .filter_map(|(core, members)| {
+                galaxy_hub(worlds, book, var_root, core, members, span).map(|h| (core.clone(), h))
+            })
             .collect()
     });
     // docs/72 — the gates' roads. A galaxy joined to another galaxy's core by
@@ -5997,20 +6311,30 @@ pub fn stamp_market_step(
     // melt replaces the open-space distance. Of several mapped gates a galaxy
     // takes the one that melts least (then by name); a galaxy whose own core
     // clears elsewhere takes none in (one road, no chains).
-    let mut route: std::collections::BTreeMap<String, &ascension::Road> = std::collections::BTreeMap::new();
-    for road in roads.iter().filter(|r| r.from != r.core && hubs.contains_key(&r.from) && hubs.contains_key(&r.core)) {
-        let better = route.get(&road.from).is_none_or(|have| (&road.melt, &road.core) < (&have.melt, &have.core));
+    let mut route: std::collections::BTreeMap<String, &ascension::Road> =
+        std::collections::BTreeMap::new();
+    for road in roads
+        .iter()
+        .filter(|r| r.from != r.core && hubs.contains_key(&r.from) && hubs.contains_key(&r.core))
+    {
+        let better = route
+            .get(&road.from)
+            .is_none_or(|have| (&road.melt, &road.core) < (&have.melt, &have.core));
         if better {
             route.insert(road.from.clone(), road);
         }
     }
     let away: Vec<String> = route.keys().cloned().collect();
     route.retain(|_, r| !away.contains(&r.core));
-    let mut clearings: std::collections::BTreeMap<String, Vec<(usize, Option<&ascension::Road>)>> = std::collections::BTreeMap::new();
+    let mut clearings: std::collections::BTreeMap<String, Vec<(usize, Option<&ascension::Road>)>> =
+        std::collections::BTreeMap::new();
     for (core, members) in &galaxies {
         let via = route.get(core).copied();
         let at = via.map(|r| r.core.clone()).unwrap_or_else(|| core.clone());
-        clearings.entry(at).or_default().extend(members.iter().map(|&i| (i, via)));
+        clearings
+            .entry(at)
+            .or_default()
+            .extend(members.iter().map(|&i| (i, via)));
     }
     let mut seq = 0u64;
     let mut next_deal = || {
@@ -6029,7 +6353,9 @@ pub fn stamp_market_step(
         for &(i, _) in &members {
             if !worlds[i].world.knows_its_star() {
                 let steward = worlds[i].steward;
-                let _ = worlds[i].world.grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
+                let _ = worlds[i]
+                    .world
+                    .grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
             }
         }
         // The wall (the iceberg law, as the old sweep kept it): a line whose
@@ -6038,28 +6364,40 @@ pub fn stamp_market_step(
         // pays the melt to a hub with nothing to meet it. A line joined by a
         // gate takes the cheaper of its two roads: open space to the hub, or
         // its own hub and the gate (what survives is what survives both legs).
-        let open: Vec<(usize, Ratio, Option<&ascension::Road>)> = profile::timed("hub:legs", || members
-            .iter()
-            .filter(|(i, _)| *i != hub)
-            .filter_map(|&(i, via)| {
-                let distance = spatial_l1(&worlds[i].spec.position, &worlds[hub].spec.position, span);
-                let direct = cfe::world::route_melt(&worlds[i].world, &worlds[hub].world, &distance);
-                let gated = via.and_then(|road| {
-                    let home = *hubs.get(&road.from)?;
-                    let leg = spatial_l1(&worlds[i].spec.position, &worlds[home].spec.position, span);
-                    let leg = cfe::world::route_melt(&worlds[i].world, &worlds[home].world, &leg);
-                    Some(one() - (one() - leg) * (one() - road.melt.clone()))
-                });
-                let (melt, via) = match gated {
-                    Some(g) if g < direct => (g, via),
-                    _ => (direct, None),
-                };
-                (melt < one()).then_some((i, melt, via))
-            })
-            .collect());
+        let open: Vec<(usize, Ratio, Option<&ascension::Road>)> =
+            profile::timed("hub:legs", || {
+                members
+                    .iter()
+                    .filter(|(i, _)| *i != hub)
+                    .filter_map(|&(i, via)| {
+                        let distance =
+                            spatial_l1(&worlds[i].spec.position, &worlds[hub].spec.position, span);
+                        let direct =
+                            cfe::world::route_melt(&worlds[i].world, &worlds[hub].world, &distance);
+                        let gated = via.and_then(|road| {
+                            let home = *hubs.get(&road.from)?;
+                            let leg = spatial_l1(
+                                &worlds[i].spec.position,
+                                &worlds[home].spec.position,
+                                span,
+                            );
+                            let leg =
+                                cfe::world::route_melt(&worlds[i].world, &worlds[home].world, &leg);
+                            Some(one() - (one() - leg) * (one() - road.melt.clone()))
+                        });
+                        let (melt, via) = match gated {
+                            Some(g) if g < direct => (g, via),
+                            _ => (direct, None),
+                        };
+                        (melt < one()).then_some((i, melt, via))
+                    })
+                    .collect()
+            });
         // A buyer brings half its STAMP, on the grain: one holding a single
         // grain brings nothing and is no buyer.
-        let buyers = open.iter().any(|(i, _, _)| cfe::world::smelt_resource(&half(stamp_of(&worlds[*i]))) > ratio(0, 1));
+        let buyers = open.iter().any(|(i, _, _)| {
+            cfe::world::smelt_resource(&half(stamp_of(&worlds[*i]))) > ratio(0, 1)
+        });
         let sellers = open.iter().any(|(i, _, _)| cargo_of(&worlds[*i]).is_some());
         if open.len() < 2 || !buyers || !sellers {
             census.closed += 1;
@@ -6074,7 +6412,11 @@ pub fn stamp_market_step(
             .map(|(i, melt, _)| {
                 let p = &worlds[*i];
                 let offer = cargo_of(p).map(|(_, a)| a).unwrap_or_else(|| ratio(0, 1));
-                (p.spec.world_name.clone(), *i, vec![stamp_of(p), offer, p.world.free_capacity(0), melt.clone()])
+                (
+                    p.spec.world_name.clone(),
+                    *i,
+                    vec![stamp_of(p), offer, p.world.free_capacity(0), melt.clone()],
+                )
             })
             .collect();
         seen.sort_by(|a, b| a.0.cmp(&b.0));
@@ -6102,12 +6444,23 @@ pub fn stamp_market_step(
                     }
                 }
                 if cfe::world::smelt_resource(&send) <= ratio(0, 1) {
-                    *census.refused.entry("STAMP below the grain".to_string()).or_insert(0) += 1;
+                    *census
+                        .refused
+                        .entry("STAMP below the grain".to_string())
+                        .or_insert(0) += 1;
                 }
                 if let Some(pay) = cfe::dop::Positive::new(cfe::world::smelt_resource(&send)) {
                     let (from, house) = two_mut(worlds, i, hub);
                     let before = stamp_of(house);
-                    match cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut house.world, cfe::world::FIRST_ORB, pay, deal, &melt) {
+                    match cfe::world::stamp_aperture_transfer(
+                        &mut from.world,
+                        cfe::world::FIRST_ORB,
+                        &mut house.world,
+                        cfe::world::FIRST_ORB,
+                        pay,
+                        deal,
+                        &melt,
+                    ) {
                         Ok(()) => {
                             let arrived = stamp_of(house) - before;
                             if arrived > ratio(0, 1) {
@@ -6116,7 +6469,11 @@ pub fn stamp_market_step(
                         }
                         Err(why) => {
                             let name = format!("{why:?}");
-                            let name = name.split([' ', '{', '(']).next().unwrap_or_default().to_string();
+                            let name = name
+                                .split([' ', '{', '('])
+                                .next()
+                                .unwrap_or_default()
+                                .to_string();
                             if name == "HullCapacityShort" {
                                 short.insert(worlds[i].spec.world_name.clone());
                             }
@@ -6129,7 +6486,10 @@ pub fn stamp_market_step(
             // and sold in others under the old sweep.
             if let Some((_, offer)) = &cargo {
                 if cfe::world::smelt_resource(offer) <= ratio(0, 1) {
-                    *census.refused.entry("cargo below the grain".to_string()).or_insert(0) += 1;
+                    *census
+                        .refused
+                        .entry("cargo below the grain".to_string())
+                        .or_insert(0) += 1;
                 }
             }
             if let Some((resource, offer)) = cargo {
@@ -6137,7 +6497,15 @@ pub fn stamp_market_step(
                     let deal = next_deal();
                     let (from, house) = two_mut(worlds, i, hub);
                     let before = banked_of(house, resource);
-                    match cfe::world::aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut house.world, cfe::world::FIRST_ORB, resource, cargo, deal) {
+                    match cfe::world::aperture_transfer(
+                        &mut from.world,
+                        cfe::world::FIRST_ORB,
+                        &mut house.world,
+                        cfe::world::FIRST_ORB,
+                        resource,
+                        cargo,
+                        deal,
+                    ) {
                         Ok(()) => {
                             let arrived = banked_of(house, resource) - before;
                             if arrived > ratio(0, 1) {
@@ -6146,7 +6514,11 @@ pub fn stamp_market_step(
                         }
                         Err(why) => {
                             let name = format!("{why:?}");
-                            let name = name.split([' ', '{', '(']).next().unwrap_or_default().to_string();
+                            let name = name
+                                .split([' ', '{', '('])
+                                .next()
+                                .unwrap_or_default()
+                                .to_string();
                             *census.refused.entry(format!("cargo {name}")).or_insert(0) += 1;
                         }
                     }
@@ -6159,7 +6531,8 @@ pub fn stamp_market_step(
         // proportion to the STAMP it brought; each seller takes the STAMP in
         // proportion to the cargo it brought. A side with nothing to meet is
         // returned what it brought (the hub holds no one's goods unmet).
-        let mut pools: std::collections::BTreeMap<Resource, Ratio> = std::collections::BTreeMap::new();
+        let mut pools: std::collections::BTreeMap<Resource, Ratio> =
+            std::collections::BTreeMap::new();
         for (_, r, a) in &gave {
             *pools.entry(*r).or_insert_with(|| ratio(0, 1)) += a.clone();
         }
@@ -6174,10 +6547,19 @@ pub fn stamp_market_step(
         }
         if matched {
             census.cleared += 1;
-            for i in paid.iter().map(|(i, _)| *i).chain(gave.iter().map(|(i, _, _)| *i)) {
-                census.met.push((worlds[i].spec.world_name.clone(), worlds[hub].spec.world_name.clone()));
+            for i in paid
+                .iter()
+                .map(|(i, _)| *i)
+                .chain(gave.iter().map(|(i, _, _)| *i))
+            {
+                census.met.push((
+                    worlds[i].spec.world_name.clone(),
+                    worlds[hub].spec.world_name.clone(),
+                ));
                 if let Some((_, _, Some(road))) = open.iter().find(|(j, _, _)| *j == i) {
-                    census.passed.push((worlds[i].spec.world_name.clone(), road.core.clone()));
+                    census
+                        .passed
+                        .push((worlds[i].spec.world_name.clone(), road.core.clone()));
                 }
             }
         } else {
@@ -6188,25 +6570,61 @@ pub fn stamp_market_step(
             let (to, house) = two_mut(worlds, *i, hub);
             if matched {
                 for (k, (r, pool)) in pools.iter().enumerate() {
-                    let share = cfe::world::smelt_resource(&(pool.clone() * brought.clone() / stamp_in.clone()));
+                    let share = cfe::world::smelt_resource(
+                        &(pool.clone() * brought.clone() / stamp_in.clone()),
+                    );
                     if let Some(share) = cfe::dop::Positive::new(share) {
-                        let _ = cfe::world::aperture_transfer(&mut house.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, *r, share, deal_base.saturating_add(k as u64 * 7));
+                        let _ = cfe::world::aperture_transfer(
+                            &mut house.world,
+                            cfe::world::FIRST_ORB,
+                            &mut to.world,
+                            cfe::world::FIRST_ORB,
+                            *r,
+                            share,
+                            deal_base.saturating_add(k as u64 * 7),
+                        );
                     }
                 }
             } else if let Some(back) = cfe::dop::Positive::new(brought.clone()) {
-                let _ = cfe::world::stamp_aperture_transfer(&mut house.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, back, deal_base, &ratio(0, 1));
+                let _ = cfe::world::stamp_aperture_transfer(
+                    &mut house.world,
+                    cfe::world::FIRST_ORB,
+                    &mut to.world,
+                    cfe::world::FIRST_ORB,
+                    back,
+                    deal_base,
+                    &ratio(0, 1),
+                );
             }
         }
         for (i, r, brought) in &gave {
             let deal = next_deal();
             let (to, house) = two_mut(worlds, *i, hub);
             if matched {
-                let share = cfe::world::smelt_resource(&(stamp_in.clone() * brought.clone() / cargo_in.clone()));
+                let share = cfe::world::smelt_resource(
+                    &(stamp_in.clone() * brought.clone() / cargo_in.clone()),
+                );
                 if let Some(share) = cfe::dop::Positive::new(share) {
-                    let _ = cfe::world::stamp_aperture_transfer(&mut house.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, share, deal, &ratio(0, 1));
+                    let _ = cfe::world::stamp_aperture_transfer(
+                        &mut house.world,
+                        cfe::world::FIRST_ORB,
+                        &mut to.world,
+                        cfe::world::FIRST_ORB,
+                        share,
+                        deal,
+                        &ratio(0, 1),
+                    );
                 }
             } else if let Some(back) = cfe::dop::Positive::new(brought.clone()) {
-                let _ = cfe::world::aperture_transfer(&mut house.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, *r, back, deal);
+                let _ = cfe::world::aperture_transfer(
+                    &mut house.world,
+                    cfe::world::FIRST_ORB,
+                    &mut to.world,
+                    cfe::world::FIRST_ORB,
+                    *r,
+                    back,
+                    deal,
+                );
             }
         }
         // docs/70 P2 — the road toll (Concordance 5.4, 5.8): charged per unit
@@ -6220,21 +6638,35 @@ pub fn stamp_market_step(
         let mut toll_paid = ratio(0, 1);
         let mut gate_paid = ratio(0, 1);
         if matched {
-            let keeper = keepers.get(&core).and_then(|k| worlds.iter().position(|p| !p.penned && p.spec.civilization.sigil == k.rider));
+            let keeper = keepers.get(&core).and_then(|k| {
+                worlds
+                    .iter()
+                    .position(|p| !p.penned && p.spec.civilization.sigil == k.rider)
+            });
             for (i, _, brought) in &gave {
-                let Some((_, melt, via)) = open.iter().find(|(j, _, _)| j == i) else { continue };
+                let Some((_, melt, via)) = open.iter().find(|(j, _, _)| j == i) else {
+                    continue;
+                };
                 let payee = match via {
                     Some(road) => road.payee,
                     None => keeper,
                 };
-                let Some(payee) = payee.filter(|p| p != i) else { continue };
+                let Some(payee) = payee.filter(|p| p != i) else {
+                    continue;
+                };
                 let have = stamp_of(&worlds[*i]);
                 let toll = cfe::world::smelt_resource(&(brought.clone() * melt.clone()).min(have));
-                let Some(toll) = cfe::dop::Positive::new(toll) else { continue };
+                let Some(toll) = cfe::dop::Positive::new(toll) else {
+                    continue;
+                };
                 let road = match via {
                     Some(_) => melt.clone(),
                     None => {
-                        let distance = spatial_l1(&worlds[*i].spec.position, &worlds[payee].spec.position, span);
+                        let distance = spatial_l1(
+                            &worlds[*i].spec.position,
+                            &worlds[payee].spec.position,
+                            span,
+                        );
                         cfe::world::route_melt(&worlds[*i].world, &worlds[payee].world, &distance)
                     }
                 };
@@ -6244,28 +6676,54 @@ pub fn stamp_market_step(
                 let deal = next_deal();
                 let before = stamp_of(&worlds[payee]);
                 let (from, to) = two_mut(worlds, *i, payee);
-                let sent = cfe::world::stamp_aperture_transfer(&mut from.world, cfe::world::FIRST_ORB, &mut to.world, cfe::world::FIRST_ORB, toll, deal, &road);
-                if matches!(sent, Err(cfe::world::ActionRefused::HullCapacityShort { .. })) {
+                let sent = cfe::world::stamp_aperture_transfer(
+                    &mut from.world,
+                    cfe::world::FIRST_ORB,
+                    &mut to.world,
+                    cfe::world::FIRST_ORB,
+                    toll,
+                    deal,
+                    &road,
+                );
+                if matches!(
+                    sent,
+                    Err(cfe::world::ActionRefused::HullCapacityShort { .. })
+                ) {
                     short.insert(worlds[*i].spec.world_name.clone());
                 }
                 if sent.is_ok() {
                     let arrived = stamp_of(&worlds[payee]) - before;
                     if let Some(road) = via {
-                        census.gate_tolls.push((road.from.clone(), road.core.clone(), arrived.clone()));
+                        census.gate_tolls.push((
+                            road.from.clone(),
+                            road.core.clone(),
+                            arrived.clone(),
+                        ));
                         gate_paid += arrived;
                     } else {
                         toll_paid += arrived;
                     }
                 }
             }
-            clears.push((core.clone(), worlds[hub].spec.world_name.clone(), toll_paid, gate_paid));
+            clears.push((
+                core.clone(),
+                worlds[hub].spec.world_name.clone(),
+                toll_paid,
+                gate_paid,
+            ));
         }
         // Decide (hull), record: the triple, persistence scored on it.
         let names: Vec<String> = seen.iter().map(|(n, _, _)| n.clone()).collect();
-        let action: Vec<u8> = names.iter().map(|n| built.get(n).copied().unwrap_or(0)).collect();
+        let action: Vec<u8> = names
+            .iter()
+            .map(|n| built.get(n).copied().unwrap_or(0))
+            .collect();
         let features: Vec<Vec<Ratio>> = seen.drain(..).map(|(_, _, f)| f).collect();
         if let Some(state) = decide::see(&features) {
-            let done = books.entry(("hull".to_string(), core)).or_default().resolve(&names, state, action, &short);
+            let done = books
+                .entry(("hull".to_string(), core))
+                .or_default()
+                .resolve(&names, state, action, &short);
             census.decided.rows += done.rows;
             census.decided.lost += done.lost;
             census.decided.correct += done.correct;
@@ -6300,7 +6758,11 @@ pub fn stamp_market_step(
 /// a merchant whose second leg refuses holds inventory — that risk
 /// is the trade. Every leg is an ordinary clear_trade: melt, void
 /// share, and both books' receipts all land by the one law.
-pub fn merchant_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(String, String, String)> {
+pub fn merchant_step(
+    worlds: &mut [Polity],
+    beat: u64,
+    span: &Ratio,
+) -> Vec<(String, String, String)> {
     let one = || ratio(1, 1);
     let n = worlds.len();
     // No singles (ruling 2026-07-31): every profitable triangle runs
@@ -6348,7 +6810,11 @@ pub fn merchant_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Str
                     let key = (x.min(y), x.max(y));
                     memo.entry(key)
                         .or_insert_with(|| {
-                            let d = spatial_l1(&worlds[x].spec.position, &worlds[y].spec.position, span);
+                            let d = spatial_l1(
+                                &worlds[x].spec.position,
+                                &worlds[y].spec.position,
+                                span,
+                            );
                             cfe::world::route_melt(&worlds[x].world, &worlds[y].world, &d)
                         })
                         .clone()
@@ -6500,7 +6966,9 @@ pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, 
     // resolved again only for a line whose library grew since its last map.
     for polity in worlds.iter_mut() {
         let generation = polity.library.generation() as usize;
-        if !polity.library.words().is_empty() && polity.knowledge.as_ref().map(|(n, _)| *n) != Some(generation) {
+        if !polity.library.words().is_empty()
+            && polity.knowledge.as_ref().map(|(n, _)| *n) != Some(generation)
+        {
             polity.knowledge = Some((generation, solver::knowledge_map(&polity.library)));
         }
     }
@@ -6509,7 +6977,12 @@ pub fn consilience_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, u32, 
             .iter()
             .enumerate()
             .filter(|(_, polity)| !polity.library.words().is_empty())
-            .filter_map(|(seat, polity)| polity.knowledge.as_ref().map(|(_, map)| (seat as u64, map, polity.senses())))
+            .filter_map(|(seat, polity)| {
+                polity
+                    .knowledge
+                    .as_ref()
+                    .map(|(_, map)| (seat as u64, map, polity.senses()))
+            })
             .collect();
         if refs.len() < 2 {
             return Vec::new(); // one learning line is no agreement
@@ -6604,13 +7077,20 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
     // beat (its length and the senses it needs), not once per buyer; a
     // buyer's price is that length plus the senses it lacks. The same prices:
     // a word that does not decode prices at 1, as before.
-    let read: Vec<Option<(usize, solver::senses::Senses)>> = profile::timed("knowledge:decode", || {
-        pool.iter()
-            .map(|(_, expansion, _)| solver_verify::program_from_bytes(expansion).map(|program| (program.len(), solver::senses::Senses::of_word(&program))))
-            .collect()
-    });
+    let read: Vec<Option<(usize, solver::senses::Senses)>> =
+        profile::timed("knowledge:decode", || {
+            pool.iter()
+                .map(|(_, expansion, _)| {
+                    solver_verify::program_from_bytes(expansion)
+                        .map(|program| (program.len(), solver::senses::Senses::of_word(&program)))
+                })
+                .collect()
+        });
     let price_at = |k: usize, senses: solver::senses::Senses| -> usize {
-        read[k].map(|(len, needs)| len + senses.missing(needs) as usize).unwrap_or(0).max(1)
+        read[k]
+            .map(|(len, needs)| len + senses.missing(needs) as usize)
+            .unwrap_or(0)
+            .max(1)
     };
     let mut licensed = Vec::new();
     for buyer in 0..worlds.len() {
@@ -6625,7 +7105,8 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
         // reachable idea.
         // A price is whole, so `crystal >= price` exactly when
         // `floor(crystal) >= price`: one floor a buyer, integer compares after.
-        let can_pay = num_traits::ToPrimitive::to_u64(&crystal.floor().to_integer()).unwrap_or(if crystal > ratio(0, 1) { u64::MAX } else { 0 });
+        let can_pay = num_traits::ToPrimitive::to_u64(&crystal.floor().to_integer())
+            .unwrap_or(if crystal > ratio(0, 1) { u64::MAX } else { 0 });
         let pick = pool
             .iter()
             .enumerate()
@@ -6660,7 +7141,11 @@ pub fn knowledge_market_step(worlds: &mut [Polity], _beat: u64) -> Vec<(String, 
 /// Each line's place on its orbit about its core. Era 1: a line turns at its
 /// era-1 system's galactic period (`periods`, by its founding place); a line
 /// with no era-1 system (a cleave until it settles one) holds its place.
-pub fn orbit_step(worlds: &mut [Polity], book: &Ledger, periods: &std::collections::BTreeMap<(Ratio, Ratio, Ratio), Ratio>) {
+pub fn orbit_step(
+    worlds: &mut [Polity],
+    book: &Ledger,
+    periods: &std::collections::BTreeMap<(Ratio, Ratio, Ratio), Ratio>,
+) {
     let span = book.universe_span();
     let mut galaxies: Option<Vec<ledger::galaxy::Galaxy>> = None;
     for polity in worlds.iter_mut() {
@@ -6668,8 +7153,15 @@ pub fn orbit_step(worlds: &mut [Polity], book: &Ledger, periods: &std::collectio
             let galaxies = galaxies.get_or_insert_with(|| book.galaxies());
             let orbit = periods.get(&polity.spec.position).and_then(|period| {
                 book.core_of(&polity.spec.position)
-                    .and_then(|core| galaxies.iter().find(|g| g.name == core).map(|g| g.center.clone()))
-                    .and_then(|centre| orbit::Orbit::of(&centre, &polity.spec.position, &span, period))
+                    .and_then(|core| {
+                        galaxies
+                            .iter()
+                            .find(|g| g.name == core)
+                            .map(|g| g.center.clone())
+                    })
+                    .and_then(|centre| {
+                        orbit::Orbit::of(&centre, &polity.spec.position, &span, period)
+                    })
             });
             polity.orbit = Some(orbit);
         }
@@ -6696,13 +7188,19 @@ pub fn conversation_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Opti
     let mut pairs = Vec::new();
     // The torus distance is symmetric: each unordered pair is measured once
     // (optimization sweep, 2026-10-13), the same nearest speaker found.
-    let mut measured: std::collections::HashMap<(usize, usize), Ratio> = std::collections::HashMap::new();
+    let mut measured: std::collections::HashMap<(usize, usize), Ratio> =
+        std::collections::HashMap::new();
     for h in (0..n).filter(|&h| !worlds[h].penned) {
         let near = (0..n)
             .filter(|&s| s != h && !worlds[s].penned && !worlds[s].library.words().is_empty())
             .map(|s| {
                 let key = (h.min(s), h.max(s));
-                let d = measured.entry(key).or_insert_with(|| spatial_l1(&worlds[h].spec.position, &worlds[s].spec.position, span)).clone();
+                let d = measured
+                    .entry(key)
+                    .or_insert_with(|| {
+                        spatial_l1(&worlds[h].spec.position, &worlds[s].spec.position, span)
+                    })
+                    .clone();
                 (d, s)
             })
             .min();
@@ -6729,12 +7227,20 @@ pub fn conversation_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Opti
         }
     }
     // Diversity: the perceptions present among the living.
-    let mut perceptions: std::collections::BTreeMap<&str, usize> = std::collections::BTreeMap::new();
+    let mut perceptions: std::collections::BTreeMap<&str, usize> =
+        std::collections::BTreeMap::new();
     for polity in worlds.iter() {
-        *perceptions.entry(polity.spec.civilization.perception.as_str()).or_default() += 1;
+        *perceptions
+            .entry(polity.spec.civilization.perception.as_str())
+            .or_default() += 1;
     }
-    let (all_heard, all_misheard) = worlds.iter().fold((0, 0), |(a, b), p| (a + p.heard, b + p.misheard));
-    let present: Vec<String> = perceptions.iter().map(|(k, v)| format!("{k}:{v}")).collect();
+    let (all_heard, all_misheard) = worlds
+        .iter()
+        .fold((0, 0), |(a, b), p| (a + p.heard, b + p.misheard));
+    let present: Vec<String> = perceptions
+        .iter()
+        .map(|(k, v)| format!("{k}:{v}"))
+        .collect();
     Some(format!(
         "COG-DIALECT beat {beat}: heard={heard} misheard={misheard} (total heard={all_heard} misheard={all_misheard}) lines={} perceptions={}",
         worlds.len(),
@@ -7225,7 +7731,9 @@ pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> 
         if deposited.contains(&polity.spec.world_name) {
             continue;
         }
-        let Some(core) = book.core_of(&polity.spec.position) else { continue };
+        let Some(core) = book.core_of(&polity.spec.position) else {
+            continue;
+        };
         for (orbit, expansion, cited) in cfe::vocabulary::solver_words(polity.world.chronicle()) {
             deposits.push(cfe::dop::ClosureEvent::CoreWordDeposited {
                 core: core.clone(),
@@ -7244,16 +7752,24 @@ pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> 
     // conjectures themselves: carried in memory, never receipted.
     let mut carried: Vec<(String, Vec<solver::Conjecture>)> = Vec::new();
     for polity in worlds.iter().filter(|p| p.world.collapsed().is_some()) {
-        let Some(core) = book.core_of(&polity.spec.position) else { continue };
+        let Some(core) = book.core_of(&polity.spec.position) else {
+            continue;
+        };
         let open: Vec<solver::Conjecture> = polity.held.values().flatten().cloned().collect();
         if !open.is_empty() {
             carried.push((core, open));
         }
     }
-    let galaxies = if carried.is_empty() { Vec::new() } else { book.galaxies() };
+    let galaxies = if carried.is_empty() {
+        Vec::new()
+    } else {
+        book.galaxies()
+    };
     let span = book.universe_span();
     for (core, open) in &carried {
-        let Some(galaxy) = galaxies.iter().find(|g| &g.name == core) else { continue };
+        let Some(galaxy) = galaxies.iter().find(|g| &g.name == core) else {
+            continue;
+        };
         let mut reached = 0;
         for polity in worlds.iter_mut().filter(|p| p.world.collapsed().is_none()) {
             if book.core_of(&polity.spec.position).as_ref() != Some(core) {
@@ -7263,11 +7779,18 @@ pub fn retire_collapsed(worlds: &mut Vec<Polity>, book: &Ledger, stamp: u64) -> 
             if distance > galaxy.reach {
                 continue;
             }
-            let cells = num_traits::ToPrimitive::to_u64(&distance.ceil().to_integer()).unwrap_or(u64::MAX);
-            polity.questions_arriving.extend(open.iter().map(|c| (stamp.saturating_add(cells), c.clone())));
+            let cells =
+                num_traits::ToPrimitive::to_u64(&distance.ceil().to_integer()).unwrap_or(u64::MAX);
+            polity.questions_arriving.extend(
+                open.iter()
+                    .map(|c| (stamp.saturating_add(cells), c.clone())),
+            );
             reached += 1;
         }
-        eprintln!("CORE-QUESTIONS {core}: {} open questions of the dead carried to {reached} lines", open.len());
+        eprintln!(
+            "CORE-QUESTIONS {core}: {} open questions of the dead carried to {reached} lines",
+            open.len()
+        );
     }
     let mut retired = Vec::new();
     worlds.retain(|polity| {
@@ -7358,7 +7881,11 @@ pub mod profile {
     fn peak_mb() -> u64 {
         std::fs::read_to_string("/proc/self/status")
             .ok()
-            .and_then(|s| s.lines().find(|l| l.starts_with("VmHWM:")).and_then(|l| l.split_whitespace().nth(1)?.parse::<u64>().ok()))
+            .and_then(|s| {
+                s.lines()
+                    .find(|l| l.starts_with("VmHWM:"))
+                    .and_then(|l| l.split_whitespace().nth(1)?.parse::<u64>().ok())
+            })
             .map_or(0, |kb| kb / 1024)
     }
 
@@ -7397,7 +7924,12 @@ pub mod profile {
         let spent = at.elapsed();
         if traced() {
             use std::io::Write;
-            eprintln!("trace: <- {name} {}ms rss {}MB peak {}MB", spent.as_millis(), rss_mb(), peak_mb());
+            eprintln!(
+                "trace: <- {name} {}ms rss {}MB peak {}MB",
+                spent.as_millis(),
+                rss_mb(),
+                peak_mb()
+            );
             let _ = std::io::stderr().flush();
         }
         let mut book = BOOK.lock().expect("profile book");
@@ -7459,7 +7991,10 @@ pub fn fleet_step(worlds: &mut [Polity]) -> (std::collections::BTreeMap<String, 
         ensure_npc_fleet(&mut polity.world, polity.automaton);
         let after = polity.world.hulls().len();
         if after > before {
-            built.insert(polity.spec.world_name.clone(), (after - before).min(255) as u8);
+            built.insert(
+                polity.spec.world_name.clone(),
+                (after - before).min(255) as u8,
+            );
         }
     }
     (built, released)
@@ -7476,8 +8011,16 @@ fn release_lapsed_hulls(world: &mut cfe::world::World, actor: u64) -> usize {
         .map(|(d, _)| *d)
         .chain(world.element_routes().iter().map(|(d, _, _, _)| *d))
         .collect();
-    let stranded: Vec<u64> = world.hulls().iter().filter(|h| h.assigned_route != 0 && !live.contains(&h.assigned_route)).map(|h| h.hull_id).collect();
-    stranded.into_iter().filter(|&id| world.assign_hull_as(actor, id, 0).is_ok()).count()
+    let stranded: Vec<u64> = world
+        .hulls()
+        .iter()
+        .filter(|h| h.assigned_route != 0 && !live.contains(&h.assigned_route))
+        .map(|h| h.hull_id)
+        .collect();
+    stranded
+        .into_iter()
+        .filter(|&id| world.assign_hull_as(actor, id, 0).is_ok())
+        .count()
 }
 
 fn ensure_npc_fleet(world: &mut cfe::world::World, actor: u64) {

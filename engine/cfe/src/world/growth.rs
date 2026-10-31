@@ -24,7 +24,10 @@ impl World {
         let mut postings = 0u64;
         let mut empty = 0u64;
         for receipt in self.chronicle.history() {
-            let ClosureEvent::BookPosted { orb_id, kept, lost, .. } = receipt.event() else {
+            let ClosureEvent::BookPosted {
+                orb_id, kept, lost, ..
+            } = receipt.event()
+            else {
                 continue;
             };
             if *orb_id != orb {

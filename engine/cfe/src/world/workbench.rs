@@ -90,9 +90,7 @@ impl World {
             .map(|h| {
                 h.zones
                     .iter()
-                    .filter(|z| {
-                        matches!(z.kind, ZoneKind::GovernmentOffice | ZoneKind::WelfareHub)
-                    })
+                    .filter(|z| matches!(z.kind, ZoneKind::GovernmentOffice | ZoneKind::WelfareHub))
                     .map(|z| BenchComponent {
                         label: format!("{} @{}", crate::dop::zone_word(z.kind), z.tile),
                         active: h.zone_active(z),
@@ -108,14 +106,29 @@ impl World {
         let estate = self.estate_levy();
         let gauges = vec![
             // — Revenue POLICY —
-            ("treasury".into(), crate::ratio::ratio_str(&self.treasury_of(orb))),
-            ("governance reach".into(), crate::ratio::ratio_str(&self.governance_reach(orb))),
-            ("continuity tax".into(), crate::ratio::ratio_str(&self.continuity_tax())),
+            (
+                "treasury".into(),
+                crate::ratio::ratio_str(&self.treasury_of(orb)),
+            ),
+            (
+                "governance reach".into(),
+                crate::ratio::ratio_str(&self.governance_reach(orb)),
+            ),
+            (
+                "continuity tax".into(),
+                crate::ratio::ratio_str(&self.continuity_tax()),
+            ),
             ("continuity levy".into(), format!("{continuity:?}")),
             ("estate levy".into(), format!("{estate:?}")),
             // — Public services —
-            ("welfare spend".into(), crate::ratio::ratio_str(&self.welfare_spend(orb, horizon))),
-            ("stability".into(), crate::ratio::ratio_str(&self.stability_of(orb, horizon))),
+            (
+                "welfare spend".into(),
+                crate::ratio::ratio_str(&self.welfare_spend(orb, horizon)),
+            ),
+            (
+                "stability".into(),
+                crate::ratio::ratio_str(&self.stability_of(orb, horizon)),
+            ),
         ];
 
         let mut alerts = Vec::new();
@@ -128,7 +141,12 @@ impl World {
             alerts.push("treasury empty — welfare cannot pay the stall".into());
         }
 
-        WorkbenchView { kind: BenchKind::Civic, components, gauges, alerts }
+        WorkbenchView {
+            kind: BenchKind::Civic,
+            components,
+            gauges,
+            alerts,
+        }
     }
 
     /// The depot bench — the provisioning society, fully read.
@@ -163,7 +181,10 @@ impl World {
             .caste_split(orb)
             .into_iter()
             .map(|(code, n)| {
-                let name = disposition_word.get(&code).cloned().unwrap_or_else(|| code.to_string());
+                let name = disposition_word
+                    .get(&code)
+                    .cloned()
+                    .unwrap_or_else(|| code.to_string());
                 format!("{name} {n}")
             })
             .collect::<Vec<_>>()
@@ -173,9 +194,16 @@ impl World {
             ("people".into(), people.to_string()),
             (
                 "castes".into(),
-                if castes.is_empty() { "—".into() } else { castes },
+                if castes.is_empty() {
+                    "—".into()
+                } else {
+                    castes
+                },
             ),
-            ("eats/head".into(), crate::ratio::ratio_str(&self.per_capita_ration())),
+            (
+                "eats/head".into(),
+                crate::ratio::ratio_str(&self.per_capita_ration()),
+            ),
             (
                 "leisure good".into(),
                 self.leisure_of(orb)
@@ -201,7 +229,10 @@ impl World {
             ));
         }
         if self.cooling_affine() {
-            gauges.push(("cooling K".into(), crate::ratio::ratio_str(&self.cooling_k_factor(orb))));
+            gauges.push((
+                "cooling K".into(),
+                crate::ratio::ratio_str(&self.cooling_k_factor(orb)),
+            ));
         }
         if self.mobility_affine(orb) {
             gauges.push((
@@ -263,7 +294,12 @@ impl World {
         } else {
             Vec::new()
         };
-        WorkbenchView { kind, components, gauges, alerts }
+        WorkbenchView {
+            kind,
+            components,
+            gauges,
+            alerts,
+        }
     }
 
     /// The lab bench — the seated science disciplines.
@@ -283,6 +319,11 @@ impl World {
         } else {
             Vec::new()
         };
-        WorkbenchView { kind, components, gauges, alerts }
+        WorkbenchView {
+            kind,
+            components,
+            gauges,
+            alerts,
+        }
     }
 }

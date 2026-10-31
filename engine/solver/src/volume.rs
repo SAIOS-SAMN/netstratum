@@ -21,6 +21,7 @@
 //! The carrier types are re-exported whole, so every existing caller
 //! (`conductor`, the pins) keeps compiling against `solver::` names.
 
+pub use solver_verify::volume::verify_volume_certificate;
 pub use solver_verify::volume::{
     forge_volume, run_volume, vocabulary, VOp, VProgram, VolDifficulty, Volume, VolumeCertificate,
     VolumeCertificateRead, VolumeTask,
@@ -28,7 +29,6 @@ pub use solver_verify::volume::{
 pub use solver_verify::work::{
     decode_volume_work, encode_volume_work, verify_volume_work, VolumeProof,
 };
-pub use solver_verify::volume::verify_volume_certificate;
 
 /// The volumetric solve reading.
 #[derive(Debug, Clone)]
@@ -76,8 +76,7 @@ pub fn solve_volume(task: &VolumeTask, max_depth: usize) -> VolumeSolveRead {
         for program in &frontier {
             if closes(program) {
                 let test_output = run_volume(program, &task.test_in);
-                let matches_expected =
-                    task.test_expected.as_ref().map(|want| want == &test_output);
+                let matches_expected = task.test_expected.as_ref().map(|want| want == &test_output);
                 let certificate = VolumeCertificate::seal(task, program, &test_output);
                 return VolumeSolveRead::Solved {
                     program: program.clone(),

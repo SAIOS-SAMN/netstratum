@@ -96,9 +96,12 @@ impl World {
         // The zone_upkeep/zone_yield substitution, applied to cost: the
         // FOOD-slot (Biomass) line prices in the line's own ration;
         // structural lines never substitute.
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
-        let held = peel(&mut self.orbs, orb)
-            .ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
+        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.zones.iter().any(|zone| zone.tile == tile) {
             return Err(ActionRefused::TileAlreadyZoned { tile });
         }
@@ -118,7 +121,15 @@ impl World {
         held.zones.push(Zone { tile, kind, base });
         held.zones.sort_by_key(|zone| zone.tile);
         let orb_id = held.orb_id;
-        self.close(ClosureEvent::ZoneBuilt { orb_id, tile, kind, base }, actor);
+        self.close(
+            ClosureEvent::ZoneBuilt {
+                orb_id,
+                tile,
+                kind,
+                base,
+            },
+            actor,
+        );
         Ok(())
     }
 }

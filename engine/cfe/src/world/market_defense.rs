@@ -184,11 +184,7 @@ impl World {
         self.liquidity_raid_as(SOVEREIGN, orb)
     }
 
-    pub fn liquidity_raid_as(
-        &mut self,
-        actor: u64,
-        orb: u64,
-    ) -> Result<(), ActionRefused> {
+    pub fn liquidity_raid_as(&mut self, actor: u64, orb: u64) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         if self.market_sealed() {
             return Err(ActionRefused::MarketCircuitOpen {

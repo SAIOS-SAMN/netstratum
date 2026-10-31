@@ -25,6 +25,7 @@
 //! - [`gates`] — the three validation gates every proposed operator
 //!   must pass: productivity, conservation, bounded magnitude.
 
+pub mod boundary;
 pub mod cage;
 pub mod capacity;
 pub mod delta;
@@ -32,19 +33,18 @@ pub mod fiber;
 pub mod fold;
 pub mod gates;
 pub mod rcf;
-pub mod boundary;
 pub mod reduce;
 
 pub use cage::{consult, Exact, Lens, Proposal};
 pub use capacity::{
-    capacity, circulation, divergence, ext_x, flux, ground, preserves_hodge_split, Degree, Flux,
-    Extent,
+    capacity, circulation, divergence, ext_x, flux, ground, preserves_hodge_split, Degree, Extent,
+    Flux,
 };
 pub use delta::{coherence_functional, for_each_residual, magnitude, Delta};
 pub use fiber::{loop_holonomy, plaquette_curvature, MatrixFiber2x2};
 pub use fold::{
-    f_fold_star, gated_fold, orbit_lock, verify_orbit_witness, FoldReading, Operator,
-    OrbitWitness, RatMatrix, TorsionCause,
+    f_fold_star, gated_fold, orbit_lock, verify_orbit_witness, FoldReading, Operator, OrbitWitness,
+    RatMatrix, TorsionCause,
 };
 pub use gates::{validate_step, GateReading, StepBound};
 // The four-row classification is struck (operator ruling 2026-08-04):
@@ -52,8 +52,10 @@ pub use gates::{validate_step, GateReading, StepBound};
 // their only gate. The boundary form stays — the divergence is a
 // first-class reading for the sign law and is what `capacity.rs` splits
 // against.
-pub use boundary::{boundary_form, Flow, BoundaryForm};
-pub use rcf::{invariant_factors, rcf_hash, rcf_hash_skew_bipartite, rcf_signature, RatPoly, RcfSignature};
+pub use boundary::{boundary_form, BoundaryForm, Flow};
+pub use rcf::{
+    invariant_factors, rcf_hash, rcf_hash_skew_bipartite, rcf_signature, RatPoly, RcfSignature,
+};
 pub use reduce::{coboundary_reduce, forest_potentials, holonomies, Holonomy, Support};
 // The carrier, re-exported. A crate that builds a Delta through this
 // algebra must name its exact-rational entries; re-exporting `Ratio`

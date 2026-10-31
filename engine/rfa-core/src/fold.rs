@@ -185,8 +185,7 @@ pub enum FoldReading {
     TorsionVeto(TorsionCause),
 }
 
-impl FoldReading {
-}
+impl FoldReading {}
 
 /// The prover's search — find an operator that carries `a` exactly onto
 /// `b` in one conjugation.
@@ -215,7 +214,10 @@ pub fn orbit_lock(a: &Delta, b: &Delta, operators: &[Operator]) -> Option<OrbitW
             continue;
         }
         if image == *b {
-            return Some(OrbitWitness { operator_id: op.id, step: 1 });
+            return Some(OrbitWitness {
+                operator_id: op.id,
+                step: 1,
+            });
         }
     }
     None

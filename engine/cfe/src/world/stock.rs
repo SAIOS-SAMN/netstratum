@@ -212,5 +212,4 @@ impl ResourceStock {
             self.seed_floor = self.ceiling.clone();
         }
     }
-
 }

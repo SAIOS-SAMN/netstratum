@@ -40,8 +40,7 @@ pub enum Hunger {
     Novelty,
 }
 
-impl Hunger {
-}
+impl Hunger {}
 
 /// The need a solve is answering.
 ///
@@ -89,7 +88,13 @@ impl Need {
 
     /// One struck want with its reading.
     pub fn struck(hunger: Hunger, starved_for: u64) -> Need {
-        Need { hungers: vec![hunger], starved_for, thin: Vec::new(), reach_bonus: 0, capacity: 0 }
+        Need {
+            hungers: vec![hunger],
+            starved_for,
+            thin: Vec::new(),
+            reach_bonus: 0,
+            capacity: 0,
+        }
     }
 
     /// Does this need reach for `family` before the others?
@@ -115,10 +120,7 @@ impl Need {
 }
 
 #[cfg(test)]
-mod tests {
-    
-
-}
+mod tests {}
 
 /// The family an operator belongs to — the census's classifier, one
 /// home shared with the derivation module's own labels.

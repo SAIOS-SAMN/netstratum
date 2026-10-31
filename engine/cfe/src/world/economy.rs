@@ -101,19 +101,25 @@ impl World {
         let (from, to) = (route.from(), route.to());
         let amount: Ratio = amount.value().clone();
         if smelt_resource(&amount) != amount {
-            return Err(ActionRefused::OffGrain { amount: Box::new(amount) });
+            return Err(ActionRefused::OffGrain {
+                amount: Box::new(amount),
+            });
         }
         let Some((survey, seed, covered)) =
-            self.chronicle.last_survey().and_then(|(own, event)| match event {
-                ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
-                    *own,
-                    *seed,
-                    covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>(),
-                )),
-                _ => None,
-            })
+            self.chronicle
+                .last_survey()
+                .and_then(|(own, event)| match event {
+                    ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
+                        *own,
+                        *seed,
+                        covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>(),
+                    )),
+                    _ => None,
+                })
         else {
-            return Err(ActionRefused::ClaimWithoutWitness { name: "estate unsurveyed".into() });
+            return Err(ActionRefused::ClaimWithoutWitness {
+                name: "estate unsurveyed".into(),
+            });
         };
         for endpoint in [from, to] {
             if !covered.contains(&endpoint) {
@@ -193,7 +199,11 @@ impl World {
         if dt == 0 {
             return Vec::new();
         }
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
         let dtr = ratio(dt as i64, 1);
         let mut out: Vec<(Resource, Ratio)> = Vec::new();
         for recipe in crate::vocabulary::recipes_built(self.chronicle()) {
@@ -228,7 +238,8 @@ impl World {
         // MASK-1a: the veil's standing toll settles at the touch — an
         // unpayable toll lifts the veil by receipt, never silently.
         if self.veiled {
-            let toll = crate::parameter::of(self.chronicle(), crate::parameter::Parameter::VeilToll);
+            let toll =
+                crate::parameter::of(self.chronicle(), crate::parameter::Parameter::VeilToll);
             let held_embers = self
                 .orbs
                 .iter()
@@ -241,7 +252,11 @@ impl World {
                 }
                 let stamp = self.clock.now();
                 self.chronicle.append(
-                    ClosureEvent::UpkeepSettled { orb_id: orb, resource: Resource::Ember, amount: toll },
+                    ClosureEvent::UpkeepSettled {
+                        orb_id: orb,
+                        resource: Resource::Ember,
+                        amount: toll,
+                    },
                     stamp,
                     vec![actor],
                 );
@@ -318,8 +333,7 @@ impl World {
         // population, folded into this touch's settlement below. Empty until a
         // recipe is raised, so a v1 world is byte-identical.
         let recipe_yields = self.recipe_yield_at_touch(orb, self.clock.now());
-        let held = peel(&mut self.orbs, orb)
-            .ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         let mut settleable: Vec<(Resource, Ratio)> = Vec::new();
         self.accrued.retain(|(owner, resource, amount)| {
             match *owner == orb && amount != &ratio(0, 1) {
@@ -346,7 +360,10 @@ impl World {
         if let Some((ration, grown)) = rejuvenated {
             match ration {
                 Ration::Resource(resource) => {
-                    match settleable.iter_mut().find(|(held_res, _)| *held_res == resource) {
+                    match settleable
+                        .iter_mut()
+                        .find(|(held_res, _)| *held_res == resource)
+                    {
                         Some((_, amount)) => *amount += grown,
                         None => settleable.push((resource, grown)),
                     }
@@ -387,7 +404,10 @@ impl World {
                         .unwrap_or_else(|| ratio(0, 1));
                     let standing = (held.banked_amount(*resource) + credit).max(ratio(0, 1));
                     let eaten = consumed.clone().min(standing);
-                    match settleable.iter_mut().find(|(held_res, _)| held_res == resource) {
+                    match settleable
+                        .iter_mut()
+                        .find(|(held_res, _)| held_res == resource)
+                    {
                         Some((_, amount)) => *amount -= eaten,
                         None => settleable.push((*resource, -eaten)),
                     }
@@ -412,7 +432,10 @@ impl World {
         // credit pattern. A world can collect on a recipe's yield ALONE, so
         // this joins before the empty gate below.
         for (resource, amount) in recipe_yields {
-            match settleable.iter_mut().find(|(held_res, _)| *held_res == resource) {
+            match settleable
+                .iter_mut()
+                .find(|(held_res, _)| *held_res == resource)
+            {
                 Some((_, held_amount)) => *held_amount += amount,
                 None => settleable.push((resource, amount)),
             }
@@ -464,17 +487,21 @@ impl World {
         touch(held, self.star, &mut self.chronicle, stamp, &ease, &supply);
         // VENT-1: seal the pending vented entropy into the ledger.
         let mut vented = ratio(0, 1);
-        self.vent_pending.retain(|(held_orb, pending)| match *held_orb == orb_id {
-            true => {
-                vented += pending.clone();
-                false
-            }
-            false => true,
-        });
+        self.vent_pending
+            .retain(|(held_orb, pending)| match *held_orb == orb_id {
+                true => {
+                    vented += pending.clone();
+                    false
+                }
+                false => true,
+            });
         if vented > ratio(0, 1) {
             held.entropy_vented += vented.clone();
             self.chronicle.append(
-                ClosureEvent::VentSettled { orb_id, amount: vented },
+                ClosureEvent::VentSettled {
+                    orb_id,
+                    amount: vented,
+                },
                 stamp,
                 vec![actor],
             );
@@ -482,13 +509,14 @@ impl World {
         // IDEO-1: the accrued ideological friction seals into the same
         // vented ledger — real entropy, its own receipt.
         let mut friction = ratio(0, 1);
-        self.friction_pending.retain(|(held_orb, pending)| match *held_orb == orb_id {
-            true => {
-                friction += pending.clone();
-                false
-            }
-            false => true,
-        });
+        self.friction_pending
+            .retain(|(held_orb, pending)| match *held_orb == orb_id {
+                true => {
+                    friction += pending.clone();
+                    false
+                }
+                false => true,
+            });
         if friction > ratio(0, 1) {
             // Encasement first, now obeyed here too (`EQUATIONS` T3,
             // 05 §1.2; operator ruling 2026-08-03: friction entropy is
@@ -552,7 +580,10 @@ impl World {
             if overflow > ratio(0, 1) {
                 held.entropy_vented += overflow.clone();
                 self.chronicle.append(
-                    ClosureEvent::FrictionSettled { orb_id, amount: overflow },
+                    ClosureEvent::FrictionSettled {
+                        orb_id,
+                        amount: overflow,
+                    },
                     stamp,
                     vec![actor],
                 );
@@ -583,7 +614,11 @@ impl World {
                         held.syntropy_contained += amount.clone();
                     }
                     self.chronicle.append(
-                        ClosureEvent::YieldCollected { orb_id, resource, amount },
+                        ClosureEvent::YieldCollected {
+                            orb_id,
+                            resource,
+                            amount,
+                        },
                         stamp,
                         vec![actor],
                     );
@@ -703,7 +738,13 @@ impl World {
             }
             if minted > ratio(0, 1) || eaten > ratio(0, 1) {
                 self.chronicle.append(
-                    ClosureEvent::ElementFarmed { orb_id: orb, element, ember, minted, eaten },
+                    ClosureEvent::ElementFarmed {
+                        orb_id: orb,
+                        element,
+                        ember,
+                        minted,
+                        eaten,
+                    },
                     stamp,
                     vec![actor],
                 );
@@ -737,9 +778,9 @@ impl World {
                     .iter_mut()
                     .find(|vein| vein.orb == orb && vein.element == element)
                     .map(|vein| {
-                        let richness = crate::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
-                        let eaten =
-                            (draw.min(richness) * lattice.clone()).floor() / lattice;
+                        let richness =
+                            crate::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
+                        let eaten = (draw.min(richness) * lattice.clone()).floor() / lattice;
                         if eaten > ratio(0, 1) {
                             // The same book motion an assay makes — the span
                             // anchor moves and the integral grows — so the
@@ -752,7 +793,11 @@ impl World {
                     .unwrap_or_else(|| ratio(0, 1));
                 if mined > ratio(0, 1) {
                     self.chronicle.append(
-                        ClosureEvent::StapleMined { orb_id: orb, element, eaten: mined },
+                        ClosureEvent::StapleMined {
+                            orb_id: orb,
+                            element,
+                            eaten: mined,
+                        },
                         stamp,
                         vec![actor],
                     );
@@ -769,7 +814,11 @@ impl World {
                 held.bank_element(element, -amount.clone());
             }
             self.chronicle.append(
-                ClosureEvent::TraceConsumed { orb_id: orb, element, amount },
+                ClosureEvent::TraceConsumed {
+                    orb_id: orb,
+                    element,
+                    amount,
+                },
                 stamp,
                 vec![actor],
             );
@@ -844,12 +893,18 @@ impl World {
         // Affordability on the post-decay bank — the books honest at
         // the stamp — computed pure, so a refusal orphans nothing.
         {
-            let source = peek(&self.orbs, from)
-                .expect("checked above");
+            let source = peek(&self.orbs, from).expect("checked above");
             // CHANNEL_DEMURRAGE: the adopted disciplines' composed
             // decay factor (the Hoard binds 1/2 — the stores keep).
             let keep = self.practice_factor(crate::vocabulary::CHANNEL_DEMURRAGE);
-            let decay = keep * demurrage_due(source, star, stamp, &ease_of(&self.techs, from, stamp), &super::rules::standing_supply(&self.orbs))
+            let decay = keep
+                * demurrage_due(
+                    source,
+                    star,
+                    stamp,
+                    &ease_of(&self.techs, from, stamp),
+                    &super::rules::standing_supply(&self.orbs),
+                )
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -879,8 +934,7 @@ impl World {
         // design: the standing loop is the friction-free channel.
         let divergence = {
             let reading = |orb: u64| {
-                let held =
-                    peek(&self.orbs, orb).expect("checked");
+                let held = peek(&self.orbs, orb).expect("checked");
                 reciprocity_reading(held)
             };
             let from_reading = reading(from);
@@ -901,22 +955,19 @@ impl World {
         // The touch, both sides (SINK-1), then the move.
         for orb in [from, to] {
             let ease = ease_of(&self.techs, orb, stamp);
-            let held = peel(&mut self.orbs, orb)
-                .expect("checked above");
+            let held = peel(&mut self.orbs, orb).expect("checked above");
             touch(held, star, &mut self.chronicle, stamp, &ease, &supply);
         }
         let value = amount.clone() * crate::dop::commensurate_weight(resource);
         {
-            let source = peel(&mut self.orbs, from)
-                .expect("checked above");
+            let source = peel(&mut self.orbs, from).expect("checked above");
             source.bank(resource, -amount.clone());
             if to_crisis {
                 source.given_in_crisis += value.clone();
             }
         }
         {
-            let target = peel(&mut self.orbs, to)
-                .expect("checked above");
+            let target = peel(&mut self.orbs, to).expect("checked above");
             target.bank(resource, amount.clone());
             if from_crisis {
                 target.drawn_in_crisis += value.clone();
@@ -928,9 +979,10 @@ impl World {
         // FORWARD-1: the delivery credits the open pact on this lane.
         credit_forwards(&mut self.forwards, from, to, resource, &amount);
         credit_councils(&mut self.councils, from, to, resource, &amount);
-        let friction = crate::parameter::of(self.chronicle(), crate::parameter::Parameter::FrictionRate)
-            * (divergence + logistics)
-            * value;
+        let friction =
+            crate::parameter::of(self.chronicle(), crate::parameter::Parameter::FrictionRate)
+                * (divergence + logistics)
+                * value;
         if friction > ratio(0, 1) {
             match self
                 .friction_pending
@@ -942,7 +994,12 @@ impl World {
             }
         }
         self.chronicle.append(
-            ClosureEvent::ResourceTransferred { from_orb: from, to_orb: to, resource, amount },
+            ClosureEvent::ResourceTransferred {
+                from_orb: from,
+                to_orb: to,
+                resource,
+                amount,
+            },
             stamp,
             vec![actor],
         );
@@ -1002,15 +1059,23 @@ impl World {
         let star = self.star;
         let pending = self.vent_pending_of(source);
         if amount > pending {
-            return Err(ActionRefused::CannotAbsorb { pending: Box::new(pending) });
+            return Err(ActionRefused::CannotAbsorb {
+                pending: Box::new(pending),
+            });
         }
         {
-            let held = peek(&self.orbs, absorber)
-                .expect("checked above");
+            let held = peek(&self.orbs, absorber).expect("checked above");
             // CHANNEL_DEMURRAGE: the adopted disciplines' composed
             // decay factor (the Hoard binds 1/2 — the stores keep).
             let keep = self.practice_factor(crate::vocabulary::CHANNEL_DEMURRAGE);
-            let decay = keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, absorber, stamp), &super::rules::standing_supply(&self.orbs))
+            let decay = keep
+                * demurrage_due(
+                    held,
+                    star,
+                    stamp,
+                    &ease_of(&self.techs, absorber, stamp),
+                    &super::rules::standing_supply(&self.orbs),
+                )
                 .into_iter()
                 .find(|(due, _)| *due == Resource::Sink)
                 .map(|(_, decay)| decay)
@@ -1035,8 +1100,7 @@ impl World {
         };
         let value = amount.clone() * crate::dop::commensurate_weight(Resource::Sink);
         {
-            let held = peel(&mut self.orbs, absorber)
-                .expect("checked above");
+            let held = peel(&mut self.orbs, absorber).expect("checked above");
             let ease = ease_of(&self.techs, absorber, stamp);
             touch(held, star, &mut self.chronicle, stamp, &ease, &supply);
             held.bank(Resource::Sink, -amount.clone());
@@ -1052,10 +1116,10 @@ impl World {
         {
             *held -= amount.clone();
         }
-        self.vent_pending.retain(|(_, pending)| pending != &ratio(0, 1));
+        self.vent_pending
+            .retain(|(_, pending)| pending != &ratio(0, 1));
         if absorber_crisis {
-            let held = peel(&mut self.orbs, source)
-                .expect("checked above");
+            let held = peel(&mut self.orbs, source).expect("checked above");
             held.drawn_in_crisis += value;
         }
         self.debts.push(AbsorptionDebt {
@@ -1065,14 +1129,17 @@ impl World {
             opened: stamp,
         });
         self.chronicle.append(
-            ClosureEvent::OverflowAbsorbed { source_orb: source, absorber_orb: absorber, amount },
+            ClosureEvent::OverflowAbsorbed {
+                source_orb: source,
+                absorber_orb: absorber,
+                amount,
+            },
             stamp,
             vec![actor],
         );
         // Emptying the pending relieves the strike, receipted.
         if self.vent_pending_of(source) == ratio(0, 1) {
-            let held = peel(&mut self.orbs, source)
-                .expect("checked above");
+            let held = peel(&mut self.orbs, source).expect("checked above");
             if held.overheat {
                 held.overheat = false;
                 self.chronicle.append(
@@ -1137,8 +1204,12 @@ impl World {
     pub fn seat_treasury(&self, to_seat: u8) -> Vec<(Resource, Ratio)> {
         let mut held: Vec<(Resource, Ratio)> = Vec::new();
         for receipt in self.chronicle().history() {
-            if let ClosureEvent::TitheReceipted { to_seat: seat, resource, amount, .. } =
-                receipt.event()
+            if let ClosureEvent::TitheReceipted {
+                to_seat: seat,
+                resource,
+                amount,
+                ..
+            } = receipt.event()
             {
                 if *seat == to_seat {
                     match held.iter_mut().find(|(r, _)| r == resource) {
@@ -1181,12 +1252,14 @@ impl World {
             .history()
             .fold(ratio(0, 1), |carried, receipt| match receipt.event() {
                 ClosureEvent::DemurrageSettled { orb_id, amount, .. }
-                | ClosureEvent::UpkeepSettled { orb_id, amount, .. } if *orb_id == orb => {
+                | ClosureEvent::UpkeepSettled { orb_id, amount, .. }
+                    if *orb_id == orb =>
+                {
                     carried + amount.clone()
                 }
-                ClosureEvent::DemurrageTouched { orb_id, decays } if *orb_id == orb => {
-                    decays.iter().fold(carried, |sum, (_, amount)| sum + amount.clone())
-                }
+                ClosureEvent::DemurrageTouched { orb_id, decays } if *orb_id == orb => decays
+                    .iter()
+                    .fold(carried, |sum, (_, amount)| sum + amount.clone()),
                 _ => carried,
             })
     }
@@ -1212,18 +1285,18 @@ impl World {
     pub fn union_review(&self, stamp: u64) -> Option<(u64, bool)> {
         self.chronicle
             .history()
-            .find(|receipt| {
-                matches!(receipt.event(), ClosureEvent::SovereignUnionSealed { .. })
-            })
+            .find(|receipt| matches!(receipt.event(), ClosureEvent::SovereignUnionSealed { .. }))
             .map(|receipt| {
                 let horizon = match receipt.event() {
                     ClosureEvent::SovereignUnionSealed { term_stamps, .. } => *term_stamps,
                     _ => crate::dop::UNION_REVIEW_HORIZON,
                 };
-                (receipt.stamp(), stamp >= receipt.stamp().saturating_add(horizon))
+                (
+                    receipt.stamp(),
+                    stamp >= receipt.stamp().saturating_add(horizon),
+                )
             })
     }
-
 
     /// **The heat encased — the syntropic arm of the thermal book,
     /// derived, never stored** (the missing-leg sweep, 2026-08-02).
@@ -1261,11 +1334,11 @@ impl World {
         self.chronicle
             .history()
             .filter_map(|receipt| match receipt.event() {
-                ClosureEvent::YieldCollected { orb_id, resource: Resource::Ember, amount }
-                    if *orb_id == orb =>
-                {
-                    Some(amount.clone())
-                }
+                ClosureEvent::YieldCollected {
+                    orb_id,
+                    resource: Resource::Ember,
+                    amount,
+                } if *orb_id == orb => Some(amount.clone()),
                 _ => None,
             })
             .fold(ratio(0, 1), |a, b| a + b)
@@ -1288,6 +1361,4 @@ impl World {
             .unwrap_or_else(|| ratio(0, 1));
         (self.heat_encased_of(orb), vented)
     }
-
-
 }

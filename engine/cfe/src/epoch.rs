@@ -79,7 +79,11 @@ mod tests {
     fn the_boundary_is_exact_and_the_lookup_is_monotone() {
         assert_eq!(epoch_at(0), Epoch::Genesis);
         assert_eq!(epoch_at(CONTINUOUS_FROM - 1), Epoch::Genesis);
-        assert_eq!(epoch_at(CONTINUOUS_FROM), Epoch::Continuous, "inclusive at the boundary");
+        assert_eq!(
+            epoch_at(CONTINUOUS_FROM),
+            Epoch::Continuous,
+            "inclusive at the boundary"
+        );
         assert_eq!(epoch_at(u64::MAX), Epoch::Continuous);
 
         // Monotone: no stamp ever returns an earlier epoch than a

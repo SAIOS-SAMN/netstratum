@@ -72,7 +72,9 @@ pub fn write(dir: &Path, world: &mut World, file_end: u64) -> io::Result<()> {
         return Ok(()); // an empty chronicle carries nothing
     };
     let held_bytes: u64 = receipts.iter().map(|r| r.wire_bytes().len() as u64).sum();
-    let base_bytes = file_end.checked_sub(held_bytes).ok_or_else(|| io::Error::other("file shorter than the held tail"))?;
+    let base_bytes = file_end
+        .checked_sub(held_bytes)
+        .ok_or_else(|| io::Error::other("file shorter than the held tail"))?;
     let annals = chronicle.annals().to_carried_bytes();
     let mut bytes = MAGIC.to_vec();
     bytes.extend_from_slice(&chronicle.total().to_le_bytes());
@@ -93,12 +95,19 @@ pub fn write(dir: &Path, world: &mut World, file_end: u64) -> io::Result<()> {
 /// or `None` when there is none or it does not read.
 pub fn read(dir: &Path) -> Option<Snapshot> {
     let bytes = std::fs::read(dir.join("state.snap")).ok()?;
-    let u64_at = |b: &[u8], at: usize| -> Option<u64> { Some(u64::from_le_bytes(b.get(at..at + 8)?.try_into().ok()?)) };
+    let u64_at = |b: &[u8], at: usize| -> Option<u64> {
+        Some(u64::from_le_bytes(b.get(at..at + 8)?.try_into().ok()?))
+    };
     if let Some(rest) = bytes.strip_prefix(MAGIC_V1) {
         let receipts = u64_at(rest, 0)? as usize;
         let head: [u8; 32] = rest.get(8..40)?.try_into().ok()?;
         let state = codec::from_state_bytes(rest.get(40..)?)?;
-        return Some(Snapshot { receipts, head, tail: None, state });
+        return Some(Snapshot {
+            receipts,
+            head,
+            tail: None,
+            state,
+        });
     }
     let (rest, carried) = match bytes.strip_prefix(MAGIC) {
         Some(rest) => (rest, true),
@@ -112,13 +121,21 @@ pub fn read(dir: &Path) -> Option<Snapshot> {
     let annals_len = u64_at(rest, 88)? as usize;
     let annals_bytes = rest.get(96..96usize.checked_add(annals_len)?)?;
     let annals = match carried {
-        true => {
-            Annals::from_carried_bytes(annals_bytes, dir.join(DIGESTS))?
-        }
+        true => Annals::from_carried_bytes(annals_bytes, dir.join(DIGESTS))?,
         false => Annals::from_bytes(annals_bytes)?,
     };
     let state = codec::from_state_bytes(rest.get(96 + annals_len..)?)?;
-    Some(Snapshot { receipts, head, tail: Some(Tail { base, base_bytes, base_parent, annals }), state })
+    Some(Snapshot {
+        receipts,
+        head,
+        tail: Some(Tail {
+            base,
+            base_bytes,
+            base_parent,
+            annals,
+        }),
+        state,
+    })
 }
 
 /// Read only `dir`'s snapshot STATE and position (receipts, head) — its
@@ -126,13 +143,17 @@ pub fn read(dir: &Path) -> Option<Snapshot> {
 /// judge's seeding.
 pub fn read_state(dir: &Path) -> Option<(usize, [u8; 32], Committed)> {
     let bytes = std::fs::read(dir.join("state.snap")).ok()?;
-    let u64_at = |b: &[u8], at: usize| -> Option<u64> { Some(u64::from_le_bytes(b.get(at..at + 8)?.try_into().ok()?)) };
+    let u64_at = |b: &[u8], at: usize| -> Option<u64> {
+        Some(u64::from_le_bytes(b.get(at..at + 8)?.try_into().ok()?))
+    };
     if let Some(rest) = bytes.strip_prefix(MAGIC_V1) {
         let receipts = u64_at(rest, 0)? as usize;
         let head: [u8; 32] = rest.get(8..40)?.try_into().ok()?;
         return Some((receipts, head, codec::from_state_bytes(rest.get(40..)?)?));
     }
-    let rest = bytes.strip_prefix(MAGIC).or_else(|| bytes.strip_prefix(MAGIC_V2))?;
+    let rest = bytes
+        .strip_prefix(MAGIC)
+        .or_else(|| bytes.strip_prefix(MAGIC_V2))?;
     let receipts = u64_at(rest, 0)? as usize;
     let head: [u8; 32] = rest.get(8..40)?.try_into().ok()?;
     let annals_len = u64_at(rest, 88)? as usize;
@@ -179,7 +200,12 @@ fn carry_forward(snap: Snapshot, chronicle: &Chronicle) -> Option<(Committed, Re
     for receipt in &receipts[snap.receipts - base..] {
         stepper.apply(receipt);
     }
-    Some((stepper.into_committed(), Resumed::Carried { tail: total - snap.receipts }))
+    Some((
+        stepper.into_committed(),
+        Resumed::Carried {
+            tail: total - snap.receipts,
+        },
+    ))
 }
 
 /// **The bounded boot** — bring a world back from its directory reading only

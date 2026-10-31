@@ -24,15 +24,28 @@ fn surveyed_transition() -> (cfe::world::Committed, cfe::world::Committed, Step)
     let prior = world.committed();
     world.survey_estate(FIRST_ORB).expect("surveys");
     let next = world.committed();
-    let receipt = world.chronicle().receipts().last().expect("the survey").clone();
-    let step = Step { event: receipt.event().clone(), actor: SOVEREIGN, stamp: receipt.stamp() };
+    let receipt = world
+        .chronicle()
+        .receipts()
+        .last()
+        .expect("the survey")
+        .clone();
+    let step = Step {
+        event: receipt.event().clone(),
+        actor: SOVEREIGN,
+        stamp: receipt.stamp(),
+    };
     (prior, next, step)
 }
 
 #[test]
 fn a_lawful_survey_is_admitted() {
     let (prior, next, step) = surveyed_transition();
-    assert_eq!(admits(&prior, &next, &step), Ok(()), "the deed the emitter escrowed admits");
+    assert_eq!(
+        admits(&prior, &next, &step),
+        Ok(()),
+        "the deed the emitter escrowed admits"
+    );
 }
 
 #[test]
@@ -45,7 +58,10 @@ fn a_partial_covering_refuses_the_observation() {
     };
     covered.pop();
     match admits(&prior, &next, &step) {
-        Err(Refused::SurveyNotWhole { covered: 1, estate: 2 }) => {}
+        Err(Refused::SurveyNotWhole {
+            covered: 1,
+            estate: 2,
+        }) => {}
         other => panic!("a partial covering must refuse SurveyNotWhole, got {other:?}"),
     }
     // And the empty covering — an unwitnessed observation — refuses too.
@@ -54,7 +70,10 @@ fn a_partial_covering_refuses_the_observation() {
     };
     covered.clear();
     assert!(
-        matches!(admits(&prior, &next, &step), Err(Refused::SurveyNotWhole { covered: 0, .. })),
+        matches!(
+            admits(&prior, &next, &step),
+            Err(Refused::SurveyNotWhole { covered: 0, .. })
+        ),
         "an unwitnessed observation cannot enter the record"
     );
 }
@@ -70,11 +89,18 @@ fn a_misquoted_meter_refuses() {
     };
     *cost = cost.clone() + ratio(1, 1);
     assert!(
-        matches!(admits(&prior, &next, &step), Err(Refused::SurveyMeterMismatch { .. })),
+        matches!(
+            admits(&prior, &next, &step),
+            Err(Refused::SurveyMeterMismatch { .. })
+        ),
         "a misquoted meter must refuse"
     );
     let (_, rate) = survey_meter();
-    assert_eq!(rate * ratio(2, 1), ratio(1, 4), "and the ruled figure is the dial's: 2 × 1/8");
+    assert_eq!(
+        rate * ratio(2, 1),
+        ratio(1, 4),
+        "and the ruled figure is the dial's: 2 × 1/8"
+    );
 }
 
 #[test]
@@ -83,7 +109,10 @@ fn the_draw_conserves_or_refuses() {
     // deed declares the draw refuses ConservationBroken.
     let (prior, _, step) = surveyed_transition();
     assert!(
-        matches!(admits(&prior, &prior, &step), Err(Refused::ConservationBroken { .. })),
+        matches!(
+            admits(&prior, &prior, &step),
+            Err(Refused::ConservationBroken { .. })
+        ),
         "declared draw with no debit is minting by omission"
     );
 }

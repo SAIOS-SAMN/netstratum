@@ -14,13 +14,20 @@ fn main() {
         if book.world_dir(&spec.world_name).join("collapsed").exists() {
             continue;
         }
-        let Some(core) = book.core_of(&spec.position) else { continue };
-        let Some(g) = galaxies.iter().find(|g| g.name == core) else { continue };
+        let Some(core) = book.core_of(&spec.position) else {
+            continue;
+        };
+        let Some(g) = galaxies.iter().find(|g| g.name == core) else {
+            continue;
+        };
         let d = ledger::torus_distance(&spec.position, &g.center, &span);
         rows.push((d, core, spec.world_name.clone()));
     }
     rows.sort();
     for (d, core, name) in &rows {
-        println!("{:>10} {core:28} {name}", format!("{:.3}", num_traits::ToPrimitive::to_f64(d).unwrap_or(-1.0)));
+        println!(
+            "{:>10} {core:28} {name}",
+            format!("{:.3}", num_traits::ToPrimitive::to_f64(d).unwrap_or(-1.0))
+        );
     }
 }

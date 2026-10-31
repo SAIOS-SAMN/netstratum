@@ -81,7 +81,11 @@ pub fn civ_reach(held_conditions: impl IntoIterator<Item = u8>, star: Option<Sta
 }
 
 /// May this people open this LINE under this sky?
-pub fn civ_may_work(line: u8, held_conditions: impl IntoIterator<Item = u8>, star: Option<StarClass>) -> bool {
+pub fn civ_may_work(
+    line: u8,
+    held_conditions: impl IntoIterator<Item = u8>,
+    star: Option<StarClass>,
+) -> bool {
     line > 0 && line <= civ_reach(held_conditions, star)
 }
 

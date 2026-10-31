@@ -23,5 +23,3 @@
 //! This slice is additive -- it changes no live behavior; it stands the new
 //! organ up and witnesses it names the same deficit the old path found, without
 //! the loss. OCULAR-2..4 migrate the consumers onto it and delete the scalars.
-
-

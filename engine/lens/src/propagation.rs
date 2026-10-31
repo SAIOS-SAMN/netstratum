@@ -164,7 +164,9 @@ impl Medium {
         match shed == ratio(0, 1) {
             // Nothing is being shed: the medium takes nothing away.
             true => Medium::inert(),
-            false => Medium { eta: retained / shed },
+            false => Medium {
+                eta: retained / shed,
+            },
         }
     }
 
@@ -284,7 +286,6 @@ impl Resonance {
             degradation: decay_consumed * distance,
         }
     }
-
 }
 
 /// Alignment — the static depth-indexed match, renamed to what it does.

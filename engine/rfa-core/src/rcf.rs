@@ -514,7 +514,11 @@ fn small_det(m: &[Vec<RatPoly>]) -> RatPoly {
             for (row, &col) in perm.iter().enumerate() {
                 term = term.mul(&m[row][col]);
             }
-            *total = if sign_of(perm) { total.add(&term) } else { total.sub(&term) };
+            *total = if sign_of(perm) {
+                total.add(&term)
+            } else {
+                total.sub(&term)
+            };
             return;
         }
         for i in 0..n {
@@ -550,7 +554,11 @@ pub fn rcf_hash_skew_bipartite(k: usize, m: &[Vec<Ratio>]) -> [u8; 32] {
     let dim = k + w;
     // G = M·Mᵀ (k×k).
     let g: Vec<Vec<Ratio>> = (0..k)
-        .map(|i| (0..k).map(|j| (0..w).fold(Ratio::zero(), |acc, c| acc + &m[i][c] * &m[j][c])).collect())
+        .map(|i| {
+            (0..k)
+                .map(|j| (0..w).fold(Ratio::zero(), |acc, c| acc + &m[i][c] * &m[j][c]))
+                .collect()
+        })
         .collect();
     // det(x²I + G) over Rat[x].
     let poly: Vec<Vec<RatPoly>> = (0..k)
@@ -571,7 +579,8 @@ pub fn rcf_hash_skew_bipartite(k: usize, m: &[Vec<Ratio>]) -> [u8; 32] {
         h = RatPoly::from_coeffs(h.coeffs[1..].to_vec());
         x_power += 1;
     }
-    let x_mult = usize::try_from(x_power).expect("χ is a polynomial: the x power is never negative");
+    let x_mult =
+        usize::try_from(x_power).expect("χ is a polynomial: the x power is never negative");
     let parts = squarefree(&h);
     let top = parts.iter().map(|(j, _)| *j).max().unwrap_or(0).max(x_mult);
     let x = RatPoly::from_coeffs(vec![Ratio::zero(), Ratio::one()]);
@@ -623,7 +632,9 @@ mod skew_bipartite_tests {
     /// A tiny deterministic generator, so the differential sweep is
     /// reproducible without a dependency.
     fn lcg(seed: &mut u64) -> u64 {
-        *seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        *seed = seed
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         *seed >> 33
     }
 
@@ -655,9 +666,17 @@ mod skew_bipartite_tests {
     fn duplicated_leaves_and_the_empty_map_agree_too() {
         let one = Ratio::from_integer(1.into());
         let two = Ratio::from_integer(2.into());
-        let m = vec![vec![one.clone(), one.clone(), one.clone()], vec![two.clone(), two.clone(), two.clone()], vec![one.clone(), Ratio::zero(), one.clone()], vec![Ratio::zero(); 3]];
+        let m = vec![
+            vec![one.clone(), one.clone(), one.clone()],
+            vec![two.clone(), two.clone(), two.clone()],
+            vec![one.clone(), Ratio::zero(), one.clone()],
+            vec![Ratio::zero(); 3],
+        ];
         assert_eq!(rcf_hash_skew_bipartite(4, &m), rcf_hash(&delta_of(4, &m)));
         let empty: Vec<Vec<Ratio>> = vec![Vec::new(); 4];
-        assert_eq!(rcf_hash_skew_bipartite(4, &empty), rcf_hash(&Delta::zero(4, 1)));
+        assert_eq!(
+            rcf_hash_skew_bipartite(4, &empty),
+            rcf_hash(&Delta::zero(4, 1))
+        );
     }
 }

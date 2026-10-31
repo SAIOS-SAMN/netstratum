@@ -29,12 +29,23 @@ pub fn carry(
     keepers: &std::collections::BTreeMap<String, crate::ancients::Keeper>,
 ) -> Vec<Carried> {
     let span = book.universe_span();
-    let parents: std::collections::BTreeMap<String, Vec<String>> = registry.list().into_iter().map(|c| (c.sigil, c.lineage)).collect();
+    let parents: std::collections::BTreeMap<String, Vec<String>> = registry
+        .list()
+        .into_iter()
+        .map(|c| (c.sigil, c.lineage))
+        .collect();
     let tubes = crate::substrata::tubes(var_root);
     let mut out = Vec::new();
     for galaxy in book.galaxies() {
-        let Some(keeper) = keepers.get(&galaxy.name) else { continue };
-        let Some((_, ancient)) = crate::ancients::arisen(var_root).into_iter().find(|(core, _)| core == &galaxy.name) else { continue };
+        let Some(keeper) = keepers.get(&galaxy.name) else {
+            continue;
+        };
+        let Some((_, ancient)) = crate::ancients::arisen(var_root)
+            .into_iter()
+            .find(|(core, _)| core == &galaxy.name)
+        else {
+            continue;
+        };
         // The council's words: those first closed below in its ancient's tubes.
         let mut words: Vec<solver::mint::MintedWord> = Vec::new();
         for tube in tubes.iter().filter(|t| t.opener == ancient) {
@@ -48,12 +59,19 @@ pub fn carry(
             continue;
         }
         let at_core: Vec<usize> = (0..worlds.len())
-            .filter(|&i| !worlds[i].penned && book.core_of(&worlds[i].spec.position).as_deref() == Some(galaxy.name.as_str()))
+            .filter(|&i| {
+                !worlds[i].penned
+                    && book.core_of(&worlds[i].spec.position).as_deref()
+                        == Some(galaxy.name.as_str())
+            })
             .collect();
         let parliament: Vec<usize> = at_core
             .iter()
             .copied()
-            .filter(|&i| crate::ancients::root_of(&worlds[i].spec.civilization.sigil, &parents) == keeper.line)
+            .filter(|&i| {
+                crate::ancients::root_of(&worlds[i].spec.civilization.sigil, &parents)
+                    == keeper.line
+            })
             .collect();
         if parliament.is_empty() {
             continue;
@@ -64,9 +82,10 @@ pub fn carry(
             if reached.contains(&i) {
                 continue;
             }
-            let near = parliament
-                .iter()
-                .any(|&p| ledger::torus_distance(&worlds[i].spec.position, &worlds[p].spec.position, &span) <= galaxy.reach);
+            let near = parliament.iter().any(|&p| {
+                ledger::torus_distance(&worlds[i].spec.position, &worlds[p].spec.position, &span)
+                    <= galaxy.reach
+            });
             if near {
                 reached.push(i);
             }
@@ -79,7 +98,12 @@ pub fn carry(
                 }
             }
         }
-        out.push((galaxy.name.clone(), keeper.line.clone(), reached.len(), heard));
+        out.push((
+            galaxy.name.clone(),
+            keeper.line.clone(),
+            reached.len(),
+            heard,
+        ));
     }
     out
 }

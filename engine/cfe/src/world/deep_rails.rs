@@ -112,4 +112,3 @@ pub struct DeepRailStatus {
     pub anchor_seated: bool,
     pub lease_hull_open: bool,
 }
-

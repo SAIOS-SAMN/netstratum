@@ -51,44 +51,78 @@ pub struct Resolved {
 /// strictly smaller values), times 10, over the rows, floored.
 fn hues(values: &[Ratio]) -> Vec<u8> {
     let n = values.len().max(1);
-    values.iter().map(|v| (values.iter().filter(|w| *w < v).count() * 10 / n) as u8).collect()
+    values
+        .iter()
+        .map(|v| (values.iter().filter(|w| *w < v).count() * 10 / n) as u8)
+        .collect()
 }
 
 /// See: the state grid of rows (each a feature vector, all of one width).
 pub fn see(rows: &[Vec<Ratio>]) -> Option<Grid> {
     let cols = rows.first()?.len();
-    let columns: Vec<Vec<u8>> = (0..cols).map(|c| hues(&rows.iter().map(|r| r[c].clone()).collect::<Vec<_>>())).collect();
-    let cells = (0..rows.len()).flat_map(|r| columns.iter().map(move |col| col[r])).collect();
+    let columns: Vec<Vec<u8>> = (0..cols)
+        .map(|c| hues(&rows.iter().map(|r| r[c].clone()).collect::<Vec<_>>()))
+        .collect();
+    let cells = (0..rows.len())
+        .flat_map(|r| columns.iter().map(move |col| col[r]))
+        .collect();
     Grid::new(rows.len(), cols, cells)
 }
 
 impl Book {
     /// Predict (persistence) and record in one: the rows by name, the state
     /// seen before the act, the incumbent's act and the rows that lost.
-    pub fn resolve(&mut self, names: &[String], state: Grid, action: Vec<u8>, lost: &BTreeSet<String>) -> Resolved {
-        let mut done = Resolved { rows: names.len() as u32, lost: names.iter().filter(|n| lost.contains(*n)).count() as u32, ..Resolved::default() };
+    pub fn resolve(
+        &mut self,
+        names: &[String],
+        state: Grid,
+        action: Vec<u8>,
+        lost: &BTreeSet<String>,
+    ) -> Resolved {
+        let mut done = Resolved {
+            rows: names.len() as u32,
+            lost: names.iter().filter(|n| lost.contains(*n)).count() as u32,
+            ..Resolved::default()
+        };
         if let Some(last) = &self.last {
             done.scored = done.rows;
-            done.correct = names.iter().filter(|n| last.get(*n).copied().unwrap_or(false) == lost.contains(*n)).count() as u32;
+            done.correct = names
+                .iter()
+                .filter(|n| last.get(*n).copied().unwrap_or(false) == lost.contains(*n))
+                .count() as u32;
             self.persistence.push_back((done.correct, done.scored));
             if self.persistence.len() > WINDOW {
                 self.persistence.pop_front();
             }
         }
-        let cells = names.iter().flat_map(|n| std::iter::repeat_n(lost.contains(n) as u8, state.cols)).collect();
+        let cells = names
+            .iter()
+            .flat_map(|n| std::iter::repeat_n(lost.contains(n) as u8, state.cols))
+            .collect();
         if let Some(outcome) = Grid::new(state.rows, state.cols, cells) {
-            self.triples.push_back(Triple { state, action, outcome });
+            self.triples.push_back(Triple {
+                state,
+                action,
+                outcome,
+            });
             if self.triples.len() > WINDOW {
                 self.triples.pop_front();
             }
         }
-        self.last = Some(names.iter().map(|n| (n.clone(), lost.contains(n))).collect());
+        self.last = Some(
+            names
+                .iter()
+                .map(|n| (n.clone(), lost.contains(n)))
+                .collect(),
+        );
         done
     }
 
     /// Persistence's hit rate over its window, (correct, rows).
     pub fn persistence_record(&self) -> (u32, u32) {
-        self.persistence.iter().fold((0, 0), |(c, r), (a, b)| (c + a, r + b))
+        self.persistence
+            .iter()
+            .fold((0, 0), |(c, r), (a, b)| (c + a, r + b))
     }
 }
 
@@ -148,14 +182,19 @@ fn decode(v: &[u8]) -> Option<((String, String), Book)> {
         at += 1;
     }
     for _ in 0..get_u16(v, &mut at)? {
-        book.persistence.push_back((get_u32(v, &mut at)?, get_u32(v, &mut at)?));
+        book.persistence
+            .push_back((get_u32(v, &mut at)?, get_u32(v, &mut at)?));
     }
     for _ in 0..get_u16(v, &mut at)? {
         let state = get_grid(v, &mut at)?;
         let action = v.get(at..at + state.rows)?.to_vec();
         at += state.rows;
         let outcome = get_grid(v, &mut at)?;
-        book.triples.push_back(Triple { state, action, outcome });
+        book.triples.push_back(Triple {
+            state,
+            action,
+            outcome,
+        });
     }
     Some(((kind, scope), book))
 }
@@ -193,7 +232,10 @@ fn encode(kind: &str, scope: &str, book: &Book, out: &mut Vec<u8>) {
 /// dropped, never guessed).
 pub fn read(var_root: &Path) -> Books {
     let bytes = std::fs::read(var_root.join("decide-books.bin")).unwrap_or_default();
-    cfe::tlv::records(&bytes).filter(|(t, _)| *t == 1).filter_map(|(_, v)| decode(v)).collect()
+    cfe::tlv::records(&bytes)
+        .filter(|(t, _)| *t == 1)
+        .filter_map(|(_, v)| decode(v))
+        .collect()
 }
 
 pub fn write(var_root: &Path, books: &Books) {
@@ -216,11 +258,19 @@ mod tests {
     #[test]
     fn a_book_survives_its_file() {
         let names = vec!["a".to_string(), "b".to_string()];
-        let state = see(&[vec![ratio(1, 2), ratio(3, 1)], vec![ratio(1, 2), ratio(1, 1)]]).unwrap();
+        let state = see(&[
+            vec![ratio(1, 2), ratio(3, 1)],
+            vec![ratio(1, 2), ratio(1, 1)],
+        ])
+        .unwrap();
         assert_eq!(state.cells, vec![0, 5, 0, 0]);
         let mut book = Book::default();
         let lost: BTreeSet<String> = ["b".to_string()].into();
-        assert_eq!(book.resolve(&names, state.clone(), vec![0, 1], &lost).scored, 0);
+        assert_eq!(
+            book.resolve(&names, state.clone(), vec![0, 1], &lost)
+                .scored,
+            0
+        );
         let again = book.resolve(&names, state, vec![0, 0], &BTreeSet::new());
         assert_eq!((again.correct, again.scored), (1, 2));
         let dir = std::env::temp_dir().join(format!("decide-{}", std::process::id()));

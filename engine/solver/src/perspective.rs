@@ -61,9 +61,13 @@ impl Perspective {
                 (Some(cells), Some(count))
             }
         };
-        Perspective { line, derived, residual, silhouettes }
+        Perspective {
+            line,
+            derived,
+            residual,
+            silhouettes,
+        }
     }
-
 }
 
 /// The cells `derived` got wrong against `want`. A dimension mismatch
@@ -72,7 +76,9 @@ fn residual_cells(derived: &Grid, want: &Grid) -> Vec<(usize, usize)> {
     if derived.rows != want.rows || derived.cols != want.cols {
         let rows = derived.rows.max(want.rows);
         let cols = derived.cols.max(want.cols);
-        return (0..rows).flat_map(|r| (0..cols).map(move |c| (r, c))).collect();
+        return (0..rows)
+            .flat_map(|r| (0..cols).map(move |c| (r, c)))
+            .collect();
     }
     let mut cells = Vec::new();
     for r in 0..derived.rows {
@@ -94,8 +100,12 @@ fn silhouette_count(shape: &Grid, residual: &[(usize, usize)]) -> usize {
     if residual.is_empty() {
         return 0;
     }
-    let rows = shape.rows.max(residual.iter().map(|(r, _)| r + 1).max().unwrap_or(0));
-    let cols = shape.cols.max(residual.iter().map(|(_, c)| c + 1).max().unwrap_or(0));
+    let rows = shape
+        .rows
+        .max(residual.iter().map(|(r, _)| r + 1).max().unwrap_or(0));
+    let cols = shape
+        .cols
+        .max(residual.iter().map(|(_, c)| c + 1).max().unwrap_or(0));
     // Hue 1 marks a residual cell on a 0 background; every cell is on
     // the ladder, so `Grid::new` cannot refuse.
     let mut cells = vec![0u8; rows * cols];

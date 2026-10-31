@@ -62,7 +62,14 @@ pub fn priced(dir: &Path) -> Vec<Served> {
         let task_id = task_digest(&task.train, &task.test_in);
         if let Some(at) = MEASURED.iter().position(|(id, _, _, _)| *id == task_id) {
             let blind = MEASURED[at].3;
-            found.push((at, Served { task, task_id, blind }));
+            found.push((
+                at,
+                Served {
+                    task,
+                    task_id,
+                    blind,
+                },
+            ));
         }
     }
     found.sort_by_key(|(at, _)| *at);
@@ -124,9 +131,7 @@ pub fn parse_program(words: &[&str]) -> Result<Program, String> {
                     Some("rows") => Ok(TileMirror::Rows),
                     Some("cols") => Ok(TileMirror::Cols),
                     Some("both") => Ok(TileMirror::Both),
-                    Some(other) => {
-                        Err(format!("{other} is not a mirror (none|rows|cols|both)"))
-                    }
+                    Some(other) => Err(format!("{other} is not a mirror (none|rows|cols|both)")),
                 };
                 Op::Tile {
                     down,
@@ -297,7 +302,11 @@ mod tests {
 
     fn served_from(task: Task) -> Served {
         let task_id = task_digest(&task.train, &task.test_in);
-        Served { task, task_id, blind: false }
+        Served {
+            task,
+            task_id,
+            blind: false,
+        }
     }
 
     #[test]
@@ -317,7 +326,9 @@ mod tests {
         let Ok(program) = parse_program(&["recolor:0>1,7>2"]) else {
             panic!("a lawful recolour");
         };
-        let Op::Recolor(map) = program[0] else { panic!("a recolour") };
+        let Op::Recolor(map) = program[0] else {
+            panic!("a recolour")
+        };
         assert_eq!(map[0], 1);
         assert_eq!(map[7], 2);
         assert_eq!(map[3], 3, "an unnamed hue maps to itself");
@@ -344,7 +355,14 @@ mod tests {
 
     #[test]
     fn the_parser_refuses_rather_than_guessing() {
-        for bad in ["wiggle", "recolor:0", "recolor:0>77", "tile:zzz", "tile:0x3", "tile:3x3:sideways"] {
+        for bad in [
+            "wiggle",
+            "recolor:0",
+            "recolor:0>77",
+            "tile:zzz",
+            "tile:0x3",
+            "tile:3x3:sideways",
+        ] {
             assert!(
                 parse_program(&[bad]).is_err(),
                 "{bad} must refuse — a misread move would seal a proof the player did not mean"
@@ -368,7 +386,9 @@ mod tests {
         let bytes = payload(&proof).expect("the proof encodes");
         assert_eq!(
             verify_work_class(&bytes),
-            Ok(WorkClass::Corpus { task_id: served.task_id }),
+            Ok(WorkClass::Corpus {
+                task_id: served.task_id
+            }),
             "what the bench seals, the gate accepts"
         );
     }
@@ -382,7 +402,9 @@ mod tests {
         let served = served_from(turning_task());
         let wrong = parse_program(&["rot180"]).expect("a lawful move");
         assert!(
-            train_verdicts(&served.task, &wrong).iter().any(|held| !held),
+            train_verdicts(&served.task, &wrong)
+                .iter()
+                .any(|held| !held),
             "the bench sees the miss"
         );
         let proof = seal(&served, wrong);
@@ -408,7 +430,10 @@ mod tests {
         let bytes = payload(&proof).expect("encodes");
 
         let mut chronicle = cfe::vrp::Chronicle::new();
-        assert!(!already_earned(&chronicle, &served.task_id), "nothing earned yet");
+        assert!(
+            !already_earned(&chronicle, &served.task_id),
+            "nothing earned yet"
+        );
         chronicle.append(
             cfe::dop::ClosureEvent::DiscoveryMinted {
                 orb_id: 1,
@@ -419,9 +444,15 @@ mod tests {
             1,
             vec![cfe::world::SOVEREIGN],
         );
-        assert!(already_earned(&chronicle, &served.task_id), "and now it has");
+        assert!(
+            already_earned(&chronicle, &served.task_id),
+            "and now it has"
+        );
         // A different task is untouched by that receipt.
-        let other = served_from(Task { name: "other".into(), ..turning_task() });
+        let other = served_from(Task {
+            name: "other".into(),
+            ..turning_task()
+        });
         let mut moved = other.task.clone();
         moved.test_in = grid(2, 2, &[8, 8, 8, 8]);
         let other = served_from(moved);
@@ -440,6 +471,9 @@ mod tests {
         // A pair reads as two grids with a marker between them.
         let rows = beside(&held, &held, "→", false);
         assert_eq!(rows.len(), 2);
-        assert!(rows.iter().any(|row| row.contains('→')), "the marker lands once");
+        assert!(
+            rows.iter().any(|row| row.contains('→')),
+            "the marker lands once"
+        );
     }
 }

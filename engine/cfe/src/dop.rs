@@ -588,8 +588,7 @@ impl Among {
         let mut distinct = members.clone();
         distinct.sort_unstable();
         distinct.dedup();
-        (distinct.len() >= 3 && distinct.len() == members.len())
-            .then_some(Among { members })
+        (distinct.len() >= 3 && distinct.len() == members.len()).then_some(Among { members })
     }
     pub fn members(&self) -> &[u64] {
         &self.members
@@ -598,8 +597,7 @@ impl Among {
 
 /// The literal door for memberships.
 pub fn among(members: &[u64]) -> Among {
-    Among::new(members.to_vec())
-        .expect("an among literal must hold three or more distinct members")
+    Among::new(members.to_vec()).expect("an among literal must hold three or more distinct members")
 }
 
 /// E-MKT-1 (31_ELEMENT_COMMERCE §4): one side of a market offer —
@@ -944,8 +942,8 @@ pub fn tech_node_name(condition: u8, node: &[u8; 32]) -> String {
         .filter(|_| condition != 0)
         .unwrap_or("working");
     const VOICES: [&str; 12] = [
-        "resonant", "patient", "vaulted", "keening", "tidal", "ember",
-        "hollow", "woven", "still", "spiral", "murmured", "adamant",
+        "resonant", "patient", "vaulted", "keening", "tidal", "ember", "hollow", "woven", "still",
+        "spiral", "murmured", "adamant",
     ];
     let voice = VOICES[(node[0] as usize) % VOICES.len()];
     format!("{voice} {concept}")
@@ -1279,28 +1277,48 @@ pub fn archetype_word(class: u8) -> &'static str {
 /// totality pinned, not assumed. The minted-vocabulary system (tag 96)
 /// extends these by deed; this is the base it extends.
 const LINE_VOICES: [&str; 12] = [
-    "adamant", "pale", "keening", "vaulted", "ember", "tidal",
-    "hollow", "woven", "still", "spiral", "murmured", "resonant",
+    "adamant", "pale", "keening", "vaulted", "ember", "tidal", "hollow", "woven", "still",
+    "spiral", "murmured", "resonant",
 ];
 const LINE_HEADS_MINERAL: [&str; 6] = ["ember", "slag", "basalt", "vein", "cinder", "forge"];
 const LINE_HEADS_BIOTIC: [&str; 6] = ["bloom", "grove", "reef", "moss", "fern", "spore"];
 const LINE_HEADS_PLASMIC: [&str; 6] = ["arc", "corona", "flux", "aurora", "filament", "sheet"];
 const LINE_TAILS: [[&str; 4]; 4] = [
-    ["march", "reach", "field", "span"],     // planar
-    ["vault", "deep", "well", "hollow"],     // volumetric
-    ["choir", "chord", "hum", "call"],       // harmonic
-    ["veil", "shade", "gloam", "shroud"],    // umbral
+    ["march", "reach", "field", "span"],  // planar
+    ["vault", "deep", "well", "hollow"],  // volumetric
+    ["choir", "chord", "hum", "call"],    // harmonic
+    ["veil", "shade", "gloam", "shroud"], // umbral
 ];
 const MOTTO_STEMS: [&str; 3] = [
-    "the frontier is",          // expansionist
-    "what we measure is",       // empiricist
-    "what we savor is",         // epicurean
+    "the frontier is",    // expansionist
+    "what we measure is", // empiricist
+    "what we savor is",   // epicurean
 ];
 const MOTTO_ENDS: [[&str; 4]; 4] = [
-    ["the next horizon", "the drawn map", "the open plain", "the far marker"], // planar
-    ["the whole depth", "the held volume", "the deep room", "the hollow's answer"], // volumetric
-    ["the standing chord", "the shared tone", "the long resonance", "the answered call"], // harmonic
-    ["the unlit path", "the kept shadow", "the quiet between", "the veiled turn"], // umbral
+    [
+        "the next horizon",
+        "the drawn map",
+        "the open plain",
+        "the far marker",
+    ], // planar
+    [
+        "the whole depth",
+        "the held volume",
+        "the deep room",
+        "the hollow's answer",
+    ], // volumetric
+    [
+        "the standing chord",
+        "the shared tone",
+        "the long resonance",
+        "the answered call",
+    ], // harmonic
+    [
+        "the unlit path",
+        "the kept shadow",
+        "the quiet between",
+        "the veiled turn",
+    ], // umbral
 ];
 
 /// One minted line, whole — everything the registry card needs, drawn
@@ -1575,12 +1593,9 @@ pub fn appraised_value(
                 .fold(ratio(0, 1), |sum, (resource, amount)| {
                     sum + amount.clone() * commensurate_weight(*resource)
                 });
-            let elements = held
-                .elements
-                .iter()
-                .fold(ratio(0, 1), |sum, (_, amount)| {
-                    sum + amount.clone() * commensurate_weight(Resource::Iron)
-                });
+            let elements = held.elements.iter().fold(ratio(0, 1), |sum, (_, amount)| {
+                sum + amount.clone() * commensurate_weight(Resource::Iron)
+            });
             let built = held
                 .zones
                 .iter()
@@ -1620,13 +1635,9 @@ pub fn appraised_value(
                     .find(|o| o.orb_id == parcel.orb_id)
                     .is_some_and(|o| o.thermal.is_some())
                 {
-                    Holding::Orbital {
-                        orb: parcel.orb_id,
-                    }
+                    Holding::Orbital { orb: parcel.orb_id }
                 } else {
-                    Holding::Planetary {
-                        orb: parcel.orb_id,
-                    }
+                    Holding::Planetary { orb: parcel.orb_id }
                 };
                 let planetary = appraised_value(&rung, orbs, &[], star_magnetism, prospects)?;
                 total += planetary * parcel.monetary.clone();
@@ -1652,7 +1663,6 @@ pub fn metabolic_ration(metabolism: u8) -> Resource {
         _ => Resource::Biomass,
     }
 }
-
 
 /// **What A levy draws on** (`49_TAXATION` §1) — the base a tax is levied
 /// against.
@@ -1956,10 +1966,7 @@ fn spine_bands(class: crate::thermal::StarClass) -> [u32; 4] {
 /// by exact modular arithmetic (Charter §9 — the draw is a reading of
 /// the seed, never an oracle): family by arbor band, tier 1–3,
 /// richness = the family's base over the tier.
-pub fn element_properties(
-    element: &[u8; 32],
-    class: crate::thermal::StarClass,
-) -> (u8, u8, Ratio) {
+pub fn element_properties(element: &[u8; 32], class: crate::thermal::StarClass) -> (u8, u8, Ratio) {
     let bands = spine_bands(class);
     let total: u32 = bands.iter().sum();
     let mut pick = u32::from(element[1]) % total.max(1);
@@ -2026,8 +2033,8 @@ pub fn element_name(family: u8, element: &[u8; 32]) -> String {
         _ => "veil",
     };
     const VOICES: [&str; 12] = [
-        "adamant", "pale", "keening", "vaulted", "ember", "tidal",
-        "hollow", "woven", "still", "spiral", "murmured", "resonant",
+        "adamant", "pale", "keening", "vaulted", "ember", "tidal", "hollow", "woven", "still",
+        "spiral", "murmured", "resonant",
     ];
     let voice = VOICES[(element[0] as usize) % VOICES.len()];
     format!("{voice} {form}")
@@ -2054,10 +2061,7 @@ pub fn refined_identity(raw: &[u8; 32]) -> [u8; 32] {
 /// from the raw element's tier via the standing refinement law
 /// (`refinement_input` / `refinement_yield`) — no new dial. The
 /// refined identity is content-addressed. Gate re-derives both.
-pub fn refine_recipe(
-    raw: &[u8; 32],
-    class: crate::thermal::StarClass,
-) -> (Ratio, [u8; 32], Ratio) {
+pub fn refine_recipe(raw: &[u8; 32], class: crate::thermal::StarClass) -> (Ratio, [u8; 32], Ratio) {
     let (_family, tier, _) = element_properties(raw, class);
     let spend = refinement_input(u32::from(tier));
     let yielded = refinement_yield(u32::from(tier));
@@ -2111,7 +2115,16 @@ pub fn self_emphasis(sitting: u8, codes: &[u8]) -> Vec<(u8, Ratio)> {
     };
     codes
         .iter()
-        .map(|&code| (code, if code == sitting { major.clone() } else { minor.clone() }))
+        .map(|&code| {
+            (
+                code,
+                if code == sitting {
+                    major.clone()
+                } else {
+                    minor.clone()
+                },
+            )
+        })
         .collect()
 }
 
@@ -2126,7 +2139,11 @@ pub fn disposition_weights(disposition: u8) -> Option<[Ratio; 3]> {
         return None;
     }
     let weights = self_emphasis(disposition, &[1, 2, 3]);
-    Some([weights[0].1.clone(), weights[1].1.clone(), weights[2].1.clone()])
+    Some([
+        weights[0].1.clone(),
+        weights[1].1.clone(),
+        weights[2].1.clone(),
+    ])
 }
 
 /// IDEO-1 (09 §2.5): the derived axis reading — syntropic /
@@ -2444,7 +2461,6 @@ pub fn refinement_yield(tier: u32) -> Ratio {
     }
 }
 
-
 impl ZoneKind {
     /// The wire reading, whole: a compiled code names its kind, and
     /// anything past the table is a minted kind carrying its own fold
@@ -2674,9 +2690,7 @@ impl ZoneKind {
             | Self::Synthesizer
             | Self::Resonator
             | Self::ElementRefinery
-            | Self::ShipYard => {
-                ratio(1, 1)
-            }
+            | Self::ShipYard => ratio(1, 1),
             // Passive storage/capture infrastructure runs cold: the
             // granary joins the shell and the cryo-array at zero.
             Self::Encasement
@@ -2721,7 +2735,11 @@ pub struct Zone {
 impl Zone {
     /// A compiled kind stands on itself.
     pub fn compiled(tile: u16, kind: ZoneKind) -> Zone {
-        Zone { tile, kind, base: None }
+        Zone {
+            tile,
+            kind,
+            base: None,
+        }
     }
     /// **What this zone costs and refunds** — the base's numbers where
     /// one was raised, its own where it is compiled. One home for both
@@ -2739,21 +2757,44 @@ pub enum ClosureEvent {
     /// BOOK-1 (19_LENS §16) — a civilization declared a new kind of
     /// account. The kind is content-addressed over the normalized name,
     /// so re-declaring an existing book is not a second book.
-    BookMinted { orb_id: u64, kind: BookKind, name: String },
+    BookMinted {
+        orb_id: u64,
+        kind: BookKind,
+        name: String,
+    },
     /// BOOK-1 — a dual entry: both sides of one account, together.
     /// There is no single-sided posting deed, by construction.
-    BookPosted { orb_id: u64, kind: BookKind, kept: Ratio, lost: Ratio },
+    BookPosted {
+        orb_id: u64,
+        kind: BookKind,
+        kept: Ratio,
+        lost: Ratio,
+    },
     /// BOOK-1 — an account closed to writing. It keeps every entry it
     /// took and stays readable forever (19_LENS §16c).
-    BookArchived { orb_id: u64, kind: BookKind },
+    BookArchived {
+        orb_id: u64,
+        kind: BookKind,
+    },
     /// LIT-1 — a literate line declares a work it reaches for. Proves
     /// nothing; costs nothing but the receipt.
-    WorkAspired { orb_id: u64, work: WorkId, name: String },
+    WorkAspired {
+        orb_id: u64,
+        work: WorkId,
+        name: String,
+    },
     /// LIT-1 — the line claims the work and cites chain receipts for
     /// it. The witnesses are receipt digests; an unwitnessed claim
     /// cannot be made.
-    WorkClaimed { orb_id: u64, work: WorkId, witnesses: Vec<[u8; 32]> },
-    ColonyFounded { orb_id: u64, name: String },
+    WorkClaimed {
+        orb_id: u64,
+        work: WorkId,
+        witnesses: Vec<[u8; 32]>,
+    },
+    ColonyFounded {
+        orb_id: u64,
+        name: String,
+    },
     ZoneBuilt {
         orb_id: u64,
         tile: u16,
@@ -2764,38 +2805,77 @@ pub enum ClosureEvent {
         /// judges from committed state and cannot resolve the fold.
         base: Option<ZoneKind>,
     },
-    YieldCollected { orb_id: u64, resource: Resource, amount: Ratio },
+    YieldCollected {
+        orb_id: u64,
+        resource: Resource,
+        amount: Ratio,
+    },
     /// Collect settled a negative net from banked (02 §2.3).
-    UpkeepSettled { orb_id: u64, resource: Resource, amount: Ratio },
+    UpkeepSettled {
+        orb_id: u64,
+        resource: Resource,
+        amount: Ratio,
+    },
     /// banked+accrued fell below 0: the stores emptied (`drawn` = what
     /// banked held at the strike), consumers went dormant (02 §2.4).
-    FamineStruck { orb_id: u64, resource: Resource, drawn: Ratio },
+    FamineStruck {
+        orb_id: u64,
+        resource: Resource,
+        drawn: Ratio,
+    },
     /// The resource recovered to one-tick upkeep; consumers woke.
-    FamineRelieved { orb_id: u64, resource: Resource },
+    FamineRelieved {
+        orb_id: u64,
+        resource: Resource,
+    },
     /// A zone demolished for half its cost back.
-    ZoneRazed { orb_id: u64, tile: u16 },
+    ZoneRazed {
+        orb_id: u64,
+        tile: u16,
+    },
     /// D3 (02 §2.5) — the star's terrain charted: the seed its tile
     /// classes derive from, pure and forever. The opt-in deed (the
     /// THERMAL-1 precedent): a star without this receipt reads all
     /// Standard; the seed is the founding receipt's digest
     /// (chronicle-seeded, Charter §9 — no wall clock, no dice).
-    WorldCharted { seed: [u8; 32] },
+    WorldCharted {
+        seed: [u8; 32],
+    },
     /// N3 — an entity joined this internet: principal 0 = a sovereign
     /// operator; nonzero = an agent contained by that principal.
-    EntityRegistered { entity_id: u64, principal: u64, handle: String },
+    EntityRegistered {
+        entity_id: u64,
+        principal: u64,
+        handle: String,
+    },
     /// N3 — a principal granted an agent one action scope.
-    ScopeGranted { agent: u64, scope: crate::ipsal::Scope },
+    ScopeGranted {
+        agent: u64,
+        scope: crate::ipsal::Scope,
+    },
     /// N3 — a grant revoked; the agent's next such action refuses.
-    ScopeRevoked { agent: u64, scope: crate::ipsal::Scope },
+    ScopeRevoked {
+        agent: u64,
+        scope: crate::ipsal::Scope,
+    },
     /// P1 — a charted colony charted on a new planet: the founding
     /// reserves move from the source orb's bank (conservation — a
     /// charter mints nothing).
-    ColonyCharted { orb_id: u64, source_orb: u64, name: String },
+    ColonyCharted {
+        orb_id: u64,
+        source_orb: u64,
+        name: String,
+    },
     /// CONVERGE-1 (07 §1) — an archived world adopted onto the one
     /// timeline: its era, name, terminal digest, and epoch offset.
     /// Lives only in the universe ledger (`convergence.tlv`), never in
     /// a world chronicle; world replay ignores it.
-    EraAnnexed { era: String, world: String, terminal: [u8; 32], offset: u64 },
+    EraAnnexed {
+        era: String,
+        world: String,
+        terminal: [u8; 32],
+        offset: u64,
+    },
     /// GALAXY-1 (13_GALAXY §3–§4) — the observation deed: a crossing
     /// anchored past the frontier (wrapped-L1 to every charted center
     /// exceeding its reach — a far region, never an outside) creates
@@ -2812,12 +2892,19 @@ pub enum ClosureEvent {
     /// THERMAL-1 (05 §1.2) — overflow exceeded encasement: the sector
     /// overheats; yields degrade by 1/(1+overflow) until cleared.
     /// World-driven (no entity forged it), the famine-strike shape.
-    OverheatStruck { orb_id: u64, overflow: Ratio },
+    OverheatStruck {
+        orb_id: u64,
+        overflow: Ratio,
+    },
     /// THERMAL-1 — the overflow returned to zero; yields recover.
-    OverheatCleared { orb_id: u64 },
+    OverheatCleared {
+        orb_id: u64,
+    },
     /// THERMAL-1 (NS-6 §7) — the container's star commissioned with its
     /// StarClass wire code. Once per world; fixes every orbit's L.
-    StarCommissioned { class: u8 },
+    StarCommissioned {
+        class: u8,
+    },
     /// THERMAL-1 (05 §1.1) — a colony sited on its orbit: albedo A and
     /// orbit radius r, the orb's terms in the equilibrium baseline.
     ///
@@ -2837,7 +2924,10 @@ pub enum ClosureEvent {
     /// VENT-1 (05 §1.4) — accumulated vented entropy settled into the
     /// orb's cumulative ledger at collect (the yield pattern: one
     /// receipt, no per-tick bloat).
-    VentSettled { orb_id: u64, amount: Ratio },
+    VentSettled {
+        orb_id: u64,
+        amount: Ratio,
+    },
     /// SINK-1 (Q2) — receipted demurrage: un-vaulted banked stores
     /// decayed since last touch; settled here, never silently.
     ///
@@ -2846,21 +2936,31 @@ pub enum ClosureEvent {
     /// row had already anchored, so a dual-resource touch's second row
     /// always read elapsed 0 (the demurrage seam). Old receipts stay
     /// decodable and replayable forever.
-    DemurrageSettled { orb_id: u64, resource: Resource, amount: Ratio },
+    DemurrageSettled {
+        orb_id: u64,
+        resource: Resource,
+        amount: Ratio,
+    },
     /// SINK-1 (tag 102, the demurrage seam closed 2026-08-06) — **one
     /// TOUCH, one receipt**: every resource the touch settles rides
     /// together, because the TOUCH is the deed and the anchor moves
     /// once. The judge reads the whole settlement against the anchor
     /// that stood before it — the per-row order sensitivity that
     /// refused lawful second rows is unrepresentable here.
-    DemurrageTouched { orb_id: u64, decays: Vec<(Resource, Ratio)> },
+    DemurrageTouched {
+        orb_id: u64,
+        decays: Vec<(Resource, Ratio)>,
+    },
     /// **P2 (tag 103) — A balance placeholder chartered**: the value
     /// the named parameter holds from this receipt on, for this world.
     /// The fold reads seed ∪ charters (`crate::parameter::of`); the
     /// band is proven at the door (`crate::parameter::Chartered` — the
     /// fourfold band of the seed, anchored so charters cannot walk);
     /// who may charter is the T0 standing gate, the mint's own law.
-    ParameterChartered { key: u8, value: Ratio },
+    ParameterChartered {
+        key: u8,
+        value: Ratio,
+    },
     /// **Treaties (tag 105, #42) — the political spectrum.** One
     /// world's leg of a co-signed pairwise charter: the kind is the
     /// politics (trade · defense · peace · war), the terms bind the
@@ -2879,7 +2979,11 @@ pub enum ClosureEvent {
     /// contrary pact (peace over war, war over peace) is broken and
     /// posts against whoever did it; one renounced by its own holder
     /// is not.
-    TreatyStruck { deal: u64, partner: String, broken: bool },
+    TreatyStruck {
+        deal: u64,
+        partner: String,
+        broken: bool,
+    },
     /// **Treaties (tag 165, E3.9) — the element allow-list.** An annex
     /// to a standing trade pact (same deal, same partner): while any
     /// live list stands on a pair, element crossings between them
@@ -2952,7 +3056,11 @@ pub enum ClosureEvent {
     /// gate re-computes rather than trusts (call-not-copy). Member
     /// order is the offered order; the gem is order-free by its own
     /// law.
-    GemCompounded { orb_id: u64, members: Vec<[u8; 32]>, gem: [u8; 32] },
+    GemCompounded {
+        orb_id: u64,
+        members: Vec<[u8; 32]>,
+        gem: [u8; 32],
+    },
     /// REFINE-1 (tag 107, 31_ELEMENT_COMMERCE §3) — banked raw element
     /// spends into a refined-form identity. Spend and yield re-derive
     /// from [`refine_recipe`]; the refined id from [`refined_identity`].
@@ -2970,21 +3078,40 @@ pub enum ClosureEvent {
     /// minted, nothing lost). The cohesion-book postings derive from
     /// this receipt and the counterparty's receipted crisis state — a
     /// replay fact, never a judgment call.
-    ResourceTransferred { from_orb: u64, to_orb: u64, resource: Resource, amount: Ratio },
+    ResourceTransferred {
+        from_orb: u64,
+        to_orb: u64,
+        resource: Resource,
+        amount: Ratio,
+    },
     /// ABSORB-1 (05 §1.4, 09 §2.4) — un-sealed overflow routed into a
     /// partner's banked sink instead of the void: sink_consumed =
     /// heat_absorbed = vented_after_shed, the absorber's ledger
     /// carrying the shed. Opens a reciprocity window owed by the
     /// source to the absorber.
-    OverflowAbsorbed { source_orb: u64, absorber_orb: u64, amount: Ratio },
+    OverflowAbsorbed {
+        source_orb: u64,
+        absorber_orb: u64,
+        amount: Ratio,
+    },
     /// ABSORB-1 (09 §2.4) — a reciprocity window expired unpaid: the
     /// remainder posts to the debtor's extraction book. World-driven
     /// at the exact stamp (the famine-strike shape).
-    AbsorptionLapsed { debtor_orb: u64, creditor_orb: u64, amount: Ratio },
+    AbsorptionLapsed {
+        debtor_orb: u64,
+        creditor_orb: u64,
+        amount: Ratio,
+    },
     /// BOND-1 (09 §2.2) — a standing order sealed: source streams
     /// `rate` of `resource` per tick to target; `term` in ticks, 0 =
     /// open-ended. One bond per (source, target, resource).
-    BondSealed { source_orb: u64, target_orb: u64, resource: Resource, rate: Ratio, term: u64 },
+    BondSealed {
+        source_orb: u64,
+        target_orb: u64,
+        resource: Resource,
+        rate: Ratio,
+        term: u64,
+    },
     /// BOND-1 — a bond's accumulated span settled by one receipt at
     /// the touch (collect / sever / term expiry). `severed` ends the
     /// bond; `load` is the severance posting (zero for an orderly
@@ -3032,7 +3159,10 @@ pub enum ClosureEvent {
     /// IDEO-1 (09 §3.2) — accrued ideological friction sealed into the
     /// mover's vented ledger at its collect (the VentSettled shape):
     /// real entropy, the handling cost of divergent boundary policies.
-    FrictionSettled { orb_id: u64, amount: Ratio },
+    FrictionSettled {
+        orb_id: u64,
+        amount: Ratio,
+    },
     /// WANT-1 (12_UNION §5b) — a cognitive want strikes: a famine of
     /// the mind, derived from the chronicle and the sealed identity
     /// (G1 — the entity type is the receipted axes, never the registry
@@ -3042,10 +3172,17 @@ pub enum ClosureEvent {
     /// empiricist mind starved of signal; crystallization halts while
     /// struck, so relief arrives by licensed leap — the co-op pressure
     /// by design). `reading` is the measured drought, in ticks.
-    WantStruck { orb_id: u64, kind: u8, reading: Ratio },
+    WantStruck {
+        orb_id: u64,
+        kind: u8,
+        reading: Ratio,
+    },
     /// WANT-1 — the want relieved: the mind fed (a new link, a fresh
     /// discovery). World-driven at the year voice, the famine shape.
-    WantRelieved { orb_id: u64, kind: u8 },
+    WantRelieved {
+        orb_id: u64,
+        kind: u8,
+    },
     /// E3.7 / WANT-1 material (tag 163) — an orb hungers for a
     /// prospected ElementId it cannot bank yet (line within civ_reach,
     /// empty element ledger). Demand for the open-matter market.
@@ -3055,7 +3192,10 @@ pub enum ClosureEvent {
         reading: Ratio,
     },
     /// E3.7 (tag 164) — material want relieved (assay/bank fed the vein).
-    ElementWantRelieved { orb_id: u64, element: [u8; 32] },
+    ElementWantRelieved {
+        orb_id: u64,
+        element: [u8; 32],
+    },
     /// **Provision (41_PROVISION §3, tag 167)** — the population settled
     /// at a touch: the net change to the elastic population (the clone
     /// count, ruling R5) over the beats since the last touch — births
@@ -3063,7 +3203,10 @@ pub enum ClosureEvent {
     /// starvation and turnover combined (R7b). Population is a logistic,
     /// not a ledger — it is not conserved — so the receipt carries the
     /// net and replay applies it straight (saturating at zero).
-    PopulationSettled { orb_id: u64, delta: i64 },
+    PopulationSettled {
+        orb_id: u64,
+        delta: i64,
+    },
     /// **The fractional population remainder (41_PROVISION, COG Slice 2,
     /// tag 179)** — the exact-rational carry in `[0, 1)` the integer
     /// headcount cannot hold. The logistic (`population_touch_delta`) yields
@@ -3073,7 +3216,10 @@ pub enum ClosureEvent {
     /// remainder that survives the truncation: births accrue here until they
     /// cross a whole person, then promote to the headcount. Absolute (the
     /// new remainder, not a delta), so replay sets it straight.
-    PopulationAccrued { orb_id: u64, remainder: Ratio },
+    PopulationAccrued {
+        orb_id: u64,
+        remainder: Ratio,
+    },
     /// **Taxation (49_TAXATION §5, tag 171)** — the SOVEREIGN treasury
     /// settled by a net change: crafted levies collected into the
     /// treasury (positive) net of a welfare budget spent out of it
@@ -3084,12 +3230,18 @@ pub enum ClosureEvent {
     /// can empty the treasury but never overdraw it. A world that
     /// never crafts a levy nor stands a WelfareHub emits none, so it
     /// replays byte-identical.
-    TreasurySettled { orb_id: u64, delta: Ratio },
+    TreasurySettled {
+        orb_id: u64,
+        delta: Ratio,
+    },
     /// **COG-1 (doc 52 §7, tag 180)** — settle the leisure bank: the net
     /// change to an orb's cognition budget (the cascade's surplus above every
     /// survival drive in, the Mind's minting out), floored at zero. A world
     /// with no surplus and no thought emits none, so it replays byte-identical.
-    LeisureSettled { orb_id: u64, delta: Ratio },
+    LeisureSettled {
+        orb_id: u64,
+        delta: Ratio,
+    },
     /// **RCP-2 (tag 181, 2026-08-16) — the emergent recipe built.** A
     /// society raised a recipe its discovery engine minted: a hashed
     /// transformation `∏ inputs → role` over the open almanac, not a
@@ -3102,7 +3254,12 @@ pub enum ClosureEvent {
     /// these receipts (`vocabulary::recipes_built`), never a committed field
     /// — the SolverWordMinted discipline. A world that mints no recipe emits
     /// none, so it replays byte-identical.
-    RecipeBuilt { orb_id: u64, inputs: Vec<[u8; 32]>, role: usize, yield_of_role: Ratio },
+    RecipeBuilt {
+        orb_id: u64,
+        inputs: Vec<[u8; 32]>,
+        role: usize,
+        yield_of_role: Ratio,
+    },
     /// **ING-2b (tag 182, 2026-08-17) — the staple FOOD settled on the
     /// element ledger.** A line whose ration is an almanac element — its
     /// staple drawn from the planet's own veins ([`crate::world::World::staple_diet_of`],
@@ -3117,7 +3274,11 @@ pub enum ClosureEvent {
     /// `PopulationSettled`, exactly as on the Resource path. A
     /// Resource-ration (v1, or unprospected) line settles food through
     /// `YieldCollected` as ever and emits none, so it replays byte-identical.
-    RationElementSettled { orb_id: u64, element: [u8; 32], delta: Ratio },
+    RationElementSettled {
+        orb_id: u64,
+        element: [u8; 32],
+        delta: Ratio,
+    },
     /// **ONT-2b — the demand-driven staple extraction (tag 183, the vein is
     /// the larder).** A population mines its staple vein by eating: the food
     /// beyond the free wild flow (the span's `bank_draw`) is drawn straight
@@ -3134,7 +3295,11 @@ pub enum ClosureEvent {
     /// operator ruling III). Replay folds the same `extracted += eaten`; the
     /// kernel re-derives the richness bound from geometry + the prior integral.
     /// A Resource-ration (v1, unprospected) line never emits it, byte-identical.
-    StapleMined { orb_id: u64, element: [u8; 32], eaten: Ratio },
+    StapleMined {
+        orb_id: u64,
+        element: [u8; 32],
+        eaten: Ratio,
+    },
     /// **Vein rejuvenation (ONT-3, tag 184)** — a worked vein recovers. At a
     /// collect touch the vein's inverse-receipt integral `rejuvenated` grows by
     /// the orbital-forcing injection: `natural/REGROWTH_GRAIN` per completed
@@ -3145,7 +3310,11 @@ pub enum ClosureEvent {
     /// element ledger holds still — the mirror of `StapleMined`. Replay folds
     /// `rejuvenated += injected`; the kernel re-derives the cap from geometry +
     /// the prior integrals. A whole or never-worked vein emits none.
-    VeinRejuvenated { orb_id: u64, element: [u8; 32], injected: Ratio },
+    VeinRejuvenated {
+        orb_id: u64,
+        element: [u8; 32],
+        injected: Ratio,
+    },
     /// **The SMELT-SWEEP (#136, ruling B / Directive 2, tag 185)** — the one-time
     /// migration that floors every element stock to the 1/64 smelt grain. Historical
     /// hauls banked element fills UN-smelted (before ruling B extended the smelt to
@@ -3163,7 +3332,9 @@ pub enum ClosureEvent {
     /// emit (`World::smelt_sweep`) appends it only when some stock is off-grain, so a
     /// board already on the grain emits nothing and a second boot re-floors during
     /// replay and adds no new deed.
-    ElementStocksSwept { dust: Ratio },
+    ElementStocksSwept {
+        dust: Ratio,
+    },
     /// **The resource SMELT-SWEEP (#138, tag 186)** — the element sweep's twin
     /// for the banked resource + STAMP ledgers. Cross-world aperture transfers
     /// bank `amount·(1−melt)` UN-smelted (the melt carries a /67-class logistics
@@ -3183,7 +3354,9 @@ pub enum ClosureEvent {
     /// (`World::smelt_resource_sweep`) appends it only when some stock is
     /// off-grain, so a board already on the grain emits nothing and a second boot
     /// re-floors during replay and adds no new deed.
-    ResourceStocksSwept { dust: Ratio },
+    ResourceStocksSwept {
+        dust: Ratio,
+    },
     /// **The big bang (tag 190, docs/58 §3)** — a universe's origin, the
     /// first receipt of its universe ledger (`convergence.tlv`): its
     /// topology and span, the digest of the compiled founding roster, and the
@@ -3191,19 +3364,31 @@ pub enum ClosureEvent {
     /// seed. `over` is `None` for a true first receipt; a universe founded
     /// before this law is RE-founded once, late, naming the ledger head it was
     /// written over — honest about the order. Identity only: nothing moves.
-    UniverseFounded { topology: String, span: Ratio, roster: [u8; 32], matter: [u8; 32], over: Option<[u8; 32]> },
+    UniverseFounded {
+        topology: String,
+        span: Ratio,
+        roster: [u8; 32],
+        matter: [u8; 32],
+        over: Option<[u8; 32]>,
+    },
     /// **The citation (tag 191, docs/58 §3)** — a world's first receipt names
     /// its universe's Big Bang, so the world's hash chain — its founding
     /// digest and every matter identity derived from it — descends from the
     /// universe's origin. Identity only: nothing moves.
-    UniverseCited { universe: [u8; 32] },
+    UniverseCited {
+        universe: [u8; 32],
+    },
     /// **The ancient arises (tag 192, docs/58 §4)** — read at an era's close
     /// and sealed on the universe ledger: the living line whose living
     /// descendant tree is strictly the largest (`tree` of `living` lines). It
     /// holds the universe's reserve, keys and mouth from here (until then the
     /// conductor holds them in trust). By lineage, never by appointment; it
     /// may change hands at a later close. Identity only: nothing moves.
-    AncientArose { sigil: String, tree: u64, living: u64 },
+    AncientArose {
+        sigil: String,
+        tree: u64,
+        living: u64,
+    },
     /// **A SINK reaches its core (tag 193, docs/58 §6 ruling 9; the cores
     /// design approved 2026-10-08)** — sealed on the universe ledger: what
     /// `world`'s deeds unmade since its last deposit (upkeep burned, famine
@@ -3212,18 +3397,33 @@ pub enum ClosureEvent {
     /// instead of vanishing. `resource` is the banked holding, `None` for
     /// STAMP. The core's holding is the sum of its deposits (less what it
     /// re-emits). Nothing moves in any world: the debit already happened there.
-    CoreDeposited { core: String, world: String, resource: Option<Resource>, amount: Ratio },
+    CoreDeposited {
+        core: String,
+        world: String,
+        resource: Option<Resource>,
+        amount: Ratio,
+    },
     /// **The bounce, the core's side (tag 194; the cores design, slice 2)** —
     /// sealed on the universe ledger: `core` re-emits `amount` of a holding
     /// it holds into `world`, one pulse a year per holding (Netstratum's core
     /// reflects, operator ruling 2026-10-08). A core holds its deposits less
     /// its emissions; it never emits what it does not hold.
-    CoreEmitted { core: String, world: String, resource: Option<Resource>, amount: Ratio },
+    CoreEmitted {
+        core: String,
+        world: String,
+        resource: Option<Resource>,
+        amount: Ratio,
+    },
     /// **The bounce, the world's side (tag 195)** — the pulse arrives: `amount`
     /// of a holding (`None` = STAMP) credited to `orb_id`'s bank from `core`,
     /// the twin of the universe ledger's `CoreEmitted`. A declared source, the
     /// core's return of what the universe's sinks gave it.
-    CoreReturned { orb_id: u64, core: String, resource: Option<Resource>, amount: Ratio },
+    CoreReturned {
+        orb_id: u64,
+        core: String,
+        resource: Option<Resource>,
+        amount: Ratio,
+    },
     /// **The dead's lexicon reaches its core (tag 196; the cores design,
     /// slice 3)** — sealed on the universe ledger when a line dies: one of
     /// its words (`orbit`, its program's wire `expansion`) deposited at
@@ -3231,7 +3431,13 @@ pub enum ClosureEvent {
     /// the line minted it on. Each dead line's word is its own claim (never
     /// merged with another line's). A living line adopts it only by
     /// reconstructing it on one of its own tasks (4.4). Identity only.
-    CoreWordDeposited { core: String, world: String, orbit: [u8; 32], expansion: Vec<u8>, cited: Vec<[u8; 32]> },
+    CoreWordDeposited {
+        core: String,
+        world: String,
+        orbit: [u8; 32],
+        expansion: Vec<u8>,
+        cited: Vec<[u8; 32]>,
+    },
     /// **A tube opens to A substratum (tag 197, docs/69)** — sealed on the
     /// universe ledger when the spacing guild opens an internal tube from
     /// `core`'s throat to a sub-universe: its `origin` (the fleet's final
@@ -3240,7 +3446,14 @@ pub enum ClosureEvent {
     /// itself), its `depth` below the base universe, the `level` of the tasks
     /// it forges, and the `opener`, the ancient whose guild opened it.
     /// Identity only: nothing in the base universe moves.
-    SubstratumOpened { core: String, origin: [u8; 32], parent: [u8; 32], depth: u32, level: u32, opener: String },
+    SubstratumOpened {
+        core: String,
+        origin: [u8; 32],
+        parent: [u8; 32],
+        depth: u32,
+        level: u32,
+        opener: String,
+    },
     /// **The galactic region (GALACTIC-1, tag 187)** — a world's charted
     /// `(X,Y,Z)` quantized onto a coarse galactic grid cell and hashed once
     /// at genesis into a regional weighting seed. Purely additive: an old
@@ -3254,13 +3467,17 @@ pub enum ClosureEvent {
     /// the galaxy, not independent per-world noise. One per world, sealed
     /// once (the `StarCommissioned`/`TaxonSealed` precedent): the position
     /// a system charts at is fixed at founding, never travels.
-    RegionCharted { seed: [u8; 32] },
+    RegionCharted {
+        seed: [u8; 32],
+    },
     /// **Composition (tag 198, the refactor onto era 1, 2026-10-15)** — the
     /// world's planet composition, its grains by Z, sealed once at founding.
     /// The world's veins are drawn from it as canonical elements
     /// (`almanac::atom::canonical`). Identity: replay moves nothing; the
     /// prospect reads it from the chronicle (the founding root's precedent).
-    CompositionSealed { nuclei: Vec<(u16, Ratio)> },
+    CompositionSealed {
+        nuclei: Vec<(u16, Ratio)>,
+    },
     /// **CHRONICLE-COMPACT-1 (tag 188)** — a world folds its history to this
     /// point and commits `folded_hash`, a content hash of its `Committed`
     /// state at the moment of closing, plus `receipt_count`, how many
@@ -3274,7 +3491,10 @@ pub enum ClosureEvent {
     /// and non-breaking on purpose: every existing chronicle (none of which
     /// carries this receipt) replays byte-identical to today, and this
     /// receipt itself only ever adds information, never removes any.
-    ChronicleCheckpointed { folded_hash: [u8; 32], receipt_count: u64 },
+    ChronicleCheckpointed {
+        folded_hash: [u8; 32],
+        receipt_count: u64,
+    },
     /// **ENTITY-ALIGN-1 (tag 189, docs/56 §3)** — a separate receipt from
     /// the `SolverWordMinted` it accompanies, closed right after that mint
     /// succeeds, never a field bolted onto it: `SolverWordMinted.expansion`
@@ -3290,7 +3510,10 @@ pub enum ClosureEvent {
     /// a real gap (hardness up to the confirming vessel count). Recorded
     /// only — nothing yet reads or spends this field; the mint gate
     /// (`cited.len() >= 2`) is untouched.
-    SolverWordHardness { orbit: [u8; 32], hardness: u32 },
+    SolverWordHardness {
+        orbit: [u8; 32],
+        hardness: u32,
+    },
     /// **Taxation (49_TAXATION §3, tag 172)** — the CONTINUITY levy at a
     /// generation turnover: `count` of the line's most-recently adopted
     /// practices lapse to the void (its unconfirmed knowledge, unkept as
@@ -3300,7 +3523,9 @@ pub enum ClosureEvent {
     /// the practice list (LIFO — the newest, least-confirmed first). A
     /// line that adopts no practice, or has sealed no lifespan class,
     /// emits none and is byte-identical.
-    PracticesLapsed { count: u8 },
+    PracticesLapsed {
+        count: u8,
+    },
     /// **BIO quarantine relief (task #30, ruling R3, tag 168)** — a
     /// quarantined orb recovers a step at the touch: its bio-pressure
     /// (both the cascade and the rogue axes) ebbs by one, the mirror of
@@ -3309,7 +3534,9 @@ pub enum ClosureEvent {
     /// carries only the orb; replay ebbs both axes by one (saturating),
     /// exactly as the settle did. A world that never quarantines emits
     /// none and is byte-identical.
-    PressureEbbed { orb_id: u64 },
+    PressureEbbed {
+        orb_id: u64,
+    },
     /// **G2 element economy (task #29, tag 173)** — the element-eater's
     /// food cycle at the collect touch. It spends `ember` to mint `minted`
     /// of its `element` (a conserved transmutation, energy in / matter
@@ -3371,13 +3598,18 @@ pub enum ClosureEvent {
     /// sealed civilization. Idempotent by construction: `settle_population`
     /// only ever crosses zero once (it floors there and stays), so this
     /// event can never fire twice for one line.
-    CivilizationCollapsed { orb_id: u64 },
+    CivilizationCollapsed {
+        orb_id: u64,
+    },
     /// MESH-1b (NS-5 §7) — the receipted handoff: the yielding hand
     /// `from` seals, naming successor `to`. One writer per clock;
     /// authority derives by the mesh's walk of the arbor (never a
     /// flag, never consulted by any game rule — the world's own
     /// mechanics are blind to it).
-    HandoffSealed { from: u64, to: u64 },
+    HandoffSealed {
+        from: u64,
+        to: u64,
+    },
     /// MARKET-1 / E-MKT-1 — an offer posts: this orb stands ready to
     /// give `give_amount` of `give` cargo for `want_amount` of `want`
     /// cargo. Cargo is Resource or Element (31 §4). The price is the
@@ -3394,40 +3626,59 @@ pub enum ClosureEvent {
     /// amounts live in the aperture legs the `deal` links (deal and
     /// deal+1 — the two directions); this receipt closes the resting
     /// intent. Replay removes the offer.
-    OfferCleared { offer: u64, deal: u64 },
+    OfferCleared {
+        offer: u64,
+        deal: u64,
+    },
     /// GAUGE-N (11 §2.1, wired 2026-07-30) — the key at a grade: the
     /// fiber is a graded vector of wrapped keys, not one dial, and
     /// this deed moves (or opens — a shift at an unopened grade grows
     /// the key, the tonal dimension the growth law promises) one
     /// plane. Grade 0 is the landed scalar; tag 42 stays its own
     /// grade-0 shorthand forever (tags permanent).
-    GaugeShiftedAt { grade: u16, gauge: Ratio },
+    GaugeShiftedAt {
+        grade: u16,
+        gauge: Ratio,
+    },
     /// AEON-1a (11 §2.1) — the world's key moved: its gauge phase G,
     /// an exact rational wrapped on the torus fiber. Progression,
     /// elevation (12_UNION §6), and crystallized tech all move in G;
     /// replay takes the receipted value verbatim (already wrapped).
-    GaugeShifted { gauge: Ratio },
+    GaugeShifted {
+        gauge: Ratio,
+    },
     /// AEON-1a (11 §3) — divergence: this line cleaved; a peer branch
     /// (no parent, no child) departs under `branch`, and this world's
     /// own key moves to `gauge` (the cleave is a key change). The
     /// branch founds its own chronicle — annex, never merge.
-    Diverged { branch: String, gauge: Ratio },
+    Diverged {
+        branch: String,
+        gauge: Ratio,
+    },
     /// AEON-1a (11 §3) — confluence: this line combined with a bonded
     /// partner line; the key moves to `gauge` (the interference of
     /// both — the midpoint on the torus). Earned via a sustained bond,
     /// never free; the hybrid's own chronicle founds separately.
-    Confluent { partner: String, gauge: Ratio },
+    Confluent {
+        partner: String,
+        gauge: Ratio,
+    },
     /// AEON-1a (11 §6) — the star moved in its region (mass ×
     /// composition × age): the class steps, luminosity recomputes,
     /// every bound orbit's T_eq⁴ shifts at the next tick. Movement in
     /// a region, never a rung on a track.
-    StarAged { class: u8 },
+    StarAged {
+        class: u8,
+    },
     /// AEON-1a (11 §5) — the fold: the era sealed and rotated into the
     /// archive sequence; the receipt carries the era ordinal and the
     /// new base gauge — the next aeon seats on its own G-sheet, a
     /// parallel degree of the torus that cannot recur into this one.
     /// Nothing is destroyed; the fold is archival by construction.
-    EraFolded { era: u64, gauge: Ratio },
+    EraFolded {
+        era: u64,
+        gauge: Ratio,
+    },
     /// PLANNER-1 (12_UNION §2, 10 §2.2) — a technology licensed out of
     /// this world into another: the planner's issuing deed, the source
     /// leg of a two-world hand-off (the aperture shape — the far world
@@ -3465,7 +3716,12 @@ pub enum ClosureEvent {
     /// the pact dissolves, the books still post). Replay banks the
     /// carried amount verbatim; the integrity stake reads from the
     /// sealed council.
-    CouncilClosed { council: u64, member: u64, fulfilled: bool, banked: Ratio },
+    CouncilClosed {
+        council: u64,
+        member: u64,
+        fulfilled: bool,
+        banked: Ratio,
+    },
     /// TECH-1a (10 §2.2) — a technology node enters the chronicle.
     /// `condition` 0 is the kernel stellar leap (12_UNION §5a): a world's
     /// first thermal opt-in receipts that its people now know their
@@ -3487,11 +3743,21 @@ pub enum ClosureEvent {
     /// bound to `deal` (the id the destination's `ApertureReceived`
     /// carries). Conservation is a property of the pair, not of this
     /// chronicle alone — replay of this world sees only the debit.
-    ApertureSent { deal: u64, from_orb: u64, resource: Resource, amount: Ratio },
+    ApertureSent {
+        deal: u64,
+        from_orb: u64,
+        resource: Resource,
+        amount: Ratio,
+    },
     /// NS-4 APERTURE (BUILD_ORDER §3a) — the destination leg: banked
     /// value arrived in this world's orb from another, bound to the same
     /// `deal`. Replay of this world sees only the credit.
-    ApertureReceived { deal: u64, to_orb: u64, resource: Resource, amount: Ratio },
+    ApertureReceived {
+        deal: u64,
+        to_orb: u64,
+        resource: Resource,
+        amount: Ratio,
+    },
     /// E-APT-1 (tag 108, WAVE-2) — source leg of a cross-world element
     /// haul. Open matter (tag 72 ledger) leaves this orb; the pair's
     /// melt is applied on the receive leg. No resource demurrage.
@@ -3552,7 +3818,10 @@ pub enum ClosureEvent {
         scrap_spent: Ratio,
     },
     /// FLEET-1 (tag 116) — hull assigned to route deal (0 = idle).
-    HullAssigned { hull_id: u64, deal: u64 },
+    HullAssigned {
+        hull_id: u64,
+        deal: u64,
+    },
     /// FLEET-1 (tag 117) — hull scrapped; scrap returned.
     HullScrapped {
         hull_id: u64,
@@ -3696,7 +3965,9 @@ pub enum ClosureEvent {
         escort_cover: Ratio,
     },
     /// P5-M MKT (tag 135) — circuit breaker; instrument books freeze until resume_at.
-    MarketSealed { resume_at: u64 },
+    MarketSealed {
+        resume_at: u64,
+    },
     /// P5-M MKT (tag 136) — breaker lifted.
     MarketResumed {},
     /// P5-M MKT (tag 137) — honest spot clear depth for last-clear seal.
@@ -3794,11 +4065,20 @@ pub enum ClosureEvent {
         kind: u8,
     },
     /// X7 (tag 151) — Anchor refused a proof (typed residual).
-    AnchorImportRefused { orb_id: u64, reason: u8 },
+    AnchorImportRefused {
+        orb_id: u64,
+        reason: u8,
+    },
     /// O6.5 (tag 152) — STAMP deposited into Vault custody.
-    VaultDeposited { orb_id: u64, amount: Ratio },
+    VaultDeposited {
+        orb_id: u64,
+        amount: Ratio,
+    },
     /// O6.5 (tag 153) — STAMP withdrawn from Vault (not margin-held).
-    VaultWithdrawn { orb_id: u64, amount: Ratio },
+    VaultWithdrawn {
+        orb_id: u64,
+        amount: Ratio,
+    },
     /// O6.4 (tag 154) — Assay office consilience re-prove of a vein.
     AssayConsilience {
         orb_id: u64,
@@ -3869,25 +4149,39 @@ pub enum ClosureEvent {
     /// event of RQP: crystals left the probing orb's bank to hold the
     /// lens open. Deliberately blind to what was asked and what was
     /// seen — query, hit, and refusal never receipt (the lens law).
-    CrystalDrawn { orb_id: u64, amount: Ratio },
+    CrystalDrawn {
+        orb_id: u64,
+        amount: Ratio,
+    },
     /// NOVEL-1 (10 §3c) — the succession deed: a successor line
     /// adopted this world's chronicle as its own substrate (the
     /// derelict door, 07 §3). The living tree drops to the world's
     /// kernel; every discovered node stands in the record forever —
     /// the pre-existing is changed, never replaced.
-    LineSucceeded { successor: String },
+    LineSucceeded {
+        successor: String,
+    },
     /// G1 (04 §1/§5) — the three axes sealed as the binding copy: from
     /// this receipt on, the registry entry is a cache of receipted
     /// truth and no mechanic reads it where this receipt exists.
     /// Genesis is entry in the bands (04 §6a) — never a tier-0 seat.
-    GenesisSealed { civilization: String, disposition: u8, metabolism: u8, perception: u8 },
+    GenesisSealed {
+        civilization: String,
+        disposition: u8,
+        metabolism: u8,
+        perception: u8,
+    },
     /// PRACTICE-1 (14 §4) — a receipted discipline binds the line:
     /// one benefit, one friction, exact-rational, on landed hooks.
-    PracticeAdopted { practice: u8 },
+    PracticeAdopted {
+        practice: u8,
+    },
     /// PRACTICE-1 — the rediscovery: lawful only after new doctrine
     /// landed since adoption; the re-emergence node rides separately
     /// as TechDiscovered condition 7.
-    PracticeReleased { practice: u8 },
+    PracticeReleased {
+        practice: u8,
+    },
     /// ELEMENT-GRAMMAR-1 (14 §3) — the mint deed: an element's
     /// identity read from what the genesis seed always held. The
     /// receipt carries the hash-derived properties, so replay reads
@@ -3907,31 +4201,47 @@ pub enum ClosureEvent {
     /// wear from the draw and recovery from the orb's regenerators
     /// settle in the same receipt ([`vein_wear`], the one home).
     /// `None` is the sealed pre-ecology form: richness holds still.
-    AssayStruck { orb_id: u64, element: [u8; 32], amount: Ratio, richness: Option<Ratio> },
+    AssayStruck {
+        orb_id: u64,
+        element: [u8; 32],
+        amount: Ratio,
+        richness: Option<Ratio>,
+    },
     /// WARDEN-1a (10 §3e) — the reverse shield: this star is the
     /// elder; every aperture refuses until the ward lifts.
     ElderWarded {},
     /// WARDEN-1a — the depth gate opened by `claimer`; the elder
     /// trades from here on (the template grant is WARDEN-1b).
-    WardLifted { claimer: String },
+    WardLifted {
+        claimer: String,
+    },
     /// MASK-1a (14 §4) — the lawful veil: renders cloud, the
     /// chronicle never lies; a standing ember toll settles at every
     /// collect.
     VeilDrawn {},
     /// MASK-1a — the veil ends: by deed (starved 0) or starved by an
     /// unpayable toll (starved 1), receipted either way.
-    VeilLifted { starved: bool },
+    VeilLifted {
+        starved: bool,
+    },
     /// INCURSION-1a (07 §3.1) — the door: a sealed derelict continued
     /// live under a woken line. Universe ledger only; world replay
     /// ignores it (the EraAnnexed precedent).
-    IncursionStruck { era: String, world: String, line: String },
+    IncursionStruck {
+        era: String,
+        world: String,
+        line: String,
+    },
     /// KERNEL-TAXON (15 §4) — class and clade sealed as identity,
     /// once per star, beside the G1 seal and never inside it (a new
     /// deed is additive; extending GenesisSealed would be breaking).
     /// Codes must stand in the ratified vocabularies; names stay
     /// register-side forever.
     /// KERNEL-TAXON — class u8, clade **u16** (open expansion; tag 85).
-    TaxonSealed { class: u8, clade: u16 },
+    TaxonSealed {
+        class: u8,
+        clade: u16,
+    },
     /// **The evolutionary ARC** (`44_LINEAGES` §2c, tag 169): a line
     /// advances along its arc — a gated, earned transformation, not a
     /// founding fact. The deed carries the new stage; replay sets it.
@@ -3939,7 +4249,9 @@ pub enum ClosureEvent {
     /// the line's identity, not the ledger, so it mints and conserves
     /// nothing. Stage lifts the civilization's provisioning capacity
     /// (`population_ceiling`) — an evolved people sustains more.
-    EvolutionAdvanced { stage: u8 },
+    EvolutionAdvanced {
+        stage: u8,
+    },
     /// **The founding tithe** (`#32`, `20_FOUNDING` §3, tag 170): the
     /// economy's genesis transaction — a debit of the line's own
     /// metabolic ration (G2, `metabolic_ration`/`metabolic_harvest`,
@@ -3949,7 +4261,12 @@ pub enum ClosureEvent {
     /// universal — `47_REGISTRY` §4a). A one-sided debit like
     /// `DemurrageSettled`: the tithe leaves the conserved system rather
     /// than crediting a bank this engine does not yet model per-seat.
-    TitheReceipted { orb_id: u64, to_seat: u8, resource: Resource, amount: Ratio },
+    TitheReceipted {
+        orb_id: u64,
+        to_seat: u8,
+        resource: Resource,
+        amount: Ratio,
+    },
     /// **The vocabulary mint** (tag 90, `28_VOCABULARY` §7,
     /// 2026-08-05): a T0 progenitor adds an entry to a vocabulary.
     ///
@@ -4002,17 +4319,29 @@ pub enum ClosureEvent {
     /// `station` is the closed office vocabulary by index (1 progenitor
     /// … 10 anchor; T4–T9 Wave-1); 0 and anything outside 1..=10 are
     /// not offices and the wire refuses them via [`Station::from_wire`].
-    StationSeated { line: String, station: u8 },
+    StationSeated {
+        line: String,
+        station: u8,
+    },
     /// U1 KERNEL-VERIFY (U_DIRECTIVES §2): the discovery mint — value
     /// created only against verified work (the PoUW anchor, I4's
     /// bound arm). `work` is the opaque proof payload — encoding is
     /// solver-verify's monopoly (the OPAQUE-PAYLOAD law): cfe carries
     /// it, never reads it; the kernel hands it to the sealed verifier
     /// whole. The receipt carries its proof — replay re-verifies.
-    DiscoveryMinted { orb_id: u64, resource: Resource, amount: Ratio, work: Vec<u8> },
+    DiscoveryMinted {
+        orb_id: u64,
+        resource: Resource,
+        amount: Ratio,
+        work: Vec<u8>,
+    },
     /// MANU-1 (10 §3f): an instrument forged — technology +
     /// understanding + industry overlaid; held per-orb like techs.
-    InstrumentForged { orb_id: u64, tech_hash: [u8; 32], grade: u8 },
+    InstrumentForged {
+        orb_id: u64,
+        tech_hash: [u8; 32],
+        grade: u8,
+    },
     /// MARKET-2 (conform ruling): the void's exact share of a hauled
     /// deal — receipted on the receiving book by the same transition
     /// that computes the trade. Banks never move on it; it is the
@@ -4028,7 +4357,12 @@ pub enum ClosureEvent {
     /// could account decay and upkeep per orb and had to leave the
     /// melt out entirely. The field is first, matching the
     /// `LE64 ‖ …` layout every orb-bearing record already uses.
-    VoidShare { orb_id: u64, deal: u64, resource: Resource, amount: Ratio },
+    VoidShare {
+        orb_id: u64,
+        deal: u64,
+        resource: Resource,
+        amount: Ratio,
+    },
     /// D5 — **the SOVEREIGN union**, struck. The offices `D(Ω)`
     /// progenitor and `V(Ω)` SOVEREIGN enter their union under a
     /// review horizon.
@@ -4049,11 +4383,20 @@ pub enum ClosureEvent {
     ///
     /// `term_stamps` is a review horizon, never an expiry: nothing
     /// settles and nothing lapses when it falls due.
-    SovereignUnionSealed { progenitor: Office, sovereign: Office, term_stamps: u64 },
+    SovereignUnionSealed {
+        progenitor: Office,
+        sovereign: Office,
+        term_stamps: u64,
+    },
     /// ROUTE-1: a lane chartered — this book's leg of the pair.
-    RouteChartered { deal: u64, eta: Unit },
+    RouteChartered {
+        deal: u64,
+        eta: Unit,
+    },
     /// ROUTE-1: the lane lapsed on this book (unpaid maintenance).
-    RouteLapsed { deal: u64 },
+    RouteLapsed {
+        deal: u64,
+    },
     /// **The ESTATE survey** (tag 97, E5b — operator rulings 2026-08-05:
     /// *survey is a derivation of observation; observations must be
     /// witnessed; surveys must be metered*).
@@ -4142,7 +4485,10 @@ pub enum ClosureEvent {
     /// `ceilings`: (class_ceiling u8, clade_ceiling **u16**). Legacy
     /// receipts used two u8s (value len 34); open form is class + clade
     /// LE u16 (value len 35).
-    LineMinted { seed: [u8; 32], ceilings: Option<(u8, u16)> },
+    LineMinted {
+        seed: [u8; 32],
+        ceilings: Option<(u8, u16)>,
+    },
 }
 
 impl ClosureEvent {
@@ -4156,7 +4502,12 @@ impl ClosureEvent {
                 value.extend_from_slice(name.as_bytes());
                 tlv::put(1, &value, &mut out);
             }
-            Self::ZoneBuilt { orb_id, tile, kind, base } => {
+            Self::ZoneBuilt {
+                orb_id,
+                tile,
+                kind,
+                base,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&tile.to_le_bytes());
                 value.push(kind.wire());
@@ -4168,13 +4519,25 @@ impl ClosureEvent {
                 }
                 tlv::put(2, &value, &mut out);
             }
-            Self::YieldCollected { orb_id, resource, amount } => {
+            Self::YieldCollected {
+                orb_id,
+                resource,
+                amount,
+            } => {
                 tlv::put(3, &amount_layout(*orb_id, *resource, amount), &mut out);
             }
-            Self::UpkeepSettled { orb_id, resource, amount } => {
+            Self::UpkeepSettled {
+                orb_id,
+                resource,
+                amount,
+            } => {
                 tlv::put(4, &amount_layout(*orb_id, *resource, amount), &mut out);
             }
-            Self::FamineStruck { orb_id, resource, drawn } => {
+            Self::FamineStruck {
+                orb_id,
+                resource,
+                drawn,
+            } => {
                 tlv::put(5, &amount_layout(*orb_id, *resource, drawn), &mut out);
             }
             Self::FamineRelieved { orb_id, resource } => {
@@ -4190,7 +4553,11 @@ impl ClosureEvent {
             Self::WorldCharted { seed } => {
                 tlv::put(8, seed, &mut out);
             }
-            Self::EntityRegistered { entity_id, principal, handle } => {
+            Self::EntityRegistered {
+                entity_id,
+                principal,
+                handle,
+            } => {
                 let mut value = entity_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&principal.to_le_bytes());
                 value.extend_from_slice(handle.as_bytes());
@@ -4206,13 +4573,22 @@ impl ClosureEvent {
                 value.push(*scope as u8);
                 tlv::put(12, &value, &mut out);
             }
-            Self::ColonyCharted { orb_id, source_orb, name } => {
+            Self::ColonyCharted {
+                orb_id,
+                source_orb,
+                name,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&source_orb.to_le_bytes());
                 value.extend_from_slice(name.as_bytes());
                 tlv::put(13, &value, &mut out);
             }
-            Self::EraAnnexed { era, world, terminal, offset } => {
+            Self::EraAnnexed {
+                era,
+                world,
+                terminal,
+                offset,
+            } => {
                 let mut value = offset.to_le_bytes().to_vec();
                 value.extend_from_slice(terminal);
                 value.extend_from_slice(&(era.len() as u16).to_le_bytes());
@@ -4220,7 +4596,13 @@ impl ClosureEvent {
                 value.extend_from_slice(world.as_bytes());
                 tlv::put(21, &value, &mut out);
             }
-            Self::GalaxyObserved { observer, creator, name, center, reach } => {
+            Self::GalaxyObserved {
+                observer,
+                creator,
+                name,
+                center,
+                reach,
+            } => {
                 let mut value = Vec::new();
                 for text in [observer, creator, name] {
                     value.extend_from_slice(&(text.len() as u16).to_le_bytes());
@@ -4243,7 +4625,13 @@ impl ClosureEvent {
             Self::StarCommissioned { class } => {
                 tlv::put(24, &[*class], &mut out);
             }
-            Self::PlanetSited { orb_id, albedo, orbit_r, theta, psi } => {
+            Self::PlanetSited {
+                orb_id,
+                albedo,
+                orbit_r,
+                theta,
+                psi,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(albedo.value(), &mut value);
                 ratio::encode(orbit_r.value(), &mut value);
@@ -4263,7 +4651,11 @@ impl ClosureEvent {
                 ratio::encode(amount, &mut value);
                 tlv::put(27, &value, &mut out);
             }
-            Self::DemurrageSettled { orb_id, resource, amount } => {
+            Self::DemurrageSettled {
+                orb_id,
+                resource,
+                amount,
+            } => {
                 tlv::put(29, &amount_layout(*orb_id, *resource, amount), &mut out);
             }
             Self::DemurrageTouched { orb_id, decays } => {
@@ -4280,7 +4672,13 @@ impl ClosureEvent {
                 ratio::encode(value, &mut bytes);
                 tlv::put(103, &bytes, &mut out);
             }
-            Self::TreatySealed { deal, kind, partner, terms, term } => {
+            Self::TreatySealed {
+                deal,
+                kind,
+                partner,
+                terms,
+                term,
+            } => {
                 let mut value = deal.to_le_bytes().to_vec();
                 value.push(*kind);
                 value.extend_from_slice(&term.to_le_bytes());
@@ -4292,13 +4690,21 @@ impl ClosureEvent {
                 value.extend_from_slice(partner.as_bytes());
                 tlv::put(105, &value, &mut out);
             }
-            Self::TreatyStruck { deal, partner, broken } => {
+            Self::TreatyStruck {
+                deal,
+                partner,
+                broken,
+            } => {
                 let mut value = deal.to_le_bytes().to_vec();
                 value.push(u8::from(*broken));
                 value.extend_from_slice(partner.as_bytes());
                 tlv::put(106, &value, &mut out);
             }
-            Self::TreatyElementsAllowed { deal, partner, elements } => {
+            Self::TreatyElementsAllowed {
+                deal,
+                partner,
+                elements,
+            } => {
                 // deal ‖ count u16 ‖ count × id[32] ‖ partner (rest).
                 let mut value = deal.to_le_bytes().to_vec();
                 value.extend_from_slice(&(elements.len() as u16).to_le_bytes());
@@ -4308,7 +4714,11 @@ impl ClosureEvent {
                 value.extend_from_slice(partner.as_bytes());
                 tlv::put(165, &value, &mut out);
             }
-            Self::SolverWordMinted { orbit, expansion, cited } => {
+            Self::SolverWordMinted {
+                orbit,
+                expansion,
+                cited,
+            } => {
                 // orbit[32] ‖ cited count u8 ‖ count × digest[32] ‖
                 // expansion (rest, opaque).
                 let mut value = orbit.to_vec();
@@ -4319,14 +4729,22 @@ impl ClosureEvent {
                 value.extend_from_slice(expansion);
                 tlv::put(166, &value, &mut out);
             }
-            Self::KnowledgeConverged { signature, mass, hardness } => {
+            Self::KnowledgeConverged {
+                signature,
+                mass,
+                hardness,
+            } => {
                 // signature[32] ‖ mass u32 ‖ hardness u32.
                 let mut value = signature.to_vec();
                 value.extend_from_slice(&mass.to_le_bytes());
                 value.extend_from_slice(&hardness.to_le_bytes());
                 tlv::put(177, &value, &mut out);
             }
-            Self::KnowledgeLicensed { orbit, expansion, cited } => {
+            Self::KnowledgeLicensed {
+                orbit,
+                expansion,
+                cited,
+            } => {
                 // orbit[32] ‖ cited count u8 ‖ count × digest[32] ‖
                 // expansion (rest, opaque) — the SolverWordMinted shape.
                 let mut value = orbit.to_vec();
@@ -4337,7 +4755,11 @@ impl ClosureEvent {
                 value.extend_from_slice(expansion);
                 tlv::put(178, &value, &mut out);
             }
-            Self::GemCompounded { orb_id, members, gem } => {
+            Self::GemCompounded {
+                orb_id,
+                members,
+                gem,
+            } => {
                 // orb ‖ gem ‖ members — the member count is the
                 // remainder over 32, so no length prefix is needed and
                 // a truncated value cannot decode as a shorter set.
@@ -4348,7 +4770,13 @@ impl ClosureEvent {
                 }
                 tlv::put(104, &value, &mut out);
             }
-            Self::ElementRefined { orb_id, raw, refined, spent, yielded } => {
+            Self::ElementRefined {
+                orb_id,
+                raw,
+                refined,
+                spent,
+                yielded,
+            } => {
                 // orb ‖ raw ‖ refined ‖ spent ‖ yielded
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(raw);
@@ -4357,26 +4785,45 @@ impl ClosureEvent {
                 ratio::encode(yielded, &mut value);
                 tlv::put(107, &value, &mut out);
             }
-            Self::ResourceTransferred { from_orb, to_orb, resource, amount } => {
+            Self::ResourceTransferred {
+                from_orb,
+                to_orb,
+                resource,
+                amount,
+            } => {
                 let mut value = from_orb.to_le_bytes().to_vec();
                 value.extend_from_slice(&to_orb.to_le_bytes());
                 value.push(*resource as u8);
                 ratio::encode(amount, &mut value);
                 tlv::put(30, &value, &mut out);
             }
-            Self::OverflowAbsorbed { source_orb, absorber_orb, amount } => {
+            Self::OverflowAbsorbed {
+                source_orb,
+                absorber_orb,
+                amount,
+            } => {
                 let mut value = source_orb.to_le_bytes().to_vec();
                 value.extend_from_slice(&absorber_orb.to_le_bytes());
                 ratio::encode(amount, &mut value);
                 tlv::put(31, &value, &mut out);
             }
-            Self::AbsorptionLapsed { debtor_orb, creditor_orb, amount } => {
+            Self::AbsorptionLapsed {
+                debtor_orb,
+                creditor_orb,
+                amount,
+            } => {
                 let mut value = debtor_orb.to_le_bytes().to_vec();
                 value.extend_from_slice(&creditor_orb.to_le_bytes());
                 ratio::encode(amount, &mut value);
                 tlv::put(32, &value, &mut out);
             }
-            Self::BondSealed { source_orb, target_orb, resource, rate, term } => {
+            Self::BondSealed {
+                source_orb,
+                target_orb,
+                resource,
+                rate,
+                term,
+            } => {
                 let mut value = source_orb.to_le_bytes().to_vec();
                 value.extend_from_slice(&target_orb.to_le_bytes());
                 value.push(*resource as u8);
@@ -4384,7 +4831,14 @@ impl ClosureEvent {
                 value.extend_from_slice(&term.to_le_bytes());
                 tlv::put(33, &value, &mut out);
             }
-            Self::BondSettled { source_orb, target_orb, resource, amount, severed, load } => {
+            Self::BondSettled {
+                source_orb,
+                target_orb,
+                resource,
+                amount,
+                severed,
+                load,
+            } => {
                 let mut value = source_orb.to_le_bytes().to_vec();
                 value.extend_from_slice(&target_orb.to_le_bytes());
                 value.push(*resource as u8);
@@ -4409,14 +4863,24 @@ impl ClosureEvent {
                 ratio::encode(collateral, &mut value);
                 tlv::put(35, &value, &mut out);
             }
-            Self::ForwardReleased { obligor_orb, beneficiary_orb, resource, collateral } => {
+            Self::ForwardReleased {
+                obligor_orb,
+                beneficiary_orb,
+                resource,
+                collateral,
+            } => {
                 tlv::put(
                     36,
                     &pact_layout(*obligor_orb, *beneficiary_orb, *resource, collateral),
                     &mut out,
                 );
             }
-            Self::ForwardSlashed { obligor_orb, beneficiary_orb, resource, collateral } => {
+            Self::ForwardSlashed {
+                obligor_orb,
+                beneficiary_orb,
+                resource,
+                collateral,
+            } => {
                 tlv::put(
                     37,
                     &pact_layout(*obligor_orb, *beneficiary_orb, *resource, collateral),
@@ -4428,7 +4892,14 @@ impl ClosureEvent {
                 ratio::encode(amount, &mut value);
                 tlv::put(38, &value, &mut out);
             }
-            Self::TechLicensed { deal, from_orb, council, condition, node, name } => {
+            Self::TechLicensed {
+                deal,
+                from_orb,
+                council,
+                condition,
+                node,
+                name,
+            } => {
                 let mut value = deal.to_le_bytes().to_vec();
                 value.extend_from_slice(&from_orb.to_le_bytes());
                 value.extend_from_slice(&council.to_le_bytes());
@@ -4437,7 +4908,14 @@ impl ClosureEvent {
                 value.extend_from_slice(name.as_bytes());
                 tlv::put(40, &value, &mut out);
             }
-            Self::CouncilSealed { council, resource, quota, window, collateral, members } => {
+            Self::CouncilSealed {
+                council,
+                resource,
+                quota,
+                window,
+                collateral,
+                members,
+            } => {
                 let mut value = council.to_le_bytes().to_vec();
                 value.push(*resource as u8);
                 ratio::encode(quota, &mut value);
@@ -4448,7 +4926,12 @@ impl ClosureEvent {
                 }
                 tlv::put(52, &value, &mut out);
             }
-            Self::CouncilClosed { council, member, fulfilled, banked } => {
+            Self::CouncilClosed {
+                council,
+                member,
+                fulfilled,
+                banked,
+            } => {
                 let mut value = council.to_le_bytes().to_vec();
                 value.extend_from_slice(&member.to_le_bytes());
                 value.push(*fulfilled as u8);
@@ -4465,7 +4948,11 @@ impl ClosureEvent {
                 ratio::encode(gauge, &mut value);
                 tlv::put(60, &value, &mut out);
             }
-            Self::WantStruck { orb_id, kind, reading } => {
+            Self::WantStruck {
+                orb_id,
+                kind,
+                reading,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.push(*kind);
                 ratio::encode(reading, &mut value);
@@ -4511,7 +4998,12 @@ impl ClosureEvent {
                 ratio::encode(delta, &mut value);
                 tlv::put(180, &value, &mut out);
             }
-            Self::RecipeBuilt { orb_id, inputs, role, yield_of_role } => {
+            Self::RecipeBuilt {
+                orb_id,
+                inputs,
+                role,
+                yield_of_role,
+            } => {
                 // orb ‖ role u8 ‖ input count u8 ‖ count × element[32] ‖
                 // yield (rest) — the SolverWordMinted count-prefix shape, the
                 // variable-length yield last so it can run to the frame edge.
@@ -4524,7 +5016,11 @@ impl ClosureEvent {
                 ratio::encode(yield_of_role, &mut value);
                 tlv::put(181, &value, &mut out);
             }
-            Self::RationElementSettled { orb_id, element, delta } => {
+            Self::RationElementSettled {
+                orb_id,
+                element,
+                delta,
+            } => {
                 // orb ‖ element[32] ‖ delta (signed, rest) — the
                 // LeisureSettled signed-delta shape (tag 180) with the
                 // element key between (tag 173's 8..40), the yield last so
@@ -4534,7 +5030,11 @@ impl ClosureEvent {
                 ratio::encode(delta, &mut value);
                 tlv::put(182, &value, &mut out);
             }
-            Self::StapleMined { orb_id, element, eaten } => {
+            Self::StapleMined {
+                orb_id,
+                element,
+                eaten,
+            } => {
                 // orb ‖ element[32] ‖ eaten (rest) — the RationElementSettled
                 // shape (tag 182), the amount unsigned (a draw is never < 0).
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -4542,7 +5042,11 @@ impl ClosureEvent {
                 ratio::encode(eaten, &mut value);
                 tlv::put(183, &value, &mut out);
             }
-            Self::VeinRejuvenated { orb_id, element, injected } => {
+            Self::VeinRejuvenated {
+                orb_id,
+                element,
+                injected,
+            } => {
                 // orb ‖ element[32] ‖ injected (rest) — the StapleMined shape
                 // (tag 183), the amount unsigned (an injection is never < 0).
                 let mut value = orb_id.to_le_bytes().to_vec();
@@ -4577,7 +5081,13 @@ impl ClosureEvent {
                 }
                 tlv::put(198, &value, &mut out);
             }
-            Self::UniverseFounded { topology, span, roster, matter, over } => {
+            Self::UniverseFounded {
+                topology,
+                span,
+                roster,
+                matter,
+                over,
+            } => {
                 // topology (u16-prefixed) ‖ span ‖ roster[32] ‖ matter[32] ‖
                 // over-flag u8 ‖ over[32]?
                 let mut value = (topology.len() as u16).to_le_bytes().to_vec();
@@ -4597,14 +5107,23 @@ impl ClosureEvent {
             Self::UniverseCited { universe } => {
                 tlv::put(191, universe, &mut out);
             }
-            Self::AncientArose { sigil, tree, living } => {
+            Self::AncientArose {
+                sigil,
+                tree,
+                living,
+            } => {
                 let mut value = (sigil.len() as u16).to_le_bytes().to_vec();
                 value.extend_from_slice(sigil.as_bytes());
                 value.extend_from_slice(&tree.to_le_bytes());
                 value.extend_from_slice(&living.to_le_bytes());
                 tlv::put(192, &value, &mut out);
             }
-            Self::CoreDeposited { core, world, resource, amount } => {
+            Self::CoreDeposited {
+                core,
+                world,
+                resource,
+                amount,
+            } => {
                 // core (u16-prefixed) ‖ world (u16-prefixed) ‖ resource u8
                 // (0 = STAMP) ‖ amount
                 let mut value = (core.len() as u16).to_le_bytes().to_vec();
@@ -4615,7 +5134,12 @@ impl ClosureEvent {
                 ratio::encode(amount, &mut value);
                 tlv::put(193, &value, &mut out);
             }
-            Self::CoreEmitted { core, world, resource, amount } => {
+            Self::CoreEmitted {
+                core,
+                world,
+                resource,
+                amount,
+            } => {
                 // the CoreDeposited layout, under its own tag
                 let mut value = (core.len() as u16).to_le_bytes().to_vec();
                 value.extend_from_slice(core.as_bytes());
@@ -4625,7 +5149,12 @@ impl ClosureEvent {
                 ratio::encode(amount, &mut value);
                 tlv::put(194, &value, &mut out);
             }
-            Self::CoreReturned { orb_id, core, resource, amount } => {
+            Self::CoreReturned {
+                orb_id,
+                core,
+                resource,
+                amount,
+            } => {
                 // orb_id u64 ‖ core (u16-prefixed) ‖ resource u8 (0 = STAMP) ‖ amount
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&(core.len() as u16).to_le_bytes());
@@ -4634,7 +5163,13 @@ impl ClosureEvent {
                 ratio::encode(amount, &mut value);
                 tlv::put(195, &value, &mut out);
             }
-            Self::CoreWordDeposited { core, world, orbit, expansion, cited } => {
+            Self::CoreWordDeposited {
+                core,
+                world,
+                orbit,
+                expansion,
+                cited,
+            } => {
                 // core (u16-prefixed) ‖ world (u16-prefixed) ‖ orbit[32] ‖
                 // expansion (u32-prefixed) ‖ cited (u32 count ‖ 32·n)
                 let mut value = (core.len() as u16).to_le_bytes().to_vec();
@@ -4650,7 +5185,14 @@ impl ClosureEvent {
                 }
                 tlv::put(196, &value, &mut out);
             }
-            Self::SubstratumOpened { core, origin, parent, depth, level, opener } => {
+            Self::SubstratumOpened {
+                core,
+                origin,
+                parent,
+                depth,
+                level,
+                opener,
+            } => {
                 // core (u16-prefixed) ‖ origin[32] ‖ parent[32] ‖ depth u32 ‖
                 // level u32 ‖ opener (u16-prefixed)
                 let mut value = (core.len() as u16).to_le_bytes().to_vec();
@@ -4663,7 +5205,10 @@ impl ClosureEvent {
                 value.extend_from_slice(opener.as_bytes());
                 tlv::put(197, &value, &mut out);
             }
-            Self::ChronicleCheckpointed { folded_hash, receipt_count } => {
+            Self::ChronicleCheckpointed {
+                folded_hash,
+                receipt_count,
+            } => {
                 // folded_hash[32] ‖ receipt_count u64 le — a world-wide
                 // bookkeeping fact, no orb key.
                 let mut value = Vec::with_capacity(40);
@@ -4685,7 +5230,13 @@ impl ClosureEvent {
             Self::PressureEbbed { orb_id } => {
                 tlv::put(168, &orb_id.to_le_bytes(), &mut out);
             }
-            Self::ElementFarmed { orb_id, element, ember, minted, eaten } => {
+            Self::ElementFarmed {
+                orb_id,
+                element,
+                ember,
+                minted,
+                eaten,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(element);
                 ratio::encode(ember, &mut value);
@@ -4701,7 +5252,14 @@ impl ClosureEvent {
                 value.extend_from_slice(&to.to_le_bytes());
                 tlv::put(67, &value, &mut out);
             }
-            Self::OfferPosted { offer, orb_id, give, give_amount, want, want_amount } => {
+            Self::OfferPosted {
+                offer,
+                orb_id,
+                give,
+                give_amount,
+                want,
+                want_amount,
+            } => {
                 let mut value = offer.to_le_bytes().to_vec();
                 value.extend_from_slice(&orb_id.to_le_bytes());
                 give.encode(&mut value);
@@ -4735,7 +5293,14 @@ impl ClosureEvent {
                 ratio::encode(gauge, &mut value);
                 tlv::put(46, &value, &mut out);
             }
-            Self::TechDiscovered { orb_id, node, condition, modifier, magnitude, name } => {
+            Self::TechDiscovered {
+                orb_id,
+                node,
+                condition,
+                modifier,
+                magnitude,
+                name,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(node);
                 value.push(*condition);
@@ -4744,21 +5309,36 @@ impl ClosureEvent {
                 value.extend_from_slice(name.as_bytes());
                 tlv::put(39, &value, &mut out);
             }
-            Self::ApertureSent { deal, from_orb, resource, amount } => {
+            Self::ApertureSent {
+                deal,
+                from_orb,
+                resource,
+                amount,
+            } => {
                 let mut value = deal.to_le_bytes().to_vec();
                 value.extend_from_slice(&from_orb.to_le_bytes());
                 value.push(*resource as u8);
                 ratio::encode(amount, &mut value);
                 tlv::put(47, &value, &mut out);
             }
-            Self::ApertureReceived { deal, to_orb, resource, amount } => {
+            Self::ApertureReceived {
+                deal,
+                to_orb,
+                resource,
+                amount,
+            } => {
                 let mut value = deal.to_le_bytes().to_vec();
                 value.extend_from_slice(&to_orb.to_le_bytes());
                 value.push(*resource as u8);
                 ratio::encode(amount, &mut value);
                 tlv::put(48, &value, &mut out);
             }
-            Self::ElementApertureSent { deal, from_orb, element, amount } => {
+            Self::ElementApertureSent {
+                deal,
+                from_orb,
+                element,
+                amount,
+            } => {
                 // deal ‖ from_orb ‖ element[32] ‖ amount
                 let mut value = deal.to_le_bytes().to_vec();
                 value.extend_from_slice(&from_orb.to_le_bytes());
@@ -4766,14 +5346,24 @@ impl ClosureEvent {
                 ratio::encode(amount, &mut value);
                 tlv::put(108, &value, &mut out);
             }
-            Self::ElementApertureReceived { deal, to_orb, element, amount } => {
+            Self::ElementApertureReceived {
+                deal,
+                to_orb,
+                element,
+                amount,
+            } => {
                 let mut value = deal.to_le_bytes().to_vec();
                 value.extend_from_slice(&to_orb.to_le_bytes());
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
                 tlv::put(109, &value, &mut out);
             }
-            Self::ElementRouteChartered { deal, element, eta, rail } => {
+            Self::ElementRouteChartered {
+                deal,
+                element,
+                eta,
+                rail,
+            } => {
                 // deal ‖ element[32] ‖ eta ‖ rail
                 let mut value = deal.to_le_bytes().to_vec();
                 value.extend_from_slice(element);
@@ -4781,25 +5371,41 @@ impl ClosureEvent {
                 value.push(*rail);
                 tlv::put(110, &value, &mut out);
             }
-            Self::StampMinted { orb_id, amount, crystal_spent } => {
+            Self::StampMinted {
+                orb_id,
+                amount,
+                crystal_spent,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(amount, &mut value);
                 ratio::encode(crystal_spent, &mut value);
                 tlv::put(111, &value, &mut out);
             }
-            Self::StampApertureSent { deal, from_orb, amount } => {
+            Self::StampApertureSent {
+                deal,
+                from_orb,
+                amount,
+            } => {
                 let mut value = deal.to_le_bytes().to_vec();
                 value.extend_from_slice(&from_orb.to_le_bytes());
                 ratio::encode(amount, &mut value);
                 tlv::put(112, &value, &mut out);
             }
-            Self::StampApertureReceived { deal, to_orb, amount } => {
+            Self::StampApertureReceived {
+                deal,
+                to_orb,
+                amount,
+            } => {
                 let mut value = deal.to_le_bytes().to_vec();
                 value.extend_from_slice(&to_orb.to_le_bytes());
                 ratio::encode(amount, &mut value);
                 tlv::put(113, &value, &mut out);
             }
-            Self::ScrapSalvaged { orb_id, amount, iron_spent } => {
+            Self::ScrapSalvaged {
+                orb_id,
+                amount,
+                iron_spent,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 ratio::encode(amount, &mut value);
                 ratio::encode(iron_spent, &mut value);
@@ -4856,13 +5462,22 @@ impl ClosureEvent {
                 ratio::encode(amount, &mut value);
                 tlv::put(119, &value, &mut out);
             }
-            Self::TraceConsumed { orb_id, element, amount } => {
+            Self::TraceConsumed {
+                orb_id,
+                element,
+                amount,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
                 tlv::put(175, &value, &mut out);
             }
-            Self::EnrichmentStruck { orb_id, stratum, element, richness } => {
+            Self::EnrichmentStruck {
+                orb_id,
+                stratum,
+                element,
+                richness,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.push(*stratum);
                 value.extend_from_slice(element);
@@ -5167,11 +5782,7 @@ impl ClosureEvent {
             } => {
                 tlv::put(144, &[*disposition, *perception, *primary], &mut out);
             }
-            Self::SpyProbed {
-                orb_id,
-                depth,
-                fee,
-            } => {
+            Self::SpyProbed { orb_id, depth, fee } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.push(*depth);
                 ratio::encode(fee, &mut value);
@@ -5365,7 +5976,12 @@ impl ClosureEvent {
             Self::LineSucceeded { successor } => {
                 tlv::put(59, successor.as_bytes(), &mut out);
             }
-            Self::GenesisSealed { civilization, disposition, metabolism, perception } => {
+            Self::GenesisSealed {
+                civilization,
+                disposition,
+                metabolism,
+                perception,
+            } => {
                 let mut value = vec![*disposition, *metabolism, *perception];
                 value.extend_from_slice(civilization.as_bytes());
                 tlv::put(61, &value, &mut out);
@@ -5376,7 +5992,15 @@ impl ClosureEvent {
             Self::PracticeReleased { practice } => {
                 tlv::put(69, &[*practice], &mut out);
             }
-            Self::ProspectStruck { orb_id, stratum, element, family, tier, richness, name } => {
+            Self::ProspectStruck {
+                orb_id,
+                stratum,
+                element,
+                family,
+                tier,
+                richness,
+                name,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.push(*stratum);
                 value.extend_from_slice(element);
@@ -5386,7 +6010,12 @@ impl ClosureEvent {
                 value.extend_from_slice(name.as_bytes());
                 tlv::put(70, &value, &mut out);
             }
-            Self::AssayStruck { orb_id, element, amount, richness } => {
+            Self::AssayStruck {
+                orb_id,
+                element,
+                amount,
+                richness,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(element);
                 ratio::encode(amount, &mut value);
@@ -5403,7 +6032,12 @@ impl ClosureEvent {
                 value.extend_from_slice(name.as_bytes());
                 tlv::put(91, &value, &mut out);
             }
-            Self::BookPosted { orb_id, kind, kept, lost } => {
+            Self::BookPosted {
+                orb_id,
+                kind,
+                kept,
+                lost,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&kind.0);
                 ratio::encode(kept, &mut value);
@@ -5421,7 +6055,11 @@ impl ClosureEvent {
                 value.extend_from_slice(name.as_bytes());
                 tlv::put(94, &value, &mut out);
             }
-            Self::WorkClaimed { orb_id, work, witnesses } => {
+            Self::WorkClaimed {
+                orb_id,
+                work,
+                witnesses,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&work.0);
                 for witness in witnesses {
@@ -5459,14 +6097,27 @@ impl ClosureEvent {
             Self::EvolutionAdvanced { stage } => {
                 tlv::put(169, &[*stage], &mut out);
             }
-            Self::TitheReceipted { orb_id, to_seat, resource, amount } => {
+            Self::TitheReceipted {
+                orb_id,
+                to_seat,
+                resource,
+                amount,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.push(*to_seat);
                 value.push(*resource as u8);
                 ratio::encode(amount, &mut value);
                 tlv::put(170, &value, &mut out);
             }
-            Self::VocabularyMinted { axis, code, sigil, word, binding, base, ration } => {
+            Self::VocabularyMinted {
+                axis,
+                code,
+                sigil,
+                word,
+                binding,
+                base,
+                ration,
+            } => {
                 let mut value = vec![*axis, *code];
                 let mut text = |s: &String| {
                     let bytes = s.as_bytes();
@@ -5494,7 +6145,12 @@ impl ClosureEvent {
                 }
                 tlv::put(96, &value, &mut out);
             }
-            Self::EstateSurveyed { seed, payer, covered, cost } => {
+            Self::EstateSurveyed {
+                seed,
+                payer,
+                covered,
+                cost,
+            } => {
                 let mut value = seed.to_vec();
                 value.extend_from_slice(&payer.to_le_bytes());
                 value.extend_from_slice(&(covered.len() as u32).to_le_bytes());
@@ -5505,7 +6161,11 @@ impl ClosureEvent {
                 ratio::encode(cost, &mut value);
                 tlv::put(97, &value, &mut out);
             }
-            Self::OfferCountered { offer, want_amount, appraisal } => {
+            Self::OfferCountered {
+                offer,
+                want_amount,
+                appraisal,
+            } => {
                 let mut value = offer.to_le_bytes().to_vec();
                 match appraisal {
                     Some(digest) => {
@@ -5548,7 +6208,13 @@ impl ClosureEvent {
                 }
                 tlv::put(100, &value, &mut out);
             }
-            Self::AppraisalStruck { subject, survey, seed, covered, value: worth } => {
+            Self::AppraisalStruck {
+                subject,
+                survey,
+                seed,
+                covered,
+                value: worth,
+            } => {
                 let mut value = subject.wire().to_vec();
                 value.extend_from_slice(survey);
                 value.extend_from_slice(seed);
@@ -5564,12 +6230,21 @@ impl ClosureEvent {
                 value.extend_from_slice(line.as_bytes());
                 tlv::put(89, &value, &mut out);
             }
-            Self::DiscoveryMinted { orb_id, resource, amount, work } => {
+            Self::DiscoveryMinted {
+                orb_id,
+                resource,
+                amount,
+                work,
+            } => {
                 let mut value = amount_layout(*orb_id, *resource, amount);
                 value.extend_from_slice(work);
                 tlv::put(86, &value, &mut out);
             }
-            Self::InstrumentForged { orb_id, tech_hash, grade } => {
+            Self::InstrumentForged {
+                orb_id,
+                tech_hash,
+                grade,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(tech_hash);
                 value.push(*grade);
@@ -5580,14 +6255,23 @@ impl ClosureEvent {
                 ratio::encode(eta.value(), &mut value);
                 tlv::put(79, &value, &mut out);
             }
-            Self::VoidShare { orb_id, deal, resource, amount } => {
+            Self::VoidShare {
+                orb_id,
+                deal,
+                resource,
+                amount,
+            } => {
                 let mut value = orb_id.to_le_bytes().to_vec();
                 value.extend_from_slice(&deal.to_le_bytes());
                 value.push(*resource as u8);
                 ratio::encode(amount, &mut value);
                 tlv::put(82, &value, &mut out);
             }
-            Self::SovereignUnionSealed { progenitor, sovereign, term_stamps } => {
+            Self::SovereignUnionSealed {
+                progenitor,
+                sovereign,
+                term_stamps,
+            } => {
                 let mut value = vec![*progenitor as u8, *sovereign as u8];
                 value.extend_from_slice(&term_stamps.to_le_bytes());
                 tlv::put(90, &value, &mut out);
@@ -5618,19 +6302,36 @@ impl ClosureEvent {
                     Some(code) => Some(ZoneKind::from_wire(*code)?),
                     None => None,
                 };
-                Some(Self::ZoneBuilt { orb_id, tile, kind, base })
+                Some(Self::ZoneBuilt {
+                    orb_id,
+                    tile,
+                    kind,
+                    base,
+                })
             }
             3 => {
                 let (orb_id, resource, amount) = amount_fields(value)?;
-                Some(Self::YieldCollected { orb_id, resource, amount })
+                Some(Self::YieldCollected {
+                    orb_id,
+                    resource,
+                    amount,
+                })
             }
             4 => {
                 let (orb_id, resource, amount) = amount_fields(value)?;
-                Some(Self::UpkeepSettled { orb_id, resource, amount })
+                Some(Self::UpkeepSettled {
+                    orb_id,
+                    resource,
+                    amount,
+                })
             }
             5 => {
                 let (orb_id, resource, drawn) = amount_fields(value)?;
-                Some(Self::FamineStruck { orb_id, resource, drawn })
+                Some(Self::FamineStruck {
+                    orb_id,
+                    resource,
+                    drawn,
+                })
             }
             6 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5650,7 +6351,11 @@ impl ClosureEvent {
                 let entity_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let principal = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let handle = String::from_utf8(value.get(16..)?.to_vec()).ok()?;
-                Some(Self::EntityRegistered { entity_id, principal, handle })
+                Some(Self::EntityRegistered {
+                    entity_id,
+                    principal,
+                    handle,
+                })
             }
             11 => {
                 let agent = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5666,7 +6371,11 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let source_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let name = String::from_utf8(value.get(16..)?.to_vec()).ok()?;
-                Some(Self::ColonyCharted { orb_id, source_orb, name })
+                Some(Self::ColonyCharted {
+                    orb_id,
+                    source_orb,
+                    name,
+                })
             }
             21 => {
                 let offset = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5674,13 +6383,17 @@ impl ClosureEvent {
                 let era_len = u16::from_le_bytes(value.get(40..42)?.try_into().ok()?) as usize;
                 let era = String::from_utf8(value.get(42..42 + era_len)?.to_vec()).ok()?;
                 let world = String::from_utf8(value.get(42 + era_len..)?.to_vec()).ok()?;
-                Some(Self::EraAnnexed { era, world, terminal, offset })
+                Some(Self::EraAnnexed {
+                    era,
+                    world,
+                    terminal,
+                    offset,
+                })
             }
             54 => {
                 let mut at = 0usize;
                 let mut take_text = || -> Option<String> {
-                    let len =
-                        u16::from_le_bytes(value.get(at..at + 2)?.try_into().ok()?) as usize;
+                    let len = u16::from_le_bytes(value.get(at..at + 2)?.try_into().ok()?) as usize;
                     at += 2;
                     let text = String::from_utf8(value.get(at..at + len)?.to_vec()).ok()?;
                     at += len;
@@ -5696,7 +6409,13 @@ impl ClosureEvent {
                 let (z, used) = ratio::decode(value.get(at..)?)?;
                 at += used;
                 let (reach, _) = ratio::decode(value.get(at..)?)?;
-                Some(Self::GalaxyObserved { observer, creator, name, center: (x, y, z), reach })
+                Some(Self::GalaxyObserved {
+                    observer,
+                    creator,
+                    name,
+                    center: (x, y, z),
+                    reach,
+                })
             }
             22 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5707,7 +6426,9 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 Some(Self::OverheatCleared { orb_id })
             }
-            24 => Some(Self::StarCommissioned { class: *value.first()? }),
+            24 => Some(Self::StarCommissioned {
+                class: *value.first()?,
+            }),
             25 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (albedo, used) = ratio::decode(value.get(8..)?)?;
@@ -5733,7 +6454,13 @@ impl ClosureEvent {
                     }
                     None => None,
                 };
-                Some(Self::PlanetSited { orb_id, albedo, orbit_r, theta, psi })
+                Some(Self::PlanetSited {
+                    orb_id,
+                    albedo,
+                    orbit_r,
+                    theta,
+                    psi,
+                })
             }
             27 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5742,7 +6469,11 @@ impl ClosureEvent {
             }
             29 => {
                 let (orb_id, resource, amount) = amount_fields(value)?;
-                Some(Self::DemurrageSettled { orb_id, resource, amount })
+                Some(Self::DemurrageSettled {
+                    orb_id,
+                    resource,
+                    amount,
+                })
             }
             102 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5764,8 +6495,10 @@ impl ClosureEvent {
                 // The key must NAME a parameter — refuse, never guess.
                 crate::parameter::Parameter::from_code(key)?;
                 let (chartered, used) = ratio::decode(value.get(1..)?)?;
-                (1 + used == value.len())
-                    .then_some(Self::ParameterChartered { key, value: chartered })
+                (1 + used == value.len()).then_some(Self::ParameterChartered {
+                    key,
+                    value: chartered,
+                })
             }
             105 => {
                 let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5784,13 +6517,23 @@ impl ClosureEvent {
                     terms.push((channel, factor));
                 }
                 let partner = String::from_utf8(value.get(at..)?.to_vec()).ok()?;
-                Some(Self::TreatySealed { deal, kind, partner, terms, term })
+                Some(Self::TreatySealed {
+                    deal,
+                    kind,
+                    partner,
+                    terms,
+                    term,
+                })
             }
             106 => {
                 let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let broken = *value.get(8)? != 0;
                 let partner = String::from_utf8(value.get(9..)?.to_vec()).ok()?;
-                Some(Self::TreatyStruck { deal, partner, broken })
+                Some(Self::TreatyStruck {
+                    deal,
+                    partner,
+                    broken,
+                })
             }
             165 => {
                 let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5803,7 +6546,11 @@ impl ClosureEvent {
                     elements.push(element);
                 }
                 let partner = String::from_utf8(value.get(at..)?.to_vec()).ok()?;
-                Some(Self::TreatyElementsAllowed { deal, partner, elements })
+                Some(Self::TreatyElementsAllowed {
+                    deal,
+                    partner,
+                    elements,
+                })
             }
             166 => {
                 let orbit: [u8; 32] = value.get(..32)?.try_into().ok()?;
@@ -5816,13 +6563,21 @@ impl ClosureEvent {
                     cited.push(digest);
                 }
                 let expansion = value.get(at..)?.to_vec();
-                Some(Self::SolverWordMinted { orbit, expansion, cited })
+                Some(Self::SolverWordMinted {
+                    orbit,
+                    expansion,
+                    cited,
+                })
             }
             177 => {
                 let signature: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 let mass = u32::from_le_bytes(value.get(32..36)?.try_into().ok()?);
                 let hardness = u32::from_le_bytes(value.get(36..40)?.try_into().ok()?);
-                Some(Self::KnowledgeConverged { signature, mass, hardness })
+                Some(Self::KnowledgeConverged {
+                    signature,
+                    mass,
+                    hardness,
+                })
             }
             178 => {
                 let orbit: [u8; 32] = value.get(..32)?.try_into().ok()?;
@@ -5835,7 +6590,11 @@ impl ClosureEvent {
                     cited.push(digest);
                 }
                 let expansion = value.get(at..)?.to_vec();
-                Some(Self::KnowledgeLicensed { orbit, expansion, cited })
+                Some(Self::KnowledgeLicensed {
+                    orbit,
+                    expansion,
+                    cited,
+                })
             }
             104 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5850,7 +6609,11 @@ impl ClosureEvent {
                     .chunks_exact(32)
                     .map(|chunk| chunk.try_into().expect("chunks_exact(32)"))
                     .collect();
-                Some(Self::GemCompounded { orb_id, members, gem })
+                Some(Self::GemCompounded {
+                    orb_id,
+                    members,
+                    gem,
+                })
             }
             107 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5871,19 +6634,32 @@ impl ClosureEvent {
                 let to_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let resource = Resource::from_wire(*value.get(16)?)?;
                 let (amount, _) = ratio::decode(value.get(17..)?)?;
-                Some(Self::ResourceTransferred { from_orb, to_orb, resource, amount })
+                Some(Self::ResourceTransferred {
+                    from_orb,
+                    to_orb,
+                    resource,
+                    amount,
+                })
             }
             31 => {
                 let source_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let absorber_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let (amount, _) = ratio::decode(value.get(16..)?)?;
-                Some(Self::OverflowAbsorbed { source_orb, absorber_orb, amount })
+                Some(Self::OverflowAbsorbed {
+                    source_orb,
+                    absorber_orb,
+                    amount,
+                })
             }
             32 => {
                 let debtor_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let creditor_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let (amount, _) = ratio::decode(value.get(16..)?)?;
-                Some(Self::AbsorptionLapsed { debtor_orb, creditor_orb, amount })
+                Some(Self::AbsorptionLapsed {
+                    debtor_orb,
+                    creditor_orb,
+                    amount,
+                })
             }
             33 => {
                 let source_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5892,7 +6668,13 @@ impl ClosureEvent {
                 let (rate, used) = ratio::decode(value.get(17..)?)?;
                 let term =
                     u64::from_le_bytes(value.get(17 + used..17 + used + 8)?.try_into().ok()?);
-                Some(Self::BondSealed { source_orb, target_orb, resource, rate, term })
+                Some(Self::BondSealed {
+                    source_orb,
+                    target_orb,
+                    resource,
+                    rate,
+                    term,
+                })
             }
             34 => {
                 let source_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5901,15 +6683,21 @@ impl ClosureEvent {
                 let (amount, used) = ratio::decode(value.get(17..)?)?;
                 let severed = *value.get(17 + used)? != 0;
                 let (load, _) = ratio::decode(value.get(18 + used..)?)?;
-                Some(Self::BondSettled { source_orb, target_orb, resource, amount, severed, load })
+                Some(Self::BondSettled {
+                    source_orb,
+                    target_orb,
+                    resource,
+                    amount,
+                    severed,
+                    load,
+                })
             }
             35 => {
                 let obligor_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let beneficiary_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let resource = Resource::from_wire(*value.get(16)?)?;
                 let (quota, used) = ratio::decode(value.get(17..)?)?;
-                let window =
-                    u64::from_le_bytes(value.get(17 + used..25 + used)?.try_into().ok()?);
+                let window = u64::from_le_bytes(value.get(17 + used..25 + used)?.try_into().ok()?);
                 let (collateral, _) = ratio::decode(value.get(25 + used..)?)?;
                 Some(Self::ForwardSealed {
                     obligor_orb,
@@ -5922,11 +6710,21 @@ impl ClosureEvent {
             }
             36 => {
                 let (obligor_orb, beneficiary_orb, resource, collateral) = pact_fields(value)?;
-                Some(Self::ForwardReleased { obligor_orb, beneficiary_orb, resource, collateral })
+                Some(Self::ForwardReleased {
+                    obligor_orb,
+                    beneficiary_orb,
+                    resource,
+                    collateral,
+                })
             }
             37 => {
                 let (obligor_orb, beneficiary_orb, resource, collateral) = pact_fields(value)?;
-                Some(Self::ForwardSlashed { obligor_orb, beneficiary_orb, resource, collateral })
+                Some(Self::ForwardSlashed {
+                    obligor_orb,
+                    beneficiary_orb,
+                    resource,
+                    collateral,
+                })
             }
             38 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5940,7 +6738,14 @@ impl ClosureEvent {
                 let condition = *value.get(24)?;
                 let node: [u8; 32] = value.get(25..57)?.try_into().ok()?;
                 let name = String::from_utf8(value.get(57..)?.to_vec()).ok()?;
-                Some(Self::TechLicensed { deal, from_orb, council, condition, node, name })
+                Some(Self::TechLicensed {
+                    deal,
+                    from_orb,
+                    council,
+                    condition,
+                    node,
+                    name,
+                })
             }
             52 => {
                 let council = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -5959,14 +6764,26 @@ impl ClosureEvent {
                     .chunks_exact(8)
                     .map(|chunk| u64::from_le_bytes(chunk.try_into().expect("8 bytes")))
                     .collect();
-                Some(Self::CouncilSealed { council, resource, quota, window, collateral, members })
+                Some(Self::CouncilSealed {
+                    council,
+                    resource,
+                    quota,
+                    window,
+                    collateral,
+                    members,
+                })
             }
             53 => {
                 let council = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let member = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let fulfilled = *value.get(16)? != 0;
                 let (banked, _) = ratio::decode(value.get(17..)?)?;
-                Some(Self::CouncilClosed { council, member, fulfilled, banked })
+                Some(Self::CouncilClosed {
+                    council,
+                    member,
+                    fulfilled,
+                    banked,
+                })
             }
             42 => {
                 let (gauge, _) = ratio::decode(value)?;
@@ -5981,7 +6798,11 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let kind = *value.get(8)?;
                 let (reading, _) = ratio::decode(value.get(9..)?)?;
-                Some(Self::WantStruck { orb_id, kind, reading })
+                Some(Self::WantStruck {
+                    orb_id,
+                    kind,
+                    reading,
+                })
             }
             63 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -6035,25 +6856,42 @@ impl ClosureEvent {
                     inputs.push(element);
                 }
                 let (yield_of_role, _) = ratio::decode(value.get(at..)?)?;
-                Some(Self::RecipeBuilt { orb_id, inputs, role, yield_of_role })
+                Some(Self::RecipeBuilt {
+                    orb_id,
+                    inputs,
+                    role,
+                    yield_of_role,
+                })
             }
             182 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let (delta, _) = ratio::decode(value.get(40..)?)?;
-                Some(Self::RationElementSettled { orb_id, element, delta })
+                Some(Self::RationElementSettled {
+                    orb_id,
+                    element,
+                    delta,
+                })
             }
             183 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let (eaten, _) = ratio::decode(value.get(40..)?)?;
-                Some(Self::StapleMined { orb_id, element, eaten })
+                Some(Self::StapleMined {
+                    orb_id,
+                    element,
+                    eaten,
+                })
             }
             184 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let (injected, _) = ratio::decode(value.get(40..)?)?;
-                Some(Self::VeinRejuvenated { orb_id, element, injected })
+                Some(Self::VeinRejuvenated {
+                    orb_id,
+                    element,
+                    injected,
+                })
             }
             185 => {
                 let (dust, _) = ratio::decode(value.get(..)?)?;
@@ -6083,7 +6921,10 @@ impl ClosureEvent {
             188 => {
                 let folded_hash: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 let receipt_count = u64::from_le_bytes(value.get(32..40)?.try_into().ok()?);
-                Some(Self::ChronicleCheckpointed { folded_hash, receipt_count })
+                Some(Self::ChronicleCheckpointed {
+                    folded_hash,
+                    receipt_count,
+                })
             }
             189 => {
                 let orbit: [u8; 32] = value.get(..32)?.try_into().ok()?;
@@ -6102,10 +6943,18 @@ impl ClosureEvent {
                 at += 32;
                 let over = match *value.get(at)? {
                     0 if value.len() == at + 1 => None,
-                    1 if value.len() == at + 33 => Some(value.get(at + 1..at + 33)?.try_into().ok()?),
+                    1 if value.len() == at + 33 => {
+                        Some(value.get(at + 1..at + 33)?.try_into().ok()?)
+                    }
                     _ => return None,
                 };
-                Some(Self::UniverseFounded { topology, span, roster, matter, over })
+                Some(Self::UniverseFounded {
+                    topology,
+                    span,
+                    roster,
+                    matter,
+                    over,
+                })
             }
             191 => {
                 let universe: [u8; 32] = value.get(..32)?.try_into().ok()?;
@@ -6116,11 +6965,16 @@ impl ClosureEvent {
                 let sigil = String::from_utf8(value.get(2..2 + len)?.to_vec()).ok()?;
                 let tree = u64::from_le_bytes(value.get(2 + len..10 + len)?.try_into().ok()?);
                 let living = u64::from_le_bytes(value.get(10 + len..18 + len)?.try_into().ok()?);
-                (value.len() == 18 + len).then_some(Self::AncientArose { sigil, tree, living })
+                (value.len() == 18 + len).then_some(Self::AncientArose {
+                    sigil,
+                    tree,
+                    living,
+                })
             }
             193 => {
                 let text = |at: &mut usize| -> Option<String> {
-                    let len = u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
+                    let len =
+                        u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
                     let s = String::from_utf8(value.get(*at + 2..*at + 2 + len)?.to_vec()).ok()?;
                     *at += 2 + len;
                     Some(s)
@@ -6133,11 +6987,17 @@ impl ClosureEvent {
                     code => Some(Resource::from_wire(code)?),
                 };
                 let (amount, used) = ratio::decode(value.get(at + 1..)?)?;
-                (value.len() == at + 1 + used).then_some(Self::CoreDeposited { core, world, resource, amount })
+                (value.len() == at + 1 + used).then_some(Self::CoreDeposited {
+                    core,
+                    world,
+                    resource,
+                    amount,
+                })
             }
             194 => {
                 let text = |at: &mut usize| -> Option<String> {
-                    let len = u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
+                    let len =
+                        u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
                     let s = String::from_utf8(value.get(*at + 2..*at + 2 + len)?.to_vec()).ok()?;
                     *at += 2 + len;
                     Some(s)
@@ -6150,7 +7010,12 @@ impl ClosureEvent {
                     code => Some(Resource::from_wire(code)?),
                 };
                 let (amount, used) = ratio::decode(value.get(at + 1..)?)?;
-                (value.len() == at + 1 + used).then_some(Self::CoreEmitted { core, world, resource, amount })
+                (value.len() == at + 1 + used).then_some(Self::CoreEmitted {
+                    core,
+                    world,
+                    resource,
+                    amount,
+                })
             }
             195 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -6162,11 +7027,17 @@ impl ClosureEvent {
                     code => Some(Resource::from_wire(code)?),
                 };
                 let (amount, used) = ratio::decode(value.get(at + 1..)?)?;
-                (value.len() == at + 1 + used).then_some(Self::CoreReturned { orb_id, core, resource, amount })
+                (value.len() == at + 1 + used).then_some(Self::CoreReturned {
+                    orb_id,
+                    core,
+                    resource,
+                    amount,
+                })
             }
             196 => {
                 let text = |at: &mut usize| -> Option<String> {
-                    let len = u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
+                    let len =
+                        u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
                     let s = String::from_utf8(value.get(*at + 2..*at + 2 + len)?.to_vec()).ok()?;
                     *at += 2 + len;
                     Some(s)
@@ -6187,11 +7058,18 @@ impl ClosureEvent {
                     cited.push(value.get(at..at + 32)?.try_into().ok()?);
                     at += 32;
                 }
-                (value.len() == at).then_some(Self::CoreWordDeposited { core, world, orbit, expansion, cited })
+                (value.len() == at).then_some(Self::CoreWordDeposited {
+                    core,
+                    world,
+                    orbit,
+                    expansion,
+                    cited,
+                })
             }
             197 => {
                 let text = |at: &mut usize| -> Option<String> {
-                    let len = u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
+                    let len =
+                        u16::from_le_bytes(value.get(*at..*at + 2)?.try_into().ok()?) as usize;
                     let s = String::from_utf8(value.get(*at + 2..*at + 2 + len)?.to_vec()).ok()?;
                     *at += 2 + len;
                     Some(s)
@@ -6204,9 +7082,18 @@ impl ClosureEvent {
                 let level = u32::from_le_bytes(value.get(at + 68..at + 72)?.try_into().ok()?);
                 at += 72;
                 let opener = text(&mut at)?;
-                (value.len() == at).then_some(Self::SubstratumOpened { core, origin, parent, depth, level, opener })
+                (value.len() == at).then_some(Self::SubstratumOpened {
+                    core,
+                    origin,
+                    parent,
+                    depth,
+                    level,
+                    opener,
+                })
             }
-            172 => Some(Self::PracticesLapsed { count: *value.first()? }),
+            172 => Some(Self::PracticesLapsed {
+                count: *value.first()?,
+            }),
             168 => Some(Self::PressureEbbed {
                 orb_id: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
             }),
@@ -6216,7 +7103,13 @@ impl ClosureEvent {
                 let (ember, used_j) = ratio::decode(value.get(40..)?)?;
                 let (minted, used_m) = ratio::decode(value.get(40 + used_j..)?)?;
                 let (eaten, _) = ratio::decode(value.get(40 + used_j + used_m..)?)?;
-                Some(Self::ElementFarmed { orb_id, element, ember, minted, eaten })
+                Some(Self::ElementFarmed {
+                    orb_id,
+                    element,
+                    ember,
+                    minted,
+                    eaten,
+                })
             }
             174 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -6237,7 +7130,14 @@ impl ClosureEvent {
                 let (want, w_used) = Cargo::decode(value.get(at..)?)?;
                 let at = at + w_used;
                 let (want_amount, _) = ratio::decode(value.get(at..)?)?;
-                Some(Self::OfferPosted { offer, orb_id, give, give_amount, want, want_amount })
+                Some(Self::OfferPosted {
+                    offer,
+                    orb_id,
+                    give,
+                    give_amount,
+                    want,
+                    want_amount,
+                })
             }
             50 => {
                 let offer = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -6254,7 +7154,9 @@ impl ClosureEvent {
                 let partner = String::from_utf8(value.get(used..)?.to_vec()).ok()?;
                 Some(Self::Confluent { partner, gauge })
             }
-            45 => Some(Self::StarAged { class: *value.first()? }),
+            45 => Some(Self::StarAged {
+                class: *value.first()?,
+            }),
             46 => {
                 let era = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let (gauge, _) = ratio::decode(value.get(8..)?)?;
@@ -6267,21 +7169,38 @@ impl ClosureEvent {
                 let modifier = *value.get(41)?;
                 let (magnitude, used) = ratio::decode(value.get(42..)?)?;
                 let name = String::from_utf8(value.get(42 + used..)?.to_vec()).ok()?;
-                Some(Self::TechDiscovered { orb_id, node, condition, modifier, magnitude, name })
+                Some(Self::TechDiscovered {
+                    orb_id,
+                    node,
+                    condition,
+                    modifier,
+                    magnitude,
+                    name,
+                })
             }
             47 => {
                 let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let from_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let resource = Resource::from_wire(*value.get(16)?)?;
                 let (amount, _) = ratio::decode(value.get(17..)?)?;
-                Some(Self::ApertureSent { deal, from_orb, resource, amount })
+                Some(Self::ApertureSent {
+                    deal,
+                    from_orb,
+                    resource,
+                    amount,
+                })
             }
             48 => {
                 let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let to_orb = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let resource = Resource::from_wire(*value.get(16)?)?;
                 let (amount, _) = ratio::decode(value.get(17..)?)?;
-                Some(Self::ApertureReceived { deal, to_orb, resource, amount })
+                Some(Self::ApertureReceived {
+                    deal,
+                    to_orb,
+                    resource,
+                    amount,
+                })
             }
             108 => {
                 let deal = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -6416,14 +7335,23 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let element: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let (amount, _) = ratio::decode(value.get(40..)?)?;
-                Some(Self::TraceConsumed { orb_id, element, amount })
+                Some(Self::TraceConsumed {
+                    orb_id,
+                    element,
+                    amount,
+                })
             }
             176 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let stratum = *value.get(8)?;
                 let element: [u8; 32] = value.get(9..41)?.try_into().ok()?;
                 let (richness, _) = ratio::decode(value.get(41..)?)?;
-                Some(Self::EnrichmentStruck { orb_id, stratum, element, richness })
+                Some(Self::EnrichmentStruck {
+                    orb_id,
+                    stratum,
+                    element,
+                    richness,
+                })
             }
             120 => {
                 let note_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -6741,11 +7669,7 @@ impl ClosureEvent {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let depth = *value.get(8)?;
                 let (fee, _) = ratio::decode(value.get(9..)?)?;
-                Some(Self::SpyProbed {
-                    orb_id,
-                    depth,
-                    fee,
-                })
+                Some(Self::SpyProbed { orb_id, depth, fee })
             }
             146 => {
                 let condition = *value.first()?;
@@ -6946,10 +7870,19 @@ impl ClosureEvent {
                 let metabolism = *value.get(1)?;
                 let perception = *value.get(2)?;
                 let civilization = String::from_utf8(value.get(3..)?.to_vec()).ok()?;
-                Some(Self::GenesisSealed { civilization, disposition, metabolism, perception })
+                Some(Self::GenesisSealed {
+                    civilization,
+                    disposition,
+                    metabolism,
+                    perception,
+                })
             }
-            68 => Some(Self::PracticeAdopted { practice: *value.first()? }),
-            69 => Some(Self::PracticeReleased { practice: *value.first()? }),
+            68 => Some(Self::PracticeAdopted {
+                practice: *value.first()?,
+            }),
+            69 => Some(Self::PracticeReleased {
+                practice: *value.first()?,
+            }),
             70 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let stratum = *value.get(8)?;
@@ -6958,7 +7891,15 @@ impl ClosureEvent {
                 let tier = *value.get(42)?;
                 let (richness, used) = ratio::decode(value.get(43..)?)?;
                 let name = String::from_utf8(value.get(43 + used..)?.to_vec()).ok()?;
-                Some(Self::ProspectStruck { orb_id, stratum, element, family, tier, richness, name })
+                Some(Self::ProspectStruck {
+                    orb_id,
+                    stratum,
+                    element,
+                    family,
+                    tier,
+                    richness,
+                    name,
+                })
             }
             71 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -6970,31 +7911,52 @@ impl ClosureEvent {
                     true => Some(ratio::decode(value.get(40 + used..)?)?.0),
                     false => None,
                 };
-                Some(Self::AssayStruck { orb_id, element, amount, richness })
+                Some(Self::AssayStruck {
+                    orb_id,
+                    element,
+                    amount,
+                    richness,
+                })
             }
             91 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let kind: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let name = String::from_utf8(value.get(40..)?.to_vec()).ok()?;
-                Some(Self::BookMinted { orb_id, kind: BookKind(kind), name })
+                Some(Self::BookMinted {
+                    orb_id,
+                    kind: BookKind(kind),
+                    name,
+                })
             }
             92 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let kind: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let (kept, used) = ratio::decode(value.get(40..)?)?;
                 let (lost, _) = ratio::decode(value.get(40 + used..)?)?;
-                Some(Self::BookPosted { orb_id, kind: BookKind(kind), kept, lost })
+                Some(Self::BookPosted {
+                    orb_id,
+                    kind: BookKind(kind),
+                    kept,
+                    lost,
+                })
             }
             93 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let kind: [u8; 32] = value.get(8..40)?.try_into().ok()?;
-                Some(Self::BookArchived { orb_id, kind: BookKind(kind) })
+                Some(Self::BookArchived {
+                    orb_id,
+                    kind: BookKind(kind),
+                })
             }
             94 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let work: [u8; 32] = value.get(8..40)?.try_into().ok()?;
                 let name = String::from_utf8(value.get(40..)?.to_vec()).ok()?;
-                Some(Self::WorkAspired { orb_id, work: WorkId(work), name })
+                Some(Self::WorkAspired {
+                    orb_id,
+                    work: WorkId(work),
+                    name,
+                })
             }
             95 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -7003,21 +7965,28 @@ impl ClosureEvent {
                 if rest.len() % 32 != 0 {
                     return None;
                 }
-                let witnesses =
-                    rest.chunks(32).map(|c| c.try_into().ok()).collect::<Option<Vec<_>>>()?;
-                Some(Self::WorkClaimed { orb_id, work: WorkId(work), witnesses })
+                let witnesses = rest
+                    .chunks(32)
+                    .map(|c| c.try_into().ok())
+                    .collect::<Option<Vec<_>>>()?;
+                Some(Self::WorkClaimed {
+                    orb_id,
+                    work: WorkId(work),
+                    witnesses,
+                })
             }
             74 => Some(Self::ElderWarded {}),
             75 => Some(Self::WardLifted {
                 claimer: String::from_utf8(value.to_vec()).ok()?,
             }),
             76 => Some(Self::VeilDrawn {}),
-            77 => Some(Self::VeilLifted { starved: *value.first()? != 0 }),
+            77 => Some(Self::VeilLifted {
+                starved: *value.first()? != 0,
+            }),
             81 => {
                 let mut at = 0usize;
                 let mut take_text = || -> Option<String> {
-                    let len =
-                        u16::from_le_bytes(value.get(at..at + 2)?.try_into().ok()?) as usize;
+                    let len = u16::from_le_bytes(value.get(at..at + 2)?.try_into().ok()?) as usize;
                     at += 2;
                     let text = String::from_utf8(value.get(at..at + len)?.to_vec()).ok()?;
                     at += len;
@@ -7038,13 +8007,20 @@ impl ClosureEvent {
                 };
                 Some(Self::TaxonSealed { class, clade })
             }
-            169 => Some(Self::EvolutionAdvanced { stage: *value.first()? }),
+            169 => Some(Self::EvolutionAdvanced {
+                stage: *value.first()?,
+            }),
             170 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let to_seat = *value.get(8)?;
                 let resource = Resource::from_wire(*value.get(9)?)?;
                 let (amount, _) = ratio::decode(value.get(10..)?)?;
-                Some(Self::TitheReceipted { orb_id, to_seat, resource, amount })
+                Some(Self::TitheReceipted {
+                    orb_id,
+                    to_seat,
+                    resource,
+                    amount,
+                })
             }
             96 => {
                 let axis = *value.first()?;
@@ -7082,13 +8058,20 @@ impl ClosureEvent {
                     32 => (None, Some(<[u8; 32]>::try_from(rest).ok()?)),
                     _ => (None, None),
                 };
-                Some(Self::VocabularyMinted { axis, code, sigil, word, binding, base, ration })
+                Some(Self::VocabularyMinted {
+                    axis,
+                    code,
+                    sigil,
+                    word,
+                    binding,
+                    base,
+                    ration,
+                })
             }
             97 => {
                 let seed: [u8; 32] = value.get(..32)?.try_into().ok()?;
                 let payer = u64::from_le_bytes(value.get(32..40)?.try_into().ok()?);
-                let count =
-                    u32::from_le_bytes(value.get(40..44)?.try_into().ok()?) as usize;
+                let count = u32::from_le_bytes(value.get(40..44)?.try_into().ok()?) as usize;
                 let mut at = 44usize;
                 let mut covered = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
@@ -7099,14 +8082,18 @@ impl ClosureEvent {
                     covered.push((orb, witness));
                 }
                 let (cost, _) = ratio::decode(value.get(at..)?)?;
-                Some(Self::EstateSurveyed { seed, payer, covered, cost })
+                Some(Self::EstateSurveyed {
+                    seed,
+                    payer,
+                    covered,
+                    cost,
+                })
             }
             98 => {
                 let subject = Holding::from_wire(value.get(..11)?)?;
                 let survey: [u8; 32] = value.get(11..43)?.try_into().ok()?;
                 let seed: [u8; 32] = value.get(43..75)?.try_into().ok()?;
-                let count =
-                    u32::from_le_bytes(value.get(75..79)?.try_into().ok()?) as usize;
+                let count = u32::from_le_bytes(value.get(75..79)?.try_into().ok()?) as usize;
                 let mut at = 79usize;
                 let mut covered = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
@@ -7114,7 +8101,13 @@ impl ClosureEvent {
                     at += 8;
                 }
                 let (worth, _) = ratio::decode(value.get(at..)?)?;
-                Some(Self::AppraisalStruck { subject, survey, seed, covered, value: worth })
+                Some(Self::AppraisalStruck {
+                    subject,
+                    survey,
+                    seed,
+                    covered,
+                    value: worth,
+                })
             }
             99 => {
                 let offer = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -7124,7 +8117,11 @@ impl ClosureEvent {
                     _ => return None,
                 };
                 let (want_amount, _) = ratio::decode(value.get(at..)?)?;
-                Some(Self::OfferCountered { offer, want_amount, appraisal })
+                Some(Self::OfferCountered {
+                    offer,
+                    want_amount,
+                    appraisal,
+                })
             }
             100 => {
                 let from_orb = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
@@ -7139,8 +8136,7 @@ impl ClosureEvent {
                 at += 32;
                 let seed: [u8; 32] = value.get(at..at + 32)?.try_into().ok()?;
                 at += 32;
-                let count =
-                    u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?) as usize;
+                let count = u32::from_le_bytes(value.get(at..at + 4)?.try_into().ok()?) as usize;
                 at += 4;
                 let mut covered = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                 for _ in 0..count {
@@ -7191,7 +8187,12 @@ impl ClosureEvent {
                 // law — solver-verify owns its form and refuses its
                 // breaks; the TLV length bounds it.
                 let work = value.get(9 + used..)?.to_vec();
-                Some(Self::DiscoveryMinted { orb_id, resource, amount, work })
+                Some(Self::DiscoveryMinted {
+                    orb_id,
+                    resource,
+                    amount,
+                    work,
+                })
             }
             78 => Some(Self::InstrumentForged {
                 orb_id: u64::from_le_bytes(value.get(..8)?.try_into().ok()?),
@@ -7211,14 +8212,23 @@ impl ClosureEvent {
                 let progenitor = Office::from_wire(*value.first()?)?;
                 let sovereign = Office::from_wire(*value.get(1)?)?;
                 let term_stamps = u64::from_le_bytes(value.get(2..10)?.try_into().ok()?);
-                Some(Self::SovereignUnionSealed { progenitor, sovereign, term_stamps })
+                Some(Self::SovereignUnionSealed {
+                    progenitor,
+                    sovereign,
+                    term_stamps,
+                })
             }
             82 => {
                 let orb_id = u64::from_le_bytes(value.get(..8)?.try_into().ok()?);
                 let deal = u64::from_le_bytes(value.get(8..16)?.try_into().ok()?);
                 let resource = Resource::from_wire(*value.get(16)?)?;
                 let (amount, _) = ratio::decode(value.get(17..)?)?;
-                Some(Self::VoidShare { orb_id, deal, resource, amount })
+                Some(Self::VoidShare {
+                    orb_id,
+                    deal,
+                    resource,
+                    amount,
+                })
             }
             _ => None,
         }
@@ -7523,7 +8533,11 @@ impl ColonyOrb {
             ("TRADE-1", &self.given_in_crisis, &self.drawn_in_crisis),
             ("ABSORB-1", &self.returned_across, &self.extracted_across),
             ("BOND-1", &self.bond_flow, &self.severance_load),
-            ("COVENANT-1", &self.forwards_fulfilled, &self.forwards_breached),
+            (
+                "COVENANT-1",
+                &self.forwards_fulfilled,
+                &self.forwards_breached,
+            ),
         ];
         let mut out: Vec<BookView> = chartered
             .iter()
@@ -7612,16 +8626,18 @@ impl ColonyOrb {
                 }
                 91 => {
                     let work: [u8; 32] = value.get(..32)?.try_into().ok()?;
-                    let count =
-                        u32::from_le_bytes(value.get(32..36)?.try_into().ok()?) as usize;
+                    let count = u32::from_le_bytes(value.get(32..36)?.try_into().ok()?) as usize;
                     let mut witnesses = Vec::new() /* SEAL A: never pre-allocate on an untrusted wire count */;
                     for at in 0..count {
                         let from = 36 + at * 32;
                         witnesses.push(value.get(from..from + 32)?.try_into().ok()?);
                     }
-                    let name =
-                        String::from_utf8(value.get(36 + count * 32..)?.to_vec()).ok()?;
-                    orb.aspirations.push(Aspiration { work: WorkId(work), name, witnesses });
+                    let name = String::from_utf8(value.get(36 + count * 32..)?.to_vec()).ok()?;
+                    orb.aspirations.push(Aspiration {
+                        work: WorkId(work),
+                        name,
+                        witnesses,
+                    });
                 }
                 90 => {
                     let kind: [u8; 32] = value.get(..32)?.try_into().ok()?;
@@ -7666,7 +8682,12 @@ impl ColonyOrb {
                         }
                         None => None,
                     };
-                    orb.thermal = Some(ThermalSite { albedo, orbit_r, theta, psi });
+                    orb.thermal = Some(ThermalSite {
+                        albedo,
+                        orbit_r,
+                        theta,
+                        psi,
+                    });
                 }
                 20 => {
                     let (contained, _) = ratio::decode(value)?;
@@ -7873,15 +8894,15 @@ pub fn tile_class(seed: &[u8; 32], orb_id: u64, tile: u16) -> TileClass {
     }
 }
 
-
-
 /// The turn law — relocated to `ratio` (2026-08-05) so the solver can
 /// address a sphere in the same frame the universe sites its orbs in,
 /// and re-exported here so every existing citation resolves unchanged.
 /// One truth, two readers: `cfe::dop::TURN_SLOTS` and
 /// `ratio::TURN_SLOTS` are the same constant, not two copies.
-pub use ratio::{non_negative, on_slot, positive, slot_angle, slot_of, turn_gap, unit, NonNegative, Positive, Slot, Unit, TURN_SLOTS};
-
+pub use ratio::{
+    non_negative, on_slot, positive, slot_angle, slot_of, turn_gap, unit, NonNegative, Positive,
+    Slot, Unit, TURN_SLOTS,
+};
 
 /// Wrapped L1 separation between two sited orbs — the only adjacency
 /// this system can compute exactly.
@@ -7915,5 +8936,3 @@ pub fn separation(a: &ThermalSite, b: &ThermalSite) -> Option<Ratio> {
     }
     Some(total)
 }
-
-

@@ -9,7 +9,6 @@
 //! codes 21..=345
 //! ```
 
-
 /// Lawful class codes 1..=13 (0 = unclassed). u8 today; raise by amendment.
 pub fn class_ceiling() -> u8 {
     13
@@ -42,11 +41,7 @@ pub fn expansion_clade(class: u8, slot: u8) -> Option<u16> {
     if slot == 0 || slot > CLADE_EXPAND_SLOTS {
         return None;
     }
-    Some(
-        CLADE_LEGACY_MAX
-            + u16::from(class - 1) * u16::from(CLADE_EXPAND_SLOTS)
-            + u16::from(slot),
-    )
+    Some(CLADE_LEGACY_MAX + u16::from(class - 1) * u16::from(CLADE_EXPAND_SLOTS) + u16::from(slot))
 }
 
 /// Inverse: which class owns an expansion clade code.
@@ -142,8 +137,10 @@ pub fn legacy_clade_word(code: u16) -> Option<&'static str> {
 }
 
 /// Pre-built expansion words for codes 21..=345 (325 entries).
-const EXPAND_WORDS: [&str; 325] =
-    include!(concat!(env!("CARGO_MANIFEST_DIR"), "/src/almanac/expand_clade_words.inc.rs"));
+const EXPAND_WORDS: [&str; 325] = include!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/src/almanac/expand_clade_words.inc.rs"
+));
 
 /// Full clade word.
 pub fn clade_word(code: u16) -> &'static str {
@@ -202,4 +199,3 @@ pub fn class_taxon_capacity(_class: u8) -> u8 {
 pub fn office_seat_bonus() -> u64 {
     25
 }
-

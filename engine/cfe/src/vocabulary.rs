@@ -231,12 +231,10 @@ impl TradingBinding {
             // holder — and it carries no polarity to judge.
             match channel_is_gate(channel) {
                 true => friction = true,
-                false => {
-                    match (factor > ratio(1, 1)) == channel_favours_increase(channel) {
-                        true => benefit = true,
-                        false => friction = true,
-                    }
-                }
+                false => match (factor > ratio(1, 1)) == channel_favours_increase(channel) {
+                    true => benefit = true,
+                    false => friction = true,
+                },
             }
         }
         if !benefit {
@@ -259,8 +257,9 @@ impl TradingBinding {
 /// The literal door — a malformed literal is a build error in a
 /// runtime coat.
 pub fn trading(entries: Vec<(u8, Ratio)>) -> TradingBinding {
-    TradingBinding::new(entries)
-        .expect("a binding literal must trade: one benefit, one friction, in bounds, on real channels")
+    TradingBinding::new(entries).expect(
+        "a binding literal must trade: one benefit, one friction, in bounds, on real channels",
+    )
 }
 
 /// **The ARCHETYPE bindings** — the seed mechanism of each class.
@@ -301,7 +300,10 @@ pub fn archetype_binding(class: u8) -> Vec<(u8, Ratio)> {
         10 => vec![(CHANNEL_SURVEY, ratio(1, 2)), (CHANNEL_UPKEEP, ratio(5, 4))], // crystal-mind
         11 => vec![(CHANNEL_YIELD, ratio(5, 4)), (CHANNEL_UPKEEP, ratio(3, 2))], // void-swarm
         // thermal-banker: banks heat — low demurrage friction, lower yield
-        12 => vec![(CHANNEL_DEMURRAGE, ratio(3, 4)), (CHANNEL_YIELD, ratio(3, 4))],
+        12 => vec![
+            (CHANNEL_DEMURRAGE, ratio(3, 4)),
+            (CHANNEL_YIELD, ratio(3, 4)),
+        ],
         // mirror-form: sees well (survey↓ cost) but yields less
         13 => vec![(CHANNEL_SURVEY, ratio(3, 4)), (CHANNEL_YIELD, ratio(3, 4))],
         _ => vec![],
@@ -453,37 +455,52 @@ pub fn seed(axis: Axis) -> Vec<Entry> {
             };
             vec![
                 // austerity: the habitats dim, the extractors ration.
-                bound(1, vec![
-                    (CHANNEL_HABITAT_YIELD, lean.clone()),
-                    (CHANNEL_EXTRACTOR_UPKEEP, lean.clone()),
-                    (CHANNEL_ALIGN, half.clone()),
-                ]),
+                bound(
+                    1,
+                    vec![
+                        (CHANNEL_HABITAT_YIELD, lean.clone()),
+                        (CHANNEL_EXTRACTOR_UPKEEP, lean.clone()),
+                        (CHANNEL_ALIGN, half.clone()),
+                    ],
+                ),
                 // showpiece: the habitats shine and eat double.
-                bound(2, vec![
-                    (CHANNEL_HABITAT_YIELD, keen.clone()),
-                    (CHANNEL_HABITAT_UPKEEP, double),
-                    (CHANNEL_ALIGN, half.clone()),
-                ]),
+                bound(
+                    2,
+                    vec![
+                        (CHANNEL_HABITAT_YIELD, keen.clone()),
+                        (CHANNEL_HABITAT_UPKEEP, double),
+                        (CHANNEL_ALIGN, half.clone()),
+                    ],
+                ),
                 // restraint: the lens disciplined — the draw halves;
                 // the alignment gate is its friction.
-                bound(3, vec![
-                    (CHANNEL_SURVEY, half.clone()),
-                    (CHANNEL_ALIGN, half.clone()),
-                ]),
+                bound(
+                    3,
+                    vec![
+                        (CHANNEL_SURVEY, half.clone()),
+                        (CHANNEL_ALIGN, half.clone()),
+                    ],
+                ),
                 // hoard: the stores keep, the converters slow.
-                bound(4, vec![
-                    (CHANNEL_CONVERTER_YIELD, lean),
-                    (CHANNEL_DEMURRAGE, half.clone()),
-                    (CHANNEL_ALIGN, half.clone()),
-                ]),
+                bound(
+                    4,
+                    vec![
+                        (CHANNEL_CONVERTER_YIELD, lean),
+                        (CHANNEL_DEMURRAGE, half.clone()),
+                        (CHANNEL_ALIGN, half.clone()),
+                    ],
+                ),
                 // overdrive: everything runs hot — and it takes only
                 // the tempered.
-                bound(5, vec![
-                    (CHANNEL_YIELD, keen.clone()),
-                    (CHANNEL_UPKEEP, keen),
-                    (CHANNEL_ALIGN, half),
-                    (CHANNEL_TEMPER, tempered),
-                ]),
+                bound(
+                    5,
+                    vec![
+                        (CHANNEL_YIELD, keen.clone()),
+                        (CHANNEL_UPKEEP, keen),
+                        (CHANNEL_ALIGN, half),
+                        (CHANNEL_TEMPER, tempered),
+                    ],
+                ),
             ]
         }
         // **The zone seed is the standing table** (#41). Every compiled
@@ -621,9 +638,7 @@ pub fn practice_word(code: u8) -> &'static str {
 /// expansion, confirming digests) in mint order. The same fold law as
 /// the axis vocabularies: the chronicle is the register, nothing is
 /// committed twice, and every node folds to the same library forever.
-pub fn solver_words(
-    chronicle: &crate::vrp::Chronicle,
-) -> Vec<([u8; 32], Vec<u8>, Vec<[u8; 32]>)> {
+pub fn solver_words(chronicle: &crate::vrp::Chronicle) -> Vec<([u8; 32], Vec<u8>, Vec<[u8; 32]>)> {
     let mut out = Vec::new();
     for receipt in chronicle.history() {
         // A line's vocabulary is the words it minted plus the words it
@@ -631,8 +646,16 @@ pub fn solver_words(
         // not just matter). Both enter the library identically: same
         // orbit, same expansion, same certificate.
         match receipt.event() {
-            crate::dop::ClosureEvent::SolverWordMinted { orbit, expansion, cited }
-            | crate::dop::ClosureEvent::KnowledgeLicensed { orbit, expansion, cited } => {
+            crate::dop::ClosureEvent::SolverWordMinted {
+                orbit,
+                expansion,
+                cited,
+            }
+            | crate::dop::ClosureEvent::KnowledgeLicensed {
+                orbit,
+                expansion,
+                cited,
+            } => {
                 out.push((*orbit, expansion.clone(), cited.clone()));
             }
             _ => {}
@@ -665,7 +688,13 @@ pub fn recipes_built(chronicle: &crate::vrp::Chronicle) -> Vec<BuiltRecipe> {
     let mut out = Vec::new();
     // The chronicle keeps its recipes as they are appended.
     for event in chronicle.recipes() {
-        if let crate::dop::ClosureEvent::RecipeBuilt { orb_id, inputs, role, yield_of_role } = event {
+        if let crate::dop::ClosureEvent::RecipeBuilt {
+            orb_id,
+            inputs,
+            role,
+            yield_of_role,
+        } = event
+        {
             out.push(BuiltRecipe {
                 orb_id: *orb_id,
                 inputs: inputs.clone(),

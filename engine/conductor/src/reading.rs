@@ -21,14 +21,22 @@ pub struct Sector {
 
 fn sixty(e: i64) -> Ratio {
     let p = Ratio::from_integer(BigInt::from(60).pow(e.unsigned_abs() as u32));
-    if e >= 0 { p } else { Ratio::one() / p }
+    if e >= 0 {
+        p
+    } else {
+        Ratio::one() / p
+    }
 }
 
 impl Sector {
     /// The lower mark, `mark·60^step`, signed.
     pub fn lo(&self) -> Ratio {
         let m = Ratio::from_integer(self.mark.clone()) * sixty(self.step);
-        if self.negative { -m } else { m }
+        if self.negative {
+            -m
+        } else {
+            m
+        }
     }
 
     /// The upper mark, `(mark + 1)·60^step` (the lower where exact), signed.
@@ -37,7 +45,11 @@ impl Sector {
             return self.lo();
         }
         let m = Ratio::from_integer(self.mark.clone() + BigInt::one()) * sixty(self.step);
-        if self.negative { -m } else { m }
+        if self.negative {
+            -m
+        } else {
+            m
+        }
     }
 }
 
@@ -45,7 +57,12 @@ impl Sector {
 /// and `PLACES` places below it.
 pub fn sector(x: &Ratio) -> Sector {
     if x.is_zero() {
-        return Sector { negative: false, mark: BigInt::zero(), step: 0, exact: true };
+        return Sector {
+            negative: false,
+            mark: BigInt::zero(),
+            step: 0,
+            exact: true,
+        };
     }
     let a = x.abs();
     let mut e: i64 = 0;
@@ -58,7 +75,12 @@ pub fn sector(x: &Ratio) -> Sector {
     let step = e - PLACES;
     let scaled = a / sixty(step);
     let mark = scaled.floor().to_integer();
-    Sector { negative: x.is_negative(), exact: scaled.is_integer(), mark, step }
+    Sector {
+        negative: x.is_negative(),
+        exact: scaled.is_integer(),
+        mark,
+        step,
+    }
 }
 
 impl std::fmt::Display for Sector {
@@ -81,18 +103,31 @@ impl std::fmt::Display for Sector {
         }
         let sign = if self.negative { "-" } else { "" };
         let at = self.step + PLACES;
-        let scale = if at == 0 { String::new() } else { format!("·60^{at}") };
+        let scale = if at == 0 {
+            String::new()
+        } else {
+            format!("·60^{at}")
+        };
         if self.exact {
             write!(f, "={sign}{}{scale}", digits(&self.mark))
         } else {
-            write!(f, "{sign}[{}…{}){scale}", digits(&self.mark), digits(&(self.mark.clone() + BigInt::one())))
+            write!(
+                f,
+                "{sign}[{}…{}){scale}",
+                digits(&self.mark),
+                digits(&(self.mark.clone() + BigInt::one()))
+            )
         }
     }
 }
 
 /// A share read as a sector of its whole (zero where the whole is empty).
 pub fn share(part: &Ratio, whole: &Ratio) -> Sector {
-    if whole.is_zero() { sector(&ratio(0, 1)) } else { sector(&(part.clone() / whole.clone())) }
+    if whole.is_zero() {
+        sector(&ratio(0, 1))
+    } else {
+        sector(&(part.clone() / whole.clone()))
+    }
 }
 
 #[cfg(test)]
@@ -102,23 +137,44 @@ mod tests {
 
     #[test]
     fn a_sector_brackets_its_value_between_two_marks_one_place_apart() {
-        for x in [ratio(1, 7), ratio(355, 113), ratio(-2, 3), ratio(-2, 7), ratio(1, 10_000_000), ratio(123_456_789, 1)] {
+        for x in [
+            ratio(1, 7),
+            ratio(355, 113),
+            ratio(-2, 3),
+            ratio(-2, 7),
+            ratio(1, 10_000_000),
+            ratio(123_456_789, 1),
+        ] {
             let s = sector(&x);
             let (lo, hi) = (s.lo(), s.hi());
             if s.exact {
                 assert_eq!(lo, x);
                 continue;
             }
-            let (low, high) = if x < ratio(0, 1) { (hi.clone(), lo.clone()) } else { (lo.clone(), hi.clone()) };
+            let (low, high) = if x < ratio(0, 1) {
+                (hi.clone(), lo.clone())
+            } else {
+                (lo.clone(), hi.clone())
+            };
             assert!(low < x && x < high, "{x}: {lo} {hi}");
             let width = high - low;
-            assert_eq!(width, Ratio::from_integer(60.into()).pow(i32::try_from(s.step).unwrap_or(0)), "{x}");
+            assert_eq!(
+                width,
+                Ratio::from_integer(60.into()).pow(i32::try_from(s.step).unwrap_or(0)),
+                "{x}"
+            );
         }
     }
 
     #[test]
     fn a_value_on_a_mark_is_served_exactly() {
-        for x in [ratio(1, 2), ratio(3, 4), ratio(7, 3600), ratio(90, 1), ratio(0, 1)] {
+        for x in [
+            ratio(1, 2),
+            ratio(3, 4),
+            ratio(7, 3600),
+            ratio(90, 1),
+            ratio(0, 1),
+        ] {
             let s = sector(&x);
             assert!(s.exact, "{x}");
             assert_eq!(s.lo(), x);
@@ -126,6 +182,9 @@ mod tests {
         }
         let s = sector(&ratio(1, 7));
         assert!(!s.exact);
-        assert!(s.mark >= 3600.into() && s.mark < 216_000.into(), "{PLACES} places below the leading one");
+        assert!(
+            s.mark >= 3600.into() && s.mark < 216_000.into(),
+            "{PLACES} places below the leading one"
+        );
     }
 }

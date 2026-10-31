@@ -476,4 +476,3 @@ pub(super) struct CrystalDeposit {
     /// novelty reading (licensed arrivals count: foreign signal feeds).
     pub(super) last_node: Option<u64>,
 }
-

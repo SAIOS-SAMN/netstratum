@@ -89,11 +89,20 @@ type Positions = BTreeMap<(u64, Holding), BigInt>;
 /// An off-grain holding the census read: receipt index, orb, holding, amount.
 pub type OffGrain = (usize, u64, Holding, String);
 
-fn positions(orbs: &[ColonyOrb], receipt: usize, off: &mut Vec<OffGrain>, held_off: &mut std::collections::BTreeSet<(u64, Holding)>) -> Positions {
+fn positions(
+    orbs: &[ColonyOrb],
+    receipt: usize,
+    off: &mut Vec<OffGrain>,
+    held_off: &mut std::collections::BTreeSet<(u64, Holding)>,
+) -> Positions {
     let mut at = Positions::new();
     let mut now_off = std::collections::BTreeSet::new();
     for orb in orbs {
-        let held = orb.banked.iter().map(|(r, a)| (Holding::Matter(*r), a)).chain(std::iter::once((Holding::Stamp, &orb.stamp)));
+        let held = orb
+            .banked
+            .iter()
+            .map(|(r, a)| (Holding::Matter(*r), a))
+            .chain(std::iter::once((Holding::Stamp, &orb.stamp)));
         for (holding, amount) in held {
             let (n, off_grain) = units(amount);
             if off_grain {
@@ -129,7 +138,11 @@ fn change(before: &Positions, after: &Positions) -> BTreeMap<(u64, Holding), Big
 /// The receipt's kind: its event's variant name.
 fn kind_of(event: &cfe::dop::ClosureEvent) -> String {
     let debug = format!("{event:?}");
-    debug.split(|c: char| !c.is_ascii_alphanumeric()).next().unwrap_or("").to_string()
+    debug
+        .split(|c: char| !c.is_ascii_alphanumeric())
+        .next()
+        .unwrap_or("")
+        .to_string()
 }
 
 /// The word A receipt issues, if it mints one — its label on the information
@@ -141,7 +154,10 @@ fn kind_of(event: &cfe::dop::ClosureEvent) -> String {
 fn word_issued(event: &cfe::dop::ClosureEvent) -> Option<String> {
     use cfe::dop::ClosureEvent as E;
     match event {
-        E::SolverWordMinted { orbit, .. } => Some(format!("SolverWordMinted:{}", orbit.iter().map(|b| format!("{b:02x}")).collect::<String>())),
+        E::SolverWordMinted { orbit, .. } => Some(format!(
+            "SolverWordMinted:{}",
+            orbit.iter().map(|b| format!("{b:02x}")).collect::<String>()
+        )),
         E::VocabularyMinted { axis, word, .. } => Some(format!("VocabularyMinted:{axis}:{word}")),
         _ => None,
     }
@@ -200,16 +216,30 @@ pub struct Stepper {
 impl Stepper {
     /// The empty book, before the first receipt.
     pub fn new() -> Stepper {
-        Stepper { replay: Replayer::new(), before: Positions::new(), applied: 0, off_grain: Vec::new(), held_off: std::collections::BTreeSet::new() }
+        Stepper {
+            replay: Replayer::new(),
+            before: Positions::new(),
+            applied: 0,
+            off_grain: Vec::new(),
+            held_off: std::collections::BTreeSet::new(),
+        }
     }
 
     /// A stepper resumed from carried state (reconstruct v): the committed
     /// state after `applied` receipts, read from a position record — never
     /// rebuilt by replaying the receipts before it.
     pub fn from_state(state: cfe::world::state::Committed, applied: usize) -> Stepper {
-        let mut stepper = Stepper { replay: Replayer::from_state(state), ..Stepper::new() };
+        let mut stepper = Stepper {
+            replay: Replayer::from_state(state),
+            ..Stepper::new()
+        };
         stepper.applied = applied;
-        stepper.before = positions(&stepper.replay.state().orbs, applied.saturating_sub(1), &mut stepper.off_grain, &mut stepper.held_off);
+        stepper.before = positions(
+            &stepper.replay.state().orbs,
+            applied.saturating_sub(1),
+            &mut stepper.off_grain,
+            &mut stepper.held_off,
+        );
         stepper
     }
 
@@ -231,7 +261,12 @@ impl Stepper {
             self.replay.apply(r);
         }
         self.applied += receipts.len();
-        self.before = positions(&self.replay.state().orbs, self.applied.saturating_sub(1), &mut self.off_grain, &mut self.held_off);
+        self.before = positions(
+            &self.replay.state().orbs,
+            self.applied.saturating_sub(1),
+            &mut self.off_grain,
+            &mut self.held_off,
+        );
         Ok(())
     }
 
@@ -241,7 +276,12 @@ impl Stepper {
         let i = self.applied;
         self.replay.apply(r);
         self.applied += 1;
-        let after = positions(&self.replay.state().orbs, i, &mut self.off_grain, &mut self.held_off);
+        let after = positions(
+            &self.replay.state().orbs,
+            i,
+            &mut self.off_grain,
+            &mut self.held_off,
+        );
         let moved = change(&self.before, &after);
         self.before = after;
         let word = word_issued(r.event());
@@ -269,7 +309,12 @@ impl Stepper {
             declared.push((word, Holding::Words, 1));
             rows.push((0, Holding::Words, 1));
         }
-        Ok(Some(Step { receipt: i, cite: r.own().0, rows, declared }))
+        Ok(Some(Step {
+            receipt: i,
+            cite: r.own().0,
+            rows,
+            declared,
+        }))
     }
 }
 
@@ -284,10 +329,19 @@ impl Default for Stepper {
 /// window's totals are read twice — as the start-to-end change of holdings
 /// and as the sum of its steps — and a census whose two readings disagree is
 /// refused, so a fold is never signed over entries that cannot re-derive it.
-pub fn take(people: &str, chronicle: &Chronicle, from: usize, to: usize) -> Result<Census, CensusRefused> {
+pub fn take(
+    people: &str,
+    chronicle: &Chronicle,
+    from: usize,
+    to: usize,
+) -> Result<Census, CensusRefused> {
     let receipts = chronicle.receipts();
     if from > to || to > receipts.len() || to == 0 {
-        return Err(CensusRefused::Window { from, to, len: receipts.len() });
+        return Err(CensusRefused::Window {
+            from,
+            to,
+            len: receipts.len(),
+        });
     }
     let mut stepper = Stepper::new();
     stepper.skip(&receipts[..from])?;
@@ -305,8 +359,12 @@ pub fn take(people: &str, chronicle: &Chronicle, from: usize, to: usize) -> Resu
         .collect::<Result<_, CensusRefused>>()?;
     // Words are issued by receipts, not held in a colony's bank: the
     // start-to-end check reads the banked holdings only.
-    let summed: BTreeMap<(u64, Holding), i128> =
-        census.rows.iter().filter(|(_, h, _)| *h != Holding::Words).map(|(o, h, v)| ((*o, *h), *v)).collect();
+    let summed: BTreeMap<(u64, Holding), i128> = census
+        .rows
+        .iter()
+        .filter(|(_, h, _)| *h != Holding::Words)
+        .map(|(o, h, v)| ((*o, *h), *v))
+        .collect();
     if held != summed {
         return Err(CensusRefused::EntriesDisagree);
     }
@@ -316,7 +374,11 @@ pub fn take(people: &str, chronicle: &Chronicle, from: usize, to: usize) -> Resu
 /// Rows and declared as the court reads them: one identity per (people,
 /// orb, holding) and per (people, kind, holding), each value on its
 /// holding's lane, each list in its identities' ascending order.
-fn nets(people: &str, rows: &[(u64, Holding, i128)], declared: &[(String, Holding, i128)]) -> (Vec<Net>, Vec<Net>) {
+fn nets(
+    people: &str,
+    rows: &[(u64, Holding, i128)],
+    declared: &[(String, Holding, i128)],
+) -> (Vec<Net>, Vec<Net>) {
     let net = |who: [u8; 32], holding: Holding, v: i128| {
         let mut lanes = [0i128; 4];
         lanes[holding.lane()] = v;
@@ -324,11 +386,23 @@ fn nets(people: &str, rows: &[(u64, Holding, i128)], declared: &[(String, Holdin
     };
     let mut r: Vec<Net> = rows
         .iter()
-        .map(|(orb, h, v)| net(crate::fold::identity("holding", &format!("{people}/{orb}/{}", h.name())), *h, *v))
+        .map(|(orb, h, v)| {
+            net(
+                crate::fold::identity("holding", &format!("{people}/{orb}/{}", h.name())),
+                *h,
+                *v,
+            )
+        })
         .collect();
     let mut d: Vec<Net> = declared
         .iter()
-        .map(|(kind, h, v)| net(crate::fold::identity("emission", &format!("{people}/{kind}/{}", h.name())), *h, *v))
+        .map(|(kind, h, v)| {
+            net(
+                crate::fold::identity("emission", &format!("{people}/{kind}/{}", h.name())),
+                *h,
+                *v,
+            )
+        })
         .collect();
     r.sort_by_key(|(who, _)| *who);
     d.sort_by_key(|(who, _)| *who);
@@ -351,7 +425,14 @@ impl Census {
         if self.steps.len() <= max.max(1) {
             return vec![self];
         }
-        let Census { people, from, to, head, steps, .. } = self;
+        let Census {
+            people,
+            from,
+            to,
+            head,
+            steps,
+            ..
+        } = self;
         let parts: Vec<Vec<Step>> = steps.chunks(max.max(1)).map(<[Step]>::to_vec).collect();
         let last = parts.len() - 1;
         let mut start = from;
@@ -372,7 +453,13 @@ impl Census {
 
     /// A census whose totals are the sums of `steps`, key by key, zero nets
     /// dropped — the window `[from, to)` ending at chronicle head `head`.
-    pub fn from_steps(people: &str, from: usize, to: usize, head: [u8; 32], steps: Vec<Step>) -> Census {
+    pub fn from_steps(
+        people: &str,
+        from: usize,
+        to: usize,
+        head: [u8; 32],
+        steps: Vec<Step>,
+    ) -> Census {
         let mut rows: BTreeMap<(u64, Holding), i128> = BTreeMap::new();
         let mut declared: BTreeMap<(String, Holding), i128> = BTreeMap::new();
         for s in &steps {
@@ -388,8 +475,16 @@ impl Census {
             from,
             to,
             head,
-            rows: rows.into_iter().filter(|(_, v)| *v != 0).map(|((o, h), v)| (o, h, v)).collect(),
-            declared: declared.into_iter().filter(|(_, v)| *v != 0).map(|((k, h), v)| (k, h, v)).collect(),
+            rows: rows
+                .into_iter()
+                .filter(|(_, v)| *v != 0)
+                .map(|((o, h), v)| (o, h, v))
+                .collect(),
+            declared: declared
+                .into_iter()
+                .filter(|(_, v)| *v != 0)
+                .map(|((k, h), v)| (k, h, v))
+                .collect(),
             steps,
         }
     }
@@ -436,16 +531,27 @@ mod tests {
         let on = cfe::ratio::ratio(2547, 512); // 5094/1024
         assert_eq!(units(&on), (BigInt::from(5094), false));
         let off = cfe::ratio::ratio(161293, 8192); // 20161.625/1024
-        assert_eq!(units(&off), (BigInt::from(20161), true), "floored to the grain, and flagged");
+        assert_eq!(
+            units(&off),
+            (BigInt::from(20161), true),
+            "floored to the grain, and flagged"
+        );
     }
 
     #[test]
     fn a_minted_word_is_an_information_source_delivered_to_the_lexicon() {
         let word = "SolverWordMinted:ab".to_string();
-        let c = census(vec![(0, Holding::Words, 1)], vec![(word, Holding::Words, 1)]);
+        let c = census(
+            vec![(0, Holding::Words, 1)],
+            vec![(word, Holding::Words, 1)],
+        );
         let (rows, declared) = c.nets();
         assert_eq!(rows[0].1, [0, 0, 0, 1], "the lexicon row rides H");
-        assert_eq!(declared[0].1, [0, 0, 0, 1], "the issued word is an H source");
+        assert_eq!(
+            declared[0].1,
+            [0, 0, 0, 1],
+            "the issued word is an H source"
+        );
         let key = ed25519_dalek::SigningKey::from_bytes(&[3; 32]);
         assert_eq!(fold(&key, c.head, rows, declared).fold.continuity(), Ok(()));
     }
@@ -459,33 +565,71 @@ mod tests {
     }
 
     fn census(rows: Vec<(u64, Holding, i128)>, declared: Vec<(String, Holding, i128)>) -> Census {
-        Census { people: "test".into(), from: 0, to: 1, head: [7; 32], rows, declared, steps: Vec::new() }
+        Census {
+            people: "test".into(),
+            from: 0,
+            to: 1,
+            head: [7; 32],
+            rows,
+            declared,
+            steps: Vec::new(),
+        }
     }
 
     #[test]
     fn a_declared_harvest_balances_and_value_from_nowhere_does_not() {
         let key = ed25519_dalek::SigningKey::from_bytes(&[3; 32]);
         let iron = Holding::Matter(Resource::Iron);
-        let harvested = census(vec![(1, iron, 2048), (1, Holding::Stamp, 5)], vec![("YieldCollected".into(), iron, 2048), ("StampApertureReceived".into(), Holding::Stamp, 5)]);
+        let harvested = census(
+            vec![(1, iron, 2048), (1, Holding::Stamp, 5)],
+            vec![
+                ("YieldCollected".into(), iron, 2048),
+                ("StampApertureReceived".into(), Holding::Stamp, 5),
+            ],
+        );
         let (rows, declared) = harvested.nets();
-        assert_eq!(fold(&key, harvested.head, rows, declared).fold.continuity(), Ok(()));
+        assert_eq!(
+            fold(&key, harvested.head, rows, declared).fold.continuity(),
+            Ok(())
+        );
 
         let nowhere = census(vec![(1, iron, 2048)], vec![]);
         let (rows, declared) = nowhere.nets();
-        assert_eq!(fold(&key, nowhere.head, rows, declared).fold.continuity(), Err(Discontinuous::Unbalanced { lane: lane::MATTER }));
+        assert_eq!(
+            fold(&key, nowhere.head, rows, declared).fold.continuity(),
+            Err(Discontinuous::Unbalanced { lane: lane::MATTER })
+        );
     }
 
     #[test]
     fn matter_and_money_never_share_a_lane_and_peoples_never_share_an_identity() {
-        let a = census(vec![(1, Holding::Matter(Resource::Iron), 1), (1, Holding::Stamp, 1)], vec![]);
+        let a = census(
+            vec![
+                (1, Holding::Matter(Resource::Iron), 1),
+                (1, Holding::Stamp, 1),
+            ],
+            vec![],
+        );
         let (rows, _) = a.nets();
         let lanes_of = |who: [u8; 32]| rows.iter().find(|(w, _)| *w == who).map(|(_, l)| *l);
-        assert_eq!(lanes_of(identity("holding", "test/1/Iron")), Some([1, 0, 0, 0]));
-        assert_eq!(lanes_of(identity("holding", "test/1/STAMP")), Some([0, 1, 0, 0]));
-        assert!(rows.windows(2).all(|w| w[0].0 < w[1].0), "rows in their identities' ascending order");
+        assert_eq!(
+            lanes_of(identity("holding", "test/1/Iron")),
+            Some([1, 0, 0, 0])
+        );
+        assert_eq!(
+            lanes_of(identity("holding", "test/1/STAMP")),
+            Some([0, 1, 0, 0])
+        );
+        assert!(
+            rows.windows(2).all(|w| w[0].0 < w[1].0),
+            "rows in their identities' ascending order"
+        );
         let mut b = a.clone();
         b.people = "other".into();
         assert!(b.nets().0.iter().all(|(who, _)| lanes_of(*who).is_none()));
-        assert_ne!(identity("holding", "a/1/Iron"), identity("emission", "a/1/Iron"));
+        assert_ne!(
+            identity("holding", "a/1/Iron"),
+            identity("emission", "a/1/Iron")
+        );
     }
 }

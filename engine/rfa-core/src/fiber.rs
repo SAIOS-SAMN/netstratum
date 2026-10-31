@@ -39,7 +39,9 @@ pub struct MatrixFiber2x2 {
 impl MatrixFiber2x2 {
     /// Build from four exact rationals, row-major.
     pub fn new(a: Ratio, b: Ratio, c: Ratio, d: Ratio) -> Self {
-        Self { m: [[a, b], [c, d]] }
+        Self {
+            m: [[a, b], [c, d]],
+        }
     }
 
     /// The identity connection — a relation that shifts no frame.
@@ -89,8 +91,14 @@ impl MatrixFiber2x2 {
         let (a, b) = (&self.m, &other.m);
         Self {
             m: [
-                [a[0][0].clone() - b[0][0].clone(), a[0][1].clone() - b[0][1].clone()],
-                [a[1][0].clone() - b[1][0].clone(), a[1][1].clone() - b[1][1].clone()],
+                [
+                    a[0][0].clone() - b[0][0].clone(),
+                    a[0][1].clone() - b[0][1].clone(),
+                ],
+                [
+                    a[1][0].clone() - b[1][0].clone(),
+                    a[1][1].clone() - b[1][1].clone(),
+                ],
             ],
         }
     }
@@ -140,7 +148,10 @@ impl MatrixFiber2x2 {
 /// An empty walk holds the identity, lawfully — nowhere to go, nothing
 /// acquired.
 pub fn loop_holonomy(walk: &[MatrixFiber2x2]) -> MatrixFiber2x2 {
-    walk.iter().fold(MatrixFiber2x2::identity(), |carried, step| carried.matmul(step))
+    walk.iter()
+        .fold(MatrixFiber2x2::identity(), |carried, step| {
+            carried.matmul(step)
+        })
 }
 
 /// **The curvature of A plaquette** — `F = dA + A ∧ A` read on the

@@ -19,12 +19,19 @@ pub struct Span {
 impl Span {
     /// The span between two exact bounds, in either order.
     pub fn between(a: Ratio, b: Ratio) -> Span {
-        if a <= b { Span { lo: a, hi: b } } else { Span { lo: b, hi: a } }
+        if a <= b {
+            Span { lo: a, hi: b }
+        } else {
+            Span { lo: b, hi: a }
+        }
     }
 
     /// A span of no extent: an exact value (a count or a share).
     pub fn exact(x: Ratio) -> Span {
-        Span { lo: x.clone(), hi: x }
+        Span {
+            lo: x.clone(),
+            hi: x,
+        }
     }
 
     pub fn lo(&self) -> &Ratio {
@@ -58,18 +65,35 @@ impl Span {
     /// The two halves, about its middle.
     pub fn halves(&self) -> (Span, Span) {
         let m = self.mid();
-        (Span { lo: self.lo.clone(), hi: m.clone() }, Span { lo: m, hi: self.hi.clone() })
+        (
+            Span {
+                lo: self.lo.clone(),
+                hi: m.clone(),
+            },
+            Span {
+                lo: m,
+                hi: self.hi.clone(),
+            },
+        )
     }
 
     /// The sum of two spans: bounds add (exact interval arithmetic).
     pub fn add(&self, o: &Span) -> Span {
-        Span { lo: self.lo.clone() + o.lo.clone(), hi: self.hi.clone() + o.hi.clone() }
+        Span {
+            lo: self.lo.clone() + o.lo.clone(),
+            hi: self.hi.clone() + o.hi.clone(),
+        }
     }
 
     /// The product of two spans: the least and greatest of the bounds'
     /// products (distinct readings; never a square of one value).
     pub fn mul(&self, o: &Span) -> Span {
-        let p = [self.lo.clone() * o.lo.clone(), self.lo.clone() * o.hi.clone(), self.hi.clone() * o.lo.clone(), self.hi.clone() * o.hi.clone()];
+        let p = [
+            self.lo.clone() * o.lo.clone(),
+            self.lo.clone() * o.hi.clone(),
+            self.hi.clone() * o.lo.clone(),
+            self.hi.clone() * o.hi.clone(),
+        ];
         let lo = p.iter().min().cloned().unwrap_or_else(Ratio::zero);
         let hi = p.iter().max().cloned().unwrap_or_else(Ratio::zero);
         Span { lo, hi }
@@ -87,7 +111,12 @@ impl Span {
     /// given): Some(true) once the whole span stands at or above the
     /// threshold, Some(false) once it stands below, None if `rounds`
     /// refinements leave it straddling (refused, never rounded).
-    pub fn decide(&self, threshold: &Ratio, rounds: u32, refine: impl Fn(&Span) -> Span) -> Option<bool> {
+    pub fn decide(
+        &self,
+        threshold: &Ratio,
+        rounds: u32,
+        refine: impl Fn(&Span) -> Span,
+    ) -> Option<bool> {
         let mut s = self.clone();
         for _ in 0..=rounds {
             if s.lo >= *threshold {
@@ -114,7 +143,11 @@ impl Span {
 /// hardens toward 1).
 pub fn poles(holding: &Ratio, magnetism: &Ratio) -> (Span, Ratio) {
     let strength = holding.clone() + magnetism.clone();
-    let balance = if strength.is_zero() { Ratio::zero() } else { holding.clone() / strength.clone() };
+    let balance = if strength.is_zero() {
+        Ratio::zero()
+    } else {
+        holding.clone() / strength.clone()
+    };
     (Span::between(-magnetism.clone(), holding.clone()), balance)
 }
 
@@ -136,13 +169,36 @@ mod tests {
     fn deciding_narrows_and_refuses_rather_than_rounds() {
         // A span straddling ½ narrowed by halving toward a value it encloses.
         let target = ratio(5, 8);
-        let narrow = |s: &Span| { let (a, b) = s.halves(); if a.contains(&target) { a } else { b } };
-        assert_eq!(Span::between(ratio(0, 1), ratio(1, 1)).decide(&ratio(1, 2), 8, narrow), Some(true));
+        let narrow = |s: &Span| {
+            let (a, b) = s.halves();
+            if a.contains(&target) {
+                a
+            } else {
+                b
+            }
+        };
+        assert_eq!(
+            Span::between(ratio(0, 1), ratio(1, 1)).decide(&ratio(1, 2), 8, narrow),
+            Some(true)
+        );
         // A value exactly at the threshold never resolves below: decided true.
-        let at = |s: &Span| { let (a, b) = s.halves(); if a.contains(&ratio(1, 2)) && a.hi() != &ratio(1, 2) { a } else { b } };
-        assert_eq!(Span::between(ratio(0, 1), ratio(1, 1)).decide(&ratio(1, 2), 8, at), Some(true));
+        let at = |s: &Span| {
+            let (a, b) = s.halves();
+            if a.contains(&ratio(1, 2)) && a.hi() != &ratio(1, 2) {
+                a
+            } else {
+                b
+            }
+        };
+        assert_eq!(
+            Span::between(ratio(0, 1), ratio(1, 1)).decide(&ratio(1, 2), 8, at),
+            Some(true)
+        );
         // No refinement: refused.
-        assert_eq!(Span::between(ratio(0, 1), ratio(1, 1)).decide(&ratio(1, 2), 8, |s| s.clone()), None);
+        assert_eq!(
+            Span::between(ratio(0, 1), ratio(1, 1)).decide(&ratio(1, 2), 8, |s| s.clone()),
+            None
+        );
     }
 
     #[test]

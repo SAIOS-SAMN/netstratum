@@ -35,9 +35,9 @@ use cfe::world::{Committed, World};
 use physics::Beacon;
 use std::fs;
 
+use cfe::ratio::ratio_str;
 use ledger::registry::Civilization;
 use ledger::Ledger;
-use cfe::ratio::ratio_str;
 use lens::render::universal_clock;
 
 /// A year = 60 ticks (08 §1.5, placeholder) — one field of the
@@ -229,12 +229,13 @@ const NORMAL_HEADLINES: [&str; 3] = [
 /// physiology register riding the entry header.
 fn archetype(committed: &Committed, voice: &Voice) -> &'static str {
     use cfe::thermal::{band_of, t_eq4, SubstrateBand};
-    let site = committed
-        .orbs
-        .iter()
-        .find_map(|orb| orb.thermal.as_ref());
+    let site = committed.orbs.iter().find_map(|orb| orb.thermal.as_ref());
     if let (Some(class), Some(site)) = (committed.star, site) {
-        let t4 = t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
+        let t4 = t_eq4(
+            &class.luminosity(),
+            site.albedo.value(),
+            site.orbit_r.value(),
+        );
         return match band_of(&t4) {
             Some(SubstrateBand::HyperThermal) => "Emberkin (Radiotroph)",
             Some(SubstrateBand::Cryogenic) => "Coherent (Cryo-Superconductor)",
@@ -325,9 +326,22 @@ pub fn narrate_year(
         .map(|receipt| receipt.into_owned())
         .collect();
     window.reverse();
-    let seed = world.chronicle().history().rev().find(|receipt| receipt.stamp() < boundary)?;
+    let seed = world
+        .chronicle()
+        .history()
+        .rev()
+        .find(|receipt| receipt.stamp() < boundary)?;
     let committed = world.committed();
-    Some(narrate(world_name, voice, year, year_ticks, &committed, &window, zones_before, &seed))
+    Some(narrate(
+        world_name,
+        voice,
+        year,
+        year_ticks,
+        &committed,
+        &window,
+        zones_before,
+        &seed,
+    ))
 }
 
 /// Narrate one completed year from its boundary state and window
@@ -348,19 +362,21 @@ fn narrate(
     let beacon = Beacon::from_digest(seed.own().0);
 
     // ---- the boundary reads (committed state only) ----
-    let banked_embers: Ratio = committed
-        .orbs
-        .iter()
-        .fold(zero.clone(), |sum, orb| sum + orb.banked_amount(Resource::Ember));
-    let banked_sink: Ratio = committed
-        .orbs
-        .iter()
-        .fold(zero.clone(), |sum, orb| sum + orb.banked_amount(Resource::Sink));
+    let banked_embers: Ratio = committed.orbs.iter().fold(zero.clone(), |sum, orb| {
+        sum + orb.banked_amount(Resource::Ember)
+    });
+    let banked_sink: Ratio = committed.orbs.iter().fold(zero.clone(), |sum, orb| {
+        sum + orb.banked_amount(Resource::Sink)
+    });
     let entropy_vented: Ratio = committed
         .orbs
         .iter()
         .fold(zero.clone(), |sum, orb| sum + orb.entropy_vented.clone());
-    let zones_now: u64 = committed.orbs.iter().map(|orb| orb.zones.len() as u64).sum();
+    let zones_now: u64 = committed
+        .orbs
+        .iter()
+        .map(|orb| orb.zones.len() as u64)
+        .sum();
     let overheat = committed.orbs.iter().any(|orb| orb.overheat);
 
     // The thermal siting read: first sited orb carries the band.
@@ -369,9 +385,11 @@ fn narrate(
         .iter()
         .find_map(|orb| orb.thermal.as_ref().map(|site| (orb, site.clone())));
     let t4 = match (committed.star, &sited) {
-        (Some(class), Some((_, site))) => {
-            Some(t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value()))
-        }
+        (Some(class), Some((_, site))) => Some(t_eq4(
+            &class.luminosity(),
+            site.albedo.value(),
+            site.orbit_r.value(),
+        )),
         _ => None,
     };
     let sub_mesic = t4
@@ -382,9 +400,7 @@ fn narrate(
     // ECON-E (05 §1.2): the year's heating bill on sub-mesic orbs.
     let heating_need: Ratio = match sub_mesic {
         true => {
-            cfe::dop::heating_per_zone()
-                * ratio(zones_now as i64, 1)
-                * ratio(year_ticks as i64, 1)
+            cfe::dop::heating_per_zone() * ratio(zones_now as i64, 1) * ratio(year_ticks as i64, 1)
         }
         false => zero.clone(),
     };
@@ -523,9 +539,8 @@ fn narrate(
         lines.push(offer);
     }
     if in_vault && banked_embers > zero {
-        lines.push(
-            "The vault band holds: banked stores sit lossless in the deep cold.".to_string(),
-        );
+        lines
+            .push("The vault band holds: banked stores sit lossless in the deep cold.".to_string());
     }
 
     // What they built, with exact growth.
@@ -672,9 +687,21 @@ pub fn render_entry_tlv(entry: &JournalEntry) -> Vec<u8> {
     card::put_str(jrn::HEADLINE, &entry.headline, &mut out);
     card::put_str(jrn::BODY, &entry.body, &mut out);
     card::put_str(jrn::BANKED_EMBERS, &entry.economics.banked_embers, &mut out);
-    card::put_str(jrn::HEATING_NEED, &entry.economics.heating_need_year, &mut out);
-    card::put_str(jrn::ENTROPY_VENTED, &entry.economics.entropy_vented, &mut out);
-    card::put_str(jrn::VENTED_YEAR, &entry.economics.vented_this_year, &mut out);
+    card::put_str(
+        jrn::HEATING_NEED,
+        &entry.economics.heating_need_year,
+        &mut out,
+    );
+    card::put_str(
+        jrn::ENTROPY_VENTED,
+        &entry.economics.entropy_vented,
+        &mut out,
+    );
+    card::put_str(
+        jrn::VENTED_YEAR,
+        &entry.economics.vented_this_year,
+        &mut out,
+    );
     card::put_str(jrn::BANKED_SINK, &entry.economics.banked_sink, &mut out);
     card::put_u64(jrn::ZONES, entry.economics.zones, &mut out);
     card::put_u64(jrn::ZONES_BUILT, entry.economics.zones_built, &mut out);

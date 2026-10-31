@@ -23,11 +23,22 @@ fn main() {
     let orb = world.orb().expect("the colony stands");
     println!("orb wire bytes: {}", hex(&orb.wire_bytes()));
     let reloaded = ColonyOrb::from_wire(&orb.wire_bytes()).expect("decodes");
-    println!("round trip byte-exact: {}", reloaded.wire_bytes() == orb.wire_bytes());
+    println!(
+        "round trip byte-exact: {}",
+        reloaded.wire_bytes() == orb.wire_bytes()
+    );
 
     for event in [
-        ClosureEvent::ColonyFounded { orb_id: 1, name: "meridian".into() },
-        ClosureEvent::ZoneBuilt { orb_id: 1, tile: 4, kind: ZoneKind::Extractor, base: None },
+        ClosureEvent::ColonyFounded {
+            orb_id: 1,
+            name: "meridian".into(),
+        },
+        ClosureEvent::ZoneBuilt {
+            orb_id: 1,
+            tile: 4,
+            kind: ZoneKind::Extractor,
+            base: None,
+        },
         ClosureEvent::YieldCollected {
             orb_id: 1,
             resource: Resource::Iron,
@@ -38,8 +49,14 @@ fn main() {
             principal: 1,
             handle: "harvest-bot".into(),
         },
-        ClosureEvent::ScopeGranted { agent: 2, scope: cfe::ipsal::Scope::Collect },
-        ClosureEvent::ScopeRevoked { agent: 2, scope: cfe::ipsal::Scope::Collect },
+        ClosureEvent::ScopeGranted {
+            agent: 2,
+            scope: cfe::ipsal::Scope::Collect,
+        },
+        ClosureEvent::ScopeRevoked {
+            agent: 2,
+            scope: cfe::ipsal::Scope::Collect,
+        },
     ] {
         println!("event {:?}", event);
         println!("  bytes: {}", hex(&event.wire_bytes()));

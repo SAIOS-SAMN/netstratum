@@ -187,8 +187,7 @@ pub fn load_peer_read(name: &str) -> Result<World, String> {
     if !path.exists() {
         return Err(format!("{name}: no chronicle.tlv"));
     }
-    let chronicle =
-        cfe::persist::load(&path).map_err(|r| format!("{name}: load refused {r:?}"))?;
+    let chronicle = cfe::persist::load(&path).map_err(|r| format!("{name}: load refused {r:?}"))?;
     Ok(World::resume(chronicle))
 }
 
@@ -396,13 +395,13 @@ pub fn render_frame(style: Style, home: &World, pane: Pane, orb_id: u64) -> Vec<
     )));
     lines.extend(render_pane(style, home, pane, orb_id));
     lines.push(hub_link_line(style, pane));
-    lines.push(style.border(
-        "╠══ COLONY ══════════════════════════════════════════════════════════╣",
-    ));
+    lines.push(
+        style.border("╠══ COLONY ══════════════════════════════════════════════════════════╣"),
+    );
     lines.push(colony_strip(style, home, orb_id));
-    lines.push(style.border(
-        "╚════════════════════════════════════════════════════════════════════╝",
-    ));
+    lines.push(
+        style.border("╚════════════════════════════════════════════════════════════════════╝"),
+    );
     lines.push(format!(
         "  {}",
         style.hint(
@@ -454,11 +453,7 @@ fn render_exch(style: Style, home: &World) -> Vec<String> {
     } else {
         format!(
             "  clear seal crystal {}/{} iron {}/{} · cascade {}",
-            mi.crystal_depth,
-            mi.seal_need,
-            mi.iron_depth,
-            mi.seal_need,
-            mi.cascade_pressure
+            mi.crystal_depth, mi.seal_need, mi.iron_depth, mi.seal_need, mi.cascade_pressure
         )
     };
     let mut lines = vec![
@@ -574,10 +569,7 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
         ),
         format!(
             "  anatomy met={} · doctrine dis={} per={} · reoriented={}  (36)",
-            posture.metabolism,
-            posture.disposition,
-            posture.perception,
-            posture.reoriented
+            posture.metabolism, posture.disposition, posture.perception, posture.reoriented
         ),
     ];
     let domains = [
@@ -607,15 +599,13 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
     } else {
         lines.push(format!(
             "  MKT depth crystal {}/{} iron {}/{} · cascade {}",
-            mi.crystal_depth,
-            mi.seal_need,
-            mi.iron_depth,
-            mi.seal_need,
-            mi.cascade_pressure
+            mi.crystal_depth, mi.seal_need, mi.iron_depth, mi.seal_need, mi.cascade_pressure
         ));
     }
     let atm = home.medium_integrity(
-        home.orb().map(|o| o.orb_id).unwrap_or(cfe::world::FIRST_ORB),
+        home.orb()
+            .map(|o| o.orb_id)
+            .unwrap_or(cfe::world::FIRST_ORB),
     );
     let atm_paint = if atm.compromised {
         style.warn("COMPROMISED")
@@ -643,11 +633,7 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
     };
     lines.push(format!(
         "  INF rank {} · {} · ward {} · detect g{} · instruments {}",
-        inf.inf_rank,
-        veil_w,
-        ward_w,
-        inf.detection_grade,
-        inf.instrument_count
+        inf.inf_rank, veil_w, ward_w, inf.detection_grade, inf.instrument_count
     ));
     let cog = home.cog_integrity();
     let cyb = home.cyb_integrity();
@@ -681,9 +667,7 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
     ));
     lines.push(format!(
         "  {}",
-        style.hint(
-            "spy probe · veil|ward · posture · escort · market · forge · suite spy"
-        )
+        style.hint("spy probe · veil|ward · posture · escort · market · forge · suite spy")
     ));
     // KIN colour (P5-K2)
     let kin_deal = home
@@ -741,7 +725,12 @@ fn render_defend(style: Style, home: &World) -> Vec<String> {
         .routes()
         .iter()
         .map(|(d, _)| *d)
-        .chain(home.committed().element_routes.iter().map(|(d, _, _, _)| *d))
+        .chain(
+            home.committed()
+                .element_routes
+                .iter()
+                .map(|(d, _, _, _)| *d),
+        )
         .collect();
     if !deals.is_empty() {
         lines.push(format!("  {}", style.label("CORRIDOR RISK")));
@@ -1057,16 +1046,20 @@ fn render_grow(style: Style, home: &World, orb_id: u64) -> Vec<String> {
         committed.instruments.len()
     )
     .pipe(|s| style.info(&s))];
-    let zone_line = committed.orbs.iter().find(|o| o.orb_id == orb_id).map(|orb| {
-        format!(
-            "  zones: {}",
-            orb.zones
-                .iter()
-                .map(|z| cfe::dop::zone_word(z.kind))
-                .collect::<Vec<_>>()
-                .join(", ")
-        )
-    });
+    let zone_line = committed
+        .orbs
+        .iter()
+        .find(|o| o.orb_id == orb_id)
+        .map(|orb| {
+            format!(
+                "  zones: {}",
+                orb.zones
+                    .iter()
+                    .map(|z| cfe::dop::zone_word(z.kind))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        });
     if let Some(line) = zone_line {
         lines.push(style.dim(&line));
     }
@@ -1174,10 +1167,7 @@ mod h13_hub_deep_link_pins {
         assert_eq!(Pane::Fleet.hub_links(), &["trade fleet", "bench fleet"]);
         assert_eq!(Pane::Exch.hub_links(), &["trade books", "bench offices"]);
         // Craft-native panes still expose two bench domains (planetary/build).
-        assert_eq!(
-            Pane::Grow.hub_links(),
-            &["bench planetary", "bench build"]
-        );
+        assert_eq!(Pane::Grow.hub_links(), &["bench planetary", "bench build"]);
         assert_eq!(Pane::Defend.hub_links(), &["intel opsec", "bench doctrine"]);
         assert_eq!(
             Pane::Explore.hub_links(),

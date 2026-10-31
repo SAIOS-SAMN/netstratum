@@ -51,7 +51,11 @@ impl CellSheaf {
             (s_prev.rank(), torsion)
         };
 
-        Cohomology { grade: k, betti: ker_dim - rank_prev, torsion }
+        Cohomology {
+            grade: k,
+            betti: ker_dim - rank_prev,
+            torsion,
+        }
     }
 
     /// The peel. Reduce `c ∈ Cᵏ` to its canonical representative in
@@ -76,5 +80,4 @@ impl CellSheaf {
         }
         matvec(&s.u_inv, &coords)
     }
-
 }

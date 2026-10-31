@@ -32,7 +32,12 @@ use crate::need::Family;
 
 /// The four generator families, in declaration order — the axes an instinct
 /// weights. (Mirrors `selfmap`'s private census order.)
-const FAMILIES: [Family; 4] = [Family::Symmetry, Family::Recolor, Family::Tile, Family::Object];
+const FAMILIES: [Family; 4] = [
+    Family::Symmetry,
+    Family::Recolor,
+    Family::Tile,
+    Family::Object,
+];
 
 /// **The workbench chooser** — a chronicle-seeded proportional draw over the
 /// instinct weights: the family the Mind reaches for first this beat, sampled
@@ -44,7 +49,9 @@ const FAMILIES: [Family; 4] = [Family::Symmetry, Family::Recolor, Family::Tile, 
 /// vocabulary facing the same deficit still guess differently if their
 /// histories differ (the digest is a hash chain of their exact past).
 pub fn choose(weights: &[(Family, u64)], seed: [u8; 32]) -> Option<Family> {
-    let total: u64 = weights.iter().fold(0u64, |sum, (_, w)| sum.saturating_add(*w));
+    let total: u64 = weights
+        .iter()
+        .fold(0u64, |sum, (_, w)| sum.saturating_add(*w));
     if total == 0 {
         return None;
     }
@@ -101,8 +108,16 @@ pub fn blend(
     FAMILIES
         .iter()
         .map(|f| {
-            let i_f = instinct.iter().find(|(g, _)| g == f).map(|(_, w)| *w).unwrap_or(0);
-            let c_f = curiosity.iter().position(|g| g == f).map(|p| n - p as u64).unwrap_or(0);
+            let i_f = instinct
+                .iter()
+                .find(|(g, _)| g == f)
+                .map(|(_, w)| *w)
+                .unwrap_or(0);
+            let c_f = curiosity
+                .iter()
+                .position(|g| g == f)
+                .map(|p| n - p as u64)
+                .unwrap_or(0);
             // W_f × (σ_den · i_total · c_total) = σ_n·i_f·c_total + inv·c_f·i_total.
             // The bracket is a shared constant across families — it cancels in
             // the proportional draw, so these integers are the blended weights.
@@ -116,8 +131,6 @@ pub fn blend(
 #[cfg(test)]
 mod tests {
     use super::*;
-    
-    
 
     #[test]
     fn stress_blends_exploit_against_explore() {
@@ -130,19 +143,35 @@ mod tests {
         // σ = 1 (starving): collapse onto the rut — Recolor must be the heaviest.
         let stressed = blend(&instinct, &curiosity, 1, 1);
         let top = |w: &[(Family, u64)]| w.iter().max_by_key(|(_, x)| *x).map(|(f, _)| *f).unwrap();
-        assert_eq!(top(&stressed), Recolor, "a starving line reaches for its rut");
+        assert_eq!(
+            top(&stressed),
+            Recolor,
+            "a starving line reaches for its rut"
+        );
 
         // σ = 0 (sated): follow curiosity — the thin frontier Object leads.
         let sated = blend(&instinct, &curiosity, 0, 1);
-        assert_eq!(top(&sated), Object, "a prosperous line explores its frontier");
+        assert_eq!(
+            top(&sated),
+            Object,
+            "a prosperous line explores its frontier"
+        );
 
         // σ = 1/2: the rut still shows through (Recolor's 40 is large), but the
         // frontier has pulled real weight onto Object — the blend is a genuine
         // mix, not a switch.
         let mixed = blend(&instinct, &curiosity, 1, 2);
-        let w = |f| mixed.iter().find(|(g, _)| *g == f).map(|(_, x)| *x).unwrap();
-        assert!(w(Object) > w(Tile), "at half stress the frontier lifts Object above its habit weight");
+        let w = |f| {
+            mixed
+                .iter()
+                .find(|(g, _)| *g == f)
+                .map(|(_, x)| *x)
+                .unwrap()
+        };
+        assert!(
+            w(Object) > w(Tile),
+            "at half stress the frontier lifts Object above its habit weight"
+        );
         assert!(w(Recolor) > 0, "the rut is still present in the blend");
     }
-
 }

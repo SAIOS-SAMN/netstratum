@@ -42,8 +42,15 @@ pub const PENDING_BOUND: usize = census::MAX_SPAN * 8;
 /// line entry. The archive's root, `var`, keeps its bare names (its folds
 /// were sealed under them).
 pub fn people_of(dir: &Path) -> String {
-    let world = dir.file_name().and_then(|n| n.to_str()).unwrap_or("unnamed");
-    let root = dir.parent().and_then(Path::parent).and_then(|r| r.file_name()).and_then(|n| n.to_str());
+    let world = dir
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("unnamed");
+    let root = dir
+        .parent()
+        .and_then(Path::parent)
+        .and_then(|r| r.file_name())
+        .and_then(|n| n.to_str());
     match root {
         Some(r) if r != "var" => format!("{r}/{world}"),
         _ => world.to_string(),
@@ -52,7 +59,12 @@ pub fn people_of(dir: &Path) -> String {
 
 /// Publish one fold's prefix for replay (78.125 evidence), from the line's
 /// own entries. `Refused(Published)` — upheld before — is answered.
-pub fn publish_fold(up: &Uplink, key: &ed25519_dalek::SigningKey, line: &TierLine, mark: &FoldMark) -> io::Result<Challenged> {
+pub fn publish_fold(
+    up: &Uplink,
+    key: &ed25519_dalek::SigningKey,
+    line: &TierLine,
+    mark: &FoldMark,
+) -> io::Result<Challenged> {
     let bad = |why: &str| io::Error::new(io::ErrorKind::InvalidData, why.to_string());
     let at = Stamp::from_key(&mark.at).ok_or_else(|| bad("an unreadable fold stamp"))?;
     if mark.first < line.offset || mark.first + mark.count > line.total() {
@@ -69,7 +81,10 @@ pub fn publish_fold(up: &Uplink, key: &ed25519_dalek::SigningKey, line: &TierLin
 
 /// Whether a publication answer leaves the fold answered.
 pub fn answered(c: &Challenged) -> bool {
-    matches!(c, Challenged::Upheld { .. } | Challenged::Refused(ChallengeRefusal::Published))
+    matches!(
+        c,
+        Challenged::Upheld { .. } | Challenged::Refused(ChallengeRefusal::Published)
+    )
 }
 
 /// Prune by finality: archive the hot entries netted only by folds the court
@@ -77,7 +92,11 @@ pub fn answered(c: &Challenged) -> bool {
 /// Unwound or Unrecorded — walking the folds in order and stopping at the
 /// first that is not settled. Returns how many entries were archived, and the
 /// first finality read that failed, if one did.
-pub fn prune(up: &Uplink, line: &mut TierLine, log: &FoldLog) -> io::Result<(usize, Option<String>)> {
+pub fn prune(
+    up: &Uplink,
+    line: &mut TierLine,
+    log: &FoldLog,
+) -> io::Result<(usize, Option<String>)> {
     let mut unread = None;
     let n = log.prunable(line, |f| {
         let read = Stamp::from_key(&f.at)
@@ -110,7 +129,8 @@ pub fn prune(up: &Uplink, line: &mut TierLine, log: &FoldLog) -> io::Result<(usi
 const POSITION: &[u8] = b"netstratum census position v1";
 
 fn position_path(home: &Path, people: &str) -> PathBuf {
-    home.join("positions-colonies").join(format!("{}.pos", people.replace('/', "~")))
+    home.join("positions-colonies")
+        .join(format!("{}.pos", people.replace('/', "~")))
 }
 
 fn write_position(home: &Path, people: &str, f: &Followed) -> io::Result<()> {
@@ -129,7 +149,10 @@ fn write_position(home: &Path, people: &str, f: &Followed) -> io::Result<()> {
 }
 
 /// A people's carried position: (applied, head, bytes, state).
-fn read_position(home: &Path, people: &str) -> Option<(usize, [u8; 32], u64, cfe::world::state::Committed)> {
+fn read_position(
+    home: &Path,
+    people: &str,
+) -> Option<(usize, [u8; 32], u64, cfe::world::state::Committed)> {
     let bytes = std::fs::read(position_path(home, people)).ok()?;
     let rest = bytes.strip_prefix(POSITION)?;
     let applied = u64::from_le_bytes(rest.get(..8)?.try_into().ok()?) as usize;
@@ -183,7 +206,13 @@ pub struct Follower {
 
 impl Follower {
     pub fn new(root: &Path, home: &Path) -> io::Result<Follower> {
-        Ok(Follower { root: root.to_path_buf(), home: home.to_path_buf(), key: tier_key(home, "colonies")?, peoples: BTreeMap::new(), per_round: 8 })
+        Ok(Follower {
+            root: root.to_path_buf(),
+            home: home.to_path_buf(),
+            key: tier_key(home, "colonies")?,
+            peoples: BTreeMap::new(),
+            per_round: 8,
+        })
     }
 
     /// Seat a people the first time it is seen: read its whole chronicle,
@@ -195,13 +224,16 @@ impl Follower {
             return Ok(f);
         }
         let mut cursor = TailCursor::default();
-        let receipts = read_tail(&dir.join("chronicle.tlv"), &mut cursor).map_err(|e| format!("{people}: the chronicle did not read: {e:?}"))?;
+        let receipts = read_tail(&dir.join("chronicle.tlv"), &mut cursor)
+            .map_err(|e| format!("{people}: the chronicle did not read: {e:?}"))?;
         let (folded, folded_head) = cursors.at.get(&people).copied().unwrap_or((0, [0; 32]));
         if folded > receipts.len() || (folded > 0 && receipts[folded - 1].own().0 != folded_head) {
             return Err(format!("{people}: the chronicle no longer holds the receipt its cursor names (receipt {folded}); not followed"));
         }
         let mut stepper = Stepper::new();
-        stepper.skip(&receipts[..folded]).map_err(|e| format!("{people}: {e:?}"))?;
+        stepper
+            .skip(&receipts[..folded])
+            .map_err(|e| format!("{people}: {e:?}"))?;
         let mut pending = Vec::new();
         for r in &receipts[folded..] {
             if let Some(step) = stepper.step(r).map_err(|e| format!("{people}: {e:?}"))? {
@@ -209,7 +241,17 @@ impl Follower {
             }
         }
         let head = receipts.last().map(|r| r.own().0).unwrap_or([0; 32]);
-        Ok(Followed { dir: dir.to_path_buf(), cursor, stepper, pending, folded, head, halted: None, reported_off: 0, recorded: 0 })
+        Ok(Followed {
+            dir: dir.to_path_buf(),
+            cursor,
+            stepper,
+            pending,
+            folded,
+            head,
+            halted: None,
+            reported_off: 0,
+            recorded: 0,
+        })
     }
 
     /// Seat a people from its carried POSITION: the census state the record
@@ -218,13 +260,22 @@ impl Follower {
     /// record, or it stands past the cursor (the line rolled back behind it),
     /// or the tail after it does not read or does not hold the cursor's
     /// receipt where the cursor names it.
-    fn seat_carried(&self, dir: &Path, people: &str, cursors: &crate::line::Cursors) -> Option<Followed> {
+    fn seat_carried(
+        &self,
+        dir: &Path,
+        people: &str,
+        cursors: &crate::line::Cursors,
+    ) -> Option<Followed> {
         let (applied, head, at, state) = read_position(&self.home, people)?;
         let (folded, folded_head) = cursors.at.get(people).copied().unwrap_or((0, [0; 32]));
         if applied == 0 || applied > folded {
             return None;
         }
-        let mut cursor = TailCursor { bytes: at, receipts: applied as u64, head: Some(cfe::vrp::ReceiptHash(head)) };
+        let mut cursor = TailCursor {
+            bytes: at,
+            receipts: applied as u64,
+            head: Some(cfe::vrp::ReceiptHash(head)),
+        };
         let tail = read_tail(&dir.join("chronicle.tlv"), &mut cursor).ok()?;
         let caught = folded - applied;
         let folded_at = match caught {
@@ -243,7 +294,17 @@ impl Follower {
             }
         }
         let last = tail.last().map(|r| r.own().0).unwrap_or(head);
-        Some(Followed { dir: dir.to_path_buf(), cursor, stepper, pending, folded, head: last, halted: None, reported_off: 0, recorded: applied })
+        Some(Followed {
+            dir: dir.to_path_buf(),
+            cursor,
+            stepper,
+            pending,
+            folded,
+            head: last,
+            halted: None,
+            reported_off: 0,
+            recorded: applied,
+        })
     }
 
     /// One round: read every chronicle's new tail, fold what moved, publish
@@ -265,7 +326,12 @@ impl Follower {
             match self.resync(court, &mut line, &mut log, &mut cursors)? {
                 Some(note) => round.notes.push(note),
                 None => {
-                    let hex = |h: &[u8; 32]| h.iter().take(8).map(|b| format!("{b:02x}")).collect::<String>();
+                    let hex = |h: &[u8; 32]| {
+                        h.iter()
+                            .take(8)
+                            .map(|b| format!("{b:02x}"))
+                            .collect::<String>()
+                    };
                     round.notes.push(format!(
                         "NOT FOLDING — the court's line head {}… is not on this line (head {}…); an operator must look",
                         hex(&court),
@@ -283,7 +349,11 @@ impl Follower {
             .filter(|p| p.join("chronicle.tlv").exists())
             // A rotated `<world>--closed-*` directory is an archived copy, not
             // a people: following one would hold a whole replay for nothing.
-            .filter(|p| !p.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.contains("--closed-")))
+            .filter(|p| {
+                !p.file_name()
+                    .and_then(|n| n.to_str())
+                    .is_some_and(|n| n.contains("--closed-"))
+            })
             .collect();
         dirs.sort();
         for dir in dirs {
@@ -301,7 +371,9 @@ impl Follower {
                 }
                 continue;
             }
-            let Some(f) = self.peoples.get_mut(&people) else { continue };
+            let Some(f) = self.peoples.get_mut(&people) else {
+                continue;
+            };
             if f.halted.is_some() || f.pending.len() >= PENDING_BOUND {
                 continue;
             }
@@ -309,7 +381,9 @@ impl Follower {
                 Ok(r) => r,
                 Err(e) => {
                     f.halted = Some(format!("the chronicle did not read: {e:?}"));
-                    round.notes.push(format!("{people}: HALTED — the chronicle did not read: {e:?}"));
+                    round.notes.push(format!(
+                        "{people}: HALTED — the chronicle did not read: {e:?}"
+                    ));
                     continue;
                 }
             };
@@ -354,11 +428,21 @@ impl Follower {
             if round.folds >= self.per_round {
                 break; // the round's budget is spent; the rest folds next round
             }
-            let window = Census::from_steps(people, f.folded, applied, f.head, std::mem::take(&mut f.pending));
+            let window = Census::from_steps(
+                people,
+                f.folded,
+                applied,
+                f.head,
+                std::mem::take(&mut f.pending),
+            );
             let mut chunks = window.chunks(census::MAX_SPAN).into_iter();
             while let Some(chunk) = chunks.next() {
                 if round.folds >= self.per_round {
-                    f.pending = chunk.steps.into_iter().chain(chunks.by_ref().flat_map(|c| c.steps)).collect();
+                    f.pending = chunk
+                        .steps
+                        .into_iter()
+                        .chain(chunks.by_ref().flat_map(|c| c.steps))
+                        .collect();
                     break;
                 }
                 let batch = chunk.entries();
@@ -366,23 +450,35 @@ impl Follower {
                 let signed = fold(&self.key, line.peek_all(&batch), rows, declared);
                 if let Err(d) = signed.fold.continuity() {
                     f.halted = Some(format!("local continuity broken: {d:?}"));
-                    round.notes.push(format!("{people}: HALTED — local continuity broken: {d:?}"));
+                    round
+                        .notes
+                        .push(format!("{people}: HALTED — local continuity broken: {d:?}"));
                     break;
                 }
                 let reply = match up.uplink_fold(&signed) {
                     Ok(reply) => reply,
                     Err(e) => {
                         // The court is away: keep this chunk and the rest pending.
-                        f.pending = chunk.steps.into_iter().chain(chunks.by_ref().flat_map(|c| c.steps)).collect();
+                        f.pending = chunk
+                            .steps
+                            .into_iter()
+                            .chain(chunks.by_ref().flat_map(|c| c.steps))
+                            .collect();
                         return Err(e);
                     }
                 };
                 let Uplinked::Admitted { at, .. } = reply else {
                     f.halted = Some(format!("the court refused: {reply:?}"));
-                    round.notes.push(format!("{people}: HALTED — the court refused a fold: {reply:?}"));
+                    round.notes.push(format!(
+                        "{people}: HALTED — the court refused a fold: {reply:?}"
+                    ));
                     break;
                 };
-                let mark = FoldMark { at: at.key(), first: line.total(), count: batch.len() as u64 };
+                let mark = FoldMark {
+                    at: at.key(),
+                    first: line.total(),
+                    count: batch.len() as u64,
+                };
                 round.entries += batch.len();
                 line.append_all(batch)?;
                 log.push(mark.clone())?;
@@ -391,18 +487,29 @@ impl Follower {
                 round.folds += 1;
                 match publish_fold(up, &self.key, &line, &mark) {
                     Ok(c) if answered(&c) => round.published += 1,
-                    Ok(c) => round.notes.push(format!("{people}: fold at h {} NOT UPHELD on publication: {c:?}", at.h)),
-                    Err(e) => round.notes.push(format!("{people}: fold at h {} not published: {e}", at.h)),
+                    Ok(c) => round.notes.push(format!(
+                        "{people}: fold at h {} NOT UPHELD on publication: {c:?}",
+                        at.h
+                    )),
+                    Err(e) => round
+                        .notes
+                        .push(format!("{people}: fold at h {} not published: {e}", at.h)),
                 }
             }
         }
 
         // Carry each fully folded people's position forward (reconstruct v).
         for (people, f) in self.peoples.iter_mut() {
-            if f.halted.is_none() && f.pending.is_empty() && f.folded == f.stepper.applied() && f.folded > f.recorded {
+            if f.halted.is_none()
+                && f.pending.is_empty()
+                && f.folded == f.stepper.applied()
+                && f.folded > f.recorded
+            {
                 match write_position(&self.home, people, f) {
                     Ok(()) => f.recorded = f.folded,
-                    Err(e) => round.notes.push(format!("{people}: position not carried: {e}")),
+                    Err(e) => round
+                        .notes
+                        .push(format!("{people}: position not carried: {e}")),
                 }
             }
         }
@@ -444,11 +551,20 @@ impl Follower {
         let lost: std::collections::BTreeSet<[u8; 32]> = removed.iter().map(|e| e.cite).collect();
         // Which people wrote each lost receipt, and where it sits in its chronicle.
         let mut rolled = Vec::new();
-        for dir in std::fs::read_dir(self.root.join("worlds"))?.flatten().map(|e| e.path()) {
-            if dir.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.contains("--closed-")) {
+        for dir in std::fs::read_dir(self.root.join("worlds"))?
+            .flatten()
+            .map(|e| e.path())
+        {
+            if dir
+                .file_name()
+                .and_then(|n| n.to_str())
+                .is_some_and(|n| n.contains("--closed-"))
+            {
                 continue;
             }
-            let Ok(chronicle) = cfe::persist::load(&dir.join("chronicle.tlv")) else { continue };
+            let Ok(chronicle) = cfe::persist::load(&dir.join("chronicle.tlv")) else {
+                continue;
+            };
             let receipts = chronicle.receipts();
             if let Some(first) = receipts.iter().position(|r| lost.contains(&r.own().0)) {
                 let people = people_of(&dir);
@@ -471,7 +587,11 @@ impl Follower {
 
     /// Peoples followed, and those halted with why.
     pub fn standing(&self) -> (usize, Vec<(String, String)>) {
-        let halted = self.peoples.iter().filter_map(|(p, f)| f.halted.clone().map(|why| (p.clone(), why))).collect();
+        let halted = self
+            .peoples
+            .iter()
+            .filter_map(|(p, f)| f.halted.clone().map(|why| (p.clone(), why)))
+            .collect();
         (self.peoples.len(), halted)
     }
 }
@@ -525,9 +645,17 @@ mod tests {
         assert_eq!(carried.stepper.state(), whole.stepper.state());
         assert_eq!(carried.head, whole.head);
         assert_eq!(carried.cursor, whole.cursor);
-        let cites = |f: &super::Followed| f.pending.iter().map(|s| (s.receipt, s.cite, s.rows.clone())).collect::<Vec<_>>();
+        let cites = |f: &super::Followed| {
+            f.pending
+                .iter()
+                .map(|s| (s.receipt, s.cite, s.rows.clone()))
+                .collect::<Vec<_>>()
+        };
         assert_eq!(cites(&carried), cites(&whole));
-        assert!(!carried.pending.is_empty(), "the new receipts moved holdings");
+        assert!(
+            !carried.pending.is_empty(),
+            "the new receipts moved holdings"
+        );
 
         // A record standing past the cursor (the line rolled back) is not used.
         write_position(&home, &people, &whole).unwrap();
@@ -539,7 +667,13 @@ mod tests {
     #[test]
     fn a_people_is_namespaced_by_its_universe_and_the_archive_keeps_bare_names() {
         assert_eq!(people_of(Path::new("var/worlds/tun-reach")), "tun-reach");
-        assert_eq!(people_of(Path::new("/opt/netstratum/var-g2/worlds/tun-reach")), "var-g2/tun-reach");
-        assert_eq!(people_of(Path::new("var-g2/worlds/tun-reach/")), "var-g2/tun-reach");
+        assert_eq!(
+            people_of(Path::new("/opt/netstratum/var-g2/worlds/tun-reach")),
+            "var-g2/tun-reach"
+        );
+        assert_eq!(
+            people_of(Path::new("var-g2/worlds/tun-reach/")),
+            "var-g2/tun-reach"
+        );
     }
 }

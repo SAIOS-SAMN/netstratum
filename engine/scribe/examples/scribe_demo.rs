@@ -9,7 +9,9 @@ use ledger::registry::{Civilization, Registry};
 use ledger::Ledger;
 
 fn main() {
-    let var = std::env::args().nth(1).expect("usage: ledger_demo <var-root>");
+    let var = std::env::args()
+        .nth(1)
+        .expect("usage: ledger_demo <var-root>");
     let registry = Registry::at(format!("{var}/registry"));
     let book = Ledger::at(format!("{var}/worlds"));
 
@@ -51,7 +53,15 @@ fn main() {
     }
     cinder.collect().unwrap();
     scribe::record(&book, "first-light", "cinder", "bimaniform-line", &cinder).unwrap();
-    scribe::record_solve(&book, "first-light", "arc_6150a2bd", "rotate180", "deadbeef", 1).unwrap();
+    scribe::record_solve(
+        &book,
+        "first-light",
+        "arc_6150a2bd",
+        "rotate180",
+        "deadbeef",
+        1,
+    )
+    .unwrap();
 
     // Deep Chorus settles tidefall, in the lantern-passage world:
     // safe and slow, an agent on a leash.
@@ -65,7 +75,14 @@ fn main() {
         tidefall.tick();
     }
     tidefall.collect_as(rover, cfe::world::FIRST_ORB).unwrap();
-    scribe::record(&book, "lantern-passage", "tidefall", "deep-chorus", &tidefall).unwrap();
+    scribe::record(
+        &book,
+        "lantern-passage",
+        "tidefall",
+        "deep-chorus",
+        &tidefall,
+    )
+    .unwrap();
 
     println!("registered 2 civilizations, exported 2 worlds under {var}");
 }

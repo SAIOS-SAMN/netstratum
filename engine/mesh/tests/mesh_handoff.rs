@@ -16,10 +16,8 @@ use mesh::{authority, yield_authority, MeshRefused};
 
 /// A per-test scratch directory (deterministic name, cleaned before use).
 fn scratch(name: &str) -> PathBuf {
-    let dir = std::env::temp_dir().join(format!(
-        "netstratum-handoff-{}-{name}",
-        std::process::id()
-    ));
+    let dir =
+        std::env::temp_dir().join(format!("netstratum-handoff-{}-{name}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(&dir).expect("scratch dir");
     dir
@@ -30,17 +28,29 @@ fn scratch(name: &str) -> PathBuf {
 fn a_premesh_chronicle() -> Chronicle {
     let mut chronicle = Chronicle::new();
     chronicle.append(
-        ClosureEvent::ColonyFounded { orb_id: 1, name: "meridian".into() },
+        ClosureEvent::ColonyFounded {
+            orb_id: 1,
+            name: "meridian".into(),
+        },
         0,
         vec![100],
     );
     chronicle.append(
-        ClosureEvent::ZoneBuilt { orb_id: 1, tile: 4, kind: ZoneKind::Extractor, base: None },
+        ClosureEvent::ZoneBuilt {
+            orb_id: 1,
+            tile: 4,
+            kind: ZoneKind::Extractor,
+            base: None,
+        },
         1,
         vec![100],
     );
     chronicle.append(
-        ClosureEvent::YieldCollected { orb_id: 1, resource: Resource::Iron, amount: ratio(3, 2) },
+        ClosureEvent::YieldCollected {
+            orb_id: 1,
+            resource: Resource::Iron,
+            amount: ratio(3, 2),
+        },
         2,
         vec![100],
     );
@@ -58,9 +68,19 @@ fn the_handoff_walks() {
     assert_eq!(authority(&chronicle), Ok(Some(9)), "the pen moved");
 
     // The taking hand's first append carries the hand and cites the seal.
-    let at = chronicle.append(ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 }, 4, vec![9, seal]).sequence();
+    let at = chronicle
+        .append(
+            ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 },
+            4,
+            vec![9, seal],
+        )
+        .sequence();
     assert_eq!(at, 4);
-    assert_eq!(authority(&chronicle), Ok(Some(9)), "the cited append is lawful");
+    assert_eq!(
+        authority(&chronicle),
+        Ok(Some(9)),
+        "the cited append is lawful"
+    );
     let receipt = &chronicle.receipts()[4];
     assert!(receipt.provenance().contains(&9), "the hand is carried");
     assert!(receipt.provenance().contains(&seal), "the seal is cited");
@@ -74,7 +94,11 @@ fn the_handoff_walks() {
     let path = scratch("walks").join("chronicle.tlv");
     sync(&chronicle, &path).expect("syncs");
     let resumed = load(&path).expect("returns");
-    assert_eq!(authority(&resumed), Ok(Some(12)), "authority survives the file");
+    assert_eq!(
+        authority(&resumed),
+        Ok(Some(12)),
+        "authority survives the file"
+    );
 }
 
 #[test]
@@ -86,7 +110,10 @@ fn an_uncited_first_append_refuses() {
     chronicle.append(ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 }, 4, vec![9]);
     assert_eq!(
         authority(&chronicle),
-        Err(MeshRefused::Uncited { at: 4, handoff: seal }),
+        Err(MeshRefused::Uncited {
+            at: 4,
+            handoff: seal
+        }),
         "the append and the seal are both named"
     );
 }
@@ -108,14 +135,28 @@ fn a_stale_hand_refuses() {
 fn a_stale_seal_refuses_at_the_door() {
     let mut chronicle = a_premesh_chronicle();
     let seal = yield_authority(&mut chronicle, 7, 9, 3).expect("the first seal");
-    chronicle.append(ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 }, 4, vec![9, seal]);
+    chronicle.append(
+        ClosureEvent::ZoneRazed { orb_id: 1, tile: 4 },
+        4,
+        vec![9, seal],
+    );
     let held = chronicle.receipts().len();
 
     // The yielded hand tries to seal onward; the door refuses before
     // anything appends.
     let refused = yield_authority(&mut chronicle, 7, 30, 5).unwrap_err();
-    assert_eq!(refused, MeshRefused::Usurped { at: held as u64, lawful: 9 });
-    assert_eq!(chronicle.receipts().len(), held, "the chronicle is unchanged");
+    assert_eq!(
+        refused,
+        MeshRefused::Usurped {
+            at: held as u64,
+            lawful: 9
+        }
+    );
+    assert_eq!(
+        chronicle.receipts().len(),
+        held,
+        "the chronicle is unchanged"
+    );
 }
 
 #[test]
@@ -144,7 +185,10 @@ fn the_hand_carries_across_a_drained_prefix() {
     assert_eq!(authority(&owed), Ok(Some(9)), "the hand survives the drain");
     let mut usurper = owed.clone();
     usurper.append(ClosureEvent::VeilDrawn {}, 5, vec![7]);
-    assert!(matches!(authority(&usurper), Err(MeshRefused::Usurped { lawful: 9, .. })));
+    assert!(matches!(
+        authority(&usurper),
+        Err(MeshRefused::Usurped { lawful: 9, .. })
+    ));
 
     // Drained up to the seal: the citation is still owed by the held head.
     let mut fresh = a_premesh_chronicle();
@@ -152,6 +196,10 @@ fn the_hand_carries_across_a_drained_prefix() {
     fresh.append(ClosureEvent::VeilDrawn {}, 4, vec![9]);
     let mut drained = fresh.clone();
     drained.drain_to(4);
-    assert_eq!(authority(&fresh), authority(&drained), "the uncited head refuses alike");
+    assert_eq!(
+        authority(&fresh),
+        authority(&drained),
+        "the uncited head refuses alike"
+    );
     assert!(authority(&drained).is_err());
 }

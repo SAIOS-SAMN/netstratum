@@ -55,8 +55,13 @@ impl Enclosure {
 /// every enclosure spans [throat 1, rim 2] of its own units.
 fn rim_of(centre: &Body, galaxy: bool, unit: &Ratio) -> Option<Ratio> {
     let grains = crate::pulse::mass(&centre.total());
-    let state = if galaxy { crate::pulse::core_state(centre) } else { grains.clone() };
-    Some((state + grains) / unit.clone()).filter(|r| *r > ratio(0, 1) && !centre.satellites.is_empty())
+    let state = if galaxy {
+        crate::pulse::core_state(centre)
+    } else {
+        grains.clone()
+    };
+    Some((state + grains) / unit.clone())
+        .filter(|r| *r > ratio(0, 1) && !centre.satellites.is_empty())
 }
 
 /// Every enclosure of the universe: each galaxy with a member, and each
@@ -66,11 +71,21 @@ pub fn enclosures(u: &Universe) -> Vec<Enclosure> {
     let unit = crate::breath::unit_mass(u);
     for core in &u.cores {
         if let Some(rim) = rim_of(core, true, &unit) {
-            out.push(Enclosure { path: core.path.clone(), dim: 360, rim, throat: core.radius.clone() });
+            out.push(Enclosure {
+                path: core.path.clone(),
+                dim: 360,
+                rim,
+                throat: core.radius.clone(),
+            });
         }
         for sys in &core.satellites {
             if let Some(rim) = rim_of(sys, false, &unit) {
-                out.push(Enclosure { path: sys.path.clone(), dim: 60, rim, throat: sys.radius.clone() });
+                out.push(Enclosure {
+                    path: sys.path.clone(),
+                    dim: 60,
+                    rim,
+                    throat: sys.radius.clone(),
+                });
             }
         }
     }
@@ -81,7 +96,11 @@ pub fn enclosures(u: &Universe) -> Vec<Enclosure> {
 /// core (its reach over the rim) and its phase at `bell`, in turns.
 pub fn place(body: &Body, enclosure: &Enclosure, phase0: &Ratio, bell: u64) -> (Ratio, Ratio) {
     let polar = body.radius.clone() / enclosure.rim.clone();
-    let turn = if body.period > ratio(0, 1) { ratio(bell as i64, 1) / body.period.clone() } else { ratio(0, 1) };
+    let turn = if body.period > ratio(0, 1) {
+        ratio(bell as i64, 1) / body.period.clone()
+    } else {
+        ratio(0, 1)
+    };
     let phase = phase0.clone() + turn;
     (polar, phase.clone() - phase.floor())
 }
@@ -115,6 +134,10 @@ pub fn route(u: &Universe, a: &[u64], b: &[u64]) -> Option<Ratio> {
     let shared = a.iter().zip(b).take_while(|(x, y)| x == y).count();
     let (up_a, up_b) = (climb(u, a)?, climb(u, b)?);
     // Climb only to the shared enclosure: drop the arcs above it.
-    let keep = |arcs: &[Ratio], len: usize| arcs[..len - shared].iter().fold(ratio(0, 1), |s, x| s + x.clone());
+    let keep = |arcs: &[Ratio], len: usize| {
+        arcs[..len - shared]
+            .iter()
+            .fold(ratio(0, 1), |s, x| s + x.clone())
+    };
     Some(keep(&up_a, a.len()) + keep(&up_b, b.len()))
 }

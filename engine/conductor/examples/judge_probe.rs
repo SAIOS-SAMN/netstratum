@@ -5,7 +5,9 @@
 //! nothing into the chain — the cost_probe discipline.
 
 fn main() {
-    let root = std::env::args().nth(1).unwrap_or_else(|| "var/worlds".into());
+    let root = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| "var/worlds".into());
     let limit: usize = std::env::args()
         .nth(2)
         .and_then(|s| s.parse().ok())
@@ -31,16 +33,14 @@ fn main() {
         };
         worlds += 1;
         let receipts = chronicle.receipts().to_vec();
-        let mut prior = cfe::world::replay(
-            &cfe::vrp::Chronicle::from_receipts(Vec::new()).expect("empty"),
-        );
+        let mut prior =
+            cfe::world::replay(&cfe::vrp::Chronicle::from_receipts(Vec::new()).expect("empty"));
         for at in 0..receipts.len() {
             if shown >= limit {
                 break;
             }
             let next = cfe::world::replay(
-                &cfe::vrp::Chronicle::from_receipts(receipts[..=at].to_vec())
-                    .expect("prefix"),
+                &cfe::vrp::Chronicle::from_receipts(receipts[..=at].to_vec()).expect("prefix"),
             );
             let receipt = &receipts[at];
             let step = kernel::Step {

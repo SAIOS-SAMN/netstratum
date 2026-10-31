@@ -47,24 +47,42 @@ const CORES_REMEMBERED: usize = 4096;
 
 impl UniverseRead {
     fn parse(path: &std::path::Path, len: u64) -> UniverseRead {
-        let mut read = UniverseRead { len: Some(len), ..Default::default() };
-        let Ok(ledger) = persist::load(path) else { return read };
+        let mut read = UniverseRead {
+            len: Some(len),
+            ..Default::default()
+        };
+        let Ok(ledger) = persist::load(path) else {
+            return read;
+        };
         for receipt in ledger.receipts() {
             match receipt.event() {
-                ClosureEvent::GalaxyObserved { name, center, reach, .. } => read.galaxies.push(Galaxy {
+                ClosureEvent::GalaxyObserved {
+                    name,
+                    center,
+                    reach,
+                    ..
+                } => read.galaxies.push(Galaxy {
                     name: name.clone(),
                     center: center.clone(),
                     reach: reach.clone(),
                 }),
-                ClosureEvent::CoreWordDeposited { core, world, orbit, expansion, cited } => {
-                    read.libraries.entry(core.clone()).or_default().push(CoreWord {
+                ClosureEvent::CoreWordDeposited {
+                    core,
+                    world,
+                    orbit,
+                    expansion,
+                    cited,
+                } => read
+                    .libraries
+                    .entry(core.clone())
+                    .or_default()
+                    .push(CoreWord {
                         world: world.clone(),
                         orbit: *orbit,
                         expansion: expansion.clone(),
                         cited: cited.clone(),
                         stamp: receipt.stamp(),
-                    })
-                }
+                    }),
                 _ => {}
             }
         }
@@ -112,7 +130,10 @@ impl Ledger {
     fn universe_read<T>(&self, take: impl FnOnce(&UniverseRead) -> T) -> T {
         let path = self.ledger_path();
         let len = fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
-        let mut cache = self.cache.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        let mut cache = self
+            .cache
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
         if cache.len != Some(len) {
             *cache = UniverseRead::parse(&path, len);
         }
@@ -129,7 +150,8 @@ impl Ledger {
         self.galaxies()
             .into_iter()
             .map(|galaxy| {
-                let distance = l1_wrapped(&(x.clone(), y.clone(), z.clone()), &galaxy.center, &span);
+                let distance =
+                    l1_wrapped(&(x.clone(), y.clone(), z.clone()), &galaxy.center, &span);
                 (distance, galaxy)
             })
             .filter(|(distance, galaxy)| distance <= &galaxy.reach)
@@ -234,7 +256,10 @@ impl Ledger {
         let span = self.universe_span();
         let path = self.ledger_path();
         let len = fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
-        let mut read = self.cache.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        let mut read = self
+            .cache
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
         if read.len != Some(len) {
             *read = UniverseRead::parse(&path, len);
         }
@@ -257,7 +282,6 @@ impl Ledger {
         core
     }
 
-
     /// Append events to the universe ledger at `stamp`, in order, and sync.
     pub fn append_universe(&self, events: Vec<ClosureEvent>, stamp: u64) -> std::io::Result<()> {
         if events.is_empty() {
@@ -279,18 +303,34 @@ impl Ledger {
     /// What each core holds: its `CoreDeposited` receipts less its
     /// `CoreEmitted` ones, per holding (`None` = STAMP). A reading: nothing
     /// is written.
-    pub fn core_holdings(&self) -> std::collections::BTreeMap<(String, Option<cfe::dop::Resource>), Ratio> {
+    pub fn core_holdings(
+        &self,
+    ) -> std::collections::BTreeMap<(String, Option<cfe::dop::Resource>), Ratio> {
         let mut held = std::collections::BTreeMap::new();
         let Ok(ledger) = persist::load(&self.ledger_path()) else {
             return held;
         };
         for receipt in ledger.receipts() {
             match receipt.event() {
-                ClosureEvent::CoreDeposited { core, resource, amount, .. } => {
-                    *held.entry((core.clone(), *resource)).or_insert_with(|| ratio(0, 1)) += amount.clone();
+                ClosureEvent::CoreDeposited {
+                    core,
+                    resource,
+                    amount,
+                    ..
+                } => {
+                    *held
+                        .entry((core.clone(), *resource))
+                        .or_insert_with(|| ratio(0, 1)) += amount.clone();
                 }
-                ClosureEvent::CoreEmitted { core, resource, amount, .. } => {
-                    *held.entry((core.clone(), *resource)).or_insert_with(|| ratio(0, 1)) -= amount.clone();
+                ClosureEvent::CoreEmitted {
+                    core,
+                    resource,
+                    amount,
+                    ..
+                } => {
+                    *held
+                        .entry((core.clone(), *resource))
+                        .or_insert_with(|| ratio(0, 1)) -= amount.clone();
                 }
                 _ => {}
             }
@@ -308,7 +348,13 @@ impl Ledger {
 
     /// The dead lines whose words already reached a core.
     pub fn deposited_worlds(&self) -> std::collections::BTreeSet<String> {
-        self.universe_read(|read| read.libraries.values().flatten().map(|word| word.world.clone()).collect())
+        self.universe_read(|read| {
+            read.libraries
+                .values()
+                .flatten()
+                .map(|word| word.world.clone())
+                .collect()
+        })
     }
 
     /// **The universe's seed** (docs/58 §3) — the own-hash of its Big Bang
@@ -330,7 +376,12 @@ impl Ledger {
     /// founded before this law) it is written once, late, as a RE-founding
     /// naming the head it was written over. Called again, it returns the seed
     /// already recorded and writes nothing.
-    pub fn found_universe(&self, roster: [u8; 32], matter: [u8; 32], stamp: u64) -> std::io::Result<([u8; 32], bool)> {
+    pub fn found_universe(
+        &self,
+        roster: [u8; 32],
+        matter: [u8; 32],
+        stamp: u64,
+    ) -> std::io::Result<([u8; 32], bool)> {
         if let Some(seed) = self.universe_seed() {
             return Ok((seed, false));
         }
@@ -352,7 +403,11 @@ impl Ledger {
             stamp,
             vec![],
         );
-        let seed = ledger.receipts().last().map(|r| r.own().0).expect("just appended");
+        let seed = ledger
+            .receipts()
+            .last()
+            .map(|r| r.own().0)
+            .expect("just appended");
         persist::sync(&ledger, &path).map_err(io_error)?;
         Ok((seed, true))
     }
@@ -402,10 +457,6 @@ impl Ledger {
 
 /// The L1 law on the torus: wrapped |Δ| summed per axis, the short way
 /// around — no squaring.
-fn l1_wrapped(
-    a: &(Ratio, Ratio, Ratio),
-    b: &(Ratio, Ratio, Ratio),
-    span: &Ratio,
-) -> Ratio {
+fn l1_wrapped(a: &(Ratio, Ratio, Ratio), b: &(Ratio, Ratio, Ratio), span: &Ratio) -> Ratio {
     crate::torus_distance(a, b, span)
 }

@@ -116,7 +116,9 @@ impl BookName {
             return Err(BookNameFault::NormalizesToNothing);
         }
         if let Some(held) = CHARTER_BOOKS.iter().find(|held| normalize(held) == normal) {
-            return Err(BookNameFault::Charter { name: (*held).to_string() });
+            return Err(BookNameFault::Charter {
+                name: (*held).to_string(),
+            });
         }
         Ok(BookName(text.to_string()))
     }

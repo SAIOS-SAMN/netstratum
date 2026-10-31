@@ -55,9 +55,17 @@ pub fn observed(
     direct.extend(watched(watch));
     let living: BTreeSet<String> = lines.iter().map(|s| s.civilization.sigil.clone()).collect();
     if let Some((sigil, _)) = crate::largest_lineage(registry, &living) {
-        direct.extend(lines.iter().filter(|s| s.civilization.sigil == sigil).map(|s| s.world_name.clone()));
+        direct.extend(
+            lines
+                .iter()
+                .filter(|s| s.civilization.sigil == sigil)
+                .map(|s| s.world_name.clone()),
+        );
     }
-    let direct: BTreeSet<String> = direct.into_iter().filter(|w| lines.iter().any(|s| &s.world_name == w)).collect();
+    let direct: BTreeSet<String> = direct
+        .into_iter()
+        .filter(|w| lines.iter().any(|s| &s.world_name == w))
+        .collect();
     // A living people reads its own world: every living line is observed.
     let mut out = direct.clone();
     out.extend(lines.iter().map(|s| s.world_name.clone()));
@@ -65,7 +73,12 @@ pub fn observed(
         let near = lines
             .iter()
             .filter(|other| other.world_name != line.world_name)
-            .map(|other| (crate::spatial_l1(&line.position, &other.position, span), &other.world_name))
+            .map(|other| {
+                (
+                    crate::spatial_l1(&line.position, &other.position, span),
+                    &other.world_name,
+                )
+            })
             .min();
         if let Some((_, world)) = near {
             out.insert(world.clone());

@@ -187,7 +187,11 @@ use solver_verify::{verify_work_class, WorkBroken, WorkClass};
 /// agent acts only within its own grants and every principal's above it
 /// (`cfe::ipsal::permits_in`), so an agent may contain agents (docs/109 A4).
 /// An agent whose principal is the sovereign reads as before.
-pub const KERNEL_VERSION: Version = Version { major: 0, minor: 38, patch: 0 };
+pub const KERNEL_VERSION: Version = Version {
+    major: 0,
+    minor: 38,
+    patch: 0,
+};
 
 /// The gate's version, as it rides the wire.
 ///
@@ -263,7 +267,11 @@ pub enum Refused {
     /// promised only to move it. Both totals carried (boxed — the
     /// carrier is a big-int rational); the residual is theirs to read
     /// (shown, never summarized away).
-    ConservationBroken { resource: Resource, before: Box<Ratio>, after: Box<Ratio> },
+    ConservationBroken {
+        resource: Resource,
+        before: Box<Ratio>,
+        after: Box<Ratio>,
+    },
     /// **D4** — a mint whose capacity increment is zero or negative:
     /// the claim on capacity never entangled with potential, so it is
     /// vacated (Equations D4). Both readings carried whole — the
@@ -277,7 +285,10 @@ pub enum Refused {
     /// this, phantom topology mints phantom rank
     /// (`EntangledRead::rank_is_defined`, `25_STANDING` §6's debt, now
     /// due). Both unknown counts carried.
-    RankUndefined { unknown_before: usize, unknown_after: usize },
+    RankUndefined {
+        unknown_before: usize,
+        unknown_after: usize,
+    },
     /// I2 — the actor is not an entity in `prior`. Identity precedes the
     /// world (NS-6 §1.2): a deed from no one refuses before any state read.
     NoSuchEntity { actor: u64 },
@@ -287,11 +298,17 @@ pub enum Refused {
     /// I4 — a mint carried a negative amount: a deed labelled a creation
     /// that actually destroys value (a burn wearing a mint's name). Value
     /// enters only by a lawful, non-negative mint.
-    MintNotPositive { resource: Resource, amount: Box<Ratio> },
+    MintNotPositive {
+        resource: Resource,
+        amount: Box<Ratio>,
+    },
     /// I5 — a decay carried a negative amount: a deed labelled a decay
     /// that actually creates value. Value leaves only by a lawful,
     /// non-negative decay.
-    DecayNotPositive { resource: Resource, amount: Box<Ratio> },
+    DecayNotPositive {
+        resource: Resource,
+        amount: Box<Ratio>,
+    },
     /// I5 — an atomic touch (tag 102) carried the same resource twice:
     /// one window settles one row per resource, and a repeat would
     /// draw the same window's decay twice.
@@ -300,12 +317,18 @@ pub enum Refused {
     /// ledger is gated with strict symmetry to the banked ledger. An
     /// element mint carried a negative amount — value enters the
     /// element ledger only by a lawful, non-negative assay.
-    ElementNotPositive { element: [u8; 32], amount: Box<Ratio> },
+    ElementNotPositive {
+        element: [u8; 32],
+        amount: Box<Ratio>,
+    },
     /// The element law: an assay drew more than the vein's declared
     /// yield — `amount ≤ richness · elapsed`, both read from the prior
     /// vein (`Prospected.richness`, `last_assay`); an assay with no
     /// prior vein yields nothing. Both sides carried whole.
-    AssayExceedsVein { bound: Box<Ratio>, claimed: Box<Ratio> },
+    AssayExceedsVein {
+        bound: Box<Ratio>,
+        claimed: Box<Ratio>,
+    },
     /// ECO-1 (#40): the assay declared an after-richness off the
     /// sealed wear law. The gate re-derives it by calling the
     /// emitter's one home (`cfe::dop::vein_wear` — wear from the
@@ -315,7 +338,10 @@ pub enum Refused {
     /// state, has no lawful derivation and refuses with expected 0.
     /// The sealed 3-field form declares nothing and judges only the
     /// bound. Both sides carried whole.
-    VeinWearMisdeclared { expected: Box<Ratio>, declared: Box<Ratio> },
+    VeinWearMisdeclared {
+        expected: Box<Ratio>,
+        declared: Box<Ratio>,
+    },
     /// ELEMENT-CHEMISTRY (#37): the receipt's members do not bond —
     /// the shells disagree, the phases cannot coexist, the count is not
     /// the geometry's arity, or the binds do not saturate. Matter that
@@ -325,7 +351,10 @@ pub enum Refused {
     /// one its members make. The gem is content-addressed and
     /// order-free, so the gate re-derives it and refuses any other
     /// identity — a compounding cannot mint a name it did not earn.
-    GemMisidentified { expected: Box<[u8; 32]>, declared: Box<[u8; 32]> },
+    GemMisidentified {
+        expected: Box<[u8; 32]>,
+        declared: Box<[u8; 32]>,
+    },
     /// ECO-1 (#40): the vein book moved off its two deeds. Richness
     /// is judged state now, so the book's motion is the law's:
     /// a prospect pushes exactly its receipted vein; an assay moves
@@ -338,7 +367,11 @@ pub enum Refused {
     /// equal the prior total plus exactly what the deed declares
     /// (only an assay declares a mint; every other deed holds every
     /// element key still). The element named, both totals whole.
-    ElementBroken { element: [u8; 32], expected: Box<Ratio>, actual: Box<Ratio> },
+    ElementBroken {
+        element: [u8; 32],
+        expected: Box<Ratio>,
+        actual: Box<Ratio>,
+    },
     /// The GAUGE law (U2d, I6's kernel half): the state's key moved
     /// where the deed declared no move, or landed off its declared
     /// key, or a plane opened or closed undeclared. The first
@@ -346,7 +379,11 @@ pub enum Refused {
     /// grade reads 0 — ground rest). Every fold transition emits
     /// exactly its declared structural delta; no state jump is
     /// special-cased (operator ruling).
-    GaugeBroken { grade: usize, expected: Box<Ratio>, actual: Box<Ratio> },
+    GaugeBroken {
+        grade: usize,
+        expected: Box<Ratio>,
+        actual: Box<Ratio>,
+    },
     /// The sign law (the value-law wave): a value-carrying deed
     /// declared a negative amount — a credit wearing a debit's name,
     /// or the reverse. Every banked movement is non-negative by
@@ -354,12 +391,18 @@ pub enum Refused {
     /// (a negative transfer would invert the flow and authorize the
     /// wrong side; a negative settle would credit through a debit).
     /// No un-guarded debit/credit path exists.
-    AmountNotPositive { resource: Resource, amount: Box<Ratio> },
+    AmountNotPositive {
+        resource: Resource,
+        amount: Box<Ratio>,
+    },
     /// I5 — the decay exceeds the sealed demurrage rule's due:
     /// `min(rate · ease · elapsed, banked)`, flat, thermally gated.
     /// Both sides carried whole (what the rule allows, what the deed
     /// claimed). Value leaves only by the flat law — never faster.
-    DecayExceedsBound { bound: Box<Ratio>, claimed: Box<Ratio> },
+    DecayExceedsBound {
+        bound: Box<Ratio>,
+        claimed: Box<Ratio>,
+    },
     /// I4 — the discovery mint's proof failed the replay (form,
     /// training, output, or chain — the sealed verifier names the
     /// break; the kernel carries it whole, never summarizes).
@@ -369,7 +412,10 @@ pub enum Refused {
     /// The bound is the emission rate `f` (Decision Box 1,
     /// 2026-08-01 — see [`mint_bound`]): ladder-pinned, zero on the
     /// saturated rungs and on every off-ladder shape.
-    MintExceedsWork { bound: Box<Ratio>, claimed: Box<Ratio> },
+    MintExceedsWork {
+        bound: Box<Ratio>,
+        claimed: Box<Ratio>,
+    },
     /// I3 — a value in `next` is not a canonical exact rational (coprime,
     /// positive denominator). Exactness is a type-level guarantee
     /// (`BigRational` is canonical by construction, no float ever entered);
@@ -408,7 +454,10 @@ pub enum Refused {
     /// sovereigns is not a DYAD, and a dyad is the whole form (`17`
     /// §3 — two that stay two, neither deriving legitimacy from the
     /// other).
-    UnionMalformed { progenitor: Office, sovereign: Office },
+    UnionMalformed {
+        progenitor: Office,
+        sovereign: Office,
+    },
     /// D5 — the union declared a review horizon other than the ruled
     /// one. The term is a review, not an expiry, and it is fixed at
     /// [`cfe::dop::UNION_REVIEW_HORIZON`]: a deed free to name its own
@@ -429,14 +478,20 @@ pub enum Refused {
     /// The appraisal — the declared value is not what the sealed rule
     /// computes over the prior state and the receipted covering. A
     /// value cannot be quoted one way and receipted another.
-    AppraisalMisvalued { declared: Box<Ratio>, computed: Box<Ratio> },
+    AppraisalMisvalued {
+        declared: Box<Ratio>,
+        computed: Box<Ratio>,
+    },
     /// Convey — an endpoint outside the survey's covering: a postal
     /// address is a surveyed parcel, at the gate as at the emitter.
     ConveyOutsideSurvey { orb: u64 },
     /// Convey — the declared postage is not the postal meter's figure
     /// over the amount. Stamps cannot be quoted one way and burned
     /// another.
-    PostageMismatch { declared: Box<Ratio>, metered: Box<Ratio> },
+    PostageMismatch {
+        declared: Box<Ratio>,
+        metered: Box<Ratio>,
+    },
     /// Convey — the ask outruns the sender parcel's monetary portion of
     /// its prior bank. The free portion stays home, held at the gate
     /// from the receipt's own covering.
@@ -451,7 +506,10 @@ pub enum Refused {
     /// volume. The kernel computes the meter by calling the same rule
     /// the emitter drew from (call-not-copy), so a survey cannot be
     /// quoted one way and charged another.
-    SurveyMeterMismatch { declared: Box<Ratio>, metered: Box<Ratio> },
+    SurveyMeterMismatch {
+        declared: Box<Ratio>,
+        metered: Box<Ratio>,
+    },
 }
 
 /// The judge. Does `step` lawfully carry `prior` to `next`? Pure,
@@ -504,7 +562,11 @@ fn vault_seated(state: &Committed) -> bool {
 /// positive). Neutral deeds hold the total still.
 fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     let declared = match &step.event {
-        ClosureEvent::StampMinted { amount, crystal_spent, .. } => {
+        ClosureEvent::StampMinted {
+            amount,
+            crystal_spent,
+            ..
+        } => {
             if *amount < ratio(0, 1) || *crystal_spent < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: [0u8; 32],
@@ -539,7 +601,11 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
         }
         // The bounce (tag 195): a core's STAMP pulse arrives — a declared
         // credit, sign-guarded like the aperture's receive leg.
-        ClosureEvent::CoreReturned { resource: None, amount, .. } => {
+        ClosureEvent::CoreReturned {
+            resource: None,
+            amount,
+            ..
+        } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: [0u8; 32],
@@ -600,9 +666,7 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
             }
             amount.clone()
         }
-        ClosureEvent::AssayConsilience { .. } | ClosureEvent::AssaySlashed { .. } => {
-            ratio(0, 1)
-        }
+        ClosureEvent::AssayConsilience { .. } | ClosureEvent::AssaySlashed { .. } => ratio(0, 1),
         // PHASE-4 / I5: issuing a Note locks its collateral out of the
         // free STAMP banks — the same off-bank move a VaultDeposited
         // declares. With Vault seated the collateral is only earmarked
@@ -623,12 +687,9 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
         // to the void, exactly what `sweep_resource_grain` applies to `orb.stamp`,
         // so the total-check `after == before + declared` holds. (The banked
         // resource floors are judged in `admitted_deltas`.)
-        ClosureEvent::ResourceStocksSwept { .. } => prior
-            .orbs
-            .iter()
-            .fold(ratio(0, 1), |s, o| {
-                s + (cfe::world::smelt_resource(&o.stamp) - o.stamp.clone())
-            }),
+        ClosureEvent::ResourceStocksSwept { .. } => prior.orbs.iter().fold(ratio(0, 1), |s, o| {
+            s + (cfe::world::smelt_resource(&o.stamp) - o.stamp.clone())
+        }),
         _ => ratio(0, 1),
     };
     let before = prior
@@ -714,7 +775,13 @@ fn stamp_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Re
 /// value the rule does not compute refuses. Staleness is deliberately
 /// not here — it triggers renegotiation and never gates a deed.
 fn appraisal_rule(prior: &Committed, step: &Step) -> Result<(), Refused> {
-    let ClosureEvent::AppraisalStruck { subject, seed, covered, value, .. } = &step.event
+    let ClosureEvent::AppraisalStruck {
+        subject,
+        seed,
+        covered,
+        value,
+        ..
+    } = &step.event
     else {
         return Ok(());
     };
@@ -789,15 +856,14 @@ fn magnetic_reach(prior: &Committed, step: &Step) -> Result<(), Refused> {
     let reach = star.ring_reach();
     match rings.len() < usize::from(reach) {
         true => Ok(()),
-        false => Err(Refused::RingBeyondReach { held: rings.len(), reach }),
+        false => Err(Refused::RingBeyondReach {
+            held: rings.len(),
+            reach,
+        }),
     }
 }
 
-fn revocation_law(
-    prior: &Committed,
-    next: &Committed,
-    step: &Step,
-) -> Result<(), Refused> {
+fn revocation_law(prior: &Committed, next: &Committed, step: &Step) -> Result<(), Refused> {
     let ClosureEvent::DiscoveryMinted { .. } = &step.event else {
         // D4 binds the mint. Motion of value that already exists makes
         // no capacity claim, so there is no claim to vacate.
@@ -820,7 +886,10 @@ fn revocation_law(
 /// phantom rank"*, with `25_STANDING` §6 recording it as debt rather
 /// than enforcement. D4 computes an increment over that rank, so the
 /// debt came due: asked first, before anything is compared.
-fn d4a_resolution(before: &bridge::EntangledRead, after: &bridge::EntangledRead) -> Result<(), Refused> {
+fn d4a_resolution(
+    before: &bridge::EntangledRead,
+    after: &bridge::EntangledRead,
+) -> Result<(), Refused> {
     match before.rank_is_defined() && after.rank_is_defined() {
         true => Ok(()),
         false => Err(Refused::RankUndefined {
@@ -909,7 +978,11 @@ fn d4c_increment(was: usize, now: usize) -> Result<(), Refused> {
 /// history — the review falls due by arithmetic on the receipt's own
 /// stamp, and nothing about it is decided here.
 fn union(step: &Step) -> Result<(), Refused> {
-    let ClosureEvent::SovereignUnionSealed { progenitor, sovereign, term_stamps } = &step.event
+    let ClosureEvent::SovereignUnionSealed {
+        progenitor,
+        sovereign,
+        term_stamps,
+    } = &step.event
     else {
         return Ok(());
     };
@@ -943,7 +1016,12 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
     // The declared element moves for this deed (empty = every key
     // holds still). Signed: a mint is positive, a spend negative.
     let declared: Vec<([u8; 32], Ratio)> = match &step.event {
-        ClosureEvent::AssayStruck { orb_id, element, amount, .. } => {
+        ClosureEvent::AssayStruck {
+            orb_id,
+            element,
+            amount,
+            ..
+        } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
@@ -965,7 +1043,8 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                     let class = prior.star?;
                     let (_, _, natural) = cfe::dop::element_properties(element, class);
                     let elapsed = step.stamp.saturating_sub(vein.last_assay);
-                    let richness = cfe::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
+                    let richness =
+                        cfe::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated);
                     Some(cfe::dop::vein_flow(&richness, &natural, elapsed))
                 })
                 .unwrap_or_else(|| ratio(0, 1));
@@ -1003,12 +1082,7 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             declared
         }
         // Chem science (tag 156): isomorphic gem union — re-derive product.
-        ClosureEvent::IsoUnionStruck {
-            a,
-            b,
-            product,
-            ..
-        } => {
+        ClosureEvent::IsoUnionStruck { a, b, product, .. } => {
             let Some((spend, yielded, expected)) = cfe::almanac::iso_union_recipe(a, b) else {
                 return Err(Refused::MatterDoesNotBond);
             };
@@ -1018,11 +1092,7 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                     declared: Box::new(*product),
                 });
             }
-            vec![
-                (*a, -spend.clone()),
-                (*b, -spend),
-                (*product, yielded),
-            ]
+            vec![(*a, -spend.clone()), (*b, -spend), (*product, yielded)]
         }
         ClosureEvent::ChemCataloged { .. }
         | ClosureEvent::DarkPullStruck { .. }
@@ -1072,7 +1142,9 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         // E-APT-1: element leave / arrive. Sign-guarded; amount on the
         // receipt is the whole truth of that leg (melt applied before
         // the receive is sealed).
-        ClosureEvent::ElementApertureSent { element, amount, .. } => {
+        ClosureEvent::ElementApertureSent {
+            element, amount, ..
+        } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
@@ -1081,7 +1153,9 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             }
             vec![(*element, -amount.clone())]
         }
-        ClosureEvent::ElementApertureReceived { element, amount, .. } => {
+        ClosureEvent::ElementApertureReceived {
+            element, amount, ..
+        } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
@@ -1112,7 +1186,11 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         // vein → mouths, never the bank, so the ledger holds still (delta 0)
         // and only the vein BOOK advances (below). A claim above the remaining
         // richness refuses — no vein feeds more than its geometry holds.
-        ClosureEvent::StapleMined { orb_id, element, eaten } => {
+        ClosureEvent::StapleMined {
+            orb_id,
+            element,
+            eaten,
+        } => {
             if *eaten < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
@@ -1126,7 +1204,11 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                 .and_then(|vein| {
                     let class = prior.star?;
                     let (_, _, natural) = cfe::dop::element_properties(element, class);
-                    Some(cfe::dop::vein_richness(&natural, &vein.extracted, &vein.rejuvenated))
+                    Some(cfe::dop::vein_richness(
+                        &natural,
+                        &vein.extracted,
+                        &vein.rejuvenated,
+                    ))
                 })
                 .unwrap_or_else(|| ratio(0, 1));
             if *eaten > bound {
@@ -1143,7 +1225,11 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         // extraction and never lifts richness above the endowment (no matter is
         // minted from geometry). No element-ledger move: a delta-0 event, the
         // vein book alone advancing (below). A claim above the headroom refuses.
-        ClosureEvent::VeinRejuvenated { orb_id, element, injected } => {
+        ClosureEvent::VeinRejuvenated {
+            orb_id,
+            element,
+            injected,
+        } => {
             if *injected < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
@@ -1171,7 +1257,13 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         // element change is `minted − eaten`. The mint bound is the
         // element's own natural flow (richness): minted ≤ ember × richness,
         // so a rarer element yields less per ember. No star → zero bound.
-        ClosureEvent::ElementFarmed { element, ember, minted, eaten, .. } => {
+        ClosureEvent::ElementFarmed {
+            element,
+            ember,
+            minted,
+            eaten,
+            ..
+        } => {
             if *minted < ratio(0, 1) || *ember < ratio(0, 1) || *eaten < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
@@ -1194,7 +1286,9 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             vec![(*element, minted.clone() - eaten.clone())]
         }
         // 34: element → scrap; element mass leaves the open-matter ledger.
-        ClosureEvent::ElementSalvaged { element, amount, .. } => {
+        ClosureEvent::ElementSalvaged {
+            element, amount, ..
+        } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
@@ -1206,7 +1300,9 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         // G2 (#trace): a population burns trace elements maintaining its
         // substrate — the element leaves the ledger (a conserved spend),
         // sign-guarded exactly as salvage is.
-        ClosureEvent::TraceConsumed { element, amount, .. } => {
+        ClosureEvent::TraceConsumed {
+            element, amount, ..
+        } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::ElementNotPositive {
                     element: *element,
@@ -1280,7 +1376,12 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
     // == effect, the banked law's shape applied to the vein registry.
     let mut book = prior.prospects.clone();
     match &step.event {
-        ClosureEvent::ProspectStruck { orb_id, stratum, element, .. } => {
+        ClosureEvent::ProspectStruck {
+            orb_id,
+            stratum,
+            element,
+            ..
+        } => {
             book.push(cfe::world::Prospected {
                 orb: *orb_id,
                 stratum: *stratum,
@@ -1292,7 +1393,12 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
             });
         }
         // #27: a dying star scatters a vein — the same push a prospect makes.
-        ClosureEvent::EnrichmentStruck { orb_id, stratum, element, .. } => {
+        ClosureEvent::EnrichmentStruck {
+            orb_id,
+            stratum,
+            element,
+            ..
+        } => {
             book.push(cfe::world::Prospected {
                 orb: *orb_id,
                 stratum: *stratum,
@@ -1303,7 +1409,12 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
                 last_assay: step.stamp,
             });
         }
-        ClosureEvent::AssayStruck { orb_id, element, amount, .. } => {
+        ClosureEvent::AssayStruck {
+            orb_id,
+            element,
+            amount,
+            ..
+        } => {
             if let Some(vein) = book
                 .iter_mut()
                 .find(|vein| vein.orb == *orb_id && vein.element == *element)
@@ -1316,7 +1427,12 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         // makes (the span anchor moves, the integral grows by exactly `eaten`),
         // only the amount is demand-driven, not geometric. Declaration ==
         // effect, the banked law's shape applied to the vein registry.
-        ClosureEvent::StapleMined { orb_id, element, eaten, .. } => {
+        ClosureEvent::StapleMined {
+            orb_id,
+            element,
+            eaten,
+            ..
+        } => {
             if let Some(vein) = book
                 .iter_mut()
                 .find(|vein| vein.orb == *orb_id && vein.element == *element)
@@ -1328,7 +1444,12 @@ fn element_move(prior: &Committed, next: &Committed, step: &Step) -> Result<(), 
         // ONT-3: rejuvenation advances the vein book — the mirror of the mine,
         // the span anchor moving and the rejuvenation integral growing by
         // exactly `injected`. Declaration == effect, the same banked-law shape.
-        ClosureEvent::VeinRejuvenated { orb_id, element, injected, .. } => {
+        ClosureEvent::VeinRejuvenated {
+            orb_id,
+            element,
+            injected,
+            ..
+        } => {
             if let Some(vein) = book
                 .iter_mut()
                 .find(|vein| vein.orb == *orb_id && vein.element == *element)
@@ -1839,11 +1960,15 @@ fn admitted_deltas(
     Ok(match event {
         // — the moves (net zero), sign-guarded: a negative move would
         //   invert the flow and authorize the wrong side —
-        E::ResourceTransferred { resource, amount, .. } => {
+        E::ResourceTransferred {
+            resource, amount, ..
+        } => {
             non_negative(*resource, amount)?;
             Vec::new()
         }
-        E::BondSettled { resource, amount, .. } => {
+        E::BondSettled {
+            resource, amount, ..
+        } => {
             non_negative(*resource, amount)?;
             Vec::new()
         }
@@ -1852,24 +1977,36 @@ fn admitted_deltas(
         E::ColonyCharted { .. } => Vec::new(),
         // — the aperture legs, sign-guarded (a negative send is a
         //   receive wearing a send's name) —
-        E::ApertureSent { resource, amount, .. } => {
+        E::ApertureSent {
+            resource, amount, ..
+        } => {
             non_negative(*resource, amount)?;
             vec![(*resource, -amount.clone())]
         }
-        E::ApertureReceived { resource, amount, .. } => {
+        E::ApertureReceived {
+            resource, amount, ..
+        } => {
             non_negative(*resource, amount)?;
             vec![(*resource, amount.clone())]
         }
         // The bounce (tag 195): a core's matter pulse arrives — declared,
         // sign-guarded; its STAMP twin is judged in stamp_move.
-        E::CoreReturned { resource: Some(resource), amount, .. } => {
+        E::CoreReturned {
+            resource: Some(resource),
+            amount,
+            ..
+        } => {
             non_negative(*resource, amount)?;
             vec![(*resource, amount.clone())]
         }
         E::CoreReturned { resource: None, .. } => Vec::new(),
         // STAMP-1: crystal spent for identity mint — resource debit only;
         // STAMP balance is judged in stamp_move.
-        E::StampMinted { crystal_spent, amount, .. } => {
+        E::StampMinted {
+            crystal_spent,
+            amount,
+            ..
+        } => {
             non_negative(Resource::Crystal, crystal_spent)?;
             if *amount != *crystal_spent {
                 return Err(Refused::AssayExceedsVein {
@@ -1880,7 +2017,9 @@ fn admitted_deltas(
             vec![(Resource::Crystal, -crystal_spent.clone())]
         }
         // FLEET-1: iron → scrap identity; scrap is not Resource.
-        E::ScrapSalvaged { iron_spent, amount, .. } => {
+        E::ScrapSalvaged {
+            iron_spent, amount, ..
+        } => {
             non_negative(Resource::Iron, iron_spent)?;
             if *amount != *iron_spent {
                 return Err(Refused::AssayExceedsVein {
@@ -1891,19 +2030,42 @@ fn admitted_deltas(
             vec![(Resource::Iron, -iron_spent.clone())]
         }
         // Hull mint/assign/scrap move scrap ledger only (not Resource).
-        E::HullMinted { .. } | E::HullAssigned { .. } | E::HullScrapped { .. } | E::OrderWorked { .. } => Vec::new(),
+        E::HullMinted { .. }
+        | E::HullAssigned { .. }
+        | E::HullScrapped { .. }
+        | E::OrderWorked { .. } => Vec::new(),
         E::ElementSalvaged { .. } | E::TraceConsumed { .. } => Vec::new(),
         // ING-2b (tag 182): the staple food settle moves the element ledger
         // only (declared in `element_move`), never a Resource — no banked
         // delta, exactly as TraceConsumed.
         // ONT-2b (tag 183): the staple mine moves the vein book only (a
         // delta-0 element move), never a Resource — no banked delta.
-        E::RationElementSettled { .. } | E::StapleMined { .. } | E::VeinRejuvenated { .. } => Vec::new(),
-        E::NoteIssued { .. } | E::NoteRedeemed { .. } | E::FutureOpened { .. } | E::FutureSettled { .. } | E::LastClearMarked { .. } | E::ShareIssued { .. } | E::ShareTransferred { .. } | E::ShareDividend { .. } | E::PerpOpened { .. } | E::PerpFunded { .. } | E::PerpClosed { .. } | E::HullFinanced { .. } | E::EscortOnDuty { .. } | E::InterdictionStruck { .. } | E::ConvoyRiskMarked { .. }
-        | E::MarketSealed { .. } | E::MarketResumed { .. } | E::SpotClearRecorded { .. } | E::LiquidityRaidStruck { .. } | E::ClearPoisonRefused { .. }
-        | E::NoteCascadeStruck { .. } | E::TamperDetected { .. } | E::PostureReoriented { .. } => {
+        E::RationElementSettled { .. } | E::StapleMined { .. } | E::VeinRejuvenated { .. } => {
             Vec::new()
         }
+        E::NoteIssued { .. }
+        | E::NoteRedeemed { .. }
+        | E::FutureOpened { .. }
+        | E::FutureSettled { .. }
+        | E::LastClearMarked { .. }
+        | E::ShareIssued { .. }
+        | E::ShareTransferred { .. }
+        | E::ShareDividend { .. }
+        | E::PerpOpened { .. }
+        | E::PerpFunded { .. }
+        | E::PerpClosed { .. }
+        | E::HullFinanced { .. }
+        | E::EscortOnDuty { .. }
+        | E::InterdictionStruck { .. }
+        | E::ConvoyRiskMarked { .. }
+        | E::MarketSealed { .. }
+        | E::MarketResumed { .. }
+        | E::SpotClearRecorded { .. }
+        | E::LiquidityRaidStruck { .. }
+        | E::ClearPoisonRefused { .. }
+        | E::NoteCascadeStruck { .. }
+        | E::TamperDetected { .. }
+        | E::PostureReoriented { .. } => Vec::new(),
         E::CovertTamperStruck { cost, .. }
         | E::SpyProbed { fee: cost, .. }
         | E::TechExfiltrated { fee: cost, .. } => {
@@ -1944,11 +2106,7 @@ fn admitted_deltas(
             fee,
             ..
         } => {
-            let met = prior
-                .genesis
-                .as_ref()
-                .map(|g| g.metabolism)
-                .unwrap_or(2);
+            let met = prior.genesis.as_ref().map(|g| g.metabolism).unwrap_or(2);
             if let Some(d) = cfe::almanac::ScienceDiscipline::from_wire(*discipline) {
                 // Re-derive the seat AFFINITY exactly as the cfe seat pays it
                 // (call-not-copy): the bill scales by the species' affinity
@@ -1962,8 +2120,9 @@ fn admitted_deltas(
                 let clade = prior.taxon.map(|(_, c)| c);
                 let mut aff = cfe::almanac::science_seat_affinity(met, d, clade).fee_mult();
                 if matches!(d, cfe::almanac::ScienceDiscipline::Research) {
-                    let (class, eco_clade) =
-                        prior.taxon.unwrap_or((7, u16::from(cfe::almanac::FLATLANDER_CLADE)));
+                    let (class, eco_clade) = prior
+                        .taxon
+                        .unwrap_or((7, u16::from(cfe::almanac::FLATLANDER_CLADE)));
                     aff *= cfe::almanac::research_affinity_mult(cfe::almanac::economic_mode(
                         class, eco_clade,
                     ));
@@ -1980,11 +2139,7 @@ fn admitted_deltas(
             }
         }
         E::LabCreated { path, fee, .. } => {
-            let met = prior
-                .genesis
-                .as_ref()
-                .map(|g| g.metabolism)
-                .unwrap_or(2);
+            let met = prior.genesis.as_ref().map(|g| g.metabolism).unwrap_or(2);
             if let Some(p) = cfe::almanac::LabPath::from_wire(*path) {
                 let mut out = Vec::new();
                 for (r, a) in cfe::almanac::lab_create_bill(p, met) {
@@ -1997,7 +2152,9 @@ fn admitted_deltas(
                 vec![(Resource::Crystal, -fee.clone())]
             }
         }
-        E::ScienceExploded { resource, slash, .. } => {
+        E::ScienceExploded {
+            resource, slash, ..
+        } => {
             let res = Resource::from_wire(*resource).unwrap_or(Resource::Crystal);
             non_negative(res, slash)?;
             if *slash > cfe::ratio::ratio(0, 1) {
@@ -2008,17 +2165,27 @@ fn admitted_deltas(
         }
         // — mints (the sign lives at I4, order preserved for the
         //   landed pins) —
-        E::YieldCollected { resource, amount, .. } => vec![(*resource, amount.clone())],
-        E::DiscoveryMinted { resource, amount, .. } => vec![(*resource, amount.clone())],
+        E::YieldCollected {
+            resource, amount, ..
+        } => vec![(*resource, amount.clone())],
+        E::DiscoveryMinted {
+            resource, amount, ..
+        } => vec![(*resource, amount.clone())],
         // — decays (the sign lives at I5, order preserved) —
-        E::DemurrageSettled { resource, amount, .. } => vec![(*resource, -amount.clone())],
-        E::TitheReceipted { resource, amount, .. } => vec![(*resource, -amount.clone())],
+        E::DemurrageSettled {
+            resource, amount, ..
+        } => vec![(*resource, -amount.clone())],
+        E::TitheReceipted {
+            resource, amount, ..
+        } => vec![(*resource, -amount.clone())],
         E::DemurrageTouched { decays, .. } => decays
             .iter()
             .map(|(resource, amount)| (*resource, -amount.clone()))
             .collect(),
         // — Tier 1: single-resource debits, sign-guarded —
-        E::UpkeepSettled { resource, amount, .. } => {
+        E::UpkeepSettled {
+            resource, amount, ..
+        } => {
             non_negative(*resource, amount)?;
             vec![(*resource, -amount.clone())]
         }
@@ -2038,7 +2205,16 @@ fn admitted_deltas(
         // total, burned like upkeep. Address and cap verified from the
         // receipt's own seed and covering against the prior state;
         // postage verified by calling the postal meter.
-        E::ParcelConveyed { from_orb, to_orb, resource, amount, postage, seed, covered, .. } => {
+        E::ParcelConveyed {
+            from_orb,
+            to_orb,
+            resource,
+            amount,
+            postage,
+            seed,
+            covered,
+            ..
+        } => {
             non_negative(*resource, amount)?;
             for endpoint in [from_orb, to_orb] {
                 if !covered.contains(endpoint) {
@@ -2098,7 +2274,9 @@ fn admitted_deltas(
             non_negative(Resource::Sink, amount)?;
             vec![(Resource::Sink, -amount.clone())]
         }
-        E::FamineStruck { resource, drawn, .. } => {
+        E::FamineStruck {
+            resource, drawn, ..
+        } => {
             non_negative(*resource, drawn)?;
             vec![(*resource, -drawn.clone())]
         }
@@ -2106,7 +2284,11 @@ fn admitted_deltas(
         // and into escrow (the sealed council enters `next`) — a move
         // within the conserved total, so the declared net is zero. The
         // sign guard stays at the door. (The escrow law.)
-        E::CouncilSealed { resource, collateral, .. } => {
+        E::CouncilSealed {
+            resource,
+            collateral,
+            ..
+        } => {
             non_negative(*resource, collateral)?;
             Vec::new()
         }
@@ -2122,9 +2304,21 @@ fn admitted_deltas(
         // door. (Council close stays declaration==effect on banked — its
         // multi-event atomic settle is per-deed threading, gated on the
         // Phase 3 flip; see the CouncilClosed arm.)
-        E::ForwardSealed { resource, collateral, .. }
-        | E::ForwardReleased { resource, collateral, .. }
-        | E::ForwardSlashed { resource, collateral, .. } => {
+        E::ForwardSealed {
+            resource,
+            collateral,
+            ..
+        }
+        | E::ForwardReleased {
+            resource,
+            collateral,
+            ..
+        }
+        | E::ForwardSlashed {
+            resource,
+            collateral,
+            ..
+        } => {
             non_negative(*resource, collateral)?;
             Vec::new()
         }
@@ -2141,15 +2335,15 @@ fn admitted_deltas(
         // council is held constant across the deed's prior→next; the
         // escrow discharge is conserved at the settle boundary, not
         // per-event. Forwards (1 deed ↔ 1 escrow move) are strengthened.
-        E::CouncilClosed { council, banked, .. } => {
-            match prior.councils.iter().find(|held| held.council == *council) {
-                Some(held) => {
-                    non_negative(held.resource, banked)?;
-                    vec![(held.resource, banked.clone())]
-                }
-                None => Vec::new(),
+        E::CouncilClosed {
+            council, banked, ..
+        } => match prior.councils.iter().find(|held| held.council == *council) {
+            Some(held) => {
+                non_negative(held.resource, banked)?;
+                vec![(held.resource, banked.clone())]
             }
-        }
+            None => Vec::new(),
+        },
         // — Tier 3: multi-resource, the sealed rules called never
         //   copied —
         // The chartered genesis mint: exactly the founding reserves.
@@ -2167,9 +2361,7 @@ fn admitted_deltas(
                 .orbs
                 .iter()
                 .find(|held| held.orb_id == cfe::world::FIRST_ORB)
-                .map(|orb| {
-                    cfe::dop::endowment_top_up_deltas(orb, &cfe::dop::star_endowment(class))
-                })
+                .map(|orb| cfe::dop::endowment_top_up_deltas(orb, &cfe::dop::star_endowment(class)))
                 .unwrap_or_default(),
             // An unknown class names no kit; the sky gate refuses the
             // deed on its own terms before value is weighed.
@@ -2180,10 +2372,11 @@ fn admitted_deltas(
         // same sealed reads the emitter used (`t_eq4` · `band_of` ·
         // `orbit_endowment`). No star, no gift (the emitter refuses
         // unsited commissioning first).
-        E::PlanetSited { albedo, orbit_r, .. } => match prior.star {
+        E::PlanetSited {
+            albedo, orbit_r, ..
+        } => match prior.star {
             Some(class) => {
-                let teq =
-                    cfe::thermal::t_eq4(&class.luminosity(), albedo.value(), orbit_r.value());
+                let teq = cfe::thermal::t_eq4(&class.luminosity(), albedo.value(), orbit_r.value());
                 cfe::dop::orbit_endowment(cfe::thermal::band_of(&teq))
             }
             None => Vec::new(),
@@ -2290,23 +2483,30 @@ fn total_conserved(state: &Committed, resource: Resource) -> Ratio {
 /// (Kernel Charter §5a), which fills on Decision Box 1. No fiat (05 §1.2).
 fn creation(step: &Step) -> Result<(), Refused> {
     match &step.event {
-        ClosureEvent::YieldCollected { resource, amount, .. } if *amount < ratio(0, 1) => {
-            Err(Refused::MintNotPositive { resource: *resource, amount: Box::new(amount.clone()) })
-        }
+        ClosureEvent::YieldCollected {
+            resource, amount, ..
+        } if *amount < ratio(0, 1) => Err(Refused::MintNotPositive {
+            resource: *resource,
+            amount: Box::new(amount.clone()),
+        }),
         // U1 — I4 completes on the discovery mint: sign, then the
         // REPLAY-COMPLETE verification (the kernel hands the opaque
         // payload to the sealed verifier whole, never parses it),
         // then the bound. No certificate → no mint; a mint past what
         // the work earns refuses with both sides carried.
-        ClosureEvent::DiscoveryMinted { resource, amount, work, .. } => {
+        ClosureEvent::DiscoveryMinted {
+            resource,
+            amount,
+            work,
+            ..
+        } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::MintNotPositive {
                     resource: *resource,
                     amount: Box::new(amount.clone()),
                 });
             }
-            let bound =
-                carrier_bound(work).map_err(|broken| Refused::WorkRefused { broken })?;
+            let bound = carrier_bound(work).map_err(|broken| Refused::WorkRefused { broken })?;
 
             match *amount <= bound {
                 true => Ok(()),
@@ -2386,9 +2586,7 @@ fn carrier_bound(work: &[u8]) -> Result<Ratio, WorkBroken> {
         // word. The benchmark is the measurement authority: a task it
         // never confirmed refuses unpriced until a re-measurement
         // extends the table (carrier_table.rs, regenerable).
-        WorkClass::Corpus { task_id } => {
-            corpus_weight(&task_id).ok_or(WorkBroken::CarrierUnpriced)
-        }
+        WorkClass::Corpus { task_id } => corpus_weight(&task_id).ok_or(WorkBroken::CarrierUnpriced),
     }
 }
 
@@ -2416,7 +2614,10 @@ pub struct Spectrum {
 }
 
 pub fn spectrum_of<'a>(work: impl Iterator<Item = &'a [u8]>) -> Spectrum {
-    let mut read = Spectrum { weighted: ratio(0, 1), ..Default::default() };
+    let mut read = Spectrum {
+        weighted: ratio(0, 1),
+        ..Default::default()
+    };
     for payload in work {
         match verify_work_class(payload) {
             Ok(WorkClass::Forge(difficulty)) => {
@@ -2485,7 +2686,11 @@ pub fn mint_bound(rung: Option<u32>) -> Ratio {
 /// demurrage rule + `last_touch` join the check.
 fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
     match &step.event {
-        ClosureEvent::DemurrageSettled { orb_id, resource, amount } => {
+        ClosureEvent::DemurrageSettled {
+            orb_id,
+            resource,
+            amount,
+        } => {
             if *amount < ratio(0, 1) {
                 return Err(Refused::DecayNotPositive {
                     resource: *resource,
@@ -2555,7 +2760,9 @@ fn decay(prior: &Committed, step: &Step) -> Result<(), Refused> {
                 // One window settles one row per resource — a repeat
                 // would draw the same window twice.
                 if decays[..at].iter().any(|(held, _)| held == resource) {
-                    return Err(Refused::DecayRowDuplicated { resource: *resource });
+                    return Err(Refused::DecayRowDuplicated {
+                        resource: *resource,
+                    });
                 }
             }
             let due_rows = prior
@@ -2641,7 +2848,10 @@ fn containment(prior: &Committed, step: &Step) -> Result<(), Refused> {
     // An agent acts within its own grants and every principal's above it.
     match cfe::ipsal::permits_in(&prior.entities, step.actor, scope) {
         true => Ok(()),
-        false => Err(Refused::NotPermitted { actor: step.actor, scope }),
+        false => Err(Refused::NotPermitted {
+            actor: step.actor,
+            scope,
+        }),
     }
 }
 
@@ -3095,7 +3305,11 @@ impl cfe::world::MintWarrant for SealedWarrant {
         actor: u64,
         stamp: u64,
     ) -> bool {
-        let step = Step { event: event.clone(), actor, stamp };
+        let step = Step {
+            event: event.clone(),
+            actor,
+            stamp,
+        };
         crate::admits(prior, next, &step).is_ok()
     }
 }

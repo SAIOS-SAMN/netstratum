@@ -73,7 +73,11 @@ impl Delta {
                 assert_eq!(cell.len(), fiber, "fiber arity must be uniform");
             }
         }
-        Self { dim, fiber, entries }
+        Self {
+            dim,
+            fiber,
+            entries,
+        }
     }
 
     /// The structural break — the first place antisymmetry or the zero

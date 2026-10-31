@@ -69,11 +69,18 @@ impl SubstrateBand {
     pub fn bounds4(self) -> (Ratio, Ratio) {
         use crate::anchor::ThermalAnchor as At;
         match self {
-            SubstrateBand::Cryogenic => (anchor_degrees(At::CryoFloor), anchor_degrees(At::CryoCeiling)),
-            SubstrateBand::Mesic => (anchor_degrees(At::MesicFloor), anchor_degrees(At::MesicCeiling)),
-            SubstrateBand::HyperThermal => {
-                (anchor_degrees(At::FoundryFloor), anchor_degrees(At::FoundryCeiling))
-            }
+            SubstrateBand::Cryogenic => (
+                anchor_degrees(At::CryoFloor),
+                anchor_degrees(At::CryoCeiling),
+            ),
+            SubstrateBand::Mesic => (
+                anchor_degrees(At::MesicFloor),
+                anchor_degrees(At::MesicCeiling),
+            ),
+            SubstrateBand::HyperThermal => (
+                anchor_degrees(At::FoundryFloor),
+                anchor_degrees(At::FoundryCeiling),
+            ),
         }
     }
 }
@@ -140,9 +147,7 @@ pub fn coverage(t_eq4: &Ratio) -> Ratio {
         });
     }
     match nearest {
-        Some(distance) if distance > zero => {
-            one.clone() / (one + distance / coverage_scale4())
-        }
+        Some(distance) if distance > zero => one.clone() / (one + distance / coverage_scale4()),
         _ => one,
     }
 }
@@ -272,11 +277,10 @@ impl StarClass {
     /// here, because fiction has no empirical citation and the census
     /// counts it honestly.
     pub fn luminosity(self) -> Ratio {
-        crate::anchor::luminosity(self)
-            .unwrap_or_else(|| match self {
-                StarClass::LuminalWhiteHole => ratio(1_000_000, 1),
-                anchored => unreachable!("{anchored:?} is anchored"),
-            })
+        crate::anchor::luminosity(self).unwrap_or_else(|| match self {
+            StarClass::LuminalWhiteHole => ratio(1_000_000, 1),
+            anchored => unreachable!("{anchored:?} is anchored"),
+        })
     }
 
     /// The star's mass in yellow-star masses (the yellow class = 1) — the anchor Kepler's third
@@ -354,7 +358,11 @@ pub fn local_years(orbit_r: &Ratio, mass: &Ratio, beats: u64) -> u64 {
     }
     // The fallback (off-track r): the exact integer-sqrt floor of beats²/P².
     let beats2 = ratio(beats as i64, 1) * ratio(beats as i64, 1);
-    let x = (beats2 / p2).floor().to_integer().to_u128().unwrap_or(u128::MAX);
+    let x = (beats2 / p2)
+        .floor()
+        .to_integer()
+        .to_u128()
+        .unwrap_or(u128::MAX);
     let mut lo = 0u64;
     let mut hi = 1u64;
     while (hi as u128).saturating_mul(hi as u128) <= x {
@@ -382,9 +390,15 @@ mod tests {
     #[test]
     fn stellar_mass_ranks_the_main_sequence() {
         // Massive hot stars burn heavy; dim red stars are tiny.
-        assert!(StarClass::Blue.mass() > StarClass::Yellow.mass(), "blue outweighs yellow");
+        assert!(
+            StarClass::Blue.mass() > StarClass::Yellow.mass(),
+            "blue outweighs yellow"
+        );
         assert_eq!(StarClass::Yellow.mass(), r(1, 1), "yellow is the mass unit");
-        assert!(StarClass::Yellow.mass() > StarClass::Red.mass(), "yellow outweighs red");
+        assert!(
+            StarClass::Yellow.mass() > StarClass::Red.mass(),
+            "yellow outweighs red"
+        );
         assert_eq!(StarClass::Red.mass(), r(1, 5), "red is the tiny red star");
     }
 
@@ -403,14 +417,21 @@ mod tests {
         // The reference yellow-star world at r=1 completes its 360-beat circuit exactly:
         // 0 years before beat 360, exactly 1 at beat 360, 2 at 720.
         assert_eq!(local_years(&r(1, 1), &g, 359), 0, "not yet a full orbit");
-        assert_eq!(local_years(&r(1, 1), &g, 360), 1, "one 360-beat circuit = one local year");
+        assert_eq!(
+            local_years(&r(1, 1), &g, 360),
+            1,
+            "one 360-beat circuit = one local year"
+        );
         assert_eq!(local_years(&r(1, 1), &g, 720), 2, "two circuits, two years");
         // Two planets, same beat, different ages: the close-and-heavy world has
         // lived far more local years than a distant one on the same cosmic tick.
         let beat = 3600;
         let inner = local_years(&r(1, 4), &StarClass::Blue.mass(), beat);
         let outer = local_years(&r(9, 1), &StarClass::Red.mass(), beat);
-        assert!(inner > outer, "same beat, but the inner-heavy world is far older: {inner} vs {outer}");
+        assert!(
+            inner > outer,
+            "same beat, but the inner-heavy world is far older: {inner} vs {outer}"
+        );
     }
 
     #[test]
@@ -424,16 +445,36 @@ mod tests {
         let p2 = orbital_period_squared(&rr, &g);
         let period = exact_sqrt(&p2).expect("a Diophantine track has an exact rational period");
         // P = base·M·k³ exactly (base = 360, M = 1): 360·(3/2)³ = 360·27/8.
-        assert_eq!(period, r(360, 1) * k.clone() * k.clone() * k, "P = BASE·M·k³ exact");
+        assert_eq!(
+            period,
+            r(360, 1) * k.clone() * k.clone() * k,
+            "P = BASE·M·k³ exact"
+        );
         // The year count is the exact rational floor ⌊beats/P⌋.
         let p_int = period.to_integer().to_u128().unwrap() as u64; // P here is integral
-        assert_eq!(local_years(&rr, &g, p_int), 1, "one exact period = one year");
+        assert_eq!(
+            local_years(&rr, &g, p_int),
+            1,
+            "one exact period = one year"
+        );
         assert_eq!(local_years(&rr, &g, p_int - 1), 0, "not yet a full period");
-        assert_eq!(local_years(&rr, &g, 3 * p_int), 3, "three periods, three years");
+        assert_eq!(
+            local_years(&rr, &g, 3 * p_int),
+            3,
+            "three periods, three years"
+        );
         // A non-Diophantine r (P² not a perfect square) has no exact period —
         // the isqrt fallback still answers, and agrees at the reference world.
-        assert_eq!(exact_sqrt(&orbital_period_squared(&r(2, 1), &g)), None, "r=2 is off-track");
-        assert_eq!(local_years(&r(1, 1), &g, 720), 2, "the reference world still ages exactly");
+        assert_eq!(
+            exact_sqrt(&orbital_period_squared(&r(2, 1), &g)),
+            None,
+            "r=2 is off-track"
+        );
+        assert_eq!(
+            local_years(&r(1, 1), &g, 720),
+            2,
+            "the reference world still ages exactly"
+        );
     }
 
     #[test]

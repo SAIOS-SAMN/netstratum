@@ -84,12 +84,12 @@ impl Parameter {
     pub fn seed(self) -> Ratio {
         match self {
             Parameter::EncasementThroughput => ratio(2, 1), // SEALED-RATE: epoch-0 charter seed
-            Parameter::RadiatorBase => ratio(2, 1), // SEALED-RATE: epoch-0 charter seed
-            Parameter::EmberLeakPerTick => ratio(1, 8), // SEALED-RATE: epoch-0 charter seed
-            Parameter::HeatingPerZone => ratio(1, 4), // SEALED-RATE: epoch-0 charter seed
-            Parameter::SinkThroughput => ratio(2, 1), // SEALED-RATE: epoch-0 charter seed
-            Parameter::FrictionRate => ratio(1, 8), // SEALED-RATE: epoch-0 charter seed
-            Parameter::VeilToll => ratio(1, 4), // SEALED-RATE: epoch-0 charter seed
+            Parameter::RadiatorBase => ratio(2, 1),         // SEALED-RATE: epoch-0 charter seed
+            Parameter::EmberLeakPerTick => ratio(1, 8),     // SEALED-RATE: epoch-0 charter seed
+            Parameter::HeatingPerZone => ratio(1, 4),       // SEALED-RATE: epoch-0 charter seed
+            Parameter::SinkThroughput => ratio(2, 1),       // SEALED-RATE: epoch-0 charter seed
+            Parameter::FrictionRate => ratio(1, 8),         // SEALED-RATE: epoch-0 charter seed
+            Parameter::VeilToll => ratio(1, 4),             // SEALED-RATE: epoch-0 charter seed
         }
     }
     pub const ALL: [Parameter; 7] = [
@@ -151,7 +151,10 @@ impl Table {
 pub fn table_of(chronicle: &crate::vrp::Chronicle) -> Table {
     // The chronicle keeps each key's last charter as it is appended: no walk.
     Table(core::array::from_fn(|at| {
-        chronicle.chartered(at as u8 + 1).cloned().unwrap_or_else(|| Parameter::ALL[at].seed())
+        chronicle
+            .chartered(at as u8 + 1)
+            .cloned()
+            .unwrap_or_else(|| Parameter::ALL[at].seed())
     }))
 }
 
@@ -159,5 +162,8 @@ pub fn table_of(chronicle: &crate::vrp::Chronicle) -> Table {
 /// for the key, or the seed where none stands. Same chain, same
 /// value, on every node, forever.
 pub fn of(chronicle: &crate::vrp::Chronicle, key: Parameter) -> Ratio {
-    chronicle.chartered(key.code()).cloned().unwrap_or_else(|| key.seed())
+    chronicle
+        .chartered(key.code())
+        .cloned()
+        .unwrap_or_else(|| key.seed())
 }

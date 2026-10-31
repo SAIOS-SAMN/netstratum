@@ -172,11 +172,22 @@ pub fn planet_fit(clade: u16, region: Option<ThermalRegion>) -> PlanetFit {
     // Adjacent bands = tolerant; far = hostile.
     let adj = matches!(
         (pref, region),
-        (ThermalRegion::Mesic, ThermalRegion::Sublime | ThermalRegion::Torrid)
-            | (ThermalRegion::Cryogenic, ThermalRegion::Quenched | ThermalRegion::Sublime)
-            | (ThermalRegion::HyperThermal, ThermalRegion::Torrid | ThermalRegion::Incandescent)
-            | (ThermalRegion::Torrid, ThermalRegion::Mesic | ThermalRegion::HyperThermal)
-            | (ThermalRegion::Sublime, ThermalRegion::Cryogenic | ThermalRegion::Mesic)
+        (
+            ThermalRegion::Mesic,
+            ThermalRegion::Sublime | ThermalRegion::Torrid
+        ) | (
+            ThermalRegion::Cryogenic,
+            ThermalRegion::Quenched | ThermalRegion::Sublime
+        ) | (
+            ThermalRegion::HyperThermal,
+            ThermalRegion::Torrid | ThermalRegion::Incandescent
+        ) | (
+            ThermalRegion::Torrid,
+            ThermalRegion::Mesic | ThermalRegion::HyperThermal
+        ) | (
+            ThermalRegion::Sublime,
+            ThermalRegion::Cryogenic | ThermalRegion::Mesic
+        )
     );
     if adj {
         PlanetFit::Tolerant
@@ -189,7 +200,7 @@ pub fn planet_fit(clade: u16, region: Option<ThermalRegion>) -> PlanetFit {
 /// Derived: mode bias × planet fit.
 pub fn extract_yield_scale(mode: EconomicMode, fit: PlanetFit) -> Ratio {
     let mode_scale = match mode {
-        EconomicMode::Extractive => ratio(5, 4), // +1/4
+        EconomicMode::Extractive => ratio(5, 4),   // +1/4
         EconomicMode::Regenerative => ratio(3, 4), // −1/4
         EconomicMode::Balanced => ratio(1, 1),
     };
@@ -240,9 +251,9 @@ pub fn extractor_soft_cap(mode: EconomicMode) -> u64 {
 /// Flatlander baseline = primary research; extractive = secondary; etc.
 pub fn research_affinity_mult(mode: EconomicMode) -> i64 {
     match mode {
-        EconomicMode::Balanced => 1,      // flatlander: knowledge path open
-        EconomicMode::Regenerative => 1,  // cycle-knowledge
-        EconomicMode::Extractive => 2,    // research costs more (secondary)
+        EconomicMode::Balanced => 1,     // flatlander: knowledge path open
+        EconomicMode::Regenerative => 1, // cycle-knowledge
+        EconomicMode::Extractive => 2,   // research costs more (secondary)
     }
 }
 
@@ -256,11 +267,7 @@ pub struct TaxonEconomy {
     pub clade: u16,
 }
 
-pub fn taxon_economy(
-    class: u8,
-    clade: u16,
-    region: Option<ThermalRegion>,
-) -> TaxonEconomy {
+pub fn taxon_economy(class: u8, clade: u16, region: Option<ThermalRegion>) -> TaxonEconomy {
     TaxonEconomy {
         mode: economic_mode(class, clade),
         fit: planet_fit(clade, region),

@@ -206,7 +206,10 @@ pub fn append_frame(path: &Path, payload: &[u8]) -> std::io::Result<()> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
-    let mut file = fs::OpenOptions::new().create(true).append(true).open(path)?;
+    let mut file = fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)?;
     file.write_all(&(payload.len() as u32).to_le_bytes())?;
     file.write_all(payload)?;
     Ok(())

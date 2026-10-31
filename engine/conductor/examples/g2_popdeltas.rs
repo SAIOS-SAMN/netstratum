@@ -8,7 +8,11 @@ fn main() {
     let mut tally: BTreeMap<(u64, i64, String), u32> = BTreeMap::new();
     let mut prev = String::new();
     for r in c.receipts() {
-        let kind = format!("{:?}", r.event()).split(|c: char| !c.is_ascii_alphanumeric()).next().unwrap_or("").to_string();
+        let kind = format!("{:?}", r.event())
+            .split(|c: char| !c.is_ascii_alphanumeric())
+            .next()
+            .unwrap_or("")
+            .to_string();
         if let E::PopulationSettled { orb_id, delta } = r.event() {
             *tally.entry((*orb_id, *delta, prev.clone())).or_default() += 1;
         }

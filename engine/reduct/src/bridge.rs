@@ -33,7 +33,11 @@ pub struct GridObs {
 
 impl GridObs {
     pub fn new(rows: usize, cols: usize, cells: Vec<i64>) -> Self {
-        assert_eq!(cells.len(), rows * cols, "GridObs: cell count must be rows·cols");
+        assert_eq!(
+            cells.len(),
+            rows * cols,
+            "GridObs: cell count must be rows·cols"
+        );
         GridObs { rows, cols, cells }
     }
 

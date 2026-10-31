@@ -43,8 +43,7 @@ impl World {
         // Every member must afford its lock before any lock happens —
         // a refusal moves nothing (the aperture discipline).
         for member in &members {
-            let held = peek(&self.orbs, *member)
-                .expect("checked");
+            let held = peek(&self.orbs, *member).expect("checked");
             let have = held.banked_amount(resource);
             if have < collateral {
                 return Err(ActionRefused::CannotAfford {
@@ -55,8 +54,7 @@ impl World {
             }
         }
         for member in &members {
-            let held = peel(&mut self.orbs, *member)
-                .expect("checked");
+            let held = peel(&mut self.orbs, *member).expect("checked");
             held.bank(resource, -collateral.clone());
         }
         let stamp = self.clock.now();
@@ -71,7 +69,14 @@ impl World {
             window,
         });
         self.close(
-            ClosureEvent::CouncilSealed { council, resource, quota, window, collateral, members },
+            ClosureEvent::CouncilSealed {
+                council,
+                resource,
+                quota,
+                window,
+                collateral,
+                members,
+            },
             SOVEREIGN,
         );
         Ok(())
@@ -128,9 +133,11 @@ impl World {
         if !self.orbs.iter().any(|held| held.orb_id == target) {
             return Err(ActionRefused::NoSuchOrb { orb: target });
         }
-        if self.bonds.iter().any(|bond| {
-            bond.source == source && bond.target == target && bond.resource == resource
-        }) {
+        if self
+            .bonds
+            .iter()
+            .any(|bond| bond.source == source && bond.target == target && bond.resource == resource)
+        {
             return Err(ActionRefused::BondAlreadySealed);
         }
         let stamp = self.clock.now();
@@ -211,12 +218,18 @@ impl World {
         let owed = rate.clone() * ratio(boundary.saturating_sub(anchored) as i64, 1);
         let star = self.star;
         let affordable = {
-            let held = peek(&self.orbs, source)
-                .expect("bond endpoints exist");
+            let held = peek(&self.orbs, source).expect("bond endpoints exist");
             // CHANNEL_DEMURRAGE: the adopted disciplines' composed
             // decay factor (the Hoard binds 1/2 — the stores keep).
             let keep = self.practice_factor(crate::vocabulary::CHANNEL_DEMURRAGE);
-            let decay = keep * demurrage_due(held, star, stamp, &ease_of(&self.techs, source, stamp), &standing_supply(&self.orbs))
+            let decay = keep
+                * demurrage_due(
+                    held,
+                    star,
+                    stamp,
+                    &ease_of(&self.techs, source, stamp),
+                    &standing_supply(&self.orbs),
+                )
                 .into_iter()
                 .find(|(due, _)| *due == resource)
                 .map(|(_, decay)| decay)
@@ -247,20 +260,17 @@ impl World {
         let supply = standing_supply(&self.orbs);
         if pay > ratio(0, 1) {
             for orb in [source, target] {
-                let held = peel(&mut self.orbs, orb)
-                    .expect("bond endpoints exist");
+                let held = peel(&mut self.orbs, orb).expect("bond endpoints exist");
                 let ease = ease_of(&self.techs, orb, stamp);
                 touch(held, star, &mut self.chronicle, stamp, &ease, &supply);
             }
             {
-                let held = peel(&mut self.orbs, source)
-                    .expect("bond endpoints exist");
+                let held = peel(&mut self.orbs, source).expect("bond endpoints exist");
                 held.bank(resource, -pay.clone());
                 held.bond_flow += value.clone();
             }
             {
-                let held = peel(&mut self.orbs, target)
-                    .expect("bond endpoints exist");
+                let held = peel(&mut self.orbs, target).expect("bond endpoints exist");
                 held.bank(resource, pay.clone());
             }
             settle_debts(&mut self.debts, &mut self.orbs, source, target, value);
@@ -271,8 +281,7 @@ impl World {
         if ended {
             self.bonds.remove(at);
             if load > ratio(0, 1) {
-                let held = peel(&mut self.orbs, source)
-                    .expect("bond endpoints exist");
+                let held = peel(&mut self.orbs, source).expect("bond endpoints exist");
                 held.severance_load += load.clone();
             }
         } else {
@@ -343,16 +352,13 @@ impl World {
             return Err(ActionRefused::NoSuchOrb { orb: beneficiary });
         }
         if self.forwards.iter().any(|held| {
-            held.obligor == obligor
-                && held.beneficiary == beneficiary
-                && held.resource == resource
+            held.obligor == obligor && held.beneficiary == beneficiary && held.resource == resource
         }) {
             return Err(ActionRefused::ForwardAlreadySealed);
         }
         let stamp = self.clock.now();
         let collateral = {
-            let held = peek(&self.orbs, obligor)
-                .expect("checked above");
+            let held = peek(&self.orbs, obligor).expect("checked above");
             let required = crate::dop::collateral_required(
                 &held.forwards_fulfilled,
                 &held.forwards_breached,
@@ -369,8 +375,7 @@ impl World {
             required
         };
         {
-            let held = peel(&mut self.orbs, obligor)
-                .expect("checked above");
+            let held = peel(&mut self.orbs, obligor).expect("checked above");
             held.bank(resource, -collateral.clone());
         }
         self.forwards.push(Forward {

@@ -39,7 +39,12 @@ pub struct Response {
 
 impl Response {
     fn refused(deed: &str, detail: String) -> Response {
-        Response { ok: false, deed: deed.to_string(), receipt: None, detail }
+        Response {
+            ok: false,
+            deed: deed.to_string(),
+            receipt: None,
+            detail,
+        }
     }
     /// Render as plain key-lines (not JSON) — uplink shape for agents.
     ///
@@ -119,18 +124,15 @@ pub fn handle(world: &mut World, actor_handle: &str, line: &str) -> Response {
         },
         "compound" => {
             let prefixes: Vec<&str> = words.collect();
-            let members: Option<Vec<[u8; 32]>> =
-                prefixes.iter().map(|held| resolve_element(world, orb, held)).collect();
+            let members: Option<Vec<[u8; 32]>> = prefixes
+                .iter()
+                .map(|held| resolve_element(world, orb, held))
+                .collect();
             match members {
                 Some(members) if members.len() >= 2 => {
                     world.compound_as(actor, orb, &members).map(|_| ())
                 }
-                _ => {
-                    return Response::refused(
-                        &deed,
-                        "usage: compound <prefix> <prefix> …".into(),
-                    )
-                }
+                _ => return Response::refused(&deed, "usage: compound <prefix> <prefix> …".into()),
             }
         }
         // A reading, not a deed: the door answers what the world looks
@@ -152,8 +154,7 @@ pub fn handle(world: &mut World, actor_handle: &str, line: &str) -> Response {
         other => {
             return Response::refused(
                 other,
-                "unknown deed — zone · prospect · raze · collect · assay · compound · look"
-                    .into(),
+                "unknown deed — zone · prospect · raze · collect · assay · compound · look".into(),
             )
         }
     };
@@ -172,7 +173,12 @@ pub fn handle(world: &mut World, actor_handle: &str, line: &str) -> Response {
                     .map(|held| crate::hex(&held.own().0)),
                 false => None,
             };
-            Response { ok: true, deed, receipt, detail: String::from("sealed") }
+            Response {
+                ok: true,
+                deed,
+                receipt,
+                detail: String::from("sealed"),
+            }
         }
         Err(refusal) => Response::refused(&deed, format!("{refusal:?}")),
     }
@@ -276,7 +282,11 @@ mod tests {
         let mut world = played();
         let answer = handle(&mut world, "nobody", "zone 0 ext");
         assert!(!answer.ok);
-        assert!(answer.detail.contains("no entity answers"), "{}", answer.detail);
+        assert!(
+            answer.detail.contains("no entity answers"),
+            "{}",
+            answer.detail
+        );
         assert_eq!(world.chronicle().receipts().len(), 2, "nothing was sealed");
     }
 
@@ -316,7 +326,9 @@ mod tests {
         };
         let w = odd.wire("rover");
         assert!(!w.contains('{'));
-        assert!(!w.lines().any(|l| l.contains('\n') && l.starts_with("detail")));
+        assert!(!w
+            .lines()
+            .any(|l| l.contains('\n') && l.starts_with("detail")));
     }
 
     #[test]
@@ -326,11 +338,19 @@ mod tests {
         let mut world = played();
         let agent = world.register_agent("rover").expect("registers");
         world.grant(agent, Scope::Build).expect("grants build");
-        assert!(handle(&mut world, "rover", "prospect 1").detail.contains("NoStar")
-            || !handle(&mut world, "rover", "prospect 1").ok);
+        assert!(
+            handle(&mut world, "rover", "prospect 1")
+                .detail
+                .contains("NoStar")
+                || !handle(&mut world, "rover", "prospect 1").ok
+        );
         let collect = handle(&mut world, "rover", "collect");
         assert!(!collect.ok, "build does not buy collect");
-        assert!(collect.detail.contains("NotPermitted"), "{}", collect.detail);
+        assert!(
+            collect.detail.contains("NotPermitted"),
+            "{}",
+            collect.detail
+        );
         world.grant(agent, Scope::Collect).expect("grants collect");
         // Now permitted — it may still refuse for its own law (nothing
         // accrued), which is a judged answer rather than a barred one.

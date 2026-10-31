@@ -18,11 +18,7 @@ fn resume_from_chronicle_ignores_missing_state_json() {
     w.zone(1, ZoneKind::Habitat).expect("hab");
 
     // Sync chronicle only — no state.json written.
-    let dir = std::env::temp_dir().join(format!(
-        "no-json-auth-{}-{}",
-        std::process::id(),
-        "tlv"
-    ));
+    let dir = std::env::temp_dir().join(format!("no-json-auth-{}-{}", std::process::id(), "tlv"));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).expect("dir");
     let path = dir.join("chronicle.tlv");

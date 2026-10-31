@@ -47,7 +47,11 @@ fn the_state_round_trips_byte_exact() {
     assert_eq!(bytes[0], SCHEMA_V26, "the schema leads the bytes");
     let decoded = from_state_bytes(&bytes).expect("the canonical state decodes");
     assert_eq!(decoded, committed, "value round trip");
-    assert_eq!(state_bytes(&decoded), bytes, "BYTE round trip — one state, one encoding");
+    assert_eq!(
+        state_bytes(&decoded),
+        bytes,
+        "BYTE round trip — one state, one encoding"
+    );
 }
 
 #[test]
@@ -89,5 +93,9 @@ fn distinct_states_encode_distinct_bytes() {
     world.shift_gauge(ratio(1, 7));
     let other = world.committed();
     assert_ne!(one, other, "the sessions truly differ");
-    assert_ne!(state_bytes(&one), state_bytes(&other), "different state, different bytes");
+    assert_ne!(
+        state_bytes(&one),
+        state_bytes(&other),
+        "different state, different bytes"
+    );
 }

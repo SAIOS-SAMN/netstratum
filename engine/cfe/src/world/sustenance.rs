@@ -32,7 +32,10 @@ pub enum FoodSource {
     /// tick's harvest (accrued yield + natural regrowth). A draw debits the bank
     /// (`YieldCollected`/`UpkeepSettled`), clamped to what stands. The legacy
     /// carrier the three compiled metabolisms farm (#40–42).
-    Bank { resource: Resource, available: Ratio },
+    Bank {
+        resource: Resource,
+        available: Ratio,
+    },
     /// A mineral vein — the larder. Its yield is the unextracted richness
     /// (`cultivated_yield` = Σ vein_richness); a draw mines it (`extracted +=
     /// eaten`, `StapleMined`), capped at that richness, the bank bypassed (food
@@ -107,7 +110,10 @@ impl World {
                     _ => ratio(0, 1),
                 };
                 let available = held.ration_amount(ration) + harvested + natural;
-                sources.push(FoodSource::Bank { resource: *resource, available });
+                sources.push(FoodSource::Bank {
+                    resource: *resource,
+                    available,
+                });
             }
             Ration::Element(element) => {
                 // The vein is the larder — the unextracted richness (no bank, no

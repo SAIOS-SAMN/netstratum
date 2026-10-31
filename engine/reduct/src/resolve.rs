@@ -82,7 +82,12 @@ pub fn overlay(obstruction: &[BigInt], generators: &Mat) -> Binding {
     let coefficients = matvec(&s.v, &q_ext);
     let torsion = factors.into_iter().filter(|d| d > &BigInt::one()).collect();
     let locked = residual.iter().all(|x| x.is_zero());
-    Binding { coefficients, torsion, residual, locked }
+    Binding {
+        coefficients,
+        torsion,
+        residual,
+        locked,
+    }
 }
 
 /// The residual alone — the non-collapsing binding's remainder. A thin view
@@ -127,4 +132,3 @@ pub fn resolve(complex: &CellSheaf, field: &[BigInt], vocabulary: &[Vec<BigInt>]
     let solved = residual.iter().all(|x| x.is_zero());
     Resolution { residual, solved }
 }
-

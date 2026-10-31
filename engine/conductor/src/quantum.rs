@@ -23,15 +23,26 @@ use cfe::ratio::{ratio, Ratio};
 /// projected on the body's planes, never flattened to one plane). Untilted
 /// reads isotropic (a third a plane).
 pub fn twist(rate: &Ratio, core_tilt: &[Ratio], body_tilt: &[Ratio]) -> Ratio {
-    let (g, b) = (crate::flows::tilt_of(core_tilt), crate::flows::tilt_of(body_tilt));
-    ratio(1, 2) * g.iter().zip(&b).fold(ratio(0, 1), |s, (gk, bk)| s + gk.clone() * bk.clone()) * rate.clone()
+    let (g, b) = (
+        crate::flows::tilt_of(core_tilt),
+        crate::flows::tilt_of(body_tilt),
+    );
+    ratio(1, 2)
+        * g.iter()
+            .zip(&b)
+            .fold(ratio(0, 1), |s, (gk, bk)| s + gk.clone() * bk.clone())
+        * rate.clone()
 }
 
 /// The hidden phase at bell `bell` of a world turning once in `period` bells
 /// in a galaxy twisting `twist` a bell.
 pub fn hidden_phase(twist: &Ratio, bell: u64, period: &Ratio) -> Ratio {
     let b = ratio(bell as i64, 1);
-    let turn = if *period > ratio(0, 1) { b.clone() / period.clone() } else { ratio(0, 1) };
+    let turn = if *period > ratio(0, 1) {
+        b.clone() / period.clone()
+    } else {
+        ratio(0, 1)
+    };
     let u = b * twist.clone() + turn;
     u.clone() - u.floor()
 }
@@ -50,19 +61,32 @@ mod tests {
         // A core at rate 1 with its disc plane holding half its tilt winds
         // ¼ a bell; at bell 30 of a 60-bell year: 30/4 + ½ = 8, phase 0.
         // A body lying in the core's disc plane takes that plane's winding.
-        let t = twist(&ratio(1, 1), &[ratio(1, 2), ratio(1, 4), ratio(1, 4)], &[ratio(1, 1), ratio(0, 1), ratio(0, 1)]);
+        let t = twist(
+            &ratio(1, 1),
+            &[ratio(1, 2), ratio(1, 4), ratio(1, 4)],
+            &[ratio(1, 1), ratio(0, 1), ratio(0, 1)],
+        );
         assert_eq!(t, ratio(1, 4));
         // Every plane counts by the body's own share: a body across all three.
-        assert_eq!(twist(&ratio(1, 1), &[ratio(1, 2), ratio(1, 4), ratio(1, 4)], &[]), ratio(1, 6));
+        assert_eq!(
+            twist(&ratio(1, 1), &[ratio(1, 2), ratio(1, 4), ratio(1, 4)], &[]),
+            ratio(1, 6)
+        );
         assert_eq!(hidden_phase(&t, 30, &ratio(60, 1)), ratio(0, 1));
-        assert_eq!(hidden_phase(&t, 1, &ratio(60, 1)), ratio(1, 4) + ratio(1, 60));
+        assert_eq!(
+            hidden_phase(&t, 1, &ratio(60, 1)),
+            ratio(1, 4) + ratio(1, 60)
+        );
         // Untilted: a third a plane, ⅙ a ring.
         assert_eq!(twist(&ratio(1, 1), &[], &[]), ratio(1, 6));
         // Closed form: the phase at 4N is the phase at N moved by 3N's turn.
         let (n, p) = (37u64, ratio(60, 1));
         let step = |b: u64| ratio(b as i64, 1) * (t.clone() + ratio(1, 1) / p.clone());
         let f = |x: Ratio| x.clone() - x.floor();
-        assert_eq!(hidden_phase(&t, 4 * n, &p), f(hidden_phase(&t, n, &p) + step(3 * n)));
+        assert_eq!(
+            hidden_phase(&t, 4 * n, &p),
+            f(hidden_phase(&t, n, &p) + step(3 * n))
+        );
         assert!(measure(&ratio(1, 4), &ratio(1, 2)));
         assert!(!measure(&ratio(3, 4), &ratio(1, 2)));
     }

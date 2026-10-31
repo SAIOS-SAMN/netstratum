@@ -129,11 +129,19 @@ mod tests {
 
     // A rank high enough to work any tier (≤ 3).
     fn full_reach() -> crate::soc::AlgebraicRank {
-        crate::soc::AlgebraicRank { components: 3, cycles: 1, relations: vec![] }
+        crate::soc::AlgebraicRank {
+            components: 3,
+            cycles: 1,
+            relations: vec![],
+        }
     }
     // A rank too shallow to work a tier-2+ element.
     fn shallow_reach() -> crate::soc::AlgebraicRank {
-        crate::soc::AlgebraicRank { components: 1, cycles: 0, relations: vec![] }
+        crate::soc::AlgebraicRank {
+            components: 1,
+            cycles: 0,
+            relations: vec![],
+        }
     }
 
     // An almanac element engineered to project strongly into a target axis: byte 0
@@ -152,7 +160,10 @@ mod tests {
         let mineral = archetype(1);
         let almanac: Vec<[u8; 32]> = (0..8u8).map(element).collect();
         let recipe = discover(morphogen::STRUCT, &almanac, &mineral, &full_reach());
-        assert!(recipe.is_some(), "the almanac offers a structure recipe to a mineral line");
+        assert!(
+            recipe.is_some(),
+            "the almanac offers a structure recipe to a mineral line"
+        );
         let r = recipe.unwrap();
         assert_eq!(r.role, morphogen::STRUCT);
         assert_eq!(r.inputs.len(), 1, "a single-element recipe");
@@ -181,7 +192,13 @@ mod tests {
         deep[2] = 1; // tier 2 — needs reach ≥ 2
         let shallow_almanac = vec![deep];
         assert!(
-            discover(morphogen::STRUCT, &shallow_almanac, &mineral, &shallow_reach()).is_none(),
+            discover(
+                morphogen::STRUCT,
+                &shallow_almanac,
+                &mineral,
+                &shallow_reach()
+            )
+            .is_none(),
             "a low-genus society cannot yet work the deep element (topological gate, not a level)"
         );
         assert!(
@@ -196,13 +213,19 @@ mod tests {
         let almanac: Vec<[u8; 32]> = (0..8u8).map(element).collect();
         let a = discover(morphogen::STRUCT, &almanac, &mineral, &full_reach()).unwrap();
         let b = discover(morphogen::STRUCT, &almanac, &mineral, &full_reach()).unwrap();
-        assert_eq!(a.id, b.id, "the same discovery mints the same recipe — replay-exact");
+        assert_eq!(
+            a.id, b.id,
+            "the same discovery mints the same recipe — replay-exact"
+        );
         // The same element into a different role is a different recipe (no collision).
         let single = vec![a.inputs[0]];
         let struct_recipe = discover(morphogen::STRUCT, &single, &mineral, &full_reach());
         let food_recipe = discover(morphogen::FOOD, &single, &mineral, &full_reach());
         if let (Some(s), Some(f)) = (struct_recipe, food_recipe) {
-            assert_ne!(s.id, f.id, "element→Structure and element→Food are distinct recipes");
+            assert_ne!(
+                s.id, f.id,
+                "element→Structure and element→Food are distinct recipes"
+            );
         }
     }
 }

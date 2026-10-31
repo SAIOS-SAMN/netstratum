@@ -92,7 +92,9 @@ impl World {
         if kind == TreatyKind::War
             && crate::treaty::stands(&self.treaties, partner, TreatyKind::Defense, now)
         {
-            return Err(ActionRefused::SwornToDefend { partner: partner.to_string() });
+            return Err(ActionRefused::SwornToDefend {
+                partner: partner.to_string(),
+            });
         }
 
         // **And the same bar, the other way.** A world cannot swear to
@@ -102,7 +104,9 @@ impl World {
         // contradictory ones. Peace first; the displacement law then
         // ends the war, and the oath can follow.
         if kind == TreatyKind::Defense && crate::treaty::walled(&self.treaties, partner, now) {
-            return Err(ActionRefused::AtWar { partner: partner.to_string() });
+            return Err(ActionRefused::AtWar {
+                partner: partner.to_string(),
+            });
         }
 
         // The displacement — struck first, and receipted in its own
@@ -293,7 +297,10 @@ impl World {
     /// stop binding (the bond's own shape).
     pub fn treaties(&self) -> Vec<&Treaty> {
         let now = self.clock.now();
-        self.treaties.iter().filter(|held| !held.expired(now)).collect()
+        self.treaties
+            .iter()
+            .filter(|held| !held.expired(now))
+            .collect()
     }
 
     /// **The pair's standing factor on one channel** — what this

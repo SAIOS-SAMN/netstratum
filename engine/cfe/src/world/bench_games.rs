@@ -187,12 +187,15 @@ impl World {
             });
         }
         let held_count = nodes.iter().filter(|n| n.held).count() as u64;
-        let instruments = self.instruments.iter().filter(|(o, _, _)| *o == orb).count() as u64;
+        let instruments = self
+            .instruments
+            .iter()
+            .filter(|(o, _, _)| *o == orb)
+            .count() as u64;
         let practices = self.practices.len() as u64;
         let wants = self.wants.iter().filter(|(o, _)| *o == orb).count() as u64;
         let next_move = if novelty_blocked {
-            "novelty want — relieve via license leap or discovery before crystallize"
-                .into()
+            "novelty want — relieve via license leap or discovery before crystallize".into()
         } else if forgeable_ready > 0 {
             format!(
                 "forge ready on {} grade(s) — `bench research forge <c>` or `forge <c>`",
@@ -235,12 +238,14 @@ impl World {
                 IntelStep::Probe,
                 "spy probe — pay crystal, leave scout mark".into(),
             )
-        } else if e.can_exfil && tech_conditions.iter().any(|c| {
-            self.techs
-                .iter()
-                .find(|(o, cond, _, _)| *o == orb && cond == c)
-                .is_some_and(|(_, _, h, _)| !self.intel_hashes.contains(h))
-        }) {
+        } else if e.can_exfil
+            && tech_conditions.iter().any(|c| {
+                self.techs
+                    .iter()
+                    .find(|(o, cond, _, _)| *o == orb && cond == c)
+                    .is_some_and(|(_, _, h, _)| !self.intel_hashes.contains(h))
+            })
+        {
             (
                 IntelStep::Exfil,
                 "spy exfil <condition> — hash to stash (never free tech mint)".into(),
@@ -275,18 +280,12 @@ impl World {
     pub fn link_board(&self) -> LinkBoard {
         let now = self.clock.now();
         let councils = self.councils.len();
-        let council_open = self
-            .councils
-            .iter()
-            .filter(|c| c.window_open(now))
-            .count();
+        let council_open = self.councils.iter().filter(|c| c.window_open(now)).count();
         let bonds = self.bonds.len();
         let forwards = self
             .forwards
             .iter()
-            .filter(|f| {
-                now < f.sealed.saturating_add(f.window) && f.delivered < f.quota
-            })
+            .filter(|f| now < f.sealed.saturating_add(f.window) && f.delivered < f.quota)
             .count();
         let treaties = self.treaties.len();
         let at_war_count = self
@@ -409,12 +408,14 @@ impl World {
             let per = periodic_of(&p.element);
             let line = per.line;
             if (1..=7).contains(&line) {
-                open_per_line[line as usize] =
-                    open_per_line[line as usize].saturating_add(1);
+                open_per_line[line as usize] = open_per_line[line as usize].saturating_add(1);
             }
             let local = star.is_some_and(|c| local_to(&p.element, c));
             let refines_now = star.is_some_and(|c| refines(&p.element, stratum_for_pressure, c));
-            let (family, _, natural) = crate::dop::element_properties(&p.element, star.unwrap_or(crate::thermal::StarClass::Yellow));
+            let (family, _, natural) = crate::dop::element_properties(
+                &p.element,
+                star.unwrap_or(crate::thermal::StarClass::Yellow),
+            );
             let name = element_name(family, &p.element);
             veins.push(StellarVeinRow {
                 stratum: p.stratum,

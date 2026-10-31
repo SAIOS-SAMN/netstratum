@@ -118,7 +118,12 @@ impl MeshHead {
         let length = u64::from_le_bytes(value.get(32..40)?.try_into().ok()?);
         let stamp = u64::from_le_bytes(value.get(40..48)?.try_into().ok()?);
         let head: [u8; 32] = value.get(48..80)?.try_into().ok()?;
-        Some(Self { genesis, length, stamp, head })
+        Some(Self {
+            genesis,
+            length,
+            stamp,
+            head,
+        })
     }
 }
 
@@ -197,7 +202,10 @@ pub fn head(chronicle: &Chronicle) -> MeshHead {
             .unwrap_or([0u8; 32]),
         length: chronicle.total(),
         stamp: receipts.last().map(|receipt| receipt.stamp()).unwrap_or(0),
-        head: receipts.last().map(|receipt| receipt.own().0).unwrap_or([0u8; 32]),
+        head: receipts
+            .last()
+            .map(|receipt| receipt.own().0)
+            .unwrap_or([0u8; 32]),
     }
 }
 
@@ -219,7 +227,10 @@ fn walk(chronicle: &Chronicle) -> Result<WalkState, MeshRefused> {
     // was written, so the walk starts from what it left — the last seal the
     // annals keep names the hand, and a seal that closed the drained prefix
     // still owes its citation to the first held receipt.
-    let mut state = WalkState { hand: None, pending_cite: None };
+    let mut state = WalkState {
+        hand: None,
+        pending_cite: None,
+    };
     let base = chronicle.base();
     if let Some((to, sequence)) = chronicle.annals().last_seal() {
         state.hand = Some(to);
@@ -230,11 +241,17 @@ fn walk(chronicle: &Chronicle) -> Result<WalkState, MeshRefused> {
     for receipt in chronicle.receipts() {
         if let Some(lawful) = state.hand {
             if !receipt.provenance().contains(&lawful) {
-                return Err(MeshRefused::Usurped { at: receipt.sequence(), lawful });
+                return Err(MeshRefused::Usurped {
+                    at: receipt.sequence(),
+                    lawful,
+                });
             }
             if let Some(handoff) = state.pending_cite {
                 if !receipt.provenance().contains(&handoff) {
-                    return Err(MeshRefused::Uncited { at: receipt.sequence(), handoff });
+                    return Err(MeshRefused::Uncited {
+                        at: receipt.sequence(),
+                        handoff,
+                    });
                 }
                 state.pending_cite = None;
             }
@@ -242,7 +259,10 @@ fn walk(chronicle: &Chronicle) -> Result<WalkState, MeshRefused> {
         if let ClosureEvent::HandoffSealed { from, to } = receipt.event() {
             if let Some(lawful) = state.hand {
                 if *from != lawful {
-                    return Err(MeshRefused::Usurped { at: receipt.sequence(), lawful });
+                    return Err(MeshRefused::Usurped {
+                        at: receipt.sequence(),
+                        lawful,
+                    });
                 }
             }
             // The first seal self-declares its incumbent (nothing

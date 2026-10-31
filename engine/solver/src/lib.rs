@@ -29,8 +29,8 @@ pub mod selfmap;
 // N-I3 (the intelligence port) — the ARC seat: peel train grids into
 // `reduct::FullMeasurement`, read them through the one reduce organ (`reduct::think`),
 // render a glued frame to a program, seal the proof. Not a search path.
-pub mod think;
 pub mod percept;
+pub mod think;
 // docs/60 D1 — the channels a word acts in and a mind perceives.
 pub mod senses;
 // N-I5 (the intelligence port) — the survival seat: peel the ration book
@@ -45,25 +45,27 @@ pub mod volume;
 // the loader, the deterministic forge, the certificate chain. Only
 // the search is prover-side. Re-exported whole so no caller breaks —
 // `solver::grid::run` and the root names both stand.
-pub use solver_verify::{certificate, forge, grid, loader, objects};
 pub use solver_verify::{
-    background, forge_task, load_task, segment, verify_certificate, CertificateRead,
-    Difficulty, Grid, LoadError, ObjOp, Object, Op, Program, SolveCertificate, Task, TaskPair,
-    TileMirror, OBJ_OPS,
+    background, forge_task, load_task, segment, verify_certificate, CertificateRead, Difficulty,
+    Grid, LoadError, ObjOp, Object, Op, Program, SolveCertificate, Task, TaskPair, TileMirror,
+    OBJ_OPS,
 };
+pub use solver_verify::{certificate, forge, grid, loader, objects};
 
 pub use derive::{derive, Candidate};
 pub use need::{Family, Hunger, Need};
-pub use selfmap::{consilience, consilience_sensed, knowledge_map, knowledge_order, knowledge_tension, Consilience, SelfMap};
+pub use selfmap::{
+    consilience, consilience_sensed, knowledge_map, knowledge_order, knowledge_tension,
+    Consilience, SelfMap,
+};
+pub use survival::{ration_reads, think_survival, RationRead, SurvivalBook, SurvivalDeed};
 pub use think::{
     hear, hear_word, hold_conjectures, measure_grid, measure_volume, think_task, think_task_held,
     think_task_sensing, think_volume_task, Conjecture, Heard, SolveRead, HELD_CONJECTURES,
 };
-pub use survival::{ration_reads, think_survival, RationRead, SurvivalBook, SurvivalDeed};
 // N-I4 — the cognitive basin's element, re-exported for the vessel layer
 // (`conductor` grows a `Vec<Crystal>` per line and passes it to `think_task`).
 pub use reduct::Crystal;
 pub use volume::{
-    forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead,
-    VolumeTask,
+    forge_volume, run_volume, solve_volume, VOp, VolDifficulty, Volume, VolumeSolveRead, VolumeTask,
 };

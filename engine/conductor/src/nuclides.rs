@@ -51,18 +51,26 @@ pub struct Place {
 impl Place {
     /// Its outer degree's claimed share, `(lone + bound)/dirs`.
     pub fn claimed(&self) -> cfe::ratio::Ratio {
-        cfe::ratio::ratio(i64::try_from(self.lone + self.bound).unwrap_or(i64::MAX), i64::try_from(self.dirs.max(1)).unwrap_or(i64::MAX))
+        cfe::ratio::ratio(
+            i64::try_from(self.lone + self.bound).unwrap_or(i64::MAX),
+            i64::try_from(self.dirs.max(1)).unwrap_or(i64::MAX),
+        )
     }
 
     /// Its outer degree's paired share, `bound/dirs` (1 at every seal).
     pub fn paired(&self) -> cfe::ratio::Ratio {
-        cfe::ratio::ratio(i64::try_from(self.bound).unwrap_or(i64::MAX), i64::try_from(self.dirs.max(1)).unwrap_or(i64::MAX))
+        cfe::ratio::ratio(
+            i64::try_from(self.bound).unwrap_or(i64::MAX),
+            i64::try_from(self.dirs.max(1)).unwrap_or(i64::MAX),
+        )
     }
 }
 
 /// The place of the nuclide of weight `w` (None past the read or at 0).
 pub fn place(w: u32) -> Option<Place> {
-    places().get(usize::try_from(w).ok()?.checked_sub(1)?).copied()
+    places()
+        .get(usize::try_from(w).ok()?.checked_sub(1)?)
+        .copied()
 }
 
 fn places() -> &'static [Place] {
@@ -79,7 +87,13 @@ fn places() -> &'static [Place] {
                 lone -= 1;
                 bound += 1;
             }
-            out.push(Place { turning, degree, dirs, lone, bound });
+            out.push(Place {
+                turning,
+                degree,
+                dirs,
+                lone,
+                bound,
+            });
             if bound == dirs {
                 degree += 1;
                 lone = 0;
@@ -131,12 +145,16 @@ fn table() -> &'static [(u32, u32)] {
 /// The protons of the nuclide of weight `w` (its charge); None past the read
 /// or at w = 0.
 pub fn protons(w: u32) -> Option<u32> {
-    table().get(usize::try_from(w).ok()?.checked_sub(1)?).map(|(q, _)| *q)
+    table()
+        .get(usize::try_from(w).ok()?.checked_sub(1)?)
+        .map(|(q, _)| *q)
 }
 
 /// The neutrons of the nuclide of weight `w`.
 pub fn neutrons(w: u32) -> Option<u32> {
-    table().get(usize::try_from(w).ok()?.checked_sub(1)?).map(|(_, z)| *z)
+    table()
+        .get(usize::try_from(w).ok()?.checked_sub(1)?)
+        .map(|(_, z)| *z)
 }
 
 /// The nucleus's coherence, its bound share `κ = 2Z/w`.
@@ -191,7 +209,11 @@ pub fn swapped(w: u32) -> Option<(u32, u32)> {
 /// the face δ, protons cross to the vacuum leg by the held face, `p·δ`, and
 /// neutrons to the continuum by the unlocked face, `n·½(1 − δ)`, both in
 /// whole nucleons, both booked: `p + n` is unchanged. Returns (p, n) after.
-pub fn exchange(p: &num_bigint::BigInt, n: &num_bigint::BigInt, delta: &cfe::ratio::Ratio) -> (num_bigint::BigInt, num_bigint::BigInt) {
+pub fn exchange(
+    p: &num_bigint::BigInt,
+    n: &num_bigint::BigInt,
+    delta: &cfe::ratio::Ratio,
+) -> (num_bigint::BigInt, num_bigint::BigInt) {
     use cfe::ratio::{ratio, Ratio};
     let whole = |x: Ratio| x.floor().to_integer();
     // The master equation (docs/105 §3): a proton binds as a fibre's partner
@@ -251,18 +273,31 @@ pub fn seal_window(nu: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
     use cfe::ratio::ratio;
     // Deuterium crosses at the throat: its grip read at the throat's held
     // share, the fixed point where it holds (docs/105 §4).
-    (ratio(1, 1) + grip(2, &crate::polarity::throat_held()).unwrap_or_else(|| ratio(0, 1))) / nu.clone()
+    (ratio(1, 1) + grip(2, &crate::polarity::throat_held()).unwrap_or_else(|| ratio(0, 1)))
+        / nu.clone()
 }
 
 /// A dying heart's release (docs/97 §11): each nuclide whose grip at the
 /// heart's pulse phase `p` its heat exceeds breaks into its nucleons, standing as hydrogen (the exchange
 /// returns their neutrons to the continuum): the fuel of the rapid capture.
 /// Nucleons conserved. Returns the nucleons released.
-pub fn release(m: &mut crate::pulse::Manifest, a: &cfe::ratio::Ratio, p: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
+pub fn release(
+    m: &mut crate::pulse::Manifest,
+    a: &cfe::ratio::Ratio,
+    p: &cfe::ratio::Ratio,
+) -> cfe::ratio::Ratio {
     use cfe::ratio::ratio;
-    let Some(h) = crate::chem::Kind::atom(1) else { return ratio(0, 1) };
+    let Some(h) = crate::chem::Kind::atom(1) else {
+        return ratio(0, 1);
+    };
     let mut freed = ratio(0, 1);
-    let broken: Vec<(crate::chem::Kind, cfe::ratio::Ratio)> = m.iter().filter(|(k, _)| crate::chem::atom_w(k).is_some_and(|w| w > 1 && grip(w, p).is_some_and(|g| *a > g))).map(|(k, x)| (k.clone(), x.clone())).collect();
+    let broken: Vec<(crate::chem::Kind, cfe::ratio::Ratio)> = m
+        .iter()
+        .filter(|(k, _)| {
+            crate::chem::atom_w(k).is_some_and(|w| w > 1 && grip(w, p).is_some_and(|g| *a > g))
+        })
+        .map(|(k, x)| (k.clone(), x.clone()))
+        .collect();
     for (k, x) in broken {
         let w = crate::chem::weight(&k);
         m.remove(&k);
@@ -296,12 +331,24 @@ pub fn survival(w: u32, p: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
 /// moved (in grains).
 fn climb(m: &mut crate::pulse::Manifest, w: u32, share: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
     use cfe::ratio::ratio;
-    let (Some(from), Some(to), Some(h)) = (crate::chem::Kind::atom(w), crate::chem::Kind::atom(w + 1), crate::chem::Kind::atom(1)) else { return ratio(0, 1) };
+    let (Some(from), Some(to), Some(h)) = (
+        crate::chem::Kind::atom(w),
+        crate::chem::Kind::atom(w + 1),
+        crate::chem::Kind::atom(1),
+    ) else {
+        return ratio(0, 1);
+    };
     let here = m.get(&from).cloned().unwrap_or_else(|| ratio(0, 1));
     let fuel = m.get(&h).cloned().unwrap_or_else(|| ratio(0, 1));
     // From hydrogen itself, two nuclei make the one that climbs.
-    let fuel_left = if w == 1 { fuel.clone() / ratio(2, 1) } else { fuel.clone() };
-    let mv = crate::pulse::nucleus(&(here.clone() * share.clone())).min(here).min(fuel_left);
+    let fuel_left = if w == 1 {
+        fuel.clone() / ratio(2, 1)
+    } else {
+        fuel.clone()
+    };
+    let mv = crate::pulse::nucleus(&(here.clone() * share.clone()))
+        .min(here)
+        .min(fuel_left);
     if mv <= ratio(0, 1) {
         return ratio(0, 1);
     }
@@ -317,13 +364,21 @@ fn climb(m: &mut crate::pulse::Manifest, w: u32, share: &cfe::ratio::Ratio) -> c
 /// `f_H·c·σ_{w+1}` of itself to `w + 1` each ring (read at the ring's start,
 /// heaviest first so no nucleus climbs twice in one ring), f_H hydrogen's
 /// share of the heart's nuclei. Nucleons conserved. Returns the nuclei moved.
-pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::ratio::Ratio, p: &cfe::ratio::Ratio, densest: u32) -> cfe::ratio::Ratio {
+pub fn capture_slow(
+    heart: &mut crate::pulse::Manifest,
+    rings: u64,
+    c: &cfe::ratio::Ratio,
+    p: &cfe::ratio::Ratio,
+    densest: u32,
+) -> cfe::ratio::Ratio {
     use cfe::ratio::ratio;
     use num_traits::Zero;
     let mut moved = ratio(0, 1);
     for _ in 0..rings {
         let count = heart.values().fold(ratio(0, 1), |s, a| s + a.clone());
-        let h = crate::chem::Kind::atom(1).and_then(|k| heart.get(&k).cloned()).unwrap_or_else(|| ratio(0, 1));
+        let h = crate::chem::Kind::atom(1)
+            .and_then(|k| heart.get(&k).cloned())
+            .unwrap_or_else(|| ratio(0, 1));
         if count.is_zero() || h.is_zero() {
             break;
         }
@@ -332,7 +387,9 @@ pub fn capture_slow(heart: &mut crate::pulse::Manifest, rings: u64, c: &cfe::rat
         weights.sort_by(|a, b| b.cmp(a));
         // Hydrogen is the fuel the heavier seeds capture, never a seed.
         for w in weights.into_iter().filter(|&w| w >= 2 && w < densest) {
-            let Some(s) = survival(w + 1, p) else { continue };
+            let Some(s) = survival(w + 1, p) else {
+                continue;
+            };
             moved += climb(heart, w, &(f_h.clone() * c.clone() * s));
         }
     }
@@ -352,7 +409,9 @@ pub fn capture_rapid(m: &mut crate::pulse::Manifest, p: &cfe::ratio::Ratio, dens
     // The universe's densest element (the founding's own, docs/97 §14)
     // stands; nothing climbs past it.
     while w < densest {
-        let h = crate::chem::Kind::atom(1).and_then(|k| m.get(&k).cloned()).unwrap_or_else(|| ratio(0, 1));
+        let h = crate::chem::Kind::atom(1)
+            .and_then(|k| m.get(&k).cloned())
+            .unwrap_or_else(|| ratio(0, 1));
         if h <= ratio(0, 1) {
             break;
         }
@@ -373,10 +432,18 @@ pub fn capture_rapid(m: &mut crate::pulse::Manifest, p: &cfe::ratio::Ratio, dens
 /// nature's own, never imposed: (neutrons per proton among the nucleons,
 /// the helium-weight mass share, hydrogen's mass share). Nature reads about
 /// 1/7, 1/4 and 3/4.
-pub fn beside_nature(m: &crate::pulse::Manifest) -> Option<(cfe::ratio::Ratio, cfe::ratio::Ratio, cfe::ratio::Ratio)> {
+pub fn beside_nature(
+    m: &crate::pulse::Manifest,
+) -> Option<(cfe::ratio::Ratio, cfe::ratio::Ratio, cfe::ratio::Ratio)> {
     use cfe::ratio::ratio;
     use num_traits::Zero;
-    let (mut q, mut z, mut whole, mut alpha, mut h) = (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
+    let (mut q, mut z, mut whole, mut alpha, mut h) = (
+        ratio(0, 1),
+        ratio(0, 1),
+        ratio(0, 1),
+        ratio(0, 1),
+        ratio(0, 1),
+    );
     for (k, a) in m {
         for &(n, w) in k.parts() {
             let count = a.clone() * ratio(i64::from(n), 1);
@@ -441,7 +508,11 @@ mod tests {
         // The lone ends of the open degree are the protons past the fibres.
         for w in [3u32, 100, 1200, 1612] {
             let p = place(w).expect("a place");
-            assert_eq!(protons(w).zip(neutrons(w)).map(|(q, z)| q - z), Some(u32::try_from(p.lone).expect("small")), "weight {w}");
+            assert_eq!(
+                protons(w).zip(neutrons(w)).map(|(q, z)| q - z),
+                Some(u32::try_from(p.lone).expect("small")),
+                "weight {w}"
+            );
             assert!(p.claimed() <= ratio(1, 1));
         }
     }
@@ -454,10 +525,17 @@ mod tests {
             assert_eq!(mobius(mobius(p)), p);
         }
         for w in [2u32, 4, 28, 208, 1092] {
-            assert_eq!(swapped(w), protons(w).zip(neutrons(w)), "seal {w} is its own image");
+            assert_eq!(
+                swapped(w),
+                protons(w).zip(neutrons(w)),
+                "seal {w} is its own image"
+            );
         }
         // Unitary: a pass books both directions; nucleons are conserved.
-        let (p, n) = (num_bigint::BigInt::from(1_000_000u64), num_bigint::BigInt::from(0));
+        let (p, n) = (
+            num_bigint::BigInt::from(1_000_000u64),
+            num_bigint::BigInt::from(0),
+        );
         let (p1, n1) = exchange(&p, &n, &ratio(1, 3));
         assert_eq!(&p1 + &n1, &p + &n);
         assert!(n1 > num_bigint::BigInt::from(0));
@@ -497,24 +575,37 @@ mod tests {
     #[test]
     fn the_stars_captures_climb_and_conserve_nucleons_by_the_held_share() {
         let k = |w: u32| crate::chem::Kind::atom(w).expect("a nuclide");
-        let nucleons = |m: &crate::pulse::Manifest| m.iter().fold(ratio(0, 1), |s, (kk, a)| s + a.clone() * ratio(i64::from(crate::chem::weight(kk)), 1));
+        let nucleons = |m: &crate::pulse::Manifest| {
+            m.iter().fold(ratio(0, 1), |s, (kk, a)| {
+                s + a.clone() * ratio(i64::from(crate::chem::weight(kk)), 1)
+            })
+        };
         let (g_hi, g_lo, g_throat) = (ratio(9, 10), ratio(1, 10), crate::polarity::throat_held());
-        let mut m: crate::pulse::Manifest = [(k(1), ratio(1_000_000, 1)), (k(4), ratio(1, 1))].into();
+        let mut m: crate::pulse::Manifest =
+            [(k(1), ratio(1_000_000, 1)), (k(4), ratio(1, 1))].into();
         let before = nucleons(&m);
         // A dying heart's heat breaks what it out-grips into nucleons.
-        let mut spent: crate::pulse::Manifest = [(k(7), ratio(10, 1)), (k(28), ratio(10, 1))].into();
+        let mut spent: crate::pulse::Manifest =
+            [(k(7), ratio(10, 1)), (k(28), ratio(10, 1))].into();
         let was = nucleons(&spent);
         // Where the held share is high, a gentle heat below both grips
         // breaks nothing.
         let mut gentle = spent.clone();
-        let low = grip(7, &g_hi).expect("a grip").min(grip(28, &g_hi).expect("a grip")) / ratio(2, 1);
+        let low = grip(7, &g_hi)
+            .expect("a grip")
+            .min(grip(28, &g_hi).expect("a grip"))
+            / ratio(2, 1);
         assert_eq!(release(&mut gentle, &low, &g_hi), ratio(0, 1));
         // Where it is low, between the grips the unsealed breaks, the seal
         // holds.
-        let between = (grip(7, &g_lo).expect("a grip") + grip(28, &g_lo).expect("a grip")) / ratio(2, 1);
+        let between =
+            (grip(7, &g_lo).expect("a grip") + grip(28, &g_lo).expect("a grip")) / ratio(2, 1);
         let freed = release(&mut spent, &between, &g_lo);
         assert_eq!(nucleons(&spent), was);
-        assert!(freed > ratio(0, 1) && spent.contains_key(&k(28)), "the unsealed break, the seal holds");
+        assert!(
+            freed > ratio(0, 1) && spent.contains_key(&k(28)),
+            "the unsealed break, the seal holds"
+        );
         // Held high, one burst climbs to the densest element.
         let mut held_hi = m.clone();
         assert_eq!(capture_rapid(&mut held_hi, &g_hi, 1200), 1200);
@@ -526,9 +617,13 @@ mod tests {
         assert!(top > 208, "one burst passes the third seal: reached {top}");
         *m.entry(k(1)).or_insert_with(|| ratio(0, 1)) += ratio(1_000_000, 1);
         let again = capture_rapid(&mut m, &g_throat, 1200);
-        assert!(again > top, "the next generation climbs higher: {top} then {again}");
+        assert!(
+            again > top,
+            "the next generation climbs higher: {top} then {again}"
+        );
         // A burning heart captures slowly and conserves too.
-        let mut heart: crate::pulse::Manifest = [(k(1), ratio(1000, 1)), (k(4), ratio(100, 1))].into();
+        let mut heart: crate::pulse::Manifest =
+            [(k(1), ratio(1000, 1)), (k(4), ratio(100, 1))].into();
         let before = nucleons(&heart);
         let moved = capture_slow(&mut heart, 10, &ratio(1, 1), &g_throat, 1200);
         assert!(moved > ratio(0, 1));
@@ -540,7 +635,11 @@ mod tests {
     fn twist_is_tension_in_the_fibre_a_wound_seal_parts_where_heat_and_torsion_pass_its_grip() {
         let k = |w: u32| crate::chem::Kind::atom(w).expect("a nuclide");
         let g = crate::polarity::throat_held();
-        let nucleons = |m: &crate::pulse::Manifest| m.iter().fold(ratio(0, 1), |s, (kk, a)| s + a.clone() * ratio(i64::from(crate::chem::weight(kk)), 1));
+        let nucleons = |m: &crate::pulse::Manifest| {
+            m.iter().fold(ratio(0, 1), |s, (kk, a)| {
+                s + a.clone() * ratio(i64::from(crate::chem::weight(kk)), 1)
+            })
+        };
         let grip28 = grip(28, &g).expect("a grip");
         // Unwound at its grip it holds (it parts only past it).
         let mut m: crate::pulse::Manifest = [(k(28), ratio(10, 1))].into();

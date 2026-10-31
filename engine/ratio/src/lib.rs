@@ -253,7 +253,12 @@ impl DivisionProof {
 /// Divide a ring of `ring` slots into `arity` cells, proving the result.
 pub const fn divide_ring(ring: i64, arity: i64) -> DivisionProof {
     if arity <= 0 {
-        return DivisionProof { arity, ring, remainder: -1, cell_span: 0 };
+        return DivisionProof {
+            arity,
+            ring,
+            remainder: -1,
+            cell_span: 0,
+        };
     }
     DivisionProof {
         arity,
@@ -287,7 +292,11 @@ pub fn slot_angle(k: i64) -> Ratio {
 /// The wrapped gap between two turn-fractions — the short way round,
 /// which is what makes each angular axis a circle rather than a segment.
 pub fn turn_gap(a: &Ratio, b: &Ratio) -> Ratio {
-    let raw = if a >= b { a.clone() - b.clone() } else { b.clone() - a.clone() };
+    let raw = if a >= b {
+        a.clone() - b.clone()
+    } else {
+        b.clone() - a.clone()
+    };
     raw.clone().min(ratio(1, 1) - raw)
 }
 

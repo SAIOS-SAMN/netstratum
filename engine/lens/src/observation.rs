@@ -163,9 +163,7 @@ impl<'a> Observation<'a> {
             View::Mid(charges) => Degree::above_ground(charges.len()),
             // The circulation count, read directly rather than through
             // the struck standing arm — the same number it computed.
-            View::Near(_) => {
-                Degree::above_ground(holonomies(self.delta, self.support).len())
-            }
+            View::Near(_) => Degree::above_ground(holonomies(self.delta, self.support).len()),
         }
     }
 
@@ -180,5 +178,4 @@ impl<'a> Observation<'a> {
             None => Regard::flat(),
         }
     }
-
 }

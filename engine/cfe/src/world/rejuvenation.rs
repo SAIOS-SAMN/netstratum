@@ -19,7 +19,9 @@
 //! grown stock and advances `last_touch`, and lands with the wiring.
 
 use super::*;
-use crate::almanac::{carrying_capacity, grained_logistic, intrinsic_rate, region_of, FLATLANDER_CLADE, ThermalRegion};
+use crate::almanac::{
+    carrying_capacity, grained_logistic, intrinsic_rate, region_of, ThermalRegion, FLATLANDER_CLADE,
+};
 use crate::dop::{metabolic_ration_of, Ration, ZoneKind};
 
 impl World {
@@ -31,9 +33,7 @@ impl World {
             .map(|held| {
                 held.zones
                     .iter()
-                    .filter(|zone| {
-                        matches!(zone.kind, ZoneKind::Habitat | ZoneKind::Regenerator)
-                    })
+                    .filter(|zone| matches!(zone.kind, ZoneKind::Habitat | ZoneKind::Regenerator))
                     .count() as u64
             })
             .unwrap_or(0)
@@ -72,7 +72,11 @@ impl World {
         if let Some(staple) = self.staple_diet_of(orb) {
             return Ration::Element(staple);
         }
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
         metabolic_ration_of(metabolism, self.metabolic_element())
     }
 
@@ -92,7 +96,11 @@ impl World {
     ///
     /// [`morphogen::staple`]: crate::morphogen::staple
     pub fn staple_diet_of(&self, orb: u64) -> Option<[u8; 32]> {
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
         let species = crate::morphogen::archetype(metabolism);
         let veins: Vec<[u8; 32]> = self
             .prospects
@@ -121,7 +129,11 @@ impl World {
         // from the planet's albedo (an icy/cloudy high-albedo world is
         // volatile-rich and wet; a dark low-albedo rock is arid) — never a
         // re-derivation of temperature.
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
         let aridity = self.orb_aridity(orb);
         carrying_capacity(
             self.living_zones_of(orb),
@@ -171,9 +183,18 @@ impl World {
         };
         let p0 = held.ration_amount(ration);
         let k = self.ration_capacity_of(orb);
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
         let dt = stamp.saturating_sub(held.last_touch);
-        let grown = grained_logistic(&p0, &k, &intrinsic_rate(metabolism, self.metabolic_element()), dt);
+        let grown = grained_logistic(
+            &p0,
+            &k,
+            &intrinsic_rate(metabolism, self.metabolic_element()),
+            dt,
+        );
         // Floor onto the LATTICE (the `stock.rs` §lattice ruling). The
         // logistic is an exact rational whose denominator compounds every
         // time its output is banked and fed back as the next `p0` — the
@@ -248,8 +269,17 @@ impl World {
         if stock > half_k {
             return Some(floor(stock - half_k));
         }
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
-        let next = grained_logistic(&stock, &k, &intrinsic_rate(metabolism, self.metabolic_element()), 1);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
+        let next = grained_logistic(
+            &stock,
+            &k,
+            &intrinsic_rate(metabolism, self.metabolic_element()),
+            1,
+        );
         Some(floor(next - stock).max(ratio(0, 1)))
     }
 
@@ -322,7 +352,11 @@ impl World {
                 vein.last_assay = stamp;
             }
             self.chronicle.append(
-                crate::dop::ClosureEvent::VeinRejuvenated { orb_id: orb, element, injected: inject },
+                crate::dop::ClosureEvent::VeinRejuvenated {
+                    orb_id: orb,
+                    element,
+                    injected: inject,
+                },
                 stamp,
                 vec![actor],
             );
@@ -357,7 +391,11 @@ impl World {
             return None;
         }
         let held = self.orb_by_id(orb)?;
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
         let dt = ratio(stamp.saturating_sub(held.last_touch) as i64, 1);
         let decay = (intrinsic_rate(metabolism, self.metabolic_element()) * dt)
             .min(held.ration_amount(&ration));
@@ -446,7 +484,11 @@ impl World {
         if dt == 0 {
             return None;
         }
-        let metabolism = self.genesis.as_ref().map(|held| held.metabolism).unwrap_or(2);
+        let metabolism = self
+            .genesis
+            .as_ref()
+            .map(|held| held.metabolism)
+            .unwrap_or(2);
         let element = self.metabolic_element();
         // R6 — per-capita demand is the line's own half-harvest, modulated
         // by the sitting class (`per_capita_ration`): a costly archetype

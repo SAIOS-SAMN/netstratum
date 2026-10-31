@@ -58,7 +58,14 @@ pub struct Seat {
 
 /// One grid as plain text: rows of hue digits, one row per line.
 fn grid_text(g: &[Vec<u8>]) -> String {
-    g.iter().map(|r| r.iter().map(|h| char::from(b'0' + h.min(&35)) ).collect::<String>()).collect::<Vec<_>>().join("\n")
+    g.iter()
+        .map(|r| {
+            r.iter()
+                .map(|h| char::from(b'0' + h.min(&35)))
+                .collect::<String>()
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 impl Seat {
@@ -72,7 +79,10 @@ impl Seat {
         let hex: String = id.iter().map(|b| format!("{b:02x}")).collect();
         // Named by the id's hash (an address can outrun a file name); the
         // whole id rides inside.
-        let named: String = blake3::hash(id).as_bytes()[..16].iter().map(|b| format!("{b:02x}")).collect();
+        let named: String = blake3::hash(id).as_bytes()[..16]
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect();
         let path = dir.join(format!("{named}.task"));
         if path.exists() || std::fs::create_dir_all(&dir).is_err() {
             return;
@@ -103,12 +113,18 @@ impl Seat {
     pub fn open_as(addr: &str, home: &Path, key: &str) -> io::Result<Seat> {
         std::fs::create_dir_all(home)?;
         let key = home.join(key);
-        let key = key.to_str().ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "the key path is not UTF-8"))?;
+        let key = key.to_str().ok_or_else(|| {
+            io::Error::new(io::ErrorKind::InvalidInput, "the key path is not UTF-8")
+        })?;
         // Signed (78.141): the seat signs its solves with Netstratum's voice
         // key — held in trust, never minted here (a missing key is an error,
         // not a new identity).
-        let key = mycelium::court::identity::HyphaKey::load_only(key)
-            .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "netstratum's voice key is not in the seat's home"))?;
+        let key = mycelium::court::identity::HyphaKey::load_only(key).ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::NotFound,
+                "netstratum's voice key is not in the seat's home",
+            )
+        })?;
         let session = Session::open(addr, Kernel::from_key(key.sk.clone()));
         Ok(Seat {
             session,
@@ -129,7 +145,12 @@ impl Seat {
     /// One stroke: pull a task, think it, file what can be filed. `Ok(None)`
     /// when the registry holds nothing for this voice.
     pub fn stroke(&mut self) -> io::Result<Option<String>> {
-        let Some(task) = self.session.pull_task(&self.key.verifying_key().to_bytes())? else { return Ok(None) };
+        let Some(task) = self
+            .session
+            .pull_task(&self.key.verifying_key().to_bytes())?
+        else {
+            return Ok(None);
+        };
         self.tally.pulled += 1;
         let id = task.id;
         let name: String = id.iter().take(6).map(|b| format!("{b:02x}")).collect();
@@ -150,7 +171,10 @@ impl Seat {
             }
             self.before.push_back(id);
         }
-        Ok(Some(format!("task {name}: {} pairs, before the seated minds", task.train.len())))
+        Ok(Some(format!(
+            "task {name}: {} pairs, before the seated minds",
+            task.train.len()
+        )))
     }
 
     /// The next task not closed at home, for the house to put before a
@@ -181,11 +205,23 @@ impl Seat {
     /// its rule's tape, as the mind sent it, and its outputs, for a task this
     /// seat pulled. The court's verdict, or `None` where the task is no longer
     /// known or the reply does not read.
-    pub fn file_answer(&mut self, id: &[u8; 32], rule: &[u8], outputs: &[Vec<Vec<u8>>]) -> Option<(u8, [u64; 4])> {
+    pub fn file_answer(
+        &mut self,
+        id: &[u8; 32],
+        rule: &[u8],
+        outputs: &[Vec<Vec<u8>>],
+    ) -> Option<(u8, [u64; 4])> {
         self.known.iter().find(|(k, _)| k == id)?;
         self.tally.answered += 1;
-        let verdict = self.session.file_solve(&self.key, id, outputs, rule).ok().flatten();
-        if verdict.is_some_and(|(code, _)| code == mycelium::anastome::dialogue::SOLVE_BOUNTY || code == mycelium::anastome::dialogue::SOLVE_FLOOR) {
+        let verdict = self
+            .session
+            .file_solve(&self.key, id, outputs, rule)
+            .ok()
+            .flatten();
+        if verdict.is_some_and(|(code, _)| {
+            code == mycelium::anastome::dialogue::SOLVE_BOUNTY
+                || code == mycelium::anastome::dialogue::SOLVE_FLOOR
+        }) {
             self.tally.answered_closed += 1;
         }
         verdict

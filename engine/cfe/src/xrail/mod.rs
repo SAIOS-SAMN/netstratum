@@ -9,13 +9,13 @@
 //! | `deep-rail-strand` / `stamp-rail-strand` | R3 | strand packets |
 //! | `deep-rail-court` / `stamp-rail-court` | R4 | isthmus frame + datum verify |
 
-pub mod strand;
-pub mod isthmus;
 pub mod datum;
+pub mod isthmus;
+pub mod strand;
 
+pub use datum::{encode_court_claim, verify_court_claim, CourtClaim, DATUM_MAGIC};
+pub use isthmus::{decode_isthmus, encode_isthmus, IsthmusFrame, ISTHMUS_MAGIC};
 pub use strand::{
     decode_strand, encode_note_packet, encode_share_packet, encode_stamp_packet, StrandKind,
     StrandPacket, STRAND_MAGIC,
 };
-pub use isthmus::{decode_isthmus, encode_isthmus, IsthmusFrame, ISTHMUS_MAGIC};
-pub use datum::{encode_court_claim, verify_court_claim, CourtClaim, DATUM_MAGIC};

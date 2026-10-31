@@ -40,12 +40,18 @@ pub const METABOLISMS: [(u64, &str); 3] = [(1, "mineral"), (2, "biotic"), (3, "p
 
 /// The metabolism named by `code`.
 pub fn metabolism_of(code: u64) -> Option<&'static str> {
-    METABOLISMS.iter().find(|(c, _)| *c == code).map(|(_, m)| *m)
+    METABOLISMS
+        .iter()
+        .find(|(c, _)| *c == code)
+        .map(|(_, m)| *m)
 }
 
 /// The code of a metabolism.
 pub fn metabolism_code(name: &str) -> Option<u64> {
-    METABOLISMS.iter().find(|(_, m)| *m == name).map(|(c, _)| *c)
+    METABOLISMS
+        .iter()
+        .find(|(_, m)| *m == name)
+        .map(|(c, _)| *c)
 }
 
 /// Lowercase hex.
@@ -56,7 +62,9 @@ pub fn hex(b: &[u8]) -> String {
 /// Bytes from lowercase hex, or `None`.
 pub fn unhex(s: &str) -> Option<Vec<u8>> {
     (s.len().is_multiple_of(2)).then_some(())?;
-    (0..s.len() / 2).map(|i| u8::from_str_radix(s.get(2 * i..2 * i + 2)?, 16).ok()).collect()
+    (0..s.len() / 2)
+        .map(|i| u8::from_str_radix(s.get(2 * i..2 * i + 2)?, 16).ok())
+        .collect()
 }
 
 /// An attached mind's entity handle: `mind-` and the first eight bytes of its

@@ -26,7 +26,10 @@ impl World {
         if let Some(orb) = peel(&mut self.orbs, FIRST_ORB) {
             crate::dop::apply_endowment_top_up(orb, &crate::dop::star_endowment(class));
         }
-        self.close(ClosureEvent::StarCommissioned { class: class as u8 }, SOVEREIGN);
+        self.close(
+            ClosureEvent::StarCommissioned { class: class as u8 },
+            SOVEREIGN,
+        );
         Ok(())
     }
     /// THERMAL-1 — site an orb on its orbit (05 §1.1): albedo A and
@@ -66,7 +69,9 @@ impl World {
                 hasher.update(&orb.to_le_bytes());
                 let slots = crate::ratio::TURN_SLOTS as u64;
                 let start = u64::from_le_bytes(
-                    hasher.finalize().as_bytes()[..8].try_into().expect("eight bytes"),
+                    hasher.finalize().as_bytes()[..8]
+                        .try_into()
+                        .expect("eight bytes"),
                 ) % slots;
                 let taken = |candidate: &crate::dop::Slot| {
                     self.orbs.iter().any(|held| {
@@ -124,7 +129,10 @@ impl World {
                             && site.psi == psi
                     })
             }) {
-                return Err(ActionRefused::OrbitOccupied { orb: taken.orb_id, slot });
+                return Err(ActionRefused::OrbitOccupied {
+                    orb: taken.orb_id,
+                    slot,
+                });
             }
         }
         // BadSiting is dead (29_CONSTRUCTION C1): albedo is a `Unit`
@@ -149,11 +157,13 @@ impl World {
         if !rings.contains(&&orbit_r) {
             let reach = self.star.expect("checked above").ring_reach();
             if rings.len() >= usize::from(reach) {
-                return Err(ActionRefused::RingReachExceeded { held: rings.len(), reach });
+                return Err(ActionRefused::RingReachExceeded {
+                    held: rings.len(),
+                    reach,
+                });
             }
         }
-        let held = peel(&mut self.orbs, orb)
-            .ok_or(ActionRefused::NoSuchOrb { orb })?;
+        let held = peel(&mut self.orbs, orb).ok_or(ActionRefused::NoSuchOrb { orb })?;
         if held.thermal.is_some() {
             return Err(ActionRefused::AlreadySited { orb });
         }
@@ -170,18 +180,18 @@ impl World {
         });
         // ORBIT-ENDOW-1: band gift from place (pure of star + site).
         let class = self.star.expect("checked above");
-        let teq = crate::thermal::t_eq4(
-            &class.luminosity(),
-            albedo.value(),
-            orbit_r.value(),
-        );
+        let teq = crate::thermal::t_eq4(&class.luminosity(), albedo.value(), orbit_r.value());
         let band = crate::thermal::band_of(&teq);
         crate::dop::apply_endowment_add(held, &crate::dop::orbit_endowment(band));
         // TECH-1a (12_UNION §5a): a world's first thermal opt-in
         // receipts the kernel stellar leap — its people now know their
         // star. Once per world, never per orb; the node id is seeded
         // from the kernel name + the discovering orb (SEAL B).
-        if !self.techs.iter().any(|(_, condition, _, _)| *condition == 0) {
+        if !self
+            .techs
+            .iter()
+            .any(|(_, condition, _, _)| *condition == 0)
+        {
             let mut seed = b"tech.kernel.stellar-leap".to_vec();
             seed.extend_from_slice(&orb.to_le_bytes());
             let node: [u8; 32] = blake3::hash(&seed).into();
@@ -199,7 +209,13 @@ impl World {
             );
         }
         self.close(
-            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta, psi },
+            ClosureEvent::PlanetSited {
+                orb_id: orb,
+                albedo,
+                orbit_r,
+                theta,
+                psi,
+            },
             SOVEREIGN,
         );
         Ok(())
@@ -207,10 +223,7 @@ impl World {
     /// AEON-1a (11 §6): the star moves in its region — the class
     /// steps, luminosity recomputes, and every sited orbit's T_eq⁴
     /// shifts at the next tick. Movement, never a rung.
-    pub fn age_star(
-        &mut self,
-        class: crate::thermal::StarClass,
-    ) -> Result<(), ActionRefused> {
+    pub fn age_star(&mut self, class: crate::thermal::StarClass) -> Result<(), ActionRefused> {
         if self.star.is_none() {
             return Err(ActionRefused::NoStarCommissioned);
         }
@@ -250,7 +263,11 @@ impl World {
             .collect();
         let stamp = self.clock.now();
         for orb in sited {
-            if self.prospects.iter().any(|vein| vein.orb == orb && vein.stratum == stratum) {
+            if self
+                .prospects
+                .iter()
+                .any(|vein| vein.orb == orb && vein.stratum == stratum)
+            {
                 continue;
             }
             let mut seed = root.to_vec();
@@ -271,7 +288,12 @@ impl World {
                 last_assay: stamp,
             });
             self.chronicle.append(
-                ClosureEvent::EnrichmentStruck { orb_id: orb, stratum, element, richness },
+                ClosureEvent::EnrichmentStruck {
+                    orb_id: orb,
+                    stratum,
+                    element,
+                    richness,
+                },
                 stamp,
                 vec![SOVEREIGN],
             );

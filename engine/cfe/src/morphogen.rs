@@ -99,7 +99,11 @@ pub fn material_of(element: &[u8; 32]) -> Vec<Ratio> {
 fn mesic_tent(thermal: &Ratio) -> Ratio {
     let one = ratio(1, 1);
     let excursion = (thermal.clone() + thermal.clone()) - one.clone();
-    let excursion = if excursion < ratio(0, 1) { -excursion } else { excursion };
+    let excursion = if excursion < ratio(0, 1) {
+        -excursion
+    } else {
+        excursion
+    };
     one - excursion
 }
 
@@ -125,7 +129,12 @@ fn mesic_tent(thermal: &Ratio) -> Ratio {
 ///
 /// Pressure, radiation, and magnetism are further axes to add here as the model
 /// grows — each its own dimension, none collapsing the others.
-pub fn environment(thermal: &Ratio, aridity: &Ratio, phi_lum: &Ratio, phi_therm: &Ratio) -> Vec<Ratio> {
+pub fn environment(
+    thermal: &Ratio,
+    aridity: &Ratio,
+    phi_lum: &Ratio,
+    phi_therm: &Ratio,
+) -> Vec<Ratio> {
     let one = ratio(1, 1);
     let mut env = vec![ratio(0, 1); ENV_DIM];
     env[C] = one - thermal.clone();
@@ -178,11 +187,11 @@ pub fn archetype(metabolism: u8) -> Metabolism {
             row(&[(H, 1)]),             // Sink: capacitance
         ],
         3 => vec![
-            row(&[(THERM, 1)]),         // Food: feeds on the thermal/energy flux
-            row(&[(V, 1), (F, 1)]),     // Structure: volatility + resonance
+            row(&[(THERM, 1)]),           // Food: feeds on the thermal/energy flux
+            row(&[(V, 1), (F, 1)]),       // Structure: volatility + resonance
             row(&[(LUM, 1), (THERM, 1)]), // Energy: light + thermal
-            row(&[(F, 1)]),             // Cognition: resonance
-            row(&[(H, 1)]),             // Sink: capacitance
+            row(&[(F, 1)]),               // Cognition: resonance
+            row(&[(H, 1)]),               // Sink: capacitance
         ],
         _ => vec![
             row(&[(S, 1), (LUM, 1)]), // Food: syntropy + light
@@ -239,7 +248,9 @@ const HALVING: i64 = 2;
 /// A role's theoretical ceiling — the sum of its projection weights (every drawn
 /// axis saturated at unity).
 fn ceiling(metabolism: &Metabolism, role: usize) -> Ratio {
-    metabolism[role].iter().fold(ratio(0, 1), |a, w| a + w.clone())
+    metabolism[role]
+        .iter()
+        .fold(ratio(0, 1), |a, w| a + w.clone())
 }
 
 /// The subsistence floor for a role — half its ceiling.
@@ -336,7 +347,11 @@ pub fn phase_feasibility(metabolism: u8, thermal: &Ratio, aridity: &Ratio) -> Ra
 /// thermal band) reads zero on every material and so has an empty diet here — it
 /// does not eat elements. The ordering is deterministic and replay-exact (ties
 /// break to the lexicographically smaller id).
-pub fn ingest(species: &Metabolism, almanac: &[[u8; 32]], epsilon: &Ratio) -> Vec<([u8; 32], Ratio)> {
+pub fn ingest(
+    species: &Metabolism,
+    almanac: &[[u8; 32]],
+    epsilon: &Ratio,
+) -> Vec<([u8; 32], Ratio)> {
     let zero = ratio(0, 1);
     let mut diet: Vec<([u8; 32], Ratio)> = almanac
         .iter()
@@ -358,7 +373,10 @@ pub fn ingest(species: &Metabolism, almanac: &[[u8; 32]], epsilon: &Ratio) -> Ve
 /// rule named it). This is what dissolves `metabolic_ration`: a food element drawn
 /// from the open catalogue by the species tensor × the planet, not a 3-way match.
 pub fn staple(species: &Metabolism, almanac: &[[u8; 32]], epsilon: &Ratio) -> Option<[u8; 32]> {
-    ingest(species, almanac, epsilon).into_iter().next().map(|(id, _)| id)
+    ingest(species, almanac, epsilon)
+        .into_iter()
+        .next()
+        .map(|(id, _)| id)
 }
 
 /// The archetype for a metabolism NAME (the roster's string axis): mineral,
@@ -431,19 +449,44 @@ mod tests {
         // A lithophage draws Food from cohesion: it eats the dense element then the
         // middling one; the purely-syntropic element is not food for it.
         let mineral = archetype(1);
-        assert_eq!(staple(&mineral, &almanac, &eps), Some(dense), "the lithophage's staple is the densest element");
-        let m_ids: Vec<[u8; 32]> = ingest(&mineral, &almanac, &eps).iter().map(|(id, _)| *id).collect();
-        assert_eq!(m_ids, vec![dense, middling], "it eats cohesion, descending; the organic is not its food");
+        assert_eq!(
+            staple(&mineral, &almanac, &eps),
+            Some(dense),
+            "the lithophage's staple is the densest element"
+        );
+        let m_ids: Vec<[u8; 32]> = ingest(&mineral, &almanac, &eps)
+            .iter()
+            .map(|(id, _)| *id)
+            .collect();
+        assert_eq!(
+            m_ids,
+            vec![dense, middling],
+            "it eats cohesion, descending; the organic is not its food"
+        );
 
         // A syntroph draws Food from syntropy: the mirror diet, the same pipeline.
         let biotic = archetype(2);
-        assert_eq!(staple(&biotic, &almanac, &eps), Some(organic), "the syntroph's staple is the most syntropic element");
-        let b_ids: Vec<[u8; 32]> = ingest(&biotic, &almanac, &eps).iter().map(|(id, _)| *id).collect();
-        assert_eq!(b_ids, vec![organic, middling], "it eats syntropy, descending; the dense is not its food");
+        assert_eq!(
+            staple(&biotic, &almanac, &eps),
+            Some(organic),
+            "the syntroph's staple is the most syntropic element"
+        );
+        let b_ids: Vec<[u8; 32]> = ingest(&biotic, &almanac, &eps)
+            .iter()
+            .map(|(id, _)| *id)
+            .collect();
+        assert_eq!(
+            b_ids,
+            vec![organic, middling],
+            "it eats syntropy, descending; the dense is not its food"
+        );
 
         // Two species, one almanac, one code path — disjoint staples. Emergence,
         // never an authored table.
-        assert_ne!(staple(&mineral, &almanac, &eps), staple(&biotic, &almanac, &eps));
+        assert_ne!(
+            staple(&mineral, &almanac, &eps),
+            staple(&biotic, &almanac, &eps)
+        );
     }
 
     #[test]
@@ -454,20 +497,35 @@ mod tests {
         let plasmic = archetype(3);
         let almanac = vec![element(255, 255), element(128, 200), element(10, 90)];
         let eps = q(0, 1);
-        assert!(ingest(&plasmic, &almanac, &eps).is_empty(), "a flux-feeder eats no element");
-        assert_eq!(staple(&plasmic, &almanac, &eps), None, "no staple — the kernel is empty (the cull)");
+        assert!(
+            ingest(&plasmic, &almanac, &eps).is_empty(),
+            "a flux-feeder eats no element"
+        );
+        assert_eq!(
+            staple(&plasmic, &almanac, &eps),
+            None,
+            "no staple — the kernel is empty (the cull)"
+        );
     }
 
     #[test]
     fn the_diet_is_deterministic_and_ordered_by_affinity() {
         let biotic = archetype(2);
-        let almanac: Vec<[u8; 32]> =
-            (0..12u8).map(|s| element(s.wrapping_mul(20), 255 - s.wrapping_mul(15))).collect();
+        let almanac: Vec<[u8; 32]> = (0..12u8)
+            .map(|s| element(s.wrapping_mul(20), 255 - s.wrapping_mul(15)))
+            .collect();
         let eps = q(1, 64);
         let a = ingest(&biotic, &almanac, &eps);
-        assert_eq!(a, ingest(&biotic, &almanac, &eps), "same species × same almanac ⇒ same diet, every replay");
+        assert_eq!(
+            a,
+            ingest(&biotic, &almanac, &eps),
+            "same species × same almanac ⇒ same diet, every replay"
+        );
         for pair in a.windows(2) {
-            assert!(pair[0].1 >= pair[1].1, "the diet is ordered by descending affinity");
+            assert!(
+                pair[0].1 >= pair[1].1,
+                "the diet is ordered by descending affinity"
+            );
         }
     }
 
@@ -478,10 +536,25 @@ mod tests {
         // the temperate band and is culled on the cold solid world and the hot
         // plasma one — carbon life's niche is the middle.
         let biotic = archetype(2);
-        assert!(survives(&biotic, &mesic_world(), &any_clade()), "carbon life holds the temperate band");
-        assert_eq!(project(&biotic, &hot_plasma())[STRUCT], ratio(0, 1), "syntropy falls to zero in the heat");
-        assert_eq!(project(&biotic, &cold_solid())[STRUCT], ratio(0, 1), "and to zero in the cold");
-        assert!(!survives(&biotic, &hot_plasma(), &any_clade()) && !survives(&biotic, &cold_solid(), &any_clade()), "culled at both extremes");
+        assert!(
+            survives(&biotic, &mesic_world(), &any_clade()),
+            "carbon life holds the temperate band"
+        );
+        assert_eq!(
+            project(&biotic, &hot_plasma())[STRUCT],
+            ratio(0, 1),
+            "syntropy falls to zero in the heat"
+        );
+        assert_eq!(
+            project(&biotic, &cold_solid())[STRUCT],
+            ratio(0, 1),
+            "and to zero in the cold"
+        );
+        assert!(
+            !survives(&biotic, &hot_plasma(), &any_clade())
+                && !survives(&biotic, &cold_solid(), &any_clade()),
+            "culled at both extremes"
+        );
     }
 
     #[test]
@@ -489,8 +562,14 @@ mod tests {
         // A mineral builds from Cohesion, which condenses cold. It thrives on the
         // cold solid world and cannot hold a body in the heat.
         let mineral = archetype(1);
-        assert!(survives(&mineral, &cold_solid(), &any_clade()), "mineral life condenses on the cold solid world");
-        assert!(!survives(&mineral, &hot_plasma(), &any_clade()), "its cohesion melts in the heat — culled");
+        assert!(
+            survives(&mineral, &cold_solid(), &any_clade()),
+            "mineral life condenses on the cold solid world"
+        );
+        assert!(
+            !survives(&mineral, &hot_plasma(), &any_clade()),
+            "its cohesion melts in the heat — culled"
+        );
     }
 
     #[test]
@@ -498,9 +577,19 @@ mod tests {
         // A plasmic structures itself by resonance and volatility — the dense hot
         // phase. Free on the hot world, frozen out on the cold solid one.
         let plasmic = archetype(3);
-        assert!(survives(&plasmic, &hot_plasma(), &any_clade()), "the plasmic is free in the heat");
-        assert_eq!(project(&plasmic, &cold_solid())[STRUCT], ratio(0, 1), "no volatility or resonance in the frozen lattice");
-        assert!(!survives(&plasmic, &cold_solid(), &any_clade()), "plasma life is culled on the cold solid world");
+        assert!(
+            survives(&plasmic, &hot_plasma(), &any_clade()),
+            "the plasmic is free in the heat"
+        );
+        assert_eq!(
+            project(&plasmic, &cold_solid())[STRUCT],
+            ratio(0, 1),
+            "no volatility or resonance in the frozen lattice"
+        );
+        assert!(
+            !survives(&plasmic, &cold_solid(), &any_clade()),
+            "plasma life is culled on the cold solid world"
+        );
     }
 
     #[test]
@@ -511,11 +600,20 @@ mod tests {
         // clade whose band is elsewhere (alignment 0) cannot use the syntropy — a
         // thermal mismatch, culled — never a false starvation on a habitable orbit.
         let biotic = archetype(2);
-        assert!(survives(&biotic, &mesic_world(), &ratio(1, 1)), "the aligned clade lives in its band");
-        assert!(!survives(&biotic, &mesic_world(), &ratio(0, 1)), "a mismatched clade on the same world is culled");
+        assert!(
+            survives(&biotic, &mesic_world(), &ratio(1, 1)),
+            "the aligned clade lives in its band"
+        );
+        assert!(
+            !survives(&biotic, &mesic_world(), &ratio(0, 1)),
+            "a mismatched clade on the same world is culled"
+        );
         // A partial alignment grades the fitness down, not to zero.
         let partial = fitness(&biotic, &mesic_world(), &q(3, 4));
-        assert!(partial > ratio(0, 1) && partial <= ratio(1, 1), "partial thermal alignment grades fitness: {partial}");
+        assert!(
+            partial > ratio(0, 1) && partial <= ratio(1, 1),
+            "partial thermal alignment grades fitness: {partial}"
+        );
     }
 
     #[test]
@@ -526,9 +624,15 @@ mod tests {
         // below the floor. Derived, not dialled.
         let plasmic = archetype(3);
         let colder = environment(&q(1, 4), &wet(), &ratio(1, 1), &ratio(1, 1));
-        assert!(!survives(&plasmic, &colder, &any_clade()), "a colder-than-mesic orbit starves the plasmic's structure");
+        assert!(
+            !survives(&plasmic, &colder, &any_clade()),
+            "a colder-than-mesic orbit starves the plasmic's structure"
+        );
         let f = fitness(&archetype(2), &mesic_world(), &any_clade());
-        assert!(f > ratio(0, 1) && f <= ratio(1, 1), "a mesic biotic lives at a graded fitness: {f}");
+        assert!(
+            f > ratio(0, 1) && f <= ratio(1, 1),
+            "a mesic biotic lives at a graded fitness: {f}"
+        );
     }
 
     #[test]
@@ -545,11 +649,21 @@ mod tests {
         ];
         // A lit but cold-enough world: cohesion holds and the light feeds it.
         let lit_cold = environment(&q(1, 4), &wet(), &ratio(1, 1), &ratio(1, 1));
-        assert!(survives(&autotroph, &lit_cold, &any_clade()), "the phototroph lives on light with cohesion to stand on");
+        assert!(
+            survives(&autotroph, &lit_cold, &any_clade()),
+            "the phototroph lives on light with cohesion to stand on"
+        );
         // A starless cold world: matter to stand on, but no light to eat.
         let dark = environment(&ratio(0, 1), &wet(), &ratio(0, 1), &ratio(1, 1));
-        assert_eq!(project(&autotroph, &dark)[FOOD], ratio(0, 1), "no light, no food, however much rock stands");
-        assert!(!survives(&autotroph, &dark, &any_clade()), "the phototroph starves in the dark — flux, not matter, feeds it");
+        assert_eq!(
+            project(&autotroph, &dark)[FOOD],
+            ratio(0, 1),
+            "no light, no food, however much rock stands"
+        );
+        assert!(
+            !survives(&autotroph, &dark, &any_clade()),
+            "the phototroph starves in the dark — flux, not matter, feeds it"
+        );
     }
 
     #[test]
@@ -562,14 +676,26 @@ mod tests {
         let biotic = archetype(2);
         let temperate_wet = environment(&q(1, 2), &ratio(1, 1), &ratio(1, 1), &ratio(1, 1));
         let temperate_arid = environment(&q(1, 2), &ratio(0, 1), &ratio(1, 1), &ratio(1, 1));
-        assert!(project(&biotic, &temperate_wet)[STRUCT] > project(&biotic, &temperate_arid)[STRUCT], "syntropy needs moisture, not just warmth");
-        assert!(survives(&biotic, &temperate_wet, &any_clade()), "organic life holds the warm WET world");
-        assert!(!survives(&biotic, &temperate_arid, &any_clade()), "and is culled on the warm ARID one — same temperature");
+        assert!(
+            project(&biotic, &temperate_wet)[STRUCT] > project(&biotic, &temperate_arid)[STRUCT],
+            "syntropy needs moisture, not just warmth"
+        );
+        assert!(
+            survives(&biotic, &temperate_wet, &any_clade()),
+            "organic life holds the warm WET world"
+        );
+        assert!(
+            !survives(&biotic, &temperate_arid, &any_clade()),
+            "and is culled on the warm ARID one — same temperature"
+        );
         // Aridity is free to vary with temperature held fixed, and vice versa: the
         // material vector is a genuine 2-D field, not a 1-D curve.
         let cold_wet = environment(&ratio(0, 1), &ratio(1, 1), &ratio(1, 1), &ratio(1, 1));
         let cold_arid = environment(&ratio(0, 1), &ratio(0, 1), &ratio(1, 1), &ratio(1, 1));
-        assert_ne!(cold_wet[H], cold_arid[H], "capacitance tracks moisture independently of temperature");
+        assert_ne!(
+            cold_wet[H], cold_arid[H],
+            "capacitance tracks moisture independently of temperature"
+        );
     }
 
     #[test]
@@ -581,11 +707,26 @@ mod tests {
         // warm-clade rock-eater is not culled (that was the regression this guards).
         let hot = q(3, 4);
         let cold = q(1, 4);
-        assert_eq!(phase_feasibility(3, &cold, &wet()), ratio(0, 1), "no plasma phase on a cold world");
-        assert!(phase_feasibility(3, &hot, &wet()) > ratio(0, 1), "plasma is feasible in the heat");
+        assert_eq!(
+            phase_feasibility(3, &cold, &wet()),
+            ratio(0, 1),
+            "no plasma phase on a cold world"
+        );
+        assert!(
+            phase_feasibility(3, &hot, &wet()) > ratio(0, 1),
+            "plasma is feasible in the heat"
+        );
         for m in [1u8, 2] {
-            assert_eq!(phase_feasibility(m, &hot, &wet()), ratio(1, 1), "solid/organic feasible when warm ({m})");
-            assert_eq!(phase_feasibility(m, &cold, &wet()), ratio(1, 1), "and when cold ({m})");
+            assert_eq!(
+                phase_feasibility(m, &hot, &wet()),
+                ratio(1, 1),
+                "solid/organic feasible when warm ({m})"
+            );
+            assert_eq!(
+                phase_feasibility(m, &cold, &wet()),
+                ratio(1, 1),
+                "and when cold ({m})"
+            );
         }
     }
 

@@ -27,10 +27,10 @@
 //! world recovers slowly at first, which is what forces the Locust to
 //! keep jumping), and the arithmetic stays exact and bounded.
 
-use crate::ratio::{ratio, Ratio};
 use super::taxon_economy::clade_preferred_region;
 use super::thermal::ThermalRegion;
 use crate::dop::metabolic_harvest_of;
+use crate::ratio::{ratio, Ratio};
 
 /// The half-recovery scale — `r·Δt = GRAIN` is where the surrogate
 /// reaches `1/2`, so `GRAIN/r` is the time to close half the gap to
@@ -126,9 +126,8 @@ pub fn vein_forcing_injection(
     if orbits == 0 || headroom <= ratio(0, 1) {
         return ratio(0, 1);
     }
-    let drive = rejuvenation_quantum(natural)
-        * ratio((1 + cycles) as i64, 1)
-        * ratio(orbits as i64, 1);
+    let drive =
+        rejuvenation_quantum(natural) * ratio((1 + cycles) as i64, 1) * ratio(orbits as i64, 1);
     drive.min(headroom)
 }
 
@@ -140,7 +139,9 @@ pub fn vein_forcing_injection(
 /// between rejuvenation settles. Replaces `natural − extracted` at every reader.
 pub fn rejuvenated_richness(natural: &Ratio, extracted: &Ratio, rejuvenated: &Ratio) -> Ratio {
     let net = extracted.clone() - rejuvenated.clone();
-    (natural.clone() - net).max(ratio(0, 1)).min(natural.clone())
+    (natural.clone() - net)
+        .max(ratio(0, 1))
+        .min(natural.clone())
 }
 
 /// **Habitability** — how life-bearing a thermal region is for A given
@@ -181,9 +182,10 @@ fn preferred_band_bounds4(clade: u16) -> (Ratio, Ratio) {
         ThermalRegion::HyperThermal | ThermalRegion::Incandescent | ThermalRegion::Beyond => {
             SubstrateBand::HyperThermal.bounds4()
         }
-        ThermalRegion::Torrid => {
-            (SubstrateBand::Mesic.bounds4().1, SubstrateBand::HyperThermal.bounds4().0)
-        }
+        ThermalRegion::Torrid => (
+            SubstrateBand::Mesic.bounds4().1,
+            SubstrateBand::HyperThermal.bounds4().0,
+        ),
         ThermalRegion::Sublime | ThermalRegion::Mesic => SubstrateBand::Mesic.bounds4(),
     }
 }
@@ -227,7 +229,11 @@ pub fn habitability_flux(clade: u16, t_eq4: &Ratio) -> Ratio {
     if two_width <= ratio(0, 1) {
         return ratio(0, 1);
     }
-    let deviation = if two_t >= edges { two_t - edges } else { edges - two_t };
+    let deviation = if two_t >= edges {
+        two_t - edges
+    } else {
+        edges - two_t
+    };
     let eta = ratio(1, 1) - deviation / two_width;
     if eta <= ratio(0, 1) {
         ratio(0, 1)

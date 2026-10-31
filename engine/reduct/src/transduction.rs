@@ -31,10 +31,16 @@ pub struct ChainMap {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TransductionError {
     /// `f_k` is not shaped `dim Cᵏ(Y) × dim Cᵏ(X)`.
-    ShapeMismatch { grade: usize, expected: (usize, usize), got: (usize, usize) },
+    ShapeMismatch {
+        grade: usize,
+        expected: (usize, usize),
+        got: (usize, usize),
+    },
     /// `f_{k+1}·δ_Xᵏ − δ_Yᵏ·f_k ≠ 0` — the map does not commute with the
     /// differential. The remainder is the topological obstruction, carried
     /// whole. Never truncated into a lossy projection.
-    Defect { grade: usize, non_commuting_remainder: Mat },
+    Defect {
+        grade: usize,
+        non_commuting_remainder: Mat,
+    },
 }
-

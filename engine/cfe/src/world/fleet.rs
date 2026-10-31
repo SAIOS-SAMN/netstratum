@@ -124,12 +124,7 @@ impl World {
 
     /// Mint a hull at the yard. Spends scrap (role/grade cost). Catalog
     /// filter by genesis metabolism when sealed (P3.6).
-    pub fn mint_hull(
-        &mut self,
-        orb: u64,
-        role: HullRole,
-        grade: u8,
-    ) -> Result<u64, ActionRefused> {
+    pub fn mint_hull(&mut self, orb: u64, role: HullRole, grade: u8) -> Result<u64, ActionRefused> {
         self.mint_hull_as(SOVEREIGN, orb, role, grade)
     }
 
@@ -214,10 +209,7 @@ impl World {
             return Err(ActionRefused::RouteUnknown { deal });
         }
         hull.assigned_route = deal;
-        self.close(
-            ClosureEvent::HullAssigned { hull_id, deal },
-            actor,
-        );
+        self.close(ClosureEvent::HullAssigned { hull_id, deal }, actor);
         Ok(())
     }
 
@@ -227,11 +219,7 @@ impl World {
         self.scrap_hull_as(SOVEREIGN, hull_id)
     }
 
-    pub fn scrap_hull_as(
-        &mut self,
-        actor: u64,
-        hull_id: u64,
-    ) -> Result<(), ActionRefused> {
+    pub fn scrap_hull_as(&mut self, actor: u64, hull_id: u64) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         let at = self
             .hulls

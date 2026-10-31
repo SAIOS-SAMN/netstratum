@@ -171,7 +171,12 @@ pub fn read_all(var_root: &Path) -> (Vec<Gate>, Vec<Envoy>, Vec<Folding>) {
         let _ = tag;
         let mut at = 0;
         let folding = (|| {
-            let (from, core, builder, master) = (get_text(value, &mut at)?, get_text(value, &mut at)?, get_text(value, &mut at)?, get_text(value, &mut at)?);
+            let (from, core, builder, master) = (
+                get_text(value, &mut at)?,
+                get_text(value, &mut at)?,
+                get_text(value, &mut at)?,
+                get_text(value, &mut at)?,
+            );
             let (trips, started) = (get_u64(value, &mut at)?, get_u64(value, &mut at)?);
             let count = u16::from_le_bytes(value.get(at..at + 2)?.try_into().ok()?);
             at += 2;
@@ -182,7 +187,15 @@ pub fn read_all(var_root: &Path) -> (Vec<Gate>, Vec<Envoy>, Vec<Folding>) {
                 at += used;
                 owed.push((sigil, r));
             }
-            Some(Folding { from, core, builder, master, owed, trips, started })
+            Some(Folding {
+                from,
+                core,
+                builder,
+                master,
+                owed,
+                trips,
+                started,
+            })
         })();
         foldings.extend(folding);
     }
@@ -197,18 +210,37 @@ fn read_gates_envoys(bytes: &[u8]) -> (Vec<Gate>, Vec<Envoy>) {
         match tag {
             1 => {
                 let gate = (|| {
-                    let (from, core, builder) = (get_text(value, &mut at)?, get_text(value, &mut at)?, get_text(value, &mut at)?);
+                    let (from, core, builder) = (
+                        get_text(value, &mut at)?,
+                        get_text(value, &mut at)?,
+                        get_text(value, &mut at)?,
+                    );
                     let span = get_u64(value, &mut at)?;
                     let mapped = *value.get(at)? != 0;
                     at += 1;
                     let (built, freshness) = (get_u64(value, &mut at)?, get_u64(value, &mut at)?);
                     let place = get_place(value, &mut at)?;
-                    Some(Gate { from, core, builder, span, mapped, built, place, freshness })
+                    Some(Gate {
+                        from,
+                        core,
+                        builder,
+                        span,
+                        mapped,
+                        built,
+                        place,
+                        freshness,
+                    })
                 })();
                 gates.extend(gate);
             }
             2 => {
-                let (Some(line), Some(core), Some(since)) = (get_text(value, &mut at), get_text(value, &mut at), get_u64(value, &mut at)) else { continue };
+                let (Some(line), Some(core), Some(since)) = (
+                    get_text(value, &mut at),
+                    get_text(value, &mut at),
+                    get_u64(value, &mut at),
+                ) else {
+                    continue;
+                };
                 envoys.push(Envoy { line, core, since });
             }
             _ => {}
@@ -217,7 +249,12 @@ fn read_gates_envoys(bytes: &[u8]) -> (Vec<Gate>, Vec<Envoy>) {
     (gates, envoys)
 }
 
-fn write(var_root: &Path, gates: &[Gate], envoys: &[Envoy], foldings: &[Folding]) -> std::io::Result<()> {
+fn write(
+    var_root: &Path,
+    gates: &[Gate],
+    envoys: &[Envoy],
+    foldings: &[Folding],
+) -> std::io::Result<()> {
     let mut out = Vec::new();
     for f in foldings {
         let mut v = Vec::new();
@@ -260,7 +297,11 @@ fn write(var_root: &Path, gates: &[Gate], envoys: &[Envoy], foldings: &[Folding]
 
 /// The envoys as `(line, core)`, for the throat's contest.
 pub fn envoys(var_root: &Path) -> Vec<(String, String)> {
-    read(var_root).1.into_iter().map(|e| (e.line, e.core)).collect()
+    read(var_root)
+        .1
+        .into_iter()
+        .map(|e| (e.line, e.core))
+        .collect()
 }
 
 /// A4: the gates the house sealed on the hypha's map, as `(gate id, the place
@@ -278,7 +319,10 @@ fn sealed(var_root: &Path) -> Vec<(String, Place)> {
 
 /// Declared: a gate's cost, the ladder's dearest closure.
 fn gate_cost() -> Ratio {
-    (0..=Difficulty::top()).map(|r| kernel::mint_bound(Some(r))).max().unwrap_or_else(|| ratio(0, 1))
+    (0..=Difficulty::top())
+        .map(|r| kernel::mint_bound(Some(r)))
+        .max()
+        .unwrap_or_else(|| ratio(0, 1))
 }
 
 /// Declared: a gate span's melt fraction, span x 1/64: what a crossing of the
@@ -288,7 +332,10 @@ pub fn gate_melt(span: u64) -> Ratio {
 }
 
 fn stamp_of(p: &Polity) -> Ratio {
-    p.world.orb().map(|o| o.stamp_amount()).unwrap_or_else(|| ratio(0, 1))
+    p.world
+        .orb()
+        .map(|o| o.stamp_amount())
+        .unwrap_or_else(|| ratio(0, 1))
 }
 
 fn cells(distance: &Ratio) -> u64 {
@@ -305,7 +352,11 @@ fn open_melt(worlds: &[Polity], a: usize, b: usize, span: &Ratio) -> Ratio {
 /// then the gate's span (what survives is what survives both).
 fn through(worlds: &[Polity], i: usize, home_hub: usize, gate: &Gate, span: &Ratio) -> Ratio {
     let one = ratio(1, 1);
-    let leg = if i == home_hub { ratio(0, 1) } else { open_melt(worlds, i, home_hub, span) };
+    let leg = if i == home_hub {
+        ratio(0, 1)
+    } else {
+        open_melt(worlds, i, home_hub, span)
+    };
     one.clone() - (one.clone() - leg) * (one - gate_melt(gate.span))
 }
 
@@ -315,7 +366,14 @@ fn through(worlds: &[Polity], i: usize, home_hub: usize, gate: &Gate, span: &Rat
 /// was carried and what arrived, or why nothing crossed (walled, short, no
 /// free hull, or the transfer's refusal). The aperture needs the stellar leap
 /// (THRESHOLD-1), granted to both as the hub clearing grants it.
-fn trip(worlds: &mut [Polity], from: usize, to: usize, amount: &Ratio, deal: u64, melt: &Ratio) -> Result<(Ratio, Ratio), String> {
+fn trip(
+    worlds: &mut [Polity],
+    from: usize,
+    to: usize,
+    amount: &Ratio,
+    deal: u64,
+    melt: &Ratio,
+) -> Result<(Ratio, Ratio), String> {
     if from == to {
         return Err("payer and payee are one line".into());
     }
@@ -338,47 +396,91 @@ fn trip(worlds: &mut [Polity], from: usize, to: usize, amount: &Ratio, deal: u64
     for i in [from, to] {
         if !worlds[i].world.knows_its_star() {
             let steward = worlds[i].steward;
-            let _ = worlds[i].world.grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
+            let _ = worlds[i]
+                .world
+                .grant_tech_as(steward, cfe::world::FIRST_ORB, 0);
         }
     }
     let before = stamp_of(&worlds[to]);
     let (a, b) = crate::two_mut(worlds, from, to);
-    cfe::world::stamp_aperture_transfer(&mut a.world, cfe::world::FIRST_ORB, &mut b.world, cfe::world::FIRST_ORB, carried, deal, melt).map_err(|e| format!("{e:?}"))?;
+    cfe::world::stamp_aperture_transfer(
+        &mut a.world,
+        cfe::world::FIRST_ORB,
+        &mut b.world,
+        cfe::world::FIRST_ORB,
+        carried,
+        deal,
+        melt,
+    )
+    .map_err(|e| format!("{e:?}"))?;
     Ok((load, stamp_of(&worlds[to]) - before))
 }
 
 fn parents_of(registry: &Registry) -> BTreeMap<String, Vec<String>> {
-    registry.list().into_iter().map(|c| (c.sigil, c.lineage)).collect()
+    registry
+        .list()
+        .into_iter()
+        .map(|c| (c.sigil, c.lineage))
+        .collect()
 }
 
 /// Every galaxy's hub (`crate::galaxy_hub`, the hub clearing's own).
-fn hubs(worlds: &[Polity], book: &Ledger, var_root: &Path, span: &Ratio) -> BTreeMap<String, usize> {
+fn hubs(
+    worlds: &[Polity],
+    book: &Ledger,
+    var_root: &Path,
+    span: &Ratio,
+) -> BTreeMap<String, usize> {
     crate::galaxy_members(worlds, book)
         .into_iter()
-        .filter_map(|(core, members)| crate::galaxy_hub(worlds, book, var_root, &core, &members, span).map(|h| (core, h)))
+        .filter_map(|(core, members)| {
+            crate::galaxy_hub(worlds, book, var_root, &core, &members, span).map(|h| (core, h))
+        })
         .collect()
 }
 
 /// The gate's builders' LINE, who takes its tolls: the builder lineage's
 /// richest living line at the core, or, keeping the throat through an envoy
 /// with no line living there, its rider.
-pub(crate) fn builder_payee(worlds: &[Polity], cores: &[Option<String>], parents: &BTreeMap<String, Vec<String>>, keepers: &BTreeMap<String, Keeper>, gate: &Gate) -> Option<usize> {
+pub(crate) fn builder_payee(
+    worlds: &[Polity],
+    cores: &[Option<String>],
+    parents: &BTreeMap<String, Vec<String>>,
+    keepers: &BTreeMap<String, Keeper>,
+    gate: &Gate,
+) -> Option<usize> {
     (0..worlds.len())
         .filter(|&i| {
             !worlds[i].penned
                 && cores[i].as_deref() == Some(gate.core.as_str())
                 && root_of(&worlds[i].spec.civilization.sigil, parents) == gate.builder
         })
-        .max_by(|a, b| stamp_of(&worlds[*a]).cmp(&stamp_of(&worlds[*b])).then(worlds[*b].spec.civilization.sigil.cmp(&worlds[*a].spec.civilization.sigil)))
+        .max_by(|a, b| {
+            stamp_of(&worlds[*a]).cmp(&stamp_of(&worlds[*b])).then(
+                worlds[*b]
+                    .spec
+                    .civilization
+                    .sigil
+                    .cmp(&worlds[*a].spec.civilization.sigil),
+            )
+        })
         .or_else(|| {
             let k = keepers.get(&gate.core).filter(|k| k.line == gate.builder)?;
-            worlds.iter().position(|p| !p.penned && p.spec.civilization.sigil == k.rider)
+            worlds
+                .iter()
+                .position(|p| !p.penned && p.spec.civilization.sigil == k.rider)
         })
 }
 
 /// The roads for the hub clearing: every mapped gate, its span's melt, and its
 /// builders' line, read with the beat's one reading of the keepers.
-pub fn roads(worlds: &[Polity], book: &Ledger, registry: &Registry, var_root: &Path, keepers: &BTreeMap<String, Keeper>) -> Vec<Road> {
+pub fn roads(
+    worlds: &[Polity],
+    book: &Ledger,
+    registry: &Registry,
+    var_root: &Path,
+    keepers: &BTreeMap<String, Keeper>,
+) -> Vec<Road> {
     let mapped: Vec<Gate> = read(var_root).0.into_iter().filter(|g| g.mapped).collect();
     if mapped.is_empty() {
         return Vec::new();
@@ -387,7 +489,12 @@ pub fn roads(worlds: &[Polity], book: &Ledger, registry: &Registry, var_root: &P
     let cores = crate::ancients::cores_of(worlds, book);
     mapped
         .iter()
-        .map(|g| Road { from: g.from.clone(), core: g.core.clone(), melt: gate_melt(g.span), payee: builder_payee(worlds, &cores, &parents, keepers, g) })
+        .map(|g| Road {
+            from: g.from.clone(),
+            core: g.core.clone(),
+            melt: gate_melt(g.span),
+            payee: builder_payee(worlds, &cores, &parents, keepers, g),
+        })
         .collect()
 }
 
@@ -414,18 +521,38 @@ fn choose_core(
             let k = keeper_at(worlds, book, cores, parents, &with, &g.name, &g.center)?;
             (k.line == root).then(|| (g.name.clone(), k.systems))
         })
-        .max_by(|(a, sa), (b, sb)| sa.cmp(sb).then((a == home).cmp(&(b == home))).then(b.cmp(a)))
+        .max_by(|(a, sa), (b, sb)| {
+            sa.cmp(sb)
+                .then((a == home).cmp(&(b == home)))
+                .then(b.cmp(a))
+        })
 }
 
 /// The systems lineage `root` holds at `core`: its lines living there, and
 /// its envoy's line `envoy` if that one lives elsewhere.
-fn lineage_systems(worlds: &[Polity], cores: &[Option<String>], parents: &BTreeMap<String, Vec<String>>, root: &str, core: &str, envoy: usize) -> u64 {
+fn lineage_systems(
+    worlds: &[Polity],
+    cores: &[Option<String>],
+    parents: &BTreeMap<String, Vec<String>>,
+    root: &str,
+    core: &str,
+    envoy: usize,
+) -> u64 {
     let living: u64 = (0..worlds.len())
-        .filter(|&i| !worlds[i].penned && cores[i].as_deref() == Some(core) && root_of(&worlds[i].spec.civilization.sigil, parents) == root)
+        .filter(|&i| {
+            !worlds[i].penned
+                && cores[i].as_deref() == Some(core)
+                && root_of(&worlds[i].spec.civilization.sigil, parents) == root
+        })
         .map(|i| worlds[i].world.orbs().len() as u64)
         .sum();
     let away = cores[envoy].as_deref() != Some(core);
-    living + if away { worlds[envoy].world.orbs().len() as u64 } else { 0 }
+    living
+        + if away {
+            worlds[envoy].world.orbs().len() as u64
+        } else {
+            0
+        }
 }
 
 /// docs/77 — A gate's account: what it cost its parliament and what passage
@@ -467,7 +594,9 @@ fn write_accounts(var_root: &Path, accounts: &BTreeMap<(String, String), (Ratio,
 /// Add to a gate's account (`cost` at its folding, `earned` as passage pays).
 fn credit(var_root: &Path, from: &str, core: &str, cost: &Ratio, earned: &Ratio) {
     let mut accounts = read_accounts(var_root);
-    let entry = accounts.entry((from.to_string(), core.to_string())).or_insert_with(|| (ratio(0, 1), ratio(0, 1)));
+    let entry = accounts
+        .entry((from.to_string(), core.to_string()))
+        .or_insert_with(|| (ratio(0, 1), ratio(0, 1)));
     entry.0 += cost.clone();
     entry.1 += earned.clone();
     write_accounts(var_root, &accounts);
@@ -480,16 +609,25 @@ fn credit(var_root: &Path, from: &str, core: &str, cost: &Ratio, earned: &Ratio)
 pub fn accounts(var_root: &Path, road_tolls: &BTreeMap<(String, String), Ratio>) -> Vec<String> {
     let mut accounts = read_accounts(var_root);
     for ((from, core), arrived) in road_tolls {
-        accounts.entry((from.clone(), core.clone())).or_insert_with(|| (ratio(0, 1), ratio(0, 1))).1 += arrived.clone();
+        accounts
+            .entry((from.clone(), core.clone()))
+            .or_insert_with(|| (ratio(0, 1), ratio(0, 1)))
+            .1 += arrived.clone();
     }
     let mut said = Vec::new();
     for g in read(var_root).0 {
-        let entry = accounts.entry((g.from.clone(), g.core.clone())).or_insert_with(|| (ratio(0, 1), ratio(0, 1)));
+        let entry = accounts
+            .entry((g.from.clone(), g.core.clone()))
+            .or_insert_with(|| (ratio(0, 1), ratio(0, 1)));
         if entry.0 == ratio(0, 1) {
             entry.0 = cfe::world::smelt_resource(&gate_cost());
         }
         let (cost, earned) = entry.clone();
-        let payback = if cost > ratio(0, 1) { earned.clone() / cost.clone() } else { ratio(0, 1) };
+        let payback = if cost > ratio(0, 1) {
+            earned.clone() / cost.clone()
+        } else {
+            ratio(0, 1)
+        };
         said.push(format!(
             "GATE ACCOUNT {} — cost {cost} STAMP, earned {earned} STAMP by its builders ({}), payback {payback}{}",
             g.id(),
@@ -503,12 +641,25 @@ pub fn accounts(var_root: &Path, road_tolls: &BTreeMap<(String, String), Ratio>)
 
 /// The ascension step, once a bounce, after the ancients' step, with the
 /// bounce's one reading of the keepers. Returns what happened, for the log.
-pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root: &Path, keepers: &BTreeMap<String, Keeper>, bounce: u64, stamp: u64) -> Vec<String> {
+pub fn step(
+    worlds: &mut [Polity],
+    book: &Ledger,
+    registry: &Registry,
+    var_root: &Path,
+    keepers: &BTreeMap<String, Keeper>,
+    bounce: u64,
+    stamp: u64,
+) -> Vec<String> {
     let mut said = Vec::new();
     let span = book.universe_span();
     let (mut gates, mut envoys, mut foldings) = read_all(var_root);
     let galaxies = book.galaxies();
-    let centre_of = |core: &str| galaxies.iter().find(|g| g.name == core).map(|g| g.center.clone());
+    let centre_of = |core: &str| {
+        galaxies
+            .iter()
+            .find(|g| g.name == core)
+            .map(|g| g.center.clone())
+    };
     let hubs = hubs(worlds, book, var_root, &span);
     // Each line's core, read once for the step (a line does not change galaxy
     // within it).
@@ -518,7 +669,9 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
     // now; a gate sealed by the house at its offered place reads mapped.
     let sealed = sealed(var_root);
     for g in gates.iter_mut() {
-        let (Some(&hub), Some(centre)) = (hubs.get(&g.from), centre_of(g.core.as_str())) else { continue };
+        let (Some(&hub), Some(centre)) = (hubs.get(&g.from), centre_of(g.core.as_str())) else {
+            continue;
+        };
         let now = worlds[hub].spec.position.clone();
         let drift = ledger::torus_distance(&now, &g.place, &span);
         if drift > ratio(i64::try_from(g.freshness).unwrap_or(i64::MAX), 1) {
@@ -529,15 +682,25 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
             g.place = now;
             g.span = cells(&ledger::torus_distance(&g.place, &centre, &span));
         }
-        if !g.mapped && sealed.iter().any(|(id, place)| *id == g.id() && *place == g.place) {
+        if !g.mapped
+            && sealed
+                .iter()
+                .any(|(id, place)| *id == g.id() && *place == g.place)
+        {
             g.mapped = true;
-            said.push(format!("THE GATE {} IS ON THE MAP — envoys may cross, trade may ride", g.id()));
+            said.push(format!(
+                "THE GATE {} IS ON THE MAP — envoys may cross, trade may ride",
+                g.id()
+            ));
         }
     }
     let arisen = crate::ancients::arisen(var_root);
     let is_ancient = |sigil: &str| arisen.iter().any(|(_, s)| s == sigil);
     let parents = parents_of(registry);
-    let envoys_now: Vec<(String, String)> = envoys.iter().map(|e| (e.line.clone(), e.core.clone())).collect();
+    let envoys_now: Vec<(String, String)> = envoys
+        .iter()
+        .map(|e| (e.line.clone(), e.core.clone()))
+        .collect();
     let top = Difficulty::top();
     let mut seq = 0u64;
     let mut deal = || {
@@ -546,11 +709,28 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
     };
     // A1: each master's choice of core, by its lineage's prospects there.
     let masters: Vec<(usize, String, String, u64)> = (0..worlds.len())
-        .filter(|&i| !worlds[i].penned && worlds[i].level >= top && !is_ancient(&worlds[i].spec.civilization.sigil))
-        .filter(|&i| !envoys.iter().any(|e| e.line == worlds[i].spec.civilization.sigil))
+        .filter(|&i| {
+            !worlds[i].penned
+                && worlds[i].level >= top
+                && !is_ancient(&worlds[i].spec.civilization.sigil)
+        })
+        .filter(|&i| {
+            !envoys
+                .iter()
+                .any(|e| e.line == worlds[i].spec.civilization.sigil)
+        })
         .filter_map(|i| {
             let home = cores[i].clone()?;
-            let (target, systems) = choose_core(worlds, book, &cores, &parents, &envoys_now, &galaxies, i, &home)?;
+            let (target, systems) = choose_core(
+                worlds,
+                book,
+                &cores,
+                &parents,
+                &envoys_now,
+                &galaxies,
+                i,
+                &home,
+            )?;
             Some((i, home, target, systems))
         })
         .collect();
@@ -558,14 +738,24 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
     // in equal shares on the grain among every living ancient of the core,
     // the remainder to the first.
     for (i, home, target, systems) in &masters {
-        if gates.iter().any(|g| &g.from == home && &g.core == target) || foldings.iter().any(|f| &f.from == home && &f.core == target) {
+        if gates.iter().any(|g| &g.from == home && &g.core == target)
+            || foldings
+                .iter()
+                .any(|f| &f.from == home && &f.core == target)
+        {
             continue;
         }
-        let Some(keeper) = keepers.get(target) else { continue };
+        let Some(keeper) = keepers.get(target) else {
+            continue;
+        };
         let ancients: Vec<String> = arisen
             .iter()
             .filter(|(c, _)| c == target)
-            .filter(|(_, s)| worlds.iter().any(|p| !p.penned && &p.spec.civilization.sigil == s))
+            .filter(|(_, s)| {
+                worlds
+                    .iter()
+                    .any(|p| !p.penned && &p.spec.civilization.sigil == s)
+            })
             .map(|(_, s)| s.clone())
             .collect();
         if ancients.is_empty() {
@@ -586,13 +776,25 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
         let n = ancients.len() as i64;
         let share = cfe::world::smelt_resource(&(cost.clone() / ratio(n, 1)));
         let first = cost - share.clone() * ratio(n - 1, 1);
-        let owed = ancients.into_iter().enumerate().map(|(k, a)| (a, if k == 0 { first.clone() } else { share.clone() })).collect();
+        let owed = ancients
+            .into_iter()
+            .enumerate()
+            .map(|(k, a)| (a, if k == 0 { first.clone() } else { share.clone() }))
+            .collect();
         let master = worlds[*i].spec.civilization.sigil.clone();
         said.push(format!(
             "A GATE {home}>{target} IS BEGUN by the parliament of {} for {master} (its lineage would hold {systems} systems there); paid in trips to {n} ancients",
             keeper.line
         ));
-        foldings.push(Folding { from: home.clone(), core: target.clone(), builder: keeper.line.clone(), master, owed, trips: 0, started: bounce });
+        foldings.push(Folding {
+            from: home.clone(),
+            core: target.clone(),
+            builder: keeper.line.clone(),
+            master,
+            owed,
+            trips: 0,
+            started: bounce,
+        });
     }
     // A1: one trip a bounce for each gate being paid for, from the builders'
     // richest line at the core that is not an ancient, to the first ancient
@@ -601,11 +803,26 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
     for mut f in std::mem::take(&mut foldings) {
         let label = format!("{}>{}", f.from, f.core);
         // An ancient no longer living is owed nothing more.
-        f.owed.retain(|(s, r)| *r > ratio(0, 1) && worlds.iter().any(|p| !p.penned && &p.spec.civilization.sigil == s));
+        f.owed.retain(|(s, r)| {
+            *r > ratio(0, 1)
+                && worlds
+                    .iter()
+                    .any(|p| !p.penned && &p.spec.civilization.sigil == s)
+        });
         let total = cfe::world::smelt_resource(&gate_cost());
         if !f.owed.is_empty() {
-            let ancients: Vec<usize> = arisen.iter().filter(|(c, _)| *c == f.core).filter_map(|(_, s)| worlds.iter().position(|p| !p.penned && &p.spec.civilization.sigil == s)).collect();
-            let to = worlds.iter().position(|p| !p.penned && p.spec.civilization.sigil == f.owed[0].0);
+            let ancients: Vec<usize> = arisen
+                .iter()
+                .filter(|(c, _)| *c == f.core)
+                .filter_map(|(_, s)| {
+                    worlds
+                        .iter()
+                        .position(|p| !p.penned && &p.spec.civilization.sigil == s)
+                })
+                .collect();
+            let to = worlds
+                .iter()
+                .position(|p| !p.penned && p.spec.civilization.sigil == f.owed[0].0);
             // The trip's payer: of the builders' lines at the core that are
             // not its ancients, the richest whose hulls are free on the road
             // to the ancient (a road that does not melt asks no hull).
@@ -618,7 +835,8 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
                             && cores[j].as_deref() == Some(f.core.as_str())
                             && root_of(&worlds[j].spec.civilization.sigil, &parents) == f.builder
                             && stamp_of(&worlds[j]) > ratio(0, 1)
-                            && (open_melt(worlds, j, to, &span) == ratio(0, 1) || worlds[j].world.free_capacity(id) > ratio(0, 1))
+                            && (open_melt(worlds, j, to, &span) == ratio(0, 1)
+                                || worlds[j].world.free_capacity(id) > ratio(0, 1))
                     })
                     .max_by(|a, b| stamp_of(&worlds[*a]).cmp(&stamp_of(&worlds[*b])))
             });
@@ -646,7 +864,10 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
                     ));
                 }
                 Err(why) => {
-                    said.push(format!("A GATE {label} IS PAYING — trip {} refused: {why}", f.trips + 1));
+                    said.push(format!(
+                        "A GATE {label} IS PAYING — trip {} refused: {why}",
+                        f.trips + 1
+                    ));
                 }
             }
         }
@@ -665,14 +886,28 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
             f.builder, f.master, f.trips
         ));
         credit(var_root, &f.from, &f.core, &total, &ratio(0, 1));
-        let gate = Gate { from: f.from, core: f.core, builder: f.builder, span: cells, mapped: false, built: bounce, place, freshness: FRESHNESS_CELLS };
+        let gate = Gate {
+            from: f.from,
+            core: f.core,
+            builder: f.builder,
+            span: cells,
+            mapped: false,
+            built: bounce,
+            place,
+            freshness: FRESHNESS_CELLS,
+        };
         // The progenitors emerge (operator 2026-10-21): the doorway's builders'
         // line, the one who takes its tolls, is a progenitor from the fold; an
         // ancient is already above the doorways.
         if let Some(b) = builder_payee(worlds, &cores, &parents, keepers, &gate) {
             let ancients: Vec<String> = arisen.iter().map(|(_, s)| s.clone()).collect();
             if crate::tiers::raise(&mut worlds[b], registry, "progenitor", &ancients) {
-                said.push(format!("A PROGENITOR EMERGES — {}, whose lineage {} folded the gate {}", worlds[b].spec.civilization.sigil, gate.builder, gate.id()));
+                said.push(format!(
+                    "A PROGENITOR EMERGES — {}, whose lineage {} folded the gate {}",
+                    worlds[b].spec.civilization.sigil,
+                    gate.builder,
+                    gate.id()
+                ));
             }
         }
         gates.push(gate);
@@ -680,9 +915,16 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
     foldings = paying;
     // A2: the masters' envoys cross mapped gates to their chosen cores (5.9).
     for (i, home, target, _) in &masters {
-        if gates.iter().any(|g| &g.from == home && &g.core == target && g.mapped) {
+        if gates
+            .iter()
+            .any(|g| &g.from == home && &g.core == target && g.mapped)
+        {
             let line = worlds[*i].spec.civilization.sigil.clone();
-            envoys.push(Envoy { line: line.clone(), core: target.clone(), since: bounce });
+            envoys.push(Envoy {
+                line: line.clone(),
+                core: target.clone(),
+                since: bounce,
+            });
             said.push(format!("AN ENVOY CROSSES — {line} from {home} to {target}"));
         }
     }
@@ -690,8 +932,14 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
     // builders through the gate.
     let mut kept = Vec::new();
     for e in envoys {
-        let Some(at) = worlds.iter().position(|p| !p.penned && p.spec.civilization.sigil == e.line) else {
-            said.push(format!("AN ENVOY LEAVES — {} from {} (its line is gone)", e.line, e.core));
+        let Some(at) = worlds
+            .iter()
+            .position(|p| !p.penned && p.spec.civilization.sigil == e.line)
+        else {
+            said.push(format!(
+                "AN ENVOY LEAVES — {} from {} (its line is gone)",
+                e.line, e.core
+            ));
             continue;
         };
         // An ascended line sits on the council: its passage is over.
@@ -700,7 +948,10 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
         }
         // An envoy is a master's: a line fallen below the ladder's top is recalled.
         if worlds[at].level < top {
-            said.push(format!("AN ENVOY IS RECALLED — {} from {} (no longer at the ladder's top)", e.line, e.core));
+            said.push(format!(
+                "AN ENVOY IS RECALLED — {} from {} (no longer at the ladder's top)",
+                e.line, e.core
+            ));
             continue;
         }
         // The judgement, each bounce after its crossing: with its envoy counted
@@ -708,12 +959,19 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
         let root = root_of(&e.line, &parents);
         if e.since < bounce && keepers.get(&e.core).is_none_or(|k| k.line != root) {
             let held = lineage_systems(worlds, &cores, &parents, &root, &e.core, at);
-            let (line, systems) = keepers.get(&e.core).map(|k| (k.line.clone(), k.systems)).unwrap_or_default();
+            let (line, systems) = keepers
+                .get(&e.core)
+                .map(|k| (k.line.clone(), k.systems))
+                .unwrap_or_default();
             said.push(format!("AN ENVOY WITHDRAWS — {} from {}: its lineage {root} holds {held} systems there, the keeper {line} {systems}", e.line, e.core));
             continue;
         }
         let home = cores[at].clone().unwrap_or_default();
-        let Some(gate) = gates.iter().find(|g| g.from == home && g.core == e.core).or_else(|| gates.iter().find(|g| g.core == e.core)) else {
+        let Some(gate) = gates
+            .iter()
+            .find(|g| g.from == home && g.core == e.core)
+            .or_else(|| gates.iter().find(|g| g.core == e.core))
+        else {
             kept.push(e);
             continue;
         };
@@ -723,11 +981,16 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
             kept.push(e);
             continue;
         }
-        let Some(payee) = builder_payee(worlds, &cores, &parents, keepers, gate).filter(|&p| p != at) else {
+        let Some(payee) =
+            builder_payee(worlds, &cores, &parents, keepers, gate).filter(|&p| p != at)
+        else {
             kept.push(e);
             continue;
         };
-        let melt = hubs.get(&gate.from).map(|&h| through(worlds, at, h, gate, &span)).unwrap_or_else(|| gate_melt(gate.span));
+        let melt = hubs
+            .get(&gate.from)
+            .map(|&h| through(worlds, at, h, gate, &span))
+            .unwrap_or_else(|| gate_melt(gate.span));
         // The toll is one trip: carried whole, or unpaid.
         let toll = cfe::world::smelt_resource(&gate_melt(gate.span));
         // A passage that costs nothing is owed nothing.
@@ -749,19 +1012,42 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
     let mut books = crate::ancients::read_books(var_root);
     let mut ascending: Vec<String> = Vec::new();
     for (core, keeper) in keepers {
-        let Some(envoy) = envoys.iter().find(|e| &e.core == core && e.line == keeper.rider) else { continue };
-        let Some(entry) = books.get_mut(core) else { continue };
-        let Some((root, since)) = &entry.kept else { continue };
+        let Some(envoy) = envoys
+            .iter()
+            .find(|e| &e.core == core && e.line == keeper.rider)
+        else {
+            continue;
+        };
+        let Some(entry) = books.get_mut(core) else {
+            continue;
+        };
+        let Some((root, since)) = &entry.kept else {
+            continue;
+        };
         // A full core period kept by the lineage, and served by the envoy itself
         // since its own crossing.
-        if root != &keeper.line || bounce < since + 1 || bounce < envoy.since + 1 || entry.ascended.contains(&envoy.line) || entry.arisen.as_ref() == Some(&envoy.line) {
+        if root != &keeper.line
+            || bounce < since + 1
+            || bounce < envoy.since + 1
+            || entry.ascended.contains(&envoy.line)
+            || entry.arisen.as_ref() == Some(&envoy.line)
+        {
             continue;
         }
-        let living = (0..worlds.len()).filter(|&i| !worlds[i].penned && cores[i].as_deref() == Some(core.as_str())).count() as u64;
-        let event = cfe::dop::ClosureEvent::AncientArose { sigil: envoy.line.clone(), tree: keeper.systems, living };
+        let living = (0..worlds.len())
+            .filter(|&i| !worlds[i].penned && cores[i].as_deref() == Some(core.as_str()))
+            .count() as u64;
+        let event = cfe::dop::ClosureEvent::AncientArose {
+            sigil: envoy.line.clone(),
+            tree: keeper.systems,
+            living,
+        };
         if book.append_universe(vec![event], stamp).is_ok() {
             entry.ascended.push(envoy.line.clone());
-            said.push(format!("AN ANCIENT ASCENDS at {core} — {} by deed, through the gate", envoy.line));
+            said.push(format!(
+                "AN ANCIENT ASCENDS at {core} — {} by deed, through the gate",
+                envoy.line
+            ));
             ascending.push(envoy.line.clone());
         }
     }
@@ -774,8 +1060,14 @@ pub fn step(worlds: &mut [Polity], book: &Ledger, registry: &Registry, var_root:
     // core, the keeper's world, six ratios, freshness u64).
     let mut out = Vec::new();
     for g in gates.iter().filter(|g| !g.mapped) {
-        let Some(centre) = centre_of(g.core.as_str()) else { continue };
-        let Some(keeper) = builder_payee(worlds, &cores, &parents, keepers, g).map(|k| worlds[k].spec.world_name.clone()) else { continue };
+        let Some(centre) = centre_of(g.core.as_str()) else {
+            continue;
+        };
+        let Some(keeper) = builder_payee(worlds, &cores, &parents, keepers, g)
+            .map(|k| worlds[k].spec.world_name.clone())
+        else {
+            continue;
+        };
         let mut v = Vec::new();
         put_text(&g.id(), &mut v);
         put_text(&g.core, &mut v);

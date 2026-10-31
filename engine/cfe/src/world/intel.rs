@@ -33,7 +33,10 @@ impl World {
             },
             detection_grade: grade,
             instrument_count: self.instrument_count(),
-            veil_toll: crate::parameter::of(self.chronicle(), crate::parameter::Parameter::VeilToll),
+            veil_toll: crate::parameter::of(
+                self.chronicle(),
+                crate::parameter::Parameter::VeilToll,
+            ),
             inf_rank: self.defense_posture().ranks[4], // INF domain index
         }
     }

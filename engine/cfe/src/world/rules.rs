@@ -46,7 +46,10 @@ pub fn ease_of(techs: &[(u64, u8, [u8; 32], Ratio)], orb: u64, at: u64) -> Ratio
 /// pattern gained one `_` and the computation is untouched — a type
 /// spelling is not the sealed meaning.)
 fn ease_cliff(techs: &[(u64, u8, [u8; 32], Ratio)], orb: u64) -> Ratio {
-    match techs.iter().any(|(held, condition, _, _)| *held == orb && *condition == 5) {
+    match techs
+        .iter()
+        .any(|(held, condition, _, _)| *held == orb && *condition == 5)
+    {
         true => ratio(1, 2), // SEALED-RATE: epoch-0 law — editing rewrites history
         false => ratio(1, 1),
     }
@@ -127,7 +130,11 @@ pub fn demurrage_due(
 ) -> Vec<(Resource, Ratio)> {
     let mut due = Vec::new();
     if let (Some(class), Some(site)) = (star, &orb.thermal) {
-        let t4 = crate::thermal::t_eq4(&class.luminosity(), site.albedo.value(), site.orbit_r.value());
+        let t4 = crate::thermal::t_eq4(
+            &class.luminosity(),
+            site.albedo.value(),
+            site.orbit_r.value(),
+        );
         if crate::thermal::leaks(&t4) && stamp > orb.last_touch {
             let elapsed = ratio((stamp - orb.last_touch) as i64, 1);
             for resource in [Resource::Ember, Resource::Sink] {
@@ -160,7 +167,6 @@ pub fn demurrage_due(
     }
     due
 }
-
 
 /// Crisis — one definition, read by both the proposer and replay.
 ///

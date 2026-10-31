@@ -92,10 +92,16 @@ where
 {
     let mut rng = SeededRng::new(seed);
     for t in 0..max_tries {
-        let weights: Vec<i64> = (0..base.len()).map(|_| rng.next_weight(weight_range)).collect();
+        let weights: Vec<i64> = (0..base.len())
+            .map(|_| rng.next_weight(weight_range))
+            .collect();
         let candidate = combine(base, &weights);
         if verify(&candidate) {
-            return Some(Mint { generator: candidate, weights, tries: t + 1 });
+            return Some(Mint {
+                generator: candidate,
+                weights,
+                tries: t + 1,
+            });
         }
     }
     None

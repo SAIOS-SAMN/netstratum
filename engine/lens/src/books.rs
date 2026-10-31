@@ -61,8 +61,7 @@ pub enum BookId {
     Minted([u8; 32]),
 }
 
-impl BookId {
-}
+impl BookId {}
 
 /// One BOOK — a dual account: what stood, against what did not.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -169,9 +168,7 @@ impl Regard {
                 *count += 1;
             }
             None => {
-                let at = self
-                    .channels
-                    .partition_point(|(book, _, _)| book < id);
+                let at = self.channels.partition_point(|(book, _, _)| book < id);
                 self.channels.insert(at, (id.clone(), signal, 1));
             }
         }

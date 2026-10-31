@@ -18,7 +18,10 @@ fn nets_accrue_exactly_and_collection_settles_them() {
     let orb = world.orb().expect("the colony stands");
     assert_eq!(
         orb.banked,
-        vec![(Resource::Iron, ratio(10, 1)), (Resource::Biomass, ratio(5, 1))]
+        vec![
+            (Resource::Iron, ratio(10, 1)),
+            (Resource::Biomass, ratio(5, 1))
+        ]
     );
     for _ in 0..4 {
         world.tick();
@@ -27,14 +30,20 @@ fn nets_accrue_exactly_and_collection_settles_them() {
     // +1/2. Four ticks: +5 iron, +2 biomass — exactly.
     assert_eq!(
         world.accrued(),
-        &[(Resource::Iron, ratio(5, 1)), (Resource::Biomass, ratio(2, 1))]
+        &[
+            (Resource::Iron, ratio(5, 1)),
+            (Resource::Biomass, ratio(2, 1))
+        ]
     );
     let receipts = world.collect().expect("nets settle");
     assert_eq!(receipts, 2, "one receipt per resource");
     let orb = world.orb().expect("the colony stands");
     assert_eq!(
         orb.banked,
-        vec![(Resource::Iron, ratio(15, 1)), (Resource::Biomass, ratio(7, 1))]
+        vec![
+            (Resource::Iron, ratio(15, 1)),
+            (Resource::Biomass, ratio(7, 1))
+        ]
     );
     assert!(world.accrued().is_empty(), "the workspace closed");
     assert_eq!(world.now(), 4, "the clock walked by quorum, once per tick");
@@ -56,13 +65,19 @@ fn settlement_lands_exact_on_the_committed_world() {
     // Settled: banked iron 10 + 9/2 = 29/2; biomass 10 − 3/2 = 17/2.
     world.zone(9, ZoneKind::Habitat).expect("affordable");
     world.tick();
-    assert!(!world.accrued().is_empty(), "workspace holds the uncollected tail");
+    assert!(
+        !world.accrued().is_empty(),
+        "workspace holds the uncollected tail"
+    );
     assert_eq!(world.chronicle().verify_chain(), ChainRead::Intact);
     let committed = world.committed();
     let banked = &committed.orbs.first().expect("the colony stands").banked;
     assert_eq!(
         banked,
-        &vec![(Resource::Iron, ratio(29, 2)), (Resource::Biomass, ratio(7, 2))],
+        &vec![
+            (Resource::Iron, ratio(29, 2)),
+            (Resource::Biomass, ratio(7, 2))
+        ],
         "29/2 iron and 17/2−5 = 7/2 biomass, exact"
     );
 }
@@ -76,10 +91,19 @@ fn actions_refuse_typed() {
         world.zone(1, ZoneKind::Habitat),
         Err(ActionRefused::NoSuchEntity { entity: 1 })
     );
-    assert_eq!(world.collect(), Err(ActionRefused::NoSuchEntity { entity: 1 }));
-    assert_eq!(world.raze(1), Err(ActionRefused::NoSuchEntity { entity: 1 }));
+    assert_eq!(
+        world.collect(),
+        Err(ActionRefused::NoSuchEntity { entity: 1 })
+    );
+    assert_eq!(
+        world.raze(1),
+        Err(ActionRefused::NoSuchEntity { entity: 1 })
+    );
     world.found("meridian").expect("founding closes");
-    assert_eq!(world.found("second"), Err(ActionRefused::ColonyAlreadyFounded));
+    assert_eq!(
+        world.found("second"),
+        Err(ActionRefused::ColonyAlreadyFounded)
+    );
     world.zone(1, ZoneKind::Habitat).expect("affordable");
     assert_eq!(
         world.zone(1, ZoneKind::Extractor),

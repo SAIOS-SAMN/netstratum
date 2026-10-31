@@ -9,7 +9,11 @@ fn main() {
         let mut at = 0;
         for (i, r) in c.receipts().iter().enumerate() {
             if after {
-                let k = format!("{:?}", r.event()).split(|ch: char| !ch.is_ascii_alphanumeric()).next().unwrap_or("").to_string();
+                let k = format!("{:?}", r.event())
+                    .split(|ch: char| !ch.is_ascii_alphanumeric())
+                    .next()
+                    .unwrap_or("")
+                    .to_string();
                 *kinds.entry(k).or_default() += 1;
             }
             if matches!(r.event(), E::CivilizationCollapsed { .. }) && !after {
@@ -17,6 +21,9 @@ fn main() {
                 at = i;
             }
         }
-        println!("{dir}: collapsed at receipt {at} of {}; after it: {kinds:?}", c.receipts().len());
+        println!(
+            "{dir}: collapsed at receipt {at} of {}; after it: {kinds:?}",
+            c.receipts().len()
+        );
     }
 }

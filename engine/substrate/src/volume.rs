@@ -146,7 +146,6 @@ impl Volume {
         write_vector_module(&mut buf, &self.gauge);
         buf
     }
-
 }
 
 impl Default for Volume {

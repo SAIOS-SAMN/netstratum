@@ -55,7 +55,9 @@ fn distance(a: &Grid, b: &Grid) -> u64 {
 }
 
 fn main() {
-    let dir = std::env::args().nth(1).expect("usage: the_opening <corpus_dir>");
+    let dir = std::env::args()
+        .nth(1)
+        .expect("usage: the_opening <corpus_dir>");
     let mut paths: Vec<_> = std::fs::read_dir(&dir)
         .expect("corpus dir")
         .filter_map(|e| e.ok().map(|e| e.path()))
@@ -90,8 +92,7 @@ fn main() {
             closed += 1;
         }
 
-        let reducing: Vec<&(u64, bool)> =
-            openings.iter().filter(|(gain, _)| *gain > 0).collect();
+        let reducing: Vec<&(u64, bool)> = openings.iter().filter(|(gain, _)| *gain > 0).collect();
 
         match reducing.len() {
             0 => {
@@ -111,8 +112,7 @@ fn main() {
         if any_closes && !reducing.is_empty() {
             openings.sort_by_key(|(gain, _)| std::cmp::Reverse(*gain));
             let best = openings[0].0;
-            let winners: Vec<&(u64, bool)> =
-                openings.iter().filter(|(g, _)| *g == best).collect();
+            let winners: Vec<&(u64, bool)> = openings.iter().filter(|(g, _)| *g == best).collect();
             match winners.iter().all(|(_, shut)| *shut) {
                 true if winners.len() == 1 => ranked_right += 1,
                 true => ties += 1,

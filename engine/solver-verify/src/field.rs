@@ -132,7 +132,10 @@ impl Field {
             shape,
         };
         let cells: Vec<u8> = scratch.coordinates().map(|at| f(&at)).collect();
-        Field { shape: scratch.shape, cells }
+        Field {
+            shape: scratch.shape,
+            cells,
+        }
     }
 }
 

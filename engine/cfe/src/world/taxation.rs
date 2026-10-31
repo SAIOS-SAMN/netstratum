@@ -65,7 +65,8 @@ impl World {
     /// spends only what the stall costs. This is the fiscal outflow the
     /// collect touch settles (a negative `TreasurySettled`).
     pub fn welfare_spend(&self, orb: u64, stamp: u64) -> Ratio {
-        self.treasury_of(orb).min(self.welfare_budget_needed(orb, stamp))
+        self.treasury_of(orb)
+            .min(self.welfare_budget_needed(orb, stamp))
     }
 
     /// **The welfare subsidy** (`49_TAXATION` §5) — how much a WelfareHub

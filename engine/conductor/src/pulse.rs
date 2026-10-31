@@ -58,7 +58,9 @@ pub fn mass(m: &Manifest) -> Ratio {
 /// A manifest's holding, its closed frames alone (the Z pole): what the open
 /// frames (`magnetism`, the Q pole) are read against, as a push's open share.
 pub fn held(m: &Manifest) -> Ratio {
-    m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::hold(k)), 1))
+    m.iter().fold(ratio(0, 1), |s, (k, a)| {
+        s + a.clone() * ratio(i64::from(crate::chem::hold(k)), 1)
+    })
 }
 
 /// The nuclei in one grain of any Z (docs/78, "The atom"): 60^30.
@@ -77,7 +79,12 @@ pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
     nuclei
         .iter()
         .filter(|(_, count)| **count > num_bigint::BigInt::from(0))
-        .filter_map(|(z, count)| Some((crate::chem::Kind::element(u32::from(*z))?, Ratio::new(count.clone(), grid.clone()))))
+        .filter_map(|(z, count)| {
+            Some((
+                crate::chem::Kind::element(u32::from(*z))?,
+                Ratio::new(count.clone(), grid.clone()),
+            ))
+        })
         .collect()
 }
 
@@ -101,8 +108,12 @@ pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     use num_bigint::BigInt;
     let zero = BigInt::from(0);
     let grid = nuclei_per_grain() * BigInt::from(1024);
-    let share = crate::nuclides::neutron_share(&crate::nuclides::seal_window(&crate::nuclides::source_clock()));
-    let neutrons = (Ratio::from_integer(nuclei.clone()) * share).floor().to_integer();
+    let share = crate::nuclides::neutron_share(&crate::nuclides::seal_window(
+        &crate::nuclides::source_clock(),
+    ));
+    let neutrons = (Ratio::from_integer(nuclei.clone()) * share)
+        .floor()
+        .to_integer();
     let protons = nuclei - &neutrons;
     let paired = protons.clone().min(neutrons.clone());
     let seeds = &paired / BigInt::from(2);
@@ -120,7 +131,14 @@ pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
         if arriving <= zero {
             break;
         }
-        let climb = crate::nuclides::survival(w + 1, &p0).map(|s| (Ratio::from_integer(arriving.clone()) * s).floor().to_integer()).unwrap_or_else(|| zero.clone()).min(free.clone());
+        let climb = crate::nuclides::survival(w + 1, &p0)
+            .map(|s| {
+                (Ratio::from_integer(arriving.clone()) * s)
+                    .floor()
+                    .to_integer()
+            })
+            .unwrap_or_else(|| zero.clone())
+            .min(free.clone());
         let stay = &arriving - &climb;
         if stay > zero {
             counts.push((w, stay));
@@ -178,15 +196,31 @@ fn reach_of(t: Ratio) -> Ratio {
 /// order 1/100 of the rest), 0 an orb (keeps all).
 pub fn tier(depth: u8) -> Tier {
     match depth {
-        3 => Tier { centre: ratio(0, 1), medium: ratio(1, 2), reach: ratio(0, 1) },
+        3 => Tier {
+            centre: ratio(0, 1),
+            medium: ratio(1, 2),
+            reach: ratio(0, 1),
+        },
         // Systems about a core: s = 12/37 (t = 1/6), each system about 0.235
         // of the mass it orbits. A placeholder sized to the stand-in's
         // grains (tens of systems a galaxy); a real galaxy's is far smaller.
-        2 => Tier { centre: ratio(1, 1000), medium: ratio(1, 10), reach: reach_of(ratio(1, 6)) },
+        2 => Tier {
+            centre: ratio(1, 1000),
+            medium: ratio(1, 10),
+            reach: reach_of(ratio(1, 6)),
+        },
         // Orbs about a star: t = 1/283, each orb about 1e-4 of what it
         // orbits, the order of the Solar System's planets against the Sun.
-        1 => Tier { centre: ratio(9986, 10000), medium: ratio(1, 100), reach: reach_of(ratio(1, 283)) },
-        _ => Tier { centre: ratio(1, 1), medium: ratio(0, 1), reach: ratio(0, 1) },
+        1 => Tier {
+            centre: ratio(9986, 10000),
+            medium: ratio(1, 100),
+            reach: reach_of(ratio(1, 283)),
+        },
+        _ => Tier {
+            centre: ratio(1, 1),
+            medium: ratio(0, 1),
+            reach: ratio(0, 1),
+        },
     }
 }
 
@@ -295,7 +329,13 @@ impl Body {
     /// Everything it holds: itself, its satellites and its medium.
     pub fn total(&self) -> Manifest {
         let mut all = self.kept.clone();
-        for (k, a) in self.satellites.iter().flat_map(|s| s.total()).chain(self.medium.clone()).chain(self.throat.clone()) {
+        for (k, a) in self
+            .satellites
+            .iter()
+            .flat_map(|s| s.total())
+            .chain(self.medium.clone())
+            .chain(self.throat.clone())
+        {
             *all.entry(k).or_insert_with(|| ratio(0, 1)) += a;
         }
         all
@@ -342,7 +382,9 @@ pub fn home_push(u: &Universe, grains: &Manifest) -> Option<(Ratio, Ratio, Ratio
     if whole.is_zero() || count.is_zero() {
         return None;
     }
-    let firm = u.firmament().iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key)) / whole;
+    let firm = u.firmament().iter().fold(ratio(0, 1), |s, x| {
+        s + x.amount.clone() * crate::flows::weight(&x.key)
+    }) / whole;
     Some((ratio(1, 2), ratio(1, 1) + firm, mass(grains) / count))
 }
 
@@ -436,15 +478,27 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate:
     };
     // The crossing sets the push (transitional: the galaxy tier's p awaits
     // the arriving ocean, docs/83).
-    let cut = (0..order.len()).collect::<Vec<_>>().partition_point(|&idx| holds(idx));
-    let held = above.get(cut).cloned().unwrap_or_else(|| above.last().cloned().unwrap_or_else(|| ratio(0, 1)) + order.last().map(|(k, a)| (*a).clone() * ratio(i64::from(weight(k)), 1) / total.clone()).unwrap_or_else(|| ratio(0, 1)));
+    let cut = (0..order.len())
+        .collect::<Vec<_>>()
+        .partition_point(|&idx| holds(idx));
+    let held = above.get(cut).cloned().unwrap_or_else(|| {
+        above.last().cloned().unwrap_or_else(|| ratio(0, 1))
+            + order
+                .last()
+                .map(|(k, a)| (*a).clone() * ratio(i64::from(weight(k)), 1) / total.clone())
+                .unwrap_or_else(|| ratio(0, 1))
+    });
     // Exact (operator 2026-10-23: "this is approximations leaking into an
     // exact system"; "build the certified intervals"): the readings stand as
     // they are. Where they multiply every mote's torque each bell, the torque
     // holds the push by its bounds on the grain and reads it exactly only
     // where those bounds would store differently (`flows::torque`).
     let h = ratio(1, 1) + held.clone();
-    let lightest = if cut >= order.len() { None } else { cut.checked_sub(1).map(|i| order[i].0.clone()) };
+    let lightest = if cut >= order.len() {
+        None
+    } else {
+        cut.checked_sub(1).map(|i| order[i].0.clone())
+    };
     Some((held / h.clone(), h, mean, lightest))
 }
 
@@ -460,7 +514,9 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate:
 /// only where the founding pulse leaves it.
 pub fn disperse(grains: &Manifest) -> Manifest {
     let weight = |k: &crate::chem::Kind| crate::chem::weight(k);
-    let Some((p, h, mean)) = galaxy_push(grains) else { return Manifest::new() };
+    let Some((p, h, mean)) = galaxy_push(grains) else {
+        return Manifest::new();
+    };
     grains
         .iter()
         .filter_map(|(k, amount)| {
@@ -468,7 +524,15 @@ pub fn disperse(grains: &Manifest) -> Manifest {
             let r = ell / h.clone();
             let lo = r.clone() * (ratio(1, 1) - p.clone());
             let span = ratio(2, 1) * p.clone() * r;
-            let f = if span.is_zero() { if lo <= h { ratio(1, 1) } else { ratio(0, 1) } } else { ((h.clone() - lo) / span).max(ratio(0, 1)).min(ratio(1, 1)) };
+            let f = if span.is_zero() {
+                if lo <= h {
+                    ratio(1, 1)
+                } else {
+                    ratio(0, 1)
+                }
+            } else {
+                ((h.clone() - lo) / span).max(ratio(0, 1)).min(ratio(1, 1))
+            };
             let held = grain(&(amount.clone() * f));
             (held > ratio(0, 1)).then(|| (k.clone(), held))
         })
@@ -556,9 +620,15 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         return (Manifest::new(), Vec::new(), ratio(2, 1));
     }
     let _ = count;
-    let mut kinds: Vec<(crate::chem::Kind, Ratio)> = manifest.iter().filter(|(_, a)| **a > ratio(0, 1)).map(|(k, a)| (k.clone(), a.clone())).collect();
+    let mut kinds: Vec<(crate::chem::Kind, Ratio)> = manifest
+        .iter()
+        .filter(|(_, a)| **a > ratio(0, 1))
+        .map(|(k, a)| (k.clone(), a.clone()))
+        .collect();
     kinds.sort_by_key(|(k, _)| crate::chem::charge(k));
-    let face = |held: &Ratio| g(&(ratio(1, 2) * held.clone() / (held.clone() + ratio(1, 1) + held.clone())));
+    let face = |held: &Ratio| {
+        g(&(ratio(1, 2) * held.clone() / (held.clone() + ratio(1, 1) + held.clone())))
+    };
     let mut held = ratio(0, 1);
     let mut share = Vec::with_capacity(kinds.len());
     for (k, a) in &kinds {
@@ -577,11 +647,16 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     // E_i = K + s_i`.
     let mut heavy: Vec<usize> = (0..kinds.len()).collect();
     heavy.sort_by(|&a, &b| w(&kinds[b].0).cmp(&w(&kinds[a].0)));
-    let prof: Vec<Ratio> = heavy.iter().map(|&i| kinds[i].1.clone() * w(&kinds[i].0)).collect();
+    let prof: Vec<Ratio> = heavy
+        .iter()
+        .map(|&i| kinds[i].1.clone() * w(&kinds[i].0))
+        .collect();
     let mut stack_share = vec![ratio(0, 1); kinds.len()];
     let mut from = 0usize;
     let close = |from: usize, to: usize, stack_share: &mut Vec<Ratio>| {
-        let s_i = heavy[from..to].iter().fold(ratio(0, 1), |a, &i| a + share[i].clone());
+        let s_i = heavy[from..to]
+            .iter()
+            .fold(ratio(0, 1), |a, &i| a + share[i].clone());
         for &i in &heavy[from..to] {
             stack_share[i] = s_i.clone();
         }
@@ -636,8 +711,14 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     // (i catching, j giving, the share of j's mix i takes).
     let mut passes: Vec<(usize, usize, Ratio)> = Vec::new();
     // Each released shell read once: its share, grip, deficit and spread.
-    let m_rel: Vec<Ratio> = released.iter().map(|(m, _)| mass(m) / total.clone()).collect();
-    let g_rel: Vec<Ratio> = released.iter().map(|(m, _)| crate::formation::grip(m)).collect();
+    let m_rel: Vec<Ratio> = released
+        .iter()
+        .map(|(m, _)| mass(m) / total.clone())
+        .collect();
+    let g_rel: Vec<Ratio> = released
+        .iter()
+        .map(|(m, _)| crate::formation::grip(m))
+        .collect();
     let d_rel: Vec<Ratio> = released.iter().map(|(_, r)| delta(r)).collect();
     let band: Vec<(Ratio, Ratio)> = released.iter().map(|(_, r)| (lo(r), hi(r))).collect();
     for i in 1..released.len() {
@@ -648,14 +729,28 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
             if mj.is_zero() || mi.is_zero() || ri <= *lo_j {
                 continue;
             }
-            let crossed = if ri >= *hi_j { ratio(1, 1) } else { (ri.clone() - lo_j.clone()) / (hi_j.clone() - lo_j.clone()) };
+            let crossed = if ri >= *hi_j {
+                ratio(1, 1)
+            } else {
+                (ri.clone() - lo_j.clone()) / (hi_j.clone() - lo_j.clone())
+            };
             let contact = ratio(1, 2) * crossed;
             let (gi, gj) = (g_rel[i].clone(), g_rel[j].clone());
-            let s = if gi.is_zero() || gj.is_zero() { ratio(0, 1) } else if gi < gj { gi / gj } else { gj / gi };
+            let s = if gi.is_zero() || gj.is_zero() {
+                ratio(0, 1)
+            } else if gi < gj {
+                gi / gj
+            } else {
+                gj / gi
+            };
             let m_ij = mi.clone() + mj.clone();
             let bind = s * m_ij.clone() / (m_ij.clone() + ratio(1, 1) - contact.clone());
             let (di, dj) = (d_rel[i].clone(), d_rel[j].clone());
-            let t = (if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() }) / (di + dj);
+            let t = (if di > dj {
+                di.clone() - dj.clone()
+            } else {
+                dj.clone() - di.clone()
+            }) / (di + dj);
             if t.is_zero() {
                 continue;
             }
@@ -670,10 +765,19 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     // shell ask more of a kind than it holds, each is scaled by what it holds
     // over what is asked (both on the grid, so the sum stays exact), so none
     // gives more than it has.
-    let takes: Vec<(usize, usize, Manifest)> = passes.into_iter().map(|(i, j, f)| {
-        let take: Manifest = released[j].0.iter().map(|(k, a)| (k.clone(), nucleus(&(a.clone() * f.clone())).min(a.clone()))).filter(|(_, a)| *a > ratio(0, 1)).collect();
-        (i, j, take)
-    }).filter(|(_, _, t)| !t.is_empty()).collect();
+    let takes: Vec<(usize, usize, Manifest)> = passes
+        .into_iter()
+        .map(|(i, j, f)| {
+            let take: Manifest = released[j]
+                .0
+                .iter()
+                .map(|(k, a)| (k.clone(), nucleus(&(a.clone() * f.clone())).min(a.clone())))
+                .filter(|(_, a)| *a > ratio(0, 1))
+                .collect();
+            (i, j, take)
+        })
+        .filter(|(_, _, t)| !t.is_empty())
+        .collect();
     let mut asked: Vec<Manifest> = vec![Manifest::new(); released.len()];
     for (_, j, t) in &takes {
         for (k, a) in t {
@@ -685,12 +789,24 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     let mut given: Vec<Manifest> = vec![Manifest::new(); released.len()];
     let mut caught: Vec<Manifest> = vec![Manifest::new(); released.len()];
     for (i, j, t) in takes {
-        let take: Manifest = t.into_iter().map(|(k, a)| {
-            let has = released[j].0.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
-            let all = asked[j].get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
-            let a = if all > has && !all.is_zero() { nucleus(&(a * has / all)) } else { a };
-            (k, a)
-        }).filter(|(_, a)| *a > ratio(0, 1)).collect();
+        let take: Manifest = t
+            .into_iter()
+            .map(|(k, a)| {
+                let has = released[j]
+                    .0
+                    .get(&k)
+                    .cloned()
+                    .unwrap_or_else(|| ratio(0, 1));
+                let all = asked[j].get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
+                let a = if all > has && !all.is_zero() {
+                    nucleus(&(a * has / all))
+                } else {
+                    a
+                };
+                (k, a)
+            })
+            .filter(|(_, a)| *a > ratio(0, 1))
+            .collect();
         if take.is_empty() {
             continue;
         }
@@ -706,7 +822,10 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         for (k, a) in std::mem::take(&mut caught[i]) {
             *shells[i].0.entry(k).or_insert_with(|| ratio(0, 1)) += a;
         }
-        let (m, ml) = parts[i].iter().fold((own.clone(), own * released[i].1.clone()), |(m, ml), (x, r)| (m + x.clone(), ml + x.clone() * r.clone()));
+        let (m, ml) = parts[i].iter().fold(
+            (own.clone(), own * released[i].1.clone()),
+            |(m, ml), (x, r)| (m + x.clone(), ml + x.clone() * r.clone()),
+        );
         if !m.is_zero() {
             shells[i].1 = g(&(ml / m));
         }
@@ -725,7 +844,8 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         // goes out with the expelled matter, in its shell.
         if reach.clone() * (ratio(1, 1) + s_final.clone()) <= ratio(1, 1) {
             let (kept, rest): (Manifest, Manifest) = m.into_iter().partition(|(k, _)| {
-                crate::chem::atom_w(k).is_some_and(|z| vessel.is_some_and(|(lo, hi)| z >= lo && z <= hi))
+                crate::chem::atom_w(k)
+                    .is_some_and(|z| vessel.is_some_and(|(lo, hi)| z >= lo && z <= hi))
             });
             for (k, a) in kept {
                 *wellspring.entry(k).or_insert_with(|| ratio(0, 1)) += a;
@@ -755,19 +875,35 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     if s_final.is_zero() {
         return (wellspring, Vec::new(), ratio(2, 1) * h);
     }
-    let density: Vec<Ratio> = out.iter().map(|(m, _)| mass(m) / total.clone() / (ratio(2, 1) * s_final.clone())).collect();
+    let density: Vec<Ratio> = out
+        .iter()
+        .map(|(m, _)| mass(m) / total.clone() / (ratio(2, 1) * s_final.clone()))
+        .collect();
     let mut galaxies = Vec::new();
     for run in runs {
-        let local: Vec<Ratio> = run.iter().map(|&i| run.iter().filter(|&&j| lo(&out[j].1) <= out[i].1 && out[i].1 <= hi(&out[j].1)).fold(ratio(0, 1), |s, &j| s + density[j].clone())).collect();
+        let local: Vec<Ratio> = run
+            .iter()
+            .map(|&i| {
+                run.iter()
+                    .filter(|&&j| lo(&out[j].1) <= out[i].1 && out[i].1 <= hi(&out[j].1))
+                    .fold(ratio(0, 1), |s, &j| s + density[j].clone())
+            })
+            .collect();
         let mut cuts = Vec::new();
         for i in 1..run.len().saturating_sub(1) {
             if local[i] < local[i - 1] && local[i] <= local[i + 1] {
-                cuts.push(if local[i - 1] >= local[i + 1] { i + 1 } else { i });
+                cuts.push(if local[i - 1] >= local[i + 1] {
+                    i + 1
+                } else {
+                    i
+                });
             }
         }
         let mut from = 0;
         let mut bead = |a: usize, b: usize| {
-            let peak = (a..b).max_by(|x, y| local[*x].cmp(&local[*y]).then(y.cmp(x))).expect("a shell");
+            let peak = (a..b)
+                .max_by(|x, y| local[*x].cmp(&local[*y]).then(y.cmp(x)))
+                .expect("a shell");
             let mut m = Manifest::new();
             for &i in &run[a..b] {
                 for (k, x) in &out[i].0 {
@@ -786,7 +922,11 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     }
     // The bubble's echo: a ring out to the outermost shell and back, held by
     // the throat on the way, `2(R + H)`.
-    let outermost = out.iter().map(|(_, r)| r.clone()).max().unwrap_or_else(|| ratio(0, 1));
+    let outermost = out
+        .iter()
+        .map(|(_, r)| r.clone())
+        .max()
+        .unwrap_or_else(|| ratio(0, 1));
     (wellspring, galaxies, ratio(2, 1) * (outermost + h))
 }
 
@@ -799,18 +939,62 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     // where the founding push carries the lightest kind and back; docs/112
     // §7.1 holds the rim's own reading open).
     let (_, _, echo) = cascade(manifest);
-    let t_u: u64 = echo.ceil().to_integer().try_into().ok().filter(|t: &u64| *t >= 4)?;
+    let t_u: u64 = echo
+        .ceil()
+        .to_integer()
+        .try_into()
+        .ok()
+        .filter(|t: &u64| *t >= 4)?;
     // The unit of mass: the home's hole, its throat's held disc.
     let unit = Some(mass(&disperse(manifest))).filter(|m| !m.is_zero())?;
-    let home = Body { solid: false, coupled: None, ell_orth: ratio(0, 1), path: vec![0], radius: ratio(0, 1), period: ratio(0, 1), kept: Manifest::new(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(0, 1), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: manifest.clone() };
-    let densest = manifest.keys().filter_map(crate::chem::atom_w).max().unwrap_or(1);
+    let home = Body {
+        solid: false,
+        coupled: None,
+        ell_orth: ratio(0, 1),
+        path: vec![0],
+        radius: ratio(0, 1),
+        period: ratio(0, 1),
+        kept: Manifest::new(),
+        satellites: Vec::new(),
+        medium: Manifest::new(),
+        ell: ratio(0, 1),
+        medium_spin: ratio(0, 1),
+        gas: Vec::new(),
+        born: 0,
+        state: ratio(0, 1),
+        flows: Vec::new(),
+        reservoir: ratio(0, 1),
+        turning: ratio(0, 1),
+        phase: Vec::new(),
+        load: ratio(0, 1),
+        bell: Vec::new(),
+        remnant: false,
+        heat: ratio(0, 1),
+        tilt: Vec::new(),
+        throat: manifest.clone(),
+    };
+    let densest = manifest
+        .keys()
+        .filter_map(crate::chem::atom_w)
+        .max()
+        .unwrap_or(1);
     // The books (docs/112 F5): the table's whole holding, all in the core.
-    Some(Universe { cores: vec![home], ocean: Vec::new(), unit, t_u, densest, founded: mass(manifest), firm_prev: Vec::new() })
+    Some(Universe {
+        cores: vec![home],
+        ocean: Vec::new(),
+        unit,
+        t_u,
+        densest,
+        founded: mass(manifest),
+        firm_prev: Vec::new(),
+    })
 }
 
 /// A set of motes' holding, grains × weight (the firmament's books).
 pub fn holding(motes: &[crate::flows::Mote]) -> Ratio {
-    motes.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key))
+    motes.iter().fold(ratio(0, 1), |s, x| {
+        s + x.amount.clone() * crate::flows::weight(&x.key)
+    })
 }
 
 /// The galaxies orbit, derived (ruling of 2026-10-19: reach and period are
@@ -842,11 +1026,32 @@ pub fn ocean_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
     }
     // The firmament is the home's held cut, counted in the home (B1).
     let firm = ratio(0, 1);
-    let home: Ratio = u.cores.iter().filter(|c| is_home(c)).fold(ratio(0, 1), |s, c| s + mass(&c.total()) / whole.clone());
-    let bodies = u.cores.iter().filter(|c| !is_home(c)).map(|c| (c.ell.clone(), ratio(2, 1) * mass(&c.total()) / whole.clone()))
-        .chain(u.ocean.iter().map(|x| (x.ell_o.clone(), x.amount.clone() * crate::flows::weight(&x.key) / whole.clone())))
+    let home: Ratio = u
+        .cores
+        .iter()
+        .filter(|c| is_home(c))
+        .fold(ratio(0, 1), |s, c| s + mass(&c.total()) / whole.clone());
+    let bodies = u
+        .cores
+        .iter()
+        .filter(|c| !is_home(c))
+        .map(|c| {
+            (
+                c.ell.clone(),
+                ratio(2, 1) * mass(&c.total()) / whole.clone(),
+            )
+        })
+        .chain(u.ocean.iter().map(|x| {
+            (
+                x.ell_o.clone(),
+                x.amount.clone() * crate::flows::weight(&x.key) / whole.clone(),
+            )
+        }))
         .collect();
-    Some(crate::flows::Enclosed::new(ratio(1, 1) + firm + home, bodies))
+    Some(crate::flows::Enclosed::new(
+        ratio(1, 1) + firm + home,
+        bodies,
+    ))
 }
 
 pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>, Collective) {
@@ -883,46 +1088,84 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
     let held_at = firmament_of(u);
     if let Some(&(i, _)) = held_at.first() {
         let held: Vec<usize> = held_at.iter().map(|&(_, j)| j).collect();
-        let mut firm: Vec<crate::flows::Mote> = held.iter().map(|&j| u.cores[i].flows[j].clone()).collect();
+        let mut firm: Vec<crate::flows::Mote> =
+            held.iter().map(|&j| u.cores[i].flows[j].clone()).collect();
         // The perturbation (docs/111 §4.1): each mote's displacement over
         // the whole bounce since the last (the torque at the home's arrival,
         // the order, the collections' own motion), matched by its kind and
         // its occurrence among that kind's motes; none at the first bounce.
-        let mut seen: std::collections::BTreeMap<crate::chem::Kind, usize> = std::collections::BTreeMap::new();
-        let keys: Vec<(crate::chem::Kind, usize)> = firm.iter().map(|x| {
-            let n = seen.entry(x.key.clone()).or_insert(0);
-            *n += 1;
-            (x.key.clone(), *n)
-        }).collect();
-        let mut seen: std::collections::BTreeMap<crate::chem::Kind, usize> = std::collections::BTreeMap::new();
-        let prev: std::collections::BTreeMap<(crate::chem::Kind, usize), Vec<Ratio>> = u.firm_prev.iter().map(|(k, ph)| {
-            let n = seen.entry(k.clone()).or_insert(0);
-            *n += 1;
-            ((k.clone(), *n), ph.clone())
-        }).collect();
-        let moves: Vec<Vec<Ratio>> = firm.iter().zip(&keys).map(|(x, k)| match prev.get(k) {
-            Some(p) if p.len() == x.phase.len() => x.phase.iter().zip(p).map(|(a, b)| crate::flows::signed(&(a.clone() - b.clone()))).collect(),
-            _ => Vec::new(),
-        }).collect();
-        u.firm_prev = firm.iter().map(|x| (x.key.clone(), x.phase.clone())).collect();
+        let mut seen: std::collections::BTreeMap<crate::chem::Kind, usize> =
+            std::collections::BTreeMap::new();
+        let keys: Vec<(crate::chem::Kind, usize)> = firm
+            .iter()
+            .map(|x| {
+                let n = seen.entry(x.key.clone()).or_insert(0);
+                *n += 1;
+                (x.key.clone(), *n)
+            })
+            .collect();
+        let mut seen: std::collections::BTreeMap<crate::chem::Kind, usize> =
+            std::collections::BTreeMap::new();
+        let prev: std::collections::BTreeMap<(crate::chem::Kind, usize), Vec<Ratio>> = u
+            .firm_prev
+            .iter()
+            .map(|(k, ph)| {
+                let n = seen.entry(k.clone()).or_insert(0);
+                *n += 1;
+                ((k.clone(), *n), ph.clone())
+            })
+            .collect();
+        let moves: Vec<Vec<Ratio>> = firm
+            .iter()
+            .zip(&keys)
+            .map(|(x, k)| match prev.get(k) {
+                Some(p) if p.len() == x.phase.len() => x
+                    .phase
+                    .iter()
+                    .zip(p)
+                    .map(|(a, b)| crate::flows::signed(&(a.clone() - b.clone())))
+                    .collect(),
+                _ => Vec::new(),
+            })
+            .collect();
+        u.firm_prev = firm
+            .iter()
+            .map(|x| (x.key.clone(), x.phase.clone()))
+            .collect();
         // Its collections (docs/111 §4.2) move as one (§4.3): one specific
         // spin in each orbit, the holding-weighted mean, held on the grain
         // with what flooring leaves to the singularity's reservoir (Σ m·ℓ +
         // reservoir exact); one displacement, the members' weighted mean.
         let sets = crate::flows::collections(&firm, &moves);
-        let booked = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / ledger_u.clone();
-        let spin_of = |ms: &[crate::flows::Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + booked(x) * (x.ell_o.clone() + x.ell_orth.clone()));
+        let booked = |x: &crate::flows::Mote| {
+            x.amount.clone() * crate::flows::weight(&x.key) / ledger_u.clone()
+        };
+        let spin_of = |ms: &[crate::flows::Mote]| {
+            ms.iter().fold(ratio(0, 1), |s, x| {
+                s + booked(x) * (x.ell_o.clone() + x.ell_orth.clone())
+            })
+        };
         let before = spin_of(&firm);
         for set in &sets {
             let total = set.iter().fold(ratio(0, 1), |s, &j| s + booked(&firm[j]));
             if total.is_zero() {
                 continue;
             }
-            let mean = |f: &dyn Fn(&crate::flows::Mote) -> Ratio| set.iter().fold(ratio(0, 1), |s, &j| s + booked(&firm[j]) * f(&firm[j])) / total.clone();
+            let mean = |f: &dyn Fn(&crate::flows::Mote) -> Ratio| {
+                set.iter()
+                    .fold(ratio(0, 1), |s, &j| s + booked(&firm[j]) * f(&firm[j]))
+                    / total.clone()
+            };
             let ell_o = crate::ring::grain(&mean(&|x| x.ell_o.clone()));
             let ell_orth = crate::ring::grain(&mean(&|x| x.ell_orth.clone()));
             let planes = set.iter().map(|&j| moves[j].len()).min().unwrap_or(0);
-            let shift: Vec<Ratio> = (0..planes).map(|k| set.iter().fold(ratio(0, 1), |s, &j| s + booked(&firm[j]) * moves[j][k].clone()) / total.clone()).collect();
+            let shift: Vec<Ratio> = (0..planes)
+                .map(|k| {
+                    set.iter().fold(ratio(0, 1), |s, &j| {
+                        s + booked(&firm[j]) * moves[j][k].clone()
+                    }) / total.clone()
+                })
+                .collect();
             for &j in set {
                 let x = &mut firm[j];
                 x.ell_o = ell_o.clone();
@@ -950,7 +1193,10 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
             bonded: sets.iter().map(|c| c.len()).sum(),
             largest: sets.iter().map(|c| c.len()).max().unwrap_or(0),
             held: ratio(0, 1),
-            in_collections: sets.iter().flatten().fold(ratio(0, 1), |s, &j| s + w(&firm[j])),
+            in_collections: sets
+                .iter()
+                .flatten()
+                .fold(ratio(0, 1), |s, &j| s + w(&firm[j])),
             tau: ratio(0, 1),
             lightest: 0,
             heaviest: 0,
@@ -970,9 +1216,16 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
         // the rest of the founded table has crossed the throat.
         let now = firmament_holding(u) + mass(&u.cores[i].throat);
         let founded = u.founded.clone();
-        collective.tau = if founded.is_zero() || now >= founded { ratio(0, 1) } else { (founded.clone() - now.clone()) / founded };
+        collective.tau = if founded.is_zero() || now >= founded {
+            ratio(0, 1)
+        } else {
+            (founded.clone() - now.clone()) / founded
+        };
         collective.held = now;
-        let ws: Vec<u32> = firmament_of(u).iter().map(|&(a, b)| crate::chem::weight(&u.cores[a].flows[b].key)).collect();
+        let ws: Vec<u32> = firmament_of(u)
+            .iter()
+            .map(|&(a, b)| crate::chem::weight(&u.cores[a].flows[b].key))
+            .collect();
         collective.lightest = ws.iter().copied().min().unwrap_or(0);
         collective.heaviest = ws.iter().copied().max().unwrap_or(0);
         collective.mean = collective_mean(u).unwrap_or_else(|| ratio(0, 1));
@@ -985,10 +1238,24 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
     // the home's, pays (identity with the firmament's).
     if !u.ocean.is_empty() {
         if let Some(enc_o) = ocean_frame(u) {
-            let booked = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / ledger_u.clone();
-            let ledger = |sea: &[crate::flows::Mote]| sea.iter().fold(ratio(0, 1), |s, x| s + booked(x) * (x.ell_o.clone() + x.ell_orth.clone()));
+            let booked = |x: &crate::flows::Mote| {
+                x.amount.clone() * crate::flows::weight(&x.key) / ledger_u.clone()
+            };
+            let ledger = |sea: &[crate::flows::Mote]| {
+                sea.iter().fold(ratio(0, 1), |s, x| {
+                    s + booked(x) * (x.ell_o.clone() + x.ell_orth.clone())
+                })
+            };
             let before = ledger(&u.ocean);
-            let (given, _) = crate::flows::torque(&mut u.ocean, &enc_o, &ratio(1, 2), None, &ledger_u, None, &mut cross);
+            let (given, _) = crate::flows::torque(
+                &mut u.ocean,
+                &enc_o,
+                &ratio(1, 2),
+                None,
+                &ledger_u,
+                None,
+                &mut cross,
+            );
             let moved = ledger(&u.ocean) - before;
             if let Some(home) = u.cores.iter_mut().find(|c| is_home(c)) {
                 let was = home.reservoir.clone();
@@ -1074,17 +1341,29 @@ pub fn magnetism(m: &Manifest) -> Ratio {
 pub fn spin_total(u: &Universe, unit: &Ratio) -> Ratio {
     fn of(b: &Body, unit: &Ratio) -> Ratio {
         let own = mass(&b.total()) / unit.clone() * (b.ell.clone() + b.ell_orth.clone());
-        b.satellites.iter().fold(own + b.medium_spin.clone(), |s, x| s + of(x, unit))
+        b.satellites
+            .iter()
+            .fold(own + b.medium_spin.clone(), |s, x| s + of(x, unit))
     }
     u.cores.iter().fold(ratio(0, 1), |s, c| s + of(c, unit))
 }
 
 /// The firmament's motes as (home, index) pairs (see `Universe::firmament`).
 pub fn firmament_of(u: &Universe) -> Vec<(usize, usize)> {
-    let Some(i) = u.cores.iter().position(is_home) else { return Vec::new() };
-    let Some(enc) = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u)) else { return Vec::new() };
+    let Some(i) = u.cores.iter().position(is_home) else {
+        return Vec::new();
+    };
+    let Some(enc) = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u)) else {
+        return Vec::new();
+    };
     let push = ratio(1, 2);
-    u.cores[i].flows.iter().enumerate().filter(|(_, x)| crate::flows::held(x, &enc, &push) == ratio(1, 1)).map(|(j, _)| (i, j)).collect()
+    u.cores[i]
+        .flows
+        .iter()
+        .enumerate()
+        .filter(|(_, x)| crate::flows::held(x, &enc, &push) == ratio(1, 1))
+        .map(|(j, _)| (i, j))
+        .collect()
 }
 
 /// The firmament's holding as the throat's cut reads it (docs/111 §4.5):
@@ -1092,10 +1371,16 @@ pub fn firmament_of(u: &Universe) -> Vec<(usize, usize)> {
 /// at the universal bounce's push ½), so a mote half within the throat
 /// counts half; the books' `held` (`held + left = founded`).
 pub fn firmament_holding(u: &Universe) -> Ratio {
-    let Some(i) = u.cores.iter().position(is_home) else { return ratio(0, 1) };
-    let Some(enc) = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u)) else { return ratio(0, 1) };
+    let Some(i) = u.cores.iter().position(is_home) else {
+        return ratio(0, 1);
+    };
+    let Some(enc) = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u)) else {
+        return ratio(0, 1);
+    };
     let push = ratio(1, 2);
-    u.cores[i].flows.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * crate::flows::weight(&x.key) * crate::flows::held(x, &enc, &push))
+    u.cores[i].flows.iter().fold(ratio(0, 1), |s, x| {
+        s + x.amount.clone() * crate::flows::weight(&x.key) * crate::flows::held(x, &enc, &push)
+    })
 }
 
 /// The mean weight of the collective the universal core holds (docs/104
@@ -1107,7 +1392,11 @@ pub fn collective_mean(u: &Universe) -> Option<Ratio> {
     let firm = u.firmament();
     let grains = firm.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone());
     // Held on the grain (the carrier, never law).
-    if grains.is_zero() { None } else { Some(crate::ring::grain(&(holding(&firm) / grains))) }
+    if grains.is_zero() {
+        None
+    } else {
+        Some(crate::ring::grain(&(holding(&firm) / grains)))
+    }
 }
 
 impl Universe {
@@ -1116,7 +1405,10 @@ impl Universe {
     /// `R(1 ± p)` within the throat in both planes, at the universal bounce's
     /// push ½), in its one enclosure. A reading, never a second list.
     pub fn firmament(&self) -> Vec<crate::flows::Mote> {
-        firmament_of(self).into_iter().map(|j| self.cores[j.0].flows[j.1].clone()).collect()
+        firmament_of(self)
+            .into_iter()
+            .map(|j| self.cores[j.0].flows[j.1].clone())
+            .collect()
     }
 
     /// The ocean's matter, read from its motes.
@@ -1165,7 +1457,14 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         let key = p.key.to_string();
         g.extend_from_slice(&(key.len() as u16).to_le_bytes());
         g.extend_from_slice(key.as_bytes());
-        for r in [&p.held, &p.inner, &p.outer, &p.agitation, &p.radiates, &p.vacuum] {
+        for r in [
+            &p.held,
+            &p.inner,
+            &p.outer,
+            &p.agitation,
+            &p.radiates,
+            &p.vacuum,
+        ] {
             cfe::ratio::encode(r, &mut g);
         }
         g.extend_from_slice(&p.born.to_le_bytes());
@@ -1338,7 +1637,8 @@ fn get_manifest(v: &[u8], at: &mut usize) -> Option<Manifest> {
     let mut m = Manifest::new();
     for _ in 0..n {
         let len = u16::from_le_bytes(v.get(*at..*at + 2)?.try_into().ok()?) as usize;
-        let key = crate::chem::Kind::parse(std::str::from_utf8(v.get(*at + 2..*at + 2 + len)?).ok()?)?;
+        let key =
+            crate::chem::Kind::parse(std::str::from_utf8(v.get(*at + 2..*at + 2 + len)?).ok()?)?;
         *at += 2 + len;
         let (a, used) = cfe::ratio::decode(v.get(*at..)?)?;
         *at += used;
@@ -1366,7 +1666,32 @@ fn get_body(v: &[u8]) -> Option<Body> {
     at += used;
     let kept = get_manifest(v, &mut at)?;
     let medium = get_manifest(v, &mut at)?;
-    Some(Body { solid: false, coupled: None, ell_orth: ratio(0, 1), path, radius, period, kept, satellites: Vec::new(), medium, ell, medium_spin, gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() })
+    Some(Body {
+        solid: false,
+        coupled: None,
+        ell_orth: ratio(0, 1),
+        path,
+        radius,
+        period,
+        kept,
+        satellites: Vec::new(),
+        medium,
+        ell,
+        medium_spin,
+        gas: Vec::new(),
+        born: 0,
+        state: ratio(0, 1),
+        flows: Vec::new(),
+        reservoir: ratio(0, 1),
+        turning: ratio(0, 1),
+        phase: Vec::new(),
+        load: ratio(0, 1),
+        bell: Vec::new(),
+        remnant: false,
+        heat: ratio(0, 1),
+        tilt: Vec::new(),
+        throat: Default::default(),
+    })
 }
 
 /// A flow mote (tag 10), attached to the body read before it.
@@ -1413,7 +1738,19 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
         }
     }
     let mut r = r.into_iter();
-    Some(crate::flows::Mote { key, amount: r.next()?, ell_o: r.next()?, ell_orth: r.next()?, agitation: r.next()?, phase, born, vacuum, lever, lever_place, tilt })
+    Some(crate::flows::Mote {
+        key,
+        amount: r.next()?,
+        ell_o: r.next()?,
+        ell_orth: r.next()?,
+        agitation: r.next()?,
+        phase,
+        born,
+        vacuum,
+        lever,
+        lever_place,
+        tilt,
+    })
 }
 
 /// A gas mote (tag 6), attached to the body read before it.
@@ -1429,7 +1766,16 @@ fn get_mote(v: &[u8]) -> Option<crate::formation::Shell> {
     }
     let born = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
     let mut r = r.into_iter();
-    Some(crate::formation::Shell { key, held: r.next()?, inner: r.next()?, outer: r.next()?, agitation: r.next()?, radiates: r.next()?, vacuum: r.next()?, born })
+    Some(crate::formation::Shell {
+        key,
+        held: r.next()?,
+        inner: r.next()?,
+        outer: r.next()?,
+        agitation: r.next()?,
+        radiates: r.next()?,
+        vacuum: r.next()?,
+        born,
+    })
 }
 
 /// Read `<var>/pulse.bin` back: the seed and the universe (bodies are
@@ -1457,7 +1803,19 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             // singularity, on the vacuum leg (its amounts kept whole).
             2 => {
                 for (k, a) in get_manifest(v, &mut 0)? {
-                    ocean.push(crate::flows::Mote { key: k, amount: a, ell_o: ratio(0, 1), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() });
+                    ocean.push(crate::flows::Mote {
+                        key: k,
+                        amount: a,
+                        ell_o: ratio(0, 1),
+                        ell_orth: ratio(0, 1),
+                        phase: crate::flows::rest(ratio(1, 2)),
+                        agitation: ratio(0, 1),
+                        born: 0,
+                        vacuum: true,
+                        lever: Vec::new(),
+                        lever_place: ratio(0, 1),
+                        tilt: Vec::new(),
+                    });
                 }
             }
             24 => ocean.push(get_flow(v)?),
@@ -1529,13 +1887,24 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     if !firmament.is_empty() {
         if let Some(home) = cores.iter_mut().find(|c| is_home(c)) {
             for x in &firmament {
-                *home.kept.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+                *home
+                    .kept
+                    .entry(x.key.clone())
+                    .or_insert_with(|| ratio(0, 1)) += x.amount.clone();
             }
             home.flows.extend(firmament);
         }
     }
     let was_founded = founded.is_some();
-    let mut u = Universe { cores, ocean, unit, t_u, densest, founded: founded.unwrap_or_else(|| ratio(0, 1)), firm_prev };
+    let mut u = Universe {
+        cores,
+        ocean,
+        unit,
+        t_u,
+        densest,
+        founded: founded.unwrap_or_else(|| ratio(0, 1)),
+        firm_prev,
+    };
     if !was_founded {
         u.founded = mass(&u.total());
     }
@@ -1552,19 +1921,46 @@ mod tests {
         // arrives (docs/97 §14): read, never set (1618 at the master
         // equation's neutron share, docs/105 §4), past the fourth seal;
         // nucleons conserved.
-        let n = num_bigint::BigInt::from(2u32).pow(55) * super::nuclei_per_grain() * num_bigint::BigInt::from(1024);
+        let n = num_bigint::BigInt::from(2u32).pow(55)
+            * super::nuclei_per_grain()
+            * num_bigint::BigInt::from(1024);
         let m = super::founding(&n);
         let top = m.keys().filter_map(crate::chem::atom_w).max();
-        assert!(top.is_some_and(|t| t > 1092), "the founding passes the fourth seal: {top:?}");
+        assert!(
+            top.is_some_and(|t| t > 1092),
+            "the founding passes the fourth seal: {top:?}"
+        );
         let grid = super::nuclei_per_grain() * num_bigint::BigInt::from(1024);
-        let nucleons = m.iter().fold(ratio(0, 1), |s, (k, a)| s + a.clone() * ratio(i64::from(crate::chem::weight(k)), 1));
+        let nucleons = m.iter().fold(ratio(0, 1), |s, (k, a)| {
+            s + a.clone() * ratio(i64::from(crate::chem::weight(k)), 1)
+        });
         assert_eq!(nucleons * Ratio::from_integer(grid), Ratio::from_integer(n));
     }
 
     #[test]
     fn a_universe_file_without_its_unit_is_refused() {
         let dir = std::env::temp_dir().join(format!("ns-refuse-unit-{}", std::process::id()));
-        let u = Universe { cores: Vec::new(), ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0001").expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() }], unit: ratio(1, 2), t_u: 15, densest: 1200, founded: ratio(0, 1), firm_prev: Vec::new() };
+        let u = Universe {
+            cores: Vec::new(),
+            ocean: vec![crate::flows::Mote {
+                key: crate::chem::Kind::parse("W0001").expect("a kind"),
+                amount: ratio(1, 1),
+                ell_o: ratio(1, 3),
+                ell_orth: ratio(0, 1),
+                phase: crate::flows::rest(ratio(1, 2)),
+                agitation: ratio(0, 1),
+                born: 0,
+                vacuum: true,
+                lever: Vec::new(),
+                lever_place: ratio(0, 1),
+                tilt: Vec::new(),
+            }],
+            unit: ratio(1, 2),
+            t_u: 15,
+            densest: 1200,
+            founded: ratio(0, 1),
+            firm_prev: Vec::new(),
+        };
         write(&dir, &[7u8; 32], &u).expect("written");
         assert!(read(&dir).is_some());
         let bytes = std::fs::read(dir.join("pulse.bin")).expect("read");
@@ -1583,8 +1979,19 @@ mod tests {
     fn the_firmaments_books_and_last_phases_are_read_back_exactly() {
         let dir = std::env::temp_dir().join(format!("ns-firm-books-{}", std::process::id()));
         let key = crate::chem::Kind::parse("W0001").expect("a kind");
-        let prev = vec![(key.clone(), vec![ratio(1, 7), ratio(2, 9), ratio(0, 1)]), (key, vec![ratio(1, 3), ratio(0, 1), ratio(5, 6)])];
-        let u = Universe { cores: Vec::new(), ocean: Vec::new(), unit: ratio(1, 2), t_u: 15, densest: 1200, founded: ratio(37, 5), firm_prev: prev.clone() };
+        let prev = vec![
+            (key.clone(), vec![ratio(1, 7), ratio(2, 9), ratio(0, 1)]),
+            (key, vec![ratio(1, 3), ratio(0, 1), ratio(5, 6)]),
+        ];
+        let u = Universe {
+            cores: Vec::new(),
+            ocean: Vec::new(),
+            unit: ratio(1, 2),
+            t_u: 15,
+            densest: 1200,
+            founded: ratio(37, 5),
+            firm_prev: prev.clone(),
+        };
         write(&dir, &[7u8; 32], &u).expect("written");
         let (_, back) = read(&dir).expect("read");
         assert_eq!(back.founded, ratio(37, 5));
@@ -1595,7 +2002,10 @@ mod tests {
     #[test]
     fn the_founding_holds_the_whole_table_in_the_universal_cores_throat() {
         // docs/112 F1: nothing placed; one core, its throat the table.
-        let table: Manifest = [("W0001", 3000), ("W0004", 900), ("W0012", 40), ("W0160", 7)].iter().map(|(k, a)| (crate::chem::Kind::parse(k).expect("a kind"), ratio(*a, 1))).collect();
+        let table: Manifest = [("W0001", 3000), ("W0004", 900), ("W0012", 40), ("W0160", 7)]
+            .iter()
+            .map(|(k, a)| (crate::chem::Kind::parse(k).expect("a kind"), ratio(*a, 1)))
+            .collect();
         let u = deploy(&table).expect("founded");
         assert_eq!(u.cores.len(), 1, "no galaxy stands at the founding");
         assert!(is_home(&u.cores[0]));
@@ -1617,23 +2027,156 @@ mod tests {
         // Z012 does (3·12); one galaxy of each reads one push, one hold, one
         // mean weight.
         let k = |s: &str| crate::chem::Kind::parse(s).expect("a kind");
-        assert_eq!(crate::chem::weight(&k("W0010·4W0001")), crate::chem::weight(&k("W0010")) + 4 * crate::chem::weight(&k("W0001")));
-        assert_eq!(crate::chem::weight(&k("W0010·4W0001")), crate::chem::weight(&k("W0014")));
+        assert_eq!(
+            crate::chem::weight(&k("W0010·4W0001")),
+            crate::chem::weight(&k("W0010")) + 4 * crate::chem::weight(&k("W0001"))
+        );
+        assert_eq!(
+            crate::chem::weight(&k("W0010·4W0001")),
+            crate::chem::weight(&k("W0014"))
+        );
         let water: Manifest = [(k("W0010·4W0001"), ratio(1, 1)), (k("W0001"), ratio(3, 1))].into();
         let twelve: Manifest = [(k("W0014"), ratio(1, 1)), (k("W0001"), ratio(3, 1))].into();
-        assert_eq!(push_cut(&water).map(|(p, h, m, _)| (p, h, m)), push_cut(&twelve).map(|(p, h, m, _)| (p, h, m)));
+        assert_eq!(
+            push_cut(&water).map(|(p, h, m, _)| (p, h, m)),
+            push_cut(&twelve).map(|(p, h, m, _)| (p, h, m))
+        );
     }
 
     #[test]
     fn the_pulse_file_reads_back_exactly() {
-        let mote = crate::formation::Shell { key: crate::chem::Kind::parse("W0001").expect("a kind"), held: ratio(1, 5), inner: ratio(1, 3), outer: ratio(2, 3), agitation: ratio(1, 2), radiates: ratio(1, 2), born: 7, vacuum: ratio(3, 7) };
-        let orb = Body { solid: true, coupled: Some([9; 32]), ell_orth: ratio(0, 1), path: vec![1, 1, 1], radius: ratio(3, 2), period: ratio(5, 2), kept: [(crate::chem::Kind::parse("W0010").expect("a kind"), ratio(1, 64))].into(), satellites: Vec::new(), medium: Manifest::new(), ell: ratio(7, 3), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let sys = Body { solid: false, coupled: None, ell_orth: ratio(0, 1), path: vec![1, 1], radius: ratio(9, 2), period: ratio(11, 2), kept: [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(3, 1024))].into(), satellites: vec![orb], medium: Manifest::new(), ell: ratio(1, 9), medium_spin: ratio(1, 7), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let core = Body { solid: false, coupled: None, ell_orth: ratio(0, 1), path: vec![1], radius: ratio(60, 1), period: ratio(0, 1), kept: [(crate::chem::Kind::parse("W0041").expect("a kind"), ratio(1, 2))].into(), satellites: vec![sys], medium: [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(5, 4))].into(), ell: ratio(0, 1), medium_spin: ratio(13, 11), gas: vec![mote], born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase: Vec::new(), load: ratio(0, 1), bell: Vec::new(), remnant: false, heat: ratio(0, 1), tilt: Vec::new(), throat: Default::default() };
-        let u = Universe { cores: vec![core], ocean: vec![crate::flows::Mote { key: crate::chem::Kind::parse("W0003").expect("a kind"), amount: ratio(1, 1024), ell_o: ratio(1, 3), ell_orth: ratio(0, 1), phase: crate::flows::rest(ratio(1, 2)), agitation: ratio(0, 1), born: 0, vacuum: true, lever: Vec::new(), lever_place: ratio(0, 1), tilt: vec![ratio(1, 2), ratio(1, 3), ratio(1, 6)] }], unit: ratio(1, 2), t_u: 15, densest: 1200, founded: ratio(0, 1), firm_prev: Vec::new() };
+        let mote = crate::formation::Shell {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            held: ratio(1, 5),
+            inner: ratio(1, 3),
+            outer: ratio(2, 3),
+            agitation: ratio(1, 2),
+            radiates: ratio(1, 2),
+            born: 7,
+            vacuum: ratio(3, 7),
+        };
+        let orb = Body {
+            solid: true,
+            coupled: Some([9; 32]),
+            ell_orth: ratio(0, 1),
+            path: vec![1, 1, 1],
+            radius: ratio(3, 2),
+            period: ratio(5, 2),
+            kept: [(
+                crate::chem::Kind::parse("W0010").expect("a kind"),
+                ratio(1, 64),
+            )]
+            .into(),
+            satellites: Vec::new(),
+            medium: Manifest::new(),
+            ell: ratio(7, 3),
+            medium_spin: ratio(0, 1),
+            gas: Vec::new(),
+            born: 0,
+            state: ratio(0, 1),
+            flows: Vec::new(),
+            reservoir: ratio(0, 1),
+            turning: ratio(0, 1),
+            phase: Vec::new(),
+            load: ratio(0, 1),
+            bell: Vec::new(),
+            remnant: false,
+            heat: ratio(0, 1),
+            tilt: Vec::new(),
+            throat: Default::default(),
+        };
+        let sys = Body {
+            solid: false,
+            coupled: None,
+            ell_orth: ratio(0, 1),
+            path: vec![1, 1],
+            radius: ratio(9, 2),
+            period: ratio(11, 2),
+            kept: [(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(3, 1024),
+            )]
+            .into(),
+            satellites: vec![orb],
+            medium: Manifest::new(),
+            ell: ratio(1, 9),
+            medium_spin: ratio(1, 7),
+            gas: Vec::new(),
+            born: 0,
+            state: ratio(0, 1),
+            flows: Vec::new(),
+            reservoir: ratio(0, 1),
+            turning: ratio(0, 1),
+            phase: Vec::new(),
+            load: ratio(0, 1),
+            bell: Vec::new(),
+            remnant: false,
+            heat: ratio(0, 1),
+            tilt: Vec::new(),
+            throat: Default::default(),
+        };
+        let core = Body {
+            solid: false,
+            coupled: None,
+            ell_orth: ratio(0, 1),
+            path: vec![1],
+            radius: ratio(60, 1),
+            period: ratio(0, 1),
+            kept: [(
+                crate::chem::Kind::parse("W0041").expect("a kind"),
+                ratio(1, 2),
+            )]
+            .into(),
+            satellites: vec![sys],
+            medium: [(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(5, 4),
+            )]
+            .into(),
+            ell: ratio(0, 1),
+            medium_spin: ratio(13, 11),
+            gas: vec![mote],
+            born: 0,
+            state: ratio(0, 1),
+            flows: Vec::new(),
+            reservoir: ratio(0, 1),
+            turning: ratio(0, 1),
+            phase: Vec::new(),
+            load: ratio(0, 1),
+            bell: Vec::new(),
+            remnant: false,
+            heat: ratio(0, 1),
+            tilt: Vec::new(),
+            throat: Default::default(),
+        };
+        let u = Universe {
+            cores: vec![core],
+            ocean: vec![crate::flows::Mote {
+                key: crate::chem::Kind::parse("W0003").expect("a kind"),
+                amount: ratio(1, 1024),
+                ell_o: ratio(1, 3),
+                ell_orth: ratio(0, 1),
+                phase: crate::flows::rest(ratio(1, 2)),
+                agitation: ratio(0, 1),
+                born: 0,
+                vacuum: true,
+                lever: Vec::new(),
+                lever_place: ratio(0, 1),
+                tilt: vec![ratio(1, 2), ratio(1, 3), ratio(1, 6)],
+            }],
+            unit: ratio(1, 2),
+            t_u: 15,
+            densest: 1200,
+            founded: ratio(0, 1),
+            firm_prev: Vec::new(),
+        };
         let dir = std::env::temp_dir().join(format!("pulse-{}", std::process::id()));
         write(&dir, &[7; 32], &u).unwrap();
-        assert_eq!(read(&dir), Some(([7; 32], u)), "the file gives the universe back");
+        assert_eq!(
+            read(&dir),
+            Some(([7; 32], u)),
+            "the file gives the universe back"
+        );
         let _ = std::fs::remove_dir_all(dir);
     }
 }

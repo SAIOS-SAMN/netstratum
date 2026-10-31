@@ -105,8 +105,11 @@ pub struct ForgeableGrade(u8);
 
 impl ForgeableGrade {
     pub fn new(condition: u8) -> Option<ForgeableGrade> {
-        matches!(node_kind(condition), NodeKind::Crystallized | NodeKind::Crown)
-            .then_some(ForgeableGrade(condition))
+        matches!(
+            node_kind(condition),
+            NodeKind::Crystallized | NodeKind::Crown
+        )
+        .then_some(ForgeableGrade(condition))
     }
     /// The condition this grade is — grade and condition are one
     /// number by MANU-1's own law.
@@ -122,12 +125,8 @@ pub fn count_of(kind: NodeKind) -> u8 {
         .filter(|c| match kind {
             NodeKind::Leap => *c == 0,
             NodeKind::Crystallized => crate::dop::tech_node_of(*c).is_some(),
-            NodeKind::Crown => {
-                crate::dop::condition_concept(*c) == Some("worldshaping")
-            }
-            NodeKind::Lesson => {
-                crate::dop::condition_concept(*c) == Some("re-emergence")
-            }
+            NodeKind::Crown => crate::dop::condition_concept(*c) == Some("worldshaping"),
+            NodeKind::Lesson => crate::dop::condition_concept(*c) == Some("re-emergence"),
             _ => false,
         })
         .count() as u8
@@ -169,7 +168,9 @@ pub const RE_EMERGENCE: u8 = 7;
 impl World {
     /// WORLDSHAPE-1: does this world hold the gifted worldshaping node?
     pub fn can_worldshape(&self) -> bool {
-        self.techs.iter().any(|(_, condition, _, _)| *condition == 6)
+        self.techs
+            .iter()
+            .any(|(_, condition, _, _)| *condition == 6)
     }
     /// WORLDSHAPE-1 — worldshape: move a sited planet between substrate
     /// bands by re-seating its albedo and orbit — the highest
@@ -203,10 +204,17 @@ impl World {
             orbit_r: orbit_r.clone(),
             // Historical siting carries no angle — an orb has a radius
             // and no place until one is receipted.
-            theta: None, psi: None,
+            theta: None,
+            psi: None,
         });
         self.close(
-            ClosureEvent::PlanetSited { orb_id: orb, albedo, orbit_r, theta: None , psi: None },
+            ClosureEvent::PlanetSited {
+                orb_id: orb,
+                albedo,
+                orbit_r,
+                theta: None,
+                psi: None,
+            },
             SOVEREIGN,
         );
         // P5.19 dual-use: overt terra path supersedes covert stress on this orb.
@@ -355,9 +363,7 @@ impl World {
                     ),
                     6 => {
                         let earned = (0u8..=5)
-                            .filter(|c| {
-                                self.techs.iter().any(|(o, k, _, _)| *o == orb && k == c)
-                            })
+                            .filter(|c| self.techs.iter().any(|(o, k, _, _)| *o == orb && k == c))
                             .count() as u64;
                         (earned, 6)
                     }
@@ -388,10 +394,12 @@ impl World {
             return Err(ActionRefused::NoColony);
         }
         if self.orbs.iter().any(|held| held.name == name) {
-            return Err(ActionRefused::PlanetNameTaken { name: name.to_string() });
+            return Err(ActionRefused::PlanetNameTaken {
+                name: name.to_string(),
+            });
         }
-        let source_orb = peel(&mut self.orbs, source)
-            .ok_or(ActionRefused::NoSuchOrb { orb: source })?;
+        let source_orb =
+            peel(&mut self.orbs, source).ok_or(ActionRefused::NoSuchOrb { orb: source })?;
         for (resource, amount) in founding_reserves() {
             let have = source_orb.banked_amount(resource);
             if have < amount {
@@ -430,7 +438,11 @@ impl World {
     /// pure and receipts nothing; the one mutation is the crystal draw
     /// (NS-2 §1.5), which closes first — the lens reads the committed
     /// world as it stands once open. Sovereign convenience.
-    pub fn scan(&mut self, prober: u64, exemplar: u64) -> Result<crate::query::ScanRead, ActionRefused> {
+    pub fn scan(
+        &mut self,
+        prober: u64,
+        exemplar: u64,
+    ) -> Result<crate::query::ScanRead, ActionRefused> {
         self.scan_as(SOVEREIGN, prober, exemplar)
     }
     /// The contained form. Collect scope in v1: the draw moves banked
@@ -488,20 +500,41 @@ impl World {
         let held = peel(&mut self.orbs, prober).expect("judged above");
         touch(held, star, &mut self.chronicle, stamp, &ease, &supply);
         held.bank(Resource::Crystal, -draw.clone());
-        self.close(ClosureEvent::CrystalDrawn { orb_id: prober, amount: draw }, actor);
-        let stamp = self.chronicle.receipts().last().expect("just closed").stamp();
+        self.close(
+            ClosureEvent::CrystalDrawn {
+                orb_id: prober,
+                amount: draw,
+            },
+            actor,
+        );
+        let stamp = self
+            .chronicle
+            .receipts()
+            .last()
+            .expect("just closed")
+            .stamp();
         let exemplar_orb = self.orb_by_id(exemplar).expect("judged above");
         let (probed, hits, refusals) = crate::query::resonance_read(exemplar_orb, &self.orbs, star);
         // G3 (NS-2 §4): the translation annotation — every candidate
         // in one world shares the line's basis, so the local read
         // survives whole; the cross-frame pairing composes at N5/N6
         // through the same table.
-        let basis = self.genesis.as_ref().map(|held| held.perception).unwrap_or(0);
+        let basis = self
+            .genesis
+            .as_ref()
+            .map(|held| held.perception)
+            .unwrap_or(0);
         let translations = hits
             .iter()
             .map(|orb| (*orb, crate::dop::translation_survival(basis, basis)))
             .collect();
-        Ok(crate::query::ScanRead { stamp, probed, hits, refusals, translations })
+        Ok(crate::query::ScanRead {
+            stamp,
+            probed,
+            hits,
+            refusals,
+            translations,
+        })
     }
     /// **CIV-REACH-1** — deepest LINE this people may open (bronze=2,
     /// rises with crystallized base conditions, capped by the star).
@@ -521,7 +554,11 @@ impl World {
     /// **CIV-REACH-1 + locality:** stratum and the drawn LINE must lie
     /// within `civ_reach` and `local_to` — bronze peoples do not open
     /// exotic depths; shallow stars do not carry deep lines.
-    pub fn prospect(&mut self, orb: u64, stratum: u8) -> Result<crate::dop::Prospect, ActionRefused> {
+    pub fn prospect(
+        &mut self,
+        orb: u64,
+        stratum: u8,
+    ) -> Result<crate::dop::Prospect, ActionRefused> {
         self.prospect_as(SOVEREIGN, orb, stratum)
     }
     /// The contained form. Build scope: prospecting opens the world.
@@ -540,13 +577,18 @@ impl World {
         // P5-C: under veil, deep reads need instrument detection grade
         // (false-assay / thin-survey refuse). Unveiled surface play free.
         if self.is_veiled() {
-            let need = Self::detection_need_for_stratum(stratum).max(Self::detection_need_veiled_scan());
+            let need =
+                Self::detection_need_for_stratum(stratum).max(Self::detection_need_veiled_scan());
             self.require_detection(need)?;
         }
         let Some(class) = self.star else {
             return Err(ActionRefused::NoStarCommissioned);
         };
-        if self.prospects.iter().any(|held| held.orb == orb && held.stratum == stratum) {
+        if self
+            .prospects
+            .iter()
+            .any(|held| held.orb == orb && held.stratum == stratum)
+        {
             return Err(ActionRefused::StratumProspected { orb, stratum });
         }
         // CIV-REACH-1: stratum is depth asked — bronze cannot open deep.
@@ -595,11 +637,26 @@ impl World {
         // the atom's depth).
         if let Some(composition) = self.composition() {
             let lines = u32::from(crate::almanac::strata_lines(stratum, class).max(1));
-            let open: Vec<&(u16, Ratio)> = composition.iter().filter(|(z, _)| crate::almanac::atom::atom(u32::from(*z)).is_some_and(|a| a.depth <= lines)).collect();
-            let pool = if open.is_empty() { composition.iter().collect::<Vec<_>>() } else { open };
+            let open: Vec<&(u16, Ratio)> = composition
+                .iter()
+                .filter(|(z, _)| {
+                    crate::almanac::atom::atom(u32::from(*z)).is_some_and(|a| a.depth <= lines)
+                })
+                .collect();
+            let pool = if open.is_empty() {
+                composition.iter().collect::<Vec<_>>()
+            } else {
+                open
+            };
             let total = pool.iter().fold(ratio(0, 1), |s, (_, w)| s + w.clone());
             if total > ratio(0, 1) {
-                let draw = ratio(i64::from(u32::from_le_bytes([element[16], element[17], element[18], element[19]]) % 1_000_000), 1_000_000) * total;
+                let draw = ratio(
+                    i64::from(
+                        u32::from_le_bytes([element[16], element[17], element[18], element[19]])
+                            % 1_000_000,
+                    ),
+                    1_000_000,
+                ) * total;
                 let mut acc = ratio(0, 1);
                 let mut pick = pool[0].0;
                 for (z, w) in &pool {
@@ -640,7 +697,13 @@ impl World {
             },
             actor,
         );
-        Ok(crate::dop::Prospect { element, family, tier, richness, name })
+        Ok(crate::dop::Prospect {
+            element,
+            family,
+            tier,
+            richness,
+            name,
+        })
     }
     /// Seal a closure with its actor's generation tag (NS-6).
     /// D3 (02 §2.5) — chart the star's terrain: the opt-in deed. The
@@ -673,7 +736,10 @@ impl World {
     /// holds (the operator's speed boost to understanding; placeholder
     /// constants, the syntropy floor at 1/2).
     pub(super) fn deposit_window(&self) -> u64 {
-        let relearned = self.techs.iter().any(|(_, condition, _, _)| *condition == 7);
+        let relearned = self
+            .techs
+            .iter()
+            .any(|(_, condition, _, _)| *condition == 7);
         let aligned = self
             .syntropy_ratio()
             .map(|ratio_read| ratio_read >= ratio(1, 2))
@@ -711,11 +777,7 @@ impl World {
         self.survey_estate_as(SOVEREIGN, payer)
     }
 
-    pub fn survey_estate_as(
-        &mut self,
-        actor: u64,
-        payer: u64,
-    ) -> Result<[u8; 32], ActionRefused> {
+    pub fn survey_estate_as(&mut self, actor: u64, payer: u64) -> Result<[u8; 32], ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         if self.orbs.is_empty() {
             return Err(ActionRefused::NoColony);
@@ -732,7 +794,9 @@ impl World {
                     _ => false,
                 })
                 .map(|receipt| receipt.own().0)
-                .ok_or(ActionRefused::ClaimWithoutWitness { name: held.name.clone() })?;
+                .ok_or(ActionRefused::ClaimWithoutWitness {
+                    name: held.name.clone(),
+                })?;
             covered.push((held.orb_id, witness));
         }
         // Theorem 2 — the meter, verified post-check and drawn pre-close.
@@ -756,7 +820,12 @@ impl World {
         held.bank(resource, -cost.clone());
         // Theorem 3 — the receipt the parcels derive from.
         self.close(
-            ClosureEvent::EstateSurveyed { seed, payer, covered, cost },
+            ClosureEvent::EstateSurveyed {
+                seed,
+                payer,
+                covered,
+                cost,
+            },
             actor,
         );
         Ok(seed)
@@ -768,15 +837,16 @@ impl World {
     /// unsurveyed estate has no parcels, because deriving one would be
     /// an unmetered survey.
     pub fn parcels(&self) -> Option<Vec<crate::dop::Parcel>> {
-        self.chronicle.history().rev().find_map(|receipt| {
-            match receipt.event() {
+        self.chronicle
+            .history()
+            .rev()
+            .find_map(|receipt| match receipt.event() {
                 ClosureEvent::EstateSurveyed { seed, covered, .. } => {
                     let orbs: Vec<u64> = covered.iter().map(|(orb, _)| *orb).collect();
                     Some(crate::dop::parcels_of(seed, &orbs))
                 }
                 _ => None,
-            }
-        })
+            })
     }
 
     /// **The appraisal** (tag 98, ruling of 2026-08-06): value derived
@@ -804,16 +874,21 @@ impl World {
         use crate::dop::Holding;
         self.permitted(actor, Scope::Build)?;
         let Some((survey, seed, covered)) =
-            self.chronicle.history().rev().find_map(|receipt| match receipt.event() {
-                ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
-                    receipt.own().0,
-                    *seed,
-                    covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>(),
-                )),
-                _ => None,
-            })
+            self.chronicle
+                .history()
+                .rev()
+                .find_map(|receipt| match receipt.event() {
+                    ClosureEvent::EstateSurveyed { seed, covered, .. } => Some((
+                        receipt.own().0,
+                        *seed,
+                        covered.iter().map(|(orb, _)| *orb).collect::<Vec<u64>>(),
+                    )),
+                    _ => None,
+                })
         else {
-            return Err(ActionRefused::ClaimWithoutWitness { name: "estate unsurveyed".into() });
+            return Err(ActionRefused::ClaimWithoutWitness {
+                name: "estate unsurveyed".into(),
+            });
         };
         if let Holding::Planetary { orb }
         | Holding::Building { orb, .. }
@@ -837,11 +912,12 @@ impl World {
             Holding::Planetary { orb } | Holding::Orbital { orb } => self
                 .appraise_value(&holding)
                 .ok_or(ActionRefused::NoSuchOrb { orb: *orb })?,
-            Holding::Stratum { orb, stratum } => self.appraise_value(&holding).ok_or(
-                ActionRefused::ClaimWithoutWitness {
-                    name: format!("stratum {stratum} unprospected on orb {orb}"),
-                },
-            )?,
+            Holding::Stratum { orb, stratum } => {
+                self.appraise_value(&holding)
+                    .ok_or(ActionRefused::ClaimWithoutWitness {
+                        name: format!("stratum {stratum} unprospected on orb {orb}"),
+                    })?
+            }
             Holding::Estate => self
                 .appraise_value(&holding)
                 .ok_or(ActionRefused::NoColony)?,
@@ -900,12 +976,16 @@ impl World {
         // construction (the held receipts all follow it).
         let receipts = self.chronicle.receipts();
         let is_it = |receipt: &&crate::vrp::Receipt| {
-            receipt.own().0 == *appraisal && matches!(receipt.event(), ClosureEvent::AppraisalStruck { .. })
+            receipt.own().0 == *appraisal
+                && matches!(receipt.event(), ClosureEvent::AppraisalStruck { .. })
         };
         if let Some(at) = receipts.iter().position(|r| is_it(&r)) {
             return Some(at + 1 < receipts.len());
         }
-        self.chronicle.annals().kept_iter().any(|r| is_it(&&r)).then_some(true)
+        self.chronicle
+            .annals()
+            .kept_iter()
+            .any(|r| is_it(&&r))
+            .then_some(true)
     }
 }
-

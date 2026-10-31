@@ -40,15 +40,69 @@ impl Difficulty {
     /// (N6); until then levels are explicit and measured.
     pub fn level(level: u32) -> Difficulty {
         match level {
-            0 | 1 => Difficulty { tier: 1, word_len: 1, rows: 3, cols: 3, train_pairs: 2 },
-            2 => Difficulty { tier: 1, word_len: 2, rows: 4, cols: 4, train_pairs: 2 },
-            3 => Difficulty { tier: 2, word_len: 2, rows: 4, cols: 5, train_pairs: 3 },
-            4 => Difficulty { tier: 3, word_len: 2, rows: 3, cols: 3, train_pairs: 3 },
-            5 => Difficulty { tier: 3, word_len: 3, rows: 4, cols: 4, train_pairs: 3 },
-            6 => Difficulty { tier: 3, word_len: 4, rows: 4, cols: 4, train_pairs: 3 },
-            7 => Difficulty { tier: 3, word_len: 5, rows: 4, cols: 5, train_pairs: 3 },
-            8 => Difficulty { tier: 3, word_len: 6, rows: 5, cols: 5, train_pairs: 3 },
-            _ => Difficulty { tier: 3, word_len: 6, rows: 5, cols: 5, train_pairs: 3 },
+            0 | 1 => Difficulty {
+                tier: 1,
+                word_len: 1,
+                rows: 3,
+                cols: 3,
+                train_pairs: 2,
+            },
+            2 => Difficulty {
+                tier: 1,
+                word_len: 2,
+                rows: 4,
+                cols: 4,
+                train_pairs: 2,
+            },
+            3 => Difficulty {
+                tier: 2,
+                word_len: 2,
+                rows: 4,
+                cols: 5,
+                train_pairs: 3,
+            },
+            4 => Difficulty {
+                tier: 3,
+                word_len: 2,
+                rows: 3,
+                cols: 3,
+                train_pairs: 3,
+            },
+            5 => Difficulty {
+                tier: 3,
+                word_len: 3,
+                rows: 4,
+                cols: 4,
+                train_pairs: 3,
+            },
+            6 => Difficulty {
+                tier: 3,
+                word_len: 4,
+                rows: 4,
+                cols: 4,
+                train_pairs: 3,
+            },
+            7 => Difficulty {
+                tier: 3,
+                word_len: 5,
+                rows: 4,
+                cols: 5,
+                train_pairs: 3,
+            },
+            8 => Difficulty {
+                tier: 3,
+                word_len: 6,
+                rows: 5,
+                cols: 5,
+                train_pairs: 3,
+            },
+            _ => Difficulty {
+                tier: 3,
+                word_len: 6,
+                rows: 5,
+                cols: 5,
+                train_pairs: 3,
+            },
         }
     }
 
@@ -166,15 +220,12 @@ fn sample_op(beacon: &Beacon, difficulty: &Difficulty, slot: usize) -> Op {
     };
     let family = beacon.uniform_index(&format!("forge.family.{slot}"), families);
     match family {
-        0 => symmetries
-            [beacon.uniform_index(&format!("forge.sym.{slot}"), 6) as usize]
-            .clone(),
+        0 => symmetries[beacon.uniform_index(&format!("forge.sym.{slot}"), 6) as usize].clone(),
         1 => {
             // A beacon-seeded hue permutation (Fisher–Yates, exact).
             let mut map = [0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9];
             for i in (1..10usize).rev() {
-                let j =
-                    beacon.uniform_index(&format!("forge.recolor.{slot}.{i}"), (i + 1) as u64);
+                let j = beacon.uniform_index(&format!("forge.recolor.{slot}.{i}"), (i + 1) as u64);
                 map.swap(i, j as usize);
             }
             Op::Recolor(map)
@@ -190,10 +241,8 @@ fn sample_op(beacon: &Beacon, difficulty: &Difficulty, slot: usize) -> Op {
             Op::Tile {
                 down,
                 across,
-                odd_row: mirrors
-                    [beacon.uniform_index(&format!("forge.tile.r.{slot}"), 4) as usize],
-                odd_col: mirrors
-                    [beacon.uniform_index(&format!("forge.tile.c.{slot}"), 4) as usize],
+                odd_row: mirrors[beacon.uniform_index(&format!("forge.tile.r.{slot}"), 4) as usize],
+                odd_col: mirrors[beacon.uniform_index(&format!("forge.tile.c.{slot}"), 4) as usize],
             }
         }
     }
@@ -216,7 +265,9 @@ fn sample_grid(beacon: &Beacon, difficulty: &Difficulty, pair: usize) -> Grid {
 /// slot — the samples, never the task, are what is re-read.
 pub fn forge_word(digest: [u8; 32], difficulty: Difficulty) -> Program {
     let beacon = Beacon::from_digest(digest);
-    (0..difficulty.word_len).map(|slot| sample_op(&beacon, &difficulty, slot)).collect()
+    (0..difficulty.word_len)
+        .map(|slot| sample_op(&beacon, &difficulty, slot))
+        .collect()
 }
 
 /// The forge's input grid `pair` for a digest (`train_pairs` = the test

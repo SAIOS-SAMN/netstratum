@@ -25,12 +25,19 @@ fn seat() -> Seat {
 fn a_seat_reads_back_whole_and_is_written_once() {
     let root = scratch("once");
     let reg = Registry::at(&root);
-    assert_eq!(reg.founded_at("bloomcall"), None, "an unseated line reads unrecorded");
+    assert_eq!(
+        reg.founded_at("bloomcall"),
+        None,
+        "an unseated line reads unrecorded"
+    );
     reg.write_founded_at("bloomcall", &seat()).unwrap();
     assert_eq!(reg.founded_at("bloomcall"), Some(seat()));
     let mut moved = seat();
     moved.world = "elsewhere".into();
-    assert!(reg.write_founded_at("bloomcall", &moved).is_err(), "a seat is never moved");
+    assert!(
+        reg.write_founded_at("bloomcall", &moved).is_err(),
+        "a seat is never moved"
+    );
     assert_eq!(reg.founded_at("bloomcall"), Some(seat()));
     assert!(reg.list().is_empty(), "a seat card is not a civilization");
     let _ = std::fs::remove_dir_all(&root);

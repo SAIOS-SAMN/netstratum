@@ -6,12 +6,18 @@ use std::path::Path;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let (Some(era1), Some("found"), Some(size)) = (args.get(1), args.get(2).map(String::as_str), args.get(3)) else {
+    let (Some(era1), Some("found"), Some(size)) =
+        (args.get(1), args.get(2).map(String::as_str), args.get(3))
+    else {
         println!("usage: pulse <era1 var> found <grains>");
         return;
     };
     let grains = match size.split_once('^') {
-        Some((b, e)) => b.parse::<num_bigint::BigInt>().ok().zip(e.parse::<u32>().ok()).map(|(b, e)| b.pow(e)),
+        Some((b, e)) => b
+            .parse::<num_bigint::BigInt>()
+            .ok()
+            .zip(e.parse::<u32>().ok())
+            .map(|(b, e)| b.pow(e)),
         None => size.parse::<num_bigint::BigInt>().ok(),
     };
     let Some(grains) = grains.filter(|g| *g > num_bigint::BigInt::from(0)) else {
@@ -38,7 +44,12 @@ fn main() {
         return;
     };
     let unit = conductor::breath::unit_mass(&u);
-    println!("DEPLOYED — {} cores; conservation {}; spin {}", u.cores.len(), u.total() == manifest, pulse::spin_total(&u, &unit));
+    println!(
+        "DEPLOYED — {} cores; conservation {}; spin {}",
+        u.cores.len(),
+        u.total() == manifest,
+        pulse::spin_total(&u, &unit)
+    );
     match pulse::write(Path::new(era1), &seed, &u) {
         Ok(()) => println!("written {era1}/pulse.bin"),
         Err(e) => println!("not written: {e}"),

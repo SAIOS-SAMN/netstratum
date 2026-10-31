@@ -10,7 +10,10 @@ use std::time::Instant;
 type G = Vec<Vec<u8>>;
 
 fn grid(lines: &[&str]) -> G {
-    lines.iter().map(|l| l.bytes().map(|b| b - b'0').collect()).collect()
+    lines
+        .iter()
+        .map(|l| l.bytes().map(|b| b - b'0').collect())
+        .collect()
 }
 
 fn read(text: &str) -> Option<(Vec<(G, G)>, Vec<G>)> {
@@ -20,12 +23,18 @@ fn read(text: &str) -> Option<(Vec<(G, G)>, Vec<G>)> {
         match lines[i] {
             "train" => {
                 let sep = lines[i + 1..].iter().position(|l| *l == "--")? + i + 1;
-                let end = lines[sep + 1..].iter().position(|l| *l == "train" || *l == "test").map_or(lines.len(), |p| p + sep + 1);
+                let end = lines[sep + 1..]
+                    .iter()
+                    .position(|l| *l == "train" || *l == "test")
+                    .map_or(lines.len(), |p| p + sep + 1);
                 train.push((grid(&lines[i + 1..sep]), grid(&lines[sep + 1..end])));
                 i = end;
             }
             "test" => {
-                let end = lines[i + 1..].iter().position(|l| *l == "train" || *l == "test").map_or(lines.len(), |p| p + i + 1);
+                let end = lines[i + 1..]
+                    .iter()
+                    .position(|l| *l == "train" || *l == "test")
+                    .map_or(lines.len(), |p| p + i + 1);
                 tests.push(grid(&lines[i + 1..end]));
                 i = end;
             }
@@ -36,15 +45,25 @@ fn read(text: &str) -> Option<(Vec<(G, G)>, Vec<G>)> {
 }
 
 fn main() {
-    let dir = std::env::args().nth(1).unwrap_or_else(|| "var/uplink/tasks".into());
+    let dir = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| "var/uplink/tasks".into());
     let (mut tasks, mut extracted, mut closed) = (0, 0, 0);
     let mut slowest = 0f64;
     let started = Instant::now();
-    let mut files: Vec<_> = std::fs::read_dir(&dir).expect("the task archive").flatten().map(|e| e.path()).collect();
+    let mut files: Vec<_> = std::fs::read_dir(&dir)
+        .expect("the task archive")
+        .flatten()
+        .map(|e| e.path())
+        .collect();
     files.sort();
     for path in files {
-        let Ok(text) = std::fs::read_to_string(&path) else { continue };
-        let Some((train, _)) = read(&text) else { continue };
+        let Ok(text) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+        let Some((train, _)) = read(&text) else {
+            continue;
+        };
         tasks += 1;
         let frames = family::perceive_family(&train);
         let spend = family::extraction_spend(&train, &frames);
@@ -54,11 +73,21 @@ fn main() {
         let secs = at.elapsed().as_secs_f64();
         slowest = slowest.max(secs);
         let closes = rule.as_ref().is_some_and(|r| {
-            train.iter().all(|(a, b)| family::speak_rule(r, a, &NoCrystal).and_then(|s| s.grid()).as_ref() == Some(b))
+            train.iter().all(|(a, b)| {
+                family::speak_rule(r, a, &NoCrystal)
+                    .and_then(|s| s.grid())
+                    .as_ref()
+                    == Some(b)
+            })
         });
         extracted += usize::from(rule.is_some());
         closed += usize::from(closes);
-        println!("{:.2}s {} {}", secs, if rule.is_some() { "rule" } else { "none" }, if closes { "CLOSES" } else { "" });
+        println!(
+            "{:.2}s {} {}",
+            secs,
+            if rule.is_some() { "rule" } else { "none" },
+            if closes { "CLOSES" } else { "" }
+        );
     }
     println!("tasks {tasks}: a rule extracted {extracted}, closing every train pair {closed}; slowest {slowest:.2}s, total {:.1}s", started.elapsed().as_secs_f64());
 }

@@ -61,12 +61,18 @@ pub fn read<T: PartialEq>(a: &Ratio, remaining: &Remaining, at: impl Fn(&Ratio) 
     }
     let runs = remaining.factors();
     // The exact value's size in bits: past it an enclosure buys nothing.
-    let exact_bits: u64 = runs.iter().map(|(b, n)| n.saturating_mul(b.numer().bits().max(b.denom().bits()))).fold(0u64, u64::saturating_add);
+    let exact_bits: u64 = runs
+        .iter()
+        .map(|(b, n)| n.saturating_mul(b.numer().bits().max(b.denom().bits())))
+        .fold(0u64, u64::saturating_add);
     let mut p: u64 = 64;
     while p < exact_bits {
         let (lo, hi) = enclose(runs, p);
         let scale = Ratio::from_integer(BigInt::one() << p);
-        let (l, h) = (at(&(a.clone() * Ratio::from_integer(lo) / scale.clone())), at(&(a.clone() * Ratio::from_integer(hi) / scale)));
+        let (l, h) = (
+            at(&(a.clone() * Ratio::from_integer(lo) / scale.clone())),
+            at(&(a.clone() * Ratio::from_integer(hi) / scale)),
+        );
         if l == h {
             return Some(l);
         }
@@ -115,30 +121,61 @@ mod tests {
     #[test]
     fn a_reading_lands_where_the_exact_value_lands() {
         let grid = 216_000;
-        for (a, x, n) in [(ratio(5, 3), ratio(1, 3), 17u64), (ratio(1, 1), ratio(2, 7), 200), (ratio(9, 4), ratio(1, 1000), 1500), (ratio(1, 2), ratio(0, 1), 9)] {
+        for (a, x, n) in [
+            (ratio(5, 3), ratio(1, 3), 17u64),
+            (ratio(1, 1), ratio(2, 7), 200),
+            (ratio(9, 4), ratio(1, 1000), 1500),
+            (ratio(1, 2), ratio(0, 1), 9),
+        ] {
             let r = after(&x, n).expect("a share");
-            assert_eq!(read(&a, &r, floor_on(grid)), Some(floor_on(grid)(&(a.clone() * r.reading()))), "{a} {x} {n}");
+            assert_eq!(
+                read(&a, &r, floor_on(grid)),
+                Some(floor_on(grid)(&(a.clone() * r.reading()))),
+                "{a} {x} {n}"
+            );
         }
         // Two shares on one clock read as one product.
-        let both = after(&ratio(1, 5), 30).and_then(|r| r.after(&ratio(1, 9), 30).ok()).expect("shares");
-        assert_eq!(read(&ratio(1, 1), &both, floor_on(grid)), Some(floor_on(grid)(&both.reading())));
+        let both = after(&ratio(1, 5), 30)
+            .and_then(|r| r.after(&ratio(1, 9), 30).ok())
+            .expect("shares");
+        assert_eq!(
+            read(&ratio(1, 1), &both, floor_on(grid)),
+            Some(floor_on(grid)(&both.reading()))
+        );
         // A value standing on a mark: (1/2)^3 = 1/8 on eighths.
-        assert_eq!(read(&ratio(1, 1), &after(&ratio(1, 2), 3).expect("a share"), floor_on(8)), Some(ratio(1, 8)));
+        assert_eq!(
+            read(
+                &ratio(1, 1),
+                &after(&ratio(1, 2), 3).expect("a share"),
+                floor_on(8)
+            ),
+            Some(ratio(1, 8))
+        );
     }
 
     #[test]
     fn a_reading_does_not_see_how_the_rings_were_grouped() {
         let x = ratio(7, 97);
         let once = after(&x, 40).expect("a share");
-        let twice = after(&x, 25).and_then(|r| r.after(&x, 15).ok()).expect("a share");
-        assert_eq!(read(&ratio(3, 1), &once, floor_on(216_000)), read(&ratio(3, 1), &twice, floor_on(216_000)));
+        let twice = after(&x, 25)
+            .and_then(|r| r.after(&x, 15).ok())
+            .expect("a share");
+        assert_eq!(
+            read(&ratio(3, 1), &once, floor_on(216_000)),
+            read(&ratio(3, 1), &twice, floor_on(216_000))
+        );
     }
 
     #[test]
     fn what_is_no_share_is_refused() {
         assert!(after(&ratio(3, 2), 2).is_none());
         assert!(after(&ratio(-1, 4), 2).is_none());
-        assert!(read(&ratio(-1, 1), &after(&ratio(1, 4), 1).expect("a share"), floor_on(60)).is_none());
+        assert!(read(
+            &ratio(-1, 1),
+            &after(&ratio(1, 4), 1).expect("a share"),
+            floor_on(60)
+        )
+        .is_none());
         assert!(rings_until(&ratio(0, 1), &ratio(1, 2)).is_none());
     }
 

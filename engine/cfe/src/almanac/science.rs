@@ -99,11 +99,7 @@ pub fn survival_utility(axes: CivAxes, members: &[[u8; 32]], yielded: &Ratio) ->
     let seats: Vec<Periodic> = members.iter().map(periodic_of).collect();
     let knowledge: i64 = seats.iter().map(|s| i64::from(s.line)).sum();
     let arity = seats.len() as i64;
-    let mean_line = if arity > 0 {
-        knowledge / arity
-    } else {
-        0
-    };
+    let mean_line = if arity > 0 { knowledge / arity } else { 0 };
     let phase = seats.first().map(|s| s.phase).unwrap_or(1);
 
     // Base: knowledge (empiricist core) + mass yield.
@@ -344,10 +340,7 @@ impl ScienceDiscipline {
     /// **Advanced** disciplines — R2 (and their create paths) need
     /// off-planet resourcing evidence (crossed / element route / route).
     pub fn is_advanced(self) -> bool {
-        matches!(
-            self,
-            Self::Synthetic | Self::Clone | Self::Skin
-        )
+        matches!(self, Self::Synthetic | Self::Clone | Self::Skin)
     }
 }
 
@@ -402,9 +395,9 @@ pub fn science_seat_bill(
     // Primary local resource by discipline × metabolism.
     let primary = match discipline {
         Chem => match metabolism {
-            1 => Resource::Iron,     // mineral chem is pressure/metal work
-            3 => Resource::Crystal,  // plasmic chem rides resonance
-            _ => Resource::Biomass,  // biotic chem
+            1 => Resource::Iron,    // mineral chem is pressure/metal work
+            3 => Resource::Crystal, // plasmic chem rides resonance
+            _ => Resource::Biomass, // biotic chem
         },
         Biology | Clone => Resource::Biomass,
         Physics => Resource::Iron,
@@ -496,17 +489,11 @@ pub fn lab_requires_off_planet(path: LabPath) -> bool {
 }
 
 /// Cost-class tags for UI.
-pub fn science_seat_cost_classes(
-    discipline: ScienceDiscipline,
-    rank: u8,
-) -> Vec<CraftCostClass> {
+pub fn science_seat_cost_classes(discipline: ScienceDiscipline, rank: u8) -> Vec<CraftCostClass> {
     use ScienceDiscipline::*;
     let mut v = match discipline {
         Math | Research => vec![CraftCostClass::Resonance],
-        Chem | Synthetic | Skin => vec![
-            CraftCostClass::LocalResource,
-            CraftCostClass::Resonance,
-        ],
+        Chem | Synthetic | Skin => vec![CraftCostClass::LocalResource, CraftCostClass::Resonance],
         Biology | Physics | Clone => vec![CraftCostClass::LocalResource],
     };
     if seat_requires_off_planet(discipline, rank) {
@@ -594,7 +581,10 @@ impl LabPath {
     /// Known positive outcome (always declared at creation).
     pub fn known_positive(self) -> (&'static str, &'static str) {
         match self {
-            Self::ChemWork => ("gem/catalog progress", "known chemistry deepens the catalog"),
+            Self::ChemWork => (
+                "gem/catalog progress",
+                "known chemistry deepens the catalog",
+            ),
             Self::BioChem => ("hybrid yield", "bio+chem product feeds survival utility"),
             Self::SynthMod => ("cyber integrity", "detection/mesh tools improve"),
             Self::CloneWork => ("population seat", "clone count rises for habitat load"),
@@ -605,10 +595,19 @@ impl LabPath {
     /// Known negative outcome (always declared — the price of the work).
     pub fn known_negative(self) -> (&'static str, &'static str) {
         match self {
-            Self::ChemWork => ("order-work entropy", "compounding vents entropy / crystal fee"),
-            Self::BioChem => ("contamination toll", "biomass spent; contamination residual risk"),
+            Self::ChemWork => (
+                "order-work entropy",
+                "compounding vents entropy / crystal fee",
+            ),
+            Self::BioChem => (
+                "contamination toll",
+                "biomass spent; contamination residual risk",
+            ),
             Self::SynthMod => ("identity shear", "synthetic graft taxes crystal + trust"),
-            Self::CloneWork => ("identity dilution", "clone pool strains habitat / line cohesion"),
+            Self::CloneWork => (
+                "identity dilution",
+                "clone pool strains habitat / line cohesion",
+            ),
             Self::SkinWork => ("unmask debt", "disguise leaves a residual if pierced"),
         }
     }
@@ -616,11 +615,20 @@ impl LabPath {
     /// Hidden positive — not shown unless math seat or empiricist perception.
     pub fn hidden_positive(self) -> (&'static str, &'static str) {
         match self {
-            Self::ChemWork => ("dark-well map", "successful work maps a dark pull for later"),
-            Self::BioChem => ("metabolic fit", "biotic metabolism scores higher next bonds"),
+            Self::ChemWork => (
+                "dark-well map",
+                "successful work maps a dark pull for later",
+            ),
+            Self::BioChem => (
+                "metabolic fit",
+                "biotic metabolism scores higher next bonds",
+            ),
             Self::SynthMod => ("mesh control", "hidden command channel on synthetic limbs"),
             Self::CloneWork => ("escort pool", "clones feed KIN escort readiness"),
-            Self::SkinWork => ("face-dance license", "hidden leap toward diplomatic/espionage mask"),
+            Self::SkinWork => (
+                "face-dance license",
+                "hidden leap toward diplomatic/espionage mask",
+            ),
         }
     }
 
@@ -628,10 +636,16 @@ impl LabPath {
     pub fn hidden_negative(self) -> (&'static str, &'static str) {
         match self {
             Self::ChemWork => ("runaway reaction", "explosion: gem loss + crystal slash"),
-            Self::BioChem => ("cascade famine seed", "explosion: biomass slash + cascade pressure"),
+            Self::BioChem => (
+                "cascade famine seed",
+                "explosion: biomass slash + cascade pressure",
+            ),
             Self::SynthMod => ("rogue faction", "explosion: matrix residual — synth turns"),
             Self::CloneWork => ("clone revolt", "explosion: identity residual + want struck"),
-            Self::SkinWork => ("unmask catastrophe", "explosion: veil fails; spy marks reverse"),
+            Self::SkinWork => (
+                "unmask catastrophe",
+                "explosion: veil fails; spy marks reverse",
+            ),
         }
     }
 

@@ -78,7 +78,11 @@ pub fn orbit_on_grain(orbit_r: &Ratio) -> Ratio {
     use num_bigint::BigInt;
     let grid = BigInt::from(ORBIT_GRAIN);
     let stepped = orbit_r.numer() * &grid / orbit_r.denom();
-    let at_least_one = if stepped < BigInt::from(1) { BigInt::from(1) } else { stepped };
+    let at_least_one = if stepped < BigInt::from(1) {
+        BigInt::from(1)
+    } else {
+        stepped
+    };
     Ratio::new(at_least_one, grid)
 }
 
@@ -134,8 +138,13 @@ pub fn workable_at(element: &[u8; 32], t_eq4: &Ratio) -> bool {
     }
     matches!(
         (phase, region),
-        (1, ThermalRegion::Quenched | ThermalRegion::Cryogenic | ThermalRegion::Sublime)
-            | (2, ThermalRegion::Mesic)
-            | (3, ThermalRegion::Torrid | ThermalRegion::HyperThermal | ThermalRegion::Incandescent)
+        (
+            1,
+            ThermalRegion::Quenched | ThermalRegion::Cryogenic | ThermalRegion::Sublime
+        ) | (2, ThermalRegion::Mesic)
+            | (
+                3,
+                ThermalRegion::Torrid | ThermalRegion::HyperThermal | ThermalRegion::Incandescent
+            )
     )
 }

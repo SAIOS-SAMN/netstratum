@@ -103,12 +103,7 @@ impl Capacity {
 /// near view from a far-sighted observer computes the far view and
 /// nothing else. That is the laziness: unobserved depths cost zero
 /// operations, and nothing is retained between calls.
-pub fn observe(
-    delta: &Delta,
-    support: &Support,
-    requested: Depth,
-    capacity: &Capacity,
-) -> View {
+pub fn observe(delta: &Delta, support: &Support, requested: Depth, capacity: &Capacity) -> View {
     peel(delta, support, capacity.admits(requested))
 }
 
@@ -153,10 +148,7 @@ pub fn resonance(
             true => Capture::Captured { at },
             false => Capture::Mismatch {
                 at,
-                separation: ratio(
-                    (left.get() as i64 - right.get() as i64).abs(),
-                    1,
-                ),
+                separation: ratio((left.get() as i64 - right.get() as i64).abs(), 1),
             },
         },
 
@@ -165,9 +157,8 @@ pub fn resonance(
         // compares: a separation of 1 between charges of 2 and 3 is a
         // different fact from a separation of 1 between 2000 and 2001.
         (View::Mid(left), View::Mid(right)) => {
-            let carried = |v: &[rfa_core::Holonomy]| {
-                v.iter().fold(ratio(0, 1), |sum, h| sum + h.value.abs())
-            };
+            let carried =
+                |v: &[rfa_core::Holonomy]| v.iter().fold(ratio(0, 1), |sum, h| sum + h.value.abs());
             let (l, r) = (carried(&left), carried(&right));
             let scale = l.clone() + r.clone();
             let separation = (l - r).abs();
@@ -176,12 +167,12 @@ pub fn resonance(
                 true => Capture::Silent { at },
                 // |l − r| · den ≤ num · (|l| + |r|), with the relative
                 // width fixed by the depth rather than by a caller.
-                false => match separation.clone() * ratio(MID_DEN, 1)
-                    <= scale * ratio(MID_NUM, 1)
-                {
-                    true => Capture::Captured { at },
-                    false => Capture::Mismatch { at, separation },
-                },
+                false => {
+                    match separation.clone() * ratio(MID_DEN, 1) <= scale * ratio(MID_NUM, 1) {
+                        true => Capture::Captured { at },
+                        false => Capture::Mismatch { at, separation },
+                    }
+                }
             }
         }
 
@@ -190,10 +181,12 @@ pub fn resonance(
         (View::Near(left), View::Near(right)) => match left == right {
             true => Capture::Captured { at },
             false => {
-                let sum = |v: &[crate::peel::Entry]| {
-                    v.iter().fold(ratio(0, 1), |s, e| s + e.value.abs())
-                };
-                Capture::Mismatch { at, separation: (sum(&left) - sum(&right)).abs() }
+                let sum =
+                    |v: &[crate::peel::Entry]| v.iter().fold(ratio(0, 1), |s, e| s + e.value.abs());
+                Capture::Mismatch {
+                    at,
+                    separation: (sum(&left) - sum(&right)).abs(),
+                }
             }
         },
 

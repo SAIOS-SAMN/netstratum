@@ -14,7 +14,10 @@ fn main() {
     std::fs::create_dir_all(&var_root).expect("var root");
     let book = ledger::Ledger::at(format!("{var_root}/worlds"));
     let eras = ledger::converge::default_era_roots(&var_root);
-    println!("era roots found: {:?}", eras.iter().map(|(n, _)| n).collect::<Vec<_>>());
+    println!(
+        "era roots found: {:?}",
+        eras.iter().map(|(n, _)| n).collect::<Vec<_>>()
+    );
     let converged = ledger::converge::converge(&book, &eras).expect("convergence");
     println!(
         "converged {} worlds ({} already annexed, {} quarantined) — epoch base {}",

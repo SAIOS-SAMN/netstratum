@@ -20,7 +20,8 @@ fn digest(n: u8) -> [u8; 32] {
 fn sealed(level: u32) -> CarriedProof {
     let difficulty = Difficulty::level(level);
     let word = forge_word(digest(level as u8), difficulty);
-    CarriedProof::seal(digest(level as u8), difficulty, &word).expect("the forge word closes its task")
+    CarriedProof::seal(digest(level as u8), difficulty, &word)
+        .expect("the forge word closes its task")
 }
 
 #[test]
@@ -30,8 +31,15 @@ fn a_carried_proof_verifies_without_the_forge_and_reads_back_whole() {
         let bytes = encode_carried_work(&proof).expect("encodes");
         assert_eq!(decode_carried_work(&bytes), Some(proof.clone()));
         assert_eq!(verify_carried_work(&bytes), Ok(proof.difficulty));
-        assert_eq!(verify_work(&bytes), Ok(proof.difficulty), "forge work by every door");
-        assert_eq!(verify_work_class(&bytes), Ok(WorkClass::Forge(proof.difficulty)));
+        assert_eq!(
+            verify_work(&bytes),
+            Ok(proof.difficulty),
+            "forge work by every door"
+        );
+        assert_eq!(
+            verify_work_class(&bytes),
+            Ok(WorkClass::Forge(proof.difficulty))
+        );
         // the carried task is the forged task
         let task = forge_task(proof.forge_digest, proof.difficulty);
         assert_eq!(proof.output(), task.test_expected.as_ref());
@@ -57,11 +65,18 @@ fn every_break_is_named_where_it_happens() {
     // State 0: a cell that is not its beacon sample.
     let mut p = honest.clone();
     p.inputs[1].cells[0] = (p.inputs[1].cells[0] + 1) % 10;
-    assert_eq!(verdict(&p), Err(WorkBroken::SampleDiverged { pair: Some(1) }));
+    assert_eq!(
+        verdict(&p),
+        Err(WorkBroken::SampleDiverged { pair: Some(1) })
+    );
 
     // The forge word: an op that is not its sample.
     let mut p = honest.clone();
-    p.forge_word[0] = if p.forge_word[0] == Op::FlipV { Op::FlipH } else { Op::FlipV };
+    p.forge_word[0] = if p.forge_word[0] == Op::FlipV {
+        Op::FlipH
+    } else {
+        Op::FlipV
+    };
     assert_eq!(verdict(&p), Err(WorkBroken::SampleDiverged { pair: None }));
 
     // The forge derivation: a carried digest that is not the step's state.
@@ -73,7 +88,12 @@ fn every_break_is_named_where_it_happens() {
     let mut p = honest.clone();
     let last = p.outputs.len() - 1;
     p.outputs[last].cells[0] = (p.outputs[last].cells[0] + 1) % 10;
-    assert_eq!(verdict(&p), Err(WorkBroken::ForgeDiverged { at_step: p.forge_word.len() + 1 }));
+    assert_eq!(
+        verdict(&p),
+        Err(WorkBroken::ForgeDiverged {
+            at_step: p.forge_word.len() + 1
+        })
+    );
 
     // The solve derivation: step 2's carried digest is broken.
     let mut p = honest.clone();
@@ -84,7 +104,10 @@ fn every_break_is_named_where_it_happens() {
     let mut p = honest.clone();
     p.program = vec![Op::Rotate90];
     p.derivation = derive(&p.program, &p.inputs).expect("derives").0;
-    assert!(matches!(verdict(&p), Err(WorkBroken::TrainingMiss { .. }) | Err(WorkBroken::OutputMismatch)));
+    assert!(matches!(
+        verdict(&p),
+        Err(WorkBroken::TrainingMiss { .. }) | Err(WorkBroken::OutputMismatch)
+    ));
 
     // No path: no claim.
     let mut p = honest.clone();

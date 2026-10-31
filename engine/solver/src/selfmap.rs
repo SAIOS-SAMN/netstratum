@@ -35,7 +35,12 @@ use rfa_core::{holonomies, ratio, rcf_hash_skew_bipartite, Delta, Holonomy, Rati
 
 /// The families in declaration order — the anchor nodes of the map and
 /// the deterministic tie-break of last resort.
-const FAMILIES: [Family; 4] = [Family::Symmetry, Family::Recolor, Family::Tile, Family::Object];
+const FAMILIES: [Family; 4] = [
+    Family::Symmetry,
+    Family::Recolor,
+    Family::Tile,
+    Family::Object,
+];
 
 /// The fiber is one coordinate: relatedness. The knowledge map carries a
 /// single affinity per edge, so every entry is a lone rational.
@@ -69,7 +74,10 @@ fn project(library: &Library) -> (Delta, Support) {
         let mut weight = [0i64; FAMILIES.len()];
         for op in &word.expansion {
             let family = family_of(op);
-            let fidx = FAMILIES.iter().position(|f| *f == family).expect("family is one of four");
+            let fidx = FAMILIES
+                .iter()
+                .position(|f| *f == family)
+                .expect("family is one of four");
             weight[fidx] += 1;
         }
         for (fidx, &w) in weight.iter().enumerate() {
@@ -93,7 +101,10 @@ fn family_block(library: &Library) -> Vec<Vec<Ratio>> {
     for (w, word) in words.iter().enumerate() {
         for op in &word.expansion {
             let family = family_of(op);
-            let fidx = FAMILIES.iter().position(|f| *f == family).expect("family is one of four");
+            let fidx = FAMILIES
+                .iter()
+                .position(|f| *f == family)
+                .expect("family is one of four");
             m[fidx][w] = m[fidx][w].clone() + ratio(1, 1);
         }
     }
@@ -173,7 +184,10 @@ fn sparse_potentials(library: &Library) -> Vec<Ratio> {
             let mut weight = [0i64; FAMILIES.len()];
             for op in &word.expansion {
                 let family = family_of(op);
-                let fidx = FAMILIES.iter().position(|f| *f == family).expect("family is one of four");
+                let fidx = FAMILIES
+                    .iter()
+                    .position(|f| *f == family)
+                    .expect("family is one of four");
                 weight[fidx] += 1;
             }
             weight
@@ -190,7 +204,10 @@ fn sparse_potentials(library: &Library) -> Vec<Ratio> {
                 .collect()
         } else {
             let weight = &weights[node - FAMILIES.len()];
-            (0..FAMILIES.len()).filter(|&f| weight[f] > 0).map(|f| (f, ratio(-weight[f], 1))).collect()
+            (0..FAMILIES.len())
+                .filter(|&f| weight[f] > 0)
+                .map(|f| (f, ratio(-weight[f], 1)))
+                .collect()
         }
     };
     let mut potential: Vec<Option<Ratio>> = vec![None; dim];
@@ -211,7 +228,10 @@ fn sparse_potentials(library: &Library) -> Vec<Ratio> {
             }
         }
     }
-    potential.into_iter().map(|p| p.unwrap_or_else(|| ratio(0, 1))).collect()
+    potential
+        .into_iter()
+        .map(|p| p.unwrap_or_else(|| ratio(0, 1)))
+        .collect()
 }
 
 /// **The full map** — the curiosity order and
@@ -287,8 +307,10 @@ pub struct Consilience {
 /// Deterministic: groups are returned in ascending signature order, each
 /// naming its lines in ascending id order.
 pub fn consilience(maps: &[(u64, &SelfMap)]) -> Vec<Consilience> {
-    let sensed: Vec<(u64, &SelfMap, crate::senses::Senses)> =
-        maps.iter().map(|&(line, map)| (line, map, crate::senses::Senses::ALL)).collect();
+    let sensed: Vec<(u64, &SelfMap, crate::senses::Senses)> = maps
+        .iter()
+        .map(|&(line, map)| (line, map, crate::senses::Senses::ALL))
+        .collect();
     consilience_sensed(&sensed)
 }
 
@@ -297,13 +319,18 @@ pub fn consilience(maps: &[(u64, &SelfMap)]) -> Vec<Consilience> {
 /// different perceptions reach is harder than one alike lines reach.
 pub fn consilience_sensed(maps: &[(u64, &SelfMap, crate::senses::Senses)]) -> Vec<Consilience> {
     let empty = knowledge_map(&Library::new()).signature;
-    let mut groups: std::collections::BTreeMap<[u8; 32], Vec<(u64, &SelfMap, crate::senses::Senses)>> =
-        std::collections::BTreeMap::new();
+    let mut groups: std::collections::BTreeMap<
+        [u8; 32],
+        Vec<(u64, &SelfMap, crate::senses::Senses)>,
+    > = std::collections::BTreeMap::new();
     for &(line, map, senses) in maps {
         if map.signature == empty {
             continue; // nothing known is nothing shared
         }
-        groups.entry(map.signature).or_default().push((line, map, senses));
+        groups
+            .entry(map.signature)
+            .or_default()
+            .push((line, map, senses));
     }
     let mut found = Vec::new();
     for (signature, mut members) in groups {
@@ -317,7 +344,10 @@ pub fn consilience_sensed(maps: &[(u64, &SelfMap, crate::senses::Senses)]) -> Ve
         // that walked it. Same knowledge from the same frontier, seen the
         // same way, bridges nothing; the more distinct the routes, the
         // harder-won.
-        let mut orders: Vec<(&Vec<Family>, u8)> = members.iter().map(|(_, m, senses)| (&m.order, senses.0)).collect();
+        let mut orders: Vec<(&Vec<Family>, u8)> = members
+            .iter()
+            .map(|(_, m, senses)| (&m.order, senses.0))
+            .collect();
         orders.sort();
         orders.dedup();
         found.push(Consilience {
@@ -341,7 +371,16 @@ mod tests {
         for (i, expansion) in [
             vec![Op::Rotate90, Op::FlipH],
             vec![Op::Recolor([0, 2, 1, 3, 4, 5, 6, 7, 8, 9]), Op::Transpose],
-            vec![Op::Tile { down: 2, across: 1, odd_row: TileMirror::None, odd_col: TileMirror::None }, Op::Rotate180, Op::Rotate180],
+            vec![
+                Op::Tile {
+                    down: 2,
+                    across: 1,
+                    odd_row: TileMirror::None,
+                    odd_col: TileMirror::None,
+                },
+                Op::Rotate180,
+                Op::Rotate180,
+            ],
             vec![Op::FlipV, Op::Recolor([1, 0, 2, 3, 4, 5, 6, 7, 8, 9])],
         ]
         .into_iter()
@@ -351,7 +390,12 @@ mod tests {
             w.orbit = [i as u8 + 1; 32];
             lib.adopt(w);
             let (delta, support) = project(&lib);
-            assert_eq!(sparse_potentials(&lib), forest_potentials(&delta, &support)[0], "after {} words", i + 1);
+            assert_eq!(
+                sparse_potentials(&lib),
+                forest_potentials(&delta, &support)[0],
+                "after {} words",
+                i + 1
+            );
         }
         assert!(sparse_potentials(&Library::new()).len() == FAMILIES.len());
     }
@@ -359,7 +403,11 @@ mod tests {
     use solver_verify::grid::{Op, TileMirror};
 
     fn word(expansion: Vec<Op>) -> MintedWord {
-        MintedWord { orbit: [0u8; 32], expansion, cited: Vec::new() }
+        MintedWord {
+            orbit: [0u8; 32],
+            expansion,
+            cited: Vec::new(),
+        }
     }
 
     fn recolor(map: [u8; 10]) -> Op {
@@ -367,7 +415,12 @@ mod tests {
     }
 
     fn tile() -> Op {
-        Op::Tile { down: 2, across: 2, odd_row: TileMirror::None, odd_col: TileMirror::None }
+        Op::Tile {
+            down: 2,
+            across: 2,
+            odd_row: TileMirror::None,
+            odd_col: TileMirror::None,
+        }
     }
 
     /// An empty library resolves to the bare declaration order — the
@@ -396,8 +449,14 @@ mod tests {
         let object_rank = order.iter().position(|f| *f == Family::Object).unwrap();
         let sym_rank = order.iter().position(|f| *f == Family::Symmetry).unwrap();
         let recolor_rank = order.iter().position(|f| *f == Family::Recolor).unwrap();
-        assert!(tile_rank < sym_rank, "the unworked Tile reaches before the worked Symmetry");
-        assert!(object_rank < recolor_rank, "the unworked Object reaches before Recolor");
+        assert!(
+            tile_rank < sym_rank,
+            "the unworked Tile reaches before the worked Symmetry"
+        );
+        assert!(
+            object_rank < recolor_rank,
+            "the unworked Object reaches before Recolor"
+        );
     }
 
     /// Deterministic: the same library resolves to the same order, every
@@ -406,7 +465,10 @@ mod tests {
     fn the_order_is_the_same_on_every_reading() {
         let mut library = Library::new();
         library.adopt(word(vec![Op::Rotate90, tile()]));
-        library.adopt(word(vec![recolor([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]), Op::Transpose]));
+        library.adopt(word(vec![
+            recolor([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]),
+            Op::Transpose,
+        ]));
         assert_eq!(knowledge_order(&library), knowledge_order(&library));
     }
 
@@ -422,7 +484,11 @@ mod tests {
         library.adopt(word(vec![Op::Rotate90, Op::Rotate180, tile()]));
         library.adopt(word(vec![Op::FlipH, tile()]));
         let map = knowledge_map(&library);
-        assert_eq!(map.signature, knowledge_map(&library).signature, "the invariant is stable");
+        assert_eq!(
+            map.signature,
+            knowledge_map(&library).signature,
+            "the invariant is stable"
+        );
         assert_eq!(map.order.len(), FAMILIES.len(), "every family is placed");
     }
 
@@ -479,11 +545,21 @@ mod tests {
         let mut a = Library::new();
         a.adopt(word(vec![Op::Rotate90, tile()]));
         let mut b = Library::new();
-        b.adopt(word(vec![recolor([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]), Op::Transpose, tile()]));
+        b.adopt(word(vec![
+            recolor([9, 8, 7, 6, 5, 4, 3, 2, 1, 0]),
+            Op::Transpose,
+            tile(),
+        ]));
         let ma = knowledge_map(&a);
         let mb = knowledge_map(&b);
-        assert!(consilience(&[(1, &ma), (2, &mb)]).is_empty(), "no two share a shape");
-        assert!(consilience(&[]).is_empty(), "an empty roster converges nothing");
+        assert!(
+            consilience(&[(1, &ma), (2, &mb)]).is_empty(),
+            "no two share a shape"
+        );
+        assert!(
+            consilience(&[]).is_empty(),
+            "an empty roster converges nothing"
+        );
     }
 }
 
@@ -497,15 +573,41 @@ mod signature_witness {
         use solver_verify::grid::{Op, TileMirror};
         let mut map = [0u8; 10];
         map[1] = 2;
-        let tile = Op::Tile { down: 2, across: 1, odd_row: TileMirror::Rows, odd_col: TileMirror::None };
-        let ops = vec![Op::Rotate90, Op::Recolor(map), Op::FlipH, tile.clone(), Op::Transpose, Op::Recolor(map), Op::Rotate180, tile, Op::FlipV, Op::Rotate270, Op::Recolor(map), Op::FlipH, Op::Rotate90];
+        let tile = Op::Tile {
+            down: 2,
+            across: 1,
+            odd_row: TileMirror::Rows,
+            odd_col: TileMirror::None,
+        };
+        let ops = vec![
+            Op::Rotate90,
+            Op::Recolor(map),
+            Op::FlipH,
+            tile.clone(),
+            Op::Transpose,
+            Op::Recolor(map),
+            Op::Rotate180,
+            tile,
+            Op::FlipV,
+            Op::Rotate270,
+            Op::Recolor(map),
+            Op::FlipH,
+            Op::Rotate90,
+        ];
         let mut library = Library::new();
         for (n, window) in ops.windows(2).enumerate().take(12) {
             let mut orbit = [0u8; 32];
             orbit[0] = n as u8;
-            library.adopt(crate::mint::MintedWord { orbit, expansion: window.to_vec(), cited: Vec::new() });
+            library.adopt(crate::mint::MintedWord {
+                orbit,
+                expansion: window.to_vec(),
+                cited: Vec::new(),
+            });
         }
         let (delta, _) = project(&library);
-        assert_eq!(knowledge_map(&library).signature, rfa_core::rcf_hash(&delta));
+        assert_eq!(
+            knowledge_map(&library).signature,
+            rfa_core::rcf_hash(&delta)
+        );
     }
 }

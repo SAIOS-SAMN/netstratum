@@ -57,7 +57,11 @@ pub fn is_zero(a: &Mat) -> bool {
 /// Exact matrix–vector product `a · x` (length `rows(a)`).
 pub fn matvec(a: &Mat, x: &[BigInt]) -> Vec<BigInt> {
     let (r, k) = shape(a);
-    debug_assert!(k == x.len() || r == 0, "matvec: inner dim {k} != {}", x.len());
+    debug_assert!(
+        k == x.len() || r == 0,
+        "matvec: inner dim {k} != {}",
+        x.len()
+    );
     (0..r)
         .map(|i| (0..k).fold(BigInt::zero(), |acc, j| acc + &a[i][j] * &x[j]))
         .collect()

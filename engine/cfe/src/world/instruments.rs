@@ -6,8 +6,7 @@
 
 use super::*;
 use crate::dop::{
-    hull_scrap_cost, HullRole, MarketFuture, MarketNote, MarketPerp, MarketShare, Resource,
-    Station,
+    hull_scrap_cost, HullRole, MarketFuture, MarketNote, MarketPerp, MarketShare, Resource, Station,
 };
 
 impl World {
@@ -24,8 +23,7 @@ impl World {
             return true;
         }
         self.orb().is_some_and(|o| {
-            o.stamp_amount() > ratio(0, 1)
-                || o.banked_amount(Resource::Crystal) > ratio(0, 1)
+            o.stamp_amount() > ratio(0, 1) || o.banked_amount(Resource::Crystal) > ratio(0, 1)
         })
     }
 
@@ -205,11 +203,7 @@ impl World {
         self.redeem_note_as(SOVEREIGN, note_id)
     }
 
-    pub fn redeem_note_as(
-        &mut self,
-        actor: u64,
-        note_id: u64,
-    ) -> Result<(), ActionRefused> {
+    pub fn redeem_note_as(&mut self, actor: u64, note_id: u64) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         let at = self
             .notes
@@ -396,11 +390,7 @@ impl World {
         self.settle_future_as(SOVEREIGN, fut_id)
     }
 
-    pub fn settle_future_as(
-        &mut self,
-        actor: u64,
-        fut_id: u64,
-    ) -> Result<(), ActionRefused> {
+    pub fn settle_future_as(&mut self, actor: u64, fut_id: u64) -> Result<(), ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         let at = self
             .futures
@@ -528,9 +518,8 @@ impl World {
             return Err(ActionRefused::NoSuchOrb { orb });
         }
         // Production evidence: zone stands or stream banked.
-        let ok = peek(&self.orbs, orb).is_some_and(|o| {
-            !o.zones.is_empty() || o.banked_amount(stream) > ratio(0, 1)
-        });
+        let ok = peek(&self.orbs, orb)
+            .is_some_and(|o| !o.zones.is_empty() || o.banked_amount(stream) > ratio(0, 1));
         if !ok {
             return Err(ActionRefused::SharesBookClosed);
         }
@@ -782,11 +771,7 @@ impl World {
         self.fund_perp_as(SOVEREIGN, perp_id)
     }
 
-    pub fn fund_perp_as(
-        &mut self,
-        actor: u64,
-        perp_id: u64,
-    ) -> Result<Ratio, ActionRefused> {
+    pub fn fund_perp_as(&mut self, actor: u64, perp_id: u64) -> Result<Ratio, ActionRefused> {
         self.permitted(actor, Scope::Build)?;
         let at = self
             .perps
@@ -878,11 +863,7 @@ impl World {
     }
 
     /// O6.5 — lock coll/margin: free-bank debit, or Vault free earmark.
-    fn lock_instrument_stamp(
-        &mut self,
-        orb: u64,
-        amount: &Ratio,
-    ) -> Result<(), ActionRefused> {
+    fn lock_instrument_stamp(&mut self, orb: u64, amount: &Ratio) -> Result<(), ActionRefused> {
         if self.vault_seated() {
             let have = self.vault_balance_of(orb);
             let reserved = self.vault_reserved(orb);

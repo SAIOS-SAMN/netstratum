@@ -172,10 +172,7 @@ pub fn tier_of(station: Option<&str>) -> Option<Tier> {
 ///
 /// Returns `Ok(())` when the office may be claimed, or `Err(reason)`
 /// naming the cure (never silent).
-pub fn office_preconditions(
-    station: &str,
-    evidence: &OfficeEvidence,
-) -> Result<(), &'static str> {
+pub fn office_preconditions(station: &str, evidence: &OfficeEvidence) -> Result<(), &'static str> {
     match station {
         "progenitor" | "watcher" | "observer" | "sovereign" | "steward" | "captain" => Ok(()),
         "caravan" => {
@@ -318,15 +315,27 @@ pub struct Seat {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RegistryRefused {
     /// The slug already exists — join it, or choose a new name.
-    AlreadyRegistered { sigil: String },
+    AlreadyRegistered {
+        sigil: String,
+    },
     /// An axis value outside the closed vocabulary, named.
-    UnknownAxis { axis: &'static str, given: String },
+    UnknownAxis {
+        axis: &'static str,
+        given: String,
+    },
     /// BAND-1 — a station outside the closed office vocabulary.
-    UnknownStation { given: String },
+    UnknownStation {
+        given: String,
+    },
     /// BAND-1 — the space-available law: the station's seats stand
     /// full for this lineage domain. Not a rank refused — a room
     /// filled; the band grows as the universe does.
-    NoSeatOpen { station: String, domain: String, held: u64, width: u64 },
+    NoSeatOpen {
+        station: String,
+        domain: String,
+        held: u64,
+        width: u64,
+    },
     Io(String),
 }
 
@@ -359,7 +368,9 @@ impl Registry {
         // open seat (the space-available law) — checked at the door.
         if let Some(station) = &civilization.station {
             if !STATIONS.contains(&station.as_str()) {
-                return Err(RegistryRefused::UnknownStation { given: station.clone() });
+                return Err(RegistryRefused::UnknownStation {
+                    given: station.clone(),
+                });
             }
             let domain = lineage_domain(&civilization.metabolism, None);
             if let Some(width) = seat_width(station) {
@@ -394,11 +405,7 @@ impl Registry {
         Ok(())
     }
 
-    fn write_civ_tlv(
-        &self,
-        path: &std::path::Path,
-        c: &Civilization,
-    ) -> std::io::Result<()> {
+    fn write_civ_tlv(&self, path: &std::path::Path, c: &Civilization) -> std::io::Result<()> {
         let mut out = Vec::new();
         card::put_str(card::civ::NAME, &c.name, &mut out);
         card::put_str(card::civ::SIGIL, &c.sigil, &mut out);
@@ -425,14 +432,21 @@ impl Registry {
     pub fn write_founded_at(&self, sigil: &str, seat: &Seat) -> std::io::Result<()> {
         let path = self.root.join(format!("{sigil}.seat"));
         if path.exists() {
-            return Err(std::io::Error::new(std::io::ErrorKind::AlreadyExists, format!("{sigil} is already seated")));
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::AlreadyExists,
+                format!("{sigil} is already seated"),
+            ));
         }
         let mut out = Vec::new();
         card::put_str(card::seat::WORLD, &seat.world, &mut out);
         card::put_str(card::seat::PLANET, &seat.planet, &mut out);
         card::put_str(card::seat::COLONY, &seat.colony, &mut out);
         card::put_str(card::seat::POLICY, &seat.policy, &mut out);
-        for (tag, r) in [(card::seat::X, &seat.position.0), (card::seat::Y, &seat.position.1), (card::seat::Z, &seat.position.2)] {
+        for (tag, r) in [
+            (card::seat::X, &seat.position.0),
+            (card::seat::Y, &seat.position.1),
+            (card::seat::Z, &seat.position.2),
+        ] {
             let mut v = Vec::new();
             ratio::encode(r, &mut v);
             card::put(tag, &v, &mut out);
@@ -447,7 +461,11 @@ impl Registry {
         let (mut world, mut planet, mut colony, mut policy) = (None, None, None, None);
         let (mut x, mut y, mut z) = (None, None, None);
         for (tag, value) in card::records(&data) {
-            let r = || ratio::decode(value).filter(|(_, n)| *n == value.len()).map(|(r, _)| r);
+            let r = || {
+                ratio::decode(value)
+                    .filter(|(_, n)| *n == value.len())
+                    .map(|(r, _)| r)
+            };
             match tag {
                 card::seat::WORLD => world = card::str_of(value),
                 card::seat::PLANET => planet = card::str_of(value),
@@ -459,7 +477,13 @@ impl Registry {
                 _ => {}
             }
         }
-        Some(Seat { world: world?, planet: planet?, colony: colony?, position: (x?, y?, z?), policy: policy? })
+        Some(Seat {
+            world: world?,
+            planet: planet?,
+            colony: colony?,
+            position: (x?, y?, z?),
+            policy: policy?,
+        })
     }
 
     /// Load one entry by sigil (`.civ` TLV only).
@@ -540,10 +564,7 @@ pub fn sigil_of(name: &str) -> String {
 /// metabolism + the substrate band its seat lives in (never stored,
 /// never chosen). The four founding domains plus the visible-next
 /// (12_UNION §2, §5a); an unsited line reads by metabolism alone.
-pub fn lineage_domain(
-    metabolism: &str,
-    band: Option<cfe::thermal::SubstrateBand>,
-) -> &'static str {
+pub fn lineage_domain(metabolism: &str, band: Option<cfe::thermal::SubstrateBand>) -> &'static str {
     use cfe::thermal::SubstrateBand as Band;
     match (metabolism, band) {
         ("plasmic", _) => "plasmic",
@@ -563,11 +584,13 @@ impl Registry {
     /// caller's evidence (the world's receipts); the registry checks
     /// the room.
     pub fn seat(&self, sigil: &str, station: &str) -> Result<(), RegistryRefused> {
-        let mut card = self.load(sigil).ok_or_else(|| RegistryRefused::Io(
-            format!("no such line: {sigil}"),
-        ))?;
+        let mut card = self
+            .load(sigil)
+            .ok_or_else(|| RegistryRefused::Io(format!("no such line: {sigil}")))?;
         if !STATIONS.contains(&station) {
-            return Err(RegistryRefused::UnknownStation { given: station.into() });
+            return Err(RegistryRefused::UnknownStation {
+                given: station.into(),
+            });
         }
         let domain = lineage_domain(&card.metabolism, None);
         if let Some(width) = seat_width(station) {

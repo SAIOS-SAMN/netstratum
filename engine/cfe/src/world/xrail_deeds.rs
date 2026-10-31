@@ -4,16 +4,21 @@ use super::*;
 use crate::dop::Rail;
 use crate::ratio::Ratio;
 use crate::xrail::{
-    decode_isthmus, decode_strand, encode_stamp_packet,
-    verify_court_claim, StrandKind,
+    decode_isthmus, decode_strand, encode_stamp_packet, verify_court_claim, StrandKind,
 };
 
 fn strand_enabled() -> bool {
-    cfg!(any(feature = "deep-rail-strand", feature = "stamp-rail-strand"))
+    cfg!(any(
+        feature = "deep-rail-strand",
+        feature = "stamp-rail-strand"
+    ))
 }
 
 fn court_enabled() -> bool {
-    cfg!(any(feature = "deep-rail-court", feature = "stamp-rail-court"))
+    cfg!(any(
+        feature = "deep-rail-court",
+        feature = "stamp-rail-court"
+    ))
 }
 
 impl World {
@@ -192,5 +197,4 @@ impl World {
         );
         Ok(amt)
     }
-
 }

@@ -86,8 +86,12 @@ impl Mind {
     /// Every learned generator as the columns of a `dim × rank` matrix — the
     /// O(n) reduction basis, ordered inner → outer.
     pub fn generators(&self) -> Vec<Vec<BigInt>> {
-        let cochains: Vec<&Vec<BigInt>> =
-            self.harmonic.iter().chain(&self.luminal).chain(&self.holonomic).collect();
+        let cochains: Vec<&Vec<BigInt>> = self
+            .harmonic
+            .iter()
+            .chain(&self.luminal)
+            .chain(&self.holonomic)
+            .collect();
         (0..self.dim)
             .map(|i| cochains.iter().map(|c| c[i].clone()).collect())
             .collect()

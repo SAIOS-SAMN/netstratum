@@ -65,7 +65,6 @@
 //! clade's own names from being renamed when a seat name was struck. Two correct uses in two layers is not
 //! a defect; the defect would be a third that conflates them.
 
-
 /// The works the charter names. Content vocabulary — a line aspires to
 /// these; it does not invent them (that is what BOOK-1 is for).
 pub const WORKS: [&str; 4] = ["VALOR", "HONOR", "COURAGE", "COMMITMENT"];
@@ -84,7 +83,9 @@ pub fn work_of(name: &str) -> WorkId {
 /// padding and case cannot smuggle a name past.
 pub fn is_work(name: &str) -> bool {
     let normal = crate::books::normalize(name);
-    WORKS.iter().any(|held| crate::books::normalize(held) == normal)
+    WORKS
+        .iter()
+        .any(|held| crate::books::normalize(held) == normal)
 }
 
 /// The chartered work a name addresses, if any.
@@ -123,4 +124,3 @@ pub struct WorkView {
     /// evidence, never a measure of the virtue.
     pub witnesses: usize,
 }
-

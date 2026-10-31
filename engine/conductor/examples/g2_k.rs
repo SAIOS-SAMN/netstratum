@@ -4,7 +4,12 @@ fn main() {
         let c = cfe::persist::load(&std::path::Path::new(&dir).join("chronicle.tlv")).unwrap();
         let w = cfe::world::World::resume(c);
         let orb = cfe::world::FIRST_ORB;
-        let f = |r: cfe::ratio::Ratio| format!("{:.3}", num_traits::ToPrimitive::to_f64(&r).unwrap_or(f64::NAN));
+        let f = |r: cfe::ratio::Ratio| {
+            format!(
+                "{:.3}",
+                num_traits::ToPrimitive::to_f64(&r).unwrap_or(f64::NAN)
+            )
+        };
         println!(
             "{dir}: pop {} capacity(K) {} ceiling(K_pop) {} per_capita {} syntropic {}",
             w.population_of(orb),

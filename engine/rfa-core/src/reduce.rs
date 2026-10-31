@@ -35,7 +35,11 @@ pub struct Support {
 impl Support {
     /// An empty complex: entities, coordinates, and no edges at all.
     pub fn new(dim: usize, fiber: usize) -> Self {
-        Self { dim, fiber, present: vec![false; dim * dim * fiber] }
+        Self {
+            dim,
+            fiber,
+            present: vec![false; dim * dim * fiber],
+        }
     }
 
     fn at(&self, i: usize, j: usize, l: usize) -> usize {
@@ -163,7 +167,12 @@ pub fn holonomies(delta: &Delta, support: &Support) -> Vec<Holonomy> {
                 };
                 let charge = delta.entry(i, j, l).clone() - (to.clone() - from.clone());
                 if !charge.is_zero() {
-                    found.push(Holonomy { i, j, l, value: charge });
+                    found.push(Holonomy {
+                        i,
+                        j,
+                        l,
+                        value: charge,
+                    });
                 }
             }
         }

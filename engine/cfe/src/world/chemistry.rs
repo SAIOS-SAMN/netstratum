@@ -175,8 +175,8 @@ impl World {
         }
         // The door: does this matter bond? Past here the set is proven,
         // and its gem and knowledge are total.
-        let set = crate::almanac::Compoundable::new(members)
-            .ok_or(ActionRefused::MatterDoesNotBond)?;
+        let set =
+            crate::almanac::Compoundable::new(members).ok_or(ActionRefused::MatterDoesNotBond)?;
 
         // The facts — the place, then the ledger. One home, so the
         // bench cannot promise what the deed would refuse.
@@ -190,8 +190,10 @@ impl World {
         // yield smelt to the element grain before the order arms, receipt, and banking
         // read them, so the element stocks stay on-grain and replay (which decodes
         // these fields) is byte-identical.
-        let spends: Vec<([u8; 32], Ratio)> =
-            spends.iter().map(|(element, spend)| (*element, smelt_element(spend))).collect();
+        let spends: Vec<([u8; 32], Ratio)> = spends
+            .iter()
+            .map(|(element, spend)| (*element, smelt_element(spend)))
+            .collect();
         let yielded = smelt_element(&yielded);
 
         // 34_MATTER_BALANCE: alchemy is order-work.
@@ -202,8 +204,7 @@ impl World {
         let gem = set.gem();
         let knowledge = set.knowledge();
         // Science residual: if dark gravity outranks survival, receipt it.
-        let (survival, dark, _) =
-            self.score_bond(set.members(), &yielded, knowledge);
+        let (survival, dark, _) = self.score_bond(set.members(), &yielded, knowledge);
         let dominant = self.dominant_dark_pull();
         let held = peel(&mut self.orbs, orb).expect("judged above");
         for (element, spend) in &spends {
@@ -434,12 +435,15 @@ impl World {
         let one = ratio(1, 1);
         let half = one.clone() / (one.clone() + one.clone());
         // Green — growth greed: crystal famine pressure or cascade.
-        let crystal_thin = self.orb().is_some_and(|o| {
-            o.banked_amount(Resource::Crystal) < ratio(1, 1)
-        });
+        let crystal_thin = self
+            .orb()
+            .is_some_and(|o| o.banked_amount(Resource::Crystal) < ratio(1, 1));
         let cascade = self.cascade_pressures.iter().any(|(_, p)| *p > 0);
         if crystal_thin || cascade {
-            out.push((DarkPull::Green, if cascade { one.clone() } else { half.clone() }));
+            out.push((
+                DarkPull::Green,
+                if cascade { one.clone() } else { half.clone() },
+            ));
         }
         // Vanity — surplus display, the epicurean trait read generically
         // (a line minted from an epicurean displays too; `44_LINEAGES`).
@@ -454,7 +458,11 @@ impl World {
             out.push((DarkPull::Envy, one.clone()));
         }
         // Wrath — any war treaty residual (at_war books).
-        if self.treaties.iter().any(|t| t.kind == crate::treaty::TreatyKind::War) {
+        if self
+            .treaties
+            .iter()
+            .any(|t| t.kind == crate::treaty::TreatyKind::War)
+        {
             out.push((DarkPull::Wrath, one.clone()));
         }
         // Sloth — no instruments forged, no practices.
@@ -478,9 +486,7 @@ impl World {
     }
 
     fn dominant_dark_pull(&self) -> Option<(DarkPull, Ratio)> {
-        self.dark_pulls()
-            .into_iter()
-            .max_by(|a, b| a.1.cmp(&b.1))
+        self.dark_pulls().into_iter().max_by(|a, b| a.1.cmp(&b.1))
     }
 
     /// Score a candidate bond under this world's civ + dark gravity.
@@ -526,11 +532,7 @@ impl World {
     /// **Chemical creation (catalog)** — seal a banked gem as known
     /// chemistry. No free matter; spends resonator-eighth crystal.
     /// Empiricist novelty want may relieve on success (mind fed).
-    pub fn chem_catalog_gem(
-        &mut self,
-        orb: u64,
-        gem: [u8; 32],
-    ) -> Result<u16, ActionRefused> {
+    pub fn chem_catalog_gem(&mut self, orb: u64, gem: [u8; 32]) -> Result<u16, ActionRefused> {
         self.chem_catalog_gem_as(SOVEREIGN, orb, gem)
     }
 
@@ -584,7 +586,13 @@ impl World {
         // Novelty want relief when empiricist mind was starving.
         if self.wants.iter().any(|(o, k)| *o == orb && *k == 3) {
             self.wants.retain(|(o, k)| !(*o == orb && *k == 3));
-            self.close(ClosureEvent::WantRelieved { orb_id: orb, kind: 3 }, actor);
+            self.close(
+                ClosureEvent::WantRelieved {
+                    orb_id: orb,
+                    kind: 3,
+                },
+                actor,
+            );
         }
         Ok(knowledge)
     }
@@ -620,8 +628,8 @@ impl World {
         if !crate::almanac::isomorphic(&a, &b) || a == b {
             return Err(ActionRefused::NotIsomorphic);
         }
-        let (spend_each, yielded, product) = crate::almanac::iso_union_recipe(&a, &b)
-            .ok_or(ActionRefused::NotIsomorphic)?;
+        let (spend_each, yielded, product) =
+            crate::almanac::iso_union_recipe(&a, &b).ok_or(ActionRefused::NotIsomorphic)?;
         // #136 D3 — iso-union declares its grain (1/1024): the per-side spend and the
         // yield smelt to the element grain before the affordability check, order arms,
         // receipt, and banking read them, so the element stocks stay on-grain and
