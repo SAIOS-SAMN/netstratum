@@ -24,7 +24,7 @@ version = "0.1.0"
 dependencies = [
  "cfe",
  "ed25519-dalek",
- "mycelium",
+ "mycelium-sdk",
 ]
 
 [[package]]
@@ -170,12 +170,11 @@ dependencies = [
  "blake3",
  "cfe",
  "codec",
- "forms",
  "kernel",
  "ledger",
  "libc",
  "mesh",
- "mycelium",
+ "mycelium-sdk",
  "num-bigint",
  "num-rational",
  "num-traits",
@@ -345,8 +344,8 @@ checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
 
 [[package]]
 name = "forms"
-version = "0.3.0-rc.1"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0-rc.1#f03e3bcf5cb7fe42faf29cfa075930b16013ac35"
+version = "0.3.0-rc.2"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0-rc.2#8b47a896ed1598d950ce5bef9093dfe8d575e577"
 dependencies = [
  "num-bigint",
  "num-rational",
@@ -491,8 +490,8 @@ dependencies = [
 
 [[package]]
 name = "mycelium"
-version = "0.3.0-rc.1"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0-rc.1#f03e3bcf5cb7fe42faf29cfa075930b16013ac35"
+version = "0.3.0-rc.2"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0-rc.2#8b47a896ed1598d950ce5bef9093dfe8d575e577"
 dependencies = [
  "blake3",
  "ctrlc",
@@ -512,6 +511,18 @@ dependencies = [
  "tikv-jemalloc-ctl",
  "tikv-jemallocator",
  "tiny-keccak",
+]
+
+[[package]]
+name = "mycelium-sdk"
+version = "0.3.0-rc.2"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0-rc.2#8b47a896ed1598d950ce5bef9093dfe8d575e577"
+dependencies = [
+ "ed25519-dalek",
+ "forms",
+ "mycelium",
+ "num-bigint",
+ "num-rational",
 ]
 
 [[package]]
@@ -551,7 +562,7 @@ dependencies = [
  "codec",
  "ed25519-dalek",
  "ledger",
- "mycelium",
+ "mycelium-sdk",
  "num-bigint",
  "num-rational",
  "num-traits",
@@ -969,7 +980,7 @@ version = "0.1.0"
 dependencies = [
  "blake3",
  "cfe",
- "mycelium",
+ "mycelium-sdk",
  "num-bigint",
  "num-rational",
  "solver",

@@ -1,5 +1,5 @@
 //! A share compounds FRAME by FRAME, read on Netstratum's carrier. The law
-//! is Mycelium's form (`forms::shares::share_compounds`, concordance 2.10):
+//! is Mycelium's form (`mycelium_sdk::forms::shares::share_compounds`, concordance 2.10):
 //! where a share `x` of what remains is taken on each ring of a body's own
 //! clock, `n` rings leave `(1 − x)^n`, held exactly as its runs
 //! `∏(1 − x_i)^n_i` (`Remaining`). This shell adds only the reading of that
@@ -7,7 +7,7 @@
 //! grain, a comparison), landing where the exact value lands while
 //! expanding the rational no further than the marks ask.
 use cfe::ratio::{ratio, Ratio};
-pub use forms::shares::share_compounds::Remaining;
+pub use mycelium_sdk::forms::shares::share_compounds::Remaining;
 use num_bigint::BigInt;
 use num_traits::{One, Signed, Zero};
 

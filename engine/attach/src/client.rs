@@ -6,11 +6,12 @@
 
 use crate::iface::*;
 use ed25519_dalek::SigningKey;
-use mycelium::anastome::dialogue::seat::{
+use mycelium_sdk::house::seat::{
     self, Arg, Call, Outcome, Percept, Post, ReadMail, Record, Refusal, Seats, SignedPost, Take,
     Taken,
 };
-use mycelium::sdk::{Session, Voice};
+use mycelium_sdk::session::Session;
+use mycelium_sdk::voice::Voice;
 use std::io;
 
 fn undecoded(what: &str) -> io::Error {

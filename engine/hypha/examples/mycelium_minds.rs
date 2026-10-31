@@ -3,8 +3,8 @@
 //! under the budget a voice uses (`extraction_spend`), and whether the rule
 //! it extracts closes every training pair when spoken back (`speak_rule`).
 //!   cargo run --release -p ns-hypha --example mycelium_minds [-- <dir>]
-use ns_hypha::mycelium::physics::Physics;
-use ns_hypha::mycelium::transducer::family::{self, NoCrystal};
+use ns_hypha::mycelium_sdk::rule::Physics;
+use ns_hypha::mycelium_sdk::rule::{self, NoCrystal};
 use std::time::Instant;
 
 type G = Vec<Vec<u8>>;
@@ -69,12 +69,12 @@ fn main() {
         let spend = family::extraction_spend(&train, &frames);
         let mut budget = Physics::default().stroke_n(spend);
         let at = Instant::now();
-        let rule = family::extract_rule_with(&train, &NoCrystal, &mut budget);
+        let rule = rule::extract_rule(&train, &mut budget);
         let secs = at.elapsed().as_secs_f64();
         slowest = slowest.max(secs);
         let closes = rule.as_ref().is_some_and(|r| {
             train.iter().all(|(a, b)| {
-                family::speak_rule(r, a, &NoCrystal)
+                rule::speak_rule(r, a, &NoCrystal)
                     .and_then(|s| s.grid())
                     .as_ref()
                     == Some(b)

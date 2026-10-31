@@ -7,17 +7,15 @@
 //! house wrappers had before Strip 7 removed them. A reply that does not
 //! decode is an error by name, never a success.
 use ed25519_dalek::SigningKey;
-use mycelium::anastome::dialogue::challenge::{
+use mycelium_sdk::house::challenge::{
     self, Challenged, FinalityReading, LineHead, SignedChallenge,
 };
-use mycelium::anastome::dialogue::domain::{
-    self, Founded, SignedDomain, SignedOrigin, SignedReservation,
-};
-use mycelium::anastome::dialogue::seat::{
+use mycelium_sdk::house::domain::{self, Founded, SignedDomain, SignedOrigin, SignedReservation};
+use mycelium_sdk::house::seat::{
     self, MailRead, Outcome, Percept, Post, ReadMail, Refusal, Seats, SignedPost, Taken,
 };
-use mycelium::anastome::dialogue::uplink::{self, FoldAt, SignedFold, Uplinked};
-use mycelium::sdk::Session;
+use mycelium_sdk::house::uplink::{self, FoldAt, SignedFold, Uplinked};
+use mycelium_sdk::session::Session;
 use std::io;
 
 fn undecoded(what: &str) -> io::Error {
@@ -64,10 +62,7 @@ pub trait HouseActs {
     ) -> io::Result<Result<MailRead, Refusal>>;
     /// A court task for `voice` from the registry, or `None` where it holds
     /// nothing for it.
-    fn pull_task(
-        &self,
-        voice: &[u8; 32],
-    ) -> io::Result<Option<mycelium::anastome::dialogue::TaskEnvelope>>;
+    fn pull_task(&self, voice: &[u8; 32]) -> io::Result<Option<mycelium_sdk::task::TaskEnvelope>>;
     /// A solve filed under `key` with its rule's tape: the court's verdict code
     /// and μ, or `None` where the reply does not read.
     fn file_solve(
@@ -139,16 +134,9 @@ impl HouseActs for Session {
         let act = seat::encode_read_mail(&ReadMail::sign_standing(key, after, epoch, nonce()?));
         seat::decode_mail_reply_standing(&self.speak(act)?).ok_or_else(|| undecoded("perception"))
     }
-    fn pull_task(
-        &self,
-        voice: &[u8; 32],
-    ) -> io::Result<Option<mycelium::anastome::dialogue::TaskEnvelope>> {
-        let reply = self.speak(mycelium::anastome::dialogue::percept::encode_task_request(
-            voice,
-        ))?;
-        Ok(mycelium::anastome::dialogue::percept::decode_task_envelope(
-            &reply,
-        ))
+    fn pull_task(&self, voice: &[u8; 32]) -> io::Result<Option<mycelium_sdk::task::TaskEnvelope>> {
+        let reply = self.speak(mycelium_sdk::task::encode_task_request(voice))?;
+        Ok(mycelium_sdk::task::decode_task_envelope(&reply))
     }
     fn file_solve(
         &self,
@@ -157,15 +145,8 @@ impl HouseActs for Session {
         outputs: &[Vec<Vec<u8>>],
         rule: &[u8],
     ) -> io::Result<Option<(u8, [u64; 4])>> {
-        let act = mycelium::anastome::dialogue::percept::encode_solve_with_rule(
-            key,
-            citation,
-            outputs,
-            Some(rule),
-        )
-        .ok_or_else(unwritten)?;
-        Ok(mycelium::anastome::dialogue::percept::decode_solve_receipt(
-            &self.speak(act)?,
-        ))
+        let act = mycelium_sdk::task::encode_solve_with_rule(key, citation, outputs, Some(rule))
+            .ok_or_else(unwritten)?;
+        Ok(mycelium_sdk::task::decode_solve_receipt(&self.speak(act)?))
     }
 }

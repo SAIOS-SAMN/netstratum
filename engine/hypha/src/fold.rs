@@ -21,8 +21,8 @@
 
 use crate::wire::HouseActs;
 use crate::Uplink;
-use mycelium::anastome::dialogue::domain::{DomainGenesis, Founded, Reservation};
-use mycelium::anastome::dialogue::uplink::{FoldAt, Net, SignedFold, TierFold, Uplinked};
+use mycelium_sdk::house::domain::{DomainGenesis, Founded, Reservation};
+use mycelium_sdk::house::uplink::{FoldAt, Net, SignedFold, TierFold, Uplinked};
 use std::io::{self, Read};
 use std::path::Path;
 
@@ -130,8 +130,8 @@ impl Uplink {
     /// sealed by it.
     pub fn finality(
         &self,
-        at: mycelium::chronometry::Stamp,
-    ) -> io::Result<(mycelium::anastome::dialogue::challenge::Finality, bool)> {
+        at: mycelium_sdk::house::Stamp,
+    ) -> io::Result<(mycelium_sdk::house::challenge::Finality, bool)> {
         self.session
             .finality(FoldAt::sealed(at))
             .map(|r| (r.finality, r.bonded))
@@ -176,10 +176,10 @@ impl Uplink {
     pub fn publish(
         &self,
         key: &ed25519_dalek::SigningKey,
-        at: mycelium::chronometry::Stamp,
-        entries: Vec<mycelium::anastome::dialogue::challenge::Entry>,
-    ) -> io::Result<mycelium::anastome::dialogue::challenge::Challenged> {
-        use mycelium::anastome::dialogue::challenge::{Challenge, Challenged};
+        at: mycelium_sdk::house::Stamp,
+        entries: Vec<mycelium_sdk::house::challenge::Entry>,
+    ) -> io::Result<mycelium_sdk::house::challenge::Challenged> {
+        use mycelium_sdk::house::challenge::{Challenge, Challenged};
         let (rows, declared) = crate::line::fold_of(&entries);
         let opened = self.session.challenge(
             &Challenge::Open {
@@ -265,8 +265,8 @@ impl Uplink {
         seed: [u8; 32],
         radius: (u64, u64),
     ) -> io::Result<Founded> {
-        use mycelium::anastome::dialogue::domain::Origin;
-        use mycelium::anastome::dialogue::universe::{Genesis, Geometry, Parent};
+        use mycelium_sdk::house::domain::Origin;
+        use mycelium_sdk::house::universe::{Genesis, Geometry, Parent};
         let domain = tier_key(home, "domain")?;
         let origin = Origin {
             domain: domain.verifying_key().to_bytes(),
