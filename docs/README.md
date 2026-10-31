@@ -2,15 +2,19 @@
 
 ## Start here
 
-- [Status](../ROADMAP.md): what Netstratum is, what works today, and where each
+- [Roadmap](../ROADMAP.md): what Netstratum is, what works today, and where each
   part is heading.
 - [Architecture](ARCHITECTURE.md): how the workspace is organized and where
   to make a change.
-- [Concepts](../GLOSSARY.md): every term, with its definition, formula and code
+- [Glossary](../GLOSSARY.md): every term, with its definition, formula and code
   location.
 - [Attachment](109_ATTACHMENT.md): how external agents and sandboxes attach
   through the hypha and are contained in the universe.
 - [The charter](00_CHARTER.md): the project's binding rules.
+- [Equations](EQUATIONS.md): every law, with its authority and its
+  implementation.
+- Open work is tracked as [GitHub issues](https://github.com/SAIOS-SAMN/netstratum/issues);
+  each links the document section it builds.
 
 ## The design record
 
