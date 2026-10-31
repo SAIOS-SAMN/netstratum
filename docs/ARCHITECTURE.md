@@ -209,12 +209,11 @@ era-1 universe in an empty root.
 
 ## 6. Mycelium
 
-Netstratum depends on two Mycelium crates, `mycelium` and `forms`, pinned at
-a tagged release in the root `Cargo.toml`. `forms` supplies shared law forms
-(for example the share-compounding law used by `conductor::compound`), the
-`hypha` crate is the uplink for verification and settlement, and `tongue`
-expresses solver programs as Mycelium rule elements. The integration and its
-open items are in [107_MYCELIUM_INTEGRATION.md](107_MYCELIUM_INTEGRATION.md).
+Netstratum depends on Mycelium at a tagged release, pinned in the root
+`Cargo.toml`. What it takes from Mycelium, how complete each use is, and
+where the line falls between Netstratum's physics and Mycelium's are in
+[MYCELIUM.md](MYCELIUM.md); how it keeps time on the network is in
+[107_MYCELIUM_INTEGRATION.md](107_MYCELIUM_INTEGRATION.md).
 
 External agents and sandboxes attach through the house in `ns-hypha`
 ([109_ATTACHMENT.md](109_ATTACHMENT.md)): the house turns their seat calls

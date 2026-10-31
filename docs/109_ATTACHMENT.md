@@ -168,7 +168,7 @@ systems and the network only by what it has learned and earned.
 | A3 Requests through the seat | built | a call becomes a directive in the world's inbox acting as the mind's entity (`hypha::attached::carry`, `Polity::apply_directive`); its result is posted back to the mind |
 | A4 Entities with principals | built | `World::register_agent_under`; containment reads the principal chain (`cfe::ipsal::permits_in`, kernel 0.38.0) |
 | A5 Sandboxes as sub-universes | built | a sandbox opens a sub-universe at the line's galaxy core, paid from its leisure; its opener traverses it (`substrata::open_for`, `substrata::step`) |
-| A6 Verification of attached transitions | built | attached worlds are ordinary world directories, so the census follower folds their receipts to the court with every other world's |
+| A6 Verification of attached transitions | partial | attached worlds are ordinary world directories, so the census follower folds their receipts to the court with every other world's; the court checks the folds' continuity, and no transition is verified against Mycelium's laws ([MYCELIUM.md](MYCELIUM.md) §3) |
 | A7 The importable libraries | built | the `attach` crate: the interface, the file exchange, and the client (`attach::client`, `examples/agent.rs`) |
 | A8 Running service | open | a configured court, the house (`ns-hypha seat`) and the conductor running against it |
 
