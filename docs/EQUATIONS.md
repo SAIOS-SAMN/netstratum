@@ -1510,3 +1510,100 @@ inherited by B-E1:**
 **Open row (FORGE_BUDGET §7.6): compassion has no entropic counterpart**
 in the present sum (`given_in_crisis` stands alone), so its ratio is not
 yet well-formed. Named, not papered over.
+
+## §8 Era 1 — the sphere universe
+
+Rows for the era-1 conductor (`engine/conductor`). Units throughout: reach in
+throat radii of the enclosing core, holding in units of that core's state, so
+the equator `δ = ½` stands at `R = H`. **Landed** rows name the sealed code;
+**specified** rows name the document that holds them until built.
+
+**E1 · The ring-density law.** Landed. Authority: docs/83; `ring::rate`,
+`ring::deficit`, `ring::period`, `ring::spin`, `ring::radius`.
+
+    rate(r, H)    = r / (r + H)          the clock
+    δ(r, H)       = H / (r + H)          the deficit; clock = 1 − δ
+    ω             = δ                    turns per received front
+    P(r, H)       = 1 + r / H            received fronts per turn
+    ℓ             = R · H                spin; balance R = ℓ / H
+
+**E2 · The faces and the equator.** Landed. Authority: docs/110 §1. The
+gravity face `g = 1 − δ`, the continuum face `u = δ`; the inversion
+`δ ↦ 1 − δ` swaps them and fixes the equator `δ = ½`, `R = H`.
+
+**E3 · The front.** Specified. Authority: docs/111 §2. One geodesic sphere
+per bounce, `W(t) = {x : d(source, x) = t}`; it meets a body at reach `r`
+after
+
+    a(r) = r + H(<r)
+
+and a moving body at the first bell `b` with `b − b_0 ≥ a(R(b))`. Bodies
+receive it (E1) and emit only as surfaces (E4).
+
+**E4 · Surfaces and strength.** Specified. Authority: docs/111 §3. A body
+reflects its share `σ` as its own bounce and transmits `1 − σ`; the strength
+reaching a body is the product over the surfaces crossed within its cell
+(docs/110 §2):
+
+    S = Π_j (1 − σ_j)
+    σ_firmament = 1 − τ        σ_core = σ_rim = 1
+    σ_body      = 1 − (1 − ρ_b)(1 − α_b)
+
+**E5 · The throat.** Specified. Authority: docs/111 §3. A body of holding
+`H_b` and extent `R_b` has the surface deficit
+
+    δ_s = H_b / (R_b + H_b)
+
+It has a throat (the tube's mouth at its equator) iff `R_b ≤ H_b`
+(`δ_s ≥ ½`); otherwise it is closed. Its density share is
+
+    ρ_b = min(1, H_b / R_b)
+
+exactly 1 at the throat. The universal core (`H = 1`, throat radius 1), the
+galactic cores and the open remnants are one object at three tiers. A
+star's bell rate `ω_s = h/(ℓ_s/h + h)` is `δ_s` at the spin extent
+`R_s = ℓ_s / h` (`breath`, landed).
+
+**E6 · The extent.** Specified. Authority: docs/111 §3.1. A body's extent
+`R_b` is where its own pressure share meets its potential share against
+the medium about it (the restoring law E9 applied at the body's surface):
+
+    P_b / (P_b + P_m) = Φ_b / (Φ_b + Φ_m),     Φ = 1 − δ,
+    P_b = hydrostatic + thermal + magnetic (docs/106 §1)
+
+With the thermal term zero it falls to the spin extent `ℓ_b / H_b`.
+
+**E7 · The remnant, read.** Specified. Authority: docs/111 §3.2. When a
+body's burn ends (`breath`, `can_burn` false), its extent is re-read by E6
+without the thermal term:
+
+    R_b ≤ H_b   ⇒  open: a core (σ = 1), its tube to its parent a road
+    R_b > H_b   ⇒  closed: a spent body
+
+**E8 · Self-held or bonded.** Specified. Authority: docs/111 §3.3; the pinch
+`ring::pinch` (landed). A collection at reach `r` about a parent `H_p` is
+self-held iff its extent lies within its pinch,
+
+    R_b ≤ d = r · H_b / (H_b + H_p)
+
+otherwise only its bonds (E10) hold it.
+
+**E9 · The restoring share (S3).** Landed. Authority: docs/106 §2, docs/110
+§3; `flows::restoring`, `flows::fluid`.
+
+    s = P_in/(P_in + P_out) − Φ_in/(Φ_in + Φ_out)
+    u = |s| · |ℓ̄_a − ℓ̄_b| · t̄_k / (m_a + m_b)       Σ m·ℓ unchanged
+
+**E10 · Collections and the firmament's transmission.** Specified.
+Authority: docs/111 §4. Two motes bond iff `step_with ≥ ½`, both carry open
+frames, and the bounce moved them together:
+
+    C_Δ = Σ_k t_k · in_step(Δφ_k^i, Δφ_k^j) ≥ ½
+
+A collection (connected bonds) moves as one, `ℓ̄ = Σ m·ℓ / Σ m`, and leaves
+whole on its crossing (`flows::exits`). The firmament transmits
+
+    τ = left / founded,     founded = held + left
+
+**E11 · The periods.** Specified. Authority: docs/111 §5. Contained
+(`τ = 0`): `T_f = 2·a(r_f)`; established (`τ > 0`): `T_u = 2·a(R_rim)`.

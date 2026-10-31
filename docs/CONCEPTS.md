@@ -41,7 +41,8 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 | **body** | A core, star or world. It keeps a manifest, has satellites and a medium, and turns about its centre. | `pulse::Body` |
 | **core** | A galaxy's centre: a singularity whose *state* is set at the founding and never drained. The first core (path `[0]`) is the home galaxy. | `pulse::Body`, `pulse::is_home` |
 | **universal core** | The home galaxy's core read at the universe tier, the source of the universal pulse. | `pulse.rs`, docs/101 |
-| **throat** | What a core holds that its bounces have not yet released, and the passage joining an enclosure to the one above it. | `Body::throat`, `enclosure.rs` |
+| **throat** | The surface at a body's equator `R = H`, where its two faces meet: the mouth of the tube joining its enclosure to the one above. A body has one iff its extent lies within it (`R_b ≤ H_b`). `Body::throat` holds the tube's unreleased contents. | docs/111 §3.1, `enclosure.rs` |
+| **extent** | A body's own size: the reach its held matter stands at about its centre, where its pressure share meets its potential share. | docs/111 §3.1 |
 | **enclosure** | The closed sphere a body defines: each galaxy is its own S^360 and each star system its own S^60, hung inside the sphere above at its core. | `enclosure.rs` |
 | **reach** `R` | A body's distance from its centre in that enclosure's units. | `Body::radius` |
 | **medium** | A tier's unbound matter beyond its last orbit. | `Body::medium` |
@@ -84,7 +85,7 @@ and releases are exchanged under the inversion `δ ↦ 1 − δ`.
 | **bond** | A binding's strength, `λ/(1 + λ)` with `λ = 2(m + μ + τ)/R`: holding, open-frame magnetism and twist over reach (docs/103 composes it from all layers). | `formation::bond`, docs/103 |
 | **shell / stretch** | A ring of a galaxy's gas, and a span of it that can collapse. | `formation::Shell`, `formation::Stretch` |
 | **heart / ignition** | A collapsing binding's centre; it ignites as a star where it holds against its own heat. | `formation.rs` |
-| **remnant** | A star whose every rung is spent: it falls to a small throat whose other face is its galactic core. | `Body::remnant` |
+| **remnant** | A star whose burn has ended. Its extent is re-read without heat: within its equator its throat opens and it is a core whose tube's other face is its galactic core; outside, it stays closed. | `Body::remnant`, docs/111 §3.2 |
 | **recycling** | Shed and spent matter returns through the cores and the ocean; total mass never changes. | `recycle.rs`, `ocean.rs` |
 | **heat** (of a world) | The agitation of the bonds that built it, cooling through its unlocked face; its thermal band `r(1 ± heat)` decides which neighbours it meets. | `Body::heat` |
 

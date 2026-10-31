@@ -75,24 +75,83 @@ the geodesic sphere `W(t) = {x ∈ S^360 : d(core, x) = t}`.
 | The firmament | `1 − τ` | It transmits the escaped share `τ` (§4). |
 | A core's throat | 1 | A galaxy's core bounces into its own enclosure and passes nothing outward. |
 | The S^360 rim | 1 | It reflects wholly. |
-| A star | `1 − (1 − ρ_s)(1 − α_s)` | Its **density** and its **activity** each count. |
+| Any other body | `1 − (1 − ρ_b)(1 − α_b)` | Its **density** and its **activity** each count (§3.1). |
 
-For a star:
-- **Density** is the share of its matter its throat holds, `ρ_s = H_kept/H_total`.
-  The `breath` code already reads this as `h_s`.
+For a body (a star, a world, a collection):
+- **Density** is its approach to its own throat, `ρ_b = min(1, H_b/R_b)`
+  (§3.1), exactly 1 when its throat opens.
 - **Activity** is the share of its holding that its burn transduces into
-  light this echo, `α_s = light made / H_kept`, from the light ledger
+  light this echo, `α_b = light made / H_kept`, from the light ledger
   (`breath`, `light.made` per star). In Xylarium this is `burn_per_bell`.
+  Zero for a body that does not burn.
 
 The union form is a share in `[0, 1]` and needs no table:
-- a dense remnant is a surface by its density;
+- an open remnant is a surface wholly by its density;
 - a burning star is a surface by its activity;
 - a cold, diffuse body is barely one at all.
 
-A star's echo is its own bounce. Its bell rings when a front meets it, with
-strength `σ_s·S`, and the bell rings independently of the star's spin count.
-Stellar remnants are cores by the same reading (`ρ_s → 1`). No separate rule
-is needed for them.
+A body's echo is its own bounce. A star's bell rings when a front meets it,
+with strength `σ·S`, and the bell rings independently of the star's spin
+count.
+
+### 3.1 The throat and the extent
+
+A throat is a surface, not matter. A body of holding `H_b` and extent
+`R_b` (the outermost reach its held matter stands at, about its own centre)
+has the surface deficit
+
+    δ_s = H_b / (R_b + H_b)
+
+It has a **throat** iff `R_b ≤ H_b` (`δ_s ≥ ½`): its extent lies within its
+own equator, the sphere where the faces meet, which is the mouth of a tube
+through which matter crosses between tiers. Otherwise it is **closed**: a
+surface with no tube. The universal core (`H = 1`, throat radius 1, the
+shared unit), the galactic cores and open remnants are one object at three
+tiers. A star has no throat while it burns; its density share is how near
+it stands to opening one.
+
+The code already reads one case. A star's bell rate
+`ω_s = h/(ℓ_s/h + h)` is `δ_s` at the spin extent `R_s = ℓ_s/h`. What it
+lacks is the extent of every other body, and the pressure that holds a body
+open. The extent is where the body's own pressure share meets its potential
+share against the medium about it, by the restoring law (docs/106 §2):
+
+    P_b / (P_b + P_m) = Φ_b / (Φ_b + Φ_m),    Φ = 1 − δ
+
+with `P_b` hydrostatic, thermal and magnetic (docs/106 §1). With no thermal
+term it falls to the spin extent `ℓ_b/H_b`.
+
+The field `Body.throat` holds the matter in a core's tube that its bounces
+have not released: the throat's contents, not the throat.
+
+### 3.2 The remnant, read
+
+When a body's burn ends (`breath`, `can_burn` false), the thermal term
+leaves its pressure and its extent is re-read:
+
+- `R_b ≤ H_b`: its throat opens; it is a core (`σ = 1`), its tube's other
+  face its parent core, a road;
+- `R_b > H_b`: it stays closed, a spent body.
+
+One formula gives both fates; `Body.remnant` becomes this reading.
+
+### 3.3 Self-held or bonded
+
+A collection at reach `r` about a parent of holding `H_p` is a body,
+self-held, iff its extent lies within its pinch (the founding's test, one
+tier down):
+
+    R_b ≤ d = r · H_b / (H_b + H_p)
+
+A collection that fails is held only by its bonds (§4): rubble, a stream,
+debris, together only while it stays in step.
+
+### 3.4 Bodies as readings
+
+No body is typed. Gas bonds into collections (§4); a collection that passes
+its pinch is self-held, a world; one whose heat crosses the ignition law
+(`formation::system`) is active, a star, held open by its pressure; when its
+burn ends it closes or opens its throat (§3.2) and joins the cores' tier.
 
 ## 4. The firmament: collections, bonded by perturbation
 
@@ -178,7 +237,10 @@ The firmament's matter moves as **collections**, not as single motes.
 - **W4. The founding and containment.** Add §5.1–§5.3 with the period `T_f`,
   and arrivals as live meetings (§2.2) at strength `S`. Witness: a sealed
   firmament breathes nothing outside itself and conserves.
-- **W5. Galaxy formation** (§5.4) and **star surfaces** (§3), including each
+- **W5. Bodies' extents and throats** (§3.1–§3.3): every body's extent by
+  the restoring law, the remnant as its reading, the pinch test for
+  collections.
+- **W6. Galaxy formation** (§5.4) and **surfaces** (§3), including each
   cell's shadow product.
 - **Read before W4.** A bounded read of a fresh 2^40 universe with W2–W3 in
   place reports:

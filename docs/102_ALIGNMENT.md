@@ -17,7 +17,7 @@ witness.
 | **shell** | a band of reach on one face, fibred by the phase torus and the R loop; its state a field of cells (docs/110) | `flows::fluid` |
 | **cell** | a shell's bead along one plane's circle, parted at gaps wider than the mean; it owns its arc (docs/110) | `flows::phase_beads` |
 | **orbit torus** | a body's invariant torus, its motion a linear flow `φ_k(n) = φ_k(0) + n·t_k/P` (docs/110) | `motion.rs` |
-| **throat** | what a core holds unreleased | `Body.throat` |
+| **throat** | the surface at a body's equator `R = H`, the tube's mouth; a body has one iff `R_b ≤ H_b` (docs/111 §3.1). `Body.throat` holds its unreleased contents | `Body.throat` |
 | **state** | what the throat held at the core's forming; set once, never drained | `Body.state` |
 | **bounce / bell** | a core's re-pulse in full in its own units; one a bell | breath's arrivals |
 | **push / unlocked face** | the bounce's carriage on a kind; the face the core does not lock, `1 − δ` | `push_cut`, release |

@@ -135,12 +135,17 @@ operators of the network.
   galaxies, stars and worlds form from flows rather than being placed;
   conservation is exact across every run. Its medium has a restoring force:
   pressure is state, and neighbouring rings are pushed back toward the
-  hydrostatic balance of pressure against potential (docs/106, S3). It can be founded, advanced and read;
+  hydrostatic balance of pressure against potential, radially and around
+  each shell's circles (docs/106 S3, docs/110). It can be founded, advanced and read;
   it cannot yet be played directly, and civilizations are seated on its star
   systems by the conductor. Several values are still imported from Earth's
   physics and are scheduled to be derived (docs/108).
-- **Trajectory.** The thermodynamic substrate (pressure, energy and heat as
-  state, docs/106), then the remaining layers (docs/102 register), then the
+- **Trajectory.** The pulse as one expanding wavefront echoed only at
+  surfaces, contained by the firmament until bonded collections of its
+  matter escape, with the zero galaxy first and every body's extent and
+  throat read by one law (docs/111, EQUATIONS §8); the thermodynamic
+  substrate (pressure, energy and heat as state, docs/106); then the
+  remaining layers (docs/102 register), then the
   game moved fully onto it.
 
 ### The protocol stack
