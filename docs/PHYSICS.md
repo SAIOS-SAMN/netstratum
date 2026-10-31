@@ -5,7 +5,7 @@ engines in the workspace, the code each one runs on the live path, where the
 same quantity is computed in more than one place, the values that are not
 yet derived, and what the engine has produced. The laws themselves are
 listed in [EQUATIONS.md](EQUATIONS.md); how Netstratum uses Mycelium is in
-[ARCHITECTURE.md](ARCHITECTURE.md) §6.
+[MYCELIUM.md](MYCELIUM.md).
 
 It reflects `main` at the time of writing, from a read of the code (file and
 line references are given so each statement can be checked).
@@ -181,4 +181,5 @@ read, and each read that failed a law has changed it. It now forms systems
 from released matter rather than placing them. It has not yet produced a
 stable universal state: the firmament is not yet a container, reads beyond
 a few bounces are stopped by the growth of the carrier, no universe is
-running, and no era-1 state has been verified by the Mycelium court.
+running, and no era-1 state has been verified by the Mycelium court
+([MYCELIUM.md](MYCELIUM.md) §3).

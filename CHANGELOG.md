@@ -12,6 +12,11 @@ change is named here.
 
 ### Added
 
+- `docs/MYCELIUM.md`: what Netstratum takes from Mycelium, where each use
+  runs and how complete it is, the defects (verification only as a
+  diagnostic, unmeasured laws counted as agreeing, `tongue` half-wired), and
+  the line between the two projects' physics. docs/109 A6 corrected to
+  partial.
 - `docs/PHYSICS.md`: the engines, the era-1 live path, the quantities
   computed in more than one place, the values not yet derived, the era-0
   bridges, and a ledger of what the engine's reads have established;
