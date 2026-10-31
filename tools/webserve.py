@@ -74,7 +74,7 @@ class Window(BaseHTTPRequestHandler):
             self.send_response(410)
             self.send_header("Content-Type", "text/plain")
             self.end_headers()
-            self.wfile.write(b"gone — use /data/index.txt (no JSON)\n")
+            self.wfile.write("gone — use /data/index.txt (no JSON)\n".encode("utf-8"))
             return
         if path.startswith("/data/"):
             relative = path[len("/data/") :]
