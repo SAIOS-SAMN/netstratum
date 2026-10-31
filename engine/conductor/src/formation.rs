@@ -1231,7 +1231,8 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, r_echo: u64, ra
     // A small body: (reach, share, matter, phases, tilt, path, heat).
     // A small body: (reach, share, matter, phases, tilt, path, heat, the
     // strike its joining gave it: the turning contrast of what met).
-    type Small = (Ratio, Ratio, Manifest, Vec<Ratio>, Vec<Ratio>, Option<Vec<u64>>, Ratio, Ratio);
+    // And (docs/109 §4) the mind coupled to it, and whether its orbit is solid.
+    type Small = (Ratio, Ratio, Manifest, Vec<Ratio>, Vec<Ratio>, Option<Vec<u64>>, Ratio, Ratio, Option<[u8; 32]>, bool);
     let mut bodies: Vec<Small> = Vec::new();
     let mut to_star = Manifest::new();
     for (kind, a) in &pool {
@@ -1251,7 +1252,7 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, r_echo: u64, ra
         for &s in &crate::flows::SPACE {
             phase[s] = crate::ring::grain(&frac(sys.phase.get(s).cloned().unwrap_or_else(|| ratio(0, 1)) + z_turn.clone()));
         }
-        bodies.push((r, mass(&[(kind.clone(), a.clone())].into()) / total.clone(), [(kind.clone(), a.clone())].into(), phase, sys.tilt.clone(), None, ratio(0, 1), ratio(0, 1)));
+        bodies.push((r, mass(&[(kind.clone(), a.clone())].into()) / total.clone(), [(kind.clone(), a.clone())].into(), phase, sys.tilt.clone(), None, ratio(0, 1), ratio(0, 1), None, false));
     }
     for (kind, a) in to_star {
         *sys.kept.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
@@ -1261,7 +1262,7 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, r_echo: u64, ra
         let r = if r < b0 { b0.clone() } else { r };
         let mut ph = w.phase.clone();
         crate::flows::full(&mut ph);
-        bodies.push((r, mass(&w.total()) / total.clone(), w.total(), ph, w.tilt.clone(), Some(w.path.clone()), w.heat.clone(), ratio(0, 1)));
+        bodies.push((r, mass(&w.total()) / total.clone(), w.total(), ph, w.tilt.clone(), Some(w.path.clone()), w.heat.clone(), ratio(0, 1), w.coupled, w.solid));
     }
     // Convergence: read every neighbouring pair at once; those failing the
     // test join; read again until all pass.
@@ -1284,7 +1285,8 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, r_echo: u64, ra
             let r = bodies[i + 1].0.clone() - bodies[i].0.clone();
             // Two solid orbits never meet; a forming one meets where the
             // stronger echo holds against their shear.
-            let both_solid = solid(bodies[i].5.is_some(), &omega[i], r_echo) && solid(bodies[i + 1].5.is_some(), &omega[i + 1], r_echo);
+            let solid_at = |k: usize| bodies[k].9 || solid(bodies[k].5.is_some(), &omega[k], r_echo);
+            let both_solid = solid_at(i) && solid_at(i + 1);
             join[i] = !both_solid && echo_holds(&omega[i], &omega[i + 1], &r, &bodies[i].1, &bodies[i + 1].1);
         }
         if !join.iter().any(|j| *j) {
@@ -1326,8 +1328,13 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, r_echo: u64, ra
             let phase: Vec<Ratio> = (0..planes).map(|kp| crate::ring::grain(&crate::flows::circle_mean(&group.iter().map(|g| (g.1.clone(), g.3.get(kp).cloned().unwrap_or_else(|| ratio(0, 1)))).collect::<Vec<_>>()))).collect();
             let tilt = crate::flows::blend(&group.iter().map(|g| (g.1.clone(), g.0.clone(), g.4.clone())).collect::<Vec<_>>());
             let path = group.iter().filter(|g| g.5.is_some()).max_by(|a, b| a.1.cmp(&b.1)).and_then(|g| g.5.clone());
+            // The joined body keeps its standing world's orbit state, and the
+            // coupling of its heaviest coupled member (docs/109 §4); any
+            // other coupling in the group is released.
+            let solid_now = group.iter().filter(|g| g.5.is_some()).max_by(|a, b| a.1.cmp(&b.1)).is_some_and(|g| g.9);
+            let coupled = group.iter().filter(|g| g.8.is_some()).max_by(|a, b| a.1.cmp(&b.1)).and_then(|g| g.8);
             group.clear();
-            merged.push((r, m, matter, phase, tilt, path, heat, strike));
+            merged.push((r, m, matter, phase, tilt, path, heat, strike, coupled, solid_now));
         }
         bodies = merged;
     }
@@ -1338,7 +1345,8 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, r_echo: u64, ra
     let mut formed = 0usize;
     let mut inner = mass(&sys.kept) / total.clone();
     let mut siblings: Vec<u64> = bodies.iter().filter_map(|b| b.5.as_ref().and_then(|p| p.last().copied())).collect();
-    for (r, m, matter, phase, tilt, path, heat, strike) in bodies {
+    for (r, m, matter, phase, tilt, path, heat, strike, coupled, was_solid) in bodies {
+        let standing = path.is_some();
         let delta_at = inner.clone() / (r.clone() + inner.clone());
         // Ignition of A grown BODY (one accretion path; with Xylarium): it is
         // a star of its system where its own matter binds as a filament,
@@ -1385,8 +1393,13 @@ pub fn settle_system(sys: &mut crate::pulse::Body, unit: &Ratio, r_echo: u64, ra
             }
         };
         let delta = delta_at;
-        let mut w = crate::pulse::Body { ell_orth: ratio(0, 1), path, radius: crate::ring::grain(&(r.clone() * total.clone() / unit.clone())), period: crate::ring::period(&r, &inner), kept: matter, satellites: Vec::new(), medium: Manifest::new(), ell: crate::ring::grain(&(r.clone() * inner.clone())), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat, tilt, throat: Default::default() };
+        let mut w = crate::pulse::Body { solid: false, coupled: None, ell_orth: ratio(0, 1), path, radius: crate::ring::grain(&(r.clone() * total.clone() / unit.clone())), period: crate::ring::period(&r, &inner), kept: matter, satellites: Vec::new(), medium: Manifest::new(), ell: crate::ring::grain(&(r.clone() * inner.clone())), medium_spin: ratio(0, 1), gas: Vec::new(), born: 0, state: ratio(0, 1), flows: Vec::new(), reservoir: ratio(0, 1), turning: ratio(0, 1), phase, load: ratio(0, 1), bell: Vec::new(), remnant: false, heat, tilt, throat: Default::default() };
         w.state = mass(&w.kept);
+        // Its orbit state (docs/96 §8.2, docs/109 §4): a standing world once
+        // round since it stood is solid, and stays solid; a coupling rides a
+        // world, never a star.
+        w.solid = !ignites && (was_solid || solid(standing, &delta, r_echo));
+        w.coupled = if ignites { None } else { coupled };
         if ignites {
             // A star of its system: born marks it (worlds are born 0).
             w.born = bell.max(1);

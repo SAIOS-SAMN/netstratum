@@ -442,19 +442,19 @@ fn main() {
         // admission published for the house.
         {
             let attached = conductor::profile::timed("attachment", || {
-                conductor::attachment::step(&universe, &mut worlds, &registry, &book, std::path::Path::new(&var_root), epoch_base + beat)
+                conductor::attachment::read(&mut universe, &mut worlds, &registry, &book, std::path::Path::new(&var_root), epoch_base + beat)
             });
-            for (sigil, world) in &attached.admitted {
-                println!("beat {beat}: A MIND ATTACHES — {sigil} founded on world {world}");
+            for (mind, path) in &attached.coupled {
+                println!("beat {beat}: A MIND COUPLES — {mind} to the forming world {path:?}");
             }
-            if attached.refused > 0 {
-                println!("beat {beat}: {} attachment request(s) refused: no viable free world", attached.refused);
+            for (sigil, world) in &attached.admitted {
+                println!("beat {beat}: A MIND ATTACHES — its orbit solid, {sigil} founded on world {world}");
             }
             for sigil in &attached.released {
                 println!("beat {beat}: A MIND DETACHES — {sigil} goes on as the universe's own");
             }
-            for (sigil, opened) in &attached.sandboxes {
-                println!("beat {beat}: A SANDBOX {} — {sigil}", if *opened { "OPENS" } else { "IS REFUSED" });
+            for (mind, opened) in &attached.sandboxes {
+                println!("beat {beat}: A SANDBOX {} — {mind}", if *opened { "OPENS" } else { "IS REFUSED (its leisure does not cover it)" });
             }
         }
         conductor::profile::timed("clocks", || {

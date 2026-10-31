@@ -7,7 +7,9 @@ and pressure are residues of it, so there is no restoring force and no
 stable equilibrium; the substrate supplies the restoring force (hydrostatic
 balance).
 
-**Status:** scope.
+**Status:** S3 built (§2, the hydrostatic balance as the restoring law, in
+`flows::restoring` and `flows::fluid`); S1, S2, S4 and S5 open. Thermal
+pressure reads agitation as the heat until S2 makes heat state.
 
 **Prerequisites:** docs/94 (UMD, SUBSTRATE_C), docs/103 (the layers),
 docs/104 (the inverse duals), docs/105 (the polarity equilibria). Read
@@ -67,7 +69,14 @@ At each place (a mote's reach in its enclosure, a ring, a body):
   balances the pull across it, the hydrostatic balance on its face, as pair
   shares: `P_in/(P_in + P_out) = Φ_in/(Φ_in + Φ_out)` across a ring's two
   sides. A place pushed off it is pushed back by the difference: the
-  substrate restores.
+  substrate restores. Between neighbouring rings the difference
+  `s = P_in/(P_in + P_out) − Φ_in/(Φ_in + Φ_out)` moves turning by the
+  exchange law (`u = s·(ℓ̄_out − ℓ̄_in)/(m_in + m_out)`, the outer gaining
+  `u·m_in`, the inner giving `u·m_out`, `Σ m·ℓ` unchanged): outward where the
+  inner ring is over-pressured (`s > 0`), inward where it is under (`s < 0`),
+  nothing at balance. This replaces the contrast `|P_in − P_out|/(P_in +
+  P_out)`, which moved turning outward whichever ring pressed harder and so
+  had no balance to restore to.
 - **Saturation (the flop):** a state that would carry more than SUBSTRATE_C
   per K-step escapes as a typed outcome, the luminal bound's own, never a
   panic (docs/94 §1).
@@ -113,7 +122,10 @@ the substrate's still point.
 2. **Heat as state with its counterweight** (docs/104 §2, docs/105 heat pair).
    Witness: the ledger's heat term closes.
 3. **Pressure as state; the hydrostatic equilibrium as the restoring law.**
-   Witness: a medium at its balance moves nothing; displaced, it returns.
+   Witness: a medium at its balance moves nothing; displaced, it returns
+   (`a_medium_at_its_balance_moves_nothing_and_displaced_it_returns`). Built.
+   Read over 300 bells of a fresh 2^40 universe: the breath created nothing,
+   the manifest unchanged, the torque identity exact.
 4. **Kinematics from the substrate:** the torque restated as the potential's
    payment and the contrast's transport. Witness: the spin ledger exact; the
    energy ledger closes.

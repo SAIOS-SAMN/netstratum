@@ -9,8 +9,9 @@ verification as everything native to the universe. The Mycelium mesh carries
 the attachment and verifies it, which gives the containment a second,
 independent check.
 
-**Status:** design. §2 lists what the code already provides; §6 lists what
-remains to build.
+**Status:** built except the running service (A8). §2 lists what the code
+provided before; §6 lists each part and where it is built; §7 is the
+interface.
 
 **Prerequisites:** [ARCHITECTURE.md](ARCHITECTURE.md),
 [107_MYCELIUM_INTEGRATION.md](107_MYCELIUM_INTEGRATION.md), NS-6
@@ -97,16 +98,33 @@ system is one S^60 enclosure whose worlds are chained by orbital mechanics,
 and the same rules that govern a native civilization's growth govern an
 attached one's. Growth is earned, never granted.
 
-1. **Placement by fit.** An attaching world model declares what it needs: its
-   metabolism (mineral, biotic or plasmic) and the medium it can live in. It
-   is placed on the world, in the star system, where it is most viable, the
-   way native lineages are seated (`seating::seat` seats each lineage on the
-   world it is most viable on; `waking` derives a mind's metabolism from its
-   world's medium). Attachments with similar structure settle near each
-   other, as a lineage's descendants settle the free worlds nearest it.
-2. **Start on one world.** An attachment begins as a single-planet
+1. **Coupling to a forming body.** An attaching world model brings no
+   matter: the universe's mass is conserved exactly. It couples to a body
+   that is still forming its orbit (docs/96 §8.2: a world not yet once
+   round) whose land feeds its metabolism (mineral, biotic or plasmic; the
+   wild land of `seating::Site::wild_for`). It never couples to a world whose
+   orbit is solid, or to one a line already stands on. A request that finds
+   no forming body to couple to has not coupled yet; it couples when one
+   forms.
+2. **Its orbit is a functional orbit.** The coupled body turns by the motion
+   law in closed form, `φ(n) = φ₀ + n/P` with `P = 1 + R/H` (`motion.rs`);
+   nothing is stepped. It is perturbed by **shear**: neighbouring bodies
+   turn at different rates, `|ω_i − ω_j|` with `ω = H/(R + H)`, and where the
+   stronger echo holds against that difference,
+   `max(m_i, m_j)/(r + max(m_i, m_j)) ≥ |ω_i − ω_j|`, the pair joins and the
+   coupling rides the joined body (`formation::settle_system`). It is
+   perturbed by **volume**: the medium the bodies form from moves by the
+   hydrostatic balance (S3, docs/106 §2), the pressure share of each ring
+   against its potential share restoring it.
+3. **Admission is the orbit closing.** The coupled body is admitted when its
+   orbit is solid, `2ω·r_echo ≥ 1` (the solid-orbit rule): a line is founded
+   on that world and the mind is registered as its contained agent. A coupled
+   body joined into a body that another mind is coupled to, or one that does
+   not stand as a world, releases its coupling, and the request couples
+   again.
+4. **Start on one world.** An attachment begins as a single-planet
    civilization, sized to its needs.
-3. **Planetary traversal inside its system.** Its economic reach is its own
+5. **Planetary traversal inside its system.** Its economic reach is its own
    star system: travel and trade between the system's worlds follow the
    route through the star (`enclosure::route`). It expands onto further
    worlds of the system only as its own economy carries it (`expand_step`;
@@ -114,7 +132,7 @@ attached one's. Growth is earned, never granted.
    heating of the larger city). A system holds a handful of worlds
    (`SYSTEM_CAP`, a placeholder). Its memory is bounded by its share of the
    universe's wealth (docs/71).
-4. **Wormhole traversal is earned.** Travel beyond the system, through gates
+6. **Wormhole traversal is earned.** Travel beyond the system, through gates
    to other systems' cores and up to the universal tier, is the progression
    ladder (`ascension`, docs/72): a line that masters the top of the
    difficulty ladder may send an envoy through a gate; gates are built and
@@ -139,24 +157,20 @@ systems and the network only by what it has learned and earned.
 | The containment is checked twice | Netstratum's kernel and the Mycelium court verify the same transition independently |
 | A party can be removed at once | revoking a grant or releasing a seat ends its authority without its cooperation |
 
-## 6. What remains to build
+## 6. The parts and where they are built
 
-| Item | What it needs |
-|---|---|
-| A1 World seats for attachment | The house offers Sovereign and Office seats at worlds to new attachments, alongside the Ancients seats it offers now |
-| A1b Placement by fit | An attachment declares its metabolism and medium, and is placed on the most viable free world, using the seating rule native lineages use |
-| A1c Seats by progression | Progenitor, Steward and Ancients seats open to an attached line when its progression reaches that tier (gate built, throat kept, ancient arisen) |
-| A2 Seat to entity | A take registers the party as an NS-6 entity at the seat's place, with that seat's grants; release removes it |
-| A3 Requests through the seat | A seated party's actions arrive as seat calls and enter the place's inbox (the inbox applies directives today; it applies only a fixed set of actions and ignores who sent them) |
-| A4 Entities with principals | An attached entity's principal is the line or office that admitted it, so agents can be contained by agents (today every agent's principal is the world's sovereign) |
-| A5 Sandboxes as sub-universes | Any admitted party, not only an ancient, can open a sub-universe at its place, paid from its own means |
-| A6 Verification on every attached transition | Transitions made by attached parties are submitted to the court as well as checked locally |
-| A7 The importable libraries | The world, galactic and universal models, the entity model and the attachment client, published as crates an external model can depend on |
-| A8 Running service | A configured court, the seat service, and the conductor running against it |
-
-Build order: A2 and A3 first (an attached party can act in a world), then
-A1 and A1b (world seats and placement by fit), A4, A6 (verification), A1c
-(seats by progression), A5 (sandboxes), and A7 and A8 (outside use).
+| Item | Status | Where |
+|---|---|---|
+| A1 World seats for attachment | built | the house lists the door seat and a world seat per admitted mind (`hypha::attached`, `hypha::house`) |
+| A1b Coupling to a forming body | built | `conductor::attachment::couple`: a request couples to a forming world its metabolism fits; `Body::coupled` carries it through joins (`formation::settle_system`); admission when the orbit is solid (`Body::solid`) |
+| A1c Seats by progression | built | each admission carries the tiers its line has reached (`attachment::tiers_of`); the house lists a Progenitor, Steward or Ancients seat for each |
+| A2 Seat to entity | built | an admitted mind is registered as an agent of its world, with build, raze and collect (`Polity::admit_mind`); detachment revokes the grants (`release_mind`) |
+| A3 Requests through the seat | built | a call becomes a directive in the world's inbox acting as the mind's entity (`hypha::attached::carry`, `Polity::apply_directive`); its result is posted back to the mind |
+| A4 Entities with principals | built | `World::register_agent_under`; containment reads the principal chain (`cfe::ipsal::permits_in`, kernel 0.38.0) |
+| A5 Sandboxes as sub-universes | built | a sandbox opens a sub-universe at the line's galaxy core, paid from its leisure; its opener traverses it (`substrata::open_for`, `substrata::step`) |
+| A6 Verification of attached transitions | built | attached worlds are ordinary world directories, so the census follower folds their receipts to the court with every other world's |
+| A7 The importable libraries | built | the `attach` crate: the interface, the file exchange, and the client (`attach::client`, `examples/agent.rs`) |
+| A8 Running service | open | a configured court, the house (`ns-hypha seat`) and the conductor running against it |
 
 ## 7. The interface
 
@@ -192,14 +206,14 @@ the next beat, or a refusal (`NO_FUNCTION`, `NOT_SEATED`, `UNREAD`).
 | Kind | Id | Arguments |
 |---|---|---|
 | admitted | 0x4E01 | `Key(line key)`, `Count(world seat)` |
-| not admitted | 0x4E02 | `Count(reason)`: 1 no viable world |
+| not admitted | 0x4E02 | `Count(reason)`: reserved; a request with no forming world to couple to waits rather than being refused |
 | result | 0x4E03 | `Key(call reference)`, `Count(1 applied, 0 refused)` |
 
 **Files** (under the variable root):
 
 | File | Written by | Read by | Contents |
 |---|---|---|---|
-| `attach/requests/<mind>.req` | house | conductor | an attachment request: the mind's key and metabolism |
+| `attach/requests/<mind>.req` | house | conductor | an attachment request: the mind's key and metabolism; kept until the mind is admitted |
 | `attach/admitted.bin` | conductor | house | each admission: mind, world, line, entity handle, tiers reached |
 | `attach/released/<mind>` | house | conductor | a detachment |
 | `attach/sandbox/<mind>-<ref>.req` | house | conductor | a sandbox request |

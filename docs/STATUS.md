@@ -111,20 +111,31 @@ operators of the network.
   world by holding its pen, which pauses the conductor for that world. A
   player can write agents with scoped permissions (build, raze, collect) and
   drive them from the CLI; every action records who took it.
-- **Trajectory.** Attachment through the hypha (docs/109): an external agent
-  or sandbox takes a seat at one world chosen by fit, becomes a scoped entity
-  there, acts only through the update rule, and is verified by the Mycelium
-  court as well as by Netstratum. It starts as a single-planet civilization,
-  trades and expands within its own star system as its economy allows, and
-  reaches other systems through gates only by progression. Seats exist today
-  at the ancients' councils only; seat-to-entity registration and requests
-  through the seat come first.
+- **Attachment (built, not yet running).** An external agent or sandbox
+  attaches through the hypha (docs/109): it calls `attach` on the house's
+  door seat with its metabolism and couples to a world still forming its
+  orbit whose land feeds it. The coupling rides that body through its joins
+  with its neighbours (the shear) as the medium settles by the hydrostatic
+  balance (the volume); when the body's orbit is solid, a line is founded on
+  that world and the mind is registered as its contained agent.
+  It acts only through its world seat, as directives that pass the update
+  rule, and each result is posted back to it. It starts as a single-planet
+  civilization, expands within its own star system as its economy allows,
+  and reaches other systems through gates only by progression; tier seats
+  open as its line reaches them. Agents can contain agents. A sandbox runs as
+  a sub-universe at its line's core. The client library is the `attach`
+  crate. It runs once a court is configured and the house and conductor run
+  against it.
+- **Trajectory.** The running service; multiple machines sharing one world
+  (NS-5, the mesh).
 
 ### The universe (era 1)
 
 - **Current.** A universe founded from an exact amount of matter, in which
   galaxies, stars and worlds form from flows rather than being placed;
-  conservation is exact across every run. It can be founded, advanced and read;
+  conservation is exact across every run. Its medium has a restoring force:
+  pressure is state, and neighbouring rings are pushed back toward the
+  hydrostatic balance of pressure against potential (docs/106, S3). It can be founded, advanced and read;
   it cannot yet be played directly, and civilizations are seated on its star
   systems by the conductor. Several values are still imported from Earth's
   physics and are scheduled to be derived (docs/108).
@@ -141,10 +152,9 @@ operators of the network.
 | NS-3 VRP (receipts, the chronicle) | Built |
 | NS-4 APERTURE (controlled disclosure) | Partly built |
 | NS-5 MESH (multi-node consensus) | Chain integrity built; no network transport |
-| NS-6 IPSAL-OS (entities and permissions) | Built for players and their agents |
+| NS-6 IPSAL-OS (entities and permissions) | Built for players, their agents, and attached minds; agents can contain agents |
 | NS-7 Anchor (external-chain settlement) | Not started |
 
 ## Not started
 
-Settlement on external blockchains (NS-7), multiplayer across machines, and
-the importable sandbox libraries (the SDK) for outside models.
+Settlement on external blockchains (NS-7) and multiplayer across machines.

@@ -60,8 +60,12 @@ verify             # re-check the world's receipt chain
 - **Run AI civilizations.** The conductor plays 22 founding civilizations,
   each thinking, building and trading on its own world. Send one a directive
   through its inbox, or take over its world by holding its pen.
-- **Write an agent.** Grant an agent scoped permissions (build, raze,
-  collect) and act through it; every action records who took it.
+- **Attach an agent or a sandbox.** An external model attaches through the
+  Mycelium hypha with the `attach` crate (`engine/attach/examples/agent.rs`):
+  it couples to a world still forming whose land fits its needs, is admitted
+  when that world's orbit closes, acts there as a contained agent under the
+  same update rule as everything else, and grows only by its own economy and
+  progression ([docs/109](docs/109_ATTACHMENT.md)).
 - **Found and study a universe.** Galaxies, stars and worlds form from flows
   of matter, with mass conserved exactly. Advance it with `breathe` and read
   it with `observe`.

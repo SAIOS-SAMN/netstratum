@@ -101,7 +101,7 @@ docs before code; witnesses by re-derivation, never equal bytes.
 |---|---|---|---|---|
 | S1 | the energy ledger (heat, motion, potential, both faces), read | docs/106 §6 | — | — |
 | S2 | heat as state with its counterweight | docs/106 §2 | S1 | — |
-| S3 | pressure as state; hydrostatic equilibrium the restoring law | docs/106 §2 | S1 | — |
+| S3 | pressure as state; hydrostatic equilibrium the restoring law | docs/106 §2 | S1 | built (`flows::restoring`) |
 | S4 | kinematics propagated from the substrate | docs/106 §3 | S2, S3 | — |
 | S5 | form's coupling: bindings against pressure | docs/106 §3 | S3 | — |
 

@@ -1681,7 +1681,12 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
                 continue;
             }
             let contrast = |a: &Ratio, b: &Ratio| { let s = a.clone() + b.clone(); if s.is_zero() { ratio(0, 1) } else { (if a > b { a.clone() - b.clone() } else { b.clone() - a.clone() }) / s } };
-            let s_p = contrast(&inn.4, &out.4);
+            // S3 (docs/106 §2): the pressure's exchange is the hydrostatic
+            // balance restoring the pair, signed (outward where the inner
+            // ring is over-pressured, inward where under), zero at balance;
+            // the field's (magnetic shear) stays the contrast, outward.
+            let one = ratio(1, 1);
+            let s_p = restoring(&inn.4, &out.4, &(one.clone() - inn.6.clone()), &(one - out.6.clone()));
             let s_b = contrast(&inn.5, &out.5) * contrast(&inn.6, &out.6);
             for (s, moved) in [(s_p, &mut moved_p), (s_b, &mut moved_b)] {
                 if s.is_zero() {
@@ -1695,7 +1700,8 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
                 for &i in &inn.0 {
                     dl[i] -= give.clone();
                 }
-                *moved += out.1.clone() * gain;
+                let spin = out.1.clone() * gain;
+                *moved += if spin < ratio(0, 1) { -spin } else { spin };
             }
         }
     }
@@ -1706,6 +1712,21 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> (R
         }
     }
     (moved_p, moved_b)
+}
+
+/// The hydrostatic balance across a ring pair (docs/106 §2, S3), as a signed
+/// share: the inner ring's share of the pair's pressure less its share of
+/// the pair's potential, `P_in/(P_in + P_out) − Φ_in/(Φ_in + Φ_out)`, with
+/// `Φ = g = 1 − δ` the hold inverse gravity gives each. Zero at balance; positive
+/// where the inner ring presses harder than its potential bears (the pair
+/// expands), negative where it presses less (the pair contracts). First
+/// degree, in `(−1, 1)`; zero where either sum is zero.
+pub fn restoring(p_in: &Ratio, p_out: &Ratio, phi_in: &Ratio, phi_out: &Ratio) -> Ratio {
+    let (sp, sf) = (p_in.clone() + p_out.clone(), phi_in.clone() + phi_out.clone());
+    if sp.is_zero() || sf.is_zero() {
+        return ratio(0, 1);
+    }
+    p_in.clone() / sp - phi_in.clone() / sf
 }
 
 /// The motes' total holding (by weight).
@@ -1796,7 +1817,7 @@ mod reading_tests {
 
 #[cfg(test)]
 mod passage_tests {
-    use super::{blend, mean_response, rest, space_of, spin_torque, tilt_from, tilt_of, Mote};
+    use super::{blend, mean_response, restoring, rest, space_of, spin_torque, tilt_from, tilt_of, Mote};
     use cfe::ratio::ratio;
 
     #[test]
@@ -1822,6 +1843,22 @@ mod passage_tests {
         // Backward: the next mark behind.
         settle(&mut x, &[(0, ratio(0, 1), ratio(1, 4))], Some(&p), &mut cross);
         assert_eq!(true_phase(&x, 0), ratio(1, 60) - ratio(1, 240));
+    }
+
+    #[test]
+    fn a_medium_at_its_balance_moves_nothing_and_displaced_it_returns() {
+        // S3's witness (docs/106 §6): pressure shares equal to potential
+        // shares stand still; the inner ring over-pressured pushes outward,
+        // under-pressured is pushed back inward, by the difference.
+        let (phi_in, phi_out) = (ratio(1, 3), ratio(2, 3));
+        assert_eq!(restoring(&ratio(1, 1), &ratio(2, 1), &phi_in, &phi_out), ratio(0, 1), "at balance nothing moves");
+        let over = restoring(&ratio(2, 1), &ratio(2, 1), &phi_in, &phi_out);
+        let under = restoring(&ratio(1, 2), &ratio(2, 1), &phi_in, &phi_out);
+        assert!(over > ratio(0, 1), "an over-pressured inner ring expands the pair");
+        assert!(under < ratio(0, 1), "an under-pressured inner ring is pushed back");
+        assert_eq!(over, ratio(1, 2) - ratio(1, 3));
+        assert_eq!(under, ratio(1, 5) - ratio(1, 3));
+        assert_eq!(restoring(&ratio(0, 1), &ratio(0, 1), &phi_in, &phi_out), ratio(0, 1), "no pressure, no push");
     }
 
     #[test]
