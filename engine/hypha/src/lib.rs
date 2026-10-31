@@ -32,6 +32,7 @@ pub mod line;
 pub mod probe;
 pub mod refound;
 pub mod seat;
+pub mod tiers;
 pub mod wire;
 
 /// No default court: the standalone :7520 court is retired (coordinator
@@ -118,8 +119,8 @@ impl Uplink {
         let key_name = key_path.to_str().ok_or_else(|| {
             io::Error::new(io::ErrorKind::InvalidInput, "the key path is not UTF-8")
         })?;
-        let voice = HyphaKey::load_or_mint(key_name).vk_bytes();
-        let kernel = mycelium::sdk::Kernel::from_voice(voice);
+        let voice = HyphaKey::load_or_mint(key_name).verifying_bytes();
+        let kernel = mycelium::sdk::Voice::from_voice(voice);
         Ok(Uplink {
             session: Session::open(addr, kernel),
             addr: addr.to_string(),

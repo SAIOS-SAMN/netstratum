@@ -10,7 +10,7 @@ use mycelium::anastome::dialogue::seat::{
     self, Arg, Call, Outcome, Percept, Post, ReadMail, Record, Refusal, Seats, SignedPost, Take,
     Taken,
 };
-use mycelium::sdk::{Kernel, Session};
+use mycelium::sdk::{Session, Voice};
 use std::io;
 
 fn undecoded(what: &str) -> io::Error {
@@ -93,7 +93,7 @@ impl Client {
     /// Connect to the hypha at `addr` (`host:port`) as the mind holding `key`,
     /// for Netstratum's domain `domain`.
     pub fn open(addr: &str, key: SigningKey, domain: [u8; 32]) -> Client {
-        let kernel = Kernel::from_key(key.clone());
+        let kernel = Voice::from_key(key.clone());
         Client {
             session: Session::open(addr, kernel),
             key,

@@ -28,9 +28,9 @@ pub struct Held {
 /// The role a reached tier sits in.
 pub fn role_of(tier: &str) -> Option<Role> {
     match tier {
-        "progenitor" => Some(Role::Progenitor),
-        "steward" => Some(Role::Steward),
-        "ancient" => Some(Role::Ancients),
+        "progenitor" => Some(crate::tiers::PROGENITOR),
+        "steward" => Some(crate::tiers::STEWARD),
+        "ancient" => Some(crate::tiers::ANCIENTS),
         _ => None,
     }
 }
@@ -49,7 +49,7 @@ pub fn held_seats(admissions: &[Admission], id: &mut dyn FnMut(&str) -> u32) -> 
             mind: a.mind,
             world: a.world.clone(),
             handle: a.handle.clone(),
-            role: Role::Sovereign,
+            role: crate::tiers::SOVEREIGN,
         });
         for t in &a.tiers {
             if let Some(role) = role_of(t) {
@@ -97,7 +97,7 @@ pub fn world_fns() -> Vec<SeatFn> {
 pub fn listed(held: &[Held], beat: &Arg) -> Vec<Seat> {
     let mut seats = vec![Seat {
         seat: DOOR,
-        role: Role::Sovereign,
+        role: crate::tiers::SOVEREIGN,
         on: door_key(),
         beat: beat.clone(),
         fns: vec![SeatFn {
@@ -248,7 +248,11 @@ mod tests {
         );
         assert_eq!(
             held.iter().map(|h| h.role).collect::<Vec<_>>(),
-            vec![Role::Sovereign, Role::Progenitor, Role::Ancients]
+            vec![
+                crate::tiers::SOVEREIGN,
+                crate::tiers::PROGENITOR,
+                crate::tiers::ANCIENTS
+            ]
         );
         let seats = listed(&held, &Arg::Q { num: 1, den: 1 });
         assert_eq!(seats[0].seat, DOOR, "the door is listed first");
@@ -302,7 +306,7 @@ mod tests {
             mind: [1; 32],
             world: "w0-1-2".into(),
             handle: handle_of(&[1; 32]),
-            role: Role::Sovereign,
+            role: crate::tiers::SOVEREIGN,
         };
         let act = act_of(FN_COLLECT, &[], &held.handle).expect("reads");
         carry(&root, &worlds, &held, &act, &[9; 32]).expect("carried");
