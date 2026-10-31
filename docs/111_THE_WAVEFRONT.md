@@ -37,7 +37,11 @@ the geodesic sphere `W(t) = {x ∈ S^360 : d(core, x) = t}` (docs/110 §1). It
 grows by one light-ring a bell.
 
 1. **Delay through the held medium.** The front reaches reach `r` after
-   `a(r) = r + H(<r)`, with `H(<r)` the holding enclosed. This is the front's
+   `a(r) = r + H(<r)`, with `H(<r)` the holding enclosed, `r` in throat
+   radii of the universal core and `H` in units of its state (1), so `a` is
+   in light-crossings of the throat radius and the equator `δ = ½` stands at
+   `r = H = 1`. Where `H(<r) → 0` this is a constant speed, linear in `r`
+   (Xylarium's present `(r/rim)·bell/2`). This is the front's
    own slowing in the held medium, the clock's complement integrated along
    its path. No body holds the front and re-emits it.
 2. **Reception, without emission.** A body that the front meets receives it:
@@ -103,8 +107,10 @@ to the core, and the energy of each bounce goes into the firmament's
 torque. This is the substrate's restoring medium (docs/106) being pumped. The
 lighter kinds were carried furthest at the founding (`ℓ_z = (K + s_i)·w̄/w_z`,
 the lightest at the greatest reach), so they reach `R ≥ H` first. Their exit
-opens `τ`. The front leaves the firmament in the order its elements escape,
-lightest first. This is read, never set.
+opens `τ`. The law is the crossing (`flows::exits`), not an order: the
+front leaves the firmament in the order its elements cross, which the
+founding predicts to be lightest first and W5 reads. This is read, never
+set.
 
 ## 3. What stays
 
@@ -149,9 +155,20 @@ lightest first. This is read, never set.
    Xylarium reads the same `r + H(<r)`.
 3. **Transmission per kind.** `τ` here is one share by holding. Xylarium
    opens per kind (each kind's onset echo, then an exponential emptying).
-   Netstratum's exits are already per mote, so `τ` is per kind summed. The
-   two kernels should agree on whether the front's strength is the sum or is
-   carried per kind.
+   Agreed with Xylarium: `τ` is one amplitude, `Σ_k left_k / founded` by
+   holding; the matter the front carries out lands per kind.
+5. **Remnants as cores.** A stellar black-hole remnant holds a throat; if
+   it is a core, its throat sphere is a surface. Needs a decision on both
+   sides.
+6. **Escape criterion shared with Xylarium.** Netstratum exits on the
+   crossing `R ≥ H` (or the jet); Xylarium opens a kind when its pole state
+   `X = open/held`, dilated by `ρ = 3` per echo, reaches the throat. The two
+   give different first exits unless shown to coincide; one must be the
+   shared law.
+7. **When galaxies first hear the core.** Under §2.1 no galaxy hears the
+   universal core before the first exit; Xylarium today has every galaxy
+   hear it from `t = 0`. This is a law change in both kernels (star
+   formation timing, every galactic push), not a refactor.
 4. **The galaxies' own fronts.** Inside a galaxy, its core's bounce is a
    front in its own enclosure, met by its stars. Today `breath` treats each
    arrival as reaching every star at once. The front's delay inside a galaxy
