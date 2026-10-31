@@ -1,5 +1,7 @@
 # Roadmap
 
+The order of the work, issue by issue, is in [docs/PLAN.md](docs/PLAN.md).
+
 What Netstratum is, what works today, and where each part is heading. This
 page is kept current; where a design document disagrees with it, this page
 and the code are right.

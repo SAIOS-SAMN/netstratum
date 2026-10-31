@@ -82,7 +82,7 @@ readers: `formation::{shells, stretches, collapse, extent, lightest}`,
 ## 3. Piecemeal implementations
 
 The same quantity is computed in more than one place. Each entry lists the
-places. Reducing each to one law is tracked as issues labelled `law`.
+places. Reducing each to one law is planned in [PLAN.md](PLAN.md).
 
 | Quantity | Places | Note |
 |---|---|---|

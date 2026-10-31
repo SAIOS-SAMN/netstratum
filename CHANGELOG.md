@@ -12,6 +12,9 @@ change is named here.
 
 ### Added
 
+- `docs/PLAN.md`: the work in order under the v0.1.0 and v0.2.0
+  milestones, each step an issue (#27–#38 filed for the consolidation, the
+  Mycelium integration and the repository's organization).
 - `docs/MYCELIUM.md`: what Netstratum takes from Mycelium, where each use
   runs and how complete it is, the defects (verification only as a
   diagnostic, unmeasured laws counted as agreeing, `tongue` half-wired), and
