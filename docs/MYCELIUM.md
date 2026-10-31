@@ -61,8 +61,8 @@ Netstratum in one place on the live path, the share-compounding law (§2.2).
 
 ## 4. What a correct integration needs
 
-These are the decisions and the work the defects call for; each is an
-issue on the project ([GitHub issues](https://github.com/SAIOS-SAMN/netstratum/issues),
+These are the decisions and the work the defects call for, in the order
+of [PLAN.md](PLAN.md); each is an issue on the project ([GitHub issues](https://github.com/SAIOS-SAMN/netstratum/issues),
 label `cross-project` where Mycelium is involved).
 
 1. **Decide what the court verifies.** Either the era-1 universe states its
