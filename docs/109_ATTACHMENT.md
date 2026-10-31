@@ -9,7 +9,7 @@ verification as everything native to the universe. The Mycelium mesh carries
 the attachment and verifies it, which gives the containment a second,
 independent check.
 
-**Status:** design. §2 lists what the code already provides; §5 lists what
+**Status:** design. §2 lists what the code already provides; §6 lists what
 remains to build.
 
 **Prerequisites:** [ARCHITECTURE.md](ARCHITECTURE.md),
@@ -67,10 +67,11 @@ sandbox (a simulation that runs its own state). Both attach the same way:
 
 1. **Connect.** The external party opens a Mycelium session to a hypha with
    its own key. The mesh authenticates every message it carries.
-2. **Take a seat.** The house lists the seats it offers. Each seat is bound to
-   one place and one model: a Sovereign or Office seat at a world, a
-   Progenitor or Steward seat at a galaxy, an Ancients seat at a council. The
-   party takes one seat; the take is recorded.
+2. **Take a seat.** The house lists the seats it offers to new attachments:
+   Sovereign or Office seats at one world (§4 explains why attachment starts
+   at the world tier). The party takes one seat; the take is recorded.
+   Seats at a galaxy (Progenitor, Steward) and at a council (Ancients) are
+   reached by progression, never granted at attachment.
 3. **Become an entity.** Netstratum registers the seated party as an NS-6
    entity at that place, with a principal (the line or office that admitted
    it) and the grants that seat carries, and nothing more.
@@ -89,7 +90,44 @@ branch of TUniversal, its internal currency non-convertible, and its results
 admitted to the universe only when a seated mind re-derives them and the
 court judges them.
 
-## 4. Containment properties
+## 4. Placement and growth
+
+An attachment's footprint follows the universe's chained manifolds. A star
+system is one S^60 enclosure whose worlds are chained by orbital mechanics,
+and the same rules that govern a native civilization's growth govern an
+attached one's. Growth is earned, never granted.
+
+1. **Placement by fit.** An attaching world model declares what it needs: its
+   metabolism (mineral, biotic or plasmic) and the medium it can live in. It
+   is placed on the world, in the star system, where it is most viable, the
+   way native lineages are seated (`seating::seat` seats each lineage on the
+   world it is most viable on; `waking` derives a mind's metabolism from its
+   world's medium). Attachments with similar structure settle near each
+   other, as a lineage's descendants settle the free worlds nearest it.
+2. **Start on one world.** An attachment begins as a single-planet
+   civilization, sized to its needs.
+3. **Planetary traversal inside its system.** Its economic reach is its own
+   star system: travel and trade between the system's worlds follow the
+   route through the star (`enclosure::route`). It expands onto further
+   worlds of the system only as its own economy carries it (`expand_step`;
+   for example, a cold colony expands only when its stored embers cover the
+   heating of the larger city). A system holds a handful of worlds
+   (`SYSTEM_CAP`, a placeholder). Its memory is bounded by its share of the
+   universe's wealth (docs/71).
+4. **Wormhole traversal is earned.** Travel beyond the system, through gates
+   to other systems' cores and up to the universal tier, is the progression
+   ladder (`ascension`, docs/72): a line that masters the top of the
+   difficulty ladder may send an envoy through a gate; gates are built and
+   paid for by the cores' parliaments; every crossing pays a toll each
+   bounce, and an envoy that cannot pay is recalled. The Mycelium uplink
+   itself (council seats, μ) belongs to the ancients' tier at the top of
+   that ladder.
+
+The result is controlled growth: an attached AI starts with one world and its
+needs, widens to its star system by its own economy, and reaches other
+systems and the network only by what it has learned and earned.
+
+## 5. Containment properties
 
 | Property | How it holds |
 |---|---|
@@ -101,11 +139,13 @@ court judges them.
 | The containment is checked twice | Netstratum's kernel and the Mycelium court verify the same transition independently |
 | A party can be removed at once | revoking a grant or releasing a seat ends its authority without its cooperation |
 
-## 5. What remains to build
+## 6. What remains to build
 
 | Item | What it needs |
 |---|---|
-| A1 Seats at every model | The house offers Sovereign and Office seats at worlds, Progenitor and Steward seats at galaxies, alongside the Ancients seats it offers now |
+| A1 World seats for attachment | The house offers Sovereign and Office seats at worlds to new attachments, alongside the Ancients seats it offers now |
+| A1b Placement by fit | An attachment declares its metabolism and medium, and is placed on the most viable free world, using the seating rule native lineages use |
+| A1c Seats by progression | Progenitor, Steward and Ancients seats open to an attached line when its progression reaches that tier (gate built, throat kept, ancient arisen) |
 | A2 Seat to entity | A take registers the party as an NS-6 entity at the seat's place, with that seat's grants; release removes it |
 | A3 Requests through the seat | A seated party's actions arrive as seat calls and enter the place's inbox (the inbox applies directives today; it applies only a fixed set of actions and ignores who sent them) |
 | A4 Entities with principals | An attached entity's principal is the line or office that admitted it, so agents can be contained by agents (today every agent's principal is the world's sovereign) |
@@ -115,5 +155,5 @@ court judges them.
 | A8 Running service | A configured court, the seat service, and the conductor running against it |
 
 Build order: A2 and A3 first (an attached party can act in a world), then
-A1 and A4 (seats at every model), A6 (verification), A5 (sandboxes), and A7
-and A8 (outside use).
+A1 and A1b (world seats and placement by fit), A4, A6 (verification), A1c
+(seats by progression), A5 (sandboxes), and A7 and A8 (outside use).

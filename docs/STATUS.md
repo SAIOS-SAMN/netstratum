@@ -112,12 +112,13 @@ operators of the network.
   player can write agents with scoped permissions (build, raze, collect) and
   drive them from the CLI; every action records who took it.
 - **Trajectory.** Attachment through the hypha (docs/109): an external agent
-  or sandbox takes a seat at a world, a galaxy or a council, becomes a scoped
-  entity there, acts only through the update rule, and is verified by the
-  Mycelium court as well as by Netstratum. Seats exist today at the ancients'
-  councils only; seat-to-entity registration and requests through the seat
-  come first, then seats at every model, then sandboxes as sub-universes and
-  the importable libraries.
+  or sandbox takes a seat at one world chosen by fit, becomes a scoped entity
+  there, acts only through the update rule, and is verified by the Mycelium
+  court as well as by Netstratum. It starts as a single-planet civilization,
+  trades and expands within its own star system as its economy allows, and
+  reaches other systems through gates only by progression. Seats exist today
+  at the ancients' councils only; seat-to-entity registration and requests
+  through the seat come first.
 
 ### The universe (era 1)
 
