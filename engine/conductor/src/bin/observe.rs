@@ -295,9 +295,10 @@ fn main() {
             read(&w, 0);
             let step = (echoes / 10).max(1);
             for e in 1..=echoes {
-                let _ = pulse::orbit_galaxies(&mut w);
+                let (_, _, c) = pulse::orbit_galaxies(&mut w);
                 if e % step == 0 {
                     read(&w, e);
+                    println!("echo {e:5} collective: {} motes, {} collections ({} bonded, the largest {})", c.motes, c.collections, c.bonded, c.largest);
                 }
             }
         }

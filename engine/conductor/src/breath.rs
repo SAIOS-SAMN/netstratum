@@ -248,6 +248,9 @@ pub struct Event {
     /// its reservoir across the torques; `ride`: each star's orthogonal spin and
     /// its galaxy's reservoir across its ride.
     pub identity: Vec<(&'static str, Ratio)>,
+    /// The firmament's collective at the universal bounce this event
+    /// follows (docs/111 §4), carried into the first arrival's record.
+    pub collective: Option<crate::pulse::Collective>,
 }
 
 /// How a star passed.
@@ -398,10 +401,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
     // The firmament's cross is carried into the first arrival's record.
     let mut pending = crate::enfold::Cross::default();
     let mut pending_firm: Option<Ratio> = None;
+    let mut pending_collective: Option<crate::pulse::Collective> = None;
     if t_u > 0 && until / t_u > from / t_u {
-        let (c, firm) = crate::pulse::orbit_galaxies(u);
+        let (c, firm, coll) = crate::pulse::orbit_galaxies(u);
         pending = c;
         pending_firm = firm;
+        pending_collective = Some(coll);
     }
     // Every echo's arrival, in time order.
     let mut arrivals: Vec<(u64, usize, u64)> = Vec::new();
@@ -1702,7 +1707,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let galaxy_id = core.path[0] as u32;
         u.ocean.extend(to_ocean);
         crate::profile::mark("breath:echo-end");
-        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, grown, escaped: escaped_all, fates, weights, impacts, discs, collapse, motes: motes_in, released, circulation, rang: rang_n, recycled, burned, burns, cross, light, tolls, identity });
+        events.push(Event { bell, galaxy: galaxy_id, rung, write: Write::Perpendicular, stars, jets, returned, dissolved, merged, encounters, grown, escaped: escaped_all, fates, weights, impacts, discs, collapse, motes: motes_in, released, circulation, rang: rang_n, recycled, burned, burns, cross, light, tolls, identity, collective: pending_collective.take() });
     }
     events
 }

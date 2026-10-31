@@ -331,10 +331,10 @@ pub fn step_with(x: &Mote, psi: &[Ratio]) -> Ratio {
 /// move), at most half a turn. All read at once, then moved. Equal charges
 /// pushing apart on a sphere settle into the polyhedra (the Thomson
 /// arrangements): whatever order forms is the mathematics', never set.
-pub fn repel(motes: &mut [Mote], push: &Ratio) {
+pub fn repel(motes: &mut [Mote], push: &Ratio) -> Vec<Vec<Ratio>> {
     let n = motes.len();
     if n < 2 {
-        return;
+        return Vec::new();
     }
     let planes = motes.iter().map(|x| x.phase.len()).min().unwrap_or(0);
     let open = |x: &Mote| ratio(i64::from(crate::chem::unpaired(&x.key)), 1);
@@ -342,7 +342,7 @@ pub fn repel(motes: &mut [Mote], push: &Ratio) {
     let charge = motes.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * open(x));
     let held = motes.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key));
     if amount.is_zero() || charge.is_zero() || held.is_zero() || planes == 0 {
-        return;
+        return Vec::new();
     }
     let (e_mean, w_mean) = (charge.clone() / amount.clone(), held / amount);
     let half = ratio(1, 2);
@@ -381,11 +381,71 @@ pub fn repel(motes: &mut [Mote], push: &Ratio) {
             moves[i][k] = m;
         }
     }
-    for (x, m) in motes.iter_mut().zip(moves) {
+    for (x, m) in motes.iter_mut().zip(&moves) {
         for k in 0..planes {
             x.phase[k] = crate::ring::grain(&frac(&(x.phase[k].clone() + m[k].clone())));
         }
     }
+    moves
+}
+
+/// Two motes of a collective are BONDED (docs/111 §4.2) where they stand on
+/// one held hemisphere (`step_with ≥ ½`, each against the other), both carry
+/// open frames, and the bounce moved them together: their perturbations
+/// `Δφ` (the displacements `repel` gave them) in step, tilt-weighted,
+/// `C_Δ = Σ_k t_k · in_step(Δφ_k^i, Δφ_k^j) ≥ ½`, by each one's tilt.
+pub fn bonded(a: &Mote, b: &Mote, da: &[Ratio], db: &[Ratio]) -> bool {
+    let half = ratio(1, 2);
+    if crate::chem::unpaired(&a.key) == 0 || crate::chem::unpaired(&b.key) == 0 {
+        return false;
+    }
+    if step_with(a, &b.phase) < half || step_with(b, &a.phase) < half {
+        return false;
+    }
+    let zero = ratio(0, 1);
+    let moved = |x: &Mote| {
+        let t = tilt_of(&x.tilt);
+        SPACE.iter().zip(&t).fold(ratio(0, 1), |c, (&k, tk)| c + tk.clone() * in_step(da.get(k).unwrap_or(&zero), db.get(k).unwrap_or(&zero)))
+    };
+    moved(a) >= half && moved(b) >= half
+}
+
+/// A collective's COLLECTIONS (docs/111 §4.2): the connected sets of its
+/// bonds, read from one bounce's perturbations (`repel`'s moves), never
+/// assigned. Each collection is its members' indices, ascending; a mote
+/// bonded to none is in none.
+pub fn collections(motes: &[Mote], moves: &[Vec<Ratio>]) -> Vec<Vec<usize>> {
+    let n = motes.len().min(moves.len());
+    let mut root: Vec<usize> = (0..n).collect();
+    fn find(root: &mut [usize], i: usize) -> usize {
+        let mut i = i;
+        while root[i] != i {
+            root[i] = root[root[i]];
+            i = root[i];
+        }
+        i
+    }
+    let mut any = vec![false; n];
+    for i in 0..n {
+        for j in i + 1..n {
+            if bonded(&motes[i], &motes[j], &moves[i], &moves[j]) {
+                let (a, b) = (find(&mut root, i), find(&mut root, j));
+                if a != b {
+                    root[a.max(b)] = a.min(b);
+                }
+                any[i] = true;
+                any[j] = true;
+            }
+        }
+    }
+    let mut sets: std::collections::BTreeMap<usize, Vec<usize>> = std::collections::BTreeMap::new();
+    for i in 0..n {
+        if any[i] {
+            let r = find(&mut root, i);
+            sets.entry(r).or_default().push(i);
+        }
+    }
+    sets.into_values().collect()
 }
 
 /// The held share of a spread about a reach R within the hold H about it
@@ -2009,6 +2069,25 @@ mod passage_tests {
         // Backward: the next mark behind.
         settle(&mut x, &[(0, ratio(0, 1), ratio(1, 4))], Some(&p), &mut cross);
         assert_eq!(true_phase(&x, 0), ratio(1, 60) - ratio(1, 240));
+    }
+
+    #[test]
+    fn motes_the_bounce_moves_together_bond_and_motes_moved_apart_do_not() {
+        // docs/111 §4.2: near on the sphere, open, and moved in step.
+        let mote = |key: &str, ph: (i64, i64)| Mote { key: crate::chem::Kind::parse(key).expect("a kind"), amount: ratio(1, 1), ell_o: ratio(1, 1), ell_orth: ratio(0, 1), phase: vec![ratio(ph.0, ph.1), ratio(0, 1), ratio(0, 1)], agitation: ratio(0, 1), born: 0, vacuum: false, lever: Vec::new(), lever_place: ratio(0, 1), tilt: Vec::new() };
+        let (a, b, c) = (mote("W0001", (0, 1)), mote("W0001", (1, 20)), mote("W0001", (1, 10)));
+        let with = |x: (i64, i64)| vec![ratio(x.0, x.1), ratio(0, 1), ratio(0, 1)];
+        assert!(super::bonded(&a, &b, &with((1, 100)), &with((1, 100))), "moved rigidly together");
+        let all = |x: (i64, i64)| vec![ratio(x.0, x.1); 3];
+        assert!(!super::bonded(&a, &b, &all((1, 4)), &all((-1, 4))), "moved apart in every plane");
+        let far = Mote { phase: vec![ratio(1, 2); 3], ..mote("W0001", (1, 2)) };
+        assert!(!super::bonded(&a, &far, &with((0, 1)), &with((0, 1))), "opposed on the sphere");
+        // Three moved together are one collection; one moved apart is in none.
+        let d = mote("W0001", (3, 20));
+        let motes = vec![a, b, c, d];
+        let moves = vec![all((1, 100)), all((1, 100)), all((1, 100)), all((-49, 100))];
+        let sets = super::collections(&motes, &moves);
+        assert_eq!(sets, vec![vec![0, 1, 2]]);
     }
 
     #[test]

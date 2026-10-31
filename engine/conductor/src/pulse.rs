@@ -991,11 +991,12 @@ pub fn ocean_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
     Some(crate::flows::Enclosed::new(ratio(1, 1) + firm + home, bodies))
 }
 
-pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>) {
+pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>, Collective) {
     let mut cross = crate::enfold::Cross::default();
+    let mut collective = Collective::default();
     let whole = mass(&u.total());
     if whole.is_zero() {
-        return (cross, None);
+        return (cross, None, collective);
     }
     let bells = ratio(u.t_u as i64, 4);
     let planes = crate::flows::PLANES;
@@ -1026,7 +1027,19 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>)
         let held: Vec<usize> = held_at.iter().map(|&(_, j)| j).collect();
         if held.len() > 1 {
             let mut firm: Vec<crate::flows::Mote> = held.iter().map(|&j| u.cores[i].flows[j].clone()).collect();
-            crate::flows::repel(&mut firm, &ratio(1, 2));
+            let moves = crate::flows::repel(&mut firm, &ratio(1, 2));
+            // Its collections (docs/111 §4): the bonds this bounce's
+            // perturbations read, a reading only.
+            let sets = crate::flows::collections(&firm, &moves);
+            let w = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key);
+            collective = Collective {
+                motes: firm.len(),
+                collections: sets.len(),
+                bonded: sets.iter().map(|c| c.len()).sum(),
+                largest: sets.iter().map(|c| c.len()).max().unwrap_or(0),
+                held: firm.iter().fold(ratio(0, 1), |s, x| s + w(x)),
+                in_collections: sets.iter().flatten().fold(ratio(0, 1), |s, &j| s + w(&firm[j])),
+            };
             for (&j, x) in held.iter().zip(firm) {
                 u.cores[i].flows[j].phase = x.phase;
             }
@@ -1082,7 +1095,20 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>)
         }
         inside += ratio(2, 1) * share;
     }
-    (cross, identity)
+    (cross, identity, collective)
+}
+
+/// The firmament's collective read at one bounce (docs/111 §4): its motes,
+/// its collections (connected bonds), the motes in them and the largest,
+/// and the holding of the whole and of what is bonded (grains × weight).
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Collective {
+    pub motes: usize,
+    pub collections: usize,
+    pub bonded: usize,
+    pub largest: usize,
+    pub held: Ratio,
+    pub in_collections: Ratio,
 }
 
 /// Magnetism (operator 2026-10-15, "transduction via magnetism"): an

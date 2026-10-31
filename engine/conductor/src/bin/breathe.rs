@@ -359,6 +359,16 @@ fn main() {
         let (made, got, gone) = (sum(&|e| e.light.made.clone()), sum(&|e| e.light.received.clone()), sum(&|e| e.light.drained.clone()));
         println!("LIGHT — made {}, received {} by the bodies on the continuum face, drained {} into the vacuum (units); balanced: {}", conductor::reading::sector(&made), conductor::reading::sector(&got), conductor::reading::sector(&gone), made == got.clone() + gone.clone());
     }
+    // The firmament's collective (docs/111 §4): its bonds read at each
+    // universal bounce; the last bounce's reading and the greatest.
+    {
+        let read: Vec<&pulse::Collective> = events.iter().filter_map(|e| e.collective.as_ref()).collect();
+        if let Some(last) = read.last() {
+            let most = read.iter().map(|c| c.collections).max().unwrap_or(0);
+            let share = if last.held == cfe::ratio::ratio(0, 1) { cfe::ratio::ratio(0, 1) } else { last.in_collections.clone() / last.held.clone() };
+            println!("COLLECTIVE — {} bounces read; the last: {} motes, {} collections ({} motes bonded, the largest {}), {} of the holding bonded; at most {} collections", read.len(), last.motes, last.collections, last.bonded, last.largest, conductor::reading::sector(&share), most);
+        }
+    }
     // The tolls: every star that passed, struck on its own bell.
     {
         let tolls: Vec<&breath::Toll> = events.iter().flat_map(|e| e.tolls.iter()).collect();
