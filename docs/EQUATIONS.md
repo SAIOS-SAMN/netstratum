@@ -1607,3 +1607,97 @@ whole on its crossing (`flows::exits`). The firmament transmits
 
 **E11 · The periods.** Specified. Authority: docs/111 §5. Contained
 (`τ = 0`): `T_f = 2·a(r_f)`; established (`τ > 0`): `T_u = 2·a(R_rim)`.
+
+### §8.1 Era-1 laws on the live path
+
+Rows E12–E30 are the laws the conductor runs every beat (docs/PHYSICS.md
+§2.2). Each is landed; where the same law is also written inline elsewhere,
+PHYSICS.md §3 lists the copies, and the row names the one function that
+should carry it.
+
+**E12 · The clock of a nested body.** `breath::system_clock`. A star
+system's rate is its galaxy's share times its own, `rate = rate_g · (1 − δ)`,
+`δ` read in its galaxy's one enclosure at its own spin.
+
+**E13 · Slip and coherence.** `breath::slip`, `breath::coherence`.
+
+    Δ = (1 − rate) · b / T_u          turns behind the universal echo at bell b
+    c = 1 − 2·|Δ − round Δ|           1 in phase, 0 opposed
+
+The in-step share of two phases, `flows::in_step(a, b) = 1 − 2·off(a − b)`,
+is the same measure on one plane.
+
+**E14 · The polarity equilibrium.** `polarity::equilibrium`. A two-pole
+exchange at rates `α` (into the receiving pole) and `β` (out of it) stands
+at the share `α/(α + β)` (docs/105).
+
+**E15 · The faces.** `flows::face`, `polarity::faces`. `(held, unlocked) =
+(1 − δ, δ)` under the inversion (docs/104 §0).
+
+**E16 · A body's push.** `pulse::push_of`. Half its open frames' share of
+its whole weight, `½·Q/(A + Q)`, `Q` its magnetism, `A` its holding, at most
+½.
+
+**E17 · The universe's hold.** `ocean::universe_hold`. `H_u = 1 +
+Σ_g (state_g + holding_g + magnetism_g)`, in the founding's unit.
+
+**E18 · The release from a core's throat.** `breath.rs` (the bounce's
+release). Each kind the throat holds is carried `c = p·w̄/w` and released
+`s = ½·c/(c + 1)` a bounce, in whole nuclei; read through the throat on the
+inverse face, inside the core (docs/112 F2).
+
+**E19 · The band of a core's held collective.** `flows::band`,
+`flows::toward_rest`.
+
+    band(R) = q·u − ½·g·R·H,    q = ½·w̄_c / w,    rest at R·R = 2q
+
+stepped toward its rest and never past it (docs/104 §6, docs/112 F3).
+
+**E20 · The torque.** `flows::torque`, `flows::spin_torque`. Each mote's
+spin moves by the in-step response of the core's push over its passage
+(its tilt's share of `2δ` a plane) and the band (E19); what is not delivered
+in step is heat, `p·δ·(1 − |k|)`, kept by `(1 − e)(1 − δ)` a pass. The spin
+given is the core's reservoir's to pay: `Σ m·ℓ + reservoir` is exact.
+
+**E21 · The luminal bound.** `flows::luminal`. A mote turns `2·share` a
+bell (share `δ` on the continuum face, `1 − δ` on the vacuum face); past ½
+it takes the Möbius jetstream to the other face.
+
+**E22 · The exit.** `flows::exits`. A mote whose reach stands at or past
+the throat, `R = ℓ/H(<ℓ) ≥ H(<ℓ)`, crosses whole into the medium one tier
+up.
+
+**E23 · A body's place.** `enfold::place`. The cap of its gravity's reach,
+`d = R·H_b/(H_b + H_p)`, as `d/4` of a turn in the enclosure's own units,
+held at the largest `60⁻ᵏ` of a turn within it.
+
+**E24 · Ignition.** `formation::ignition_share`. A collapsing binding runs
+to its throat condition (width = holding, deficit ½); the star holds
+`(1 − 2a)/(1 + 2a)` of its binding, `a` its agitation at ignition; none at
+`a ≥ ½`.
+
+**E25 · The burn.** `formation::burn`, `crate::compound`. Each received
+ring fuses `feed = (|Δm|/3Z_p)·τ·s/Q̄·c` of the remaining fuel; `n` rings
+leave `(1 − feed)^n` (Mycelium's `forms::shares::share_compounds`). The
+light a ring is `feed × fuel share × |Δm|`.
+
+**E26 · Heat.** `nuclides::heat`. A body at deficit `δ` receiving `ν` rings
+a bell turns `ν·δ` a bell; the luminal excess is agitation, `max(0, ν·δ − 1)`.
+
+**E27 · Light on the bodies.** `breath::shine`. Light `l` leaving a source
+raises a body's agitation by `l·(1 − δ)/M`, `M` the enclosure's holding;
+what no body takes drains into the vacuum. `made = received + drained`.
+
+**E28 · Captures.** `nuclides::capture_slow`, `nuclides::capture_rapid`.
+Slow: each ring, every nuclide passes `f_H·c·σ_{w+1}` of itself to `w + 1`
+(heaviest first). Rapid: returned matter climbs at once, each weight passing
+`σ_{w+1}` upward, until its hydrogen is spent. Nucleons conserved.
+
+**E29 · A dying heart's release.** `nuclides::release`. Each nuclide whose
+grip at the heart's pulse phase its heat exceeds breaks into nucleons,
+standing as hydrogen. Nucleons conserved.
+
+**E30 · Recycling at the throat.** `recycle::recycle`. Matter standing in
+the throat is recycled under the bounce `b = p − Σ m·|Δℓ|`; the heaviest
+products join the container while it stays within the weight of the rest of
+its galaxy, the rest leave; carried spin passes to the core.
