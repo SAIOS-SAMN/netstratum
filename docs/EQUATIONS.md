@@ -1728,10 +1728,12 @@ There and back is the identity. Matter crosses whole; the spin difference
     H_b/H_a = D(p_ab),   p_ab = (H_b − H_a)/(H_b + H_a)
     p_ac = p_ab ⊕ p_bc,  x ⊕ y = (x + y)/(1 + x·y)
 
-**E34 · The Kaluza–Klein passage.** Specified; waits on an audit of the
-`vacuum` flag (docs/114 T4).
-
-    M = (x ↦ 1/x,  ψ_R ↦ ψ_R + ½),   M ∘ M = identity
+**E34 · The passage as an event.** Specified (docs/114 T4). The passage
+through the throat is the event where a mote's orthogonal phase crosses ½
+(`breath`), its faces exchanged there by E31. The orthogonal orbit is
+sheared across all the axes and runs forward, so two passages do not return
+a body to its start: not an involution on its state, and not a Kaluza–Klein
+passage (R is not compact).
 
 **E35 · An open tube.** Specified (the reading `ring::open`, docs/111 §3.1).
 A mote turns `2δ = 2/(1 + x)` a bell, past one turn exactly inside the
