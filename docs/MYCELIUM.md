@@ -65,10 +65,11 @@ These are the decisions and the work the defects call for, in the order
 of [PLAN.md](PLAN.md); each is an issue on the project ([GitHub issues](https://github.com/SAIOS-SAMN/netstratum/issues),
 label `cross-project` where Mycelium is involved).
 
-1. **State the era-1 step as transitions** the court rebuilds under
-   Mycelium's laws: the bounce's reverberation through S^n, each shell's
-   turn a versor carrying its motes, the throat's release and return as
-   fluxes ([113_THE_BOUNCE_ON_THE_COURT.md](113_THE_BOUNCE_ON_THE_COURT.md)).
+1. **State the crossings at the universal core as transitions** the court
+   rebuilds under Mycelium's laws: the throat's release and return as
+   fluxes, the motes they carry as bodies, universe-scoped acts, and
+   whatever enters or leaves. Inner steps stay Netstratum's
+   ([113_THE_BOUNCE_ON_THE_COURT.md](113_THE_BOUNCE_ON_THE_COURT.md)).
    The probe then retires. A Netstratum law is verified by its own id only
    once Mycelium hosts its form.
 2. **Fix the agreement rule** so an unmeasured law on one side is a
