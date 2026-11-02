@@ -1701,3 +1701,38 @@ standing as hydrogen. Nucleons conserved.
 the throat is recycled under the bounce `b = p − Σ m·|Δℓ|`; the heaviest
 products join the container while it stays within the weight of the rest of
 its galaxy, the rest leave; carried spin passes to the core.
+
+### §8.2 The tube
+
+Rows E31–E35 are the throat as a connector (docs/114). `x = R/H` is a
+reach in its enclosure's own throat units.
+
+**E31 · The face inversion as a map of reach.** Specified; conflicts with
+the compact sphere's passage (docs/114 §2). `ring::inverted`.
+
+    δ(1/x) = 1 − δ(x),   x ↦ 1/x,   R′ = H·(H/R)
+
+An involution fixing the throat; it exchanges the faces.
+
+**E32 · A tube between two mouths.** Built, not on the live path.
+`ring::tube`.
+
+    x_b = 1/x_a,   R_b = H_a·H_b / R_a
+
+There and back is the identity. Matter crosses whole; the spin difference
+`m·(ℓ_b − ℓ_a)` is booked to the two mouths' reservoirs.
+
+**E33 · Chained tubes.** Built, not on the live path. `ring::tube_share`,
+`ring::dilation` (LAW-DILATION), `ring::compose`.
+
+    H_b/H_a = D(p_ab),   p_ab = (H_b − H_a)/(H_b + H_a)
+    p_ac = p_ab ⊕ p_bc,  x ⊕ y = (x + y)/(1 + x·y)
+
+**E34 · The Kaluza–Klein passage.** Specified; waits on an audit of the
+`vacuum` flag (docs/114 T4).
+
+    M = (x ↦ 1/x,  ψ_R ↦ ψ_R + ½),   M ∘ M = identity
+
+**E35 · An open tube.** Specified (the reading `ring::open`, docs/111 §3.1).
+A mote turns `2δ = 2/(1 + x)` a bell, past one turn exactly inside the
+throat; a tube is open while both mouths are throats, `R_b ≤ H_b`.

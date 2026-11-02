@@ -12,6 +12,12 @@ change is named here.
 
 ### Added
 
+- docs/114 and EQUATIONS §8.2 (E31–E35): the throat as a tube's connector
+  (the face inversion as `x ↦ 1/x`, a tube between mouths, chained tubes
+  composing by LAW-DILATION, the Kaluza–Klein passage on the R loop, an
+  open tube), with `ring::{inverted, tube, tube_share, dilation, compose}`
+  and their witnesses; the conflict with the compact sphere's passage
+  stated (docs/114 §2).
 - `docs/PLAN.md`: the work in order under the v0.1.0 and v0.2.0
   milestones, each step an issue (#27–#38 filed for the consolidation, the
   Mycelium integration and the repository's organization).

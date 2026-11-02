@@ -102,6 +102,7 @@ places. Reducing each to one law is planned in [PLAN.md](PLAN.md).
 | A galaxy's winding | `quantum::twist` (½ a turn a ring), `pulse.rs:1291` (4δ an echo) | |
 | Orbital motion | `motion::Turning` (φ₀ + n/P), `orbit::Orbit` (era 0's L1 diamond, on the live path) | |
 | The grain mark | `ring::grain_step`, `enfold::mark` | |
+| The passage through the throat | `flows::mobius`/`flows::luminal` (in place, the faces read at `1 − δ`, which is `x ↦ 1/x`); `flows::through` (`R → 2H − R`, used by the band, the release and formation) | The two disagree away from the throat (docs/114 §2) |
 | Seeded draws | `physics::Beacon`, `pulse::draw` (unkeyed, no rejection) | |
 | Shedding | `breath.rs:1310` (by coherence), `life::window_echoes` (by `tier(1).medium`, stale) | |
 
