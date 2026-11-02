@@ -1,7 +1,7 @@
 # 114 — The tube: the throat as a bridge, and tubes between mouths
 
 This document states the theorems that make a throat the connector of a tube
-(an Einstein–Rosen bridge; a Kaluza–Klein passage on the R loop), from
+(an Einstein–Rosen bridge), from
 Netstratum's own laws: the deficit `δ = H/(R + H)`, the face inversion
 `δ ↦ 1 − δ` (docs/104 §0), the throat at `R = H` (docs/111 §3.1) and
 LAW-DILATION. Each is stated only where it closes; §6 lists what does not.
@@ -10,8 +10,8 @@ Throughout, `x = R/H` is a reach in its enclosure's own throat units.
 **Status:** T2, T3 and T5 are built as laws with witnesses in
 `conductor::ring` (`inverted`, `tube`, `tube_share`, `dilation`, `compose`);
 none is yet on the live path. T1 conflicts with the passage on the compact
-sphere (§2) and waits on a decision. T4 waits on an audit of the `vacuum`
-flag.
+sphere (§2) and waits on a decision. T4 is the passage as an event on the
+orthogonal orbit; the Kaluza–Klein reading does not close (§7).
 
 ## 1. T1: the face inversion is the inversion in the throat sphere
 
@@ -87,21 +87,21 @@ mouths' pair shares; each `|p| < 1`, so no chain reaches `|p| = 1`.
 This holds along a chain's radial line, where each enclosure joins the one
 above at its throat (concentric inversions compose to a dilation).
 
-## 5. T4: the Kaluza–Klein passage is half a turn of the R loop
+## 5. T4: the passage is an event on the orthogonal orbit
 
-The compact extra dimension is the R loop (docs/95), the plane of the
-orthogonal orbit. The passage is
+The R coordinate is the orthogonal orbit (`flows::LOOP`, docs/95), not a
+closed loop. Its phase is held mod 1, but the body does not return with it:
+each bell the torque moves the orthogonal spin `ℓ_⊥` (E20), the swing
+`ℓ ± ℓ_⊥·response(ψ_⊥)` moves the reach (`flows::swung`), and the tilt is
+re-read across the three spatial planes (`flows::tilt_from`). The orbit is
+determined by shear across all the axes, and R runs forward in linear time.
 
-    M = (x ↦ 1/x,  ψ_R ↦ ψ_R + ½)
-
-an involution (`1/(1/x) = x`, `ψ_R + 1 ≡ ψ_R`). It exchanges the faces
-exactly where a body's face is read as the hemisphere of its loop phase,
-the reading docs/104 §1.1 already uses against ½ for the held count. The
-breath makes the crossing at this event: a vacuum mote passes the throat
-when its orthogonal phase crosses ½. The stored `vacuum` flag would then be
-a reading of `ψ_R`; this needs every place the flag is set checked against
-the loop phase before it is changed. (`flows::mobius` turns every plane by
-½, not only the loop.)
+So the passage is an event: the orthogonal phase crossing ½, where the
+breath already passes a vacuum mote through the throat. At that event the
+faces exchange by T1 (`x ↦ 1/x`). Two passages do not return a body to its
+start: between them the shear has moved it. The passage is therefore not an
+involution on the body's state, and the `vacuum` flag is not a reading of
+the orbit's phase.
 
 ## 6. T5: where a tube is open and traversable
 
@@ -120,9 +120,11 @@ Witness: `ring::tests::the_luminal_bound_saturates_exactly_at_the_throat`.
   no stress tensor, so the Morris–Thorne condition for holding a tube open
   (negative energy at the throat) cannot be stated. T5's condition stands in
   its place; it is not derived from it.
-- **Kaluza–Klein charge quantisation**, `q = n/L_R`: the R loop has no law
-  for its length, so a winding's charge cannot be stated. T4 needs only the
-  half turn.
+- **A Kaluza–Klein passage.** Kaluza–Klein needs a compact extra
+  dimension, a closed circle a body returns around. R is the orthogonal
+  orbit under multi-axial shear, running forward in linear time; it is not
+  compact, so neither the passage as an involution on a circle nor charge
+  as a winding (`q = n/L`) can be stated.
 - **Tubes between mouths off a chain's radial line.** Inversions in two
   spheres that are not concentric compose to a general Möbius
   transformation, not T3's dilation; that composition is not derived here.
@@ -132,7 +134,7 @@ Witness: `ring::tests::the_luminal_bound_saturates_exactly_at_the_throat`.
 1. Decide §2: the passage `x ↦ 1/x` (T1), or the compact sphere's
    `R → 2H − R` with the faces read in place. Then `flows::through` and its
    three callers follow, and PR #40 states the crossing's motion.
-2. T4: audit the `vacuum` flag against the loop phase; then retire the flag
-   for the reading.
+2. Rename the R coordinate from "loop" to the orthogonal orbit in the code
+   (`flows::LOOP`) and the design record (docs/95).
 3. Wire T2/T3 where a body crosses between mouths (the gates and roads,
    today game records), booking the spin difference to both reservoirs.

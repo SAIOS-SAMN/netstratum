@@ -53,6 +53,9 @@ change is named here.
 
 ### Changed
 
+- docs/114 T4 and E34: the passage restated as an event on the orthogonal
+  orbit (sheared across the axes, forward in time). The Kaluza–Klein
+  reading is withdrawn: R is not compact.
 - The workspace is formatted with rustfmt and clean under clippy
   `-D warnings`; `type_complexity`, `too_many_arguments` and
   `needless_range_loop` are allowed workspace-wide.
