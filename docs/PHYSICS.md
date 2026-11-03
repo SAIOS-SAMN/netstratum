@@ -140,6 +140,9 @@ directly by the conductor; `2760` and `2273` stand as bare literals in
 
 ## 5. Values not yet derived
 
+Each is deduced, or shown not to close, in
+[116_PLACEHOLDERS_DEDUCED.md](116_PLACEHOLDERS_DEDUCED.md).
+
 Each is a placeholder for physics still owed, never a tuned number.
 
 | Value | Where |
