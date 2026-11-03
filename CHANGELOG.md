@@ -12,6 +12,11 @@ change is named here.
 
 ### Added
 
+- docs/116 and EQUATIONS §8.5 (E47–E50): every placeholder in PHYSICS §5
+  read in its code and deduced where a law closes (the isotropic body,
+  compounding for `ln 2`, the tier shares retired, the bell's years and
+  kelvin read on own rulers), with what stands, what needs a read and what
+  does not close.
 - docs/115 and EQUATIONS §8.4 (E40–E44): bonds from nucleons and electrons,
   derived from the electrons' count, the phase transitions, the fibre and
   transduction: a bond pairs a held lone end with a free one, whole

@@ -1765,3 +1765,22 @@ its atoms, taking back its light from its agitation.
 **E44 · Open (docs/115 §7).** One count of an atom's open ends
 (`chem::unpaired` against `L_e`, agreeing at 282 of 1495 weights);
 clusters that keep open ends.
+
+### §8.5 The placeholders' replacements
+
+Rows E47–E50 (docs/116). Deduced; built in two passes.
+
+**E47 · A body without a lead.** It stands at its enclosure's plane (the
+attractor's fixed point, E38); its torsion is 0. Replaces the isotropic
+third (`flows::tilt_of`).
+
+**E48 · A reading over the planes.** Weighted by the tilt, `Σ_k t_k·(…)`
+(as `C_Δ`, E44's `bonded`). Replaces the equal mean `/3`.
+
+**E49 · The release's base phase per plane.** `2·d_k·t_k` a bell, `t_k` the
+core's lead (the motion law on each plane by its share). Replaces
+`(2/3)·d_k`.
+
+**E50 · A share kept over passes.** `(1 − x)^n` over the body's own rings
+(`compound`, E25); the rings to a level by `compound::rings_until`.
+Replaces `e^(−λ)` by halvings and the `ln 2` constants.
