@@ -61,9 +61,11 @@ logarithm leaves the code.
   passed;
 - the galaxy winding `4δ` an echo (`pulse.rs:1291`): the motion law's `2δ`
   times the same double pass, apparently; a duplicate of `quantum::twist`;
-- `T_u/4`, a core ring in bells (three copies): stated at the founding
-  (`f7915863`), not derived; it follows the contained period (docs/111 §2.1,
-  #6).
+- `T_u/4`, a core ring in bells (three copies): **derived**. At the rim the
+  reach equals the holding within (the rim law, deficit ½), so
+  `a(R_rim) = 2·R_rim` and `T_u = 2·a(R_rim) = 4·R_rim`: the ring is the rim
+  itself, `T_u/4 = R_rim` (`pulse::established_period`). Read: `R_rim`
+  1.136 and 1.250 at the first two echoes, against the stored `T_u` 186.
 
 **Does not close:**
 - `CONTACT_K` (a contact's grip): two atoms meeting without pairing; docs/115

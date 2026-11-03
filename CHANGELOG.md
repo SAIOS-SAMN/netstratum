@@ -12,6 +12,11 @@ change is named here.
 
 ### Added
 
+- The front's periods read live at each universal echo (E51–E53): the
+  contained front per plane per cell, the rim `R_rim = H(<R_rim)`, and the
+  established period `T_u = 4·R_rim`, so `T_u/4` is the rim (docs/112 §7.1
+  closed). Read: `T_u` 4.54 and 5.00 bells at the first two echoes against
+  the stored 186. The schedule does not use them yet.
 - docs/116 and EQUATIONS §8.5 (E47–E50): every placeholder in PHYSICS §5
   read in its code and deduced where a law closes (the isotropic body,
   compounding for `ln 2`, the tier shares retired, the bell's years and

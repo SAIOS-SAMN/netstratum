@@ -1366,6 +1366,109 @@ pub fn firmament_of(u: &Universe) -> Vec<(usize, usize)> {
         .collect()
 }
 
+/// The universal enclosure's frame: the home's, which encloses the
+/// universal core.
+pub fn home_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
+    let i = u.cores.iter().position(is_home)?;
+    crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u))
+}
+
+/// The established period (docs/111 §5.3, docs/116): the front's round trip
+/// to the S^360 rim, `T_u = 2·a(R_rim)`. At the rim the reach equals the
+/// holding within (`Enclosed::rim`), so `a(R_rim) = 2·R_rim` and
+/// `T_u = 4·R_rim`: a core ring in bells, `T_u/4`, is the rim itself.
+/// Returns `(T_u, R_rim)` in the universal enclosure's own units (the home's
+/// frame, which encloses the universal core).
+pub fn established_period(u: &Universe) -> Option<(Ratio, Ratio)> {
+    let i = u.cores.iter().position(is_home)?;
+    let enc = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u))?;
+    let r = enc.rim();
+    let a = crate::ring::arrival(&r, &enc.hold_within(&r));
+    Some((ratio(2, 1) * a, r))
+}
+
+/// A cell of the contained front (docs/111 §2.4, docs/110 §2): on one
+/// spatial plane, one cell of the firmament's shell, its arc of the plane's
+/// circle, its members, and the front's round trip to its outer held spread.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FrontCell {
+    /// The spatial plane (an index into `flows::SPACE`).
+    pub plane: usize,
+    /// Its arc of the plane's circle (a plane's cells' arcs sum to 1).
+    pub arc: Ratio,
+    /// Its members.
+    pub members: usize,
+    /// Its outer held spread, `max R(1 + p)` over its members, each reach
+    /// read from both orbits (`flows::swung`).
+    pub r_f: Ratio,
+    /// The front's round trip to it, `2·a(r_f)`, `a(r) = r + H(<r)`.
+    pub period: Ratio,
+}
+
+/// The contained front, read live per plane per cell (docs/111 §2.4, §5.2):
+/// the firmament's motes parted into cells on each spatial plane by their
+/// own phases (`flows::phase_beads`, docs/110 §2); each cell's outer held
+/// spread from its members' reaches in both orbits, the swing of the
+/// orthogonal on the orbital (`flows::swung`), spread at the universal
+/// bounce's push (the push the throat's cut reads, `firmament_of`); each
+/// cell's round trip `2·a(r_f)`. The bubble is this set of return times, one
+/// per cell per plane, never one radius. Empty while no firmament stands.
+pub fn contained_front(u: &Universe) -> Vec<FrontCell> {
+    let Some(i) = u.cores.iter().position(is_home) else {
+        return Vec::new();
+    };
+    let Some(enc) = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u)) else {
+        return Vec::new();
+    };
+    let push = ratio(1, 2);
+    let firm: Vec<&crate::flows::Mote> = firmament_of(u)
+        .into_iter()
+        .map(|(c, j)| &u.cores[c].flows[j])
+        .collect();
+    let outer = |x: &crate::flows::Mote| {
+        let psi = x
+            .phase
+            .get(crate::flows::LOOP)
+            .cloned()
+            .unwrap_or_else(|| ratio(0, 1));
+        let (ell, _) = crate::flows::swung(&x.ell_o, &x.ell_orth, &psi);
+        enc.reach(&ell).0 * (ratio(1, 1) + push.clone())
+    };
+    let mut out = Vec::new();
+    for (plane, &k) in crate::flows::SPACE.iter().enumerate() {
+        let on_plane: Vec<(usize, Ratio)> = firm
+            .iter()
+            .enumerate()
+            .map(|(n, x)| {
+                let ph = crate::flows::true_phase(x, k);
+                (n, ph.clone() - ph.floor())
+            })
+            .collect();
+        if on_plane.is_empty() {
+            continue;
+        }
+        let cells = if on_plane.len() < 2 {
+            vec![(vec![0], ratio(1, 1))]
+        } else {
+            crate::flows::phase_beads(&on_plane)
+        };
+        for (idx, arc) in cells {
+            let Some(r_f) = idx.iter().map(|&n| outer(firm[n])).max() else {
+                continue;
+            };
+            let a = crate::ring::arrival(&r_f, &enc.hold_within(&r_f));
+            out.push(FrontCell {
+                plane,
+                arc,
+                members: idx.len(),
+                r_f,
+                period: ratio(2, 1) * a,
+            });
+        }
+    }
+    out
+}
+
 /// The firmament's holding as the throat's cut reads it (docs/111 §4.5):
 /// every home mote's grains × weight times its held share (`flows::held`,
 /// at the universal bounce's push ½), so a mote half within the throat

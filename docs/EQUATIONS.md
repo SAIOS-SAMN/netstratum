@@ -1784,3 +1784,18 @@ core's lead (the motion law on each plane by its share). Replaces
 **E50 · A share kept over passes.** `(1 − x)^n` over the body's own rings
 (`compound`, E25); the rings to a level by `compound::rings_until`.
 Replaces `e^(−λ)` by halvings and the `ln 2` constants.
+
+### §8.6 The front's periods
+
+Rows E51–E53 (docs/111 §5, docs/112 §7.1). Read live; the bounce schedule
+does not yet use them.
+
+**E51 · The contained front.** Per plane per cell of the firmament's
+shell, the round trip to the cell's outer held spread, `2·a(r_f)`,
+`a(r) = r + H(<r)`, each reach from both orbits (`pulse::contained_front`).
+
+**E52 · The rim.** `R_rim = H(<R_rim)`, deficit ½ on the whole enclosure
+(`Enclosed::rim`): the whole holding where every body stands inside.
+
+**E53 · The established period.** `T_u = 2·a(R_rim) = 4·R_rim`; a core ring
+in bells, `T_u/4`, is `R_rim` (`pulse::established_period`).

@@ -702,6 +702,23 @@ impl Enclosed {
         self.held[self.spins.partition_point(|l| l < ell)].clone()
     }
 
+    /// The rim (the rim law, `enclosure::rim_of`; docs/112 §7.1): where the
+    /// vacuum's hold equals the continuum's push, deficit ½, so the reach
+    /// equals the holding enclosed there, `R_rim = H(<R_rim)`. Read from the
+    /// whole holding inward: where every body stands inside it, the rim is
+    /// the whole holding; a body past it is outside, and the rim is read
+    /// again on what stays within.
+    pub fn rim(&self) -> Ratio {
+        let mut r = self.whole();
+        loop {
+            let h = self.hold_within(&r);
+            if h >= r || h.is_zero() {
+                return r;
+            }
+            r = h;
+        }
+    }
+
     /// The enclosure's base: its throat's own hold (the ring's `H`).
     pub fn base(&self) -> Ratio {
         self.held.first().cloned().unwrap_or_else(|| ratio(0, 1))

@@ -177,6 +177,36 @@ fn main() {
                 .flat_map(|c| &c.satellites)
                 .map(|s| s.satellites.len())
                 .sum();
+            if let Some((t_e, r_rim)) = pulse::established_period(&u) {
+                eprintln!(
+                    "RIM at bell {}: R_rim {}, established period T_u = 2·a(R_rim) = {} bells; stored T_u {}; whole holding {}, within the rim {}",
+                    b + 1,
+                    conductor::reading::sector(&r_rim),
+                    conductor::reading::sector(&t_e),
+                    t_u,
+                    pulse::home_frame(&u).map(|e| conductor::reading::sector(&e.whole()).to_string()).unwrap_or_default(),
+                    pulse::home_frame(&u).map(|e| conductor::reading::sector(&e.hold_within(&r_rim)).to_string()).unwrap_or_default()
+                );
+            }
+            let front = pulse::contained_front(&u);
+            for plane in 0..conductor::flows::SPACE.len() {
+                let cells: Vec<&pulse::FrontCell> =
+                    front.iter().filter(|c| c.plane == plane).collect();
+                let (Some(lo), Some(hi)) = (
+                    cells.iter().map(|c| c.period.clone()).min(),
+                    cells.iter().map(|c| c.period.clone()).max(),
+                ) else {
+                    continue;
+                };
+                eprintln!(
+                    "FRONT at bell {} plane {plane}: {} cells, round trips {}..{} bells; stored T_u {}",
+                    b + 1,
+                    cells.len(),
+                    conductor::reading::sector(&lo),
+                    conductor::reading::sector(&hi),
+                    t_u
+                );
+            }
             eprintln!("echo at bell {}: {} systems ({} merged, {} dissolved, {} born so far), {} worlds standing ({} grown), {} bodies and motes in systems, {} galaxy motes, {} ocean motes, {:?} since start", b + 1, systems, merged_n, dissolved_n, born_n, worlds_now, worlds_n, bodies, u.cores.iter().map(|c| c.flows.len()).sum::<usize>(), u.ocean.len(), started.elapsed());
         }
         if t_u > 0 && (b + 1) % (10 * t_u) == 0 {
