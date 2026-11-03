@@ -12,6 +12,12 @@ change is named here.
 
 ### Added
 
+- docs/115 and EQUATIONS §8.4 (E40–E44): bonds from nucleons and electrons,
+  derived from the electrons' count, the phase transitions, the fibre and
+  transduction: a bond pairs a held lone end with a free one, whole
+  clusters by integer count, the light of a bond, a bond parting by heat
+  and torsion against its grip. Open: one count of open ends (two in the
+  code, agreeing at 282 of 1495 weights); clusters that stay open.
 - docs/114 and EQUATIONS §8.2 (E31–E35): the throat as a tube's connector
   (the face inversion as `x ↦ 1/x`, a tube between mouths, chained tubes
   composing by LAW-DILATION, the Kaluza–Klein passage on the R loop, an

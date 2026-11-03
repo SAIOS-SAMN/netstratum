@@ -1738,3 +1738,30 @@ passage (R is not compact).
 **E35 · An open tube.** Specified (the reading `ring::open`, docs/111 §3.1).
 A mote turns `2δ = 2/(1 + x)` a bell, past one turn exactly inside the
 throat; a tube is open while both mouths are throats, `R_b ≤ H_b`.
+
+### §8.4 Bonds
+
+Rows E40–E44 (docs/115). Derived, not built.
+
+**E40 · A bond is a fibre between two atoms.** A held lone electron end of
+one atom pairs with a free lone end of another, counter-turning; two held or
+two free ends do not pair. A lone end is held where
+`in_step(φ_⊥, φ_held) ≥ ½`.
+
+**E41 · Whole clusters.** Where held meets free, the closing cluster
+`n_A = L_B/g`, `n_B = L_A/g` (`g = gcd(L_A, L_B)`, `chem::closing`) forms
+
+    k = min(⌊a_A / n_A⌋, ⌊a_B / n_B⌋)
+
+times; the rest stays as it was. Nucleons conserved.
+
+**E42 · The light of a bond.** `k·(n_A·L_A + n_B·L_B) = 2·k·n_A·L_A`
+quanta, the open ends closed (transduction, E25), booked on the light
+ledger.
+
+**E43 · A bond parts.** Where `a + τ > κ_c·h_c` (docs/100 §9.2), whole into
+its atoms, taking back its light from its agitation.
+
+**E44 · Open (docs/115 §7).** One count of an atom's open ends
+(`chem::unpaired` against `L_e`, agreeing at 282 of 1495 weights);
+clusters that keep open ends.

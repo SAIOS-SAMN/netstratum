@@ -72,6 +72,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 111 | [The wavefront: one expanding sphere, echoed at surfaces](111_THE_WAVEFRONT.md) |
 | 112 | [The founding: a table of elements in the core](112_THE_FOUNDING.md) |
 | 114 | [The tube: the throat as a bridge, and tubes between mouths](114_THE_TUBE.md) |
+| 115 | [Bonds from nucleons and electrons](115_BONDS_FROM_NUCLEONS.md) |
 
 ## Era 0: the game, its civilizations and economy (01–77)
 
