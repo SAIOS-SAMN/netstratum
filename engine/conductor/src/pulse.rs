@@ -1366,6 +1366,27 @@ pub fn firmament_of(u: &Universe) -> Vec<(usize, usize)> {
         .collect()
 }
 
+/// The universal enclosure's frame: the home's, which encloses the
+/// universal core.
+pub fn home_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
+    let i = u.cores.iter().position(is_home)?;
+    crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u))
+}
+
+/// The established period (docs/111 §5.3, docs/116): the front's round trip
+/// to the S^360 rim, `T_u = 2·a(R_rim)`. At the rim the reach equals the
+/// holding within (`Enclosed::rim`), so `a(R_rim) = 2·R_rim` and
+/// `T_u = 4·R_rim`: a core ring in bells, `T_u/4`, is the rim itself.
+/// Returns `(T_u, R_rim)` in the universal enclosure's own units (the home's
+/// frame, which encloses the universal core).
+pub fn established_period(u: &Universe) -> Option<(Ratio, Ratio)> {
+    let i = u.cores.iter().position(is_home)?;
+    let enc = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u))?;
+    let r = enc.rim();
+    let a = crate::ring::arrival(&r, &enc.hold_within(&r));
+    Some((ratio(2, 1) * a, r))
+}
+
 /// A cell of the contained front (docs/111 §2.4, docs/110 §2): on one
 /// spatial plane, one cell of the firmament's shell, its arc of the plane's
 /// circle, its members, and the front's round trip to its outer held spread.

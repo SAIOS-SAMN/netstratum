@@ -177,6 +177,17 @@ fn main() {
                 .flat_map(|c| &c.satellites)
                 .map(|s| s.satellites.len())
                 .sum();
+            if let Some((t_e, r_rim)) = pulse::established_period(&u) {
+                eprintln!(
+                    "RIM at bell {}: R_rim {}, established period T_u = 2·a(R_rim) = {} bells; stored T_u {}; whole holding {}, within the rim {}",
+                    b + 1,
+                    conductor::reading::sector(&r_rim),
+                    conductor::reading::sector(&t_e),
+                    t_u,
+                    pulse::home_frame(&u).map(|e| conductor::reading::sector(&e.whole()).to_string()).unwrap_or_default(),
+                    pulse::home_frame(&u).map(|e| conductor::reading::sector(&e.hold_within(&r_rim)).to_string()).unwrap_or_default()
+                );
+            }
             let front = pulse::contained_front(&u);
             for plane in 0..conductor::flows::SPACE.len() {
                 let cells: Vec<&pulse::FrontCell> =

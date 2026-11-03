@@ -164,10 +164,14 @@ Everything outside the core is matter that crossed the throat:
 
 ## 7. Open
 
-1. **The rim.** With no shells at the founding, the S^360 rim needs its own
-   reading. The enclosure's rim law, `rim = H` (`Enclosed::whole`), puts it
-   at 2 in the core's own units. `T_u` and the bell's length in core rings
-   (`orbit_galaxies`' `t_u/4`) must be re-read on it.
+1. **The rim (closed, docs/116 §5).** The rim law (deficit ½, the reach
+   equal to the holding within) read on the universal enclosure,
+   `R_rim = H(<R_rim)` (`Enclosed::rim`): the universe's whole holding where
+   every body stands inside it. Then `a(R_rim) = 2·R_rim`,
+   `T_u = 2·a(R_rim) = 4·R_rim`, and a core ring in bells, `T_u/4`, is the
+   rim. Read on a fresh 2^40 universe: `R_rim` 1.136 (bell 186; 1 % of the
+   holding outside) and 1.250 (bell 372; all within), so `T_u` 4.54 and
+   5.00 bells against the stored 186.
 2. **A collection's weight.** Is `W` the sum over one formula unit of its
    members (a molecule), or its holding per grain? §3.2 takes the former;
    the two give different rest points.
