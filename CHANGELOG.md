@@ -53,6 +53,9 @@ change is named here.
 
 ### Changed
 
+- A world's composition handed to era 0 is keyed by proton count (it was
+  the nucleon count, which era 0 read as Z); clusters are split among
+  their atoms' elements by nucleons instead of dropped (#27).
 - docs/114 T4 and E34: the passage restated as an event on the orthogonal
   orbit (sheared across the axes, forward in time). The Kaluza–Klein
   reading is withdrawn: R is not compact.
