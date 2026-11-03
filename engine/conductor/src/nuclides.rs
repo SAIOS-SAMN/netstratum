@@ -253,6 +253,35 @@ pub fn held(_w: u32, g: &cfe::ratio::Ratio) -> Option<cfe::ratio::Ratio> {
     crate::polarity::equilibrium(g, &(cfe::ratio::ratio(1, 1) - g.clone()))
 }
 
+/// The electrons' ends of the nuclide of weight `w` (docs/104 §1.1): its `Q`
+/// electrons converge on S^11 as a nucleus of weight `Q` does, so they stand
+/// as `F_e = Z(Q)` fibres and `L_e = Q(Q) − Z(Q)` lone ends, `Q = 2F_e + L_e`.
+/// Returns `(F_e, L_e, Q)`.
+pub fn electron_ends(w: u32) -> Option<(u32, u32, u32)> {
+    let q = protons(w)?;
+    let f = neutrons(q)?;
+    let l = protons(q)?.checked_sub(f)?;
+    Some((f, l, q))
+}
+
+/// The electrons' held share, counted (docs/104 §1.1): every fibre holds one
+/// end on the held hemisphere whatever the phase; each lone end holds by its
+/// in-step share with the held face at the pulse phase `p`,
+/// `h = (F_e + L_e·in_step(p, φ_held))/Q`; `φ_held` 0 forward, ½ inverse.
+pub fn held_count(
+    w: u32,
+    p: &cfe::ratio::Ratio,
+    phi_held: &cfe::ratio::Ratio,
+) -> Option<cfe::ratio::Ratio> {
+    use cfe::ratio::ratio;
+    let (f, l, q) = electron_ends(w)?;
+    if q == 0 {
+        return None;
+    }
+    let held = ratio(i64::from(f), 1) + ratio(i64::from(l), 1) * crate::flows::in_step(p, phi_held);
+    Some(held / ratio(i64::from(q), 1))
+}
+
 /// A nucleus's grip (docs/97 §11, §13): a fibre is two counter-turning ends
 /// sharing one whole turn, the held end's share the held hemisphere, so a
 /// nucleus grips by `κ_w·h` at its pulse phase.

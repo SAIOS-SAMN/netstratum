@@ -380,6 +380,37 @@ pub fn in_step(a: &Ratio, b: &Ratio) -> Ratio {
     ratio(1, 1) - ratio(2, 1) * off(&(a.clone() - b.clone()))
 }
 
+/// A mote's open share (docs/104 §1.1–§1.2): its electrons' ends not held,
+/// `1 − h`, counted over every atom of its kind (`Σ n·Q` ends), each lone end
+/// read at the mote's pulse phase (its orthogonal orbit's phase, the bell's
+/// own turn whole) against the face it stands on (forward 0; the vacuum leg,
+/// inverse, ½). Moves with the electron phase; sealed shells are never open.
+pub fn open_share(x: &Mote) -> Ratio {
+    let p = x.phase.get(LOOP).cloned().unwrap_or_else(|| ratio(0, 1));
+    let face = if x.vacuum { ratio(1, 2) } else { ratio(0, 1) };
+    let s = in_step(&p, &face);
+    let (mut open, mut ends) = (ratio(0, 1), ratio(0, 1));
+    for &(n, w) in x.key.parts() {
+        if let Some((_, l, q)) = crate::nuclides::electron_ends(w) {
+            let n = ratio(i64::from(n), 1);
+            open += n.clone() * ratio(i64::from(l), 1) * (ratio(1, 1) - s.clone());
+            ends += n * ratio(i64::from(q), 1);
+        }
+    }
+    if ends.is_zero() {
+        ratio(0, 1)
+    } else {
+        open / ends
+    }
+}
+
+/// A mote's spread, its manifold's half-width as a share of its reach: the
+/// core's push `p` on its open share (`open_share`), so its band `R(1 ± p·o)`
+/// breathes with its electrons' phase and is never one width for a galaxy.
+pub fn spread(x: &Mote, p: &Ratio) -> Ratio {
+    (p.clone() * open_share(x)).min(ratio(1, 1))
+}
+
 /// Quantum torsion (docs/100 §8; the bounce is Einstein–Cartan, torsion
 /// couples to spin): the winding a quantum state keeps from the twist, its
 /// lead between planes against its enclosure's plane, `τ = Σ_k |t_k −
@@ -1489,18 +1520,24 @@ pub fn beads(
         return beads_by_face;
     }
     let half = ratio(1, 2);
-    let (down, up) = (
-        ratio(1, 1) - p.clone().min(ratio(1, 1)),
-        ratio(1, 1) + p.clone(),
-    );
     let hh: Vec<Ratio> = motes.iter().map(|x| enc.hold(&x.ell_o)).collect();
     let rr: Vec<Ratio> = motes
         .iter()
         .zip(&hh)
         .map(|(x, h)| x.ell_o.clone() / h.clone())
         .collect();
-    let lov: Vec<Ratio> = rr.iter().map(|r| r.clone() * down.clone()).collect();
-    let hiv: Vec<Ratio> = rr.iter().map(|r| r.clone() * up.clone()).collect();
+    // Each mote's own spread (its electrons' open share, docs/104 §1.1).
+    let sp: Vec<Ratio> = motes.iter().map(|x| spread(x, p)).collect();
+    let lov: Vec<Ratio> = rr
+        .iter()
+        .zip(&sp)
+        .map(|(r, s)| r.clone() * (ratio(1, 1) - s.clone()))
+        .collect();
+    let hiv: Vec<Ratio> = rr
+        .iter()
+        .zip(&sp)
+        .map(|(r, s)| r.clone() * (ratio(1, 1) + s.clone()))
+        .collect();
     let delta_of = |j: usize, r: &Ratio| hh[j].clone() / (r.clone() + hh[j].clone());
     // The hold along a group by reach: each member spread over its own band,
     // the hold at a place the sum of every member whose band covers it.
@@ -1600,18 +1637,24 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
     // Each mote's reach and band, read once by the one enclosure (exact;
     // recomputing them at every use was most of the cost): its reach `ℓ/H(<ℓ)`
     // and the hold it turns about.
-    let (down, up) = (
-        ratio(1, 1) - p.clone().min(ratio(1, 1)),
-        ratio(1, 1) + p.clone(),
-    );
     let hh: Vec<Ratio> = motes.iter().map(|x| enc.hold(&x.ell_o)).collect();
     let rr: Vec<Ratio> = motes
         .iter()
         .zip(&hh)
         .map(|(x, h)| x.ell_o.clone() / h.clone())
         .collect();
-    let lov: Vec<Ratio> = rr.iter().map(|r| r.clone() * down.clone()).collect();
-    let hiv: Vec<Ratio> = rr.iter().map(|r| r.clone() * up.clone()).collect();
+    // Each mote's own spread (its electrons' open share, docs/104 §1.1).
+    let sp: Vec<Ratio> = motes.iter().map(|x| spread(x, p)).collect();
+    let lov: Vec<Ratio> = rr
+        .iter()
+        .zip(&sp)
+        .map(|(r, s)| r.clone() * (ratio(1, 1) - s.clone()))
+        .collect();
+    let hiv: Vec<Ratio> = rr
+        .iter()
+        .zip(&sp)
+        .map(|(r, s)| r.clone() * (ratio(1, 1) + s.clone()))
+        .collect();
     // The deficit at a reach about the hold a member turns about.
     let delta_of = |j: usize, r: &Ratio| hh[j].clone() / (r.clone() + hh[j].clone());
     // A group judged whole by the filament law, edge to edge.
@@ -1866,10 +1909,8 @@ pub fn band_pairs(
     };
     let band = |i: usize| {
         let r = enc.reach(&motes[i].ell_o).0;
-        (
-            r.clone() * (ratio(1, 1) - p.clone()),
-            r * (ratio(1, 1) + p.clone()),
-        )
+        let s = spread(&motes[i], &p);
+        (r.clone() * (ratio(1, 1) - s.clone()), r * (ratio(1, 1) + s))
     };
     let bands_all: Vec<(Ratio, Ratio)> = (0..motes.len()).map(band).collect();
     let inside = |x: &Ratio| -> Ratio {
