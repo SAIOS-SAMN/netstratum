@@ -177,6 +177,25 @@ fn main() {
                 .flat_map(|c| &c.satellites)
                 .map(|s| s.satellites.len())
                 .sum();
+            let front = pulse::contained_front(&u);
+            for plane in 0..conductor::flows::SPACE.len() {
+                let cells: Vec<&pulse::FrontCell> =
+                    front.iter().filter(|c| c.plane == plane).collect();
+                let (Some(lo), Some(hi)) = (
+                    cells.iter().map(|c| c.period.clone()).min(),
+                    cells.iter().map(|c| c.period.clone()).max(),
+                ) else {
+                    continue;
+                };
+                eprintln!(
+                    "FRONT at bell {} plane {plane}: {} cells, round trips {}..{} bells; stored T_u {}",
+                    b + 1,
+                    cells.len(),
+                    conductor::reading::sector(&lo),
+                    conductor::reading::sector(&hi),
+                    t_u
+                );
+            }
             eprintln!("echo at bell {}: {} systems ({} merged, {} dissolved, {} born so far), {} worlds standing ({} grown), {} bodies and motes in systems, {} galaxy motes, {} ocean motes, {:?} since start", b + 1, systems, merged_n, dissolved_n, born_n, worlds_now, worlds_n, bodies, u.cores.iter().map(|c| c.flows.len()).sum::<usize>(), u.ocean.len(), started.elapsed());
         }
         if t_u > 0 && (b + 1) % (10 * t_u) == 0 {
