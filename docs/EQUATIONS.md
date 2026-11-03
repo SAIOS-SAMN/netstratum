@@ -1775,7 +1775,7 @@ attractor's fixed point, E38); its torsion is 0. Replaces the isotropic
 third (`flows::tilt_of`).
 
 **E48 · A reading over the planes.** Weighted by the tilt, `Σ_k t_k·(…)`
-(as `C_Δ`, E44's `bonded`). Replaces the equal mean `/3`.
+(as `C_Δ` in `flows::bonded`, docs/111 §4.2). Replaces the equal mean `/3`.
 
 **E49 · The release's base phase per plane.** `2·d_k·t_k` a bell, `t_k` the
 core's lead (the motion law on each plane by its share). Replaces
