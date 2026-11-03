@@ -177,6 +177,7 @@ dependencies = [
  "mesh",
  "mycelium",
  "num-bigint",
+ "num-integer",
  "num-rational",
  "num-traits",
  "physics",
