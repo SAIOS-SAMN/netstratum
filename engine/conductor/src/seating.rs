@@ -60,7 +60,8 @@ pub fn place_of(u: &Universe, path: &[u64]) -> Option<Place> {
     Some(system_place(&galaxy_place(k), j))
 }
 
-/// A world's composition, its grains by Z (the pulse's `Z###` keys).
+/// A world's composition, its grains by element (`Z`, the proton count era 0
+/// reads it by); see [`composition`].
 pub fn composition_of(u: &Universe, path: &[u64]) -> Option<Vec<(u16, cfe::ratio::Ratio)>> {
     let core = u.cores.iter().find(|c| c.path.first() == path.first())?;
     let sys = core
@@ -71,16 +72,30 @@ pub fn composition_of(u: &Universe, path: &[u64]) -> Option<Vec<(u16, cfe::ratio
         .satellites
         .iter()
         .find(|o| o.path.get(2) == path.get(2))?;
-    Some(
-        orb.kept
-            .iter()
-            .filter_map(|(k, a)| {
-                crate::chem::atom_w(k)
-                    .and_then(|z| u16::try_from(z).ok())
-                    .map(|z| (z, a.clone()))
-            })
-            .collect(),
-    )
+    Some(composition(&orb.kept))
+}
+
+/// Matter by element: each kind's grains go to its parts' elements by the
+/// nucleons each part carries, `a·n·w/weight` to `Z = protons(w)` (a plain
+/// atom wholly to its own Z; a cluster split among its atoms), so no matter
+/// is dropped and the composition is keyed by charge, never by weight.
+pub fn composition(kept: &crate::pulse::Manifest) -> Vec<(u16, cfe::ratio::Ratio)> {
+    let mut by_z: std::collections::BTreeMap<u16, cfe::ratio::Ratio> =
+        std::collections::BTreeMap::new();
+    for (k, a) in kept {
+        let whole = crate::chem::weight(k);
+        if whole == 0 {
+            continue;
+        }
+        for &(n, w) in k.parts() {
+            let Some(z) = crate::nuclides::protons(w).and_then(|z| u16::try_from(z).ok()) else {
+                continue;
+            };
+            let share = a.clone() * ratio(i64::from(n * w), i64::from(whole));
+            *by_z.entry(z).or_insert_with(|| ratio(0, 1)) += share;
+        }
+    }
+    by_z.into_iter().collect()
 }
 
 /// Each system's stand-in place and its galactic period (bells a turn about
@@ -371,6 +386,30 @@ pub fn seat(
 mod tests {
     use super::*;
     use num_traits::Signed;
+
+    #[test]
+    fn a_worlds_composition_is_keyed_by_charge_and_keeps_every_grain() {
+        // #27: era 0 reads the key as Z, so it is the proton count, never
+        // the nucleon count; a cluster's grains go to its atoms' elements by
+        // their nucleons.
+        let w = 56;
+        let q = crate::nuclides::protons(w).expect("iron's weight") as u16;
+        assert_ne!(u32::from(q), w);
+        let mut kept = crate::pulse::Manifest::new();
+        kept.insert(crate::chem::Kind::atom(w).expect("a nuclide"), ratio(3, 1));
+        let c = super::composition(&kept);
+        assert_eq!(c, vec![(q, ratio(3, 1))]);
+        let pair = crate::chem::Kind::cluster(&[(1, 56), (1, 2)]).expect("a cluster");
+        let mut kept = crate::pulse::Manifest::new();
+        kept.insert(pair, ratio(58, 1));
+        let c = super::composition(&kept);
+        let total = c.iter().fold(ratio(0, 1), |s, (_, a)| s + a.clone());
+        assert_eq!(total, ratio(58, 1), "no grain dropped");
+        assert_eq!(
+            c.iter().find(|(z, _)| *z == q).map(|(_, a)| a.clone()),
+            Some(ratio(56, 1))
+        );
+    }
 
     #[test]
     fn galaxies_stand_beyond_each_others_reach_and_systems_within_their_own() {

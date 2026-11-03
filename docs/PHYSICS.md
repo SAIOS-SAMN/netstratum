@@ -127,9 +127,10 @@ and land come from era 1:
   elements (era 0's hashed properties, era 1's nuclides), food and land, and
   the contact anchor (`CONTACT_K = 2760` in both `life.rs:50` and
   `cfe/src/almanac/periodic.rs:128`).
-- **A likely defect:** `composition_of` keys the composition by
-  `chem::atom_w`, the nucleon count `w`, and era 0 reads it as the proton
-  count `Z` (`survey.rs:643, 669`).
+- **Fixed (#27):** `seating::composition` keys a world's composition by
+  the proton count `Z` era 0 reads it by (it was keyed by the nucleon count
+  `w`), and splits a cluster's grains among its atoms' elements by their
+  nucleons (clusters were dropped).
 
 [108_OWN_RULERS.md](108_OWN_RULERS.md) lists these imports as O1–O7; the
 read corrects it: O5's only caller is `life.rs:445`; O7's bands are also read
