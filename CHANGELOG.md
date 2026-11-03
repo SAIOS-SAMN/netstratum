@@ -64,6 +64,10 @@ change is named here.
 
 ### Changed
 
+- The firmament's collective push (`flows::repel`) sums its pairs exactly on
+  the phases' common 60-adic denominator instead of term by term in reduced
+  rationals: the same values (witnessed), and a fresh 2^40 universe now
+  reaches its third bounce (#5).
 - A world's composition handed to era 0 is keyed by proton count (it was
   the nucleon count, which era 0 read as Z); clusters are split among
   their atoms' elements by nucleons instead of dropped (#27).
