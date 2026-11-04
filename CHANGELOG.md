@@ -12,6 +12,12 @@ change is named here.
 
 ### Added
 
+- docs/117: the seven base axes and their signature (each frame plane
+  hyperbolic, `Z² = +1`, `Q² = −1`; LAW-DILATION is that plane's boost),
+  degrees counted on many axes, and the tower `S³ → S⁷ → S⁴` with
+  `S¹¹ = S⁷ ∗ S³`: the machine on S⁷ and the quantum state riding on it.
+  The nuclide table's degrees on S¹¹ split exactly over the machine's and
+  the state's (witness: `the_degrees_on_s11_split_over_the_base_s7_and_the_state_s3`).
 - docs/114 §9 (T6): the passage through a throat derived as a quarter turn,
   left multiplication by a unit quaternion on the body's state `q = H +
   R·(t_x·i + t_y·j + t_z·k)`. It is an L1 isometry, exact over ℚ, of order

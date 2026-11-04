@@ -75,6 +75,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 114 | [The tube: the throat as a bridge, and tubes between mouths](114_THE_TUBE.md) |
 | 115 | [Bonds from nucleons and electrons](115_BONDS_FROM_NUCLEONS.md) |
 | 116 | [The placeholders deduced](116_PLACEHOLDERS_DEDUCED.md) |
+| 117 | [The axes and the tower: S³ → S⁷ → S⁴, and S¹¹ = S⁷ ∗ S³](117_THE_AXES_AND_THE_TOWER.md) |
 
 ## Era 0: the game, its civilizations and economy (01–77)
 
