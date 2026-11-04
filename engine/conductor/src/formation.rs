@@ -1212,12 +1212,24 @@ fn exchange(
 /// base and every mote and world inside by its holding share at its own spin.
 /// None where the system holds nothing.
 pub fn system_frame(sys: &crate::pulse::Body, unit: &Ratio) -> Option<crate::flows::Enclosed> {
-    let total = mass(&sys.total());
+    system_frame_of(sys, unit, &mass(&sys.total()), &mass(&sys.kept))
+}
+
+/// The same frame from the system's whole mass and its kept mass already
+/// read (`mass(&sys.total())`, `mass(&sys.kept)`), where a caller carries them
+/// forward exactly instead of re-reading every holding.
+pub fn system_frame_of(
+    sys: &crate::pulse::Body,
+    unit: &Ratio,
+    total: &Ratio,
+    kept: &Ratio,
+) -> Option<crate::flows::Enclosed> {
+    let total = total.clone();
     if total.is_zero() || unit.is_zero() {
         return None;
     }
     Some(crate::flows::Enclosed::new(
-        mass(&sys.kept) / total.clone(),
+        kept.clone() / total.clone(),
         sys.flows
             .iter()
             .map(|x| {

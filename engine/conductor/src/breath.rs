@@ -756,6 +756,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         encounters += star_bounces;
         crate::profile::mark("breath:systems");
         for (mut sys, c_was) in met {
+            crate::profile::mark("sys:clock");
             // Its clock about the galaxy's centre: the rings it receives at its
             // reach, `1 − δ`, δ by the galaxy's one enclosure at its own spin.
             let own = nested(
@@ -827,6 +828,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 if !scale_pre.is_zero() {
                     // At its reach by what is enclosed inside it (the core
                     // and every mote and star inside): the cyclotron.
+                    crate::profile::mark("sys:pull");
                     let ell_s = own_of(&sys);
                     // Its orthogonal spin in its galaxy's own units (docs/90): `ℓ_⊥`
                     // is kept in the units of `ell`; the two readings of its
@@ -1075,6 +1077,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     dissolved += 1;
                     continue;
                 }
+                crate::profile::mark("sys:settle");
                 // Its system still moves: worlds and debris meet, and what
                 // oversteps the rim crosses into the galaxy.
                 let (escaped, settled) =
@@ -1146,6 +1149,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The outburst is thrown cool (operator 2026-10-18: "heat
             // dissipates into the void/vacuum"): only the deep heart is hot;
             // the outer layers it is thrown from hold whole atoms.
+            crate::profile::mark("sys:heart");
             let heat = ratio(0, 1);
             let burst = if rang {
                 crate::formation::heart_cut(&sys.kept, &ratio(0, 1), &heat)
@@ -1307,6 +1311,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // them at that phase.
                 // Its torsion adds to the heat against the grip (docs/100
                 // §9.2: the fibres part where `a + τ > κ_w·h`).
+                crate::profile::mark("sys:nuclides");
                 let heart_heat =
                     crate::nuclides::heat(&h_s, &nu) + crate::flows::torsion(&sys.tilt, &core.tilt);
                 crate::nuclides::release(&mut all, &heart_heat, &g_star);
@@ -1366,6 +1371,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // them at that phase.
                 // Its torsion adds to the heat against the grip (docs/100
                 // §9.2: the fibres part where `a + τ > κ_w·h`).
+                crate::profile::mark("sys:nuclides");
                 let heart_heat =
                     crate::nuclides::heat(&h_s, &nu) + crate::flows::torsion(&sys.tilt, &core.tilt);
                 crate::nuclides::release(&mut all, &heart_heat, &g_star);
@@ -1450,7 +1456,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The slow capture (docs/97 §10): each ring its clock received this
             // echo, its heart's nuclides capture its hydrogen, one nucleon a
             // ring, kept by the hemisphere law at its pulse phase.
+            crate::profile::mark("sys:capture-slow");
             crate::nuclides::capture_slow(&mut sys.kept, r_echo, &in_phase, &g_star, densest);
+            crate::profile::mark("sys:light");
             // Its light crosses its own system on the continuum face.
             if !shone.is_zero() {
                 let whole = mass(&sys.total());
@@ -1502,6 +1510,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 sys.remnant = true;
                 sys.state = mass(&sys.kept);
             }
+            crate::profile::mark("sys:settle");
             // Collisions in the system's own medium: worlds grow; what
             // overreaches the system's rim crosses into the galaxy.
             let (escaped, settled) =
@@ -1563,6 +1572,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             enclosed_in += mass(&sys.total()) / unit.clone();
             keep.push(sys);
         }
+        crate::profile::mark("sys:orphans");
         // RE-anchoring (with Xylarium): an emptied remnant's worlds pass to the
         // nearest star still burning, by reach; with none, they cross whole
         // into the galaxy's flows. A world stands against its star, so it is
@@ -1600,6 +1610,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
             }
         }
+        crate::profile::mark("sys:capture");
         // Capture is settling (ruling of 2026-10-24, relayed by Xylarium: the
         // star is caught in its own gravitational motion with the galactic
         // core, which settles amongst all larger gravity wells, and a world
@@ -1676,6 +1687,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     }
                 }
             }
+            crate::profile::mark("cap:each");
+            // Each star's whole mass and kept mass, read once and carried
+            // forward exactly: a capture adds its nuclei's mass to the
+            // star's medium and changes nothing it keeps.
+            let mut masses: Vec<Option<(Ratio, Ratio)>> = vec![None; keep.len()];
             for (mi, cl) in claims.into_iter().enumerate() {
                 if cl.is_empty() {
                     continue;
@@ -1698,6 +1714,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     };
                     core.flows[mi].amount -= take.clone();
                     let x = core.flows[mi].clone();
+                    let (w_sys, kept_m) = masses[si]
+                        .get_or_insert_with(|| (mass(&keep[si].total()), mass(&keep[si].kept)))
+                        .clone();
                     let s = &mut keep[si];
                     let key = x.key.clone();
                     let m = take.clone() * crate::flows::weight(&key);
@@ -1708,8 +1727,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     } else {
                         (x.ell_orth.clone() - s.ell_orth.clone()) / x.ell_o.clone()
                     };
+                    crate::profile::mark("cap:book");
                     // The galaxy tier's book, both planes.
-                    let w_sys = mass(&s.total());
                     if !(w_sys.clone() + m.clone()).is_zero() {
                         let exact_o = (w_sys.clone() * s.ell.clone() + m.clone() * x.ell_o.clone())
                             / (w_sys.clone() + m.clone());
@@ -1733,6 +1752,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         s.ell = go;
                         s.ell_orth = gc;
                     }
+                    crate::profile::mark("cap:place");
                     // The system tier: set down at its place.
                     let gap = if r_m > r_s {
                         r_m.clone() - r_s.clone()
@@ -1741,21 +1761,22 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     };
                     // A galaxy length enters the system divided once by its
                     // holding share, against its breathing rim.
-                    let lam = mass(&s.total()) / g_before.clone();
+                    let lam = w_sys.clone() / g_before.clone();
                     let r_sys = if lam.is_zero() {
                         ratio(0, 1)
                     } else {
                         gap / lam
                     };
-                    let tot = mass(&s.total());
-                    let h_sys = if tot.is_zero() {
+                    let h_sys = if w_sys.is_zero() {
                         ratio(1, 1)
                     } else {
-                        mass(&s.kept) / tot
+                        kept_m.clone() / w_sys.clone()
                     };
-                    let h_at = crate::formation::system_frame(s, &unit)
+                    crate::profile::mark("cap:frame");
+                    let h_at = crate::formation::system_frame_of(s, &unit, &w_sys, &kept_m)
                         .map(|enc_s| enc_s.hold_within(&r_sys))
                         .unwrap_or(h_sys);
+                    crate::profile::mark("cap:mote");
                     let ell_o = crate::ring::grain(&(r_sys * h_at));
                     let phase: Vec<Ratio> = x
                         .phase
@@ -1779,6 +1800,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         lever_place: ratio(0, 1),
                         tilt: x.tilt.clone(),
                     };
+                    if let Some((w, _)) = masses[si].as_mut() {
+                        *w += take.clone() * crate::flows::weight(&key);
+                    }
                     *s.medium.entry(key).or_insert_with(|| ratio(0, 1)) += take;
                     s.flows.push(mote);
                 }
