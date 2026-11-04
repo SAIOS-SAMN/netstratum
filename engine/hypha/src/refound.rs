@@ -4,10 +4,17 @@
 //! re-posts its standing, in order, with the same keys (a domain's id is its
 //! founding verifying key, so `var/uplink/*.key` kept intact keeps 5deab117):
 //!
+//! 0. the contract (Mycelium's KERNEL profile): the statement the hypha
+//!    serves and its Concordance's hash, each read against the pinned SDK's,
+//!    and the domain's signature over the hash; a hypha on another contract
+//!    stops the re-founding before anything is posted;
 //! 1. the domain (`found`), its tiers named at genesis (78.119/78.120);
-//! 2. its origin (`originate`): the Big Bang's seed and the flat L1 torus, which
-//!    also states the universe's geometry (78.140) a local throat needs;
-//! 3. its reserve (`reserve union`, held for stillcold, docs/68);
+//! 2. its origin (`originate`): the Big Bang's seed and era 1's closed
+//!    sphere, which also states the universe's geometry (78.140) a local
+//!    throat needs; then the universe read back as originated;
+//! 3. its reserve (`reserve union`, held for stillcold, docs/68); then the
+//!    universe's manifest, its nuclei per Z, signed by that reserve: granted,
+//!    or refused by the court's standing by name;
 //! 4. its first ledger entry (78.154 sub-kind 12) at a final point: the
 //!    commitment over its checkpoints (Concordance 1.13), no events yet;
 //! 5. then, each tend, its gates as LOCAL throats (map record kind 2), signed
@@ -27,14 +34,18 @@
 //! maps only after the re-founding has run for the present origin (`refounded`
 //! in the uplink home): the coordinator ruled the map waits for the recut.
 use crate::wire::HouseActs;
-use mycelium::anastome::dialogue::atlas::{
+use mycelium_sdk::house::atlas::{
     decode_map_reply, encode_map, MapAct, MapRecord, MapRefusal, Mapped,
 };
-use mycelium::anastome::dialogue::domain::{DomainGenesis, Founded, Origin, Reservation};
-use mycelium::anastome::dialogue::seat::Arg;
-use mycelium::anastome::dialogue::universe::{Genesis, Geometry, Parent};
-use mycelium::chronometry::tuniversal::TPoint;
-use mycelium::sdk::Session;
+use mycelium_sdk::house::domain::{BigBangRecord, DomainGenesis, Founded, Reservation};
+use mycelium_sdk::house::seat::Arg;
+use mycelium_sdk::house::tuniversal::TPoint;
+use mycelium_sdk::house::universe::{Genesis, Geometry, Parent};
+use mycelium_sdk::house::{
+    decode_grant_reply, decode_universe_reading, encode_manifest, encode_universe_read,
+    GrantRefusal, Granted, Manifest,
+};
+use mycelium_sdk::session::Session;
 use std::io;
 use std::path::Path;
 
@@ -109,11 +120,11 @@ pub fn ledger_frame(
     domain: [u8; 32],
     var_root: &Path,
     u: u64,
-    point: mycelium::chronometry::tuniversal::TPoint,
+    point: mycelium_sdk::house::tuniversal::TPoint,
     parent: [u8; 32],
 ) -> io::Result<(Vec<u8>, usize)> {
-    use mycelium::anastome::dialogue::atlas::{encode_ledger, LedgerEntry};
-    use mycelium::anastome::dialogue::commitment::commitment;
+    use mycelium_sdk::house::atlas::{encode_ledger, LedgerEntry};
+    use mycelium_sdk::house::commitment::commitment;
     let records = checkpoint_records(var_root);
     let commitment =
         commitment(&records).ok_or_else(|| io::Error::other("a checkpoint key repeats"))?;
@@ -131,7 +142,7 @@ pub fn ledger_frame(
 }
 
 pub fn post_ledger(session: &Session, home: &Path, var_root: &Path, u: u64) -> io::Result<String> {
-    use mycelium::anastome::dialogue::atlas::{decode_ledger_reply, Ledgered};
+    use mycelium_sdk::house::atlas::{decode_ledger_reply, Ledgered};
     let reserve = load_key(home, "tier-union.key")?;
     let domain = load_key(home, "tier-domain.key")?
         .verifying_key()
@@ -177,7 +188,7 @@ pub fn refounded_under(home: &Path) -> Option<String> {
         .map(str::to_string)
 }
 
-/// The RE-founding, steps 1 to 4 and the marker, with the keys already in the
+/// The RE-founding, steps 0 to 4 and the marker, with the keys already in the
 /// uplink home (never minted): found, originate (the flat L1 torus, periods
 /// 64 cells), reserve the union tier, the first ledger entry at the world's u
 /// with a zero parent; when the entry seals, `refounded` names the origin it
@@ -188,7 +199,11 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     let union = load_key(home, "tier-union.key")?;
     let colonies = load_key(home, "tier-colonies.key")?;
     let id = domain.verifying_key().to_bytes();
-    let mut said = Vec::new();
+    // 0. The contract.
+    let (agreed, mut said) = concord(session, &domain)?;
+    if !agreed {
+        return Ok((false, said));
+    }
     // 1. The domain, its tiers named at genesis (ascending, each once).
     let mut tiers = vec![
         colonies.verifying_key().to_bytes(),
@@ -204,7 +219,7 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     // A pointed door reply carries the door's final point: if the domain's
     // answer brought none, read the court's clock, whose reply does.
     if session.tuniversal().is_none() {
-        let _ = session.speak(mycelium::physics::laws::codec::encode_clock_request());
+        let _ = session.speak(mycelium_sdk::house::encode_clock_request());
     }
     let Some(point) = session.tuniversal() else {
         said.push("the re-founding waits: no final point read yet".into());
@@ -220,15 +235,16 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
         .find(|r| matches!(r.event(), cfe::dop::ClosureEvent::UniverseFounded { .. }))
         .map(|r| r.own().0)
         .ok_or_else(|| io::Error::other("no Big Bang on the universe ledger"))?;
-    let origin = Origin {
+    let genesis = Genesis {
+        geometry: Geometry::Sphere(crate::fold::universe_radius(var_root)?),
+        parent: Parent::Unwitnessed,
+    };
+    let origin = BigBangRecord {
         domain: id,
         kind: crate::fold::ORIGIN_KIND,
         version: 2,
         commitment: seed,
-        universe: Some(Genesis {
-            geometry: Geometry::Sphere(crate::fold::universe_radius(var_root)?),
-            parent: Parent::Unwitnessed,
-        }),
+        universe: Some(genesis.clone()),
     };
     let originated = session.originate(&origin.sign(&domain))?;
     said.push(format!("2 origin: {originated:?}"));
@@ -236,6 +252,25 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
         originated,
         Founded::Originated { .. } | Founded::AlreadyOriginated
     ) {
+        return Ok((false, said));
+    }
+    // The universe read back: originated, in the geometry and parent face the
+    // origin stated.
+    let read = decode_universe_reading(&session.speak(encode_universe_read(id))?);
+    let stands = read.as_ref().is_some_and(|r| {
+        r.originated
+            && r.geometry.as_ref() == Some(&genesis.geometry)
+            && r.parent.as_ref() == Some(&genesis.parent)
+    });
+    said.push(format!(
+        "2 universe: {}",
+        if stands {
+            "originated as stated"
+        } else {
+            "not the universe originated"
+        }
+    ));
+    if !stands {
         return Ok((false, said));
     }
     // 3. The reserve: the union tier, held for stillcold (docs/68).
@@ -249,6 +284,24 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     )?;
     said.push(format!("3 reserve: {reserved:?}"));
     if !matches!(reserved, Founded::Reserved { .. }) {
+        return Ok((false, said));
+    }
+    // The manifest: the universe's nuclei per Z, signed by the sitting
+    // reserve. Granted, or refused by the court's standing (short, granted
+    // already, one in flight, no new closures), nothing moved; any other
+    // refusal names a fault on this side and stops the rest.
+    let granted = post_manifest(session, &union, id, var_root)?;
+    said.push(format!("3 manifest: {granted:?}"));
+    if !matches!(
+        granted,
+        Granted::Sealed { .. }
+            | Granted::Refused(
+                GrantRefusal::Short
+                    | GrantRefusal::Granted
+                    | GrantRefusal::InFlight
+                    | GrantRefusal::NoNewClosures
+            )
+    ) {
         return Ok((false, said));
     }
     // 4. The first ledger entry: its parent is zero, so a head kept from
@@ -282,6 +335,73 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
         origin_of(&point)
     ));
     Ok((true, said))
+}
+
+/// THE CONTRACT, the re-founding's step 0 (Mycelium's KERNEL profile): the
+/// statement the hypha serves and its Concordance's hash, each against the
+/// pinned SDK's, then the domain's signature over the hash presented and
+/// judged. Agreed only where all three hold; what each read said.
+pub fn concord(
+    session: &Session,
+    domain: &ed25519_dalek::SigningKey,
+) -> io::Result<(bool, Vec<String>)> {
+    use mycelium_sdk::conformance::{
+        decode_statement_reply, encode_statement_request, StatementRead, STATEMENT,
+    };
+    use mycelium_sdk::house::{
+        decode_concordance_reply, decode_signature_reply, encode_concordance_request,
+        encode_signature_request, ConcordanceSignature, CONCORDANCE_HASH,
+    };
+    let mut said = Vec::new();
+    let stated = decode_statement_reply(&session.speak(encode_statement_request())?);
+    if stated != Some(StatementRead::of(&STATEMENT)) {
+        said.push("0 statement: not the pinned contract".into());
+        return Ok((false, said));
+    }
+    said.push("0 statement: the pinned contract".into());
+    if decode_concordance_reply(&session.speak(encode_concordance_request())?)
+        != Some(CONCORDANCE_HASH)
+    {
+        said.push("0 concordance: another version".into());
+        return Ok((false, said));
+    }
+    said.push("0 concordance: the pinned hash".into());
+    let signed = ConcordanceSignature::sign(domain, CONCORDANCE_HASH);
+    let judged = decode_signature_reply(&session.speak(encode_signature_request(&signed))?);
+    said.push(format!("0 signature: {judged:?}"));
+    Ok((matches!(judged, Some(Ok(()))), said))
+}
+
+/// THE MANIFEST: the universe's nuclei per Z (`conductor::pulse::nuclei_by_z`
+/// over what it holds), signed by the sitting reserve, and the court's grant
+/// or its refusal by name.
+pub fn post_manifest(
+    session: &Session,
+    reserve: &ed25519_dalek::SigningKey,
+    domain: [u8; 32],
+    var_root: &Path,
+) -> io::Result<Granted> {
+    let (_, u) = conductor::pulse::read(var_root)
+        .ok_or_else(|| io::Error::other("the universe did not read (pulse.bin)"))?;
+    let nuclei = conductor::pulse::nuclei_by_z(&u.total())
+        .into_iter()
+        .map(|(z, c)| Some((u16::try_from(z).ok()?, c.to_biguint()?)))
+        .collect::<Option<Vec<_>>>()
+        .ok_or_else(|| io::Error::other("a Z or a count passes the manifest's carrier"))?;
+    let signed = Manifest {
+        domain,
+        nuclei,
+        nonce: nonce()?,
+    }
+    .sign(reserve)
+    .ok_or_else(unwritten_manifest)?;
+    let act = encode_manifest(&signed).ok_or_else(unwritten_manifest)?;
+    decode_grant_reply(&session.speak(act)?)
+        .ok_or_else(|| io::Error::other("the grant did not decode"))
+}
+
+fn unwritten_manifest() -> io::Error {
+    io::Error::other("the manifest passes its carrier")
 }
 
 /// One gate to map, as the conductor writes it.
@@ -366,7 +486,7 @@ pub fn map_frame(
     end: &GateEnd,
 ) -> io::Result<Vec<u8>> {
     let frame = |c: &[cfe::ratio::Ratio; 3]| {
-        mycelium::transducer::cga::translator_at(&[c[0].clone(), c[1].clone(), c[2].clone()])
+        mycelium_sdk::house::translator_at(&[c[0].clone(), c[1].clone(), c[2].clone()])
     };
     let record = MapRecord::LocalThroat {
         throat: *blake3::hash(format!("netstratum gate {}", end.id).as_bytes()).as_bytes(),
@@ -418,7 +538,7 @@ pub fn map_gates(
     let mut said = Vec::new();
     let mut unknown = false;
     for end in due {
-        match decode_map_reply(&session.speak(map_frame(&reserve, domain, point, end)?)?) {
+        match decode_map_reply(&session.speak(map_frame(&reserve, domain, point.clone(), end)?)?) {
             Some(Mapped::Sealed { h, .. }) => {
                 sealed.retain(|(id, _)| *id != end.id);
                 sealed.push((end.id.clone(), end.from.clone()));

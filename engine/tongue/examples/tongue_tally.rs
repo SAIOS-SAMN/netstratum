@@ -31,7 +31,7 @@ fn main() {
         let verdict = match tongue::translate(
             &word,
             &[(rows(&probe), rows(&said))],
-            &tongue::mycelium::transducer::family::NoCrystal,
+            &tongue::mycelium_sdk::rule::NoCrystal,
         ) {
             Ok(_) => "stated".to_string(),
             Err(tongue::Untranslated::Refused(why)) => {
