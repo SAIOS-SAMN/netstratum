@@ -4,9 +4,9 @@
 //! the reserve's key. Each test also breaks the act and must see it refused.
 
 use ed25519_dalek::{Signature, SigningKey, Verifier};
-use mycelium::anastome::dialogue::atlas::MapRecord;
-use mycelium::anastome::dialogue::domain::{decode_domain_request, DomainRequest};
-use mycelium::chronometry::tuniversal::{Origin, TPoint};
+use mycelium_sdk::house::atlas::MapRecord;
+use mycelium_sdk::house::domain::{decode_domain_request, DomainRequest};
+use mycelium_sdk::house::tuniversal::{Origin, TPoint};
 use ns_hypha::refound::{ledger_frame, map_frame, GateEnd};
 
 fn point() -> TPoint {
@@ -67,7 +67,7 @@ fn the_gate_map_act_is_read_by_the_court_as_netstratums_local_throat() {
         "kept by the keeper's line"
     );
     let to = |c: &[cfe::ratio::Ratio; 3]| {
-        mycelium::transducer::cga::translator_at(&[c[0].clone(), c[1].clone(), c[2].clone()])
+        mycelium_sdk::house::translator_at(&[c[0].clone(), c[1].clone(), c[2].clone()])
     };
     assert_eq!(frames.0, to(&end.from), "side 0 stands at the hub");
     assert_eq!(frames.1, to(&end.to), "side 1 stands at the core");

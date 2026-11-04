@@ -34,7 +34,7 @@
 use ns_hypha::census::{self, grains};
 use ns_hypha::fold::{fold, tier_key};
 use ns_hypha::line::{Cursors, FoldLog, FoldMark, TierLine};
-use ns_hypha::mycelium::anastome::dialogue::uplink::Uplinked;
+use ns_hypha::mycelium_sdk::house::uplink::Uplinked;
 use ns_hypha::{laws_of, probe, Uplink};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -259,8 +259,8 @@ fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
 /// Publish every hot fold the court still reads Provisional: its entries
 /// streamed for replay, so it is upheld before anyone can demand it.
 fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
-    use ns_hypha::mycelium::anastome::dialogue::challenge::Finality;
-    use ns_hypha::mycelium::chronometry::Stamp;
+    use ns_hypha::mycelium_sdk::house::challenge::Finality;
+    use ns_hypha::mycelium_sdk::house::Stamp;
     let (line, log, key) = match TierLine::open(home, "colonies").and_then(|l| {
         Ok((
             l,
@@ -669,8 +669,8 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     // faster than its budget) is left to rest, doubling each time it defers
     // again (to 64 strokes) and reset when a stroke completes.
     let mut rest: Vec<(u64, u64)> = vec![(0, 0); seats.len()];
-    let mut final_point: Option<ns_hypha::mycelium::chronometry::tuniversal::TPoint> = None;
-    let mut written: Option<ns_hypha::mycelium::chronometry::tuniversal::TPoint> = None;
+    let mut final_point: Option<ns_hypha::mycelium_sdk::house::tuniversal::TPoint> = None;
+    let mut written: Option<ns_hypha::mycelium_sdk::house::tuniversal::TPoint> = None;
     loop {
         let at = (strokes as usize) % seats.len();
         let (until, backoff) = rest[at];

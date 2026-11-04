@@ -7,7 +7,8 @@
 //! the μ a seated mind earns is the ancients'.
 
 use crate::wire::HouseActs;
-use mycelium::sdk::{Session, Voice};
+use mycelium_sdk::session::Session;
+use mycelium_sdk::voice::Voice;
 use std::io;
 use std::path::Path;
 
@@ -50,7 +51,7 @@ pub struct Seat {
     key: ed25519_dalek::SigningKey,
     home: Option<std::path::PathBuf>,
     /// Tasks the seat pulled, by citation, oldest first.
-    known: std::collections::VecDeque<([u8; 32], Vec<mycelium::transducer::family::TrainPair>)>,
+    known: std::collections::VecDeque<([u8; 32], Vec<mycelium_sdk::rule::TrainPair>)>,
     /// Tasks not closed at home, waiting to be put before a seated mind.
     before: std::collections::VecDeque<[u8; 32]>,
     pub tally: Tally,
@@ -73,7 +74,7 @@ impl Seat {
     /// plain text (`home/tasks/<id>.task`: `train` pairs then `test` inputs,
     /// grids as hue digits), so Netstratum's minds can be measured on the
     /// court's own tasks offline, never only on self-forged ones.
-    fn keep(&self, id: &[u8], task: &mycelium::anastome::dialogue::TaskEnvelope) {
+    fn keep(&self, id: &[u8], task: &mycelium_sdk::task::TaskEnvelope) {
         let Some(home) = &self.home else { return };
         let dir = home.join("tasks");
         let hex: String = id.iter().map(|b| format!("{b:02x}")).collect();
@@ -119,7 +120,7 @@ impl Seat {
         // Signed (78.141): the seat signs its solves with Netstratum's voice
         // key — held in trust, never minted here (a missing key is an error,
         // not a new identity).
-        let key = mycelium::court::identity::HyphaKey::load_only(key).ok_or_else(|| {
+        let key = mycelium_sdk::house::HyphaKey::load_only(key).ok_or_else(|| {
             io::Error::new(
                 io::ErrorKind::NotFound,
                 "netstratum's voice key is not in the seat's home",
@@ -181,7 +182,7 @@ impl Seat {
     /// seated mind.
     /// docs/67 N8 — the last final TUniversal point this seat's session read
     /// off a door reply (78.152), or `None` before the first.
-    pub fn tuniversal(&self) -> Option<mycelium::chronometry::tuniversal::TPoint> {
+    pub fn tuniversal(&self) -> Option<mycelium_sdk::house::tuniversal::TPoint> {
         self.session.tuniversal()
     }
 
@@ -219,8 +220,7 @@ impl Seat {
             .ok()
             .flatten();
         if verdict.is_some_and(|(code, _)| {
-            code == mycelium::anastome::dialogue::SOLVE_BOUNTY
-                || code == mycelium::anastome::dialogue::SOLVE_FLOOR
+            code == mycelium_sdk::task::SOLVE_BOUNTY || code == mycelium_sdk::task::SOLVE_FLOOR
         }) {
             self.tally.answered_closed += 1;
         }

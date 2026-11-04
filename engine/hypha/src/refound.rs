@@ -27,14 +27,14 @@
 //! maps only after the re-founding has run for the present origin (`refounded`
 //! in the uplink home): the coordinator ruled the map waits for the recut.
 use crate::wire::HouseActs;
-use mycelium::anastome::dialogue::atlas::{
+use mycelium_sdk::house::atlas::{
     decode_map_reply, encode_map, MapAct, MapRecord, MapRefusal, Mapped,
 };
-use mycelium::anastome::dialogue::domain::{DomainGenesis, Founded, Origin, Reservation};
-use mycelium::anastome::dialogue::seat::Arg;
-use mycelium::anastome::dialogue::universe::{Genesis, Geometry, Parent};
-use mycelium::chronometry::tuniversal::TPoint;
-use mycelium::sdk::Session;
+use mycelium_sdk::house::domain::{DomainGenesis, Founded, Origin, Reservation};
+use mycelium_sdk::house::seat::Arg;
+use mycelium_sdk::house::tuniversal::TPoint;
+use mycelium_sdk::house::universe::{Genesis, Geometry, Parent};
+use mycelium_sdk::session::Session;
 use std::io;
 use std::path::Path;
 
@@ -109,11 +109,11 @@ pub fn ledger_frame(
     domain: [u8; 32],
     var_root: &Path,
     u: u64,
-    point: mycelium::chronometry::tuniversal::TPoint,
+    point: mycelium_sdk::house::tuniversal::TPoint,
     parent: [u8; 32],
 ) -> io::Result<(Vec<u8>, usize)> {
-    use mycelium::anastome::dialogue::atlas::{encode_ledger, LedgerEntry};
-    use mycelium::anastome::dialogue::commitment::commitment;
+    use mycelium_sdk::house::atlas::{encode_ledger, LedgerEntry};
+    use mycelium_sdk::house::commitment::commitment;
     let records = checkpoint_records(var_root);
     let commitment =
         commitment(&records).ok_or_else(|| io::Error::other("a checkpoint key repeats"))?;
@@ -131,7 +131,7 @@ pub fn ledger_frame(
 }
 
 pub fn post_ledger(session: &Session, home: &Path, var_root: &Path, u: u64) -> io::Result<String> {
-    use mycelium::anastome::dialogue::atlas::{decode_ledger_reply, Ledgered};
+    use mycelium_sdk::house::atlas::{decode_ledger_reply, Ledgered};
     let reserve = load_key(home, "tier-union.key")?;
     let domain = load_key(home, "tier-domain.key")?
         .verifying_key()
@@ -204,7 +204,7 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     // A pointed door reply carries the door's final point: if the domain's
     // answer brought none, read the court's clock, whose reply does.
     if session.tuniversal().is_none() {
-        let _ = session.speak(mycelium::physics::laws::codec::encode_clock_request());
+        let _ = session.speak(mycelium_sdk::house::encode_clock_request());
     }
     let Some(point) = session.tuniversal() else {
         said.push("the re-founding waits: no final point read yet".into());
@@ -366,7 +366,7 @@ pub fn map_frame(
     end: &GateEnd,
 ) -> io::Result<Vec<u8>> {
     let frame = |c: &[cfe::ratio::Ratio; 3]| {
-        mycelium::transducer::cga::translator_at(&[c[0].clone(), c[1].clone(), c[2].clone()])
+        mycelium_sdk::house::translator_at(&[c[0].clone(), c[1].clone(), c[2].clone()])
     };
     let record = MapRecord::LocalThroat {
         throat: *blake3::hash(format!("netstratum gate {}", end.id).as_bytes()).as_bytes(),

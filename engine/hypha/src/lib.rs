@@ -14,14 +14,14 @@
 //!
 //! Every call goes to a real `mycelium-server` (78.59, "no mock").
 
-use mycelium::court::identity::HyphaKey;
-use mycelium::physics::laws::{self, Breach, Law, Transition, Verdict};
-use mycelium::sdk::Session;
-use mycelium::transducer::cga::Undecomposed;
+use mycelium_sdk::house::HyphaKey;
+use mycelium_sdk::house::Undecomposed;
+use mycelium_sdk::house::{Breach, Law, Transition, Verdict};
+use mycelium_sdk::session::Session;
 use std::io;
 use std::path::Path;
 
-pub use mycelium;
+pub use mycelium_sdk;
 
 pub mod attached;
 pub mod census;
@@ -80,7 +80,7 @@ pub fn laws_of(v: &Verdict) -> Vec<Law> {
 /// The same verifier the court's act runs, under the stroke the motion's
 /// own modes need.
 pub fn verify_local(t: &Transition) -> Verdict {
-    laws::verify_sized(t)
+    mycelium_sdk::house::verify_sized(t)
 }
 
 /// The terms Netstratum speaks on the network, each in the vocabulary it
@@ -120,7 +120,7 @@ impl Uplink {
             io::Error::new(io::ErrorKind::InvalidInput, "the key path is not UTF-8")
         })?;
         let voice = HyphaKey::load_or_mint(key_name).verifying_bytes();
-        let kernel = mycelium::sdk::Voice::from_voice(voice);
+        let kernel = mycelium_sdk::voice::Voice::from_voice(voice);
         Ok(Uplink {
             session: Session::open(addr, kernel),
             addr: addr.to_string(),
@@ -135,8 +135,8 @@ impl Uplink {
         &self.session
     }
 
-    pub fn laws(&self) -> io::Result<Vec<mycelium::physics::laws::codec::Served>> {
-        use mycelium::physics::laws::codec::{decode_register_reply, encode_register_request};
+    pub fn laws(&self) -> io::Result<Vec<mycelium_sdk::house::Served>> {
+        use mycelium_sdk::house::{decode_register_reply, encode_register_request};
         decode_register_reply(&self.session.speak(encode_register_request())?).ok_or_else(|| {
             io::Error::new(
                 io::ErrorKind::InvalidData,
@@ -148,8 +148,8 @@ impl Uplink {
     /// The server's lexicon version, and every term in [`TERMS`] it does not
     /// serve in the vocabulary Netstratum means it in.
     pub fn lexicon_check(&self) -> io::Result<(u8, Vec<String>)> {
-        use mycelium::physics::laws::codec::{decode_lexicon_reply, encode_lexicon_request};
-        use mycelium::physics::laws::lexicon::Vocabulary;
+        use mycelium_sdk::readings::Vocabulary;
+        use mycelium_sdk::readings::{decode_lexicon_reply, encode_lexicon_request};
         let (version, served) = decode_lexicon_reply(
             &self.session.speak(encode_lexicon_request())?,
         )
@@ -180,9 +180,9 @@ impl Uplink {
     pub fn verify_both(&self, t: &Transition) -> io::Result<Reading> {
         let reply = self
             .session
-            .speak(mycelium::physics::laws::codec::encode_verify_request(t))?;
+            .speak(mycelium_sdk::house::encode_verify_request(t))?;
         let mut p = 0;
-        let court = match mycelium::physics::laws::codec::take_verdict(&reply, &mut p) {
+        let court = match mycelium_sdk::house::take_verdict(&reply, &mut p) {
             Some(v) if p == reply.len() => v,
             _ => {
                 return Err(io::Error::new(

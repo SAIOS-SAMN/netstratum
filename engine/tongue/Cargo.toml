@@ -7,7 +7,7 @@ description = "netstratum's words stated in the fleet's tongue: the translator f
 
 [dependencies]
 # The same pinned release ns-hypha speaks through (the root Cargo.toml).
-mycelium.workspace = true
+mycelium-sdk.workspace = true
 solver = { path = "../solver" }
 blake3.workspace = true
 num-bigint.workspace = true
