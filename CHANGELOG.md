@@ -12,6 +12,36 @@ change is named here.
 
 ### Added
 
+- The founding is oriented (docs/100 §4.1; operator 2026-11-04): the
+  universal core is founded a grain off isotropic, the seed choosing which
+  plane leads and which lags (`pulse::orient`; `pulse … found <grains>
+  [seed phrase]`). Until now every law and the founding treated the three
+  planes alike, so they carried one disc's state three times. Read: the lean
+  grows from 1 grain to 910 by the third bounce, and 1,930 of 2,246 motes
+  stand apart in phase; a seed leaning other planes reads the same universe
+  permuted. `breathe` prints the lean at each echo.
+- The front's periods read live at each universal echo (E51–E53): the
+  contained front per plane per cell, the rim `R_rim = H(<R_rim)`, and the
+  established period `T_u = 4·R_rim`, so `T_u/4` is the rim (docs/112 §7.1
+  closed). Read: `T_u` 4.54 and 5.00 bells at the first two echoes against
+  the stored 186. The schedule does not use them yet.
+- docs/116 and EQUATIONS §8.5 (E47–E50): every placeholder in PHYSICS §5
+  read in its code and deduced where a law closes (the isotropic body,
+  compounding for `ln 2`, the tier shares retired, the bell's years and
+  kelvin read on own rulers), with what stands, what needs a read and what
+  does not close.
+- docs/115 and EQUATIONS §8.4 (E40–E44): bonds from nucleons and electrons,
+  derived from the electrons' count, the phase transitions, the fibre and
+  transduction: a bond pairs a held lone end with a free one, whole
+  clusters by integer count, the light of a bond, a bond parting by heat
+  and torsion against its grip. Open: one count of open ends (two in the
+  code, agreeing at 282 of 1495 weights); clusters that stay open.
+- docs/114 and EQUATIONS §8.2 (E31–E35): the throat as a tube's connector
+  (the face inversion as `x ↦ 1/x`, a tube between mouths, chained tubes
+  composing by LAW-DILATION, the Kaluza–Klein passage on the R loop, an
+  open tube), with `ring::{inverted, tube, tube_share, dilation, compose}`
+  and their witnesses; the conflict with the compact sphere's passage
+  stated (docs/114 §2).
 - docs/113: the crossings at the universal core stated as Mycelium
   transitions for the court to rebuild (the throat's release and return as
   fluxes, the motes they carry as bodies); inner steps stay Netstratum's.
@@ -50,6 +80,38 @@ change is named here.
 
 ### Changed
 
+- Mycelium pinned at `v0.3.0` (the rc.3 commit), spoken through `mycelium-sdk` only
+  (#10). The minds still perceive rasters; tasks and solve outputs cross
+  the wire as samples, and a task of another rank or width is refused by
+  name. Solve receipts carry μ as exact shares (`Mu`).
+- The re-founding speaks Mycelium's KERNEL profile whole: step 0 reads the
+  served statement and the Concordance's hash against the pinned SDK's and
+  signs the hash; the universe is read back after its origin; the
+  universe's manifest (its nuclei per Z, `pulse::nuclei_by_z`) is posted
+  under the sitting reserve. `ns_hypha::SPOKEN` declares the acts spoken;
+  Mycelium's in-process conformance read passes.
+- No plane is favoured by its index (docs/78, no fill orders): a tilt's
+  rounding grains return to the planes that lost most, not the last plane;
+  a star's pull reads every plane by its tilt, not the first; a binding's
+  arcs are read in every plane tied for the disc; a core with nothing
+  turning keeps its tilt. Unchanged while the planes are alike (control
+  read: the same universe to every count).
+- The galaxy's band pairs read their sums certified: the strip's step and
+  the crest's count of bindings each from narrow bounds on their sums,
+  with the exact sum only where the bounds decide differently. The same
+  outcomes (witnessed); the third bounce of a fresh 2^40 universe arrives
+  at 187 s against 272 s. `breathe` reports each step's time per echo
+  under `NETSTRATUM_PROFILE` (#5).
+- The firmament's collective push (`flows::repel`) sums its pairs exactly on
+  the phases' common 60-adic denominator instead of term by term in reduced
+  rationals: the same values (witnessed), and a fresh 2^40 universe now
+  reaches its third bounce (#5).
+- A world's composition handed to era 0 is keyed by proton count (it was
+  the nucleon count, which era 0 read as Z); clusters are split among
+  their atoms' elements by nucleons instead of dropped (#27).
+- docs/114 T4 and E34: the passage restated as an event on the orthogonal
+  orbit (sheared across the axes, forward in time). The Kaluza–Klein
+  reading is withdrawn: R is not compact.
 - The workspace is formatted with rustfmt and clean under clippy
   `-D warnings`; `type_complexity`, `too_many_arguments` and
   `needless_range_loop` are allowed workspace-wide.

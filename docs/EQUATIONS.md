@@ -1701,3 +1701,101 @@ standing as hydrogen. Nucleons conserved.
 the throat is recycled under the bounce `b = p − Σ m·|Δℓ|`; the heaviest
 products join the container while it stays within the weight of the rest of
 its galaxy, the rest leave; carried spin passes to the core.
+
+### §8.2 The tube
+
+Rows E31–E35 are the throat as a connector (docs/114). `x = R/H` is a
+reach in its enclosure's own throat units.
+
+**E31 · The face inversion as a map of reach.** Specified; conflicts with
+the compact sphere's passage (docs/114 §2). `ring::inverted`.
+
+    δ(1/x) = 1 − δ(x),   x ↦ 1/x,   R′ = H·(H/R)
+
+An involution fixing the throat; it exchanges the faces.
+
+**E32 · A tube between two mouths.** Built, not on the live path.
+`ring::tube`.
+
+    x_b = 1/x_a,   R_b = H_a·H_b / R_a
+
+There and back is the identity. Matter crosses whole; the spin difference
+`m·(ℓ_b − ℓ_a)` is booked to the two mouths' reservoirs.
+
+**E33 · Chained tubes.** Built, not on the live path. `ring::tube_share`,
+`ring::dilation` (LAW-DILATION), `ring::compose`.
+
+    H_b/H_a = D(p_ab),   p_ab = (H_b − H_a)/(H_b + H_a)
+    p_ac = p_ab ⊕ p_bc,  x ⊕ y = (x + y)/(1 + x·y)
+
+**E34 · The passage as an event.** Specified (docs/114 T4). The passage
+through the throat is the event where a mote's orthogonal phase crosses ½
+(`breath`), its faces exchanged there by E31. The orthogonal orbit is
+sheared across all the axes and runs forward, so two passages do not return
+a body to its start: not an involution on its state, and not a Kaluza–Klein
+passage (R is not compact).
+
+**E35 · An open tube.** Specified (the reading `ring::open`, docs/111 §3.1).
+A mote turns `2δ = 2/(1 + x)` a bell, past one turn exactly inside the
+throat; a tube is open while both mouths are throats, `R_b ≤ H_b`.
+
+### §8.4 Bonds
+
+Rows E40–E44 (docs/115). Derived, not built.
+
+**E40 · A bond is a fibre between two atoms.** A held lone electron end of
+one atom pairs with a free lone end of another, counter-turning; two held or
+two free ends do not pair. A lone end is held where
+`in_step(φ_⊥, φ_held) ≥ ½`.
+
+**E41 · Whole clusters.** Where held meets free, the closing cluster
+`n_A = L_B/g`, `n_B = L_A/g` (`g = gcd(L_A, L_B)`, `chem::closing`) forms
+
+    k = min(⌊a_A / n_A⌋, ⌊a_B / n_B⌋)
+
+times; the rest stays as it was. Nucleons conserved.
+
+**E42 · The light of a bond.** `k·(n_A·L_A + n_B·L_B) = 2·k·n_A·L_A`
+quanta, the open ends closed (transduction, E25), booked on the light
+ledger.
+
+**E43 · A bond parts.** Where `a + τ > κ_c·h_c` (docs/100 §9.2), whole into
+its atoms, taking back its light from its agitation.
+
+**E44 · Open (docs/115 §7).** One count of an atom's open ends
+(`chem::unpaired` against `L_e`, agreeing at 282 of 1495 weights);
+clusters that keep open ends.
+
+### §8.5 The placeholders' replacements
+
+Rows E47–E50 (docs/116). Deduced; built in two passes.
+
+**E47 · A body without a lead.** It stands at its enclosure's plane (the
+attractor's fixed point, E38); its torsion is 0. Replaces the isotropic
+third (`flows::tilt_of`).
+
+**E48 · A reading over the planes.** Weighted by the tilt, `Σ_k t_k·(…)`
+(as `C_Δ` in `flows::bonded`, docs/111 §4.2). Replaces the equal mean `/3`.
+
+**E49 · The release's base phase per plane.** `2·d_k·t_k` a bell, `t_k` the
+core's lead (the motion law on each plane by its share). Replaces
+`(2/3)·d_k`.
+
+**E50 · A share kept over passes.** `(1 − x)^n` over the body's own rings
+(`compound`, E25); the rings to a level by `compound::rings_until`.
+Replaces `e^(−λ)` by halvings and the `ln 2` constants.
+
+### §8.6 The front's periods
+
+Rows E51–E53 (docs/111 §5, docs/112 §7.1). Read live; the bounce schedule
+does not yet use them.
+
+**E51 · The contained front.** Per plane per cell of the firmament's
+shell, the round trip to the cell's outer held spread, `2·a(r_f)`,
+`a(r) = r + H(<r)`, each reach from both orbits (`pulse::contained_front`).
+
+**E52 · The rim.** `R_rim = H(<R_rim)`, deficit ½ on the whole enclosure
+(`Enclosed::rim`): the whole holding where every body stands inside.
+
+**E53 · The established period.** `T_u = 2·a(R_rim) = 4·R_rim`; a core ring
+in bells, `T_u/4`, is `R_rim` (`pulse::established_period`).

@@ -102,6 +102,8 @@ places. Reducing each to one law is planned in [PLAN.md](PLAN.md).
 | A galaxy's winding | `quantum::twist` (½ a turn a ring), `pulse.rs:1291` (4δ an echo) | |
 | Orbital motion | `motion::Turning` (φ₀ + n/P), `orbit::Orbit` (era 0's L1 diamond, on the live path) | |
 | The grain mark | `ring::grain_step`, `enfold::mark` | |
+| The passage through the throat | `flows::mobius`/`flows::luminal` (in place, the faces read at `1 − δ`, which is `x ↦ 1/x`); `flows::through` (`R → 2H − R`, used by the band, the release and formation) | The two disagree away from the throat (docs/114 §2) |
+| An atom's open ends | `chem::unpaired` (era 0's windings; sets magnetism and the push), `L_e = Q(Q) − Z(Q)` (the S^11 convergence, docs/104 §1.1) | Agree at 282 of 1495 weights (docs/115 §7) |
 | Seeded draws | `physics::Beacon`, `pulse::draw` (unkeyed, no rejection) | |
 | Shedding | `breath.rs:1310` (by coherence), `life::window_echoes` (by `tier(1).medium`, stale) | |
 
@@ -126,9 +128,10 @@ and land come from era 1:
   elements (era 0's hashed properties, era 1's nuclides), food and land, and
   the contact anchor (`CONTACT_K = 2760` in both `life.rs:50` and
   `cfe/src/almanac/periodic.rs:128`).
-- **A likely defect:** `composition_of` keys the composition by
-  `chem::atom_w`, the nucleon count `w`, and era 0 reads it as the proton
-  count `Z` (`survey.rs:643, 669`).
+- **Fixed (#27):** `seating::composition` keys a world's composition by
+  the proton count `Z` era 0 reads it by (it was keyed by the nucleon count
+  `w`), and splits a cluster's grains among its atoms' elements by their
+  nucleons (clusters were dropped).
 
 [108_OWN_RULERS.md](108_OWN_RULERS.md) lists these imports as O1–O7; the
 read corrects it: O5's only caller is `life.rs:445`; O7's bands are also read
@@ -136,6 +139,9 @@ directly by the conductor; `2760` and `2273` stand as bare literals in
 `cfe/src/almanac/periodic.rs:128, 133`.
 
 ## 5. Values not yet derived
+
+Each is deduced, or shown not to close, in
+[116_PLACEHOLDERS_DEDUCED.md](116_PLACEHOLDERS_DEDUCED.md).
 
 Each is a placeholder for physics still owed, never a tuned number.
 

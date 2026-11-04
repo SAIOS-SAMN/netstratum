@@ -68,6 +68,28 @@ pub fn nuclei_per_grain() -> num_bigint::BigInt {
     num_bigint::BigInt::from(60u32).pow(30)
 }
 
+/// A manifest's nuclei per Z (protons), Z ascending, each once, every count
+/// positive: what a universe holds as Mycelium's manifest states it. Each
+/// amount is a whole count of nuclei on the one grid (`nucleus`); a
+/// cluster's nuclei are its parts', each at its own Z. An amount off the
+/// grid is floored to whole nuclei, as `nucleus` floors it.
+pub fn nuclei_by_z(m: &Manifest) -> Vec<(u32, num_bigint::BigInt)> {
+    let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+    let mut by_z: BTreeMap<u32, num_bigint::BigInt> = BTreeMap::new();
+    for (k, a) in m {
+        let count = (a.clone() * Ratio::from_integer(grid.clone()))
+            .floor()
+            .to_integer();
+        for &(n, w) in k.parts() {
+            *by_z.entry(crate::chem::protons(w)).or_default() +=
+                &count * num_bigint::BigInt::from(n);
+        }
+    }
+    by_z.into_iter()
+        .filter(|(_, c)| *c > num_bigint::BigInt::from(0))
+        .collect()
+}
+
 /// Nuclei per Z, as Mycelium's manifest carries them (ACT_DOMAIN 17).
 pub type Nuclei = BTreeMap<u16, num_bigint::BigInt>;
 
@@ -990,6 +1012,37 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     })
 }
 
+/// The founding's orientation (operator 2026-11-04, option (a)): every law
+/// treats the three spatial planes alike, so a universe founded alike in
+/// them stays alike for ever, one disc's worth of state in three. The
+/// universal core is founded leaning: its tilt a grain off isotropic, one
+/// plane leading by a grain and one lagging by a grain, `(⅓ + g, ⅓, ⅓ − g)`
+/// (g the spin grain, the least lean the universe can carry). Which plane
+/// leads and which lags is the seed's, read along its fixed path; one of the
+/// six orientations, none preferred. The lean is a partition of one, so it
+/// adds no spin: its offsets sum to zero. An initial condition, never a draw
+/// inside a law; everything after is the laws' (the release writes the
+/// core's tilt into each mote, `breath`).
+pub fn orient(u: &mut Universe, seed: &[u8; 32]) {
+    let Some(home) = u.cores.iter_mut().find(|c| is_home(c)) else {
+        return;
+    };
+    let g = crate::ring::grain_step();
+    let third = ratio(1, 3);
+    let (lead, lag) = match draw(seed, &home.path, "lean", 0) % 6 {
+        0 => (0, 1),
+        1 => (0, 2),
+        2 => (1, 0),
+        3 => (1, 2),
+        4 => (2, 0),
+        _ => (2, 1),
+    };
+    let mut tilt = vec![third; crate::flows::SPACE.len()];
+    tilt[lead] += g.clone();
+    tilt[lag] -= g;
+    home.tilt = tilt;
+}
+
 /// A set of motes' holding, grains × weight (the firmament's books).
 pub fn holding(motes: &[crate::flows::Mote]) -> Ratio {
     motes.iter().fold(ratio(0, 1), |s, x| {
@@ -1136,6 +1189,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
         // spin in each orbit, the holding-weighted mean, held on the grain
         // with what flooring leaves to the singularity's reservoir (Σ m·ℓ +
         // reservoir exact); one displacement, the members' weighted mean.
+        crate::profile::mark("orbit:collections");
         let sets = crate::flows::collections(&firm, &moves);
         let booked = |x: &crate::flows::Mote| {
             x.amount.clone() * crate::flows::weight(&x.key) / ledger_u.clone()
@@ -1205,6 +1259,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
         let _ = founded;
         // The order (B1): matter pushing matter apart by its open frames
         // (`flows::repel`, at the bounce's push).
+        crate::profile::mark("orbit:order");
         if firm.len() > 1 {
             let _ = crate::flows::repel(&mut firm, &ratio(1, 2));
         }
@@ -1247,6 +1302,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
                 })
             };
             let before = ledger(&u.ocean);
+            crate::profile::mark("orbit:ocean");
             let (given, _) = crate::flows::torque(
                 &mut u.ocean,
                 &enc_o,
@@ -1268,6 +1324,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
     // The singularity's state (1); the firmament is the home's held cut,
     // added with the home below.
     let mut inside = ratio(1, 1);
+    crate::profile::mark("orbit:galaxies");
     for i in order {
         let share = mass(&u.cores[i].total()) / whole.clone();
         let c = &mut u.cores[i];
@@ -1364,6 +1421,109 @@ pub fn firmament_of(u: &Universe) -> Vec<(usize, usize)> {
         .filter(|(_, x)| crate::flows::held(x, &enc, &push) == ratio(1, 1))
         .map(|(j, _)| (i, j))
         .collect()
+}
+
+/// The universal enclosure's frame: the home's, which encloses the
+/// universal core.
+pub fn home_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
+    let i = u.cores.iter().position(is_home)?;
+    crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u))
+}
+
+/// The established period (docs/111 §5.3, docs/116): the front's round trip
+/// to the S^360 rim, `T_u = 2·a(R_rim)`. At the rim the reach equals the
+/// holding within (`Enclosed::rim`), so `a(R_rim) = 2·R_rim` and
+/// `T_u = 4·R_rim`: a core ring in bells, `T_u/4`, is the rim itself.
+/// Returns `(T_u, R_rim)` in the universal enclosure's own units (the home's
+/// frame, which encloses the universal core).
+pub fn established_period(u: &Universe) -> Option<(Ratio, Ratio)> {
+    let i = u.cores.iter().position(is_home)?;
+    let enc = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u))?;
+    let r = enc.rim();
+    let a = crate::ring::arrival(&r, &enc.hold_within(&r));
+    Some((ratio(2, 1) * a, r))
+}
+
+/// A cell of the contained front (docs/111 §2.4, docs/110 §2): on one
+/// spatial plane, one cell of the firmament's shell, its arc of the plane's
+/// circle, its members, and the front's round trip to its outer held spread.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FrontCell {
+    /// The spatial plane (an index into `flows::SPACE`).
+    pub plane: usize,
+    /// Its arc of the plane's circle (a plane's cells' arcs sum to 1).
+    pub arc: Ratio,
+    /// Its members.
+    pub members: usize,
+    /// Its outer held spread, `max R(1 + p)` over its members, each reach
+    /// read from both orbits (`flows::swung`).
+    pub r_f: Ratio,
+    /// The front's round trip to it, `2·a(r_f)`, `a(r) = r + H(<r)`.
+    pub period: Ratio,
+}
+
+/// The contained front, read live per plane per cell (docs/111 §2.4, §5.2):
+/// the firmament's motes parted into cells on each spatial plane by their
+/// own phases (`flows::phase_beads`, docs/110 §2); each cell's outer held
+/// spread from its members' reaches in both orbits, the swing of the
+/// orthogonal on the orbital (`flows::swung`), spread at the universal
+/// bounce's push (the push the throat's cut reads, `firmament_of`); each
+/// cell's round trip `2·a(r_f)`. The bubble is this set of return times, one
+/// per cell per plane, never one radius. Empty while no firmament stands.
+pub fn contained_front(u: &Universe) -> Vec<FrontCell> {
+    let Some(i) = u.cores.iter().position(is_home) else {
+        return Vec::new();
+    };
+    let Some(enc) = crate::breath::galaxy_frame(u, i, &crate::breath::unit_mass(u)) else {
+        return Vec::new();
+    };
+    let push = ratio(1, 2);
+    let firm: Vec<&crate::flows::Mote> = firmament_of(u)
+        .into_iter()
+        .map(|(c, j)| &u.cores[c].flows[j])
+        .collect();
+    let outer = |x: &crate::flows::Mote| {
+        let psi = x
+            .phase
+            .get(crate::flows::LOOP)
+            .cloned()
+            .unwrap_or_else(|| ratio(0, 1));
+        let (ell, _) = crate::flows::swung(&x.ell_o, &x.ell_orth, &psi);
+        enc.reach(&ell).0 * (ratio(1, 1) + push.clone())
+    };
+    let mut out = Vec::new();
+    for (plane, &k) in crate::flows::SPACE.iter().enumerate() {
+        let on_plane: Vec<(usize, Ratio)> = firm
+            .iter()
+            .enumerate()
+            .map(|(n, x)| {
+                let ph = crate::flows::true_phase(x, k);
+                (n, ph.clone() - ph.floor())
+            })
+            .collect();
+        if on_plane.is_empty() {
+            continue;
+        }
+        let cells = if on_plane.len() < 2 {
+            vec![(vec![0], ratio(1, 1))]
+        } else {
+            crate::flows::phase_beads(&on_plane)
+        };
+        for (idx, arc) in cells {
+            let Some(r_f) = idx.iter().map(|&n| outer(firm[n])).max() else {
+                continue;
+            };
+            let a = crate::ring::arrival(&r_f, &enc.hold_within(&r_f));
+            out.push(FrontCell {
+                plane,
+                arc,
+                members: idx.len(),
+                r_f,
+                period: ratio(2, 1) * a,
+            });
+        }
+    }
+    out
 }
 
 /// The firmament's holding as the throat's cut reads it (docs/111 §4.5):
@@ -2018,6 +2178,69 @@ mod tests {
     #[test]
     fn a_founding_that_holds_no_disc_is_refused() {
         assert!(deploy(&Manifest::new()).is_none());
+    }
+
+    #[test]
+    fn a_manifests_nuclei_count_whole_per_z_its_clusters_by_their_parts() {
+        let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+        let k = |s: &str| crate::chem::Kind::parse(s).expect("a kind");
+        let whole = |n: i64| Ratio::new(num_bigint::BigInt::from(n), grid.clone());
+        // Hydrogen, weight 4, and water: one centre and four hydrogens per
+        // molecule.
+        let m: Manifest = [
+            (k("W0001"), whole(10)),
+            (k("W0004"), whole(3)),
+            (k("W0010·4W0001"), whole(2)),
+        ]
+        .into();
+        let z_water = crate::chem::protons(k("W0010").parts()[0].1);
+        let mut want: BTreeMap<u32, num_bigint::BigInt> = BTreeMap::new();
+        *want.entry(1).or_default() += num_bigint::BigInt::from(10 + 4 * 2);
+        *want.entry(crate::chem::protons(4)).or_default() += num_bigint::BigInt::from(3);
+        *want.entry(z_water).or_default() += num_bigint::BigInt::from(2);
+        assert_eq!(nuclei_by_z(&m), want.into_iter().collect::<Vec<_>>());
+        // Z ascending, each once.
+        let zs: Vec<u32> = nuclei_by_z(&m).iter().map(|(z, _)| *z).collect();
+        assert!(zs.windows(2).all(|p| p[0] < p[1]));
+    }
+
+    #[test]
+    fn the_founding_leans_a_grain_by_its_seed_and_adds_no_spin() {
+        let table: Manifest = [("W0001", 3000), ("W0004", 900), ("W0012", 40)]
+            .iter()
+            .map(|(k, a)| (crate::chem::Kind::parse(k).expect("a kind"), ratio(*a, 1)))
+            .collect();
+        let base = deploy(&table).expect("a universe");
+        let g = crate::ring::grain_step();
+        let mut seen = std::collections::BTreeSet::new();
+        for phrase in 0u32..24 {
+            let seed = *blake3::hash(&phrase.to_le_bytes()).as_bytes();
+            let mut u = base.clone();
+            orient(&mut u, &seed);
+            let t = u
+                .cores
+                .iter()
+                .find(|c| is_home(c))
+                .expect("home")
+                .tilt
+                .clone();
+            // A partition of one: the lean adds no spin.
+            assert_eq!(
+                t.iter().fold(ratio(0, 1), |s, x| s + x.clone()),
+                ratio(1, 1)
+            );
+            // One plane leads by a grain, one lags by a grain, one stands.
+            let mut off: Vec<Ratio> = t.iter().map(|x| x.clone() - ratio(1, 3)).collect();
+            off.sort();
+            assert_eq!(off, vec![-g.clone(), ratio(0, 1), g.clone()]);
+            seen.insert(t.iter().map(ToString::to_string).collect::<Vec<_>>());
+            // Read the same from the same seed.
+            let mut again = base.clone();
+            orient(&mut again, &seed);
+            assert_eq!(again.cores, u.cores);
+        }
+        // The seed chooses among the orientations; none is fixed.
+        assert!(seen.len() > 1, "the seed orients");
     }
 
     #[test]

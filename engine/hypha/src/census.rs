@@ -28,7 +28,7 @@ use cfe::ratio::Ratio;
 use cfe::vrp::{Chronicle, Receipt};
 use cfe::world::replay::Replayer;
 use cfe::world::RESOURCE_LEDGER_GRAIN;
-use mycelium::anastome::dialogue::uplink::Net;
+use mycelium_sdk::house::uplink::Net;
 use num_bigint::BigInt;
 use num_traits::{ToPrimitive, Zero};
 use std::collections::BTreeMap;
@@ -524,7 +524,7 @@ pub fn grains(v: i128) -> String {
 mod tests {
     use super::*;
     use crate::fold::{fold, identity};
-    use mycelium::anastome::dialogue::uplink::Discontinuous;
+    use mycelium_sdk::house::uplink::Discontinuous;
 
     #[test]
     fn a_holding_is_read_at_the_grain_and_an_off_grain_one_is_flagged() {

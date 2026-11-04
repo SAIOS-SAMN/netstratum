@@ -177,6 +177,99 @@ fn main() {
                 .flat_map(|c| &c.satellites)
                 .map(|s| s.satellites.len())
                 .sum();
+            if let Some((t_e, r_rim)) = pulse::established_period(&u) {
+                eprintln!(
+                    "RIM at bell {}: R_rim {}, established period T_u = 2·a(R_rim) = {} bells; stored T_u {}; whole holding {}, within the rim {}",
+                    b + 1,
+                    conductor::reading::sector(&r_rim),
+                    conductor::reading::sector(&t_e),
+                    t_u,
+                    pulse::home_frame(&u).map(|e| conductor::reading::sector(&e.whole()).to_string()).unwrap_or_default(),
+                    pulse::home_frame(&u).map(|e| conductor::reading::sector(&e.hold_within(&r_rim)).to_string()).unwrap_or_default()
+                );
+            }
+            if std::env::var_os("NETSTRATUM_PROFILE").is_some() {
+                conductor::profile::mark("breathe:echo");
+                let spent = conductor::profile::drain();
+                let whole: f64 = spent.iter().map(|(_, d)| d.as_secs_f64()).sum();
+                for (name, d) in spent.iter().take(8) {
+                    eprintln!(
+                        "PROFILE echo at bell {} {name}: {:.1} s ({:.0} %)",
+                        b + 1,
+                        d.as_secs_f64(),
+                        100.0 * d.as_secs_f64() / whole.max(1e-9)
+                    );
+                }
+            }
+            let front = pulse::contained_front(&u);
+            for plane in 0..conductor::flows::SPACE.len() {
+                let cells: Vec<&pulse::FrontCell> =
+                    front.iter().filter(|c| c.plane == plane).collect();
+                let (Some(lo), Some(hi)) = (
+                    cells.iter().map(|c| c.period.clone()).min(),
+                    cells.iter().map(|c| c.period.clone()).max(),
+                ) else {
+                    continue;
+                };
+                eprintln!(
+                    "FRONT at bell {} plane {plane}: {} cells, round trips {}..{} bells; stored T_u {}",
+                    b + 1,
+                    cells.len(),
+                    conductor::reading::sector(&lo),
+                    conductor::reading::sector(&hi),
+                    t_u
+                );
+            }
+            // The lean (the founding's orientation, `pulse::orient`): how far
+            // the planes have come apart. The universal core's tilt and the
+            // galaxy motes' (by holding) as offsets from a third, the widest
+            // single mote's, and how many motes stand at different phases in
+            // different planes.
+            {
+                use num_traits::ToPrimitive;
+                let third = cfe::ratio::ratio(1, 3);
+                let off = |t: &[cfe::ratio::Ratio]| -> Vec<f64> {
+                    conductor::flows::tilt_of(t)
+                        .iter()
+                        .map(|x| (x.clone() - third.clone()).to_f64().unwrap_or(f64::NAN))
+                        .collect()
+                };
+                let home = u
+                    .cores
+                    .iter()
+                    .find(|c| pulse::is_home(c))
+                    .map(|c| off(&c.tilt))
+                    .unwrap_or_default();
+                let motes: Vec<&conductor::flows::Mote> =
+                    u.cores.iter().flat_map(|c| c.flows.iter()).collect();
+                let mut sum = [0f64; 3];
+                let (mut whole, mut widest, mut apart) = (0f64, 0f64, 0usize);
+                for x in &motes {
+                    let w = x.amount.to_f64().unwrap_or(0.0);
+                    for (j, o) in off(&x.tilt).iter().enumerate() {
+                        sum[j] += w * o;
+                        widest = widest.max(o.abs());
+                    }
+                    whole += w;
+                    let ph = conductor::flows::space_of(&x.phase);
+                    if ph.iter().any(|p| *p != ph[0]) {
+                        apart += 1;
+                    }
+                }
+                let mean: Vec<f64> = sum.iter().map(|s| s / whole.max(1e-300)).collect();
+                eprintln!(
+                    "LEAN at bell {}: core {:+.3e} {:+.3e} {:+.3e}; motes {:+.3e} {:+.3e} {:+.3e}, widest {:.3e}; {apart} of {} motes apart in phase",
+                    b + 1,
+                    home.first().copied().unwrap_or(f64::NAN),
+                    home.get(1).copied().unwrap_or(f64::NAN),
+                    home.get(2).copied().unwrap_or(f64::NAN),
+                    mean[0],
+                    mean[1],
+                    mean[2],
+                    widest,
+                    motes.len()
+                );
+            }
             eprintln!("echo at bell {}: {} systems ({} merged, {} dissolved, {} born so far), {} worlds standing ({} grown), {} bodies and motes in systems, {} galaxy motes, {} ocean motes, {:?} since start", b + 1, systems, merged_n, dissolved_n, born_n, worlds_now, worlds_n, bodies, u.cores.iter().map(|c| c.flows.len()).sum::<usize>(), u.ocean.len(), started.elapsed());
         }
         if t_u > 0 && (b + 1) % (10 * t_u) == 0 {

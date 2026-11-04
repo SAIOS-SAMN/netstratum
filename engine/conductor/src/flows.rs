@@ -91,24 +91,48 @@ pub fn tilt_of(t: &[Ratio]) -> Vec<Ratio> {
 }
 
 /// A tilt from per-plane spin magnitudes: each plane's share of their sum,
-/// held on the grain with the last plane taking the rest (the shares sum to
-/// one exactly, never re-divided without bound). Isotropic where nothing
-/// turns.
+/// held on the grain (the shares sum to one exactly, never re-divided
+/// without bound). Isotropic where nothing turns.
+///
+/// No plane takes the rest (docs/78: no fill orders): each share is floored
+/// to the grain, and the grains the floors lost (fewer than the planes)
+/// return to the planes that lost the most, greatest first; planes that lost
+/// alike share alike, splitting a grain between them where too few remain.
+/// So the tilt depends on the spins alone, never on which plane is which:
+/// permuting the spins permutes the tilt.
 pub fn tilt_from(spins: &[Ratio]) -> Vec<Ratio> {
     let sum = spins.iter().fold(ratio(0, 1), |s, l| s + l.clone());
     if sum.is_zero() {
         return Vec::new();
     }
-    let mut t: Vec<Ratio> = spins
+    let exact: Vec<Ratio> = spins.iter().map(|l| l.clone() / sum.clone()).collect();
+    let mut t: Vec<Ratio> = exact.iter().map(crate::ring::grain).collect();
+    let lost: Vec<Ratio> = exact
         .iter()
-        .map(|l| crate::ring::grain(&(l.clone() / sum.clone())))
+        .zip(&t)
+        .map(|(e, g)| e.clone() - g.clone())
         .collect();
-    let rest = ratio(1, 1)
-        - t[..t.len() - 1]
-            .iter()
-            .fold(ratio(0, 1), |s, x| s + x.clone());
-    let last = t.len() - 1;
-    t[last] = rest;
+    let step = crate::ring::grain_step();
+    let mut left = ratio(1, 1) - t.iter().fold(ratio(0, 1), |s, x| s + x.clone());
+    let mut levels: Vec<&Ratio> = lost.iter().filter(|l| !l.is_zero()).collect();
+    levels.sort_by(|a, b| b.cmp(a));
+    levels.dedup();
+    for level in levels {
+        if left.is_zero() {
+            break;
+        }
+        let alike: Vec<usize> = (0..t.len()).filter(|&j| lost[j] == *level).collect();
+        let n = Ratio::from_integer(num_bigint::BigInt::from(alike.len()));
+        let each = if left >= step.clone() * n.clone() {
+            step.clone()
+        } else {
+            left.clone() / n.clone()
+        };
+        for j in alike {
+            t[j] += each.clone();
+        }
+        left -= each * n;
+    }
     t
 }
 
@@ -458,16 +482,9 @@ pub fn repel(motes: &mut [Mote], push: &Ratio) -> Vec<Vec<Ratio>> {
     }
     let (e_mean, w_mean) = (charge.clone() / amount.clone(), held / amount);
     let half = ratio(1, 2);
-    let away = |d: &Ratio| {
-        let f = frac(d);
-        if f.is_zero() || f == half {
-            ratio(0, 1)
-        } else if f < half {
-            ratio(1, 1)
-        } else {
-            ratio(-1, 1)
-        }
-    };
+    // Each mote's pushed sum, `Σ_j q_j·Π_k in_step(φ_i, φ_j)·sign_k`, read
+    // exactly on the phases' common denominator (`pair_sums`).
+    let sums = pair_sums(motes, planes, &open);
     let mut moves: Vec<Vec<Ratio>> = vec![vec![ratio(0, 1); planes]; n];
     for i in 0..n {
         let e_i = open(&motes[i]);
@@ -476,27 +493,7 @@ pub fn repel(motes: &mut [Mote], push: &Ratio) -> Vec<Vec<Ratio>> {
         }
         let carried =
             push.clone() * (e_i / e_mean.clone()) * (w_mean.clone() / weight(&motes[i].key));
-        for j in 0..n {
-            if i == j {
-                continue;
-            }
-            let q = motes[j].amount.clone() * open(&motes[j]);
-            if q.is_zero() {
-                continue;
-            }
-            let close = (0..planes).fold(ratio(1, 1), |c, k| {
-                c * in_step(&motes[i].phase[k], &motes[j].phase[k])
-            });
-            if close.is_zero() {
-                continue;
-            }
-            for k in 0..planes {
-                let sg = away(&(motes[i].phase[k].clone() - motes[j].phase[k].clone()));
-                if !sg.is_zero() {
-                    moves[i][k] += q.clone() * close.clone() * sg;
-                }
-            }
-        }
+        moves[i] = sums[i].clone();
         for k in 0..planes {
             let m = (carried.clone() * moves[i][k].clone() / charge.clone())
                 .max(-half.clone())
@@ -510,6 +507,84 @@ pub fn repel(motes: &mut [Mote], push: &Ratio) -> Vec<Vec<Ratio>> {
         }
     }
     moves
+}
+
+/// The collective's pushed sums (docs/111 §4.1, `repel`): for each mote i
+/// with open frames and each plane k, `Σ_{j≠i} q_j·Π_l in_step(φ_i^l, φ_j^l)·
+/// sign(φ_i^k − φ_j^k)`, `q_j = a_j·open_j`. Every phase is held on a 60-adic
+/// place (`enfold`, `ring::grain`), so on the phases' common denominator `D`
+/// each in-step share is an integer over `D`, and the whole sum an integer
+/// over `D^planes` times the amounts' denominator: the same exact value as
+/// the rational sum, without reducing each term.
+fn pair_sums(motes: &[Mote], planes: usize, open: &dyn Fn(&Mote) -> Ratio) -> Vec<Vec<Ratio>> {
+    use num_bigint::BigInt;
+    use num_integer::Integer;
+    use num_traits::One;
+    let n = motes.len();
+    let lcm = |vals: &mut dyn Iterator<Item = BigInt>| vals.fold(BigInt::one(), |l, d| l.lcm(&d));
+    let d = lcm(&mut motes
+        .iter()
+        .flat_map(|x| x.phase.iter().take(planes).map(|p| p.denom().clone())));
+    let qd = lcm(&mut motes.iter().map(|x| x.amount.denom().clone()));
+    let wrap = |p: &Ratio| -> BigInt {
+        let v = p.numer() * (&d / p.denom());
+        v.mod_floor(&d)
+    };
+    let ph: Vec<Vec<BigInt>> = motes
+        .iter()
+        .map(|x| x.phase.iter().take(planes).map(&wrap).collect())
+        .collect();
+    let q: Vec<BigInt> = motes
+        .iter()
+        .map(|x| {
+            let a = x.amount.clone() * open(x) * Ratio::from_integer(qd.clone());
+            a.to_integer()
+        })
+        .collect();
+    let two = BigInt::from(2);
+    let mut out = vec![vec![ratio(0, 1); planes]; n];
+    let scale = Ratio::from_integer(qd.clone() * num_traits::pow(d.clone(), planes));
+    for i in 0..n {
+        if open(&motes[i]).is_zero() {
+            continue;
+        }
+        let mut acc = vec![BigInt::from(0); planes];
+        for j in 0..n {
+            if i == j || q[j].is_zero() {
+                continue;
+            }
+            let mut close = q[j].clone();
+            let mut sg = vec![0i8; planes];
+            for k in 0..planes {
+                let f = (&ph[i][k] - &ph[j][k]).mod_floor(&d);
+                let back = &d - &f;
+                let near = if f <= back { f.clone() } else { back };
+                close *= &d - &two * near;
+                let twice = &two * &f;
+                sg[k] = if f.is_zero() || twice == d {
+                    0
+                } else if twice < d {
+                    1
+                } else {
+                    -1
+                };
+            }
+            if close.is_zero() {
+                continue;
+            }
+            for k in 0..planes {
+                match sg[k] {
+                    1 => acc[k] += &close,
+                    -1 => acc[k] -= &close,
+                    _ => {}
+                }
+            }
+        }
+        for k in 0..planes {
+            out[i][k] = Ratio::new(acc[k].clone(), BigInt::one()) / scale.clone();
+        }
+    }
+    out
 }
 
 /// Two motes of a collective are BONDED (docs/111 §4.2) where they stand on
@@ -649,6 +724,23 @@ impl Enclosed {
     /// `H(<ℓ)`: the base and everything turning with less spin.
     pub fn hold(&self, ell: &Ratio) -> Ratio {
         self.held[self.spins.partition_point(|l| l < ell)].clone()
+    }
+
+    /// The rim (the rim law, `enclosure::rim_of`; docs/112 §7.1): where the
+    /// vacuum's hold equals the continuum's push, deficit ½, so the reach
+    /// equals the holding enclosed there, `R_rim = H(<R_rim)`. Read from the
+    /// whole holding inward: where every body stands inside it, the rim is
+    /// the whole holding; a body past it is outside, and the rim is read
+    /// again on what stays within.
+    pub fn rim(&self) -> Ratio {
+        let mut r = self.whole();
+        loop {
+            let h = self.hold_within(&r);
+            if h >= r || h.is_zero() {
+                return r;
+            }
+            r = h;
+        }
     }
 
     /// The enclosure's base: its throat's own hold (the ring's `H`).
@@ -1872,12 +1964,29 @@ pub fn band_pairs(
         )
     };
     let bands_all: Vec<(Ratio, Ratio)> = (0..motes.len()).map(band).collect();
-    let inside = |x: &Ratio| -> Ratio {
+    // What stands inside the pair at `x`: the ring's own share and every
+    // mote's holding by its band's share within the pair. Each share divides
+    // by its own band's width, so the exact sum's denominator grows with
+    // every mote; `read` gives each share's grain mark below (`up` false) or
+    // the next (`up` true), bounding the sum with narrow terms.
+    let inside_by = |x: &Ratio, read: &dyn Fn(Ratio) -> Ratio| -> Ratio {
         let (a, b) = pair(x);
         (0..motes.len()).fold(ring.clone() / whole.clone(), |acc, i| {
-            acc + m_of(i) * share_in(&bands_all[i].0, &bands_all[i].1, &a, &b)
+            acc + m_of(i) * read(share_in(&bands_all[i].0, &bands_all[i].1, &a, &b))
         })
     };
+    let step_mark = crate::ring::grain_step();
+    let below = |s: Ratio| crate::ring::grain(&s);
+    let above = |s: Ratio| {
+        let lo = crate::ring::grain(&s);
+        if lo == s {
+            lo
+        } else {
+            lo + step_mark.clone()
+        }
+    };
+    let exact = |s: Ratio| s;
+    crate::profile::mark("pairs:strip");
     let s0 = ring.clone() / whole.clone();
     let rho0 = (ratio(2, 1) * s0 - ratio(1, 1)).max(ratio(0, 1));
     let mut rhos: Vec<Ratio> = vec![ratio(0, 1)];
@@ -1888,21 +1997,22 @@ pub fn band_pairs(
         if at >= ratio(1, 1) || at <= ratio(0, 1) || rhos.len() >= 256 {
             break;
         }
-        let s_in = inside(&at);
-        let g_out = ratio(1, 1) - s_in.clone();
-        if g_out <= ratio(0, 1) {
-            break;
-        }
-        let k_at = s_in / g_out * (ratio(1, 1) + at.clone()) / (ratio(1, 1) - at.clone());
-        if k_at <= ratio(1, 1) {
-            break;
-        }
-        let next = crate::ring::grain(&(at * k_at));
-        rhos.push(if next < ratio(1, 1) {
-            next
+        // The step's outcome rises with what stands inside (`strip_step`),
+        // so it is read at the two bounds and, only where they differ, at
+        // the exact sum.
+        let (lo, hi) = (
+            strip_step(&at, &inside_by(&at, &below)),
+            strip_step(&at, &inside_by(&at, &above)),
+        );
+        let outcome = if lo == hi {
+            lo
         } else {
-            ratio(1, 1)
-        });
+            strip_step(&at, &inside_by(&at, &exact))
+        };
+        match outcome {
+            Strip::Next(next) => rhos.push(next),
+            Strip::Held | Strip::Whole => break,
+        }
     }
     if *rhos.last().expect("one") < ratio(1, 1) {
         rhos.push(ratio(1, 1));
@@ -1924,6 +2034,7 @@ pub fn band_pairs(
         // A binding gathers on the disc leg (docs/99 §2.1): the axial leg is
         // matter in transit, half a loop from the disc; the rings above
         // step on all the galaxy's matter, the binding's own is the disc's.
+        crate::profile::mark("pairs:members");
         let members: Vec<(usize, Ratio)> = (0..motes.len())
             .filter(|&i| on_disc_leg(&motes[i]))
             .filter_map(|i| {
@@ -1944,6 +2055,7 @@ pub fn band_pairs(
         // shear, so ⌊R/w_J⌋ bindings stand around the turn. Each member
         // joins the binding whose arc holds it, by its phase in the galaxy's
         // disc plane (the plane the disc settled into, `settle_disc`).
+        crate::profile::mark("pairs:sums");
         let mid = (o_lo.clone() + o_hi.clone()) / ratio(2, 1);
         let h_mid = enc.hold_within(&mid);
         let held_of = |i: usize, s: &Ratio| {
@@ -1966,6 +2078,7 @@ pub fn band_pairs(
                 acc + held_of(*i, s) * motes[*i].agitation.clone()
             }) / m.clone()),
         );
+        crate::profile::mark("pairs:lead");
         // Its members' net lead (their tilts blended by holding: aligned
         // leads add, opposed cancel) against the disc plane, by holding.
         let lead = blend(
@@ -1981,42 +2094,125 @@ pub fn band_pairs(
                 .collect::<Vec<_>>(),
         );
         let tau = m.clone() * torsion(&lead, plane);
-        // The nuclear layer ν: the members' holding by their nuclei's grip.
-        let nu = members.iter().fold(ratio(0, 1), |acc, (i, s)| {
-            acc + held_of(*i, s)
-                * grip_share(
-                    &motes[*i],
-                    &crate::polarity::faces(&enc.reach(&motes[*i].ell_o).1).0,
-                )
-        });
-        let Some((_, count)) =
-            crate::formation::crest_collapse(&m, &mu, &tau, &nu, &a, &mid, &h_mid)
-        else {
+        // The nuclear layer ν: the members' holding by their nuclei's grip at
+        // each one's held share `g = 1 − δ`. Summed exactly, its denominator
+        // grows with every member (each δ its own), so it is read certified
+        // first: each g between its grain mark below and the next, the grip
+        // linear and increasing in g, so ν between the two sums
+        // (`crest_count`); the exact sum only where they decide differently.
+        crate::profile::mark("pairs:nu");
+        let g_of = |i: usize| crate::polarity::faces(&enc.reach(&motes[i].ell_o).1).0;
+        let nu_at = |g: &dyn Fn(usize) -> Ratio| {
+            members.iter().fold(ratio(0, 1), |acc, (i, s)| {
+                acc + held_of(*i, s) * grip_share(&motes[*i], &g(*i))
+            })
+        };
+        let step = crate::ring::grain_step();
+        let g_lo = |i: usize| crate::ring::grain(&g_of(i));
+        let g_hi = |i: usize| {
+            let g = g_of(i);
+            let lo = crate::ring::grain(&g);
+            if lo == g {
+                lo
+            } else {
+                lo + step.clone()
+            }
+        };
+        let Some(count) = crest_count(
+            &(
+                m.clone(),
+                mu.clone(),
+                tau.clone(),
+                a.clone(),
+                mid.clone(),
+                h_mid.clone(),
+            ),
+            &nu_at(&g_lo),
+            &nu_at(&g_hi),
+            &|| nu_at(&g_of),
+        ) else {
             continue;
         };
         if count == 0 {
             continue;
         }
-        let disc = SPACE[tilt_of(plane)
-            .iter()
-            .enumerate()
-            .max_by(|x, y| x.1.cmp(y.1).then(y.0.cmp(&x.0)))
-            .map(|(j, _)| j)
-            .unwrap_or(0)];
+        crate::profile::mark("pairs:arcs");
+        // The disc: the plane its tilt leans in most, or every plane that
+        // ties for it (none chosen over another by its index; docs/78). A
+        // binding's arc is its place in each of them.
+        let lean = tilt_of(plane);
+        let most = lean.iter().max().cloned().unwrap_or_else(|| ratio(0, 1));
+        let disc: Vec<usize> = (0..lean.len())
+            .filter(|&j| lean[j] == most)
+            .map(|j| SPACE[j])
+            .collect();
         let n = Ratio::from_integer(num_bigint::BigInt::from(count));
-        let mut arcs: std::collections::BTreeMap<num_bigint::BigInt, Vec<(usize, Ratio)>> =
+        let mut arcs: std::collections::BTreeMap<Vec<num_bigint::BigInt>, Vec<(usize, Ratio)>> =
             std::collections::BTreeMap::new();
         for (i, sh) in members {
-            let at = frac(motes[i].phase.get(disc).unwrap_or(&ratio(0, 1)));
-            arcs.entry((at * n.clone()).floor().to_integer())
-                .or_default()
-                .push((i, sh));
+            let at: Vec<num_bigint::BigInt> = disc
+                .iter()
+                .map(|&k| {
+                    (frac(motes[i].phase.get(k).unwrap_or(&ratio(0, 1))) * n.clone())
+                        .floor()
+                        .to_integer()
+                })
+                .collect();
+            arcs.entry(at).or_default().push((i, sh));
         }
         for (_, binding) in arcs {
             out.push((crate::ring::grain(&mid), binding));
         }
     }
     out
+}
+
+/// One step of the strip (`band_pairs`) from the share `s_in` standing
+/// inside the pair at `at`: none outside (`Whole`, the pair holds it all),
+/// the step no wider (`Held`, `k ≤ 1`), or the next pair's edge on the
+/// grain, `⌊at·k⌋`, `k = s_in/(1 − s_in)·(1 + at)/(1 − at)`. As `s_in`
+/// rises the outcome passes `Held`, then edges never narrower, then `Whole`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum Strip {
+    Held,
+    Next(Ratio),
+    Whole,
+}
+
+fn strip_step(at: &Ratio, s_in: &Ratio) -> Strip {
+    let g_out = ratio(1, 1) - s_in.clone();
+    if g_out <= ratio(0, 1) {
+        return Strip::Whole;
+    }
+    let k_at = s_in.clone() / g_out * (ratio(1, 1) + at.clone()) / (ratio(1, 1) - at.clone());
+    if k_at <= ratio(1, 1) {
+        return Strip::Held;
+    }
+    let next = crate::ring::grain(&(at.clone() * k_at));
+    Strip::Next(if next < ratio(1, 1) {
+        next
+    } else {
+        ratio(1, 1)
+    })
+}
+
+/// The crest's count of bindings (`formation::crest_collapse`) from its
+/// nuclear layer certified between `nu_lo` and `nu_hi`: the count falls as ν
+/// rises (a larger ν binds wider), so where both bounds give the same
+/// outcome it is the exact one; only where they differ is the exact ν read.
+fn crest_count(
+    c: &(Ratio, Ratio, Ratio, Ratio, Ratio, Ratio),
+    nu_lo: &Ratio,
+    nu_hi: &Ratio,
+    exact: &dyn Fn() -> Ratio,
+) -> Option<u64> {
+    let (m, mu, tau, a, r, h) = c;
+    let at = |nu: &Ratio| crate::formation::crest_collapse(m, mu, tau, nu, a, r, h).map(|x| x.1);
+    let (lo, hi) = (at(nu_lo), at(nu_hi));
+    if lo == hi {
+        return lo;
+    }
+    at(&exact())
 }
 
 /// Merge by the matter's own gatherings (ruling of 2026-10-23: no grids,
@@ -2819,6 +3015,113 @@ mod passage_tests {
     }
 
     #[test]
+    fn the_strips_step_rises_with_what_stands_inside() {
+        // The order the certified strip relies on: Held, then edges never
+        // narrower, then Whole, as the inside share rises.
+        use super::{strip_step, Strip};
+        let rank = |s: &Strip| match s {
+            Strip::Held => (0, ratio(0, 1)),
+            Strip::Next(r) => (1, r.clone()),
+            Strip::Whole => (2, ratio(0, 1)),
+        };
+        for at in [ratio(1, 10), ratio(1, 3), ratio(7, 10)] {
+            let mut last = rank(&strip_step(&at, &ratio(0, 1)));
+            for k in 1..=400 {
+                let now = rank(&strip_step(&at, &ratio(k, 400)));
+                assert!(now >= last, "at {at}, s {k}/400");
+                last = now;
+            }
+        }
+    }
+
+    #[test]
+    fn the_crests_count_certified_is_the_exact_count() {
+        // Wherever the bounds agree they give the exact count; where they do
+        // not, the exact ν decides. Swept over ν and its bounds.
+        let c = (
+            ratio(3, 10),
+            ratio(1, 10),
+            ratio(0, 1),
+            ratio(1, 50),
+            ratio(2, 1),
+            ratio(1, 1),
+        );
+        let exact_at = |nu: &Ratio| {
+            crate::formation::crest_collapse(&c.0, &c.1, &c.2, nu, &c.3, &c.4, &c.5).map(|x| x.1)
+        };
+        for k in 0..200 {
+            let nu = ratio(k, 97);
+            let (lo, hi) = (ratio(k, 97) - ratio(1, 300), ratio(k, 97) + ratio(1, 300));
+            let lo = if lo < ratio(0, 1) { ratio(0, 1) } else { lo };
+            assert_eq!(
+                super::crest_count(&c, &lo, &hi, &|| nu.clone()),
+                exact_at(&nu),
+                "ν = {k}/97"
+            );
+        }
+    }
+
+    #[test]
+    fn the_collectives_pair_sums_are_the_rational_sums_exactly() {
+        // `repel`'s pushed sums on the phases' common denominator equal the
+        // term-by-term rational sums, value for value.
+        use super::{in_step, Mote};
+        let mote = |w: &str, a: i64, ph: [(i64, i64); 4]| Mote {
+            key: crate::chem::Kind::parse(w).expect("a kind"),
+            amount: ratio(a, 7),
+            ell_o: ratio(1, 1),
+            ell_orth: ratio(0, 1),
+            phase: ph.iter().map(|&(n, d)| ratio(n, d)).collect(),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            tilt: Vec::new(),
+        };
+        let motes = vec![
+            mote("W0007", 3, [(1, 60), (7, 3600), (59, 60), (1, 2)]),
+            mote("W0012", 5, [(13, 216000), (1, 4), (2, 3), (1, 6)]),
+            mote("W0016", 11, [(1, 2), (31, 60), (1, 60), (5, 12)]),
+            mote("W0001", 2, [(0, 1), (1, 3), (7, 12), (11, 60)]),
+        ];
+        let open = |x: &Mote| ratio(i64::from(crate::chem::unpaired(&x.key)), 1);
+        let fast = super::pair_sums(&motes, 4, &open);
+        let half = ratio(1, 2);
+        let away = |d: &Ratio| {
+            let f = d.clone() - d.floor();
+            if f.is_zero() || f == half {
+                ratio(0, 1)
+            } else if f < half {
+                ratio(1, 1)
+            } else {
+                ratio(-1, 1)
+            }
+        };
+        for i in 0..motes.len() {
+            if open(&motes[i]).is_zero() {
+                continue;
+            }
+            let mut want = vec![ratio(0, 1); 4];
+            for j in 0..motes.len() {
+                if i == j {
+                    continue;
+                }
+                let q = motes[j].amount.clone() * open(&motes[j]);
+                let close = (0..4).fold(ratio(1, 1), |c, k| {
+                    c * in_step(&motes[i].phase[k], &motes[j].phase[k])
+                });
+                for k in 0..4 {
+                    want[k] += q.clone()
+                        * close.clone()
+                        * away(&(motes[i].phase[k].clone() - motes[j].phase[k].clone()));
+                }
+            }
+            assert_eq!(fast[i], want, "mote {i}");
+        }
+    }
+
+    #[test]
     fn a_motes_lever_keeps_its_true_place() {
         use super::{settle, true_phase, Mote};
         let mut x = Mote {
@@ -3078,13 +3381,63 @@ mod passage_tests {
     }
 
     #[test]
+    fn a_tilt_knows_its_spins_never_which_plane_is_which() {
+        // Every permutation of the spins permutes the tilt the same way, so
+        // no plane is favoured by its index (docs/78: no fill orders).
+        let perms = [
+            [0, 1, 2],
+            [0, 2, 1],
+            [1, 0, 2],
+            [1, 2, 0],
+            [2, 0, 1],
+            [2, 1, 0],
+        ];
+        for spins in [
+            [ratio(1, 7), ratio(2, 7), ratio(4, 7)],
+            [ratio(1, 3), ratio(1, 3), ratio(1, 3)],
+            [ratio(1, 1), ratio(1, 1), ratio(5, 1)],
+            [ratio(2, 1), ratio(0, 1), ratio(2, 1)],
+            [ratio(1, 11), ratio(1, 11), ratio(1, 13)],
+        ] {
+            let t = tilt_from(&spins);
+            assert_eq!(
+                t.iter().fold(ratio(0, 1), |s, x| s + x.clone()),
+                ratio(1, 1)
+            );
+            for p in perms {
+                let moved: Vec<Ratio> = p.iter().map(|&j| spins[j].clone()).collect();
+                let want: Vec<Ratio> = p.iter().map(|&j| t[j].clone()).collect();
+                assert_eq!(tilt_from(&moved), want, "permuted with {p:?}");
+            }
+        }
+        // Equal spins part equally; a plane that does not turn holds none.
+        assert_eq!(
+            tilt_from(&[ratio(1, 7), ratio(1, 7), ratio(1, 7)]),
+            vec![ratio(1, 3); 3]
+        );
+        assert_eq!(
+            tilt_from(&[ratio(1, 7), ratio(0, 1), ratio(1, 7)])[1],
+            ratio(0, 1)
+        );
+    }
+
+    #[test]
     fn a_tilt_parts_the_spin_over_three_planes_and_sums_to_one() {
-        // Shares from plane spins sum to one exactly, the last plane taking the rest.
+        // Shares from plane spins sum to one exactly, no plane taking the rest.
         let t = tilt_from(&[ratio(1, 7), ratio(2, 7), ratio(4, 7)]);
         assert_eq!(
             t.iter().fold(ratio(0, 1), |s, x| s + x.clone()),
             ratio(1, 1)
         );
+        // Each share stands within a grain of its exact share.
+        for (tk, e) in t.iter().zip([ratio(1, 7), ratio(2, 7), ratio(4, 7)]) {
+            let gap = if *tk > e {
+                tk.clone() - e
+            } else {
+                e - tk.clone()
+            };
+            assert!(gap < crate::ring::grain_step(), "within a grain");
+        }
         // Blending adds plane spins: a body all in plane 0 and one all in
         // plane 2, equal holding and spin, join half and half.
         let b = blend(&[

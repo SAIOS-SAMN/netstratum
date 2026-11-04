@@ -6,7 +6,7 @@ what crosses the universal core in the reverberation of the bounce in the
 Einstein–Cartan core as the transitions the court rebuilds under
 Mycelium's laws (L0, `laws::verify`).
 
-**Status:** specified; one open point (§4). It replaces the fixed two-body
+**Status:** specified; the crossing's motion ruled (§4). It replaces the fixed two-body
 probe (`ns-hypha probe`) as what Netstratum offers the court.
 
 ## 1. The scope: the crossings at the vertex
@@ -47,15 +47,29 @@ rebuilds:
 | Reservoir | a change of kind is unitary on the fibre |
 | Continuity | the universe's matter after is its matter before, plus the throat's release, less its return (3Z conserved) |
 
-## 4. Open: the throat's passage as one law
+## 4. The crossing's motion, ruled
 
-Netstratum reads the passage through the throat linearly, `R → 2H − R`
-(`flows::through`: the core and the rim change places, the throat stands;
-no square). The conformal versor of the throat sphere is the inversion
-`R → H²/R`. Both fix the throat and swap the faces; they differ off it. The
-crossing the court rebuilds must be one of them: either the court carries
-Netstratum's linear passage as a named form, or Netstratum's passage is the
-sphere's inversion. To settle with the coordinator before the build.
+Ruled 2026-11-04 (Netstratum's lead, delegated by the operator): the
+passage through the throat is `R → 2H − R` (`flows::through`), the
+reflection of the polar angle `θ = 90°·R/H` on the compact sphere: the
+throat at 90° stands, the core and the rim change places. It is the
+operator's ruling of 2026-10-21 ("the second double inversion must not be
+flattened"), and it is first degree.
+
+The sphere's conformal inversion `R → H²/R` is not Netstratum's passage:
+moving a reach by it squares `H`, against design law 2 (docs/78, no
+squares). The inversion stands only where it is first degree, on a share:
+`δ ↦ 1 − δ`, the faces read across the throat (docs/114 T1).
+
+So the court rebuilds the crossing's motion as Netstratum's linear passage
+carried as a named form, not as the throat sphere's versor. Mycelium adds
+the form; its release is the operators' decision.
+
+Still owed, inside the universe (out of this document's scope, docs/114
+§2): `flows::mobius` and `flows::luminal` read a crossing mote's pull in
+place, `1 − δ` at its own reach, where `through` would read it at the
+moved reach. Aligning them changes how the universe moves, so it is read
+before and after on a fresh founding, never assumed.
 
 ## 5. Build
 

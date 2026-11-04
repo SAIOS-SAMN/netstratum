@@ -1,6 +1,8 @@
-//! Found an era-1 universe: `pulse <era1 var> found <grains>`, the founding's
-//! size in grains of nucleons, exact (a decimal, or `2^N`); written to the
-//! var's pulse.bin. A var that already holds a universe is refused.
+//! Found an era-1 universe: `pulse <era1 var> found <grains> [seed phrase]`,
+//! the founding's size in grains of nucleons, exact (a decimal, or `2^N`);
+//! written to the var's pulse.bin. The seed is the phrase's hash (the
+//! stand-in phrase where none is given); it orients the founding
+//! (`pulse::orient`). A var that already holds a universe is refused.
 use conductor::pulse;
 use std::path::Path;
 
@@ -9,7 +11,7 @@ fn main() {
     let (Some(era1), Some("found"), Some(size)) =
         (args.get(1), args.get(2).map(String::as_str), args.get(3))
     else {
-        println!("usage: pulse <era1 var> found <grains>");
+        println!("usage: pulse <era1 var> found <grains> [seed phrase]");
         return;
     };
     let grains = match size.split_once('^') {
@@ -38,17 +40,26 @@ fn main() {
         let f = |x: &cfe::ratio::Ratio| conductor::reading::sector(x).to_string();
         println!("BESIDE NATURE — neutrons per proton {} (nature about 1/7), weight-4 mass share {} (about 1/4), hydrogen {} (about 3/4)", f(&np), f(&he), f(&h));
     }
-    let seed = *blake3::hash(b"netstratum era 1, unfounded stand-in").as_bytes();
-    let Some(u) = pulse::deploy(&manifest) else {
+    let phrase = args
+        .get(4)
+        .map_or("netstratum era 1, unfounded stand-in", String::as_str);
+    let seed = *blake3::hash(phrase.as_bytes()).as_bytes();
+    let Some(mut u) = pulse::deploy(&manifest) else {
         println!("refused: the founding holds no disc, or its echo carries no ring");
         return;
     };
+    pulse::orient(&mut u, &seed);
     let unit = conductor::breath::unit_mass(&u);
     println!(
-        "DEPLOYED — {} cores; conservation {}; spin {}",
+        "DEPLOYED — {} cores; conservation {}; spin {}; lean {:?}",
         u.cores.len(),
         u.total() == manifest,
-        pulse::spin_total(&u, &unit)
+        pulse::spin_total(&u, &unit),
+        u.cores.iter().find(|c| pulse::is_home(c)).map(|c| c
+            .tilt
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>())
     );
     match pulse::write(Path::new(era1), &seed, &u) {
         Ok(()) => println!("written {era1}/pulse.bin"),
