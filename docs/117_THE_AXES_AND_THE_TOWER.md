@@ -32,14 +32,16 @@ axis and five isoclinic planes (`11 = 1 + 2 × 5`). Netstratum's is
 
 ## 2. The signature
 
-Each frame plane `(Z_k, Q_k)` is hyperbolic, one axis of each square:
+Each frame plane `(Z_k, Q_k)` is hyperbolic: one of its poles squares to
++1 and the other to −1, and R squares to +1. Which pole is negative is not
+fixed. It is state, plane by plane (operator 2026-11-05: "Q or Z could be
+negative - the point is to have dynamic capabilities"):
 
-    Z_k² = +1,   Q_k² = −1,   R² = +1
+    in plane k, either  Z_k² = +1, Q_k² = −1   or   Z_k² = −1, Q_k² = +1
 
-so the base algebra is Cl(4, 3), and with Mycelium's conformal pair
-(`e₊² = +1`, `e₋² = −1`) Cl(5, 4). Which pole is negative is a convention;
-that one of each is negative is not. The default here is Q, the open pole,
-standing at infinity as Xylarium places it (§7).
+Every state has three positive and three negative frame axes, so the base
+algebra is always Cl(4, 3), and with Mycelium's conformal pair
+(`e₊² = +1`, `e₋² = −1`) Cl(5, 4). §3 reads what the state changes.
 
 The evidence is already in the record:
 
@@ -69,18 +71,27 @@ that reorder the axes, times the square of each shared axis. On the seven
 axes the degrees hold 1, 7, 21, 35, 35, 21, 7, 1 elements. A plane is any
 two axes, not only a frame plane: `Z₁Q₂` and `Z₂Z₃` are planes too.
 
-A degree-2 element behaves by the axes it joins:
+A degree-2 element `e_a·e_b` squares to `−a²·b²`, so it behaves by the
+signs of the two axes it joins, not by their names:
 
 | it joins | squares to | it is |
 |---|---|---|
-| two closed frames (`Z₂Z₃`, `Z₃Z₁`, `Z₁Z₂`) | −1 | a turning: `i, j, k`, with `i·j = k = −j·i` (Q₈) |
-| two open frames (`Q₂Q₃`, …) | −1 | a second Q₈, commuting with the first |
-| a closed and an open frame (`Z_kQ_l`) | +1 | a boost: LAW-DILATION and the flow law |
+| two positive axes | −1 | a turning |
+| two negative axes | −1 | a turning |
+| a positive and a negative axis | +1 | a boost: LAW-DILATION and the flow law |
 
-So crossings between axes do not commute, and the exchange between a frame's
-closed and open sides is hyperbolic. The two Q₈ copies, closed and open,
-stand side by side and commute: the left and the right of an isoclinic
-turn, the kind the core's twist already is (docs/100 §2).
+In every state of the six frame axes there are three positive and three
+negative, so there are always six turnings and nine boosts. The three
+positive axes form one quaternion triple (`i, j, k` with `i·j = k = −j·i`,
+Q₈), the three negative axes another, and the two triples commute: the left
+and the right of an isoclinic turn, the kind the core's twist already is
+(docs/100 §2). The boosts are the nine pairs between the triples.
+
+What the state changes is the triples' members. With every plane alike, the
+closed frames are one triple and the open the other. Flipping plane k's
+signature moves `Z_k` into the other triple and `Q_k` the other way: with
+plane 3 alone flipped, the positive triple is `Z₁, Z₂, Q₃`. Read in all
+eight states of the three planes: six turnings and nine boosts in each.
 
 ## 4. The tower
 
@@ -144,17 +155,22 @@ Its group Q₈ is the closed frames' degree-2 elements of §3, acting
 one-sidedly, exact over ℚ. A loop's obstruction (docs/114 §10) is the class
 of its product of units in that Q₈, over the points of the base.
 
-The face swap `Z ↔ Q` exchanges the closed-frame Q₈ with the open-frame one
-(§3). Since S³ appears twice in the tower (as S⁷'s Hopf fibre and as the
-riding state), the conjecture is that a passage across the horizon moves
-the turning between the machine's fibre and the riding state. Not derived
+**A crossing in plane k is plane k's signature flipping.** It moves the
+plane's two poles between the positive and the negative triple (§3): the
+face swap of that plane, with no flag beside the state. Flipping two planes
+in either order reaches the same signature, but the turnings carried
+through the flips do not commute, so the order is held in the state `q`'s
+units (docs/114 §10). Since S³ appears twice in the tower (as S⁷'s Hopf
+fibre and as the riding state), the conjecture is that a flip moves the
+turning between the machine's fibre and the riding state. Not derived
 (§7).
 
 ## 7. What is open
 
-1. **Which pole is negative.** Q by default (§2); Z otherwise. The
-   commutation signs of §3 do not depend on it; the meaning of "forward"
-   on R may.
+1. **What flips a plane's signature.** §6 reads a crossing as the flip;
+   the law that sets when (the luminal bound at the throat, docs/94 §2, is
+   the candidate) and in which plane (docs/114 §9.6) is not derived. Nor is
+   how "forward" on R reads in a mixed state.
 2. **The eighth dimension of ℝ⁸.** Seven base axes stand under S⁷'s eight:
    R is paired into a plane with something, as Xylarium pairs its pole
    axis. docs/95 §2 joins R to origin and infinity (`e₊`, `e₋`); whether
