@@ -12,6 +12,12 @@ change is named here.
 
 ### Added
 
+- docs/114 §9 (T6): the passage through a throat derived as a quarter turn,
+  left multiplication by a unit quaternion on the body's state `q = H +
+  R·(t_x·i + t_y·j + t_z·k)`. It is an L1 isometry, exact over ℚ, of order
+  four and non-abelian (Q₈). Both reach maps (`2H − R`, `H²/R`) and the
+  scalar Möbius reading are ruled out (operator 2026-11-05). Derived, not
+  built; open points in §9.6. docs/113 §4 now points to it.
 - The founding is oriented (docs/100 §4.1; operator 2026-11-04): the
   universal core is founded a grain off isotropic, the seed choosing which
   plane leads and which lags (`pulse::orient`; `pulse … found <grains>
