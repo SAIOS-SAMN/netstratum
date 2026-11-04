@@ -6,7 +6,7 @@ what crosses the universal core in the reverberation of the bounce in the
 Einstein–Cartan core as the transitions the court rebuilds under
 Mycelium's laws (L0, `laws::verify`).
 
-**Status:** specified; the crossing's motion ruled (§4). It replaces the fixed two-body
+**Status:** specified; the crossing's motion derived, under review (§4). It replaces the fixed two-body
 probe (`ns-hypha probe`) as what Netstratum offers the court.
 
 ## 1. The scope: the crossings at the vertex
@@ -47,29 +47,23 @@ rebuilds:
 | Reservoir | a change of kind is unitary on the fibre |
 | Continuity | the universe's matter after is its matter before, plus the throat's release, less its return (3Z conserved) |
 
-## 4. The crossing's motion, ruled
+## 4. The crossing's motion, derived (under review)
 
-Ruled 2026-11-04 (Netstratum's lead, delegated by the operator): the
-passage through the throat is `R → 2H − R` (`flows::through`), the
-reflection of the polar angle `θ = 90°·R/H` on the compact sphere: the
-throat at 90° stands, the core and the rim change places. It is the
-operator's ruling of 2026-10-21 ("the second double inversion must not be
-flattened"), and it is first degree.
+The ruling of 2026-11-04 (`R → 2H − R`) is reversed (operator 2026-11-05).
+No reach map is the passage: `2H − R` flattens the double inversion, and
+`H²/R` squares, forming rigidity. The scalar reading `δ ↦ 1 − δ` with a
+phase half turn and a sense flip is a scalar collapse.
 
-The sphere's conformal inversion `R → H²/R` is not Netstratum's passage:
-moving a reach by it squares `H`, against design law 2 (docs/78, no
-squares). The inversion stands only where it is first degree, on a share:
-`δ ↦ 1 − δ`, the faces read across the throat (docs/114 T1).
+The passage is derived in docs/114 §9 (T6): a crossing is left
+multiplication by a unit quaternion on the body's state `q = H + R·(t_x·i +
+t_y·j + t_z·k)`, a quarter turn, an isometry of the L1 metric, exact over
+ℚ. Two passes reverse the state (`−q`), four return it, and crossings in
+two planes do not commute (Q₈). It is first degree and squares nothing.
+In Mycelium's algebra it is the one-sided action of the even subalgebra's
+unit bivectors, never the sandwich.
 
-So the court rebuilds the crossing's motion as Netstratum's linear passage
-carried as a named form, not as the throat sphere's versor. Mycelium adds
-the form; its release is the operators' decision.
-
-Still owed, inside the universe (out of this document's scope, docs/114
-§2): `flows::mobius` and `flows::luminal` read a crossing mote's pull in
-place, `1 − δ` at its own reach, where `through` would read it at the
-moved reach. Aligning them changes how the universe moves, so it is read
-before and after on a fresh founding, never assumed.
+Its open points (docs/114 §9.6) are settled with the operator before the
+court's form (`forms::passage`, held in Mycelium) or the code changes.
 
 ## 5. Build
 

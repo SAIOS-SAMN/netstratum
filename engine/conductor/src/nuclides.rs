@@ -471,6 +471,33 @@ mod tests {
     use cfe::ratio::ratio;
 
     #[test]
+    fn the_degrees_on_s11_split_over_the_base_s7_and_the_state_s3() {
+        // docs/117 §4: S^11 = S^7 * S^3 (the join), so a degree-l harmonic
+        // on S^11 is the sum over a + b + 2j = l of the base's degree-a
+        // directions (S^7, R^8) times the state's degree-b (S^3, R^4).
+        let on = |n: u64, l: u64| {
+            choose(l + n - 1, n - 1) - if l >= 2 { choose(l + n - 3, n - 1) } else { 0 }
+        };
+        for l in 0..40u64 {
+            let mut split = 0;
+            for a in 0..=l {
+                for b in 0..=(l - a) {
+                    if (l - a - b) % 2 == 0 {
+                        split += on(8, a) * on(4, b);
+                    }
+                }
+            }
+            assert_eq!(directions(l), split, "degree {l}");
+        }
+        // The base and the state alone: 1, 8, 35, 112 and 1, 4, 9, 16.
+        assert_eq!(
+            (1..4).map(|l| on(8, l)).collect::<Vec<_>>(),
+            vec![8, 35, 112]
+        );
+        assert_eq!((1..4).map(|l| on(4, l)).collect::<Vec<_>>(), vec![4, 9, 16]);
+    }
+
+    #[test]
     fn the_nucleus_converges_on_s11_and_seals_where_every_degree_is_bound() {
         // Hydrogen is a lone proton; deuterium seals the first turning.
         assert_eq!((protons(1), neutrons(1)), (Some(1), Some(0)));
