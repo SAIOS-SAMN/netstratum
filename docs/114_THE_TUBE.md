@@ -46,8 +46,12 @@ The two cannot both be the passage. With `x ↦ 1/x`, a core's deep interior
 in the sphere one tier up, which would make the throat the connector
 between tiers. With `R → 2H − R`, the passage stays inside the enclosure and
 the faces are read in place, so `through` would no longer move a reach.
-Which holds is a decision on the law; `flows::through` is unchanged until it
-is made. PR #40 (the crossings the court rebuilds) waits on it.
+Ruled 2026-11-04 (docs/113 §4): the passage moves a reach by
+`R → 2H − R`; the face inversion `x ↦ 1/x` stands on shares alone
+(`δ ↦ 1 − δ`), never on a reach, which it would square. A tube between
+mouths (T2 below) is its own connector, not the throat's passage. Owed:
+the in-place readings (`mobius`, `luminal`) aligned with the moved reach,
+read before and after.
 
 ## 3. T2: a tube between two mouths
 

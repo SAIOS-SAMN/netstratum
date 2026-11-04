@@ -42,6 +42,9 @@ change is named here.
   open tube), with `ring::{inverted, tube, tube_share, dilation, compose}`
   and their witnesses; the conflict with the compact sphere's passage
   stated (docs/114 §2).
+- docs/113: the crossings at the universal core stated as Mycelium
+  transitions for the court to rebuild (the throat's release and return as
+  fluxes, the motes they carry as bodies); inner steps stay Netstratum's.
 - `docs/PLAN.md`: the work in order under the v0.1.0 and v0.2.0
   milestones, each step an issue (#27–#38 filed for the consolidation, the
   Mycelium integration and the repository's organization).
