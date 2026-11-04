@@ -840,8 +840,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         sys.phase.get(crate::flows::LOOP).unwrap_or(&ratio(0, 1)),
                     );
                     let (r, d_enc) = enc.reach(&now);
-                    // Its orbit phase as the echo starts (the pull reads it).
-                    let psi_o = sys.phase.first().cloned().unwrap_or_else(|| ratio(0, 1));
+                    // Its orbit phases as the echo starts (the pull reads
+                    // them), one in each spatial plane.
+                    let psi_o = crate::flows::space_of(&sys.phase);
                     let h_in = enc.hold(&now);
                     let was = sys.bell.clone();
                     // The star's place: the cap its own gravity holds about it.
@@ -954,15 +955,23 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     // core"): its orbit spin takes its galaxy's torque by the one
                     // law, as the galaxy's motes do (the band held back, operator
                     // 2026-10-21): the core's push over its passage by
-                    // hemisphere, `p·δ·k`, from the orbit phase it stood at.
+                    // hemisphere, `p·δ·k`, from the orbit phases it stood at,
+                    // each plane's response weighted by its tilt's share (as a
+                    // mote's, `flows::torque`; no plane reads for the others).
                     // Through the centre where it passes it; the core's
                     // reservoir pays exactly what is stored.
-                    let from = if through_c {
-                        psi_o.clone() + ratio(1, 2) - (psi_o.clone() + ratio(1, 2)).floor()
-                    } else {
-                        psi_o
-                    };
-                    let k = crate::flows::mean_response(&from, &(ratio(2, 1) * d_enc.clone()));
+                    let passage = ratio(2, 1) * d_enc.clone();
+                    let k = psi_o.iter().zip(crate::flows::tilt_of(&sys.tilt)).fold(
+                        ratio(0, 1),
+                        |s, (psi, tk)| {
+                            let from = if through_c {
+                                psi.clone() + ratio(1, 2) - (psi.clone() + ratio(1, 2)).floor()
+                            } else {
+                                psi.clone()
+                            };
+                            s + tk * crate::flows::mean_response(&from, &passage)
+                        },
+                    );
                     let raw = sys.ell.clone() + p_g.clone() * d_enc.clone() * k;
                     let ledger_unit = if home {
                         ledger_u.clone()
@@ -2046,8 +2055,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &mut cross,
             );
             // The disc forms: each mote's tilt returns toward its galaxy's spin
-            // plane (`flows::settle_disc`).
-            core.tilt = crate::flows::settle_disc(&mut core.flows, enc.as_ref().unwrap_or(&throat));
+            // plane (`flows::settle_disc`). A core whose disc holds nothing
+            // turning keeps its own lean (its founding orientation, `pulse::
+            // orient`), never reset to none.
+            let plane = crate::flows::settle_disc(&mut core.flows, enc.as_ref().unwrap_or(&throat));
+            if !plane.is_empty() {
+                core.tilt = plane;
+            }
             core.reservoir -= given;
             identity.push(("torque", ledger_sum(core) - before));
             crate::profile::mark("breath:recycle");

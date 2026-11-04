@@ -12,6 +12,14 @@ change is named here.
 
 ### Added
 
+- The founding is oriented (docs/100 §4.1; operator 2026-11-04): the
+  universal core is founded a grain off isotropic, the seed choosing which
+  plane leads and which lags (`pulse::orient`; `pulse … found <grains>
+  [seed phrase]`). Until now every law and the founding treated the three
+  planes alike, so they carried one disc's state three times. Read: the lean
+  grows from 1 grain to 910 by the third bounce, and 1,930 of 2,246 motes
+  stand apart in phase; a seed leaning other planes reads the same universe
+  permuted. `breathe` prints the lean at each echo.
 - The front's periods read live at each universal echo (E51–E53): the
   contained front per plane per cell, the rim `R_rim = H(<R_rim)`, and the
   established period `T_u = 4·R_rim`, so `T_u/4` is the rim (docs/112 §7.1
@@ -69,6 +77,12 @@ change is named here.
 
 ### Changed
 
+- No plane is favoured by its index (docs/78, no fill orders): a tilt's
+  rounding grains return to the planes that lost most, not the last plane;
+  a star's pull reads every plane by its tilt, not the first; a binding's
+  arcs are read in every plane tied for the disc; a core with nothing
+  turning keeps its tilt. Unchanged while the planes are alike (control
+  read: the same universe to every count).
 - The galaxy's band pairs read their sums certified: the strip's step and
   the crest's count of bindings each from narrow bounds on their sums,
   with the exact sum only where the bounds decide differently. The same

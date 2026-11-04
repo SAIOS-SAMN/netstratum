@@ -990,6 +990,37 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     })
 }
 
+/// The founding's orientation (operator 2026-11-04, option (a)): every law
+/// treats the three spatial planes alike, so a universe founded alike in
+/// them stays alike for ever, one disc's worth of state in three. The
+/// universal core is founded leaning: its tilt a grain off isotropic, one
+/// plane leading by a grain and one lagging by a grain, `(⅓ + g, ⅓, ⅓ − g)`
+/// (g the spin grain, the least lean the universe can carry). Which plane
+/// leads and which lags is the seed's, read along its fixed path; one of the
+/// six orientations, none preferred. The lean is a partition of one, so it
+/// adds no spin: its offsets sum to zero. An initial condition, never a draw
+/// inside a law; everything after is the laws' (the release writes the
+/// core's tilt into each mote, `breath`).
+pub fn orient(u: &mut Universe, seed: &[u8; 32]) {
+    let Some(home) = u.cores.iter_mut().find(|c| is_home(c)) else {
+        return;
+    };
+    let g = crate::ring::grain_step();
+    let third = ratio(1, 3);
+    let (lead, lag) = match draw(seed, &home.path, "lean", 0) % 6 {
+        0 => (0, 1),
+        1 => (0, 2),
+        2 => (1, 0),
+        3 => (1, 2),
+        4 => (2, 0),
+        _ => (2, 1),
+    };
+    let mut tilt = vec![third; crate::flows::SPACE.len()];
+    tilt[lead] += g.clone();
+    tilt[lag] -= g;
+    home.tilt = tilt;
+}
+
 /// A set of motes' holding, grains × weight (the firmament's books).
 pub fn holding(motes: &[crate::flows::Mote]) -> Ratio {
     motes.iter().fold(ratio(0, 1), |s, x| {
@@ -2125,6 +2156,45 @@ mod tests {
     #[test]
     fn a_founding_that_holds_no_disc_is_refused() {
         assert!(deploy(&Manifest::new()).is_none());
+    }
+
+    #[test]
+    fn the_founding_leans_a_grain_by_its_seed_and_adds_no_spin() {
+        let table: Manifest = [("W0001", 3000), ("W0004", 900), ("W0012", 40)]
+            .iter()
+            .map(|(k, a)| (crate::chem::Kind::parse(k).expect("a kind"), ratio(*a, 1)))
+            .collect();
+        let base = deploy(&table).expect("a universe");
+        let g = crate::ring::grain_step();
+        let mut seen = std::collections::BTreeSet::new();
+        for phrase in 0u32..24 {
+            let seed = *blake3::hash(&phrase.to_le_bytes()).as_bytes();
+            let mut u = base.clone();
+            orient(&mut u, &seed);
+            let t = u
+                .cores
+                .iter()
+                .find(|c| is_home(c))
+                .expect("home")
+                .tilt
+                .clone();
+            // A partition of one: the lean adds no spin.
+            assert_eq!(
+                t.iter().fold(ratio(0, 1), |s, x| s + x.clone()),
+                ratio(1, 1)
+            );
+            // One plane leads by a grain, one lags by a grain, one stands.
+            let mut off: Vec<Ratio> = t.iter().map(|x| x.clone() - ratio(1, 3)).collect();
+            off.sort();
+            assert_eq!(off, vec![-g.clone(), ratio(0, 1), g.clone()]);
+            seen.insert(t.iter().map(ToString::to_string).collect::<Vec<_>>());
+            // Read the same from the same seed.
+            let mut again = base.clone();
+            orient(&mut again, &seed);
+            assert_eq!(again.cores, u.cores);
+        }
+        // The seed chooses among the orientations; none is fixed.
+        assert!(seen.len() > 1, "the seed orients");
     }
 
     #[test]

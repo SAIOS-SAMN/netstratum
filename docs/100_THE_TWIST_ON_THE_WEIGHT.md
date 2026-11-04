@@ -117,6 +117,69 @@ Netstratum's, by machinery already built:
 - **On the vacuum leg** the route runs backward (docs/98), so the helix's
   handedness turns with the Möbius pass: one law.
 
+### 4.1 The founding's orientation (the planes come apart)
+
+Operator 2026-11-04: "otherwise we just have a single flat disc"; option (a)
+ruled.
+
+Every law treats the three spatial planes alike: the nucleus's 3Z, the
+founding at zero spin, the core's isoclinic twist, the release, the core's
+`4δ`, the torque, the swing, the Möbius pass, the band, the bonds. A state
+alike in the planes, stepped by laws alike in them, stays alike for ever;
+read on a 2^40 founding to bell 580, every mote stood at one phase in all
+three planes. One disc's worth of state in three. No further symmetric law
+can change that.
+
+So the founding is oriented: the universal core is founded leaning, its
+tilt a grain off isotropic, `(⅓ + g, ⅓, ⅓ − g)` with `g = 60⁻⁶` the spin
+grain, the least lean the universe can carry (`pulse::orient`). Which plane
+leads and which lags is the seed's, read along its fixed path, one of six
+orientations, none preferred. It is an initial condition, never a draw
+inside a law; a partition of one, so it adds no spin. Everything after is
+the laws': the release writes the core's tilt into each mote (§4 above), the
+attractor settles each mote toward its galaxy's plane, and the galaxy's plane
+becomes its core's tilt.
+
+What the planes may not do (docs/78, no fill orders), found and closed with
+the orientation:
+
+- A tilt re-read from its planes' spins (`flows::tilt_from`) gave the last
+  plane the grains its shares' floors lost; they now return to the planes
+  that lost most, alike shared alike.
+- A star's pull read its orbit phase in the first plane alone; it now reads
+  each plane by its tilt's share, as a mote's torque does.
+- A binding's arcs were read in the first of the planes tied for the
+  disc; they are now read in every tied plane.
+- A core whose disc holds nothing turning was reset to no tilt; it keeps its
+  lean.
+
+Each is unchanged while the planes are alike (the control read below).
+
+**Read** (2^40, 580 bells; `breathe` prints `LEAN` at each echo):
+
+| echo at bell | the core's lean (lead, lag) | in grains | motes apart in phase |
+|---|---|---|---|
+| founding | `∓2.1·10⁻¹¹` | 1 | none |
+| 186 | `±8.6·10⁻¹¹` | 4 | 922 of 964 |
+| 372 | `±8.8·10⁻¹⁰` | 41 | 1,662 of 1,999 |
+| 558 | `∓1.9·10⁻⁸` | 910 | 1,930 of 2,246 |
+
+The lean grows, ten- to twentyfold a bounce, its sense turning at some
+bounces; the third plane stands at its third. At bell 558 the leading plane's
+front holds 492 cells against 491. Conservation holds; settle, system and
+torque identities exact.
+
+- **Control:** the same founding unleaned reads as before every count (15
+  systems, 19 born, 4 merged, 754 in systems, 2,251 galaxy motes, 2
+  collections of 92), with no mote apart in phase.
+- **Equivariance:** a seed leaning other planes reads the same universe with
+  the planes permuted, every reading to its last figure. Only the seed tells
+  the planes apart.
+
+Open: whether the growth carries on to a disc (at this rate about nine
+bounces, some 1,700 bells, to a lean of a tenth), saturates, or turns back;
+what sets its rate.
+
 ## 5. Twist is tension in the fibre
 
 Xylarium (8): "twist is tension in the fibre: it adds to the tautness of every
