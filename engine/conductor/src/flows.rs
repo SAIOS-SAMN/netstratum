@@ -91,24 +91,48 @@ pub fn tilt_of(t: &[Ratio]) -> Vec<Ratio> {
 }
 
 /// A tilt from per-plane spin magnitudes: each plane's share of their sum,
-/// held on the grain with the last plane taking the rest (the shares sum to
-/// one exactly, never re-divided without bound). Isotropic where nothing
-/// turns.
+/// held on the grain (the shares sum to one exactly, never re-divided
+/// without bound). Isotropic where nothing turns.
+///
+/// No plane takes the rest (docs/78: no fill orders): each share is floored
+/// to the grain, and the grains the floors lost (fewer than the planes)
+/// return to the planes that lost the most, greatest first; planes that lost
+/// alike share alike, splitting a grain between them where too few remain.
+/// So the tilt depends on the spins alone, never on which plane is which:
+/// permuting the spins permutes the tilt.
 pub fn tilt_from(spins: &[Ratio]) -> Vec<Ratio> {
     let sum = spins.iter().fold(ratio(0, 1), |s, l| s + l.clone());
     if sum.is_zero() {
         return Vec::new();
     }
-    let mut t: Vec<Ratio> = spins
+    let exact: Vec<Ratio> = spins.iter().map(|l| l.clone() / sum.clone()).collect();
+    let mut t: Vec<Ratio> = exact.iter().map(crate::ring::grain).collect();
+    let lost: Vec<Ratio> = exact
         .iter()
-        .map(|l| crate::ring::grain(&(l.clone() / sum.clone())))
+        .zip(&t)
+        .map(|(e, g)| e.clone() - g.clone())
         .collect();
-    let rest = ratio(1, 1)
-        - t[..t.len() - 1]
-            .iter()
-            .fold(ratio(0, 1), |s, x| s + x.clone());
-    let last = t.len() - 1;
-    t[last] = rest;
+    let step = crate::ring::grain_step();
+    let mut left = ratio(1, 1) - t.iter().fold(ratio(0, 1), |s, x| s + x.clone());
+    let mut levels: Vec<&Ratio> = lost.iter().filter(|l| !l.is_zero()).collect();
+    levels.sort_by(|a, b| b.cmp(a));
+    levels.dedup();
+    for level in levels {
+        if left.is_zero() {
+            break;
+        }
+        let alike: Vec<usize> = (0..t.len()).filter(|&j| lost[j] == *level).collect();
+        let n = Ratio::from_integer(num_bigint::BigInt::from(alike.len()));
+        let each = if left >= step.clone() * n.clone() {
+            step.clone()
+        } else {
+            left.clone() / n.clone()
+        };
+        for j in alike {
+            t[j] += each.clone();
+        }
+        left -= each * n;
+    }
     t
 }
 
@@ -2113,20 +2137,28 @@ pub fn band_pairs(
             continue;
         }
         crate::profile::mark("pairs:arcs");
-        let disc = SPACE[tilt_of(plane)
-            .iter()
-            .enumerate()
-            .max_by(|x, y| x.1.cmp(y.1).then(y.0.cmp(&x.0)))
-            .map(|(j, _)| j)
-            .unwrap_or(0)];
+        // The disc: the plane its tilt leans in most, or every plane that
+        // ties for it (none chosen over another by its index; docs/78). A
+        // binding's arc is its place in each of them.
+        let lean = tilt_of(plane);
+        let most = lean.iter().max().cloned().unwrap_or_else(|| ratio(0, 1));
+        let disc: Vec<usize> = (0..lean.len())
+            .filter(|&j| lean[j] == most)
+            .map(|j| SPACE[j])
+            .collect();
         let n = Ratio::from_integer(num_bigint::BigInt::from(count));
-        let mut arcs: std::collections::BTreeMap<num_bigint::BigInt, Vec<(usize, Ratio)>> =
+        let mut arcs: std::collections::BTreeMap<Vec<num_bigint::BigInt>, Vec<(usize, Ratio)>> =
             std::collections::BTreeMap::new();
         for (i, sh) in members {
-            let at = frac(motes[i].phase.get(disc).unwrap_or(&ratio(0, 1)));
-            arcs.entry((at * n.clone()).floor().to_integer())
-                .or_default()
-                .push((i, sh));
+            let at: Vec<num_bigint::BigInt> = disc
+                .iter()
+                .map(|&k| {
+                    (frac(motes[i].phase.get(k).unwrap_or(&ratio(0, 1))) * n.clone())
+                        .floor()
+                        .to_integer()
+                })
+                .collect();
+            arcs.entry(at).or_default().push((i, sh));
         }
         for (_, binding) in arcs {
             out.push((crate::ring::grain(&mid), binding));
@@ -3349,13 +3381,63 @@ mod passage_tests {
     }
 
     #[test]
+    fn a_tilt_knows_its_spins_never_which_plane_is_which() {
+        // Every permutation of the spins permutes the tilt the same way, so
+        // no plane is favoured by its index (docs/78: no fill orders).
+        let perms = [
+            [0, 1, 2],
+            [0, 2, 1],
+            [1, 0, 2],
+            [1, 2, 0],
+            [2, 0, 1],
+            [2, 1, 0],
+        ];
+        for spins in [
+            [ratio(1, 7), ratio(2, 7), ratio(4, 7)],
+            [ratio(1, 3), ratio(1, 3), ratio(1, 3)],
+            [ratio(1, 1), ratio(1, 1), ratio(5, 1)],
+            [ratio(2, 1), ratio(0, 1), ratio(2, 1)],
+            [ratio(1, 11), ratio(1, 11), ratio(1, 13)],
+        ] {
+            let t = tilt_from(&spins);
+            assert_eq!(
+                t.iter().fold(ratio(0, 1), |s, x| s + x.clone()),
+                ratio(1, 1)
+            );
+            for p in perms {
+                let moved: Vec<Ratio> = p.iter().map(|&j| spins[j].clone()).collect();
+                let want: Vec<Ratio> = p.iter().map(|&j| t[j].clone()).collect();
+                assert_eq!(tilt_from(&moved), want, "permuted with {p:?}");
+            }
+        }
+        // Equal spins part equally; a plane that does not turn holds none.
+        assert_eq!(
+            tilt_from(&[ratio(1, 7), ratio(1, 7), ratio(1, 7)]),
+            vec![ratio(1, 3); 3]
+        );
+        assert_eq!(
+            tilt_from(&[ratio(1, 7), ratio(0, 1), ratio(1, 7)])[1],
+            ratio(0, 1)
+        );
+    }
+
+    #[test]
     fn a_tilt_parts_the_spin_over_three_planes_and_sums_to_one() {
-        // Shares from plane spins sum to one exactly, the last plane taking the rest.
+        // Shares from plane spins sum to one exactly, no plane taking the rest.
         let t = tilt_from(&[ratio(1, 7), ratio(2, 7), ratio(4, 7)]);
         assert_eq!(
             t.iter().fold(ratio(0, 1), |s, x| s + x.clone()),
             ratio(1, 1)
         );
+        // Each share stands within a grain of its exact share.
+        for (tk, e) in t.iter().zip([ratio(1, 7), ratio(2, 7), ratio(4, 7)]) {
+            let gap = if *tk > e {
+                tk.clone() - e
+            } else {
+                e - tk.clone()
+            };
+            assert!(gap < crate::ring::grain_step(), "within a grain");
+        }
         // Blending adds plane spins: a body all in plane 0 and one all in
         // plane 2, equal holding and spin, join half and half.
         let b = blend(&[
