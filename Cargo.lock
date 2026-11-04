@@ -346,7 +346,7 @@ checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
 [[package]]
 name = "forms"
 version = "0.3.0-rc.3"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0-rc.3#534297944f83fc20fed690d6c6ab233a522ab239"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0#534297944f83fc20fed690d6c6ab233a522ab239"
 dependencies = [
  "num-bigint",
  "num-rational",
@@ -492,7 +492,7 @@ dependencies = [
 [[package]]
 name = "mycelium"
 version = "0.3.0-rc.3"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0-rc.3#534297944f83fc20fed690d6c6ab233a522ab239"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0#534297944f83fc20fed690d6c6ab233a522ab239"
 dependencies = [
  "blake3",
  "ctrlc",
@@ -517,7 +517,7 @@ dependencies = [
 [[package]]
 name = "mycelium-sdk"
 version = "0.3.0-rc.3"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0-rc.3#534297944f83fc20fed690d6c6ab233a522ab239"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0#534297944f83fc20fed690d6c6ab233a522ab239"
 dependencies = [
  "ed25519-dalek",
  "forms",

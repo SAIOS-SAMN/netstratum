@@ -77,7 +77,7 @@ change is named here.
 
 ### Changed
 
-- Mycelium pinned at `v0.3.0-rc.3`, spoken through `mycelium-sdk` only
+- Mycelium pinned at `v0.3.0` (the rc.3 commit), spoken through `mycelium-sdk` only
   (#10). The minds still perceive rasters; tasks and solve outputs cross
   the wire as samples, and a task of another rank or width is refused by
   name. Solve receipts carry μ as exact shares (`Mu`).

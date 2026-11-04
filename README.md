@@ -114,7 +114,7 @@ protocol stack.
 
 | Project | Pinned at |
 |---|---|
-| [Mycelium](https://github.com/SAIOS-SAMN/mycelium) (`mycelium`, `forms`) | `v0.3.0-rc.1` (release candidate; `v0.3.0` once cut). Conformance read: pending |
+| [Mycelium](https://github.com/SAIOS-SAMN/mycelium) (`mycelium-sdk`) | `v0.3.0`. Conformance read (KERNEL profile, wire 0x0200, law version 5): conforms, in process and live |
 
 ## License
 
