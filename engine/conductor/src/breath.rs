@@ -2105,6 +2105,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             // Clusters part in the throat's heat (1, as the newborn heart's
             // cut) before they split (with Xylarium).
+            crate::profile::mark("rec:part");
             in_throat = crate::recycle::part(&mut core.flows, &in_throat);
             // Puncture: each body entering the throat's other face.
             for _ in &in_throat {
@@ -2121,6 +2122,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 .filter(|&&j| j < core.flows.len())
                 .map(|&j| (j, core.flows[j].key.clone(), core.flows[j].amount.clone()))
                 .collect();
+            crate::profile::mark("rec:recycle");
             let before = core.flows.len();
             let r = crate::recycle::recycle(
                 &mut core.flows,
@@ -2156,6 +2158,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let scar = -holding(&x.key, &x.amount);
                 cross.note(0, crate::enfold::Fate::Cauterized, &scar);
             }
+            crate::profile::mark("rec:light");
             // The throat's light crosses the galaxy on the continuum face.
             if !r.light.is_zero() {
                 // By the galaxy's one enclosure as it stands.
