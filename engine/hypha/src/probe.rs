@@ -1,7 +1,7 @@
 //! Transitions with known verdicts, for proving a live court reads as this
 //! kernel does: a lawful turn, and the same turn with time standing still.
 
-use mycelium_sdk::house::{carried_body, Body};
+use mycelium_sdk::house::{carried_body, BodyMoments};
 use mycelium_sdk::house::{rotator, sphere_at, Mv};
 use mycelium_sdk::house::{BodyState, Transition};
 use num_bigint::BigInt;
@@ -11,8 +11,8 @@ fn q(n: i64) -> BigRational {
     BigRational::from_integer(BigInt::from(n))
 }
 
-fn body(centre: [i64; 3]) -> Body {
-    Body {
+fn body(centre: [i64; 3]) -> BodyMoments {
+    BodyMoments {
         centre: centre.iter().map(|&c| q(c)).collect(),
         mass: q(1),
         moments: vec![
@@ -52,7 +52,7 @@ pub fn lawful(h: u64) -> Option<Transition> {
         motion: m.clone(),
         heights: (h, h + 1),
         bodies: carried(&m)?,
-        hues: Vec::new(),
+        hues: Default::default(),
         fluxes: Vec::new(),
     })
 }
@@ -65,7 +65,7 @@ pub fn timeless(h: u64) -> Option<Transition> {
         motion: m.clone(),
         heights: (h, h),
         bodies: carried(&m)?,
-        hues: Vec::new(),
+        hues: Default::default(),
         fluxes: Vec::new(),
     })
 }

@@ -265,10 +265,10 @@ impl Uplink {
         seed: [u8; 32],
         radius: (u64, u64),
     ) -> io::Result<Founded> {
-        use mycelium_sdk::house::domain::Origin;
+        use mycelium_sdk::house::domain::BigBangRecord;
         use mycelium_sdk::house::universe::{Genesis, Geometry, Parent};
         let domain = tier_key(home, "domain")?;
-        let origin = Origin {
+        let origin = BigBangRecord {
             domain: domain.verifying_key().to_bytes(),
             kind: ORIGIN_KIND,
             version: 2,

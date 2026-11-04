@@ -722,7 +722,7 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
                 final_point = Some(point);
             }
         }
-        if let Some(point) = final_point.filter(|p| Some(*p) != written) {
+        if let Some(point) = final_point.clone().filter(|p| Some(p) != written.as_ref()) {
             let path = worlds.parent().unwrap_or(Path::new(".")).join("tuniversal");
             let staged = path.with_extension("staged");
             if std::fs::write(&staged, point.print())

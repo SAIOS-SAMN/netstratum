@@ -74,7 +74,7 @@ impl Seat {
     /// plain text (`home/tasks/<id>.task`: `train` pairs then `test` inputs,
     /// grids as hue digits), so Netstratum's minds can be measured on the
     /// court's own tasks offline, never only on self-forged ones.
-    fn keep(&self, id: &[u8], task: &mycelium_sdk::task::TaskEnvelope) {
+    fn keep(&self, id: &[u8], task: &mycelium_sdk::task::TaskRasters) {
         let Some(home) = &self.home else { return };
         let dir = home.join("tasks");
         let hex: String = id.iter().map(|b| format!("{b:02x}")).collect();
@@ -155,6 +155,18 @@ impl Seat {
         self.tally.pulled += 1;
         let id = task.id;
         let name: String = id.iter().take(6).map(|b| format!("{b:02x}")).collect();
+        // The minds perceive rasters (rank 2, width 1; Mycelium v0.3.0's
+        // raster intake): a task of samples of another rank or width is
+        // refused by name, never read as something it is not.
+        let task = match task.rasters() {
+            Ok(task) => task,
+            Err(n) => {
+                return Ok(Some(format!(
+                    "task {name}: samples of rank {} and width {}, no raster; not before the minds",
+                    n.rank, n.width
+                )))
+            }
+        };
         self.keep(&id, &task);
         if !self.known.iter().any(|(k, _)| *k == id) {
             if self.known.len() >= KNOWN {
@@ -211,7 +223,7 @@ impl Seat {
         id: &[u8; 32],
         rule: &[u8],
         outputs: &[Vec<Vec<u8>>],
-    ) -> Option<(u8, [u64; 4])> {
+    ) -> Option<(u8, mycelium_sdk::wallet::Mu)> {
         self.known.iter().find(|(k, _)| k == id)?;
         self.tally.answered += 1;
         let verdict = self
@@ -219,8 +231,8 @@ impl Seat {
             .file_solve(&self.key, id, outputs, rule)
             .ok()
             .flatten();
-        if verdict.is_some_and(|(code, _)| {
-            code == mycelium_sdk::task::SOLVE_BOUNTY || code == mycelium_sdk::task::SOLVE_FLOOR
+        if verdict.as_ref().is_some_and(|(code, _)| {
+            *code == mycelium_sdk::task::SOLVE_BOUNTY || *code == mycelium_sdk::task::SOLVE_AGAIN
         }) {
             self.tally.answered_closed += 1;
         }

@@ -585,10 +585,29 @@ impl House {
         let mut at = 0;
         let rule =
             mycelium_sdk::rule::Element::from_bytes(tape, &mut at).filter(|_| at == tape.len());
-        let outputs = mycelium_sdk::task::decode_grids(outs);
+        // The outputs as samples (Mycelium v0.3.0), read at the raster
+        // intake (the SDK's one public reader of a sample as a raster is the
+        // envelope's); a stated ground after them is the mind's and not read
+        // here.
+        let outputs = mycelium_sdk::task::decode_samples(outs)
+            .ok()
+            .and_then(|tests| {
+                mycelium_sdk::task::TaskEnvelope {
+                    id,
+                    train: Vec::new(),
+                    tests,
+                }
+                .rasters()
+                .ok()
+                .map(|r| r.tests)
+            });
         // The tape must read whole as a rule; it is filed as the mind sent it.
         let (Some(_), Some(outputs)) = (rule, outputs) else {
-            return (UNREAD, id, "the tape or the grids do not read whole".into());
+            return (
+                UNREAD,
+                id,
+                "the tape or the outputs do not read whole".into(),
+            );
         };
         self.judge(seat, s, id, tape.clone(), outputs)
     }
@@ -605,7 +624,10 @@ impl House {
         outputs: Vec<Vec<Vec<u8>>>,
     ) -> (u16, [u8; 32], String) {
         let verdict = seat.file_answer(&id, &rule, &outputs);
-        if verdict.is_some_and(|(code, _)| code == SOLVE_UNREAD) {
+        if verdict
+            .as_ref()
+            .is_some_and(|(code, _)| *code == SOLVE_UNREAD)
+        {
             self.task.insert(s, (id, self.tends));
             self.refile.insert(s, (rule, outputs));
             return (PENDING, id, "not judged yet; re-filed next tend".into());
@@ -618,7 +640,7 @@ impl House {
                 id,
                 format!("CLOSED FIRST, paid {mu:?} to the house"),
             ),
-            Some((code, _)) if code == mycelium_sdk::task::SOLVE_FLOOR => {
+            Some((code, _)) if code == mycelium_sdk::task::SOLVE_AGAIN => {
                 (CLOSED, id, "closed again".into())
             }
             Some((code, _)) => (

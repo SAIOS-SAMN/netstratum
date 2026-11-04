@@ -68,6 +68,28 @@ pub fn nuclei_per_grain() -> num_bigint::BigInt {
     num_bigint::BigInt::from(60u32).pow(30)
 }
 
+/// A manifest's nuclei per Z (protons), Z ascending, each once, every count
+/// positive: what a universe holds as Mycelium's manifest states it. Each
+/// amount is a whole count of nuclei on the one grid (`nucleus`); a
+/// cluster's nuclei are its parts', each at its own Z. An amount off the
+/// grid is floored to whole nuclei, as `nucleus` floors it.
+pub fn nuclei_by_z(m: &Manifest) -> Vec<(u32, num_bigint::BigInt)> {
+    let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+    let mut by_z: BTreeMap<u32, num_bigint::BigInt> = BTreeMap::new();
+    for (k, a) in m {
+        let count = (a.clone() * Ratio::from_integer(grid.clone()))
+            .floor()
+            .to_integer();
+        for &(n, w) in k.parts() {
+            *by_z.entry(crate::chem::protons(w)).or_default() +=
+                &count * num_bigint::BigInt::from(n);
+        }
+    }
+    by_z.into_iter()
+        .filter(|(_, c)| *c > num_bigint::BigInt::from(0))
+        .collect()
+}
+
 /// Nuclei per Z, as Mycelium's manifest carries them (ACT_DOMAIN 17).
 pub type Nuclei = BTreeMap<u16, num_bigint::BigInt>;
 
@@ -2156,6 +2178,30 @@ mod tests {
     #[test]
     fn a_founding_that_holds_no_disc_is_refused() {
         assert!(deploy(&Manifest::new()).is_none());
+    }
+
+    #[test]
+    fn a_manifests_nuclei_count_whole_per_z_its_clusters_by_their_parts() {
+        let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+        let k = |s: &str| crate::chem::Kind::parse(s).expect("a kind");
+        let whole = |n: i64| Ratio::new(num_bigint::BigInt::from(n), grid.clone());
+        // Hydrogen, weight 4, and water: one centre and four hydrogens per
+        // molecule.
+        let m: Manifest = [
+            (k("W0001"), whole(10)),
+            (k("W0004"), whole(3)),
+            (k("W0010·4W0001"), whole(2)),
+        ]
+        .into();
+        let z_water = crate::chem::protons(k("W0010").parts()[0].1);
+        let mut want: BTreeMap<u32, num_bigint::BigInt> = BTreeMap::new();
+        *want.entry(1).or_default() += num_bigint::BigInt::from(10 + 4 * 2);
+        *want.entry(crate::chem::protons(4)).or_default() += num_bigint::BigInt::from(3);
+        *want.entry(z_water).or_default() += num_bigint::BigInt::from(2);
+        assert_eq!(nuclei_by_z(&m), want.into_iter().collect::<Vec<_>>());
+        // Z ascending, each once.
+        let zs: Vec<u32> = nuclei_by_z(&m).iter().map(|(z, _)| *z).collect();
+        assert!(zs.windows(2).all(|p| p[0] < p[1]));
     }
 
     #[test]

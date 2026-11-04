@@ -16,7 +16,7 @@ fn point() -> TPoint {
             epoch: 0x92,
         },
         h: 0xb708,
-        lanes: [1, 2, 3, 4],
+        lanes: [1, 2, 3, 4].into(),
         k: 5,
     }
 }

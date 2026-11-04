@@ -13,6 +13,9 @@ path = "src/main.rs"
 # Mycelium at the workspace's pinned release (the root Cargo.toml).
 mycelium-sdk.workspace = true
 cfe = { path = "../cfe" }
+# The universe the uplink speaks for: its founding read by the conductor's
+# own reader (`pulse::read`), its nuclei per Z for the manifest.
+conductor = { path = "../conductor" }
 # The attachment interface (docs/109) and the inbox's directive format.
 attach = { path = "../attach" }
 ledger = { path = "../ledger" }

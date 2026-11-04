@@ -16,7 +16,7 @@
 
 use mycelium_sdk::house::HyphaKey;
 use mycelium_sdk::house::Undecomposed;
-use mycelium_sdk::house::{Breach, Law, Transition, Verdict};
+use mycelium_sdk::house::{Breach, Law, Transition, TransitionVerdict};
 use mycelium_sdk::session::Session;
 use std::io;
 use std::path::Path;
@@ -35,6 +35,30 @@ pub mod seat;
 pub mod tiers;
 pub mod wire;
 
+/// The acts this uplink speaks to a hypha, by their names in Mycelium's
+/// client conformance statement (`mycelium_sdk::conformance::STATEMENT`),
+/// declared under the KERNEL profile: each is spoken somewhere in this
+/// crate (`wire`, `refound`, `seat`, [`Uplink`]). The conformance read
+/// (`tests/conformance.rs`) holds the list to the statement.
+pub const SPOKEN: &[&str] = &[
+    "laws register",
+    "laws statement",
+    "laws concordance",
+    "laws signature",
+    "laws clock",
+    "laws verify",
+    "laws lexicon",
+    "domain founding",
+    "domain origin",
+    "domain manifest",
+    "domain universe",
+    "task",
+    "solve",
+    "seat post",
+    "seat listing",
+    "seat mail",
+];
+
 /// No default court: the standalone :7520 court is retired (coordinator
 /// 2026-10-09, docs/PORT.md) and the fleet's hyphae are real tiers, so every
 /// command names its hypha (`--at` / `NS_HYPHA`).
@@ -47,8 +71,8 @@ pub struct Uplink {
 
 /// A transition read twice: by this kernel and by the court.
 pub struct Reading {
-    pub local: Verdict,
-    pub court: Verdict,
+    pub local: TransitionVerdict,
+    pub court: TransitionVerdict,
 }
 
 impl Reading {
@@ -65,7 +89,7 @@ pub fn unmeasured(b: &Breach) -> bool {
 }
 
 /// The laws a verdict says were breached, not counting unmeasured readings.
-pub fn laws_of(v: &Verdict) -> Vec<Law> {
+pub fn laws_of(v: &TransitionVerdict) -> Vec<Law> {
     let mut l: Vec<Law> = v
         .breaches
         .iter()
@@ -79,7 +103,7 @@ pub fn laws_of(v: &Verdict) -> Vec<Law> {
 
 /// The same verifier the court's act runs, under the stroke the motion's
 /// own modes need.
-pub fn verify_local(t: &Transition) -> Verdict {
+pub fn verify_local(t: &Transition) -> TransitionVerdict {
     mycelium_sdk::house::verify_sized(t)
 }
 

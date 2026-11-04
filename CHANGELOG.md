@@ -77,6 +77,16 @@ change is named here.
 
 ### Changed
 
+- Mycelium pinned at `v0.3.0-rc.3`, spoken through `mycelium-sdk` only
+  (#10). The minds still perceive rasters; tasks and solve outputs cross
+  the wire as samples, and a task of another rank or width is refused by
+  name. Solve receipts carry μ as exact shares (`Mu`).
+- The re-founding speaks Mycelium's KERNEL profile whole: step 0 reads the
+  served statement and the Concordance's hash against the pinned SDK's and
+  signs the hash; the universe is read back after its origin; the
+  universe's manifest (its nuclei per Z, `pulse::nuclei_by_z`) is posted
+  under the sitting reserve. `ns_hypha::SPOKEN` declares the acts spoken;
+  Mycelium's in-process conformance read passes.
 - No plane is favoured by its index (docs/78, no fill orders): a tilt's
   rounding grains return to the planes that lost most, not the last plane;
   a star's pull reads every plane by its tilt, not the first; a binding's
