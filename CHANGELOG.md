@@ -69,6 +69,12 @@ change is named here.
 
 ### Changed
 
+- The galaxy's band pairs read their sums certified: the strip's step and
+  the crest's count of bindings each from narrow bounds on their sums,
+  with the exact sum only where the bounds decide differently. The same
+  outcomes (witnessed); the third bounce of a fresh 2^40 universe arrives
+  at 187 s against 272 s. `breathe` reports each step's time per echo
+  under `NETSTRATUM_PROFILE` (#5).
 - The firmament's collective push (`flows::repel`) sums its pairs exactly on
   the phases' common 60-adic denominator instead of term by term in reduced
   rationals: the same values (witnessed), and a fresh 2^40 universe now

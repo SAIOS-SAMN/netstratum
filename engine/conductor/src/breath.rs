@@ -468,6 +468,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
     let mut pending_firm: Option<Ratio> = None;
     let mut pending_collective: Option<crate::pulse::Collective> = None;
     if t_u > 0 && until / t_u > from / t_u {
+        crate::profile::mark("orbit:collective");
         let (c, firm, coll) = crate::pulse::orbit_galaxies(u);
         pending = c;
         pending_firm = firm;
@@ -490,6 +491,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
     arrivals.sort();
     let mut events = Vec::new();
     for (bell, i, rung) in arrivals {
+        crate::profile::mark("breath:arrival");
         // Decohere: each star sheds `ε · (1 − c)` of what it holds, c its
         // coherence with the echo at this bell (its nested clock's slip).
         let g_rate = galaxy_rate(u, i, &unit);
@@ -2241,6 +2243,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 Vec<(Ratio, Ratio, Ratio)>,
                 Ratio,
             )> = Vec::new();
+            crate::profile::mark("breath:bindings-take");
             for (reach, shares) in bindings {
                 // Each member as it stood, its share of its mote.
                 let mut members: Vec<crate::flows::Mote> = Vec::new();
@@ -2398,6 +2401,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     rho_birth,
                 ));
             }
+            crate::profile::mark("breath:births-each");
             for (
                 reach,
                 star,
@@ -2455,6 +2459,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // nuclei's grip, read at the binding's held share; the parted stand as hydrogen, the new
                 // heart's fuel. Nucleons conserved.
                 let mut star = star;
+                crate::profile::mark("breath:births-torsion");
                 let tau_b = crate::flows::torsion(
                     &crate::flows::blend(
                         &members
@@ -2473,6 +2478,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its held share at its reach in the galaxy (docs/105 §3).
                 let g_b = crate::polarity::faces(&tide).0;
                 crate::nuclides::release(&mut star, &(a_binding.clone() + tau_b), &g_b);
+                crate::profile::mark("breath:births-ignite");
                 let lit = crate::formation::ignition_share(&a_binding).and_then(|_| {
                     crate::formation::system(
                         &star,
@@ -2564,6 +2570,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             core.flows.retain(|x| x.amount > ratio(0, 1));
             // Each mote's place for the condensation: the cap its own gravity
             // holds in the galaxy's enclosure.
+            crate::profile::mark("breath:births-enclose");
             let enc_m = crate::flows::Enclosed::new(
                 ratio(1, 1),
                 core.flows

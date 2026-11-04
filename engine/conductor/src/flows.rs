@@ -1940,12 +1940,29 @@ pub fn band_pairs(
         )
     };
     let bands_all: Vec<(Ratio, Ratio)> = (0..motes.len()).map(band).collect();
-    let inside = |x: &Ratio| -> Ratio {
+    // What stands inside the pair at `x`: the ring's own share and every
+    // mote's holding by its band's share within the pair. Each share divides
+    // by its own band's width, so the exact sum's denominator grows with
+    // every mote; `read` gives each share's grain mark below (`up` false) or
+    // the next (`up` true), bounding the sum with narrow terms.
+    let inside_by = |x: &Ratio, read: &dyn Fn(Ratio) -> Ratio| -> Ratio {
         let (a, b) = pair(x);
         (0..motes.len()).fold(ring.clone() / whole.clone(), |acc, i| {
-            acc + m_of(i) * share_in(&bands_all[i].0, &bands_all[i].1, &a, &b)
+            acc + m_of(i) * read(share_in(&bands_all[i].0, &bands_all[i].1, &a, &b))
         })
     };
+    let step_mark = crate::ring::grain_step();
+    let below = |s: Ratio| crate::ring::grain(&s);
+    let above = |s: Ratio| {
+        let lo = crate::ring::grain(&s);
+        if lo == s {
+            lo
+        } else {
+            lo + step_mark.clone()
+        }
+    };
+    let exact = |s: Ratio| s;
+    crate::profile::mark("pairs:strip");
     let s0 = ring.clone() / whole.clone();
     let rho0 = (ratio(2, 1) * s0 - ratio(1, 1)).max(ratio(0, 1));
     let mut rhos: Vec<Ratio> = vec![ratio(0, 1)];
@@ -1956,21 +1973,22 @@ pub fn band_pairs(
         if at >= ratio(1, 1) || at <= ratio(0, 1) || rhos.len() >= 256 {
             break;
         }
-        let s_in = inside(&at);
-        let g_out = ratio(1, 1) - s_in.clone();
-        if g_out <= ratio(0, 1) {
-            break;
-        }
-        let k_at = s_in / g_out * (ratio(1, 1) + at.clone()) / (ratio(1, 1) - at.clone());
-        if k_at <= ratio(1, 1) {
-            break;
-        }
-        let next = crate::ring::grain(&(at * k_at));
-        rhos.push(if next < ratio(1, 1) {
-            next
+        // The step's outcome rises with what stands inside (`strip_step`),
+        // so it is read at the two bounds and, only where they differ, at
+        // the exact sum.
+        let (lo, hi) = (
+            strip_step(&at, &inside_by(&at, &below)),
+            strip_step(&at, &inside_by(&at, &above)),
+        );
+        let outcome = if lo == hi {
+            lo
         } else {
-            ratio(1, 1)
-        });
+            strip_step(&at, &inside_by(&at, &exact))
+        };
+        match outcome {
+            Strip::Next(next) => rhos.push(next),
+            Strip::Held | Strip::Whole => break,
+        }
     }
     if *rhos.last().expect("one") < ratio(1, 1) {
         rhos.push(ratio(1, 1));
@@ -1992,6 +2010,7 @@ pub fn band_pairs(
         // A binding gathers on the disc leg (docs/99 §2.1): the axial leg is
         // matter in transit, half a loop from the disc; the rings above
         // step on all the galaxy's matter, the binding's own is the disc's.
+        crate::profile::mark("pairs:members");
         let members: Vec<(usize, Ratio)> = (0..motes.len())
             .filter(|&i| on_disc_leg(&motes[i]))
             .filter_map(|i| {
@@ -2012,6 +2031,7 @@ pub fn band_pairs(
         // shear, so ⌊R/w_J⌋ bindings stand around the turn. Each member
         // joins the binding whose arc holds it, by its phase in the galaxy's
         // disc plane (the plane the disc settled into, `settle_disc`).
+        crate::profile::mark("pairs:sums");
         let mid = (o_lo.clone() + o_hi.clone()) / ratio(2, 1);
         let h_mid = enc.hold_within(&mid);
         let held_of = |i: usize, s: &Ratio| {
@@ -2034,6 +2054,7 @@ pub fn band_pairs(
                 acc + held_of(*i, s) * motes[*i].agitation.clone()
             }) / m.clone()),
         );
+        crate::profile::mark("pairs:lead");
         // Its members' net lead (their tilts blended by holding: aligned
         // leads add, opposed cancel) against the disc plane, by holding.
         let lead = blend(
@@ -2049,22 +2070,49 @@ pub fn band_pairs(
                 .collect::<Vec<_>>(),
         );
         let tau = m.clone() * torsion(&lead, plane);
-        // The nuclear layer ν: the members' holding by their nuclei's grip.
-        let nu = members.iter().fold(ratio(0, 1), |acc, (i, s)| {
-            acc + held_of(*i, s)
-                * grip_share(
-                    &motes[*i],
-                    &crate::polarity::faces(&enc.reach(&motes[*i].ell_o).1).0,
-                )
-        });
-        let Some((_, count)) =
-            crate::formation::crest_collapse(&m, &mu, &tau, &nu, &a, &mid, &h_mid)
-        else {
+        // The nuclear layer ν: the members' holding by their nuclei's grip at
+        // each one's held share `g = 1 − δ`. Summed exactly, its denominator
+        // grows with every member (each δ its own), so it is read certified
+        // first: each g between its grain mark below and the next, the grip
+        // linear and increasing in g, so ν between the two sums
+        // (`crest_count`); the exact sum only where they decide differently.
+        crate::profile::mark("pairs:nu");
+        let g_of = |i: usize| crate::polarity::faces(&enc.reach(&motes[i].ell_o).1).0;
+        let nu_at = |g: &dyn Fn(usize) -> Ratio| {
+            members.iter().fold(ratio(0, 1), |acc, (i, s)| {
+                acc + held_of(*i, s) * grip_share(&motes[*i], &g(*i))
+            })
+        };
+        let step = crate::ring::grain_step();
+        let g_lo = |i: usize| crate::ring::grain(&g_of(i));
+        let g_hi = |i: usize| {
+            let g = g_of(i);
+            let lo = crate::ring::grain(&g);
+            if lo == g {
+                lo
+            } else {
+                lo + step.clone()
+            }
+        };
+        let Some(count) = crest_count(
+            &(
+                m.clone(),
+                mu.clone(),
+                tau.clone(),
+                a.clone(),
+                mid.clone(),
+                h_mid.clone(),
+            ),
+            &nu_at(&g_lo),
+            &nu_at(&g_hi),
+            &|| nu_at(&g_of),
+        ) else {
             continue;
         };
         if count == 0 {
             continue;
         }
+        crate::profile::mark("pairs:arcs");
         let disc = SPACE[tilt_of(plane)
             .iter()
             .enumerate()
@@ -2085,6 +2133,54 @@ pub fn band_pairs(
         }
     }
     out
+}
+
+/// One step of the strip (`band_pairs`) from the share `s_in` standing
+/// inside the pair at `at`: none outside (`Whole`, the pair holds it all),
+/// the step no wider (`Held`, `k ≤ 1`), or the next pair's edge on the
+/// grain, `⌊at·k⌋`, `k = s_in/(1 − s_in)·(1 + at)/(1 − at)`. As `s_in`
+/// rises the outcome passes `Held`, then edges never narrower, then `Whole`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum Strip {
+    Held,
+    Next(Ratio),
+    Whole,
+}
+
+fn strip_step(at: &Ratio, s_in: &Ratio) -> Strip {
+    let g_out = ratio(1, 1) - s_in.clone();
+    if g_out <= ratio(0, 1) {
+        return Strip::Whole;
+    }
+    let k_at = s_in.clone() / g_out * (ratio(1, 1) + at.clone()) / (ratio(1, 1) - at.clone());
+    if k_at <= ratio(1, 1) {
+        return Strip::Held;
+    }
+    let next = crate::ring::grain(&(at.clone() * k_at));
+    Strip::Next(if next < ratio(1, 1) {
+        next
+    } else {
+        ratio(1, 1)
+    })
+}
+
+/// The crest's count of bindings (`formation::crest_collapse`) from its
+/// nuclear layer certified between `nu_lo` and `nu_hi`: the count falls as ν
+/// rises (a larger ν binds wider), so where both bounds give the same
+/// outcome it is the exact one; only where they differ is the exact ν read.
+fn crest_count(
+    c: &(Ratio, Ratio, Ratio, Ratio, Ratio, Ratio),
+    nu_lo: &Ratio,
+    nu_hi: &Ratio,
+    exact: &dyn Fn() -> Ratio,
+) -> Option<u64> {
+    let (m, mu, tau, a, r, h) = c;
+    let at = |nu: &Ratio| crate::formation::crest_collapse(m, mu, tau, nu, a, r, h).map(|x| x.1);
+    let (lo, hi) = (at(nu_lo), at(nu_hi));
+    if lo == hi {
+        return lo;
+    }
+    at(&exact())
 }
 
 /// Merge by the matter's own gatherings (ruling of 2026-10-23: no grids,
@@ -2884,6 +2980,53 @@ mod passage_tests {
         // throat stands.
         assert_eq!(through(&ratio(0, 1), &ratio(1, 1)), ratio(2, 1));
         assert_eq!(through(&ratio(1, 1), &ratio(1, 1)), ratio(1, 1));
+    }
+
+    #[test]
+    fn the_strips_step_rises_with_what_stands_inside() {
+        // The order the certified strip relies on: Held, then edges never
+        // narrower, then Whole, as the inside share rises.
+        use super::{strip_step, Strip};
+        let rank = |s: &Strip| match s {
+            Strip::Held => (0, ratio(0, 1)),
+            Strip::Next(r) => (1, r.clone()),
+            Strip::Whole => (2, ratio(0, 1)),
+        };
+        for at in [ratio(1, 10), ratio(1, 3), ratio(7, 10)] {
+            let mut last = rank(&strip_step(&at, &ratio(0, 1)));
+            for k in 1..=400 {
+                let now = rank(&strip_step(&at, &ratio(k, 400)));
+                assert!(now >= last, "at {at}, s {k}/400");
+                last = now;
+            }
+        }
+    }
+
+    #[test]
+    fn the_crests_count_certified_is_the_exact_count() {
+        // Wherever the bounds agree they give the exact count; where they do
+        // not, the exact ν decides. Swept over ν and its bounds.
+        let c = (
+            ratio(3, 10),
+            ratio(1, 10),
+            ratio(0, 1),
+            ratio(1, 50),
+            ratio(2, 1),
+            ratio(1, 1),
+        );
+        let exact_at = |nu: &Ratio| {
+            crate::formation::crest_collapse(&c.0, &c.1, &c.2, nu, &c.3, &c.4, &c.5).map(|x| x.1)
+        };
+        for k in 0..200 {
+            let nu = ratio(k, 97);
+            let (lo, hi) = (ratio(k, 97) - ratio(1, 300), ratio(k, 97) + ratio(1, 300));
+            let lo = if lo < ratio(0, 1) { ratio(0, 1) } else { lo };
+            assert_eq!(
+                super::crest_count(&c, &lo, &hi, &|| nu.clone()),
+                exact_at(&nu),
+                "ν = {k}/97"
+            );
+        }
     }
 
     #[test]
