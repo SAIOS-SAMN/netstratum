@@ -24,11 +24,11 @@
 
 use crate::wire::HouseActs;
 use ed25519_dalek::SigningKey;
-use mycelium::anastome::dialogue::seat::{
+use mycelium_sdk::house::seat::{
     Arg, Outcome, Percept, Post, Record, Refusal, Seat, SeatFn, Seats, Taken,
 };
-use mycelium::client::sdk::seat_mind::task::{FN_DECLINE, FN_SOLVE, KIND_TASK};
-use mycelium::sdk::seat::HouseMail;
+use mycelium_sdk::house::HouseMail;
+use mycelium_sdk::house::{FN_DECLINE, FN_SOLVE, KIND_TASK};
 use std::collections::BTreeMap;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -583,12 +583,31 @@ impl House {
             );
         };
         let mut at = 0;
-        let rule = mycelium::transducer::element::Element::from_bytes(tape, &mut at)
-            .filter(|_| at == tape.len());
-        let outputs = mycelium::anastome::dialogue::decode_grids(outs);
+        let rule =
+            mycelium_sdk::rule::Element::from_bytes(tape, &mut at).filter(|_| at == tape.len());
+        // The outputs as samples (Mycelium v0.3.0), read at the raster
+        // intake (the SDK's one public reader of a sample as a raster is the
+        // envelope's); a stated ground after them is the mind's and not read
+        // here.
+        let outputs = mycelium_sdk::task::decode_samples(outs)
+            .ok()
+            .and_then(|tests| {
+                mycelium_sdk::task::TaskEnvelope {
+                    id,
+                    train: Vec::new(),
+                    tests,
+                }
+                .rasters()
+                .ok()
+                .map(|r| r.tests)
+            });
         // The tape must read whole as a rule; it is filed as the mind sent it.
         let (Some(_), Some(outputs)) = (rule, outputs) else {
-            return (UNREAD, id, "the tape or the grids do not read whole".into());
+            return (
+                UNREAD,
+                id,
+                "the tape or the outputs do not read whole".into(),
+            );
         };
         self.judge(seat, s, id, tape.clone(), outputs)
     }
@@ -605,7 +624,10 @@ impl House {
         outputs: Vec<Vec<Vec<u8>>>,
     ) -> (u16, [u8; 32], String) {
         let verdict = seat.file_answer(&id, &rule, &outputs);
-        if verdict.is_some_and(|(code, _)| code == SOLVE_UNREAD) {
+        if verdict
+            .as_ref()
+            .is_some_and(|(code, _)| *code == SOLVE_UNREAD)
+        {
             self.task.insert(s, (id, self.tends));
             self.refile.insert(s, (rule, outputs));
             return (PENDING, id, "not judged yet; re-filed next tend".into());
@@ -613,12 +635,12 @@ impl House {
         self.task.remove(&s);
         self.refile.remove(&s);
         match verdict {
-            Some((code, mu)) if code == mycelium::anastome::dialogue::SOLVE_BOUNTY => (
+            Some((code, mu)) if code == mycelium_sdk::task::SOLVE_BOUNTY => (
                 CLOSED,
                 id,
                 format!("CLOSED FIRST, paid {mu:?} to the house"),
             ),
-            Some((code, _)) if code == mycelium::anastome::dialogue::SOLVE_FLOOR => {
+            Some((code, _)) if code == mycelium_sdk::task::SOLVE_AGAIN => {
                 (CLOSED, id, "closed again".into())
             }
             Some((code, _)) => (
@@ -907,7 +929,7 @@ impl House {
     /// A call on the door: an attachment request for the next beat.
     fn door_call(
         &mut self,
-        call: &mycelium::anastome::dialogue::seat::Call,
+        call: &mycelium_sdk::house::seat::Call,
         reference: [u8; 32],
     ) -> (u16, [u8; 32], String) {
         if call.fn_id != attach::FN_ATTACH {
@@ -939,7 +961,7 @@ impl House {
     fn held_call(
         &mut self,
         held: &crate::attached::Held,
-        call: &mycelium::anastome::dialogue::seat::Call,
+        call: &mycelium_sdk::house::seat::Call,
         reference: [u8; 32],
     ) -> (u16, [u8; 32], String) {
         if call.mind != held.mind {
