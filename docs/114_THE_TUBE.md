@@ -295,3 +295,85 @@ tilt isotropic (`q = 3 + 2i + 2j + 2k`, `|q|₁ = 9`, `δ = 1/3`):
 - **Phases.** The orbit phases `ψ_k` (`Mote::phase`) are separate from `q`.
   Whether a crossing's quarter turn advances them (as `antipode` does now
   by a half) or `q`'s quadrant replaces that, is open.
+
+## 10. Inflections, deformation and obstruction across horizons
+
+Operator 2026-11-05: "we are looking for auxiliary inflection points across
+event horizons via coordinates in manifolds as it relates to deformations
+and reformations in the manifold as obstructions or non-obstructions."
+Derived on §9's state `q`; each product below is checked by exact
+quaternion arithmetic.
+
+### 10.1 Inflection points are where a part of q passes zero
+
+On the L1 sphere `q` moves along flat facets. It bends only where one of its
+four parts passes through zero, crossing a coordinate hyperplane from one
+facet to the next. Those are its inflection points, read from `q`'s
+coordinates, never from a length:
+
+- **The throat** (`δ = ½`, the middle of a plane's quarter, §9.2): the
+  primary inflection, where the held and unlocked shares cross.
+- **The auxiliary inflections:** a plane's part `R·t_k` passing zero (the
+  body's orbit leaving that plane, its tilt share there vanishing), and
+  the scalar part `H` passing zero (the body on the other sheet, §9.5).
+
+A passage moves `q` across exactly one hyperplane pair: `i·q` exchanges the
+hold with plane x's part and turns y into z. So each crossing is an
+inflection, and each inflection can be read in the tier's own coordinates,
+in nested manifolds, each tier's `q` about its own hold.
+
+### 10.2 A deformation is motion and residue
+
+Mycelium's transduction factors a deformation as motion ∘ residue
+(MU-SENSING §3.9). Across a crossing by the unit `g`:
+
+    residue = q_after − g·q_before
+
+- **Non-obstruction:** the residue is zero. The passage carries the whole
+  change; the manifold reforms.
+- **Obstruction:** the residue is not zero. It is what moved `q` between
+  passes and no unit carries: the shear (T4), the torque on the tilt, the
+  size `|q|₁` changed by matter or spin. For example, with `q = 3 + 2i + 2j +
+  2k` and `g = i`, a shear moving one unit from plane y to plane x leaves
+  the residue `(0, 1, −1, 0)`.
+
+### 10.3 The obstruction around a loop is its holonomy in Q₈
+
+Along a closed path the crossings' units multiply, in order, to one element
+of Q₈. That element classifies the loop exactly:
+
+| holonomy | the loop |
+|---|---|
+| `+1` | reforms: no obstruction |
+| `−1` | closes with its sense reversed: the ℤ₂ obstruction |
+| `±i`, `±j`, `±k` | does not close: a quarter-turn obstruction, naming its plane |
+
+Two facts make this specific:
+
+- **Returning through the same throat is the same unit again.** The double
+  pass must not flatten, so out and back is `i·i = −1`: every simple
+  out-and-back carries the ℤ₂ obstruction. Only a passage by the inverse
+  unit (`i⁻¹ = −i`) would undo it, and no crossing is that.
+- **The ℤ₂ is what non-commutation leaves.** The commutator of two planes'
+  crossings is `[i, j] = i·j·i⁻¹·j⁻¹ = −1`. Crossing planes x, y, z in
+  that order (`k·j·i`) gives `+1`, a full reformation; in the reverse order
+  (`i·j·k`), `−1`.
+
+So the class of a loop's obstruction has two parts:
+- the quotient Q₈/{±1} = ℤ₂ × ℤ₂, which planes were crossed an odd number
+  of times;
+- the central sign, which records the order.
+
+### 10.4 What it asks of the code, once §9.6 is settled
+
+- **Per crossing:** record the unit `g`, keep `q_before`, and read the
+  residue after. The residue's size is the obstruction carried there.
+- **Per body:** the running product of its units is its holonomy. It names
+  the body's class whenever its path closes: a star's return to its galaxy,
+  matter released and recaptured by the universal core.
+- **Per tier:** the share of a tier's crossings that are non-obstructions
+  reads how far its manifold reforms against how far it deforms.
+
+All of this waits on §9.6's first open point, which plane a crossing is in:
+the units `g` are not defined before it.
+
