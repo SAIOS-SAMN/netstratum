@@ -89,6 +89,7 @@ pub mod enfold;
 pub mod flows;
 pub mod formation;
 pub mod gauges;
+pub mod horizons;
 pub mod life;
 pub mod motion;
 pub mod nuclides;
