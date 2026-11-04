@@ -168,10 +168,8 @@ turning between the machine's fibre and the riding state. Not derived
 
 ## 7. What is open
 
-1. **What flips a plane's signature.** §6 reads a crossing as the flip;
-   the law that sets when (the luminal bound at the throat, docs/94 §2, is
-   the candidate) and in which plane (docs/114 §9.6) is not derived. Nor is
-   how "forward" on R reads in a mixed state.
+1. **What flips a plane's signature:** derived in §8. Still open: how
+   "forward" on R reads in a mixed state, and §8's three open points.
 2. **The eighth dimension of ℝ⁸.** Seven base axes stand under S⁷'s eight:
    R is paired into a plane with something, as Xylarium pairs its pole
    axis. docs/95 §2 joins R to origin and infinity (`e₊`, `e₋`); whether
@@ -191,3 +189,74 @@ turning between the machine's fibre and the riding state. Not derived
 7. **docs/114 §9–§10 restated in degrees.** "Quarter turn", "half", the
    arc chart and every angle are to be replaced by the degree-2 elements of
    §3 and the degrees they exchange.
+
+## 8. The flip law
+
+Derived 2026-11-05: when a plane's signature flips, and which plane.
+
+### 8.1 When: where the face reading is continuous
+
+A flip of plane k swaps its face reading: its share `δ_k` is read as
+`1 − δ_k` (the vacuum face's share, docs/94 §2). A motion is continuous, so
+the swap can stand only where it changes nothing in size:
+
+    δ_k = 1 − δ_k,   that is   δ_k = ½
+
+Read in the plane's own enclosure (ruling of 2026-10-16: shares in their
+own enclosure), with the plane's part of the state `q` (docs/114 §9.1):
+
+    δ_k = H / (H + |R·t_k|)
+
+so **plane k flips exactly where its part reaches the hold: `|R·t_k| = H`.**
+It is the throat law the luminal bound already applies to a whole mote
+(`flows::luminal`: the share past ½ takes the other face), applied to each
+plane by its own share. A plane on the continuum face flips as its part
+falls through the hold; on the vacuum face, as it rises through it. One
+condition, both ways, first degree, no square.
+
+### 8.2 Which plane: each by its own part
+
+Every plane is read alone; any plane whose part crosses the hold in a bell
+flips. Where several cross in one bell they are ordered by when each
+crossed, read first degree from the bell's two readings of its part, `a`
+before and `b` after:
+
+    s_k = (H − a) / (b − a),   in [0, 1]
+
+the earlier `s_k` first. The order is the content (docs/114 §10.3): two
+flips carry turnings that do not commute.
+
+### 8.3 What it reproduces and what it changes
+
+- **A disc-settled mote** (its tilt wholly in one plane, `t_k = 1`): the
+  plane's condition is the whole's, `R = H`, the luminal bound as built.
+- **A spread tilt flips earlier than the whole.** An isotropic mote
+  (`t_k = ⅓`) flips all three planes at `R = 3H`, where the whole stands
+  outside its throat (`δ = ¼`). The built luminal bound flips nothing
+  there. So the law changes how the universe moves, and is read before and
+  after on a fresh founding before it is built.
+- **Before the lean, every flip was a tie.** With the planes alike
+  (docs/100 §4.1), all three planes' parts are equal and cross at the same
+  `s_k`. Since the founding leans, the parts differ and the ties break,
+  though a tie within one bell stays possible (§8.4).
+
+### 8.4 What is open
+
+1. **The flip against §9's left multiplication.** docs/114 §9.3 writes a
+   crossing as `q ↦ i·q`, which is isoclinic: it exchanges the hold with
+   plane x's part, and it also turns planes y and z into each other
+   (`H + R_x i + R_y j + R_z k ↦ −R_x + H i − R_z j + R_y k`). At the flip
+   `|R_x| = H`, so the first exchange is continuous, but the second moves
+   plane y's part to plane z's size and back, a jump unless `|R_y| = |R_z|`.
+   So a single plane's flip is not `i·q` as written. Either the flip
+   changes the signature and leaves `q`'s values in place, the units being
+   only the holonomy's record of the order; or the turning of the other two
+   planes into each other is real, a prediction a read must show. Not
+   decided.
+2. **Ties within a bell.** Equal `s_k` leave the order, and so the
+   holonomy's sign (`i·j = −j·i`), undetermined. A rule for an exact tie is
+   owed.
+3. **Which hold.** `H` here is the enclosure's hold at the mote's whole
+   spin, `H(<ℓ)`, one enclosure (`flows::Enclosed`); whether a plane's flip
+   reads the hold at its own part's spin instead is not derived.
+
