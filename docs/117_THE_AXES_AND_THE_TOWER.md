@@ -296,3 +296,121 @@ state is read as `B` is, component by component, never by a square.
    decided.
 5. **Ties** of two planes at their horizons in one bell; a rule is owed.
 6. **Which hold** a plane reads: at the whole spin or its own part's.
+
+## 9. The six open points of §8, derived
+
+Derived 2026-11-05. Each claim below was checked against the exact Clifford
+algebra over the seven axes; one result (§9.3) still carries a square, and
+says so.
+
+### 9.1 The three-plane event
+
+The three planes' directions together are the degree-3 element
+`T = v₁ ∧ v₂ ∧ v₃`, eight components, one for each choice of a pole on each
+plane, each sized by the parts it joins.
+
+- **T is null exactly when one plane is.** The planes are orthogonal, so
+  `T` is null as soon as any `v_k` is null: a single plane's horizon makes
+  the whole three-plane element null. No separate three-plane horizon
+  exists.
+- **T's orientation changes only where a plane's part reverses,** passing
+  through zero: docs/114 §10.1's auxiliary inflections. A horizon does not
+  reverse it.
+- **The whole body's passage is a fourth reading**, not this one: the built
+  whole-mote luminal bound reads `R = H` with R the L1 sum of the planes'
+  parts. It is the horizon of the summed direction, which coincides with a
+  plane's only for a disc-settled tilt (§8.4).
+
+### 9.2 Obstructions by motion type
+
+Around a loop, motions that do not commute leave a residue, and its type is
+read from the two motions' components by set arithmetic (§8.3), in first
+degree:
+
+| two motions sharing one axis | what their failure to commute leaves |
+|---|---|
+| boost and boost | a **turning** on their two other axes |
+| turning and turning | a turning |
+| turning and boost | a boost |
+| motions on disjoint axes | nothing: they commute, no obstruction |
+
+The first row is the deepest: two boosts that share an axis, closed around a
+loop, leave a turning (the boosts `Z₁Q₁` and `Z₁Q₂` leave a turning on
+`Q₁Q₂`). That is the Thomas–Wigner rotation, here read on Netstratum's own
+axes. So a loop's obstruction is classified by the types it leaves:
+
+- **reforms:** every residue empty;
+- **a turning obstruction:** the loop returns turned;
+- **a boost obstruction:** the loop returns scaled, the tube's dilation not
+  undone (docs/114 T3);
+- **a screw obstruction:** both, on disjoint planes;
+- **a null obstruction:** a residue on a null pair, a shift with no rate,
+  only at a horizon.
+
+Q₈'s units (docs/114 §10.3) are the turning row's special case.
+
+### 9.3 The levels of the tower, and the passage
+
+A plane's direction acts on the riding state one-sidedly, `q ↦ v_k·q`. Since
+`v_k` is of degree 1, it carries every even degree of `q` to an odd one:
+
+- **The two sheets of the bridge are the state's two parities,** even and
+  odd. A passage is the change of parity, read from the state, never a
+  flag.
+- **At a plane's horizon the passage is one-way.** There `v_k` is null and
+  `v_k·(v_k·q) = 0`: a state carried through cannot be carried back the same
+  way. That is what makes the horizon an event horizon.
+- **This is the link between the levels:** the machine's direction (S⁷)
+  steps the riding state's degree by one (S³ and its even and odd parts),
+  the operator `∂` of §5 at one place.
+
+**What still squares.** Off the horizon two passes return the state
+multiplied by `v_k·v_k = H² − R_k²`: positive inside the plane's horizon
+(the state returns), negative outside (it returns reversed), zero at it.
+Its sign is first degree, the sign of `H − |R_k|`; its size is a square.
+Before this is built the return must be stated without that size, for
+instance by reading the return through the other null direction of the
+plane. Not derived.
+
+### 9.4 Which is the passage
+
+docs/114 §9 wrote a crossing as `i·q`, left multiplication by an even unit.
+§9.3 reads it as `v_k·q`, multiplication by the plane's direction, odd.
+These reconcile: `i = e_Z₂·e_Z₃` is a product of two directions, so §9's
+`i·q` is **two** passages, through planes 2 and 3, not one. That is why it
+turned two planes into each other (§8.6): it was a double crossing. **The
+passage is `v_k·q`, one plane at a time**, and every even unit of the state
+is a product of passages.
+
+### 9.5 Ties
+
+Two planes' directions anticommute, `v_k·v_l = −v_l·v_k`, because their
+planes are orthogonal. So two passages in the same bell at the same `s_k`
+(§8.2's crossing order) reach the same state up to one sign, and the order
+sets only that sign.
+
+At an exact tie the two planes stand alike, and choosing either order would
+favour one by its index, a fill order (docs/78). The lawful reading is the
+one that needs no order: the pair of planes is recorded, and the loop's
+class is carried without its central sign, in the class of which planes
+were crossed, until a later passage that is not tied. This is a rule
+derived from the no-fill-order law, not from a reading. Whether the sign is
+recovered later or stays undetermined is not derived.
+
+### 9.6 Which hold a plane reads
+
+Shares are read in their own enclosure (ruling of 2026-10-16). The
+enclosure `H(<ℓ)` is built from the bodies sorted by their whole spin
+(`flows::Enclosed`). A plane's own enclosure is the same construction sorted
+by each body's spin in that plane, `ℓ·t_k`:
+
+    H_k(<ℓ_k) = the base + the holding of every body with less spin in plane k
+
+So plane k reads `δ_k = H_k/(H_k + R_k)` with `R_k = ℓ_k/H_k(<ℓ_k)`, and its
+direction is `v_k = H_k·e_Zk + R_k·e_Qk`. For a disc-settled tilt it is the
+whole's enclosure. It costs three enclosures where one is built now.
+
+Open from it: `q`'s scalar part was the one hold `H` (docs/114 §9.1); with a
+hold per plane, what `q`'s scalar part is, the whole's hold or the three
+planes' together, is not derived.
+
