@@ -151,8 +151,9 @@ the axes by one (Clifford analysis: each harmonic degree is
 
 The passage (docs/114 §9) acts on the state, the S³ riding on the machine,
 never on the machine's point: a crossing turns the quantum state at a place.
-Its group Q₈ is the closed frames' degree-2 elements of §3, acting
-one-sidedly, exact over ℚ. A loop's obstruction (docs/114 §10) is the class
+Its group Q₈ is the degree-2 elements of one same-signed triple of §3
+(the closed frames when every plane is alike), acting one-sidedly, exact
+over ℚ. A loop's obstruction (docs/114 §10) is the class
 of its product of units in that Q₈, over the points of the base.
 
 **A crossing in plane k is plane k's signature flipping.** It moves the
