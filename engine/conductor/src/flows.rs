@@ -3058,8 +3058,8 @@ mod passage_tests {
         use super::through;
         // The throat's reflection: the core and the rim change places, the
         // throat stands.
-        assert_eq!(through(&ratio(0, 1), &ratio(1, 1)), ratio(2, 1));
-        assert_eq!(through(&ratio(1, 1), &ratio(1, 1)), ratio(1, 1));
+        assert_eq!(super::through(&ratio(0, 1), &ratio(1, 1)), ratio(2, 1));
+        assert_eq!(super::through(&ratio(1, 1), &ratio(1, 1)), ratio(1, 1));
     }
 
     #[test]
@@ -3641,6 +3641,23 @@ mod passage_tests {
         );
         mobius(&mut x);
         assert_eq!(x, was, "two passes close");
+    }
+
+    #[test]
+    fn the_passage_reads_the_courts_law_passage_fixtures() {
+        // Mycelium's LAW-PASSAGE v1 (proposal 78.172 §5): the court's
+        // fixtures, which this kernel's passage must reach exactly.
+        assert_eq!(super::through(&ratio(1, 2), &ratio(3, 2)), ratio(5, 2));
+        assert_eq!(super::through(&ratio(5, 2), &ratio(3, 2)), ratio(1, 2));
+        assert_eq!(super::through(&ratio(7, 3), &ratio(7, 3)), ratio(7, 3));
+        // On a share, the face read across the throat.
+        assert_eq!(ratio(1, 1) - ratio(1, 5), ratio(4, 5));
+        // Never the sphere's inversion: H²/R would read 4 here, the passage 3.
+        assert_eq!(super::through(&ratio(1, 1), &ratio(2, 1)), ratio(3, 1));
+        // Past 2H the passage is signed (the centre passed), and the reverse
+        // returns the reach: the involution holds only on the sign.
+        assert_eq!(super::through(&ratio(3, 1), &ratio(1, 1)), ratio(-1, 1));
+        assert_eq!(super::through(&ratio(-1, 1), &ratio(1, 1)), ratio(3, 1));
     }
 
     #[test]

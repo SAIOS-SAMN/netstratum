@@ -12,6 +12,18 @@ change is named here.
 
 ### Added
 
+- docs/117: the seven base axes and their signature (each frame plane
+  hyperbolic, `Z² = +1`, `Q² = −1`; LAW-DILATION is that plane's boost),
+  degrees counted on many axes, and the tower `S³ → S⁷ → S⁴` with
+  `S¹¹ = S⁷ ∗ S³`: the machine on S⁷ and the quantum state riding on it.
+  The nuclide table's degrees on S¹¹ split exactly over the machine's and
+  the state's (witness: `the_degrees_on_s11_split_over_the_base_s7_and_the_state_s3`).
+- docs/114 §9 (T6): the passage through a throat derived as a quarter turn,
+  left multiplication by a unit quaternion on the body's state `q = H +
+  R·(t_x·i + t_y·j + t_z·k)`. It is an L1 isometry, exact over ℚ, of order
+  four and non-abelian (Q₈). Both reach maps (`2H − R`, `H²/R`) and the
+  scalar Möbius reading are ruled out (operator 2026-11-05). Derived, not
+  built; open points in §9.6. docs/113 §4 now points to it.
 - The founding is oriented (docs/100 §4.1; operator 2026-11-04): the
   universal core is founded a grain off isotropic, the seed choosing which
   plane leads and which lags (`pulse::orient`; `pulse … found <grains>
@@ -42,6 +54,9 @@ change is named here.
   open tube), with `ring::{inverted, tube, tube_share, dilation, compose}`
   and their witnesses; the conflict with the compact sphere's passage
   stated (docs/114 §2).
+- docs/113: the crossings at the universal core stated as Mycelium
+  transitions for the court to rebuild (the throat's release and return as
+  fluxes, the motes they carry as bodies); inner steps stay Netstratum's.
 - `docs/PLAN.md`: the work in order under the v0.1.0 and v0.2.0
   milestones, each step an issue (#27–#38 filed for the consolidation, the
   Mycelium integration and the repository's organization).
