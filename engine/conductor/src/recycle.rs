@@ -146,6 +146,7 @@ pub fn recycle(
     let e = b.clone() * s.clone();
     let built = s.clone() / (s.clone() + e.clone());
     let mut stack: Vec<usize> = at.iter().copied().filter(|&i| i < motes.len()).collect();
+    crate::profile::mark("rec:press");
     // Constructed: each kind's share pressed like with like on the rung.
     let mut load: Vec<(usize, u32, Ratio)> = Vec::new();
     let mut light = ratio(0, 1);
@@ -181,6 +182,7 @@ pub fn recycle(
             load.push((i, z, free));
         }
     }
+    crate::profile::mark("rec:peel");
     out.light = light.clone();
     // Deconstructed: the reverberation with construction's light, shared by
     // holding over the load, each kind peeled loosest first.
@@ -193,16 +195,17 @@ pub fn recycle(
             let mut share =
                 pool.clone() * n.clone() * ratio(i64::from(nuclide_hold(z)), 1) / whole.clone();
             // As deep as it pays, every nucleus alike; a releasing step is
-            // always taken.
+            // always taken. Step by step the share pays `n·(c(k+1) − c(k))`
+            // while it lasts, so the walk stops at the first k where the
+            // costs so far pass it, `n·c(k+1) > share` (`c(0) = 0`): for whole
+            // costs, `c(k+1) > ⌊share/n⌋`, read on whole numbers; what is left
+            // is `share − n·c(k)`.
+            let afford = (share.clone() / n.clone()).floor().to_integer();
             let mut k = 0u32;
-            while k + 1 < z {
-                let step = n.clone() * ratio(peel_cost(z, k + 1) - peel_cost(z, k), 1);
-                if step > share {
-                    break;
-                }
-                share -= step;
+            while k + 1 < z && num_bigint::BigInt::from(peel_cost(z, k + 1)) <= afford {
                 k += 1;
             }
+            share -= n.clone() * ratio(peel_cost(z, k), 1);
             // Whole nuclei one step further with what is left.
             let next = if k + 1 < z {
                 peel_cost(z, k + 1) - peel_cost(z, k)
@@ -284,6 +287,7 @@ pub fn recycle(
     // weight of the rest of its galaxy: `S + Δ ≤ G − Δ`, room `(G − S)/2`.
     // Past the balance it releases everything; the rest leaves on the
     // continuum.
+    crate::profile::mark("rec:sort");
     let mut room = ((g.clone() - s.clone()) / ratio(2, 1)).max(ratio(0, 1));
     let mut order: Vec<usize> = stack
         .iter()
@@ -303,6 +307,7 @@ pub fn recycle(
             held.push((motes[i].key.clone(), t));
         }
     }
+    crate::profile::mark("rec:trap");
     for (k, mut t) in held {
         out.trapped += t.clone() * ratio(i64::from(crate::chem::weight(&k)), 1);
         let mut at_throat: Option<Mote> = None;
