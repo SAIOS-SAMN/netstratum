@@ -168,8 +168,8 @@ turning between the machine's fibre and the riding state. Not derived
 
 ## 7. What is open
 
-1. **What flips a plane's signature:** derived in §8. Still open: how
-   "forward" on R reads in a mixed state, and §8's three open points.
+1. **What turns a plane over:** derived in §8 (its direction passing
+   null). Still open: how "forward" on R reads in a mixed state, and §8.5.
 2. **The eighth dimension of ℝ⁸.** Seven base axes stand under S⁷'s eight:
    R is paired into a plane with something, as Xylarium pairs its pole
    axis. docs/95 §2 joins R to origin and infinity (`e₊`, `e₋`); whether
@@ -190,73 +190,116 @@ turning between the machine's fibre and the riding state. Not derived
    arc chart and every angle are to be replaced by the degree-2 elements of
    §3 and the degrees they exchange.
 
-## 8. The flip law
+## 8. Degree as velocity, its inverse as drag, and the horizon
 
-Derived 2026-11-05: when a plane's signature flips, and which plane.
+Derived 2026-11-05 (operator: the per-plane flip "is just palindrome
+construction and deconstruction ... on a single dimensional traversing
+linear ley lines - we're missing the deeper dimensions"; "increase to
+degrees as velocity with inverse as drag"). Every reading below was checked
+in an exact Clifford algebra over the seven axes.
 
-### 8.1 When: where the face reading is continuous
+### 8.1 A plane's state is a direction
 
-A flip of plane k swaps its face reading: its share `δ_k` is read as
-`1 − δ_k` (the vacuum face's share, docs/94 §2). A motion is continuous, so
-the swap can stand only where it changes nothing in size:
+Plane k's state is one direction in its hyperbolic plane: the hold on its
+closed axis and its part of the state `q` (docs/114 §9.1) on its open axis,
 
-    δ_k = 1 − δ_k,   that is   δ_k = ½
+    v_k = H·e_Zk + R·t_k·e_Qk
 
-Read in the plane's own enclosure (ruling of 2026-10-16: shares in their
-own enclosure), with the plane's part of the state `q` (docs/114 §9.1):
+The three planes' directions, with R, are the body's point on the machine
+(S⁷); `q` is the state riding on it (§4). Nothing here is new state: `H`,
+`R` and the tilt are carried already.
 
-    δ_k = H / (H + |R·t_k|)
+### 8.2 The product splits into velocity and drag
 
-so **plane k flips exactly where its part reaches the hold: `|R·t_k| = H`.**
-It is the throat law the luminal bound already applies to a whole mote
-(`flows::luminal`: the share past ½ takes the other face), applied to each
-plane by its own share. A plane on the continuum face flips as its part
-falls through the hold; on the vacuum face, as it rises through it. One
-condition, both ways, first degree, no square.
+Multiplying the direction by an axis gives two parts by degree: the wedge,
+which raises it, and the contraction, which lowers it.
 
-### 8.2 Which plane: each by its own part
+- **Raising the degree is velocity:** motion into an axis the direction did
+  not stand on.
+- **Lowering it, the inverse, is drag:** contraction back toward the hold.
 
-Every plane is read alone; any plane whose part crosses the hold in a bell
-flips. Where several cross in one bell they are ordered by when each
-crossed, read first degree from the bell's two readings of its part, `a`
-before and `b` after:
+Read on plane k's own axes, their sizes (L1) are the shares the code already
+carries:
 
-    s_k = (H − a) / (b − a),   in [0, 1]
+| read from | velocity (degree up) | drag (degree down) |
+|---|---|---|
+| the open axis `Q_k` | `H/(H + R_k) = δ` | `R_k/(H + R_k) = 1 − δ` |
+| the closed axis `Z_k` | `1 − δ` | `δ` |
+| any other axis | all of it | none |
 
-the earlier `s_k` first. The order is the content (docs/114 §10.3): two
-flips carry turnings that do not commute.
+From the open axis this is the turning share `δ` (`2δ` a bell, both passes)
+and `flows::settle_disc`'s drag `d = 1 − δ`, now derived rather than
+assigned. Read from the closed axis the two exchange: that is the other face.
+**A face is the axis a plane's state is read from**, not a flag.
 
-### 8.3 What it reproduces and what it changes
+Toward any axis outside the plane the product is wholly velocity, with no
+drag: motion into new axes climbs the degrees unresisted, and drag acts only
+within a plane. Drag is the contraction, never `v⁻¹ = v/v²`, which squares
+and does not exist where `v` is null (§8.3).
 
-- **A disc-settled mote** (its tilt wholly in one plane, `t_k = 1`): the
-  plane's condition is the whole's, `R = H`, the luminal bound as built.
-- **A spread tilt flips earlier than the whole.** An isotropic mote
-  (`t_k = ⅓`) flips all three planes at `R = 3H`, where the whole stands
-  outside its throat (`δ = ¼`). The built luminal bound flips nothing
-  there. So the law changes how the universe moves, and is read before and
-  after on a fresh founding before it is built.
-- **Before the lean, every flip was a tie.** With the planes alike
-  (docs/100 §4.1), all three planes' parts are equal and cross at the same
-  `s_k`. Since the founding leans, the parts differ and the ties break,
-  though a tie within one bell stays possible (§8.4).
+### 8.3 The horizon is where a plane's direction is null
 
-### 8.4 What is open
+Velocity equals drag exactly where `|R·t_k| = H`: there `δ = ½` from either
+axis, and `v_k` lies on the plane's null cone, on the whole `A + Q` or the
+span `A − Q` (§2). That is the event horizon of plane k. Only the sign of
+`|H| − |R·t_k|` is read, a first-degree comparison; no square is carried.
 
-1. **The flip against §9's left multiplication.** docs/114 §9.3 writes a
-   crossing as `q ↦ i·q`, which is isoclinic: it exchanges the hold with
-   plane x's part, and it also turns planes y and z into each other
-   (`H + R_x i + R_y j + R_z k ↦ −R_x + H i − R_z j + R_y k`). At the flip
-   `|R_x| = H`, so the first exchange is continuous, but the second moves
-   plane y's part to plane z's size and back, a jump unless `|R_y| = |R_z|`.
-   So a single plane's flip is not `i·q` as written. Either the flip
-   changes the signature and leaves `q`'s values in place, the units being
-   only the holonomy's record of the order; or the turning of the other two
-   planes into each other is real, a prediction a read must show. Not
+The crossing is not one plane's swap. As `v_k` passes through null, its
+coupling to every other axis, `v_k ∧ e_X`, turns over at once:
+
+| plane 1's part against the hold | `Z₂` | `Z₃` | `Q₂` | `Q₃` | `R` |
+|---|---|---|---|---|---|
+| outside (`3/2`) | boost | boost | turning | turning | boost |
+| at it (`1`) | null | null | null | null | null |
+| inside (`2/3`) | turning | turning | boost | boost | turning |
+
+One plane's horizon reaches five axes at the same instant, R among them. The
+axes keep their squares; what changes is the character of the state's
+direction, so the dynamic signature of §2 is the state's own, reached by the
+motion, never set. The couplings between planes, `v_k ∧ v_l`, are turnings
+where the two planes stand on one side of their horizons, boosts where they
+stand on opposite sides, and null where either is at its horizon: the web
+of §3's eight states, now arrived at.
+
+The built luminal bound (`flows::luminal`, whole mote) is the case of a
+disc-settled tilt, `t_k = 1`, where plane k's horizon is the whole's. With a
+spread tilt each plane reaches its horizon at its own reach (isotropic: all
+three at `R = 3H`, the whole still outside, `δ = ¼`): a change in how the
+universe moves, read before and after on a fresh founding before it is
+built.
+
+### 8.4 Degrees as the ladder
+
+Velocity climbs the degrees and drag descends them:
+
+- degree 0: the hold, `H`;
+- degree 1: the planes' directions, `v_k`, and R;
+- degree 2: their couplings, `v_k ∧ e_X` and `v_k ∧ v_l` (turnings,
+  boosts, null at a horizon);
+- degree 3: the three planes together, `v₁ ∧ v₂ ∧ v₃`, the orientation of
+  the whole web;
+- up to degree 7, all seven axes, the machine's top.
+
+At each step the luminal bound reads as velocity not passing drag, the share
+at most ½, with the horizon where the two are equal.
+
+### 8.5 What is open
+
+1. **The degree-3 event.** `v₁ ∧ v₂ ∧ v₃` changes sign only through a
+   three-plane crossing a single plane cannot show; whether that is the
+   whole body's passage (the old whole-mote Möbius) is not derived.
+2. **The type of a motion.** A generator turns, boosts, does both (a
+   screw), or is parabolic, on the null boundary. At a horizon the
+   generator is parabolic. The obstructions of docs/114 §10 are to be
+   read by these types, not only by Q₈'s units.
+3. **The levels of the tower.** Whether a horizon on the machine (S⁷) is a
+   degree step in the riding state (S³), through `∂` (§5), is the link
+   between the levels; not derived.
+4. **docs/114 §9's left multiplication.** `i·q` is isoclinic and turns two
+   planes into each other; against §8.3's reading of a crossing as a
+   plane's direction passing null, which of the two is the passage is not
    decided.
-2. **Ties within a bell.** Equal `s_k` leave the order, and so the
-   holonomy's sign (`i·j = −j·i`), undetermined. A rule for an exact tie is
-   owed.
-3. **Which hold.** `H` here is the enclosure's hold at the mote's whole
-   spin, `H(<ℓ)`, one enclosure (`flows::Enclosed`); whether a plane's flip
-   reads the hold at its own part's spin instead is not derived.
-
+5. **Ties.** Two planes at their horizons in the same bell leave the order,
+   and the sign of their coupling's passage, undetermined; a rule is owed.
+6. **Which hold.** `H` is the enclosure's hold at the whole spin; whether a
+   plane reads the hold at its own part's spin is not derived.
