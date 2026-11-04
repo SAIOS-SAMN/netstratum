@@ -12,6 +12,15 @@ change is named here.
 
 ### Added
 
+- `horizons::read` and a `HORIZON` line per echo in `breathe` (docs/117
+  §8–§9, readings only): for each galaxy mote, which planes stand inside
+  their horizons (`|R·t_k| < H`), against the whole enclosure's hold and each
+  plane's own; where a turning plane is inside while the whole is outside
+  (where the passage per plane would move a mote the built luminal bound
+  does not); tilt ties; and where the two holds disagree. Read (2^40, 580
+  bells): the universe unchanged; every mote's three planes inside; the
+  whole outside with a plane inside for 21, 49 and 89 motes at the three
+  echoes (about 4%); no ties; the holds never disagree.
 - docs/117: the seven base axes and their signature (each frame plane
   hyperbolic, `Z² = +1`, `Q² = −1`; LAW-DILATION is that plane's boost),
   degrees counted on many axes, and the tower `S³ → S⁷ → S⁴` with
