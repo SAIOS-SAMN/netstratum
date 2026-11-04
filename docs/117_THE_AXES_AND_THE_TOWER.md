@@ -169,7 +169,7 @@ turning between the machine's fibre and the riding state. Not derived
 ## 7. What is open
 
 1. **What turns a plane over:** derived in §8 (its direction passing
-   null). Still open: how "forward" on R reads in a mixed state, and §8.5.
+   null). Still open: how "forward" on R reads in a mixed state, and §8.6.
 2. **The eighth dimension of ℝ⁸.** Seven base axes stand under S⁷'s eight:
    R is paired into a plane with something, as Xylarium pairs its pole
    axis. docs/95 §2 joins R to origin and infinity (`e₊`, `e₋`); whether
@@ -190,116 +190,109 @@ turning between the machine's fibre and the riding state. Not derived
    arc chart and every angle are to be replaced by the degree-2 elements of
    §3 and the degrees they exchange.
 
-## 8. Degree as velocity, its inverse as drag, and the horizon
+## 8. Velocity as the generator, drag as its contraction, the horizon
 
 Derived 2026-11-05 (operator: the per-plane flip "is just palindrome
 construction and deconstruction ... on a single dimensional traversing
-linear ley lines - we're missing the deeper dimensions"; "increase to
-degrees as velocity with inverse as drag"). Every reading below was checked
-in an exact Clifford algebra over the seven axes.
+linear ley lines"; "increase to degrees as velocity with inverse as drag";
+"the wedge is flat - you're missing the 2nd and 4th dimension"; "you're
+still losing density on B²"). Every reading below was checked against an
+exact Clifford algebra over the seven axes, and none of them squares.
 
 ### 8.1 A plane's state is a direction
 
-Plane k's state is one direction in its hyperbolic plane: the hold on its
-closed axis and its part of the state `q` (docs/114 §9.1) on its open axis,
+Plane k's state is one direction in its hyperbolic plane, the hold on its
+closed axis and its part of `q` (docs/114 §9.1) on its open axis:
 
     v_k = H·e_Zk + R·t_k·e_Qk
 
-The three planes' directions, with R, are the body's point on the machine
-(S⁷); `q` is the state riding on it (§4). Nothing here is new state: `H`,
-`R` and the tilt are carried already.
+The three directions with R are the body's point on the machine (S⁷).
+Nothing here is new state.
 
-### 8.2 The product splits into velocity and drag
+### 8.2 Velocity is the generator; drag is its contraction
 
-Multiplying the direction by an axis gives two parts by degree: the wedge,
-which raises it, and the contraction, which lowers it.
+A motion is a degree-2 generator `B`: its components stand on pairs of
+axes, 21 on the seven, each with its own size. Velocity is `B` itself,
+the planes a motion turns or boosts in, never a vector wedged with one axis
+(that gives a single flat plane). Drag is the contraction, the part of a
+product that lowers the degree back toward the hold.
 
-- **Raising the degree is velocity:** motion into an axis the direction did
-  not stand on.
-- **Lowering it, the inverse, is drag:** contraction back toward the hold.
+On one plane's own axes the split gives the shares the code already carries:
+read from the open axis `Q_k`, velocity `δ = H/(H + R_k)` and drag
+`1 − δ = R_k/(H + R_k)`, the turning share and `flows::settle_disc`'s drag,
+derived rather than assigned; read from the closed axis `Z_k`, the two
+exchange, which is the other face. A face is the axis a plane's state is
+read from. Toward an axis outside the plane the product is all velocity,
+with no drag.
 
-Read on plane k's own axes, their sizes (L1) are the shares the code already
-carries:
+### 8.3 B is read in first degree, never by its square
 
-| read from | velocity (degree up) | drag (degree down) |
+`B²` folds 21 components into a rate and a degree-4 coupling, products of
+sizes that no longer say which planes move, at what size each, or how they
+meet: it loses density. So `B` is read component by component, and
+everything the square summarised is read from the components directly:
+
+- **Each component's character, by its axes' signs:** a component on two
+  axes of one sign is a turning, on two of opposite signs a boost (§3).
+  No size enters.
+- **How two components meet, by set arithmetic on their axes:**
+  - **disjoint** (no axis shared): they commute, and together they are a
+    screw pair, two planes moving at once. This is the degree-4 coupling
+    the square would have summed away; here it stays a named pair with each
+    size kept.
+  - **sharing one axis X:** they compose into a coupling of their two other
+    axes. Where those two axes are of opposite sign and the two sizes are
+    equal in magnitude, the pair is **null: a horizon**.
+- **Size** stays L1: the sum of the components' magnitudes.
+
+Checked against the exact algebra:
+
+| B | read in first degree | exact `B²` |
 |---|---|---|
-| the open axis `Q_k` | `H/(H + R_k) = δ` | `R_k/(H + R_k) = 1 − δ` |
-| the closed axis `Z_k` | `1 − δ` | `δ` |
-| any other axis | all of it | none |
+| boost `Z₁Q₁` 1 + turning `Z₂Z₃` 1 | disjoint: a screw pair | degree 4 only |
+| turning `Z₁Z₂` 1 + boost `Q₁Z₂` 1 | share `Z₂`, `Z₁`/`Q₁` opposite, sizes equal: null | `0` |
+| turning `Z₁Z₂` 1 + boost `Q₁Z₂` 2 | share `Z₂`, sizes unequal: not null | a degree-0 part |
 
-From the open axis this is the turning share `δ` (`2δ` a bell, both passes)
-and `flows::settle_disc`'s drag `d = 1 − δ`, now derived rather than
-assigned. Read from the closed axis the two exchange: that is the other face.
-**A face is the axis a plane's state is read from**, not a flag.
+A screw at equal sizes (the first row) is where a degree-0 reading of the
+square would have called a horizon falsely: its rate vanishes but its two
+planes still move.
 
-Toward any axis outside the plane the product is wholly velocity, with no
-drag: motion into new axes climbs the degrees unresisted, and drag acts only
-within a plane. Drag is the contraction, never `v⁻¹ = v/v²`, which squares
-and does not exist where `v` is null (§8.3).
+### 8.4 The horizon
 
-### 8.3 The horizon is where a plane's direction is null
-
-Velocity equals drag exactly where `|R·t_k| = H`: there `δ = ½` from either
-axis, and `v_k` lies on the plane's null cone, on the whole `A + Q` or the
-span `A − Q` (§2). That is the event horizon of plane k. Only the sign of
-`|H| − |R·t_k|` is read, a first-degree comparison; no square is carried.
-
-The crossing is not one plane's swap. As `v_k` passes through null, its
-coupling to every other axis, `v_k ∧ e_X`, turns over at once:
-
-| plane 1's part against the hold | `Z₂` | `Z₃` | `Q₂` | `Q₃` | `R` |
-|---|---|---|---|---|---|
-| outside (`3/2`) | boost | boost | turning | turning | boost |
-| at it (`1`) | null | null | null | null | null |
-| inside (`2/3`) | turning | turning | boost | boost | turning |
-
-One plane's horizon reaches five axes at the same instant, R among them. The
-axes keep their squares; what changes is the character of the state's
-direction, so the dynamic signature of §2 is the state's own, reached by the
-motion, never set. The couplings between planes, `v_k ∧ v_l`, are turnings
-where the two planes stand on one side of their horizons, boosts where they
-stand on opposite sides, and null where either is at its horizon: the web
-of §3's eight states, now arrived at.
+A plane's horizon is where its direction `v_k` is null, `|R·t_k| = H`: then
+any motion carrying it, `v_k ∧ e_X`, is a null pair (§8.3's second row),
+and its coupling to every other axis turns over at once, turnings to
+boosts and boosts to turnings, five axes at the same instant, R among them.
+The axes keep their squares; the character of the state's motion changes,
+so the dynamic signature of §2 is the state's own, reached by the motion.
 
 The built luminal bound (`flows::luminal`, whole mote) is the case of a
-disc-settled tilt, `t_k = 1`, where plane k's horizon is the whole's. With a
-spread tilt each plane reaches its horizon at its own reach (isotropic: all
-three at `R = 3H`, the whole still outside, `δ = ¼`): a change in how the
-universe moves, read before and after on a fresh founding before it is
-built.
+disc-settled tilt, `t_k = 1`. With a spread tilt each plane reaches its
+horizon at its own reach (isotropic: all three at `R = 3H`, the whole still
+outside, `δ = ¼`): a change in how the universe moves, read before and after
+on a fresh founding before it is built.
 
-### 8.4 Degrees as the ladder
+### 8.5 The riding state on even degrees
 
-Velocity climbs the degrees and drag descends them:
+The state `q` (docs/114 §9) stood on degrees 0 and 2 of three axes, the
+quaternions. On the seven axes the even degrees are 0, 2, 4 and 6
+(1 + 21 + 35 + 7 = 64 components): a state that can hold screw pairs
+(degree 4) and the six-axis couplings (degree 6) as its own, not only one
+plane's turning. A motion `B` acts on it one-sidedly, exact over ℚ, and the
+state is read as `B` is, component by component, never by a square.
 
-- degree 0: the hold, `H`;
-- degree 1: the planes' directions, `v_k`, and R;
-- degree 2: their couplings, `v_k ∧ e_X` and `v_k ∧ v_l` (turnings,
-  boosts, null at a horizon);
-- degree 3: the three planes together, `v₁ ∧ v₂ ∧ v₃`, the orientation of
-  the whole web;
-- up to degree 7, all seven axes, the machine's top.
+### 8.6 What is open
 
-At each step the luminal bound reads as velocity not passing drag, the share
-at most ½, with the horizon where the two are equal.
-
-### 8.5 What is open
-
-1. **The degree-3 event.** `v₁ ∧ v₂ ∧ v₃` changes sign only through a
-   three-plane crossing a single plane cannot show; whether that is the
-   whole body's passage (the old whole-mote Möbius) is not derived.
-2. **The type of a motion.** A generator turns, boosts, does both (a
-   screw), or is parabolic, on the null boundary. At a horizon the
-   generator is parabolic. The obstructions of docs/114 §10 are to be
-   read by these types, not only by Q₈'s units.
-3. **The levels of the tower.** Whether a horizon on the machine (S⁷) is a
-   degree step in the riding state (S³), through `∂` (§5), is the link
-   between the levels; not derived.
-4. **docs/114 §9's left multiplication.** `i·q` is isoclinic and turns two
-   planes into each other; against §8.3's reading of a crossing as a
-   plane's direction passing null, which of the two is the passage is not
+1. **The three-plane event.** A component of degree 3 among the planes'
+   directions (`v₁ ∧ v₂ ∧ v₃`) changes sign only through a crossing of all
+   three; whether that is the whole body's passage is not derived.
+2. **Obstructions by motion type.** The obstructions of docs/114 §10 are to
+   be read by §8.3's first-degree types (turning, boost, screw pair, null),
+   not only by Q₈'s units.
+3. **The tower's levels.** Whether a horizon on the machine (S⁷) is a degree
+   step in the riding state, through `∂` (§5), is not derived.
+4. **docs/114 §9's `i·q`** turns two planes into each other; against §8.4's
+   crossing as a plane's direction passing null, which is the passage is not
    decided.
-5. **Ties.** Two planes at their horizons in the same bell leave the order,
-   and the sign of their coupling's passage, undetermined; a rule is owed.
-6. **Which hold.** `H` is the enclosure's hold at the whole spin; whether a
-   plane reads the hold at its own part's spin is not derived.
+5. **Ties** of two planes at their horizons in one bell; a rule is owed.
+6. **Which hold** a plane reads: at the whole spin or its own part's.
