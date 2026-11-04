@@ -1136,6 +1136,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
         // spin in each orbit, the holding-weighted mean, held on the grain
         // with what flooring leaves to the singularity's reservoir (Σ m·ℓ +
         // reservoir exact); one displacement, the members' weighted mean.
+        crate::profile::mark("orbit:collections");
         let sets = crate::flows::collections(&firm, &moves);
         let booked = |x: &crate::flows::Mote| {
             x.amount.clone() * crate::flows::weight(&x.key) / ledger_u.clone()
@@ -1205,6 +1206,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
         let _ = founded;
         // The order (B1): matter pushing matter apart by its open frames
         // (`flows::repel`, at the bounce's push).
+        crate::profile::mark("orbit:order");
         if firm.len() > 1 {
             let _ = crate::flows::repel(&mut firm, &ratio(1, 2));
         }
@@ -1247,6 +1249,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
                 })
             };
             let before = ledger(&u.ocean);
+            crate::profile::mark("orbit:ocean");
             let (given, _) = crate::flows::torque(
                 &mut u.ocean,
                 &enc_o,
@@ -1268,6 +1271,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
     // The singularity's state (1); the firmament is the home's held cut,
     // added with the home below.
     let mut inside = ratio(1, 1);
+    crate::profile::mark("orbit:galaxies");
     for i in order {
         let share = mass(&u.cores[i].total()) / whole.clone();
         let c = &mut u.cores[i];

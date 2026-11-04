@@ -188,6 +188,19 @@ fn main() {
                     pulse::home_frame(&u).map(|e| conductor::reading::sector(&e.hold_within(&r_rim)).to_string()).unwrap_or_default()
                 );
             }
+            if std::env::var_os("NETSTRATUM_PROFILE").is_some() {
+                conductor::profile::mark("breathe:echo");
+                let spent = conductor::profile::drain();
+                let whole: f64 = spent.iter().map(|(_, d)| d.as_secs_f64()).sum();
+                for (name, d) in spent.iter().take(8) {
+                    eprintln!(
+                        "PROFILE echo at bell {} {name}: {:.1} s ({:.0} %)",
+                        b + 1,
+                        d.as_secs_f64(),
+                        100.0 * d.as_secs_f64() / whole.max(1e-9)
+                    );
+                }
+            }
             let front = pulse::contained_front(&u);
             for plane in 0..conductor::flows::SPACE.len() {
                 let cells: Vec<&pulse::FrontCell> =
