@@ -626,12 +626,60 @@ pub fn collections(motes: &[Mote], moves: &[Vec<Ratio>]) -> Vec<Vec<usize>> {
         i
     }
     let mut any = vec![false; n];
+    // A certified screen before the exact test (the pairs are many, the
+    // bonds few): each condition of `bonded` is a tilt-weighted sum of
+    // in-step shares, each share 2-Lipschitz in its phases on the circle and
+    // the weights summing to one, so in floating point each sum stands
+    // within a few roundings of its exact value. A pair whose screened sum
+    // falls short of ½ by more than `MARGIN` (far past any rounding) fails
+    // the exact test too and is passed over; every other pair is read
+    // exactly. The bonds, and so the collections, are the exact ones.
+    const MARGIN: f64 = 1e-6;
+    struct Screen {
+        open: bool,
+        phase: [f64; 3],
+        tilt: [f64; 3],
+        moved: [f64; 3],
+    }
+    let f = |x: &Ratio| {
+        use num_traits::ToPrimitive;
+        x.to_f64().unwrap_or(f64::NAN)
+    };
+    let screens: Vec<Screen> = (0..n)
+        .map(|i| {
+            let x = &motes[i];
+            let at = |v: &[Ratio], k: usize| v.get(k).map_or(0.0, &f);
+            let t = tilt_of(&x.tilt);
+            Screen {
+                open: crate::chem::unpaired(&x.key) != 0,
+                phase: SPACE.map(|k| at(&x.phase, k)),
+                tilt: [f(&t[0]), f(&t[1]), f(&t[2])],
+                moved: SPACE.map(|k| at(&moves[i], k)),
+            }
+        })
+        .collect();
+    let in_step_f = |a: f64, b: f64| {
+        let d = a - b;
+        let fr = d - d.floor();
+        1.0 - 2.0 * fr.min(1.0 - fr)
+    };
+    let short = |t: &[f64; 3], a: &[f64; 3], b: &[f64; 3]| {
+        (0..3).map(|k| t[k] * in_step_f(a[k], b[k])).sum::<f64>() < 0.5 - MARGIN
+    };
+    let passed_over = |a: &Screen, b: &Screen| {
+        !a.open
+            || !b.open
+            || short(&a.tilt, &a.phase, &b.phase)
+            || short(&b.tilt, &b.phase, &a.phase)
+            || short(&a.tilt, &a.moved, &b.moved)
+            || short(&b.tilt, &a.moved, &b.moved)
+    };
     for i in 0..n {
         if moves[i].is_empty() {
             continue;
         }
         for j in i + 1..n {
-            if moves[j].is_empty() {
+            if moves[j].is_empty() || passed_over(&screens[i], &screens[j]) {
                 continue;
             }
             if bonded(&motes[i], &motes[j], &moves[i], &moves[j]) {
@@ -3378,6 +3426,80 @@ mod passage_tests {
         assert_eq!(mean_response(&ratio(1, 2), &ratio(1, 2)), ratio(-1, 2));
         // Across the bell: from ¾ to 1¼, the loss then the gain cancel.
         assert_eq!(mean_response(&ratio(3, 4), &ratio(1, 2)), ratio(0, 1));
+    }
+
+    #[test]
+    fn the_screened_collections_are_the_exact_ones() {
+        // Phases on a fine grid near and far from every threshold, tilts
+        // uneven, moves of both senses: the screened pass reads the same
+        // bonds as testing every pair exactly.
+        let kinds = ["W0001", "W0004", "W0007", "W0010"];
+        let mut motes = Vec::new();
+        let mut moves = Vec::new();
+        for i in 0..48i64 {
+            let mut x = Mote {
+                key: crate::chem::Kind::parse(kinds[(i % 4) as usize]).expect("a kind"),
+                amount: ratio(1, 1),
+                ell_o: ratio(1, 2),
+                ell_orth: ratio(0, 1),
+                phase: rest(ratio(1, 2)),
+                agitation: ratio(0, 1),
+                born: 0,
+                vacuum: false,
+                lever: Vec::new(),
+                lever_place: ratio(0, 1),
+                tilt: tilt_from(&[ratio(1 + i % 3, 1), ratio(2, 1), ratio(1 + i % 5, 1)]),
+            };
+            for (j, &k) in super::SPACE.iter().enumerate() {
+                x.phase[k] = ratio((i * (7 + j as i64)) % 24, 24);
+            }
+            let mut m = vec![ratio(0, 1); super::PLANES];
+            for (j, &k) in super::SPACE.iter().enumerate() {
+                m[k] = ratio((i * (5 + j as i64)) % 13 - 6, 26);
+            }
+            motes.push(x);
+            moves.push(if i % 11 == 0 { Vec::new() } else { m });
+        }
+        let mut exact: Vec<(usize, usize)> = Vec::new();
+        for i in 0..motes.len() {
+            for j in i + 1..motes.len() {
+                if !moves[i].is_empty()
+                    && !moves[j].is_empty()
+                    && super::bonded(&motes[i], &motes[j], &moves[i], &moves[j])
+                {
+                    exact.push((i, j));
+                }
+            }
+        }
+        assert!(!exact.is_empty(), "the fixture bonds some pairs");
+        // The exact collections: connected sets of the exact bonds.
+        let mut root: Vec<usize> = (0..motes.len()).collect();
+        fn find(root: &mut [usize], i: usize) -> usize {
+            if root[i] == i {
+                i
+            } else {
+                let r = find(root, root[i]);
+                root[i] = r;
+                r
+            }
+        }
+        for &(i, j) in &exact {
+            let (a, b) = (find(&mut root, i), find(&mut root, j));
+            if a != b {
+                root[a.max(b)] = a.min(b);
+            }
+        }
+        let mut sets: std::collections::BTreeMap<usize, Vec<usize>> = Default::default();
+        for i in 0..motes.len() {
+            if exact.iter().any(|&(a, b)| a == i || b == i) {
+                let r = find(&mut root, i);
+                sets.entry(r).or_default().push(i);
+            }
+        }
+        assert_eq!(
+            super::collections(&motes, &moves),
+            sets.into_values().collect::<Vec<_>>()
+        );
     }
 
     #[test]
