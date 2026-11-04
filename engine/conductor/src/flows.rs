@@ -3055,7 +3055,6 @@ mod passage_tests {
 
     #[test]
     fn the_throats_inversion_exchanges_core_and_rim() {
-        use super::through;
         // The throat's reflection: the core and the rim change places, the
         // throat stands.
         assert_eq!(super::through(&ratio(0, 1), &ratio(1, 1)), ratio(2, 1));
