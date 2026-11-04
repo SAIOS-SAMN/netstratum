@@ -12,3 +12,4 @@ vendor/
 
 # Local live-binary snapshots (operator deploys), never published
 .live*/
+.reads/

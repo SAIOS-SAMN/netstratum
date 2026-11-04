@@ -192,7 +192,7 @@ fn main() {
                 conductor::profile::mark("breathe:echo");
                 let spent = conductor::profile::drain();
                 let whole: f64 = spent.iter().map(|(_, d)| d.as_secs_f64()).sum();
-                for (name, d) in spent.iter().take(8) {
+                for (name, d) in spent.iter().take(14) {
                     eprintln!(
                         "PROFILE echo at bell {} {name}: {:.1} s ({:.0} %)",
                         b + 1,
