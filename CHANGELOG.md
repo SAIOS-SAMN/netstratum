@@ -92,6 +92,13 @@ change is named here.
 
 ### Changed
 
+- Bounces are cheaper, the universe unchanged to every reading (#5):
+  capture carries each star's mass forward instead of re-reading every
+  holding per captured mote; the peel walks its rungs on whole numbers; the
+  collective's bonds are screened with a certified floating-point margin
+  before the exact test. Read (2^40, 580 bells): three bounces in 2 min 7 s
+  (3 min 14 s before); at the third echo capture from 32 s to about 6 s,
+  the peel out of the profile, the collections 1.9 s.
 - Mycelium pinned at `v0.3.0` (the rc.3 commit), spoken through `mycelium-sdk` only
   (#10). The minds still perceive rasters; tasks and solve outputs cross
   the wire as samples, and a task of another rank or width is refused by
