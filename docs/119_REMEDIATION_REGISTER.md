@@ -73,7 +73,7 @@ inverse (S2 unless marked):**
 
 | id | where | size |
 |---|---|---|
-| A28 | flows.rs:547-582 `pair_sums` (via `repel`) | n(n−1)·4 over the firmament, BigInt |
+| A28 | flows.rs:547-582 `pair_sums` (via `repel`) | n(n−1)·4 over the firmament, BigInt | Read 2026-11-05: not a range: every pair contributes (in step is never negative) and the product over planes does not separate, so no bisection gives the same sum; it runs once, at the founding (`pulse.rs` firmament) |
 | A29 | flows.rs:677-694 `collections` | n²/2, screened |
 | A30 | pulse.rs:746-785, 906-913 `cascade` | K²/2 over founding kinds; Σ run² for density (once) |
 | A31 | breath.rs:548-570 | ocean motes × galaxies inside the arrival loop |
