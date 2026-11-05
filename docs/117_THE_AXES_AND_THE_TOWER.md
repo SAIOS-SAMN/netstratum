@@ -530,3 +530,60 @@ leg runs R backward" is that reversal.
 4. The R plane's role in the tower: S⁴ as the ratio of two quaternions (§4)
    reads anew with four hyperbolic planes.
 
+
+## 11. Composing motions: degrees as the state, the generator as the rate, the volume kept
+
+The operator ruled on 2026-11-05:
+- "quarter turn needs to be defined by degrees not semantics - rotors are
+  flat and need re-volumized data";
+- earlier the same day, "for each sexigesimal tick you contain your entire
+  universe on a dimension as a vector" (docs/120 §8b);
+- and the Cayley form on the generator was chosen as the composition.
+
+Xylarium (T18) adds three points: a split between two planes is
+antisymmetric and weighted by each plane's own hold; the turning between two
+planes, `τ`, is its own stored generator; and composition does not commute.
+
+### 11.1 The state in degrees
+
+`H`'s components are stored in degrees, as exact rationals, with the plane
+named. A quarter turn is 90° on a named plane, never a word. Each plane's
+phase is stored, and so is each turning between planes (`τ₁₂`, ...). `K_c =
+⌊|θ_c|/360⌋` per component. Within one plane, motion is the closed-form
+advance, `θ + ω·bells` (docs/120 §2), and it commutes there.
+
+### 11.2 The rate is the generator; motions compose by Cayley
+
+A motion's rate is its degree-2 generator `B` (§8.2), with exact rational
+components on the planes and the signature read per plane. Two motions
+compose through the Cayley form `R = (1 + B)(1 − B)⁻¹`. The product
+`R₁R₂` is exact over ℚ, and the generator is read back as `B = (R − 1)(R +
+1)⁻¹`, also exact. No trigonometric value enters, and no quarter-turn
+rotor.
+
+- **On one hyperbolic plane** this is the flow law, `b₁ ⊕ b₂ = (b₁ +
+  b₂)/(1 + b₁b₂)` (LAW-DILATION, `ring::compose`, built).
+- **On one elliptic plane** it is `(b₁ + b₂)/(1 − b₁b₂)`.
+- **Across planes** it does not commute. The commutator of the two
+  generators is the turning between planes, `τ`.
+- **A split between planes** is hold-weighted: plane 1 takes `t·2h₂/(h₁ +
+  h₂)` and plane 2 takes `−t·2h₁/(h₁ + h₂)`, equal only where the holds are.
+
+### 11.3 The volume is kept
+
+A rotor on one plane is flat. In four or more axes the Cayley rotor of a
+generator that is not simple carries a grade-4 part, `B₁∧B₂`, the volume.
+The composed product keeps it, on the even algebra: scalar + generator +
+volume. A three-axis (Gibbs) product drops it, and so does any product
+taken plane by plane. That volume is the density §8.3 forbids losing.
+
+### 11.4 Open: reading a composed rate in degrees
+
+A generator's degree reading is not rational (Niven: `θ = 2·arctan b`
+leaves ℚ except at the quarter-turn points). The proposed way through
+follows the 2026-10-17 and 10-24 rulings ("ℝ never stored, exact bounds",
+"render exact only under observation"): a composed rate is stored exactly
+as its even multivector, and its degree reading is a certified
+sexagesimal sector at the depth asked, never a stored rational. How such a
+rate advances a state stored in degrees, as an exact interval over bells,
+is to be derived. Fixture 11b (Mycelium 78.173) waits on it.
