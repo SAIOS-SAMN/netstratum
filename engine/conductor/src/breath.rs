@@ -1013,9 +1013,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     _ => None,
                 };
                 let now = mass(&sys.kept);
-                if let (Some(d), Some(orbit), false) =
-                    (d, sys.phase.first().cloned(), now.is_zero())
-                {
+                if let (Some(d), Some(orbit), false) = (
+                    d,
+                    (!sys.phase.is_empty()).then(|| sys.phase.clone()),
+                    now.is_zero(),
+                ) {
                     let share = (d / ratio(2, 1) * sys.state.clone() / now).min(ratio(1, 1));
                     let mut out = crate::pulse::Manifest::new();
                     for (k, a) in &sys.kept {
@@ -1041,7 +1043,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         &mut core.medium_spin,
                         &mut identity,
                     );
-                    infall.push((out, at, sys.ell_orth.clone(), vec![orbit, ratio(1, 2)]));
+                    // It leaves at its own orbit, every plane's phase kept,
+                    // its loop at ½ (it was a two-entry vector, which the
+                    // flows read as no phase at all).
+                    let mut phase = orbit;
+                    crate::flows::full(&mut phase);
+                    phase[crate::flows::LOOP] = ratio(1, 2);
+                    infall.push((out, at, sys.ell_orth.clone(), phase));
                 }
                 if mass(&sys.kept).is_zero() {
                     // Emptied: its medium crosses whole; its worlds re-anchor.
@@ -2107,9 +2115,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // cut) before they split (with Xylarium).
             crate::profile::mark("rec:part");
             in_throat = crate::recycle::part(&mut core.flows, &in_throat);
-            // Puncture: each body entering the throat's other face.
+            // Puncture: each body entering the throat's other face. A throat
+            // crossing is an event on the orthogonal orbit (its phase crossing
+            // ½), so it is booked there, never on a spatial plane.
             for _ in &in_throat {
-                cross.note(0, crate::enfold::Fate::Punctured, &ratio(0, 1));
+                cross.note(
+                    crate::flows::LOOP,
+                    crate::enfold::Fate::Punctured,
+                    &ratio(0, 1),
+                );
             }
             // The container (11.0 (18)): the core's state and the kinds held
             // at or above its cut, the heaviest that moved least; the bounce
@@ -2146,17 +2160,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             for (j, key, amount) in entered {
                 core.flows[j].vacuum = false;
                 if core.flows[j].key == key && core.flows[j].amount == amount {
-                    cross.note(0, crate::enfold::Fate::Sealed, &ratio(0, 1));
+                    cross.note(
+                        crate::flows::LOOP,
+                        crate::enfold::Fate::Sealed,
+                        &ratio(0, 1),
+                    );
                 } else {
                     let scar =
                         holding(&key, &amount) - holding(&core.flows[j].key, &core.flows[j].amount);
-                    cross.note(0, crate::enfold::Fate::Cauterized, &scar);
+                    cross.note(crate::flows::LOOP, crate::enfold::Fate::Cauterized, &scar);
                 }
             }
             for x in core.flows.iter_mut().skip(before) {
                 x.vacuum = false;
                 let scar = -holding(&x.key, &x.amount);
-                cross.note(0, crate::enfold::Fate::Cauterized, &scar);
+                cross.note(crate::flows::LOOP, crate::enfold::Fate::Cauterized, &scar);
             }
             crate::profile::mark("rec:light");
             // The throat's light crosses the galaxy on the continuum face.

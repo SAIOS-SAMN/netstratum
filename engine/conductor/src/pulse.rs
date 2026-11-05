@@ -2040,7 +2040,10 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             _ => return None,
         }
     }
-    let (unit, t_u) = (unit.filter(|u| !u.is_zero())?, t_u?);
+    // A period of no bells is no universe: the echoes would stand at every
+    // bell and the schedule would never advance (`deploy` founds at 4 or
+    // more).
+    let (unit, t_u) = (unit.filter(|u| !u.is_zero())?, t_u.filter(|t| *t > 0)?);
     // A save from before the densest was recorded climbs to the read.
     let densest = densest.unwrap_or(crate::nuclides::READ - 1);
     // A save from before B1: its firmament list joins the home's flows.
@@ -2264,6 +2267,24 @@ mod tests {
             push_cut(&water).map(|(p, h, m, _)| (p, h, m)),
             push_cut(&twelve).map(|(p, h, m, _)| (p, h, m))
         );
+    }
+
+    #[test]
+    fn a_tape_with_no_period_is_refused() {
+        let table: Manifest = [("W0001", 3000), ("W0004", 900), ("W0012", 40)]
+            .iter()
+            .map(|(k, a)| (crate::chem::Kind::parse(k).expect("a kind"), ratio(*a, 1)))
+            .collect();
+        let mut u = deploy(&table).expect("a universe");
+        let dir = std::env::temp_dir().join(format!("ns-no-period-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("a scratch dir");
+        write(&dir, &[1; 32], &u).expect("written");
+        assert!(read(&dir).is_some(), "the founded period reads back");
+        u.t_u = 0;
+        write(&dir, &[1; 32], &u).expect("written");
+        assert!(read(&dir).is_none(), "a period of no bells is no universe");
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
