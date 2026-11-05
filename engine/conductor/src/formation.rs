@@ -1765,7 +1765,15 @@ pub fn settle_system(
     );
     let mut bodies: Vec<Small> = Vec::new();
     let mut to_star = Manifest::new();
+    // The partition of what entered (register B15): every mote and world is
+    // read once, as escaping, falling to the star or entering convergence,
+    // each with its spin; their sum is checked against the spin read before.
+    let mote_spin = |x: &crate::flows::Mote| {
+        x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * x.ell_o.clone()
+    };
+    let mut parted = ratio(0, 1);
     for x in motes {
+        parted += mote_spin(&x);
         // Its reach, read by the system's enclosure from its own spin.
         let r = frame
             .as_ref()
@@ -1806,6 +1814,7 @@ pub fn settle_system(
         *sys.kept.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
     }
     for w in std::mem::take(&mut sys.satellites) {
+        parted += mass(&w.total()) / unit.clone() * w.ell.clone();
         let r = if total.is_zero() {
             b0.clone()
         } else {
@@ -2123,9 +2132,14 @@ pub fn settle_system(
     sys.medium_spin -= moved.clone();
     read.formed = formed;
     read.moved = moved;
-    // Its identity: the spin it re-read stands booked (bodies and medium
-    // together unchanged).
-    read.residual = spin_of(sys) + (sys.medium_spin.clone() - medium_was) - spin_before;
+    // Its identities, each read from both sides (register B15): the spin
+    // of every mote and world it read, partitioned, against the spin before;
+    // the spin it re-read booked to the medium (bodies and medium together
+    // unchanged); and its matter: what it holds now and what escaped
+    // against what it held.
+    read.residual = (parted - spin_before.clone())
+        + (spin_of(sys) + (sys.medium_spin.clone() - medium_was) - spin_before);
+    read.matter = mass(&sys.total()) + mass(&escaped) - total;
     (escaped, read)
 }
 
@@ -2143,8 +2157,12 @@ pub struct Settled {
     pub worlds_nuclei: Ratio,
     /// The spin the re-reading moved, booked to the system's medium.
     pub moved: Ratio,
-    /// Its identity residual (zero where booked exactly).
+    /// Its spin identity residual: the partition of what entered, and the
+    /// re-reading's booking (zero where booked exactly).
     pub residual: Ratio,
+    /// Its matter identity residual: holding after plus escaped, less the
+    /// holding before.
+    pub matter: Ratio,
     /// The holding of the medium no mote carried (zero where every spray
     /// and capture booked its motes).
     pub unmoted: Ratio,
