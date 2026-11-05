@@ -1096,7 +1096,7 @@ pub fn ocean_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
         })
         .chain(u.ocean.iter().map(|x| {
             (
-                x.ell_o.clone(),
+                x.ell_o(),
                 x.amount.clone() * crate::flows::weight(&x.key) / whole.clone(),
             )
         }))
@@ -1196,7 +1196,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
         };
         let spin_of = |ms: &[crate::flows::Mote]| {
             ms.iter().fold(ratio(0, 1), |s, x| {
-                s + booked(x) * (x.ell_o.clone() + x.ell_orth.clone())
+                s + booked(x) * (x.ell_o() + x.ell_orth.clone())
             })
         };
         let before = spin_of(&firm);
@@ -1210,7 +1210,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
                     .fold(ratio(0, 1), |s, &j| s + booked(&firm[j]) * f(&firm[j]))
                     / total.clone()
             };
-            let ell_o = crate::ring::grain(&mean(&|x| x.ell_o.clone()));
+            let ell_o = crate::ring::grain(&mean(&|x| x.ell_o()));
             let ell_orth = crate::ring::grain(&mean(&|x| x.ell_orth.clone()));
             let planes = set.iter().map(|&j| moves[j].len()).min().unwrap_or(0);
             let shift: Vec<Ratio> = (0..planes)
@@ -1222,7 +1222,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
                 .collect();
             for &j in set {
                 let x = &mut firm[j];
-                x.ell_o = ell_o.clone();
+                x.set_ell_o(ell_o.clone());
                 x.ell_orth = ell_orth.clone();
                 for (k, d) in shift.iter().enumerate() {
                     let from = x.phase[k].clone() - moves[j][k].clone();
@@ -1298,7 +1298,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
             };
             let ledger = |sea: &[crate::flows::Mote]| {
                 sea.iter().fold(ratio(0, 1), |s, x| {
-                    s + booked(x) * (x.ell_o.clone() + x.ell_orth.clone())
+                    s + booked(x) * (x.ell_o() + x.ell_orth.clone())
                 })
             };
             let before = ledger(&u.ocean);
@@ -1488,7 +1488,7 @@ pub fn contained_front(u: &Universe) -> Vec<FrontCell> {
             .get(crate::flows::LOOP)
             .cloned()
             .unwrap_or_else(|| ratio(0, 1));
-        let (ell, _) = crate::flows::swung(&x.ell_o, &x.ell_orth, &psi);
+        let (ell, _) = crate::flows::swung(&x.ell_o(), &x.ell_orth, &psi);
         enc.reach(&ell).0 * (ratio(1, 1) + push.clone())
     };
     let mut out = Vec::new();
@@ -1643,7 +1643,7 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         let key = x.key.to_string();
         w.extend_from_slice(&(key.len() as u16).to_le_bytes());
         w.extend_from_slice(key.as_bytes());
-        for r in [&x.amount, &x.ell_o, &x.ell_orth, &x.agitation] {
+        for r in [&x.amount, &x.ell_o(), &x.ell_orth, &x.agitation] {
             cfe::ratio::encode(r, &mut w);
         }
         w.push(x.phase.len() as u8);
@@ -1657,8 +1657,9 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         for l in &x.lever {
             cfe::ratio::encode(l, &mut w);
         }
-        w.push(x.tilt.len() as u8);
-        for t in &x.tilt {
+        let tilt = x.tilt();
+        w.push(tilt.len() as u8);
+        for t in &tilt {
             cfe::ratio::encode(t, &mut w);
         }
         cfe::tlv::put(10, &w, out);
@@ -1763,7 +1764,7 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
         let key = x.key.to_string();
         w.extend_from_slice(&(key.len() as u16).to_le_bytes());
         w.extend_from_slice(key.as_bytes());
-        for r in [&x.amount, &x.ell_o, &x.ell_orth, &x.agitation] {
+        for r in [&x.amount, &x.ell_o(), &x.ell_orth, &x.agitation] {
             cfe::ratio::encode(r, &mut w);
         }
         w.push(x.phase.len() as u8);
@@ -1778,8 +1779,9 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
             cfe::ratio::encode(l, &mut w);
         }
         // Its lead (docs/100 §4), as a flow mote's (tag 10).
-        w.push(x.tilt.len() as u8);
-        for t in &x.tilt {
+        let tilt = x.tilt();
+        w.push(tilt.len() as u8);
+        for t in &tilt {
             cfe::ratio::encode(t, &mut w);
         }
         cfe::tlv::put(tag, &w, &mut out);
@@ -1901,7 +1903,7 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
     Some(crate::flows::Mote {
         key,
         amount: r.next()?,
-        ell_o: r.next()?,
+        spins: crate::flows::Mote::spins_of(&r.next()?, &tilt),
         ell_orth: r.next()?,
         agitation: r.next()?,
         phase,
@@ -1909,7 +1911,6 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
         vacuum,
         lever,
         lever_place,
-        tilt,
     })
 }
 
@@ -2081,7 +2082,7 @@ mod tests {
             ocean: vec![crate::flows::Mote {
                 key: crate::chem::Kind::parse("W0001").expect("a kind"),
                 amount: ratio(1, 1),
-                ell_o: ratio(1, 3),
+                spins: crate::flows::Mote::spins_of(&ratio(1, 3), &[]),
                 ell_orth: ratio(0, 1),
                 phase: crate::flows::rest(ratio(1, 2)),
                 agitation: ratio(0, 1),
@@ -2089,7 +2090,6 @@ mod tests {
                 vacuum: true,
                 lever: Vec::new(),
                 lever_place: ratio(0, 1),
-                tilt: Vec::new(),
             }],
             unit: ratio(1, 2),
             t_u: 15,
@@ -2380,7 +2380,10 @@ mod tests {
             ocean: vec![crate::flows::Mote {
                 key: crate::chem::Kind::parse("W0003").expect("a kind"),
                 amount: ratio(1, 1024),
-                ell_o: ratio(1, 3),
+                spins: crate::flows::Mote::spins_of(
+                    &ratio(1, 3),
+                    &[ratio(1, 2), ratio(1, 3), ratio(1, 6)],
+                ),
                 ell_orth: ratio(0, 1),
                 phase: crate::flows::rest(ratio(1, 2)),
                 agitation: ratio(0, 1),
@@ -2388,7 +2391,6 @@ mod tests {
                 vacuum: true,
                 lever: Vec::new(),
                 lever_place: ratio(0, 1),
-                tilt: vec![ratio(1, 2), ratio(1, 3), ratio(1, 6)],
             }],
             unit: ratio(1, 2),
             t_u: 15,

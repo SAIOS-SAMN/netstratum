@@ -43,7 +43,7 @@ fn main() {
         let mut in_systems = 0usize;
         let mut widest = 0u64;
         let mut see = |x: &conductor::flows::Mote| {
-            widest = widest.max(bits(&x.ell_o)).max(bits(&x.ell_orth));
+            widest = widest.max(bits(&x.ell_o())).max(bits(&x.ell_orth));
             for p in &x.phase {
                 widest = widest.max(bits(p));
             }
@@ -100,7 +100,7 @@ fn main() {
             for x in &b.flows {
                 for (n, r) in [
                     ("amount", &x.amount),
-                    ("ell_o", &x.ell_o),
+                    ("ell_o", &x.ell_o()),
                     ("ell_orth", &x.ell_orth),
                     ("agitation", &x.agitation),
                     ("lever_place", &x.lever_place),
@@ -118,7 +118,7 @@ fn main() {
         for x in &u.ocean {
             for (n, r) in [
                 ("amount", &x.amount),
-                ("ell_o", &x.ell_o),
+                ("ell_o", &x.ell_o()),
                 ("ell_orth", &x.ell_orth),
                 ("agitation", &x.agitation),
             ] {
@@ -246,7 +246,7 @@ fn main() {
                 let (mut whole, mut widest, mut apart) = (0f64, 0f64, 0usize);
                 for x in &motes {
                     let w = x.amount.to_f64().unwrap_or(0.0);
-                    for (j, o) in off(&x.tilt).iter().enumerate() {
+                    for (j, o) in off(&x.tilt()).iter().enumerate() {
                         sum[j] += w * o;
                         widest = widest.max(o.abs());
                     }
@@ -676,7 +676,7 @@ fn main() {
         }
         for x in &motes {
             amounts = amounts.max(bits(&x.amount));
-            spins = spins.max(bits(&x.ell_o)).max(bits(&x.ell_orth));
+            spins = spins.max(bits(&x.ell_o())).max(bits(&x.ell_orth));
             agitation = agitation.max(bits(&x.agitation));
             for p in &x.phase {
                 phases = phases.max(bits(p));

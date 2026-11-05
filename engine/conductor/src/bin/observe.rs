@@ -338,11 +338,7 @@ fn main() {
                 .iter()
                 .filter(|x| conductor::flows::held(x, &frame, &p) == ratio(0, 1))
                 .count();
-            let reaches: Vec<Ratio> = c
-                .flows
-                .iter()
-                .map(|x| x.ell_o.clone() / h.clone())
-                .collect();
+            let reaches: Vec<Ratio> = c.flows.iter().map(|x| x.ell_o() / h.clone()).collect();
             let phases: Vec<String> = (0..conductor::flows::PLANES)
                 .map(|k| {
                     span(
@@ -419,7 +415,7 @@ fn main() {
                 );
                 let mut band = pulse::Manifest::new();
                 for x in &c.flows {
-                    let r = x.ell_o.clone() / h.clone();
+                    let r = x.ell_o() / h.clone();
                     if r >= lo && r <= hi {
                         *band.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) +=
                             x.amount.clone();
@@ -706,7 +702,7 @@ fn main() {
                 if h_s == ratio(0, 1) {
                     continue;
                 }
-                rs.extend(s.flows.iter().map(|x| x.ell_o.clone() / h_s.clone()));
+                rs.extend(s.flows.iter().map(|x| x.ell_o() / h_s.clone()));
             }
             rs.sort();
             if let (Some(lo), Some(hi)) = (rs.first(), rs.last()) {
