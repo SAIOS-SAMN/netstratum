@@ -1208,8 +1208,11 @@ pub fn spin_torque(
     // core's bounce pushes each kind out, `q = push/w` (`push = ½·w̄_c`, the
     // mean weight of the collective the core holds), and its hold returns it,
     // so its held matter rests in a band (docs/104 §6). The vacuum feels the
-    // same law across the throat's pole swap (docs/117 §12): at its own
-    // reach, no reach moved, on the other sheet, so in the reversed sense.
+    // same law reflected through the throat, which stands at the core's
+    // state, R = 1 (the enclosed law's base: throat 1, rim 2 in the
+    // enclosure's own units): `R → 2 − R` (`through`). Past the rim the
+    // vacuum stands outside this sphere.
+    let throat = ratio(1, 1);
     let band = match heart_push {
         Some(push) if !h.is_zero() => {
             // On the inverse faces (docs/104 §6.2): the push on the unlocked
@@ -1220,7 +1223,12 @@ pub fn spin_torque(
             if !x.vacuum {
                 toward_rest(&q, r_o, h, &x.ell_o)
             } else {
-                -at(r_o)
+                let mirrored = through(r_o, &throat);
+                if mirrored > ratio(0, 1) {
+                    -at(&mirrored)
+                } else {
+                    ratio(0, 1)
+                }
             }
         }
         _ => ratio(0, 1),
@@ -1404,6 +1412,15 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
         }
     }
     moved
+}
+
+/// The throat's inversion on the sphere (ruling of 2026-10-21: the second
+/// double inversion must not be flattened): with the polar angle `θ =
+/// 90°·R/H` (the throat at 90°, where δ = ½; the rim at 180°), inverting
+/// through the throat reflects `θ → 180° − θ`, so `R → 2H − R`: the core and
+/// the rim change places, the throat stands. Linear, exact, no square.
+pub fn through(r: &Ratio, h: &Ratio) -> Ratio {
+    ratio(2, 1) * h.clone() - r.clone()
 }
 
 /// The spray (with Xylarium; the founding epoch one tier down): matter a
@@ -3091,6 +3108,14 @@ mod passage_tests {
     use num_traits::Zero;
 
     #[test]
+    fn the_throats_inversion_exchanges_core_and_rim() {
+        // The throat's reflection: the core and the rim change places, the
+        // throat stands.
+        assert_eq!(super::through(&ratio(0, 1), &ratio(1, 1)), ratio(2, 1));
+        assert_eq!(super::through(&ratio(1, 1), &ratio(1, 1)), ratio(1, 1));
+    }
+
+    #[test]
     fn the_strips_step_rises_with_what_stands_inside() {
         // The order the certified strip relies on: Held, then edges never
         // narrower, then Whole, as the inside share rises.
@@ -3683,6 +3708,23 @@ mod passage_tests {
         );
         mobius(&mut x);
         assert_eq!(x, was, "two passes close");
+    }
+
+    #[test]
+    fn the_passage_reads_the_courts_law_passage_fixtures() {
+        // Mycelium's LAW-PASSAGE v1 (proposal 78.172 §5): the court's
+        // fixtures, which this kernel's passage must reach exactly.
+        assert_eq!(super::through(&ratio(1, 2), &ratio(3, 2)), ratio(5, 2));
+        assert_eq!(super::through(&ratio(5, 2), &ratio(3, 2)), ratio(1, 2));
+        assert_eq!(super::through(&ratio(7, 3), &ratio(7, 3)), ratio(7, 3));
+        // On a share, the face read across the throat.
+        assert_eq!(ratio(1, 1) - ratio(1, 5), ratio(4, 5));
+        // Never the sphere's inversion: H²/R would read 4 here, the passage 3.
+        assert_eq!(super::through(&ratio(1, 1), &ratio(2, 1)), ratio(3, 1));
+        // Past 2H the passage is signed (the centre passed), and the reverse
+        // returns the reach: the involution holds only on the sign.
+        assert_eq!(super::through(&ratio(3, 1), &ratio(1, 1)), ratio(-1, 1));
+        assert_eq!(super::through(&ratio(-1, 1), &ratio(1, 1)), ratio(3, 1));
     }
 
     #[test]

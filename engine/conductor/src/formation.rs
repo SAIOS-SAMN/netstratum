@@ -1784,9 +1784,12 @@ pub fn settle_system(
             .as_ref()
             .map(|e| e.reach(&x.ell_o).0)
             .unwrap_or_else(|| b0.clone());
-        // The return leg is the pole swap's other sheet (docs/117 §12): no
-        // reach moves, so matter returning inside the heart's extent falls
-        // to the star.
+        // The return leg stands at its image through the ring.
+        let r = if r < ring {
+            crate::flows::through(&r, &ring)
+        } else {
+            r
+        };
         if r > rim {
             *escaped.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
             continue;

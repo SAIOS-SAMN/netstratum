@@ -613,3 +613,23 @@ open (78.173 §7). Operator, 2026-11-05: the flux is "the span's change".
    with no return. That is the event horizon of a pole. The throat
    (`A = Q`) has span zero: a passage there writes nothing on `T` and flips
    a sheet of no width.
+6. **The frame state in the code's terms (operator 2026-11-05):** `(A, Q) =
+   (H, R)`, the enclosure's hold and the body's reach. The swap exchanges
+   them. A body at reach `R` about hold `H` stands, past the throat, at
+   reach `H` about hold `R`. The whole `H + R` is kept and the face inverts,
+   `δ = H/(R + H) ↦ 1 − δ` (the inverse across the event horizon), with no
+   square and no reach mapped into the old frame.
+   - **Within one enclosure** the passage is the face exchange alone, which
+     is the stream reading (`flows::stream_delta`, register B16).
+   - **Across a throat** it is the re-origin, the roles exchanged in the new
+     enclosure.
+   - Read inside the old frame, the passage can only appear as the
+     reflection `2H − R` or the inversion `H²/R`, and both are ruled out.
+     The sites that use `flows::through` today (the vacuum's band, the
+     core's release, the settle's return leg) are each a crossing between
+     enclosures. Each becomes a re-origin once its bodies carry their origin
+     (docs/120 §5). Read 2026-11-05: keeping the centre's reach at those
+     sites instead takes the systems from 13 to 3 (the release) and the
+     worlds from 14 to 0 (the return leg). That confirms the old frame
+     cannot hold the passage.
+
