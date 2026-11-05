@@ -197,9 +197,13 @@ The operator answered §8's first and third points:
    (ruling of 2026-10-16), a sign `h_k ∈ {+1, 0, −1}`. Their coupling takes
    no magnitude from a flat `1 − off/180°` or a cosine.
 3. **The range's field as one** (§9.2): for body `i`,
-   `F_i,k = Σ_j σ_j·o_j·n_ij·h_ij,k`, its neighbours in its range on `S`
-   (§6), with `o` the open share and `n = M/(|g| + M)` the ring law's
-   nearness. The pair `σ_i·F_i,k` is the field's pull on `i` on plane k,
+   `F_i,k = Σ_j w_j·σ_j·o_j·n_ij·h_ij,k / Σ_j w_j`, against the range's
+   whole holding, its neighbours in its range on `S` (§6), with `o` the open
+   share and `n = M/(|g| + M)` the ring law's nearness. Each term stands in
+   `[−1, 1]`, so `|F| ≤ 1`, and with `o ≤ 1` and `|x̄ ⊖ x| < 1` the pull keeps
+   `|y| < 1`: the flow law then holds the rate inside the luminal bound by
+   construction. (A first draft summed the field without the holding; its
+   witness carried a rate past the bound.) The pair `σ_i·F_i,k` is the field's pull on `i` on plane k,
    attracting where negative and repelling where positive, by one law.
 4. **Bending: rates compose by the flow law.** A rate on plane k is a share
    of the luminal bound (`SUBSTRATE_C`, "never faster than a turn a

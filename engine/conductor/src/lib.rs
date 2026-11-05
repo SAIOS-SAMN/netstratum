@@ -64,6 +64,7 @@ use std::path::Path;
 // research. Replaces the cartesian build cascade with the peel.
 pub mod civic;
 pub mod coordinate;
+pub mod coupling;
 // docs/61 G1 — a line's place about its core, in closed form.
 pub mod orbit;
 // docs/63 — a world is unrolled only while it is observed.
