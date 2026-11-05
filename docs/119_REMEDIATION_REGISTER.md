@@ -77,10 +77,10 @@ inverse (S2 unless marked):**
 | A29 | flows.rs:677-694 `collections` | n²/2, screened |
 | A30 | pulse.rs:746-785, 906-913 `cascade` | K²/2 over founding kinds; Σ run² for density (once) |
 | A31 | breath.rs:548-570 | ocean motes × galaxies inside the arrival loop |
-| A32 | breath.rs:1225-1240 | stars × every galaxy mote, a linear filter (`within_reach` would bisect) |
+| A32 | breath.rs:1225-1240 | stars × every galaxy mote, a linear filter (`within_reach` would bisect) **done**: capture reads its candidates by `flows::within_reach` (bisection) |
 | A33 | flows.rs:2020-2025, 2086-2095 `band_pairs` | up to 256 strip steps × bounds × n |
-| A34 | flows.rs:808-817 `hold_within`, 783-792 `rim` | O(n) per call, per kind and band (`hold` bisects) |
-| A35 | breath.rs:1776 | a new system `Enclosed` per captured take |
+| A34 | flows.rs:808-817 `hold_within`, 783-792 `rim` | O(n) per call, per kind and band (`hold` bisects) **done (#83)**: `hold_within` bisects the bodies' own reaches, summed once |
+| A35 | breath.rs:1776 | a new system `Enclosed` per captured take **done (#79)**: capture is a re-origin and builds no system enclosure |
 | A36 | formation.rs:1826-1950 `settle_system` | up to n rounds × n log n |
 
 **Era 0 (S2, demolition):** the 3-torus of coordinate triples
