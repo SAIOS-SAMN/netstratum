@@ -56,12 +56,12 @@ Every body (a mote, a star, a world, a galactic core) stands at
 | `h` | the bell, the universe's tick, from the founding | a count |
 | `S` | its cumulative boost: the dilation of its reach, R's plane's span (docs/117 §10.2) | exact, signed |
 | `G` | its cumulative hue move: the change of its kind, its place on S¹¹ (docs/97 §2, docs/117 §5) | exact |
-| `T` | its cumulative null flux: its passages through the throat and at the poles (docs/117 §9.3, §10.1) | exact, signed |
+| `T` | its cumulative null flux: each passage through the throat writes its span's change, `−2·(A − Q)` (docs/117 §12) | exact, signed |
 | `H` | its cumulative turning: the turnings between planes the code's phases read (docs/117 §10.3) | exact, signed |
 | `K` | the orbits it has closed | a count |
 
 - **The coordinate is the state.** A body's reach is read from `S`, its
-  kind from `G`, its face and sheet from `T`, its place on its orbit from
+  kind from `G`, its sheet from the sign of `S`'s span (docs/117 §12), its crossings' flux from `T`, its place on its orbit from
   `H`, its completed turns from `K`, each at its enclosure. The fields a
   mote carries now (reach, spin magnitudes, tilt, phases, `vacuum`, kind)
   become readings of its coordinate.
