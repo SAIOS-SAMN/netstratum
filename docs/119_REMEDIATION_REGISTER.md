@@ -22,6 +22,9 @@ line. Paths are under `engine/conductor/src/` unless given.
 Remediations marked **(F)** wait on the foundation's state type (docs/118
 Part IV step 2); the rest can be done before it.
 
+**Done:** B6, B10, B12, A11, A13, J2, J3, J5 (PR #58). The order of the rest
+is [docs/PLAN.md](PLAN.md).
+
 ---
 
 ## §A. Cartesian structure in expansion and contraction (the deepest)
@@ -42,9 +45,9 @@ for the plane state and one generator for motion (docs/118 F2–F4).
 | A8 | S2 | flows.rs:556-571 (`pair_sums`), 497-507 (`repel`); breath.rs:697-709, 1234-1236, 1271-1273 | Products over four planes (a fourth power when the planes are alike); `repel` clamps each axis to ±½, a box | (F) As A7 |
 | A9 | S2 | flows.rs:1669-1680 (`beads`) | Fibres keyed by 16 orthants; a fibre straddling ½ on any axis is cut. Feeds `merge` and `fluid` | Gather by the plane state's hemispheres, not each axis's |
 | A10 | S2 | flows.rs:2191-2210 (`band_pairs`) | The disc picked by largest tilt index; members binned on `⌊phase·count⌋`, a fixed grid anchored at phase 0 (against the 2026-10-23 "no grids" ruling) | Arcs by gaps on the plane state (as `phase_beads` does) |
-| A11 | S1 | flows.rs:1785-1792 (`strands`) | Extent as a bounding box over axes, and it ignores the wrap at phase 0: a strand straddling 0 reads an extent near 1 | Circular spread; fix the wrap now |
+| A11 | **done (#58)** S1 | flows.rs:1785-1792 (`strands`) | Extent as a bounding box over axes, and it ignores the wrap at phase 0: a strand straddling 0 reads an extent near 1 | Circular spread; fix the wrap now |
 | A12 | S2 | breath.rs:556-570, 1680-1687, 1584-1591; formation.rs:1841-1850 | Landing, capture, orphan placement and system joins by radial length differences, never phases (against "phases, not frames", 2026-10-27) | Membership by in-step phase and the hemisphere law |
-| A13 | S1 | breath.rs:2112, 2149, 2153, 2159 | Every throat puncture, seal and cauterize booked on plane 0 | Book on the plane the crossing is in |
+| A13 | **done (#58)** S1 | breath.rs:2112, 2149, 2153, 2159 | Every throat puncture, seal and cauterize booked on plane 0 | Book on the plane the crossing is in |
 | A14 | S3 | flows.rs:2558, 2737 | `phase.get(1)` instead of `LOOP` | Name the plane |
 | A15 | S2 | flows.rs:638-668; pulse.rs:1032-1039; flows.rs:89 | `[f64; 3]`, `(0..3)`, a hand-written table of six axis pairs, a `1/3; 3` default | Planes named by role, not position |
 | A16 | S2 | horizons.rs:28-29, 67-76, 143 | `[usize; 8]` orthant bitmask; hard-coded three-way tie test | Superseded (docs/117 §10); restate on the pole basis or retire |
@@ -97,13 +100,13 @@ inverse (S2 unless marked):**
 | B3 | formation.rs:1715-1716, 2078 | `settle_system` clears a system's motes and writes back only a manifest: the spray, captured motes, birth discs, warming and residue shifts lose their state at each settle | Keep the system's motes through the settle |
 | B4 | breath.rs:1341-1343 vs 1036, 1129, 1562; 1305, 1365; 1048-1078 | Spin books disagree: the slip shed books twice or the other three book too little; decohered and spent stars credit spin to the medium while their motes also carry it; an emptied remnant credits nothing | One outflow book; an identity on every passing path |
 | B5 | breath.rs:1985-1994, 2231-2233 | Arrivals and exits re-set spin with no identity | Book them under the torque identity |
-| B6 | breath.rs:1044 with 2016 | Remnant infall's phase is pushed as a 2-vector and replaced by zero | Carry the star's phases |
+| B6 | **done (#58)** breath.rs:1044 with 2016 | Remnant infall's phase is pushed as a 2-vector and replaced by zero | Carry the star's phases |
 | B7 | polarity.rs:32-34 vs breath.rs:391, formation.rs:684-687, 1013, 1020 | The unlocked face is `δ` in `polarity::faces` (and everything nuclear) and `1 − δ` in light, systems and strikes: both at once | One face law, read from the plane's axis (docs/117 §8.2) |
 | B8 | chem.rs (`hold`); formation.rs:436-441, 1009-1014, 61-67 | Hydrogen's hold is 0 under `weight − open`, so `burn` makes no light for hydrogen, ignition heat is always 0, and `radiates(H) = 0` against its own doc | Settle hydrogen's hold; one starlight law (B9) |
 | B9 | breath.rs:1433 vs formation.rs:441 | Two starlight laws: live light is `made·rung_light(z)`; `burn`'s own light feeds only `system()` and printouts | One |
-| B10 | life.rs:205 | `chem::closing(a.z, …)` passes protons where weights are expected | Pass weights |
+| B10 | **done (#58)** life.rs:205 | `chem::closing(a.z, …)` passes protons where weights are expected | Pass weights |
 | B11 | flows.rs:1191 | `toward_rest` gets the swung reach and the stored `ell_o`: before and after are different quantities | One reach |
-| B12 | pulse.rs:2037; breath.rs:484 | A tape with `t_u = 0` loops forever | Refuse it on read |
+| B12 | **done (#58)** pulse.rs:2037; breath.rs:484 | A tape with `t_u = 0` loops forever | Refuse it on read |
 | B13 | Body.load; breath.rs:2701 | `load` is read in the period law and never set by a law (always 0) | Derive its writer or retire it |
 | B14 | pulse.rs:2047-2056 | The legacy tag-19 read counts the firmament twice until the next cut | Retire the legacy read (§H, superseded layouts) |
 | B15 | formation.rs:2079-2086 | `read.residual` is zero by construction: a tautology, not a witness | Witness the books from both sides |
@@ -376,10 +379,10 @@ the code does not do (§H).
 | id | sev | law | where | finding | remediation |
 |---|---|---|---|---|---|
 | J1 | S2 | law 8, 78.62 L1, 78.59 Ruling 1, 78.169(3) | era-1 physics; `ns-hypha::probe` | Nothing of the era-1 universe reaches the court; only the fixed probe builds a transition. A body is scalars, not ground plus modes plus momentum, so a crossing cannot be composed under the court's algebra | (F) The state type in the court's form; crossings stated at the vertex (docs/113) |
-| J2 | S1 | law 4, 78.130, 78.45 | flows.rs:637-676 (`collections`, PR #54) | A float screen (`MARGIN = 1e-6`) in a physics decision; "certified" only by a comment, with no test of the bound | Mycelium's certified enclosures (`Encl`) in place of f64, or the exact test alone |
-| J3 | S1 | law 9, 78.21, 78.152 | hypha/src/house.rs:662-666 | The SEATS epoch posted on the wire is `SystemTime::now()`, a wall clock; beats paced by `sleep` (main.rs:345, 1388; hypha main.rs:402, 679, 741) | The epoch from the ledger's TUniversal point |
+| J2 | **done (#58)** S1 | law 4, 78.130, 78.45 | flows.rs:637-676 (`collections`, PR #54) | A float screen (`MARGIN = 1e-6`) in a physics decision; "certified" only by a comment, with no test of the bound | Mycelium's certified enclosures (`Encl`) in place of f64, or the exact test alone |
+| J3 | **done (#58)** S1 | law 9, 78.21, 78.152 | hypha/src/house.rs:662-666 | The SEATS epoch posted on the wire is `SystemTime::now()`, a wall clock; beats paced by `sleep` (main.rs:345, 1388; hypha main.rs:402, 679, 741) | The epoch from the ledger's TUniversal point |
 | J4 | S2 | law 12, 78.43 | pulse.rs:595; breath.rs:470-490; main.rs:368, 911 | A stored, frozen period drives the schedule against the derived one (§C14), and is sealed into the origin's radius, which can never be edited | The established period; the origin's radius from it at the next founding |
-| J5 | S1 | 78.121 | hypha/src/lib.rs:80-102 (`agree`) | Drops unmeasured laws, so "unmeasured" on one side and "breached" on the other reads as agreement | Unread is not agreement |
+| J5 | **done (#58)** S1 | 78.121 | hypha/src/lib.rs:80-102 (`agree`) | Drops unmeasured laws, so "unmeasured" on one side and "breached" on the other reads as agreement | Unread is not agreement |
 | J6 | S2 | 78.154, §1.5 | hypha/src/refound.rs:96-108 | The ledger commitment is over file paths and blake3 digests of file bytes; the court can check bytes, never reconstruct the state | Canonical records with exact values |
 | J7 | S2 | §42.7 | flows.rs:1386, 3645-3660 | The passage a scalar reach map; the tests pin LAW-PASSAGE v1's fixtures, which Mycelium has since struck; the dead `H²/R` model still cited in EQUATIONS.md:1711 | (F) The passage `v_k·q`; tests to v2's fixtures; EQUATIONS corrected |
 | J8 | S2 | 78.45(2), law 1, rule 11 | formation.rs:243-259; flows.rs:292-308 | Fixed-count forward guesses: 24 bisections for the collapse width, 64 halvings then 0 | Closed forms (§C12) |
