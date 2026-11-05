@@ -181,3 +181,40 @@ The operator answered §8's first and third points:
    Both are derived before the coupling replaces `repel`, `shear`, the
    field exchange and the band (with its `½`, its halved step and its
    squared rest).
+
+## 10. The coupling derived on the manifold (resolving §9.3)
+
+1. **The pole is the span's sign.** A body's frame state is `(A, Q)`, its
+   closed and open frames (docs/95 §8, docs/117 §10.1). Its dipole's pole is
+   `σ = sign(A − Q)`, closed against open, the same sign a passage flips
+   (docs/117 §12). It is read from the state: the body's holding against
+   its open frames. The electrons' phase state (B6, test-only) is not
+   needed for it.
+2. **Orientation and alignment are the hemisphere law.** The dipole's
+   orientation on plane k is its turning there, `H`'s component, in
+   degrees. Two dipoles are aligned on plane k where their separation is
+   under 90°, opposed past 90°, and uncoupled at 90°: the hemisphere law
+   (ruling of 2026-10-16), a sign `h_k ∈ {+1, 0, −1}`. Their coupling takes
+   no magnitude from a flat `1 − off/180°` or a cosine.
+3. **The range's field as one** (§9.2): for body `i`,
+   `F_i,k = Σ_j σ_j·o_j·n_ij·h_ij,k`, its neighbours in its range on `S`
+   (§6), with `o` the open share and `n = M/(|g| + M)` the ring law's
+   nearness. The pair `σ_i·F_i,k` is the field's pull on `i` on plane k,
+   attracting where negative and repelling where positive, by one law.
+4. **Bending: rates compose by the flow law.** A rate on plane k is a share
+   of the luminal bound (`SUBSTRATE_C`, "never faster than a turn a
+   bell"), `x ∈ (−1, 1)`. The field moves it by composition,
+   `x ⊕ y = (x + y)/(1 + x·y)` (LAW-DILATION's flow law, built), where
+   `y = −σ_i·F_i,k·o_i·(x̄ ⊖ x)` is the pull toward the range's
+   holding-weighted rate `x̄`, and `⊖` is the flow law's inverse. The
+   denominator is the curvature: no step is halved, and no rate passes the
+   bound.
+5. **The rest is first degree:** `|g| = M(1 − c_g)/c_g` (§5). It replaces
+   the band's `½`, its halved step and its squared rest `R·R = 2q`
+   (register K9).
+6. **Witnesses before it is built:**
+   - the flow-law composition never passes ±1;
+   - aligned dipoles push their rates apart and opposed ones lock them;
+   - the range's holding-weighted rate is kept where the field exchanges
+     between neighbours;
+   - a body alone in its range is untouched.
