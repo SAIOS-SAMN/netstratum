@@ -4,8 +4,7 @@ Every remediation the audits of 2026-11-05 found, one row each, with where it
 stands, what is wrong and what remedies it. It is the register docs/118 Part IV
 works from, and it corrects docs/118 where the audits contradict it.
 
-**Status:** 8 of 9 audits recorded (§A–§I). The audit against MU-STANDARDS
-and MU-RECURSION is added as §J when it reports. Nothing here changes code.
+**Status:** all 9 audits recorded (§A–§J). Nothing here changes code.
 
 **Method:** nine readers, read-only, against main `8e6f3d32` (the code is the
 same on `law/poles`), each reading its slice in full and citing file and
@@ -365,4 +364,39 @@ anchors (docs/92), θ (docs/81) nor the gauges of mind (docs/82).
 
 
 
-## §J. MU-STANDARDS and MU-RECURSION: pending
+## §J. MU-STANDARDS and MU-RECURSION
+
+MU-RECURSION's laws that bind Netstratum, as a kernel or at what crosses the
+universal core, and how the code stands against them. MU-STANDARDS and
+MU-RECURSION's coding rules bind Mycelium's own tree; they bind Netstratum
+only by adoption, which CONTRIBUTING.md claims ("matches the standards") and
+the code does not do (§H).
+
+| id | sev | law | where | finding | remediation |
+|---|---|---|---|---|---|
+| J1 | S2 | law 8, 78.62 L1, 78.59 Ruling 1, 78.169(3) | era-1 physics; `ns-hypha::probe` | Nothing of the era-1 universe reaches the court; only the fixed probe builds a transition. A body is scalars, not ground plus modes plus momentum, so a crossing cannot be composed under the court's algebra | (F) The state type in the court's form; crossings stated at the vertex (docs/113) |
+| J2 | S1 | law 4, 78.130, 78.45 | flows.rs:637-676 (`collections`, PR #54) | A float screen (`MARGIN = 1e-6`) in a physics decision; "certified" only by a comment, with no test of the bound | Mycelium's certified enclosures (`Encl`) in place of f64, or the exact test alone |
+| J3 | S1 | law 9, 78.21, 78.152 | hypha/src/house.rs:662-666 | The SEATS epoch posted on the wire is `SystemTime::now()`, a wall clock; beats paced by `sleep` (main.rs:345, 1388; hypha main.rs:402, 679, 741) | The epoch from the ledger's TUniversal point |
+| J4 | S2 | law 12, 78.43 | pulse.rs:595; breath.rs:470-490; main.rs:368, 911 | A stored, frozen period drives the schedule against the derived one (§C14), and is sealed into the origin's radius, which can never be edited | The established period; the origin's radius from it at the next founding |
+| J5 | S1 | 78.121 | hypha/src/lib.rs:80-102 (`agree`) | Drops unmeasured laws, so "unmeasured" on one side and "breached" on the other reads as agreement | Unread is not agreement |
+| J6 | S2 | 78.154, §1.5 | hypha/src/refound.rs:96-108 | The ledger commitment is over file paths and blake3 digests of file bytes; the court can check bytes, never reconstruct the state | Canonical records with exact values |
+| J7 | S2 | §42.7 | flows.rs:1386, 3645-3660 | The passage a scalar reach map; the tests pin LAW-PASSAGE v1's fixtures, which Mycelium has since struck; the dead `H²/R` model still cited in EQUATIONS.md:1711 | (F) The passage `v_k·q`; tests to v2's fixtures; EQUATIONS corrected |
+| J8 | S2 | 78.45(2), law 1, rule 11 | formation.rs:243-259; flows.rs:292-308 | Fixed-count forward guesses: 24 bisections for the collapse width, 64 halvings then 0 | Closed forms (§C12) |
+| J9 | S2 | law 2, rule 15 | ring.rs:231-237 (`birth_key`) | A body's identity is the bell plus a 60⁶-mark sector, bumped +1 on a collision: it depends on the reading's resolution and on processing order | Identity as the body's content |
+| J10 | S2 | laws 4, 7 | ring.rs:192-195; enfold.rs:28-55, 134-138; flows.rs:226-231; pulse.rs:964-969; breath.rs:480 | Rounding to fixed sexagesimal places; residue below one nucleus leaves the state with only a tally, and the tally is floored | Remainders carried, never discarded (§C13) |
+| J11 | S3 | §0.0 | nuclides.rs:21 (`READ = 8192`); ring.rs:193, enfold.rs:167 (60, 60⁶); pulse.rs:40-44, 66-69 (1024·60³⁰); the 24 and 64 counts; ocean.rs:72-74 (default 2) | Underived numbers not named as open physics; `tier`'s imports registered (docs/108) but live | Register each or derive it |
+| J12 | S3 | 78.122, 78.152 TU-5 | hypha/src/lib.rs:174-201; main.rs:916-931; ledger/src/lib.rs:46, 169, 212; chem.rs:116 | The lexicon version is returned and compared with nothing; `TPoint` hand-parsed, keeping `h` only; an in-game `TUniversal{S,G,T}` collides with the clock; `protons(w).unwrap_or(0)` files weights past 8192 under Z = 0 | Compare the version; `TPoint::parse`; rename; refuse past the read |
+| J13 | S2 | 78.165, 78.169 | refound.rs:491-493; house.rs:96-98 | A local throat's keeper is `line_key`, blake3 of a name: a key nobody holds | A held key |
+| J14 | S3 | 78.62 L0, 78.169(3) | EQUATIONS.md:1726 | Only LAW-DILATION is declared, with no version; the hypha never reads `LAW_VERSION` | Declare each law with its version; read L0's |
+| J15 | S3 | 78.132, .139, .140 | refound.rs; fold.rs:254-282 | The origin commits the seed only, not the laws as ratios or the drawn parameters | The Big Bang record whole |
+| J16 | S3 | 78.31, 76.1 | pulse.rs:219-247; breath.rs:1584-1591 | Tiers as a `match depth` table; orphaned worlds to the "nearest" star by `min_by_key` | Recursion through the core; placement by law |
+| J17 | S4 | rules 4, 15, 11; MU-STANDARDS 2.4 | flows.rs:1307, 1684, 1699; pulse.rs:1120; `unwrap_or` 374 times | Index tie-breaks (`.then(a.cmp(b))`); invented values for missing ones | Ties held; refusals, never defaults |
+
+**Honoured:** polytonic lanes never summed (law 5); amendment versus fork
+and the origin never edited (78.59 Ruling 2, 78.132); the shared law forms
+passed in (78.131); the manifest as nuclei per Z, unit-free (78.155b,
+with J12's defect); the Concordance signed (78.169(4)); the reserve's
+designation (78.138); conservation witnessed internally (78.89, though
+never stated as L0 `Flux`). Of J1–J17, three were not in Netstratum's own
+record: J2, J3 and J13.
+
