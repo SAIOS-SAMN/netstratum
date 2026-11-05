@@ -587,3 +587,29 @@ as its even multivector, and its degree reading is a certified
 sexagesimal sector at the depth asked, never a stored rational. How such a
 rate advances a state stored in degrees, as an exact interval over bells,
 is to be derived. Fixture 11b (Mycelium 78.173) waits on it.
+
+## 12. The passage is the pole swap; its flux on T is the span's change
+
+This section closes §9.3's open return and the passage flux Mycelium held
+open (78.173 §7). Operator, 2026-11-05: the flux is "the span's change".
+
+1. **The passage is the reflection in the throat's unit `e₊`** (§10.1), the
+   pole swap `n_Z ↔ n_Q`. It does not multiply the state by a plane's
+   direction `v_k` (§9.3). Because `e₊² = +1`, two passes are the identity
+   exactly: `M∘M = 1`, with no square. That retires §9.3's `H² − R_k²`.
+2. **No reach moves.** The swap reverses the span, `A − Q ↦ Q − A`, and keeps
+   `|A − Q|`. This is LAW-PASSAGE derived, not imposed. `flows::through`,
+   the reach map `2H − R`, is not the passage and is retired (register A22).
+3. **The sheet is the span's sign,** stored on `S` (R's plane's span,
+   docs/120 §1). A passage flips it. A body on the vacuum stream is one on
+   the negative sheet. The sheet is read from the state, never kept as a
+   flag.
+4. **One passage writes its span's change on `T`:** `T ↦ T − 2·(A − Q)`, with
+   `A − Q` the span before the pass. This is first degree and signed, and it
+   carries the crossing's size. A pass and its immediate return cancel on
+   `T` (`−2s` then `−2·(−s)`), as `M∘M = 1` cancels on the state.
+5. **At a pole the passage is one-way** (§9.3, §10.1): the state is null
+   there, and the swap carries it into the singularity or out to infinity
+   with no return. That is the event horizon of a pole. The throat
+   (`A = Q`) has span zero: a passage there writes nothing on `T` and flips
+   a sheet of no width.
