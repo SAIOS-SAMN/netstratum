@@ -407,15 +407,20 @@ pub fn shine(
     let mut received = ratio(0, 1);
     // Each body's unlocked face at its reach, read by the one enclosure it
     // stands in, at its own spin there.
-    let unlocked = |ell: &Ratio| ratio(1, 1) - enc.reach(ell).1;
+    // One face law (register B7, B16): a world and a continuum mote on the
+    // open axis, a vacuum mote on the closed.
+    let unlocked = |ell: &Ratio, axis: crate::polarity::Axis| {
+        crate::polarity::faces_on(&enc.reach(ell).1, axis).1
+    };
     for w in worlds.iter_mut() {
-        let warm = l.clone() * unlocked(&w.ell) / whole.clone();
+        let warm = l.clone() * unlocked(&w.ell, crate::polarity::Axis::Open) / whole.clone();
         let now = crate::ring::grain(&(w.heat.clone() + warm));
         received += (now.clone() - w.heat.clone()) * mass(&w.kept);
         w.heat = now;
     }
     for x in motes.iter_mut() {
-        let warm = l.clone() * unlocked(&x.ell_o) / whole.clone();
+        let warm = l.clone() * unlocked(&x.ell_o, crate::polarity::Axis::of_stream(x.vacuum))
+            / whole.clone();
         // What actually entered its heat (agitation still stands on the
         // coordinate's grain, docs/84 §3): the ledger counts that, so made =
         // received + drained stays exact.
@@ -458,7 +463,8 @@ pub fn shine_systems(
             continue;
         }
         // The system's unlocked face at its reach in the galaxy's one frame.
-        let unlocked = ratio(1, 1) - enc.reach(&sys.ell).1;
+        let unlocked =
+            crate::polarity::faces_on(&enc.reach(&sys.ell).1, crate::polarity::Axis::Open).1;
         let taken = l.clone() * unlocked * held.clone() / whole.clone();
         let Some(enc_s) = crate::formation::system_frame(sys, unit) else {
             drained += taken;

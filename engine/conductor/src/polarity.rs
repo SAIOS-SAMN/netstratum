@@ -27,10 +27,48 @@ pub fn after(x0: &Ratio, alpha: &Ratio, beta: &Ratio, n: u32) -> Option<Ratio> {
     Some(star.clone() + (x0.clone() - star) * pow)
 }
 
-/// The faces at a deficit δ under inverse gravity (docs/104 §0): `(g, u)`, the
-/// held share `1 − δ` and the unlocked share `δ`. A pair: `g + u = 1`.
+/// The axis a plane's state is read from (docs/117 §8.2): a face is that
+/// axis. The open axis `Q` reads the continuum (its turning share `δ`, its
+/// drag `1 − δ`); the closed axis `Z` the two exchanged, the inverse
+/// (docs/104) and the vacuum stream.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Axis {
+    /// The open axis `Q`: held (the turning share) `δ`, unlocked `1 − δ`.
+    Open,
+    /// The closed axis `Z`: the two exchanged.
+    Closed,
+}
+
+impl Axis {
+    /// The axis a mote's state is read from: the continuum from the open
+    /// axis, the vacuum stream (the continuum inverted) from the closed.
+    pub fn of_stream(vacuum: bool) -> Axis {
+        if vacuum {
+            Axis::Closed
+        } else {
+            Axis::Open
+        }
+    }
+}
+
+/// The one face law (docs/117 §8.2, register B7): the faces `(g, u)` at a
+/// deficit δ read from `axis`, the held share and the unlocked. From the open
+/// axis the held share is the turning `δ` and the unlocked the drag `1 − δ`
+/// (the continuum: the tide heats by `1 − δ`, ruling 2026-10-16); from the
+/// closed axis the two exchange (docs/104's inverse). A pair on either:
+/// `g + u = 1`.
+pub fn faces_on(delta: &Ratio, axis: Axis) -> (Ratio, Ratio) {
+    let (velocity, drag) = (delta.clone(), ratio(1, 1) - delta.clone());
+    match axis {
+        Axis::Open => (velocity, drag),
+        Axis::Closed => (drag, velocity),
+    }
+}
+
+/// The faces under inverse gravity (docs/104 §0), read from the closed axis:
+/// the held share `1 − δ` and the unlocked share `δ`.
 pub fn faces(delta: &Ratio) -> (Ratio, Ratio) {
-    (ratio(1, 1) - delta.clone(), delta.clone())
+    faces_on(delta, Axis::Closed)
 }
 
 /// The held share AT the throat (`R = H`): the faces equal, the inversion's
@@ -42,6 +80,20 @@ pub fn throat_held() -> Ratio {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn one_face_law_read_from_either_axis_exchanges_its_shares() {
+        let d = ratio(2, 7);
+        let (g_q, u_q) = faces_on(&d, Axis::Open);
+        let (g_z, u_z) = faces_on(&d, Axis::Closed);
+        assert_eq!((g_q.clone(), u_q.clone()), (u_z.clone(), g_z.clone()));
+        assert_eq!(g_q.clone() + u_q.clone(), ratio(1, 1));
+        // The continuum (open axis) holds its turning share and heats by
+        // `1 − δ` (ruling 2026-10-16); the inverse (closed) the exchange
+        // (docs/104).
+        assert_eq!((g_q, u_q), (d.clone(), ratio(5, 7)));
+        assert_eq!(faces(&d), faces_on(&d, Axis::Closed));
+    }
 
     #[test]
     fn the_master_equation_conserves_its_poles_and_stands_at_its_pair_share() {

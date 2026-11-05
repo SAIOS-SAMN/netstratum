@@ -251,6 +251,16 @@ what MU-RECURSION law 8 asks.
   closed repeat, so the form holds each lane exactly and assumes no period.
   §2's advance does: `K` counts H's whole turns; no cycle is assumed.
 
+- **LAW-FIELD v1 (Mycelium 78.171), 2026-11-05:** read against docs/114–121,
+  amended by Mycelium. The pole basis is its null pair (`e₀/e∞` written
+  `n_Z/n_Q`, docs/117 §10), the throat's fixed sphere its membrane. Its
+  signature is read per plane (`Cl(p, q)`). A point holds its winding with
+  each phase, so `H` stays exact and `K = ⌊|H|⌋`. Mycelium's operator agreed
+  that a sphere enters the field's law only as a holding's own enclosure,
+  never as a reference surface, so docs/117's `S⁷ ⊂ S¹¹` stands as nested
+  enclosures. Its fixtures 1–6 hold by hand; they are read as tests when its
+  form has an API.
+
 ## 9. What is open
 
 1. **G's content.** That a hue move is a change of kind (the place on S¹¹)

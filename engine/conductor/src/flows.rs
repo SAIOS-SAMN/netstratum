@@ -287,17 +287,11 @@ pub fn open(k: &crate::chem::Kind) -> Ratio {
     )
 }
 
-/// The two faces at a deficit, read through the inversion (docs/104 §0):
-/// `(held, unlocked) = (1 − δ, δ)`.
-pub fn face(delta: &Ratio) -> (Ratio, Ratio) {
-    (ratio(1, 1) - delta.clone(), delta.clone())
-}
-
 /// The band at reach R about the hold H for a kind carried `q = ½·w̄_c/w`
 /// (docs/104 §6.2): `q·u − ½·g·R·H` on the faces `(g, u)` at
 /// `δ = H/(R + H)`; zero at `R·R = 2q` whatever H holds (§6.3).
 pub fn band(q: &Ratio, r: &Ratio, h: &Ratio) -> Ratio {
-    let (g, u) = face(&(h.clone() / (r.clone() + h.clone())));
+    let (g, u) = crate::polarity::faces(&(h.clone() / (r.clone() + h.clone())));
     q.clone() * u - ratio(1, 2) * g * r.clone() * h.clone()
 }
 
@@ -3263,7 +3257,7 @@ mod passage_tests {
         let light = ratio(1, 2) * ratio(9, 4);
         assert!(super::band(&light, &ratio(1, 1), &ratio(1, 1)) > ratio(0, 1));
         assert_eq!(
-            super::face(&ratio(1, 2)),
+            crate::polarity::faces(&ratio(1, 2)),
             (ratio(1, 2), ratio(1, 2)),
             "the faces balance at the ring"
         );
