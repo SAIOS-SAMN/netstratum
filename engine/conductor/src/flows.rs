@@ -43,7 +43,7 @@
 //! the disc).
 use crate::pulse::Manifest;
 use cfe::ratio::{ratio, Ratio};
-use num_traits::Zero;
+use num_traits::{Signed, Zero};
 
 /// The SPATIAL PLANES (docs/95): a nucleus weighs `3Z`, one frame of each
 /// proton on each of three axes, and each axis is a plane of its closed (Z)
@@ -746,25 +746,37 @@ fn held_share(r: &Ratio, h: &Ratio, p: &Ratio) -> Ratio {
     ((h.clone() - lo) / span).max(ratio(0, 1)).min(ratio(1, 1))
 }
 
+/// A body's own enclosure (docs/120 §8c, operator 2026-11-05), read and
+/// never stored: on each plane of its orbit (the orbit, the circulation),
+/// where its own pull meets its enclosure's, the pinch share `m/(m + H(<R))`
+/// of its reach (`ring::pinch_share`), in degrees: its degrees of separation
+/// there. `m` is its holding in the enclosure's unit `whole`.
+pub fn own_enclosure(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
+    let m = if whole.is_zero() {
+        ratio(0, 1)
+    } else {
+        mote.amount.clone() * weight(&mote.key) / whole.clone()
+    };
+    [&mote.ell_o, &mote.ell_orth].map(|ell| {
+        let h = enc.hold(&ell.abs());
+        ratio(360, 1) * crate::ring::pinch_share(&m, &h)
+    })
+}
+
 /// The cut as A reading, by the one enclosure (one grammar: the hold the
 /// exits and the ring law read, `H(<ℓ)` with the throat its base, never a
 /// second hold of its own): a mote's held share in each plane, its reach
-/// `R = |ℓ|/H(<|ℓ|)` spread by the push about the hold there, `f_o·f_c`. A
-/// spin's sense is a direction, never a reach.
-pub fn held(mote: &Mote, enc: &Enclosed, p: &Ratio) -> Ratio {
-    let size = |x: &Ratio| {
-        if *x < ratio(0, 1) {
-            -x.clone()
-        } else {
-            x.clone()
-        }
-    };
-    let plane = |ell: &Ratio| {
-        let l = size(ell);
+/// `R = |ℓ|/H(<|ℓ|)` with its own enclosure about it (`own_enclosure`), the
+/// part of it within the hold there, `f_o·f_c`. A spin's sense is a
+/// direction, never a reach.
+pub fn held(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> Ratio {
+    let own = own_enclosure(mote, enc, whole);
+    let plane = |ell: &Ratio, k: usize| {
+        let l = ell.abs();
         let (r, _) = enc.reach(&l);
-        held_share(&r, &enc.hold(&l), p)
+        held_share(&r, &enc.hold(&l), &(own[k].clone() / ratio(360, 1)))
     };
-    plane(&mote.ell_o) * plane(&mote.ell_orth)
+    plane(&mote.ell_o, 0) * plane(&mote.ell_orth, 1)
 }
 
 /// The enclosed holding (the ring-density law, Xylarium 11.0: a ring is
@@ -1523,11 +1535,11 @@ pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
 
 /// The galaxy's held and free manifests, read from its motes: on the
 /// disc leg by the cut in its one enclosure; on the axial leg, in transit, never held.
-pub fn read_cut(motes: &[Mote], enc: &Enclosed, p: &Ratio) -> (Manifest, Manifest) {
+pub fn read_cut(motes: &[Mote], enc: &Enclosed, whole: &Ratio) -> (Manifest, Manifest) {
     let (mut kept, mut free) = (Manifest::new(), Manifest::new());
     for x in motes {
         let share = if on_disc_leg(x) {
-            held(x, enc, p)
+            held(x, enc, whole)
         } else {
             ratio(0, 1)
         };

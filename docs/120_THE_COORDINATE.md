@@ -310,6 +310,13 @@ semantically, and dimensionally". (Never "cells": ruling 2026-10-16.)
   Its held share is read from it.
 - **A passage** exchanges reach and hold and carries the enclosure whole:
   `H + R` is kept, so the volume is conserved through the crossing.
+- **The extent is derived, never set** (operator 2026-11-05: "let the
+  codebase derive the degrees of separation"): `flows::own_enclosure` reads
+  a body's degrees of separation on each plane of its orbit. They are where
+  its own pull meets its enclosure's, the pinch share `m/(m + H(<R))`
+  (`ring::pinch_share`), as `360°·m/(m + H(<R))`. Nothing stores a width. The
+  cut's held share (`flows::held`) reads the part of that enclosure within
+  the hold; captures and bonds follow.
 
 ## 9. What is open
 

@@ -2268,7 +2268,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 });
                 jets += 1;
             }
-            let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &p);
+            let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &g_mass);
             core.kept = kept;
             core.medium = free;
             // The bindings, where the motes are; the echo compresses only
@@ -2671,7 +2671,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             motes_in[4] += held_before.saturating_sub(core.flows.len());
             motes_in[5] = core.flows.len();
             core.reservoir += remainder;
-            let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &p);
+            let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &g_mass);
             core.kept = kept;
             core.medium = free;
             core.gas.clear();
