@@ -636,3 +636,17 @@ open (78.173 §7). Operator, 2026-11-05: the flux is "the span's change".
      worlds from 14 to 0 (the return leg). That confirms the old frame
      cannot hold the passage.
 
+### 11.5 The founding's lean is an inter-plane turning (Xylarium T18)
+
+Xylarium's T18: founded matter is isoclinic (its plane components equal),
+and the planes separate only through a link's turnings between them, the
+split antisymmetric and weighted by each plane's hold. The founding lean
+(`pulse::orient`, operator 2026-11-04 option (a)) is `(⅓ + g, ⅓, ⅓ − g)`: one
+plane gains a grain and another loses it, the offsets summing to zero. That
+is a turning of one grain from the lagging plane into the leading one, `τ =
+g`, antisymmetric and off-diagonal, split equally because the founding's
+holds are equal. Every law treats the planes alike, so some initial turning
+between planes is needed for any separation; T18 says its form, and the
+lean has that form. With per-plane spins (docs/120 §6), it is stored as
+that turning.
+
