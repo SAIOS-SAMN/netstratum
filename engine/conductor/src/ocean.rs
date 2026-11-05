@@ -79,23 +79,6 @@ pub fn swing(r: &Ratio, h_g: &Ratio, h_u: &Ratio) -> (Ratio, Ratio) {
     )
 }
 
-/// The swing's radial share at a crossing of the crest at `at` (proposed; a
-/// reading, never a trajectory): the crossing's place along the swing as a
-/// share `u = (at − R₋)/(R₊ − R₋)`, read by the coherence form
-/// `e·(1 − |2u − 1|)`: zero at the turnings, e at the guiding reach, never
-/// more than e; no square, no root.
-pub fn radial_share(r: &Ratio, h_g: &Ratio, at: &Ratio, h_u: &Ratio) -> Ratio {
-    let (lo, hi) = swing(r, h_g, h_u);
-    if hi <= lo {
-        return ratio(0, 1);
-    }
-    let e = (hi.clone() - r.clone()) / r.clone();
-    let u = (at.clone() - lo.clone()) / (hi - lo);
-    let off = ratio(2, 1) * u - ratio(1, 1);
-    let off = if off < ratio(0, 1) { -off } else { off };
-    e * (ratio(1, 1) - off).max(ratio(0, 1))
-}
-
 /// The pump (convection, with Xylarium; docs/83): the universal tide a
 /// swinging galaxy feels differs between its turnings,
 /// `π = δ_u(R₋) − δ_u(R₊)`, zero for a circle. The outside tide enters the

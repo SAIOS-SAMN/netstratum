@@ -166,6 +166,19 @@ fn carried_spin(m: &crate::pulse::Manifest, at: &Ratio, orth: &Ratio, unit: &Rat
     mass(m) / unit.clone() * (crate::ring::grain(at) + orth.clone())
 }
 
+/// A galaxy's frame map for a mote's spin, the exit (register B5): carried
+/// into the universe by its galaxy's share `f`, `ℓ_u = ℓ_g + ℓ·f`.
+pub fn to_universe(ell: &Ratio, ell_g: &Ratio, f: &Ratio) -> Ratio {
+    ell_g.clone() + ell.clone() * f.clone()
+}
+
+/// The arrival, the exit's inverse (docs/120 §5, register B5): signed,
+/// nothing placed, `ℓ = (ℓ_u − ℓ_g)/f`; None where the galaxy holds nothing.
+pub fn from_universe(ell_u: &Ratio, ell_g: &Ratio, f: &Ratio) -> Option<Ratio> {
+    use num_traits::Zero as _;
+    (!f.is_zero()).then(|| (ell_u.clone() - ell_g.clone()) / f.clone())
+}
+
 /// A star system's nested clock: its galaxy's share (none for the home) times
 /// its orbit's, the rings it receives at its reach, `1 − δ`, δ by its
 /// galaxy's one enclosure at its own spin (`galaxy_frame`).
@@ -536,7 +549,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 })
                 .collect();
             let reach = galaxies[i].1.clone();
-            let h_g = galaxies[i].2.clone();
             // The galaxy's share of the universe: a mote's own spin crosses
             // between the galaxy's frame and the universe's by it, once (×f
             // out, /f home), so its turning survives the round trip.
@@ -545,11 +557,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             } else {
                 crate::pulse::mass(&u.cores[i].total()) / whole.clone()
             };
-            let ell_g = u.cores[i].ell.clone();
+            let (ell_g, orth_g) = (u.cores[i].ell.clone(), u.cores[i].ell_orth.clone());
             let frame = crate::pulse::ocean_frame(u);
-            // Each landing mote with its own crossing turning (with Xylarium):
-            // in the orbit plane its spin against the galaxy's orbit there,
-            // `|ℓ_m − ℓ_g|/f`; across it, the swing's radial share at its reach.
+            // Each landing mote is re-origined into the galaxy (docs/120 §5,
+            // register B5): the exit's frame map `ℓ_u = ℓ_g + ℓ·f` inverted,
+            // signed, in each orbit, `ℓ = (ℓ_u − ℓ_g)/f`; nothing placed and
+            // no reach moved, so its spin about the universal core is kept
+            // exactly. A galaxy holding nothing takes no arrival.
             let mut landed: Vec<(crate::flows::Mote, Ratio, Ratio)> = Vec::new();
             let mut flowing: Vec<crate::flows::Mote> = Vec::new();
             for x in std::mem::take(&mut u.ocean) {
@@ -575,19 +589,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         d(a).cmp(&d(b)).then(b.0.cmp(&a.0))
                     })
                     .map(|g| g.0);
-                if best == Some(i) {
-                    let rel = if x.ell_o > ell_g {
-                        x.ell_o.clone() - ell_g.clone()
-                    } else {
-                        ell_g.clone() - x.ell_o.clone()
-                    };
-                    let t_o = if f_g.is_zero() {
-                        ratio(0, 1)
-                    } else {
-                        rel / f_g.clone()
-                    };
-                    let t_c = crate::ocean::radial_share(&reach, &h_g, &r_m, &h_u);
-                    landed.push((x, t_o, t_c));
+                if best == Some(i) && !f_g.is_zero() {
+                    let ell = from_universe(&x.ell_o, &ell_g, &f_g);
+                    let orth = from_universe(&x.ell_orth, &orth_g, &f_g);
+                    if let (Some(ell), Some(orth)) = (ell, orth) {
+                        landed.push((x, ell, orth));
+                    }
                 } else {
                     flowing.push(x);
                 }
@@ -2013,26 +2020,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // (The arrivals ride the vacuum's loop; each passes the throat
             // when its orthogonal phase crosses ½ in the torques, below.)
             let mut in_throat: Vec<usize> = Vec::new();
-            for (x, t_o, t_c) in gathered {
+            for (x, ell_o, ell_orth) in gathered {
                 let (k, a, agitation) = (x.key, x.amount, x.agitation);
-                // It lands from the ring (docs/94 §2), within its disc's span
-                // (its matter's share of its hold: 1 for a galaxy, the home's
-                // share of the universe for the home), at the balance of its
-                // place in the galaxy's one enclosure; its own crossing
-                // turning carried.
-                let span = if home && !whole_u.is_zero() {
-                    mass(&core.total()) / whole_u.clone()
-                } else {
-                    ratio(1, 1)
-                };
-                let r_land =
-                    ratio(1, 1) + span * p.clone() * mean.clone() / crate::flows::weight(&k);
-                let h_land = enc
-                    .as_ref()
-                    .map(|e| e.hold_within(&r_land))
-                    .unwrap_or_else(|| ratio(1, 1));
-                let ell_o = r_land * h_land + nested(g_rate.as_ref(), t_o);
-                let ell_orth = nested(g_rate.as_ref(), t_c);
                 // It arrives with the Wellspring's winding: its orthogonal orbit leads its orbit by
                 // the push share (½ at the universe tier), the jet's helix.
                 motes_in[0] += 1;
@@ -2288,8 +2277,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     mass(&core.total()) / whole_u.clone()
                 };
                 let (ell_u, orth_u) = (
-                    crate::ring::grain(&(core.ell.clone() + x.ell_o.clone() * f_g.clone())),
-                    crate::ring::grain(&(core.ell_orth.clone() + x.ell_orth.clone() * f_g)),
+                    crate::ring::grain(&to_universe(&x.ell_o, &core.ell, &f_g)),
+                    crate::ring::grain(&to_universe(&x.ell_orth, &core.ell_orth, &f_g)),
                 );
                 to_ocean.push(crate::flows::Mote {
                     ell_o: ell_u,
@@ -2803,6 +2792,20 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn an_arrival_is_the_exits_inverse_signed() {
+        // Register B5: a round trip through the ocean returns a mote's spin
+        // exactly, either sense; a galaxy holding nothing takes none.
+        let (ell_g, f) = (ratio(3, 7), ratio(2, 5));
+        for ell in [ratio(1, 3), ratio(-5, 4), ratio(0, 1)] {
+            let out = to_universe(&ell, &ell_g, &f);
+            assert_eq!(from_universe(&out, &ell_g, &f), Some(ell));
+        }
+        // A mote counter-turning against its galaxy lands counter-turning.
+        assert!(from_universe(&ratio(1, 7), &ell_g, &f).expect("held") < ratio(0, 1));
+        assert_eq!(from_universe(&ratio(1, 1), &ell_g, &ratio(0, 1)), None);
+    }
 
     #[test]
     fn the_home_has_no_clock_of_its_own_and_its_stars_read_the_source_directly() {
