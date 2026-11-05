@@ -1227,11 +1227,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         .into_iter()
                         .map(|(k, l)| {
                             let r = l / held_k.clone() * lambda.clone();
-                            let h = frame
+                            // One reach (register B11): the spin the
+                            // enclosure reads back at exactly `r`.
+                            let ell = frame
                                 .as_ref()
-                                .map(|e| e.hold_within(&r))
-                                .unwrap_or_else(|| lambda.clone());
-                            (k, r * h)
+                                .map(|e| e.spin_at(&r))
+                                .unwrap_or_else(|| r.clone() * lambda.clone());
+                            (k, ell)
                         })
                         .collect()
                 };
@@ -1759,7 +1761,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     continue;
                 }
                 let n = ratio(cl.len() as i64, 1);
-                let r_m = reach_m(&core.flows[mi]);
                 let whole_amount = core.flows[mi].amount.clone();
                 for si in cl {
                     let take = if n == ratio(1, 1) {
@@ -1771,75 +1772,45 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     if take <= ratio(0, 1) {
                         continue;
                     }
-                    let Some((r_s, _)) = spheres[si].clone() else {
+                    if spheres[si].is_none() {
                         continue;
-                    };
+                    }
                     core.flows[mi].amount -= take.clone();
                     let x = core.flows[mi].clone();
-                    let (w_sys, kept_m) = masses[si]
+                    let (w_sys, _) = masses[si]
                         .get_or_insert_with(|| (mass(&keep[si].total()), mass(&keep[si].kept)))
                         .clone();
                     let s = &mut keep[si];
                     let key = x.key.clone();
                     let m = take.clone() * crate::flows::weight(&key);
-                    // Its circulation against the star's, read before the book
-                    // moves the star's.
-                    let carried_c = if x.ell_o.is_zero() {
-                        ratio(0, 1)
-                    } else {
-                        (x.ell_orth.clone() - s.ell_orth.clone()) / x.ell_o.clone()
-                    };
+                    // The capture split as two bodies (operator 2026-11-05;
+                    // register K1: a two-body split under the exit's frame law,
+                    // not the pole swap): the star's orbit keeps
+                    // its specific spin (its holding grows by the mote's),
+                    // and the mote keeps its motion relative to the star,
+                    // carried into the system by the system's share of the
+                    // galaxy, `(ℓ_m − ℓ_s)/λ` in each orbit, signed, placed
+                    // nowhere. `W·ℓ_s + m·ℓ_m` is kept exactly; the grain's
+                    // remainder goes to the galaxy's medium spin.
                     crate::profile::mark("cap:book");
-                    // The galaxy tier's book, both planes.
-                    if !(w_sys.clone() + m.clone()).is_zero() {
-                        let exact_o = (w_sys.clone() * s.ell.clone() + m.clone() * x.ell_o.clone())
-                            / (w_sys.clone() + m.clone());
-                        let exact_c = (w_sys.clone() * s.ell_orth.clone()
-                            + m.clone() * x.ell_orth.clone())
-                            / (w_sys.clone() + m.clone());
-                        let before = w_sys.clone() * (s.ell.clone() + s.ell_orth.clone())
-                            + m.clone() * (x.ell_o.clone() + x.ell_orth.clone());
-                        let (go, gc) = (crate::ring::grain(&exact_o), crate::ring::grain(&exact_c));
-                        let rest = before.clone()
-                            - (w_sys.clone() + m.clone()) * (go.clone() + gc.clone());
-                        core.medium_spin += rest.clone() / unit.clone();
-                        identity.push((
-                            "settle",
-                            (w_sys.clone() + m.clone()) * (go.clone() + gc.clone()) + rest - before,
-                        ));
-                        s.tilt = crate::flows::blend(&[
-                            (w_sys.clone(), s.ell.clone(), s.tilt.clone()),
-                            (m.clone(), x.ell_o.clone(), x.tilt.clone()),
-                        ]);
-                        s.ell = go;
-                        s.ell_orth = gc;
-                    }
-                    crate::profile::mark("cap:place");
-                    // The system tier: set down at its place.
-                    let gap = if r_m > r_s {
-                        r_m.clone() - r_s.clone()
-                    } else {
-                        r_s.clone() - r_m.clone()
-                    };
-                    // A galaxy length enters the system divided once by its
-                    // holding share, against its breathing rim.
                     let lam = w_sys.clone() / g_before.clone();
-                    let r_sys = if lam.is_zero() {
-                        ratio(0, 1)
-                    } else {
-                        gap / lam
+                    let rel = |own: &Ratio, star: &Ratio| {
+                        if lam.is_zero() {
+                            ratio(0, 1)
+                        } else {
+                            (own.clone() - star.clone()) / lam.clone()
+                        }
                     };
-                    let h_sys = if w_sys.is_zero() {
-                        ratio(1, 1)
-                    } else {
-                        kept_m.clone() / w_sys.clone()
-                    };
-                    crate::profile::mark("cap:frame");
-                    let h_at = crate::formation::system_frame_of(s, &unit, &w_sys, &kept_m)
-                        .map(|enc_s| enc_s.hold_within(&r_sys))
-                        .unwrap_or(h_sys);
+                    let ell_o = crate::ring::grain(&rel(&x.ell_o, &s.ell));
+                    let ell_orth = crate::ring::grain(&rel(&x.ell_orth, &s.ell_orth));
+                    let before = w_sys.clone() * (s.ell.clone() + s.ell_orth.clone())
+                        + m.clone() * (x.ell_o.clone() + x.ell_orth.clone());
+                    let after = (w_sys.clone() + m.clone()) * (s.ell.clone() + s.ell_orth.clone())
+                        + m.clone() * lam.clone() * (ell_o.clone() + ell_orth.clone());
+                    let rest = before.clone() - after.clone();
+                    core.medium_spin += rest.clone() / unit.clone();
+                    identity.push(("settle", after + rest - before));
                     crate::profile::mark("cap:mote");
-                    let ell_o = crate::ring::grain(&(r_sys * h_at));
                     let phase: Vec<Ratio> = x
                         .phase
                         .iter()
@@ -1852,7 +1823,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let mote = crate::flows::Mote {
                         key: key.clone(),
                         amount: take.clone(),
-                        ell_orth: crate::ring::grain(&(carried_c * ell_o.clone())),
+                        ell_orth,
                         ell_o,
                         phase,
                         agitation: x.agitation.clone(),
@@ -1980,7 +1951,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let mirrored = crate::flows::through(&out, &ratio(1, 1));
                     let passed = mirrored < ratio(0, 1);
                     let r = if passed { -mirrored } else { mirrored };
-                    let ell = crate::ring::grain(&(r.clone() * enc_r.hold_within(&r)));
+                    let ell = crate::ring::grain(&enc_r.spin_at(&r));
                     let d_k = base.clone() / (c.clone() + base.clone());
                     let z = ratio(i64::from(crate::chem::charge(&k)), 2);
                     let base = frac(ratio(bell as i64, 1) * ratio(2, 3) * d_k + z.clone());
@@ -2298,7 +2269,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 });
                 jets += 1;
             }
-            let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &p);
+            let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &g_mass);
             core.kept = kept;
             core.medium = free;
             // The bindings, where the motes are; the echo compresses only
@@ -2701,7 +2672,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             motes_in[4] += held_before.saturating_sub(core.flows.len());
             motes_in[5] = core.flows.len();
             core.reservoir += remainder;
-            let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &p);
+            let (kept, free) = crate::flows::read_cut(&core.flows, &galaxy_enc(core), &g_mass);
             core.kept = kept;
             core.medium = free;
             core.gas.clear();

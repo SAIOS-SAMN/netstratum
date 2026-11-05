@@ -43,7 +43,7 @@
 //! the disc).
 use crate::pulse::Manifest;
 use cfe::ratio::{ratio, Ratio};
-use num_traits::Zero;
+use num_traits::{Signed, Zero};
 
 /// The SPATIAL PLANES (docs/95): a nucleus weighs `3Z`, one frame of each
 /// proton on each of three axes, and each axis is a plane of its closed (Z)
@@ -746,25 +746,38 @@ fn held_share(r: &Ratio, h: &Ratio, p: &Ratio) -> Ratio {
     ((h.clone() - lo) / span).max(ratio(0, 1)).min(ratio(1, 1))
 }
 
+/// A body's own enclosure (docs/120 §8c, operator 2026-11-05), read and
+/// never stored: on each plane of its orbit (the orbit, the circulation),
+/// where its own pull meets its enclosure's, the pinch share `m/(m + H(<R))`
+/// of its reach (`ring::pinch_share`), a share of its reach. Its reading in
+/// degrees is open (register K3). `m` is its holding in the enclosure's
+/// unit `whole`.
+pub fn own_enclosure(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
+    let m = if whole.is_zero() {
+        ratio(0, 1)
+    } else {
+        mote.amount.clone() * weight(&mote.key) / whole.clone()
+    };
+    [&mote.ell_o, &mote.ell_orth].map(|ell| {
+        let h = enc.hold(&ell.abs());
+        crate::ring::pinch_share(&m, &h)
+    })
+}
+
 /// The cut as A reading, by the one enclosure (one grammar: the hold the
 /// exits and the ring law read, `H(<ℓ)` with the throat its base, never a
 /// second hold of its own): a mote's held share in each plane, its reach
-/// `R = |ℓ|/H(<|ℓ|)` spread by the push about the hold there, `f_o·f_c`. A
-/// spin's sense is a direction, never a reach.
-pub fn held(mote: &Mote, enc: &Enclosed, p: &Ratio) -> Ratio {
-    let size = |x: &Ratio| {
-        if *x < ratio(0, 1) {
-            -x.clone()
-        } else {
-            x.clone()
-        }
-    };
-    let plane = |ell: &Ratio| {
-        let l = size(ell);
+/// `R = |ℓ|/H(<|ℓ|)` with its own enclosure about it (`own_enclosure`), the
+/// part of it within the hold there, `f_o·f_c`. A spin's sense is a
+/// direction, never a reach.
+pub fn held(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> Ratio {
+    let own = own_enclosure(mote, enc, whole);
+    let plane = |ell: &Ratio, k: usize| {
+        let l = ell.abs();
         let (r, _) = enc.reach(&l);
-        held_share(&r, &enc.hold(&l), p)
+        held_share(&r, &enc.hold(&l), &own[k])
     };
-    plane(&mote.ell_o) * plane(&mote.ell_orth)
+    plane(&mote.ell_o, 0) * plane(&mote.ell_orth, 1)
 }
 
 /// The enclosed holding (the ring-density law, Xylarium 11.0: a ring is
@@ -780,6 +793,10 @@ pub fn held(mote: &Mote, enc: &Enclosed, p: &Ratio) -> Ratio {
 pub struct Enclosed {
     spins: Vec<Ratio>,
     held: Vec<Ratio>,
+    /// Each body's own reach (`ℓ/H(<ℓ)`), in order, with the holding standing
+    /// at or within it summed from the base: `hold_within` by bisection.
+    places: Vec<Ratio>,
+    within: Vec<Ratio>,
 }
 
 impl Enclosed {
@@ -796,9 +813,30 @@ impl Enclosed {
             run += crate::ring::grain(h);
             held.push(run.clone());
         }
+        let mut by_place: Vec<(Ratio, Ratio)> = bodies
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| !held[*i].is_zero())
+            .map(|(i, (l, _))| {
+                (
+                    l.clone() / held[i].clone(),
+                    held[i + 1].clone() - held[i].clone(),
+                )
+            })
+            .collect();
+        by_place.sort_by(|a, b| a.0.cmp(&b.0));
+        let mut within = Vec::with_capacity(by_place.len() + 1);
+        let mut run = held[0].clone();
+        within.push(run.clone());
+        for (_, h) in &by_place {
+            run += h.clone();
+            within.push(run.clone());
+        }
         Enclosed {
             spins: bodies.into_iter().map(|(l, _)| l).collect(),
             held,
+            places: by_place.into_iter().map(|(r, _)| r).collect(),
+            within,
         }
     }
 
@@ -839,14 +877,22 @@ impl Enclosed {
     /// within `r`, the hold a body standing at reach r turns about (the ring
     /// law's containment read by place, for a body known by where it stands).
     pub fn hold_within(&self, r: &Ratio) -> Ratio {
-        let mut h = self.held[0].clone();
-        for (i, l) in self.spins.iter().enumerate() {
-            let at = l.clone() / self.held[i].clone();
-            if at < *r {
-                h += self.held[i + 1].clone() - self.held[i].clone();
+        self.within[self.places.partition_point(|at| at < r)].clone()
+    }
+
+    /// The spin a body standing at reach `r` carries (register B11, one
+    /// reach): the exact inverse of `reach`, the least ℓ with `ℓ = r·H(<ℓ)`.
+    /// `H(<ℓ)` is constant between neighbouring spins and only grows, so the
+    /// steps' readings overlap and never leave a gap: each step is read once,
+    /// in order, and the first whose interval holds `r·H` is the answer.
+    pub fn spin_at(&self, r: &Ratio) -> Ratio {
+        for (k, h) in self.held.iter().enumerate() {
+            let ell = r.clone() * h.clone();
+            if self.spins.get(k).is_none_or(|top| ell <= *top) {
+                return ell;
             }
         }
-        h
+        r.clone() * self.whole()
     }
 
     /// A body's reach and deficit at spin ℓ: `R = ℓ/H(<ℓ)`, `δ = H/(R + H)`,
@@ -1508,11 +1554,11 @@ pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
 
 /// The galaxy's held and free manifests, read from its motes: on the
 /// disc leg by the cut in its one enclosure; on the axial leg, in transit, never held.
-pub fn read_cut(motes: &[Mote], enc: &Enclosed, p: &Ratio) -> (Manifest, Manifest) {
+pub fn read_cut(motes: &[Mote], enc: &Enclosed, whole: &Ratio) -> (Manifest, Manifest) {
     let (mut kept, mut free) = (Manifest::new(), Manifest::new());
     for x in motes {
         let share = if on_disc_leg(x) {
-            held(x, enc, p)
+            held(x, enc, whole)
         } else {
             ratio(0, 1)
         };
@@ -4013,5 +4059,68 @@ mod stream_tests {
             stream_delta(&d, true) + stream_delta(&d, false),
             ratio(1, 1)
         );
+    }
+}
+
+#[cfg(test)]
+mod one_reach_tests {
+    use super::Enclosed;
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn a_spin_set_at_a_reach_reads_back_that_reach() {
+        // Register B11: the spin a body is given at reach r reads back at r by
+        // the same enclosure, wherever a spin reads r exactly.
+        let enc = Enclosed::new(
+            ratio(1, 1),
+            vec![
+                (ratio(1, 2), ratio(1, 4)),
+                (ratio(3, 1), ratio(1, 2)),
+                (ratio(7, 1), ratio(1, 3)),
+            ],
+        );
+        for r in [ratio(1, 3), ratio(2, 1), ratio(9, 2), ratio(5, 1)] {
+            let ell = enc.spin_at(&r);
+            let (back, _) = enc.reach(&ell);
+            assert_eq!(back, r, "reach {r} read back");
+        }
+        // Where two spins read one reach (the steps overlap), the least.
+        let shared = ratio(12, 5);
+        assert_eq!(enc.spin_at(&shared), ratio(3, 1));
+        assert_eq!(enc.reach(&ratio(3, 1)).0, shared);
+    }
+}
+
+#[cfg(test)]
+mod hold_by_place_tests {
+    use super::Enclosed;
+    use cfe::ratio::{ratio, Ratio};
+
+    #[test]
+    fn the_hold_by_place_bisected_is_the_hold_counted_body_by_body() {
+        // Register A34: the same sum as testing every body's own reach.
+        let bodies: Vec<(Ratio, Ratio)> = (1..40i64)
+            .map(|i| (ratio((i * 37) % 53 + 1, 7), ratio(i % 5 + 1, 97)))
+            .collect();
+        let enc = Enclosed::new(ratio(1, 3), bodies.clone());
+        let mut sorted = bodies.clone();
+        sorted.sort_by(|a, b| a.0.cmp(&b.0));
+        for r in [
+            ratio(0, 1),
+            ratio(1, 2),
+            ratio(3, 1),
+            ratio(7, 2),
+            ratio(20, 1),
+        ] {
+            let mut by_hand = enc.hold(&ratio(0, 1));
+            let mut below = enc.hold(&ratio(0, 1));
+            for (l, h) in &sorted {
+                if l.clone() / below.clone() < r {
+                    by_hand += crate::ring::grain(h);
+                }
+                below += crate::ring::grain(h);
+            }
+            assert_eq!(enc.hold_within(&r), by_hand, "at {r}");
+        }
     }
 }

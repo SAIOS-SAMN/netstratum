@@ -153,3 +153,94 @@ sense and step filtered within it.
    rest changes how the universe moves; it is read before and after on a
    fresh founding, conservation and every identity exact, before it is
    built.
+
+## 9. Rulings of 2026-11-05: dipoles, and the range's field as one
+
+The operator answered §8's first and third points:
+- the sense is "both - as dipoles";
+- many neighbours act through "the range's field as one".
+
+1. **A body's moment is a dipole on each plane.** Its orientation on plane
+   k is its turning there, the component of H, in degrees. Its pole is its
+   electrons' phase state (bound or freed, docs/97 §3), so magnetism stays
+   where its open frames are. Its strength is its open frames, `m`. A dipole
+   is never a bare sign: two dipoles couple by how they stand to each other
+   on each plane, their separation in degrees, read as a share on the
+   manifold. It is not a product of two signs. Attraction and repulsion
+   remain one law: dipoles standing opposed draw together, and aligned
+   dipoles push apart.
+2. **The range's field acts as one.** The dipoles of the bodies in a body's
+   range (a range on S, §6) sum into one field, each weighted by its
+   nearness `M/(|g| + M)`. The body's dipole answers that one field, and
+   its exchange is against the range's whole holding, which conserves the
+   holding-weighted reach and turning across the range.
+3. **What remains open.** First, the dipole's coupling as a share of its
+   separation on each plane, which must be read on the manifold (the
+   turning composed by Cayley, docs/117 §11), never as a flat
+   `1 − off/180°`. Second, the electrons' pole in the coordinate's lanes.
+   Both are derived before the coupling replaces `repel`, `shear`, the
+   field exchange and the band (with its `½`, its halved step and its
+   squared rest).
+
+## 10. The coupling derived on the manifold (resolving §9.3)
+
+1. **The pole is the span's sign.** A body's frame state is `(A, Q)`, its
+   closed and open frames (docs/95 §8, docs/117 §10.1). Its dipole's pole is
+   `σ = sign(A − Q)`, closed against open, the same sign a passage flips
+   (docs/117 §12). It is read from the state: the body's holding against
+   its open frames. The electrons' phase state (B6, test-only) is not
+   needed for it.
+2. **Orientation and alignment are the hemisphere law.** The dipole's
+   orientation on plane k is its turning there, `H`'s component, in
+   degrees. Two dipoles are aligned on plane k where their separation is
+   under 90°, opposed past 90°, and uncoupled at 90°: the hemisphere law
+   (ruling of 2026-10-16), a sign `h_k ∈ {+1, 0, −1}`. Their coupling takes
+   no magnitude from a flat `1 − off/180°` or a cosine.
+3. **The range's field as one** (§9.2): for body `i`,
+   `F_i,k = Σ_j w_j·σ_j·o_j·n_ij·h_ij,k / Σ_j w_j`, against the range's
+   whole holding, its neighbours in its range on `S` (§6), with `o` the open
+   share and `n = M/(|g| + M)` the ring law's nearness. Each term stands in
+   `[−1, 1]`, so `|F| ≤ 1`, and with `o ≤ 1` and `|x̄ ⊖ x| < 1` the pull keeps
+   `|y| < 1`: the flow law then holds the rate inside the luminal bound by
+   construction. (A first draft summed the field without the holding; its
+   witness carried a rate past the bound.) The pair `σ_i·F_i,k` is the field's pull on `i` on plane k,
+   attracting where negative and repelling where positive, by one law.
+4. **Bending: rates compose by the flow law.** A rate on plane k is a share
+   of the luminal bound (`SUBSTRATE_C`, "never faster than a turn a
+   bell"), `x ∈ (−1, 1)`. The field moves it by composition,
+   `x ⊕ y = (x + y)/(1 + x·y)` (LAW-DILATION's flow law, built), where
+   `y = −σ_i·F_i,k·o_i·(x̄ ⊖ x)` is the pull toward the range's
+   holding-weighted rate `x̄`, and `⊖` is the flow law's inverse. The
+   denominator is the curvature: no step is halved, and no rate passes the
+   bound.
+5. **The rest is first degree:** `|g| = M(1 − c_g)/c_g` (§5). It replaces
+   the band's `½`, its halved step and its squared rest `R·R = 2q`
+   (register K9).
+6. **Witnesses before it is built:**
+   - the flow-law composition never passes ±1;
+   - aligned dipoles push their rates apart and opposed ones lock them;
+   - the range's holding-weighted rate is kept where the field exchanges
+     between neighbours;
+   - a body alone in its range is untouched.
+
+## 11. Shear is the degree of modulation at every level (operator, 2026-11-05)
+
+The operator ruled: "shear needs to be the degree of modulation at any
+dimensional level (phase, quantum, state)".
+
+- **Shear is the degree of modulation:** the difference, in degrees a bell,
+  between a body's rate and its range's field's rate, composed by the flow
+  law (§10.4). It is not a spin exchange between neighbouring rings
+  (`flows::shear`'s reading, one level, one way).
+- **The same law at every level of the tower** (docs/117):
+  - **phase:** the turning on each plane, `H`'s components;
+  - **quantum:** the riding state's modulation on `S³ ⊂ S¹¹`, the change of
+    kind on `G`;
+  - **state:** the span's dilation on `S`, and the passages on `T`.
+- **Each level's rate is a share of its own luminal bound,** and each change
+  is booked on that level's own ledger: spin `Σ m·ℓ` at the phase level,
+  the span at the state level, the hue moves at the quantum level.
+  `coupling::pulled` is that one law; the level is which lane it reads.
+- **What the engine holds today:** the phase level, as spins and phases, and
+  the state level, as reach. `G` holds no rate yet (docs/120 §9 item 1), so
+  the quantum level is read where the code gains it.

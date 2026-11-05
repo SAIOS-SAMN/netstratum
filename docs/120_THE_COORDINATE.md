@@ -56,12 +56,12 @@ Every body (a mote, a star, a world, a galactic core) stands at
 | `h` | the bell, the universe's tick, from the founding | a count |
 | `S` | its cumulative boost: the dilation of its reach, R's plane's span (docs/117 §10.2) | exact, signed |
 | `G` | its cumulative hue move: the change of its kind, its place on S¹¹ (docs/97 §2, docs/117 §5) | exact |
-| `T` | its cumulative null flux: its passages through the throat and at the poles (docs/117 §9.3, §10.1) | exact, signed |
+| `T` | its cumulative null flux: each passage through the throat writes its span's change, `−2·(A − Q)` (docs/117 §12) | exact, signed |
 | `H` | its cumulative turning: the turnings between planes the code's phases read (docs/117 §10.3) | exact, signed |
 | `K` | the orbits it has closed | a count |
 
 - **The coordinate is the state.** A body's reach is read from `S`, its
-  kind from `G`, its face and sheet from `T`, its place on its orbit from
+  kind from `G`, its sheet from the sign of `S`'s span (docs/117 §12), its crossings' flux from `T`, its place on its orbit from
   `H`, its completed turns from `K`, each at its enclosure. The fields a
   mote carries now (reach, spin magnitudes, tilt, phases, `vacuum`, kind)
   become readings of its coordinate.
@@ -260,6 +260,64 @@ what MU-RECURSION law 8 asks.
   never as a reference surface, so docs/117's `S⁷ ⊂ S¹¹` stands as nested
   enclosures. Its fixtures 1–6 hold by hand; they are read as tests when its
   form has an API.
+
+## 8b. A lane is a vector at every tick (operator, 2026-11-05)
+
+The operator ruled: "for each sexigesimal tick you contain your entire
+universe on a dimension as a vector". A lane is never one number:
+
+- **Each lane holds a vector on the axes,** the universe's whole content on
+  that dimension. `H` holds the per-plane phases and the turnings between
+  planes as one degree-2 generator on the poles basis (docs/117 §8, §10),
+  never a phase folded into a rational; `S`, `G` and `T` likewise hold their
+  components on the axes they move on.
+- **The sexagesimal reading reads the vector at each tick:** a sector at
+  depth `d` is the exact cell holding every component, never a reading of
+  one component or of a norm (no square, no scalar collapse).
+- **Order and ranges stay first degree:** the canonical key orders a lane by
+  its components in axis order, exactly; a range on a lane is a range on one
+  of its components, read by bisection as now.
+- **What this changes:** LAW-COORDINATE v1 (78.173) holds each lane as one
+  exact rational, so `H` across three planes is a scalar collapse. Brought to
+  Mycelium before v0.4.0's tag; `conductor::coordinate` follows the agreed
+  form.
+
+## 8c. A body's own enclosure: the volume a point collapsed (operator, 2026-11-05)
+
+The operator ruled: "identify the collapse and add the volume back both
+semantically, and dimensionally". (Never "cells": ruling 2026-10-16.)
+
+- **The collapse.** A mote carries its holding as an amount at one reach,
+  one spin per orbit and one phase per plane: a point. The matter it stands
+  for occupies a volume, which the record already states. The dispersal
+  ruling (2026-10-16) has every kind spread over `R(1 ± p)`, and
+  `flows::held` reads a mote's held share as the part of `R(1 ± p)` inside
+  the throat. The volume lives in that one reading and is dropped
+  everywhere else. So every law that sets one reach for matter with extent
+  flattens it: the release's mirror (the inner edge), and either edge.
+- **Semantically: a mote is a body,** holding with its own enclosure, in the
+  grammar of stars and worlds (one grammar, coupled tiers). Its extent is
+  its own sphere about its place, the holding's own enclosure (the one
+  sphere LAW-FIELD admits). That sphere is the dispersal's half-width, `R·p`.
+- **Dimensionally: the extent is state,** carried on `S` beside the reach,
+  a component per plane of the base. A law reads how much of a body's
+  enclosure stands where: the held share, a capture, a bond and an exit are
+  each the part of the enclosure on one side of a boundary. None of them
+  compares a single reach.
+- **The release:** the core's released parcel stands at the throat (`R = 1`)
+  with its own enclosure spanning `± span·c`, both sides of the throat at
+  once, as the dispersal law states. Nothing is placed and nothing mirrored.
+  Its held share is read from it.
+- **A passage** exchanges reach and hold and carries the enclosure whole:
+  `H + R` is kept, so the volume is conserved through the crossing.
+- **The extent is derived, never set** (operator 2026-11-05: "let the
+  codebase derive the degrees of separation"): `flows::own_enclosure` reads
+  a body's extent on each plane of its orbit, where its own pull meets its
+  enclosure's, the pinch share `m/(m + H(<R))` of its reach
+  (`ring::pinch_share`). Nothing stores a width. Its reading in degrees is
+  open: a ratio of reaches is not a fraction of a turn (register K3). The
+  cut's held share (`flows::held`) reads the part of that enclosure within
+  the hold; captures and bonds follow.
 
 ## 9. What is open
 

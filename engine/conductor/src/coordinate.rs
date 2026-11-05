@@ -1,8 +1,8 @@
 // AI-GENERATED CONTENT — see DISCLAIMER.md.
 //
-//! The coordinate (docs/120; Mycelium LAW-COORDINATE v1, proposal 78.173):
-//! every body stands at a TUniversal point inside the universe,
-//! `origin / h : S : G : T : H : K`, and is addressed by it.
+//! The coordinate (docs/120; Mycelium LAW-COORDINATE, proposal 78.173,
+//! FORMS-COORDINATE v3): every body stands at a TUniversal point inside the
+//! universe, `origin / h : S : G : T : H : K`, and is addressed by it.
 //!
 //! - The `origin` is the body's enclosure: the universe's root (genesis
 //!   hash and epoch) and the enclosures it stands in, outermost first, each
@@ -13,26 +13,26 @@
 //!   of one kind, in the network's meanings: S spatial (boost and dilation,
 //!   the reach), G gauge (the change of kind), T temporal (null flux: the
 //!   beat and the passages), H holonomic (the turnings).
-//! - `K` is the orbits closed: the whole turns of H.
+//! - **A lane is a vector at every tick** (operator 2026-11-05: "for each
+//!   sexigesimal tick you contain your entire universe on a dimension as a
+//!   vector"; docs/120 §8b): its components on its axes, never one number.
+//!   `H`'s components are the planes' phases and the turnings between planes,
+//!   stored in degrees with the plane named (docs/117 §11.1).
+//! - `K` is the orbits closed, per component of `H`: `K_c = ⌊|θ_c|/360⌋`.
 //!
 //! The coordinate is the state. Motion is the closed-form advance of the
-//! lanes from one bell to another, one addition per lane, never a bell
-//! stepped; an event's bell is solved from the lanes, never stepped to; a
-//! lane is held exactly and no period is assumed. Lanes are never summed
-//! into one another.
+//! lanes from one bell to another, one addition per component, never a bell
+//! stepped; an event's bell is solved from a component, never stepped to; no
+//! period is assumed. Components are never summed into one another.
 //!
-//! Bodies are held in the canonical order ([`Bodies`]), so the neighbours
-//! on one lane are two bisections, never a test of every body. A sector of
-//! the sexagesimal reading is an exact interval `[m·60⁻ᵈ, (m + 1)·60⁻ᵈ)`
-//! on a lane: pure base 60, degrees being a caller's unit. Reading a region
-//! at a depth is a range, and expansion and contraction are depth, never
-//! iteration. The places are display only.
+//! Bodies are held in the canonical order ([`Bodies`]): a lane's components
+//! in axis order. The neighbours on one component are two bisections, never
+//! a test of every body. A sector of the sexagesimal reading is the product
+//! cell holding every component, `[m·60⁻ᵈ, (m + 1)·60⁻ᵈ)` on each, pure base
+//! 60 (on `H`, degrees;minutes,seconds). The places are display only.
 //!
-//! The interim form of Mycelium's `forms::coordinate`, its names and
-//! writing the same, so the switch is an import. Replaced by it when it is
-//! released at a tag, never kept beside it. The motion (advance, the
-//! event's bell, merger with its offsets and fission, re-origin) is stated
-//! to Mycelium as fixtures 7–10 and moves with it.
+//! The interim form of Mycelium's `forms::coordinate` v3, its names and
+//! writing the same, so the switch is an import at its tag.
 
 use cfe::ratio::{ratio, Ratio};
 use num_bigint::BigInt;
@@ -41,6 +41,9 @@ use std::cmp::Ordering;
 
 /// The reading's base.
 pub const BASE: u32 = 60;
+
+/// Degrees in a whole turn: `H`'s closed orbits count by it.
+pub const TURN: i64 = 360;
 
 /// The four lanes, in the network's meanings.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -51,7 +54,7 @@ pub enum Lane {
     G,
     /// Temporal: null flux, the beat and the passages.
     T,
-    /// Holonomic: the turnings.
+    /// Holonomic: the turnings, in degrees.
     H,
 }
 
@@ -70,18 +73,33 @@ impl Lane {
     }
 }
 
-/// A body's place within its origin: the bell, the four signed exact lanes
-/// in lane order, the orbits closed. Ordered as written.
+/// A lane's value: its components on its axes, in axis order, each exact and
+/// signed. Ordered by its components in axis order.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
-pub struct Local {
-    pub h: u64,
-    pub lanes: [Ratio; 4],
-    pub k: u64,
-}
+pub struct Value(pub Vec<Ratio>);
 
-/// The whole turns of a holonomic value, both senses counted.
-fn closed(h: &Ratio) -> u64 {
-    h.abs().floor().to_integer().try_into().unwrap_or(u64::MAX)
+impl Value {
+    /// A one-component lane.
+    pub fn one(x: Ratio) -> Value {
+        Value(vec![x])
+    }
+
+    /// Its components.
+    pub fn components(&self) -> &[Ratio] {
+        &self.0
+    }
+
+    /// Its exact writing: a one-component lane bare, `n/d`; a vector
+    /// `(n₁/d₁,n₂/d₂)`, components in axis order, lowercase hex.
+    pub fn written(&self) -> String {
+        match self.0.as_slice() {
+            [x] => lane_text(x),
+            xs => format!(
+                "({})",
+                xs.iter().map(lane_text).collect::<Vec<_>>().join(",")
+            ),
+        }
+    }
 }
 
 /// A lane's one writing: `n/d` in lowercase hex, lowest terms, a negative
@@ -94,51 +112,101 @@ fn lane_text(q: &Ratio) -> String {
     )
 }
 
+/// The whole turns of each of `H`'s components, both senses counted:
+/// `⌊|θ|/360⌋`.
+fn closed(h: &Value) -> Vec<u64> {
+    h.0.iter()
+        .map(|th| {
+            (th.abs() / Ratio::from_integer(TURN.into()))
+                .floor()
+                .to_integer()
+                .try_into()
+                .unwrap_or(u64::MAX)
+        })
+        .collect()
+}
+
+/// A body's place within its origin: the bell, the four lanes in lane order,
+/// the orbits closed per component of `H`. Ordered as written.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
+pub struct Local {
+    pub h: u64,
+    pub lanes: [Value; 4],
+    pub k: Vec<u64>,
+}
+
 impl Local {
     /// A body standing at `lanes` at bell `h`, its closed orbits read from H.
-    pub fn at(h: u64, lanes: [Ratio; 4]) -> Local {
+    pub fn at(h: u64, lanes: [Value; 4]) -> Local {
         let k = closed(&lanes[Lane::H.place()]);
         Local { h, lanes, k }
     }
 
     /// One lane's value.
-    pub fn lane(&self, lane: Lane) -> &Ratio {
+    pub fn lane(&self, lane: Lane) -> &Value {
         &self.lanes[lane.place()]
     }
 
-    /// The writing `h:S:G:T:H:K`, `h` and `K` in 16 lowercase hex digits.
+    /// The writing `h:S:G:T:H:K`, `h` and each `K` in 16 lowercase hex
+    /// digits, a vector `K` in parentheses as its lane is.
     pub fn written(&self) -> String {
         let mut fields = vec![format!("{:016x}", self.h)];
-        fields.extend(self.lanes.iter().map(lane_text));
-        fields.push(format!("{:016x}", self.k));
+        fields.extend(self.lanes.iter().map(Value::written));
+        let k: Vec<String> = self.k.iter().map(|k| format!("{k:016x}")).collect();
+        fields.push(match k.as_slice() {
+            [one] => one.clone(),
+            [] => format!("{:016x}", 0),
+            many => format!("({})", many.join(",")),
+        });
         fields.join(":")
     }
 
     /// The place advanced in closed form to bell `to` under `rate`: each
-    /// lane plus its rate times the bells between, the closed orbits read
-    /// from H. None where `to` stands before the place's own bell.
+    /// component plus its rate times the bells between, the closed orbits
+    /// read from H. None where `to` stands before the place's own bell, or a
+    /// rate's components do not match its lane's.
     pub fn advanced(&self, rate: &Rate, to: u64) -> Option<Local> {
         let bells = Ratio::from_integer(to.checked_sub(self.h)?.into());
-        let lanes =
-            std::array::from_fn(|i| self.lanes[i].clone() + rate.0[i].clone() * bells.clone());
+        let mut lanes: [Value; 4] = Default::default();
+        for (i, lane) in lanes.iter_mut().enumerate() {
+            let (x, r) = (&self.lanes[i].0, &rate.0[i].0);
+            if x.len() != r.len() {
+                return None;
+            }
+            *lane = Value(
+                x.iter()
+                    .zip(r)
+                    .map(|(x, r)| x.clone() + r.clone() * bells.clone())
+                    .collect(),
+            );
+        }
         Some(Local::at(to, lanes))
     }
 
-    /// The bell (exact, possibly between whole bells) at which `lane`
-    /// reaches `value` under `rate`, solved in first degree from the lane's
-    /// closed form. None where the lane does not move toward it, or reached
-    /// it before the place's own bell.
-    pub fn when(&self, rate: &Rate, lane: Lane, value: &Ratio) -> Option<Ratio> {
-        let r = &rate.0[lane.place()];
+    /// When component `c` of `lane` reaches `value` under `rate`, solved in
+    /// first degree from its closed form.
+    pub fn bell_of(&self, rate: &Rate, lane: Lane, c: usize, value: &Ratio) -> Option<When> {
+        let r = rate.0[lane.place()].0.get(c)?;
+        let x = self.lane(lane).0.get(c)?;
         if r.is_zero() {
-            return None;
+            return Some(When::Unmoving);
         }
-        let bells = (value.clone() - self.lane(lane).clone()) / r.clone();
-        if bells.is_negative() {
-            return None;
-        }
-        Some(Ratio::from_integer(self.h.into()) + bells)
+        let at = Ratio::from_integer(self.h.into()) + (value.clone() - x.clone()) / r.clone();
+        Some(if at < Ratio::from_integer(self.h.into()) {
+            When::Behind(at)
+        } else {
+            When::At(at)
+        })
     }
+}
+
+/// When a component reaches a value: at an exact bell, never (it does not
+/// move), or before the place's own bell (the bell it stood there).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum When {
+    At(Ratio),
+    Unmoving,
+    Behind(Ratio),
 }
 
 /// A body's enclosure: the universe's root and the enclosures it stands
@@ -181,7 +249,8 @@ impl Origin {
 }
 
 /// A body's coordinate: its origin and its place within it. Ordered as the
-/// canonical key: origin, bell, each lane in lane order, the closed orbits.
+/// canonical key: origin, bell, each lane's components in lane and axis
+/// order, the closed orbits.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct Coordinate {
     pub origin: Origin,
@@ -196,6 +265,8 @@ pub enum CoordinateRefusal {
         held: Box<Origin>,
         asked: Box<Origin>,
     },
+    /// Two lanes with different numbers of components.
+    ComponentsDiffer { lane: Lane },
 }
 
 /// Where a value stands against a sector, decided exactly.
@@ -206,27 +277,26 @@ pub enum Side {
     Above,
 }
 
-/// A body's generator read per lane: what each lane advances by a bell, by
-/// motion type.
+/// A body's rate per lane, per component: what each advances by a bell.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Rate(pub [Ratio; 4]);
+pub struct Rate(pub [Value; 4]);
 
 impl Rate {
-    /// No motion.
-    pub fn still() -> Rate {
-        Rate(std::array::from_fn(|_| ratio(0, 1)))
+    /// No motion on lanes of these component counts.
+    pub fn still(shape: [usize; 4]) -> Rate {
+        Rate(std::array::from_fn(|i| Value(vec![ratio(0, 1); shape[i]])))
     }
 }
 
 /// Two bodies joined (TU-6 SUPERPOSE): the merged coordinate and each
-/// body's offset from it per lane, kept so nothing is discarded. The
-/// offsets' holding-weighted sum is zero on every lane, and fission is the
-/// inverse.
+/// body's offset from it, per lane and component, kept so nothing is
+/// discarded. The offsets' holding-weighted sum is zero on every component,
+/// and fission is the inverse.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Merger {
     pub point: Coordinate,
     pub weights: [Ratio; 2],
-    pub offsets: [[Ratio; 4]; 2],
+    pub offsets: [[Value; 4]; 2],
 }
 
 impl Merger {
@@ -234,7 +304,14 @@ impl Merger {
     pub fn fission(&self) -> [Coordinate; 2] {
         std::array::from_fn(|b| {
             let lanes = std::array::from_fn(|i| {
-                self.point.local.lanes[i].clone() + self.offsets[b][i].clone()
+                Value(
+                    self.point.local.lanes[i]
+                        .0
+                        .iter()
+                        .zip(&self.offsets[b][i].0)
+                        .map(|(x, o)| x.clone() + o.clone())
+                        .collect(),
+                )
             });
             Coordinate {
                 origin: self.point.origin.clone(),
@@ -251,13 +328,14 @@ impl Coordinate {
     }
 
     /// One lane's value.
-    pub fn lane(&self, lane: Lane) -> &Ratio {
+    pub fn lane(&self, lane: Lane) -> &Value {
         self.local.lane(lane)
     }
 
-    /// The sexagesimal reading of `lane` at `depth`: the sector holding it.
-    pub fn reading(&self, lane: Lane, depth: u32) -> Sector {
-        Sector::holding(self.lane(lane), depth)
+    /// The sexagesimal reading of `lane` at `depth`: the product cell holding
+    /// every component.
+    pub fn reading(&self, lane: Lane, depth: u32) -> Cell {
+        Cell::holding(self.lane(lane), depth)
     }
 
     fn same_origin(&self, other: &Coordinate) -> Result<(), CoordinateRefusal> {
@@ -270,16 +348,17 @@ impl Coordinate {
         }
     }
 
-    /// Where this body stands on `lane` against the sector at `depth` that
-    /// holds `other`'s value there, on the sector's exact bounds.
+    /// Where this body stands on `lane` against the cell at `depth` that
+    /// holds `other`'s value there: a side per component, on the cell's
+    /// exact bounds. Within the cell only where every side is `Within`.
     pub fn within(
         &self,
         other: &Coordinate,
         lane: Lane,
         depth: u32,
-    ) -> Result<Side, CoordinateRefusal> {
+    ) -> Result<Vec<Side>, CoordinateRefusal> {
         self.same_origin(other)?;
-        Ok(other.reading(lane, depth).side(self.lane(lane)))
+        other.reading(lane, depth).sides(self.lane(lane))
     }
 
     /// The coordinate advanced in closed form to bell `to`, at its origin.
@@ -290,9 +369,10 @@ impl Coordinate {
         })
     }
 
-    /// Two bodies joined at one coordinate: each lane the holding-weighted
-    /// mean, each body's offset from it kept. Refused across origins; None
-    /// across bells (advance one to the other's first) or with no holding.
+    /// Two bodies joined at one coordinate: each component the
+    /// holding-weighted mean, each body's offset from it kept. Refused across
+    /// origins or component counts; None across bells (advance one to the
+    /// other's first) or with no holding.
     pub fn merged(
         &self,
         w_self: &Ratio,
@@ -300,17 +380,39 @@ impl Coordinate {
         w_other: &Ratio,
     ) -> Result<Option<Merger>, CoordinateRefusal> {
         self.same_origin(other)?;
+        for lane in Lane::ALL {
+            if self.lane(lane).0.len() != other.lane(lane).0.len() {
+                return Err(CoordinateRefusal::ComponentsDiffer { lane });
+            }
+        }
         let whole = w_self.clone() + w_other.clone();
         if self.local.h != other.local.h || whole.is_zero() {
             return Ok(None);
         }
-        let lanes: [Ratio; 4] = std::array::from_fn(|i| {
-            (self.local.lanes[i].clone() * w_self.clone()
-                + other.local.lanes[i].clone() * w_other.clone())
-                / whole.clone()
+        let lanes: [Value; 4] = std::array::from_fn(|i| {
+            Value(
+                self.local.lanes[i]
+                    .0
+                    .iter()
+                    .zip(&other.local.lanes[i].0)
+                    .map(|(a, b)| {
+                        (a.clone() * w_self.clone() + b.clone() * w_other.clone()) / whole.clone()
+                    })
+                    .collect(),
+            )
         });
-        let offsets = [self, other]
-            .map(|b| std::array::from_fn(|i| b.local.lanes[i].clone() - lanes[i].clone()));
+        let offsets = [self, other].map(|b| {
+            std::array::from_fn(|i| {
+                Value(
+                    b.local.lanes[i]
+                        .0
+                        .iter()
+                        .zip(&lanes[i].0)
+                        .map(|(x, m)| x.clone() - m.clone())
+                        .collect(),
+                )
+            })
+        });
         Ok(Some(Merger {
             point: Coordinate {
                 origin: self.origin.clone(),
@@ -321,22 +423,42 @@ impl Coordinate {
         }))
     }
 
-    /// A body carried into another enclosure across a throat (a re-origin):
-    /// written at `into`, its lanes kept and its passage recorded on T by
-    /// `flux`. No reach moves (LAW-PASSAGE): S is unchanged.
-    pub fn re_origined(&self, into: Origin, flux: &Ratio) -> Coordinate {
+    /// The passage through the throat (docs/117 §12): the pole swap, an exact
+    /// involution. The span on `S`'s first component reverses (its sheet
+    /// flips, its reach `|S|` kept: no reach moves), and `T`'s first
+    /// component gains the span's change, `−2·(A − Q)`.
+    pub fn passed(&self) -> Coordinate {
         let mut lanes = self.local.lanes.clone();
-        lanes[Lane::T.place()] += flux.clone();
+        let span = lanes[Lane::S.place()]
+            .0
+            .first()
+            .cloned()
+            .unwrap_or_else(|| ratio(0, 1));
+        if let Some(s) = lanes[Lane::S.place()].0.first_mut() {
+            *s = -span.clone();
+        }
+        if let Some(t) = lanes[Lane::T.place()].0.first_mut() {
+            *t -= ratio(2, 1) * span;
+        }
+        Coordinate {
+            origin: self.origin.clone(),
+            local: Local::at(self.local.h, lanes),
+        }
+    }
+
+    /// A body carried into another enclosure across a throat (a re-origin):
+    /// its passage (`passed`), written at `into`.
+    pub fn re_origined(&self, into: Origin) -> Coordinate {
         Coordinate {
             origin: into,
-            local: Local::at(self.local.h, lanes),
+            ..self.passed()
         }
     }
 }
 
-/// One sector of the sexagesimal reading: at `depth`, the exact interval
-/// `[index·60⁻ᵈᵉᵖᵗʰ, (index + 1)·60⁻ᵈᵉᵖᵗʰ)`. The value read is never
-/// replaced by it.
+/// One sector of the sexagesimal reading of one component: at `depth`, the
+/// exact interval `[index·60⁻ᵈᵉᵖᵗʰ, (index + 1)·60⁻ᵈᵉᵖᵗʰ)`. The value read is
+/// never replaced by it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Sector {
     pub depth: u32,
@@ -426,6 +548,47 @@ impl Sector {
     }
 }
 
+/// The sexagesimal reading of a lane at a depth: the product cell, one
+/// sector per component, holding every component at once.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Cell(pub Vec<Sector>);
+
+impl Cell {
+    /// The cell at `depth` holding every component of `value`.
+    pub fn holding(value: &Value, depth: u32) -> Cell {
+        Cell(value.0.iter().map(|x| Sector::holding(x, depth)).collect())
+    }
+
+    /// The side of each component of `value` against the cell's sectors.
+    pub fn sides(&self, value: &Value) -> Result<Vec<Side>, CoordinateRefusal> {
+        if value.0.len() != self.0.len() {
+            return Err(CoordinateRefusal::ComponentsDiffer { lane: Lane::H });
+        }
+        Ok(self
+            .0
+            .iter()
+            .zip(&value.0)
+            .map(|(s, x)| s.side(x))
+            .collect())
+    }
+
+    /// Whether `value` stands within the cell: every component within.
+    pub fn holds(&self, value: &Value) -> bool {
+        self.sides(value)
+            .is_ok_and(|s| s.iter().all(|x| *x == Side::Within))
+    }
+
+    /// The writing, for display only: a one-component cell bare, components
+    /// joined by ` × `.
+    pub fn written(&self) -> String {
+        self.0
+            .iter()
+            .map(Sector::written)
+            .collect::<Vec<_>>()
+            .join(" × ")
+    }
+}
+
 /// The bodies held, in the canonical order: the ordered key is the index,
 /// so a neighbour is found by bisection on it.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -433,8 +596,8 @@ pub struct Bodies {
     held: Vec<Coordinate>,
 }
 
-/// The bodies of one range on one lane, and the probes the two bisections
-/// that found it took (the work counter, never a clock).
+/// The bodies of one range on one component, and the probes the two
+/// bisections that found it took (the work counter, never a clock).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Neighbours<'a> {
     pub bodies: &'a [Coordinate],
@@ -475,22 +638,34 @@ impl Bodies {
         at
     }
 
-    /// The neighbours of `at` on `lane` over `[lo, hi)`: the bodies at
-    /// `at`'s origin and bell whose lanes before `lane` equal `at`'s and
-    /// whose value on `lane` lies in `[lo, hi)`. In the canonical order they
-    /// stand together, so two bisections find them.
-    pub fn range(&self, at: &Coordinate, lane: Lane, lo: &Ratio, hi: &Ratio) -> Neighbours<'_> {
+    /// The neighbours of `at` on component `c` of `lane` over `[lo, hi)`:
+    /// the bodies at `at`'s origin and bell whose lanes before `lane`, and
+    /// components before `c`, equal `at`'s, and whose component `c` lies in
+    /// `[lo, hi)`. In the canonical order they stand together, so two
+    /// bisections find them; any other component is a filter within them.
+    pub fn range(
+        &self,
+        at: &Coordinate,
+        lane: Lane,
+        c: usize,
+        lo: &Ratio,
+        hi: &Ratio,
+    ) -> Neighbours<'_> {
         let n = lane.place();
-        let key = |c: &Coordinate, v: &Ratio| -> Ordering {
-            (&c.origin, c.local.h, &c.local.lanes[..n], &c.local.lanes[n]).cmp(&(
+        let key = |x: &Coordinate, v: &Ratio| -> Ordering {
+            let mine = x.local.lanes[n].0.get(..c).unwrap_or(&[]);
+            let theirs = at.local.lanes[n].0.get(..c).unwrap_or(&[]);
+            let value = x.local.lanes[n].0.get(c);
+            (&x.origin, x.local.h, &x.local.lanes[..n], mine, value).cmp(&(
                 &at.origin,
                 at.local.h,
                 &at.local.lanes[..n],
-                v,
+                theirs,
+                Some(v),
             ))
         };
-        let (start, p) = bisect(&self.held, |c| key(c, lo) == Ordering::Less);
-        let (end, q) = bisect(&self.held, |c| key(c, hi) == Ordering::Less);
+        let (start, p) = bisect(&self.held, |x| key(x, lo) == Ordering::Less);
+        let (end, q) = bisect(&self.held, |x| key(x, hi) == Ordering::Less);
         // An empty span (`hi ≤ lo`) ends at or before it starts: no body.
         let bodies = match self.held.get(start..end) {
             Some(b) => b,
@@ -516,15 +691,24 @@ mod tests {
         ratio(n, d)
     }
 
-    fn body(origin: &Origin, h: u64, lanes: [Ratio; 4], k: u64) -> Coordinate {
+    fn v(x: Ratio) -> Value {
+        Value::one(x)
+    }
+
+    fn z() -> Value {
+        v(q(0, 1))
+    }
+
+    /// One-component lanes S, G, T, H.
+    fn lanes(s: Ratio, g: Ratio, t: Ratio, h: Ratio) -> [Value; 4] {
+        [v(s), v(g), v(t), v(h)]
+    }
+
+    fn body(origin: &Origin, h: u64, lanes: [Value; 4], k: Vec<u64>) -> Coordinate {
         Coordinate {
             origin: origin.clone(),
             local: Local { h, lanes, k },
         }
-    }
-
-    fn sh(s: Ratio, h: Ratio) -> [Ratio; 4] {
-        [s, q(0, 1), q(0, 1), h]
     }
 
     fn tenth_15() -> Ratio {
@@ -534,20 +718,20 @@ mod tests {
     #[test]
     fn fixture_1_the_order_and_the_writing() {
         let r = root();
-        let z = || q(0, 1);
+        let o = || q(0, 1);
         let enclosed = r.branch(Local {
             h: 3,
-            lanes: [q(2, 1), z(), z(), z()],
-            k: 0,
+            lanes: lanes(q(2, 1), o(), o(), o()),
+            k: vec![0],
         });
         let order = [
-            body(&r, 5, [q(-1, 2), z(), z(), z()], 1),
-            body(&r, 5, [q(1, 3), q(-1, 1), z(), z()], 9),
-            body(&r, 5, [q(1, 3), z(), z(), z()], 1),
-            body(&r, 5, [q(1, 3), z(), z(), z()], 2),
-            body(&r, 5, [q(1, 2), z(), z(), z()], 1),
-            body(&r, 6, [q(-7, 1), z(), z(), z()], 0),
-            body(&enclosed, 0, [z(), z(), z(), z()], 0),
+            body(&r, 5, lanes(q(-1, 2), o(), o(), o()), vec![1]),
+            body(&r, 5, lanes(q(1, 3), q(-1, 1), o(), o()), vec![9]),
+            body(&r, 5, lanes(q(1, 3), o(), o(), o()), vec![1]),
+            body(&r, 5, lanes(q(1, 3), o(), o(), o()), vec![2]),
+            body(&r, 5, lanes(q(1, 2), o(), o(), o()), vec![1]),
+            body(&r, 6, lanes(q(-7, 1), o(), o(), o()), vec![0]),
+            body(&enclosed, 0, lanes(o(), o(), o(), o()), vec![0]),
         ];
         for pair in order.windows(2) {
             assert!(
@@ -570,9 +754,8 @@ mod tests {
                  /0000000000000000:0/1:0/1:0/1:0/1:0000000000000000"
             )
         );
-        // TPoint's case.
         let top = Ratio::from_integer(BigInt::from(u64::MAX));
-        let tp = body(&r, 40961, [q(3, 1), top, z(), q(17, 1)], 812);
+        let tp = body(&r, 40961, lanes(q(3, 1), top, o(), q(17, 1)), vec![812]);
         assert_eq!(
             tp.written(),
             format!(
@@ -581,8 +764,8 @@ mod tests {
         );
         let local = Local {
             h: 10,
-            lanes: [q(7, 30), z(), q(1, 900), q(2, 1)],
-            k: 3,
+            lanes: lanes(q(7, 30), o(), q(1, 900), q(2, 1)),
+            k: vec![3],
         };
         assert_eq!(
             local.written(),
@@ -602,11 +785,11 @@ mod tests {
             (q(-1, 3), 1, -20, "-1;40"),
             (q(-1, 7), 1, -9, "-1;51"),
         ];
-        for (v, d, m, w) in rows {
-            let s = Sector::holding(&v, d);
+        for (x, d, m, w) in rows {
+            let s = Sector::holding(&x, d);
             assert_eq!(s.index, BigInt::from(m));
             assert_eq!(s.written(), w);
-            assert!(s.lo() <= v && v < s.hi());
+            assert!(s.lo() <= x && x < s.hi());
         }
         assert_eq!(Sector::holding(&q(7, 3), 1).hi(), q(47, 20));
         assert_eq!(Sector::holding(&q(-1, 7), 1).lo(), q(-3, 20));
@@ -618,9 +801,9 @@ mod tests {
 
     #[test]
     fn fixture_3_sectors_are_exact_and_nested() {
-        for v in [q(1, 7), q(-22, 7), q(7, 3), q(0, 1), q(-1, 3)] {
+        for x in [q(1, 7), q(-22, 7), q(7, 3), q(0, 1), q(-1, 3)] {
             for d in 0..=5 {
-                let (coarse, fine) = (Sector::holding(&v, d), Sector::holding(&v, d + 1));
+                let (coarse, fine) = (Sector::holding(&x, d), Sector::holding(&x, d + 1));
                 assert!(coarse.lo() <= fine.lo() && fine.hi() <= coarse.hi());
                 assert_eq!(Sector::holding(&fine.lo(), d), coarse);
                 assert_eq!(fine.parent(), Some(coarse));
@@ -631,7 +814,7 @@ mod tests {
     #[test]
     fn fixture_4_within_on_and_off_a_bound() {
         let r = root();
-        let other = body(&r, 0, sh(q(1, 3), q(0, 1)), 0);
+        let other = body(&r, 0, lanes(q(1, 3), q(0, 1), q(0, 1), q(0, 1)), vec![0]);
         let sixth = Ratio::new(BigInt::one(), BigInt::from(3) * scale(6));
         let rows = [
             (q(1, 3), 1, Side::Within),
@@ -642,17 +825,22 @@ mod tests {
             (q(2, 5), 1, Side::Above),
         ];
         for (s, d, side) in rows {
-            let b = body(&r, 0, sh(s, q(0, 1)), 0);
-            assert_eq!(b.within(&other, Lane::S, d), Ok(side));
+            let b = body(&r, 0, lanes(s, q(0, 1), q(0, 1), q(0, 1)), vec![0]);
+            assert_eq!(b.within(&other, Lane::S, d), Ok(vec![side]));
         }
     }
 
     #[test]
     fn fixture_5_origins_are_never_compared() {
         let r = root();
-        let inner = r.branch(Local::at(3, sh(q(2, 1), q(0, 1))));
-        let a = body(&r, 5, sh(q(1, 3), q(0, 1)), 0);
-        let b = body(&inner, 5, sh(q(1, 3), q(0, 1)), 0);
+        let inner = r.branch(Local::at(3, lanes(q(2, 1), q(0, 1), q(0, 1), q(0, 1))));
+        let a = body(&r, 5, lanes(q(1, 3), q(0, 1), q(0, 1), q(0, 1)), vec![0]);
+        let b = body(
+            &inner,
+            5,
+            lanes(q(1, 3), q(0, 1), q(0, 1), q(0, 1)),
+            vec![0],
+        );
         let refused = Err(CoordinateRefusal::OriginsDiffer {
             held: Box::new(r.clone()),
             asked: Box::new(inner.clone()),
@@ -665,7 +853,9 @@ mod tests {
     fn fixture_6_a_range_is_the_test_of_every_body() {
         let r = root();
         let later = Origin::root([0x6a; 32], 0x93);
-        let at = |o: &Origin, h: u64, s: Ratio, g: Ratio| body(o, h, [s, g, q(0, 1), q(0, 1)], 0);
+        let at = |o: &Origin, h: u64, s: Ratio, g: Ratio| {
+            body(o, h, lanes(s, g, q(0, 1), q(0, 1)), vec![0])
+        };
         let mut held = Bodies::new();
         for i in 0..20 {
             held.hold(at(&r, 5, q(i, 10), q(0, 1)));
@@ -676,45 +866,34 @@ mod tests {
             held.hold(at(&r, 5, q(1, 2), g));
         }
         let probe = at(&r, 5, q(0, 1), q(0, 1));
-        let read = held.range(&probe, Lane::S, &q(1, 2), &q(9, 10));
-        let got: Vec<(Ratio, Ratio)> = read
+        let read = held.range(&probe, Lane::S, 0, &q(1, 2), &q(9, 10));
+        let got: Vec<(Value, Value)> = read
             .bodies
             .iter()
             .map(|b| (b.lane(Lane::S).clone(), b.lane(Lane::G).clone()))
             .collect();
-        let half = || q(1, 2);
+        let half = || v(q(1, 2));
         assert_eq!(
             got,
             vec![
-                (half(), q(-1, 1)),
-                (half(), q(0, 1)),
-                (half(), q(1, 4)),
-                (half(), q(2, 1)),
-                (q(3, 5), q(0, 1)),
-                (q(7, 10), q(0, 1)),
-                (q(4, 5), q(0, 1)),
+                (half(), v(q(-1, 1))),
+                (half(), z()),
+                (half(), v(q(1, 4))),
+                (half(), v(q(2, 1))),
+                (v(q(3, 5)), z()),
+                (v(q(7, 10)), z()),
+                (v(q(4, 5)), z()),
             ]
         );
-        let every: Vec<&Coordinate> = held
-            .held()
-            .iter()
-            .filter(|b| {
-                b.origin == r
-                    && b.local.h == 5
-                    && b.lane(Lane::S) >= &q(1, 2)
-                    && b.lane(Lane::S) < &q(9, 10)
-            })
-            .collect();
-        assert_eq!(read.bodies.iter().collect::<Vec<_>>(), every);
-        let on_g = held.range(&at(&r, 5, q(1, 2), q(0, 1)), Lane::G, &q(0, 1), &q(1, 1));
-        let gs: Vec<Ratio> = on_g
+        let on_g = held.range(&at(&r, 5, q(1, 2), q(0, 1)), Lane::G, 0, &q(0, 1), &q(1, 1));
+        let gs: Vec<Value> = on_g
             .bodies
             .iter()
             .map(|b| b.lane(Lane::G).clone())
             .collect();
-        assert_eq!(gs, vec![q(0, 1), q(1, 4)]);
+        assert_eq!(gs, vec![z(), v(q(1, 4))]);
         assert!(held
-            .range(&probe, Lane::S, &q(9, 10), &q(1, 2))
+            .range(&probe, Lane::S, 0, &q(9, 10), &q(1, 2))
             .bodies
             .is_empty());
         // N to 4N: each bisection is at most ⌊log₂ L⌋ + 1 probes.
@@ -723,72 +902,168 @@ mod tests {
             for i in 0..n {
                 many.hold(at(&r, 5, q((i * 7919) % n, n), q(0, 1)));
             }
-            let read = many.range(&probe, Lane::S, &q(1, 5), &q(2, 5));
+            let read = many.range(&probe, Lane::S, 0, &q(1, 5), &q(2, 5));
             let bound = 2 * (63 - (n as u64).leading_zeros() + 1);
             assert!(read.probes <= bound, "{} probes over {n}", read.probes);
         }
     }
 
     #[test]
-    fn fixture_7_advance_is_closed_form_and_composes() {
+    fn fixture_7_advance_is_closed_form_and_composes_in_degrees() {
+        // H in degrees: 90° at bell 10, turning 72° a bell; 30 bells on it
+        // stands at 2250°, six whole turns.
         let r = root();
-        let p = body(&r, 10, sh(q(1, 3), q(1, 4)), 0);
-        let rate = Rate([q(1, 7), q(0, 1), q(1, 2), q(1, 5)]);
-        // One advance of 30 bells equals two of 12 and 18.
+        let p = body(&r, 10, lanes(q(1, 3), q(0, 1), q(0, 1), q(90, 1)), vec![0]);
+        let rate = Rate(lanes(q(1, 7), q(0, 1), q(1, 2), q(72, 1)));
         let once = p.advanced(&rate, 40).expect("forward");
         let twice = p
             .advanced(&rate, 22)
             .and_then(|c| c.advanced(&rate, 40))
             .expect("forward");
         assert_eq!(once, twice);
-        assert_eq!(once.lane(Lane::S), &(q(1, 3) + q(30, 7)));
-        assert_eq!(once.lane(Lane::T), &q(15, 1));
-        assert_eq!(once.lane(Lane::H), &q(25, 4));
-        assert_eq!(once.local.k, 6);
+        assert_eq!(once.lane(Lane::S), &v(q(1, 3) + q(30, 7)));
+        assert_eq!(once.lane(Lane::T), &v(q(15, 1)));
+        assert_eq!(once.lane(Lane::H), &v(q(2250, 1)));
+        assert_eq!(once.local.k, vec![6]);
         assert!(p.advanced(&rate, 9).is_none());
     }
 
     #[test]
     fn fixture_8_an_events_bell_is_solved_from_the_lane() {
-        let p = Local::at(4, sh(q(0, 1), q(0, 1)));
-        let rate = Rate([q(2, 3), q(0, 1), q(0, 1), q(0, 1)]);
-        assert_eq!(p.when(&rate, Lane::S, &q(1, 1)), Some(q(11, 2)));
-        assert_eq!(p.when(&rate, Lane::G, &q(1, 1)), None);
-        assert_eq!(p.when(&rate, Lane::S, &q(-1, 1)), None);
+        let p = Local::at(4, lanes(q(0, 1), q(0, 1), q(0, 1), q(0, 1)));
+        let rate = Rate(lanes(q(2, 3), q(0, 1), q(0, 1), q(0, 1)));
+        assert_eq!(
+            p.bell_of(&rate, Lane::S, 0, &q(1, 1)),
+            Some(When::At(q(11, 2)))
+        );
+        assert_eq!(p.bell_of(&rate, Lane::G, 0, &q(1, 1)), Some(When::Unmoving));
+        assert_eq!(
+            p.bell_of(&rate, Lane::S, 0, &q(-1, 1)),
+            Some(When::Behind(q(5, 2)))
+        );
     }
 
     #[test]
     fn fixtures_9_and_10_a_merger_keeps_its_offsets_and_fission_inverts_it() {
+        // H in degrees: a at 720° (two whole turns), b at 0.
         let r = root();
-        let a = body(&r, 2, sh(q(1, 1), q(2, 1)), 2);
-        let b = body(&r, 2, sh(q(3, 1), q(0, 1)), 0);
+        let a = body(&r, 5, lanes(q(1, 1), q(0, 1), q(0, 1), q(720, 1)), vec![2]);
+        let b = body(&r, 5, lanes(q(3, 1), q(0, 1), q(0, 1), q(0, 1)), vec![0]);
         let m = a
             .merged(&q(1, 1), &b, &q(3, 1))
             .expect("one origin")
             .expect("one bell");
-        assert_eq!(m.point.lane(Lane::S), &q(5, 2));
-        assert_eq!(m.point.lane(Lane::H), &q(1, 2));
-        assert_eq!(m.point.local.k, 0);
-        assert_eq!(m.offsets[0], sh(q(-3, 2), q(3, 2)));
-        assert_eq!(m.offsets[1], sh(q(1, 2), q(-1, 2)));
-        for i in 0..4 {
-            let sum = m.offsets[0][i].clone() * m.weights[0].clone()
-                + m.offsets[1][i].clone() * m.weights[1].clone();
-            assert!(sum.is_zero());
-        }
+        assert_eq!(m.point.lane(Lane::S), &v(q(5, 2)));
+        assert_eq!(m.point.lane(Lane::H), &v(q(180, 1)));
+        assert_eq!(m.point.local.k, vec![0]);
+        assert_eq!(m.offsets[0][0], v(q(-3, 2)));
+        assert_eq!(m.offsets[0][3], v(q(540, 1)));
+        assert_eq!(m.offsets[1][0], v(q(1, 2)));
+        assert_eq!(m.offsets[1][3], v(q(-180, 1)));
         assert_eq!(m.fission(), [a.clone(), b.clone()]);
-        let later = b.advanced(&Rate::still(), 3).expect("forward");
+        let later = b.advanced(&Rate::still([1; 4]), 6).expect("forward");
         assert_eq!(a.merged(&q(1, 1), &later, &q(1, 1)), Ok(None));
     }
 
+    /// Bodies at R, bell 5, S = G = T = 0, H = (θ₁, θ₂) in degrees.
+    fn planar(h1: Ratio, h2: Ratio) -> Coordinate {
+        let lanes = [z(), z(), z(), Value(vec![h1, h2])];
+        Coordinate {
+            origin: root(),
+            local: Local::at(5, lanes),
+        }
+    }
+
     #[test]
-    fn a_re_origin_keeps_the_reach_and_records_the_passage() {
+    fn fixture_11_a_vector_lane_is_ordered_and_read_by_its_cell() {
+        let a = planar(q(1, 3), q(7, 4));
+        let b = planar(q(1, 3), q(-1, 2));
+        let c = planar(q(1, 2), q(0, 1));
+        assert!(b < a && a < c, "component 1, the tie by component 2");
+        assert_eq!(a.lane(Lane::H).written(), "(1/3,7/4)");
+        assert_eq!(a.reading(Lane::H, 0).written(), "0 × 1");
+        let cell = a.reading(Lane::H, 1);
+        assert_eq!(cell.written(), "0;20 × 1;45");
+        assert_eq!(cell.0[0].lo(), q(1, 3));
+        assert_eq!(cell.0[0].hi(), q(7, 20));
+        assert_eq!(cell.0[1].lo(), q(7, 4));
+        assert_eq!(cell.0[1].hi(), q(53, 30));
+        assert_eq!(Sector::holding(&q(-1, 2), 0).written(), "-1");
+        assert_eq!(Sector::holding(&q(-1, 2), 1).written(), "-1;30");
+        assert_eq!(
+            c.within(&a, Lane::H, 0),
+            Ok(vec![Side::Within, Side::Below])
+        );
+        assert!(!a.reading(Lane::H, 0).holds(c.lane(Lane::H)));
+    }
+
+    #[test]
+    fn fixture_12_a_range_on_one_component_then_a_filter() {
+        let (a, b, c, d) = (
+            planar(q(1, 3), q(7, 4)),
+            planar(q(1, 3), q(-1, 2)),
+            planar(q(1, 2), q(0, 1)),
+            planar(q(2, 5), q(7, 4)),
+        );
+        let mut held = Bodies::new();
+        for x in [&a, &b, &c, &d] {
+            held.hold(x.clone());
+        }
+        let probe = planar(q(0, 1), q(0, 1));
+        let read = held.range(&probe, Lane::H, 0, &q(1, 3), &q(1, 2));
+        assert_eq!(read.bodies, &[b.clone(), a.clone(), d.clone()]);
+        let filtered: Vec<&Coordinate> = read
+            .bodies
+            .iter()
+            .filter(|x| {
+                let t = &x.lane(Lane::H).0[1];
+                *t >= q(1, 1) && *t < q(2, 1)
+            })
+            .collect();
+        assert_eq!(filtered, vec![&a, &d]);
+    }
+
+    #[test]
+    fn fixture_13_a_merger_and_fission_per_component() {
+        let a = planar(q(1, 3), q(7, 4));
+        let e = planar(q(1, 1), q(-1, 4));
+        let m = a
+            .merged(&q(1, 1), &e, &q(2, 1))
+            .expect("one origin")
+            .expect("one bell");
+        assert_eq!(m.point.lane(Lane::H), &Value(vec![q(7, 9), q(5, 12)]));
+        assert_eq!(m.offsets[0][3], Value(vec![q(-4, 9), q(4, 3)]));
+        assert_eq!(m.offsets[1][3], Value(vec![q(2, 9), q(-2, 3)]));
+        for k in 0..2 {
+            let sum = m.offsets[0][3].0[k].clone() + q(2, 1) * m.offsets[1][3].0[k].clone();
+            assert!(sum.is_zero());
+        }
+        assert_eq!(m.point.reading(Lane::H, 1).written(), "0;46 × 0;25");
+        assert_eq!(m.fission(), [a, e]);
+        // Lanes of different component counts are refused.
+        let one = body(&root(), 5, [z(), z(), z(), z()], vec![0]);
+        assert_eq!(
+            planar(q(0, 1), q(0, 1)).merged(&q(1, 1), &one, &q(1, 1)),
+            Err(CoordinateRefusal::ComponentsDiffer { lane: Lane::H })
+        );
+    }
+
+    #[test]
+    fn a_passage_is_the_pole_swap_and_writes_its_span_change_on_t() {
+        // docs/117 §12: span 3/5 crosses to −3/5, T gains −6/5; the return
+        // restores both exactly (M∘M = 1); at the throat nothing changes.
         let r = root();
-        let inner = r.branch(Local::at(1, sh(q(0, 1), q(0, 1))));
-        let a = body(&r, 1, sh(q(1, 2), q(0, 1)), 0);
-        let carried = a.re_origined(inner.clone(), &q(1, 1));
+        let a = body(&r, 1, lanes(q(3, 5), q(0, 1), q(0, 1), q(0, 1)), vec![0]);
+        let once = a.passed();
+        assert_eq!(once.lane(Lane::S), &v(q(-3, 5)));
+        assert_eq!(once.lane(Lane::T), &v(q(-6, 5)));
+        assert_eq!(once.passed(), a);
+        let throat = body(&r, 1, lanes(q(0, 1), q(0, 1), q(0, 1), q(0, 1)), vec![0]);
+        assert_eq!(throat.passed(), throat);
+        // A re-origin is the passage written at the other enclosure.
+        let inner = r.branch(Local::at(1, lanes(q(0, 1), q(0, 1), q(0, 1), q(0, 1))));
+        let carried = a.re_origined(inner.clone());
         assert_eq!(carried.origin, inner);
-        assert_eq!(carried.lane(Lane::S), a.lane(Lane::S));
-        assert_eq!(carried.lane(Lane::T), &q(1, 1));
+        assert_eq!(carried.local, once.local);
     }
 }

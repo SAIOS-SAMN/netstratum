@@ -1004,16 +1004,16 @@ fn seal_answer(task: &Task, program: Program) -> SolveRead {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// N-I10 — hear: the crystal-exchange primitive (an utterance drained or walled).
+// N-I10 — hear: the crystal-exchange primitive (an expression drained or walled).
 // ─────────────────────────────────────────────────────────────────────
 
-/// How a hearer received an utterance — the only verdicts hearing renders.
+/// How a hearer received an expression — the only verdicts hearing renders.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Heard {
-    /// The hearer's basin drained the utterance — already accounted (understood).
+    /// The hearer's basin drained the expression — already accounted (understood).
     /// Nothing adopted; the hearer knew it (or it is a universal gauge).
     Understood,
-    /// The utterance walled — the hearer could not account it; the crystal is
+    /// The expression walled — the hearer could not account it; the crystal is
     /// adopted onto the hearer's own basin (learned).
     Learned,
 }
@@ -1023,7 +1023,7 @@ pub enum Heard {
 /// same reduce organ as think). `Accounted` → `Understood` (drain, nothing
 /// adopted); a wall → `Learned`, and the crystal is adopted onto `grown` only.
 /// No chat, no score, and never a copy of the speaker's basin — the hearer
-/// reaches the utterance through its own reduce or walls and mints its own
+/// reaches the expression through its own reduce or walls and mints its own
 /// crystal. The caller prices the look (N-I7); this owns no leisure.
 pub fn hear(a: &FullMeasurement, b: &FullMeasurement, grown: &mut Vec<Crystal>) -> Heard {
     match reduct::observe(a, b, grown) {
@@ -1036,7 +1036,7 @@ pub fn hear(a: &FullMeasurement, b: &FullMeasurement, grown: &mut Vec<Crystal>) 
     }
 }
 
-/// N-I10 — hear a folded word (a `Program`): the word is the utterance, offered
+/// N-I10 — hear a folded word (a `Program`): the word is the expression, offered
 /// as the pair `(probe, word(probe))` and heard against the hearer's basin. A
 /// pure-geometry word is a universal gauge (drains → `Understood`); a word that
 /// recolors a probe hue to one the probe never carried is a generation gap
@@ -1049,8 +1049,8 @@ pub fn hear_word(expansion: &[Op], grown: &mut Vec<Crystal>) -> Heard {
         Some(g) => g,
         None => return Heard::Understood,
     };
-    let uttered = run(&expansion.to_vec(), &probe);
-    match (measure_grid(&probe), measure_grid(&uttered)) {
+    let expressed = run(&expansion.to_vec(), &probe);
+    match (measure_grid(&probe), measure_grid(&expressed)) {
         (Ok(a), Ok(b)) => hear(&a, &b, grown),
         _ => Heard::Understood,
     }

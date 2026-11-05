@@ -1784,12 +1784,8 @@ pub fn settle_system(
             .as_ref()
             .map(|e| e.reach(&x.ell_o).0)
             .unwrap_or_else(|| b0.clone());
-        // The return leg stands at its image through the ring.
-        let r = if r < ring {
-            crate::flows::through(&r, &ring)
-        } else {
-            r
-        };
+        // No mirror (docs/117 §12): a mote's reach is read in this enclosure
+        // and kept; one inside the star's ring belongs to the star.
         if r > rim {
             *escaped.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
             continue;
@@ -1972,7 +1968,7 @@ pub fn settle_system(
     // What stands: a world where its core holds; otherwise the belts.
     bodies.sort_by(|a, b| a.0.cmp(&b.0));
     let mut out: Vec<crate::pulse::Body> = Vec::new();
-    // The star's load (register B13): its worlds' drag, each world's holding
+    // The star's load (register B13; proposed, K7): its worlds' drag, each world's holding
     // share times the drag share at its reach about the star, `Σ m·(1 − δ)`
     // (the one face law's drag, docs/117 §8.2), in the system's own units.
     let mut load = ratio(0, 1);

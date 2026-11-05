@@ -64,6 +64,7 @@ use std::path::Path;
 // research. Replaces the cartesian build cascade with the peel.
 pub mod civic;
 pub mod coordinate;
+pub mod coupling;
 // docs/61 G1 — a line's place about its core, in closed form.
 pub mod orbit;
 // docs/63 — a world is unrolled only while it is observed.
@@ -1308,7 +1309,7 @@ pub struct Polity {
     /// form yet). Filled a few words a beat; workspace like `grown`.
     stated: std::collections::HashMap<[u8; 32], bool>,
     /// AUTIC-2 — sentences one vessel has spoken to the other (composed
-    /// utterances), and how many carried a DemandUnmet leftover the hearer learned
+    /// expressions), and how many carried a DemandUnmet leftover the hearer learned
     /// (adopted as a new crystal). Cumulative workspace. The live measure of the
     /// compose move: multi-word thought exchanged and comprehended between minds.
     pub autic_spoke: usize,
@@ -3938,7 +3939,7 @@ impl Polity {
     }
 
     /// AUTIC-2 — the compose move, live. The `speaker` splices its grown words
-    /// into an `AuticSentence` (a composed multi-word utterance) and the `hearer`
+    /// into an `AuticSentence` (a composed multi-word expression) and the `hearer`
     /// assembles it against its own basin: the pieces it recognises are accounted,
     /// and any leftover (`DemandUnmet`) is exactly the structure it lacked — which
     /// it learns by adopting the remainder as a new crystal. This is genuine

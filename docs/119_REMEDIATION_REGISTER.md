@@ -62,7 +62,7 @@ inverse (S2 unless marked):**
 | A19 | rim exit, flows.rs:1459-1471 | arrival, breath.rs:1979-1986 | Different criteria |
 | A20 | star outflow book, breath.rs:131-160, 737-747 | star capture book, breath.rs:1732-1789 | Outflow books `ℓ` only, capture `ℓ` and `ℓ_⊥`; phases relative coming in, absolute going out |
 | A21 | continuum band, flows.rs:1190-1191 | vacuum band, flows.rs:1192-1198 | Two laws for one band; the vacuum one unguarded and through the reach map |
-| A22 | `ring::inverted`, `tube` (unused) | `flows::through` (live) | Two throat inversions coexist. **`inverted` and `tube` removed (#63)**; `through` (2H − R, ruled out 11-05) remains, replaced by the passage on the poles basis (PLAN step 3) |
+| A22 | `ring::inverted`, `tube` (unused) | `flows::through` (live) | Two throat inversions coexist. **`inverted` and `tube` removed (#63)**; `through` (2H − R, ruled out 11-05) gone from the settle (#80, worlds formed by motion: 16, main had 14 by the mirror); it remains at the throat release and the vacuum band |
 | A23 | nuclide release, nuclides.rs:284-309 | captures, nuclides.rs:367-397, 404-429 | Three pieces with opposite fill orders; `nuclides::exchange` is the one-law form |
 | A24 | recycle press, recycle.rs:149-184 | recycle peel, recycle.rs:185-262, trap 284-320 | Two laws, each with a fill order |
 | A25 | outward transport: `shear`, `fluid`'s field share, `formation::exchange` | none | Hard-coded "outer gains"; only `restoring` is signed both ways |
@@ -73,14 +73,14 @@ inverse (S2 unless marked):**
 
 | id | where | size |
 |---|---|---|
-| A28 | flows.rs:547-582 `pair_sums` (via `repel`) | n(n−1)·4 over the firmament, BigInt |
+| A28 | flows.rs:547-582 `pair_sums` (via `repel`) | n(n−1)·4 over the firmament, BigInt | Read 2026-11-05: not a range: every pair contributes (in step is never negative) and the product over planes does not separate, so no bisection gives the same sum; it runs once, at the founding (`pulse.rs` firmament) |
 | A29 | flows.rs:677-694 `collections` | n²/2, screened |
 | A30 | pulse.rs:746-785, 906-913 `cascade` | K²/2 over founding kinds; Σ run² for density (once) |
 | A31 | breath.rs:548-570 | ocean motes × galaxies inside the arrival loop |
-| A32 | breath.rs:1225-1240 | stars × every galaxy mote, a linear filter (`within_reach` would bisect) |
+| A32 | breath.rs:1225-1240 | stars × every galaxy mote, a linear filter (`within_reach` would bisect) **done**: capture reads its candidates by `flows::within_reach` (bisection) |
 | A33 | flows.rs:2020-2025, 2086-2095 `band_pairs` | up to 256 strip steps × bounds × n |
-| A34 | flows.rs:808-817 `hold_within`, 783-792 `rim` | O(n) per call, per kind and band (`hold` bisects) |
-| A35 | breath.rs:1776 | a new system `Enclosed` per captured take |
+| A34 | flows.rs:808-817 `hold_within`, 783-792 `rim` | O(n) per call, per kind and band (`hold` bisects) **done (#83)**: `hold_within` bisects the bodies' own reaches, summed once |
+| A35 | breath.rs:1776 | a new system `Enclosed` per captured take **done (#79)**: capture is a re-origin and builds no system enclosure |
 | A36 | formation.rs:1826-1950 `settle_system` | up to n rounds × n log n |
 
 **Era 0 (S2, demolition):** the 3-torus of coordinate triples
@@ -404,3 +404,44 @@ designation (78.138); conservation witnessed internally (78.89, though
 never stated as L0 `Flux`). Of J1–J17, three were not in Netstratum's own
 record: J2, J3 and J13.
 
+
+## §K. The day's axioms, theorems and proofs, verified (2026-11-05)
+
+Requested by the operator ("verify your axioms, theorems and the proof
+structure"). Each claim is classed as proved (from the algebra, with
+its witness), an axiom (ruled), or assumed (introduced without
+derivation). Wrong or mislabelled claims are rows with their remedy.
+
+**Proved:**
+- the pole swap's algebra (docs/117 §12): `e₊·x·e₊` takes `n_Z` to `n_Q`,
+  keeps `A + Q`, reverses `A − Q`; two passes are the identity on the frame
+  and on the spinor;
+- the arrival as the exit's inverse (B5);
+- `Enclosed::spin_at` as the least spin reading `r` (the steps overlap,
+  never a gap);
+- `hold_within` by bisection equals the scan;
+- the bond theorem (`step_with ≥ ½` ⟺ `Σ t_k·off_k ≤ 90°`), relative to
+  its axiom;
+- Cayley composition (tanh and tan addition; the composed rotor keeps its
+  grade-4 part, and its generator is a bivector);
+- the coordinate's fixtures 1–16 and the passage's fixtures 1–6, by hand.
+
+**Axioms, ruled:**
+- the poles basis;
+- `(A, Q) = (H, R)`;
+- T's flux `−2·(A − Q)`;
+- vector lanes with H in degrees;
+- the face law on two axes;
+- the dipoles, and the range's field as one.
+
+| # | claim | finding | remedy |
+|---|---|---|---|
+| K1 | Capture is "a re-origin (docs/117 §12)" (#79) | It is a two-body split (`ℓ_s` kept, the relative motion scaled by `λ`, the exit's frame law), not the pole swap. Its `settle` identity is zero by construction, and it books the grain's remainder to the body ledger, which excludes motes | Cited as the split and the frame law **done (#85)**. A two-sided witness is not yet possible: the frame scale `λ = W/g` changes as each capture grows the system, so a captured mote's spin read back in the galaxy's frame depends on when it is read; the books are not a function of the state until `λ` is fixed (open) |
+| K2 | "A re-origin keeps ℓ and reads the reach in the new enclosure" | Not the swap: the swap puts the body at reach `H` about hold `R`; reading `ℓ/H′(<ℓ)` returns `H` only if `H′(<ℓ) = R` | docs/117 §12.6 corrected: across a throat the body stands at reach `H` about hold `R`, the new enclosure's hold read from the body, never the reverse **done (#85)** |
+| K3 | `own_enclosure` gives "degrees of separation" (`×360`) | The pinch share `m/(m + H)` is a ratio of reaches; calling it a fraction of a turn is not derived (`held` divides it out) | The `×360` removed: it returns the pinch share; the degree reading of an extent is open **done (#85)** |
+| K4 | The passage at a pole is "one-way, the event horizon" | The swap takes a pole to the other pole, and two passes return it; "one-way" is a reading | docs/117 §12.5 corrected **done (#85)** |
+| K5 | docs/122's bond energy `u(z)` | The open-frame count, the frames reading the operator rejected | docs/122 is held; the bond's energy is to be derived without frames |
+| K6 | The hold-weighted split `t·2h₂/(h₁ + h₂)` (docs/117 §11.2) | Introduced, not derived | Marked proposed |
+| K7 | The load writer `Σ m·(1 − δ)` (B13) | Introduced: Xylarium holds no source for the 10-17 ruling's `x_k` | Marked proposed |
+| K8 | The bond theorem's axiom `in_step = 1 − off/180°`, a product over planes | Flat per plane (the operator's critique); the 90° is correct only relative to it | Held with A29; replaced by the dipole coupling's reading on the manifold (docs/121 §9) |
+| K9 | The band's `½`, `toward_rest`'s halving, its squared rest `R·R = 2q` | Inherited, not derived | Replaced by the dipole coupling (docs/121), never patched |
