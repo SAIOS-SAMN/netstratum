@@ -204,16 +204,32 @@ a T-lane event under LAW-PASSAGE. The court verifies a crossing by
 reconstructing the coordinate from the generator and the bells, which is
 what MU-RECURSION law 8 asks.
 
+## 8a. Alignment across the nodes (2026-11-05)
+
+- **The lane meanings** are the network's (Mycelium's point; Xylarium's
+  network.md): S spatial, G gauge, T temporal, H holonomic. Xylarium's
+  kernel lanes map to them: its S (a phase on the anchor's ring) is a
+  one-plane reading of H; its G (holding as a share of the anchor's, with
+  `D(δ)` its dilation) is a reading of S; its T (the beat) is T. Its G from
+  the transductions (fusion, fission, frame pairing) is planned.
+- **The shared form:** proposed to Mycelium that the coordinate and its
+  sexagesimal reading be one form all kernels use, Xylarium's
+  `xyl-core::coordinate` the base. Xylarium agrees and deletes its copy
+  when the form lands; Netstratum's `conductor::coordinate` is built in its
+  shape to be replaced by it.
+- **Xylarium's condition:** a lane's advance is a sheared return, never a
+  closed repeat, so the form holds each lane exactly and assumes no period.
+  §2's advance does: `K` counts H's whole turns; no cycle is assumed.
+
 ## 9. What is open
 
 1. **G's content.** That a hue move is a change of kind (the place on S¹¹)
    is this document's reading; Mycelium's G lane counts hue moves of
    symbols. Whether G is the kind's bidegree `(a, b, j)` or the kind's
    composition change alone is not derived.
-2. **H across three planes.** A body turns between several pairs of planes
-   (docs/117 §10.3). Whether `H` is one lane read across them or the
-   turnings carry their own lanes inside `H` is not derived; the point has
-   one H lane.
+2. **H across three planes:** answered by Xylarium (2026-11-05). `H` holds
+   the per-plane phases and the turnings between planes together; a phase
+   on one plane's ring is a one-plane reading of `H`, not the whole lane.
 3. **The generator's reading from the coordinate.** §2's `b_S`, `b_H`,
    `b_T` are read from the body's coordinate and its enclosure's. Each law
    that sets a generator now (the torque, the band, the push) is to be
