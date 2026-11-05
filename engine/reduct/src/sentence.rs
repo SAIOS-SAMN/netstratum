@@ -1,7 +1,7 @@
 //! **The compose move** (AUTIC-2) — the sentence, the 3rd of the four reduce
 //! moves (doc 53). `think` runs derive + reduce; this is compose: a mind splices
-//! several of its words into one composed utterance (an `AuticSentence`), and a
-//! hearer assembles that utterance against its own vocabulary — accounting the
+//! several of its words into one composed expression (an `AuticSentence`), and a
+//! hearer assembles that expression against its own vocabulary — accounting the
 //! pieces it recognises and naming exactly what it does not (the `DemandUnmet`
 //! remainder). Built on the same exact accounting the whole engine reduces with
 //! (`drain_exact`); coordinates with the sodalitum/lith shape (shared v0.4
@@ -16,7 +16,7 @@
 use crate::congruence::{signed_entry_sum, ChainDelta};
 use crate::reduction::{drain_exact, BoundingRecord, Crystal};
 
-/// A composed utterance: several words spoken as one meaning.
+/// A composed expression: several words spoken as one meaning.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AuticSentence {
     pub words: Vec<ChainDelta>,
@@ -87,7 +87,7 @@ impl AssemblyRead {
 }
 
 /// A single-entry probe class at a far-off site — a synthetic "word" for building
-/// control utterances (guaranteed outside any real learned language) without the
+/// control expressions (guaranteed outside any real learned language) without the
 /// caller reaching for `num_bigint`/`ChainEntry`. `seed` places it; `dir` is its
 /// gauge direction.
 pub fn probe_class(seed: i64, dir: u8) -> ChainDelta {
