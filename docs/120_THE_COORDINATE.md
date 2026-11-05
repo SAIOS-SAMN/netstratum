@@ -121,12 +121,13 @@ index keyed by coordinate.
 
 ## 4. Expansion and contraction are depth, not iteration
 
-The sexagesimal reading at depth d (degrees, then five places of 60:
-Xylarium's protractor of 360 × 60⁵ marks) places a lane's exact value in a
-**sector**, the exact interval `[lo, lo + width)` that holds it, decided by
+The sexagesimal reading at depth d (pure base 60, LAW-COORDINATE v1; degrees
+are a caller's unit, so Xylarium's depth d on turns is this reading's depth
+d − 1 on degrees) places a lane's exact value in a **sector**, the exact
+interval `[m·60⁻ᵈ, (m + 1)·60⁻ᵈ)` that holds it, decided by
 exact comparison and never rounded (Mycelium's frame law: "never a floor on
 a grid"). The coordinate itself is kept whole. The sectors nest: a node at
-depth d holds its sixty children at depth d + 1 (360 at the first place), so
+depth d holds its sixty children at depth d + 1, so
 they form a tree, and a node is a range on the lane:
 
 - **Contraction** (zooming out, the dynamic carriers ruling of 2026-10-24:
@@ -155,7 +156,11 @@ A body's `origin` is its enclosure. The tiers nest as origins nest:
   BRANCH). A world is a branch of its system.
 - **Superpose is a merger.** Two bodies that join stand at one coordinate
   read from both (Mycelium TU-6 SUPERPOSE): their lanes joined by the law
-  of the encounter (holding-weighted, docs/96), at one origin.
+  of the encounter (holding-weighted, docs/96), at one origin. No residual
+  is discarded: the merger keeps each body's offset from the merged point
+  per lane (their holding-weighted sum is zero), so the merged body's
+  internal spread is read back and **fission is the inverse** (agreed with
+  Mycelium 2026-11-05, fixtures 9 and 10).
 - **Reset is a re-origin across a throat.** A body crossing out of its
   enclosure into the one above is written at the new origin, its lanes read
   across the passage (docs/117 §9.3–§9.4): the null flux `T` records the
@@ -224,7 +229,12 @@ what MU-RECURSION law 8 asks.
 - **Xylarium's kernel takes no Mycelium dependency** (only its private
   uplink links the SDK), so it conforms to LAW-COORDINATE v1 by reading
   proposal 78.173's fixtures as its own tests, its lanes renamed in place.
-  Netstratum links Mycelium's forms already and imports `forms::coordinate`.
+  Netstratum links Mycelium's forms already and imports `forms::coordinate`
+  when it is released at a tag; until then `conductor::coordinate` carries
+  the form's names, writing and reading (pure base 60, `Sector`, `within`
+  and `Side`, `OriginsDiffer`, `Bodies::range`) and reads 78.173's fixtures
+  1–6 as tests, with the motion stated to Mycelium as fixtures 7–10 (the
+  advance, the event's bell, the merger with its offsets, fission).
 - **Xylarium's condition:** a lane's advance is a sheared return, never a
   closed repeat, so the form holds each lane exactly and assumes no period.
   §2's advance does: `K` counts H's whole turns; no cycle is assumed.
