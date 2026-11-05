@@ -62,7 +62,7 @@ inverse (S2 unless marked):**
 | A19 | rim exit, flows.rs:1459-1471 | arrival, breath.rs:1979-1986 | Different criteria |
 | A20 | star outflow book, breath.rs:131-160, 737-747 | star capture book, breath.rs:1732-1789 | Outflow books `ℓ` only, capture `ℓ` and `ℓ_⊥`; phases relative coming in, absolute going out |
 | A21 | continuum band, flows.rs:1190-1191 | vacuum band, flows.rs:1192-1198 | Two laws for one band; the vacuum one unguarded and through the reach map |
-| A22 | `ring::inverted`, `tube` (unused) | `flows::through` (live) | Two throat inversions coexist |
+| A22 | `ring::inverted`, `tube` (unused) | `flows::through` (live) | Two throat inversions coexist. **`inverted` and `tube` removed (#63)**; `through` (2H − R, ruled out 11-05) remains, replaced by the passage on the poles basis (PLAN step 3) |
 | A23 | nuclide release, nuclides.rs:284-309 | captures, nuclides.rs:367-397, 404-429 | Three pieces with opposite fill orders; `nuclides::exchange` is the one-law form |
 | A24 | recycle press, recycle.rs:149-184 | recycle peel, recycle.rs:185-262, trap 284-320 | Two laws, each with a fill order |
 | A25 | outward transport: `shear`, `fluid`'s field share, `formation::exchange` | none | Hard-coded "outer gains"; only `restoring` is signed both ways |

@@ -1707,20 +1707,13 @@ its galaxy, the rest leave; carried spin passes to the core.
 Rows E31–E35 are the throat as a connector (docs/114). `x = R/H` is a
 reach in its enclosure's own throat units.
 
-**E31 · The face inversion as a map of reach.** Specified; conflicts with
-the compact sphere's passage (docs/114 §2). `ring::inverted`.
+**E31 · The face inversion as a map of reach.** Retired (operator
+2026-11-05: "this is dimensional collapse: R → H²/R - we dont square";
+docs/117 §10, register docs/119). `ring::inverted` removed. The passage is
+read on the poles basis (docs/117 §10), never as a map of reach.
 
-    δ(1/x) = 1 − δ(x),   x ↦ 1/x,   R′ = H·(H/R)
-
-An involution fixing the throat; it exchanges the faces.
-
-**E32 · A tube between two mouths.** Built, not on the live path.
-`ring::tube`.
-
-    x_b = 1/x_a,   R_b = H_a·H_b / R_a
-
-There and back is the identity. Matter crosses whole; the spin difference
-`m·(ℓ_b − ℓ_a)` is booked to the two mouths' reservoirs.
+**E32 · A tube between two mouths.** Retired with E31 (`R_b = H_a·H_b/R_a`
+is the same reach map). `ring::tube` removed.
 
 **E33 · Chained tubes.** Built, not on the live path. `ring::tube_share`,
 `ring::dilation` (LAW-DILATION), `ring::compose`.
@@ -1730,7 +1723,7 @@ There and back is the identity. Matter crosses whole; the spin difference
 
 **E34 · The passage as an event.** Specified (docs/114 T4). The passage
 through the throat is the event where a mote's orthogonal phase crosses ½
-(`breath`), its faces exchanged there by E31. The orthogonal orbit is
+(`breath`), its faces exchanged there (docs/117 §10; E31 retired). The orthogonal orbit is
 sheared across all the axes and runs forward, so two passages do not return
 a body to its start: not an involution on its state, and not a Kaluza–Klein
 passage (R is not compact).
