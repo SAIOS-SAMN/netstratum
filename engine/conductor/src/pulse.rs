@@ -579,7 +579,7 @@ pub struct Universe {
     /// the founding's Wellspring holds stay at the singularity as motes, each
     /// at its capture phase, torqued by the universal bounce each echo by its
     /// own inertia (the heaviest barely move). What order its phases gather
-    /// into is a reading, never set. Tag 19, one mote a record.
+    /// into is a reading, never set.
     // The firmament is the universal core's held cut (docs/101 §2, B1): its
     // motes stand in the home's own flows, read by `Universe::firmament`.
     /// The unit of mass: the deepest core's hole AT the founding. A hole is
@@ -1949,7 +1949,6 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     let mut densest: Option<u32> = None;
     let mut founded: Option<Ratio> = None;
     let mut firm_prev: Vec<(crate::chem::Kind, Vec<Ratio>)> = Vec::new();
-    let mut firmament: Vec<crate::flows::Mote> = Vec::new();
     let mut flat: Vec<Body> = Vec::new();
     // A universe is read whole or refused: the spin ledger's format (tag 5),
     // its unit (8) and its bell's period (17) are required.
@@ -1959,25 +1958,12 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     for (t, v) in cfe::tlv::records(&bytes) {
         match t {
             3 => seed = v.try_into().ok(),
-            // A file from before the ocean was motes: its manifest at the
-            // singularity, on the vacuum leg (its amounts kept whole).
-            2 => {
-                for (k, a) in get_manifest(v, &mut 0)? {
-                    ocean.push(crate::flows::Mote {
-                        key: k,
-                        amount: a,
-                        ell_o: ratio(0, 1),
-                        ell_orth: ratio(0, 1),
-                        phase: crate::flows::rest(ratio(1, 2)),
-                        agitation: ratio(0, 1),
-                        born: 0,
-                        vacuum: true,
-                        lever: Vec::new(),
-                        lever_place: ratio(0, 1),
-                        tilt: Vec::new(),
-                    });
-                }
-            }
+            // Superseded layouts (register docs/119 B14, §H): the ocean as
+            // a manifest (tag 2) and the firmament as its own list (tag 19,
+            // before B1) are refused, never migrated (operator 2026-10-14:
+            // the universe data is test data); a skipped tag would lose
+            // their matter.
+            2 | 19 => return None,
             24 => ocean.push(get_flow(v)?),
             1 => flat.push(get_body(v)?),
             6 => flat.last_mut()?.gas.push(get_mote(v)?),
@@ -2000,7 +1986,6 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
                 }
                 firm_prev.push((key, ph));
             }
-            19 => firmament.push(get_flow(v)?),
             9 => flat.last_mut()?.state = cfe::ratio::decode(v)?.0,
             10 => flat.last_mut()?.flows.push(get_flow(v)?),
             11 => flat.last_mut()?.reservoir = cfe::ratio::decode(v)?.0,
@@ -2046,18 +2031,6 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
     let (unit, t_u) = (unit.filter(|u| !u.is_zero())?, t_u.filter(|t| *t > 0)?);
     // A save from before the densest was recorded climbs to the read.
     let densest = densest.unwrap_or(crate::nuclides::READ - 1);
-    // A save from before B1: its firmament list joins the home's flows.
-    if !firmament.is_empty() {
-        if let Some(home) = cores.iter_mut().find(|c| is_home(c)) {
-            for x in &firmament {
-                *home
-                    .kept
-                    .entry(x.key.clone())
-                    .or_insert_with(|| ratio(0, 1)) += x.amount.clone();
-            }
-            home.flows.extend(firmament);
-        }
-    }
     let was_founded = founded.is_some();
     let mut u = Universe {
         cores,
@@ -2135,6 +2108,15 @@ mod tests {
         }
         std::fs::write(dir.join("pulse.bin"), out).expect("rewritten");
         assert!(read(&dir).is_none());
+        // A superseded layout (tag 2, tag 19) is refused, never read with its
+        // matter skipped (register B14).
+        for retired in [2u8, 19] {
+            write(&dir, &[7u8; 32], &u).expect("written");
+            let mut bytes = std::fs::read(dir.join("pulse.bin")).expect("read");
+            cfe::tlv::put(retired, &[], &mut bytes);
+            std::fs::write(dir.join("pulse.bin"), bytes).expect("rewritten");
+            assert!(read(&dir).is_none(), "tag {retired} refused");
+        }
         let _ = std::fs::remove_dir_all(&dir);
     }
 
