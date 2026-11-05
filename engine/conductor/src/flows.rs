@@ -80,6 +80,13 @@ pub fn antipode(phase: &mut [Ratio]) {
     }
 }
 
+/// A mote's own share at a deficit δ, read on its stream's axis (one face
+/// law, docs/117 §8.2, register B16): the continuum's turning share `δ`, the
+/// vacuum's (the continuum inverted) `1 − δ`.
+pub fn stream_delta(delta: &Ratio, vacuum: bool) -> Ratio {
+    crate::polarity::faces_on(delta, crate::polarity::Axis::of_stream(vacuum)).0
+}
+
 /// A tilt read whole: its three shares, isotropic (a third each) where none
 /// is carried.
 pub fn tilt_of(t: &[Ratio]) -> Vec<Ratio> {
@@ -1337,7 +1344,10 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
         .iter()
         .map(|x| x.amount.clone() * weight(&x.key) / total.clone())
         .collect();
-    let d: Vec<Ratio> = motes.iter().map(|x| enc.reach(&x.ell_o).1).collect();
+    let d: Vec<Ratio> = motes
+        .iter()
+        .map(|x| stream_delta(&enc.reach(&x.ell_o).1, x.vacuum))
+        .collect();
     // (outer, inner, the outer's gain, the inner's give), all from the start.
     let mut moves: Vec<(usize, usize, Ratio, Ratio)> = Vec::new();
     let mut out = vec![ratio(0, 1); n];
@@ -1667,7 +1677,12 @@ pub fn beads(
         .collect();
     let lov: Vec<Ratio> = rr.iter().map(|r| r.clone() * down.clone()).collect();
     let hiv: Vec<Ratio> = rr.iter().map(|r| r.clone() * up.clone()).collect();
-    let delta_of = |j: usize, r: &Ratio| hh[j].clone() / (r.clone() + hh[j].clone());
+    let delta_of = |j: usize, r: &Ratio| {
+        stream_delta(
+            &(hh[j].clone() / (r.clone() + hh[j].clone())),
+            motes[j].vacuum,
+        )
+    };
     // The hold along a group by reach: each member spread over its own band,
     // the hold at a place the sum of every member whose band covers it.
     let profile = |along: &[usize]| -> Vec<Ratio> {
@@ -1779,7 +1794,12 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
     let lov: Vec<Ratio> = rr.iter().map(|r| r.clone() * down.clone()).collect();
     let hiv: Vec<Ratio> = rr.iter().map(|r| r.clone() * up.clone()).collect();
     // The deficit at a reach about the hold a member turns about.
-    let delta_of = |j: usize, r: &Ratio| hh[j].clone() / (r.clone() + hh[j].clone());
+    let delta_of = |j: usize, r: &Ratio| {
+        stream_delta(
+            &(hh[j].clone() / (r.clone() + hh[j].clone())),
+            motes[j].vacuum,
+        )
+    };
     // A group judged whole by the filament law, edge to edge.
     let judge = |members: Vec<usize>| -> Option<Strand> {
         let (mut x, mut held, mut a_w, mut r_w) =
@@ -1953,7 +1973,7 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
         return plane;
     }
     for x in motes.iter_mut() {
-        let d = enc.reach(&x.ell_o).1;
+        let d = stream_delta(&enc.reach(&x.ell_o).1, x.vacuum);
         let drag = ratio(1, 1) - d.clone();
         let turned = ratio(2, 1) * d;
         if (drag.clone() + turned.clone()).is_zero() {
@@ -2177,7 +2197,13 @@ pub fn band_pairs(
         // linear and increasing in g, so ν between the two sums
         // (`crest_count`); the exact sum only where they decide differently.
         crate::profile::mark("pairs:nu");
-        let g_of = |i: usize| crate::polarity::faces(&enc.reach(&motes[i].ell_o).1).0;
+        let g_of = |i: usize| {
+            crate::polarity::faces(&stream_delta(
+                &enc.reach(&motes[i].ell_o).1,
+                motes[i].vacuum,
+            ))
+            .0
+        };
         let nu_at = |g: &dyn Fn(usize) -> Ratio| {
             members.iter().fold(ratio(0, 1), |acc, (i, s)| {
                 acc + held_of(*i, s) * grip_share(&motes[*i], &g(*i))
@@ -2683,7 +2709,7 @@ pub fn fluid(
             .flat_map(|r| r.0.iter().copied())
             .map(|i| {
                 let (r, d) = enc.reach(&motes[i].ell_o);
-                (i, r, d)
+                (i, r, stream_delta(&d, motes[i].vacuum))
             })
             .collect();
         on_face.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
@@ -3968,5 +3994,24 @@ mod passage_tests {
             psi += len;
             assert_eq!(inv(&ell, &psi), start);
         }
+    }
+}
+
+#[cfg(test)]
+mod stream_tests {
+    use super::stream_delta;
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn a_vacuum_mote_reads_the_continuums_exchanged_share() {
+        // Register B16: one face law on both streams, never one stream's
+        // face for every mote.
+        let d = ratio(3, 11);
+        assert_eq!(stream_delta(&d, false), d);
+        assert_eq!(stream_delta(&d, true), ratio(1, 1) - d.clone());
+        assert_eq!(
+            stream_delta(&d, true) + stream_delta(&d, false),
+            ratio(1, 1)
+        );
     }
 }
