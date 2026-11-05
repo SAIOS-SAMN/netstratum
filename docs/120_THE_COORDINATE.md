@@ -221,6 +221,10 @@ what MU-RECURSION law 8 asks.
   `xyl-core::coordinate` the base. Xylarium agrees and deletes its copy
   when the form lands; Netstratum's `conductor::coordinate` is built in its
   shape to be replaced by it.
+- **Xylarium's kernel takes no Mycelium dependency** (only its private
+  uplink links the SDK), so it conforms to LAW-COORDINATE v1 by reading
+  proposal 78.173's fixtures as its own tests, its lanes renamed in place.
+  Netstratum links Mycelium's forms already and imports `forms::coordinate`.
 - **Xylarium's condition:** a lane's advance is a sheared return, never a
   closed repeat, so the form holds each lane exactly and assumes no period.
   §2's advance does: `K` counts H's whole turns; no cycle is assumed.

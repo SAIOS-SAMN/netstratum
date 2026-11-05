@@ -79,6 +79,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 118 | [The foundation, the audit and the trajectory](118_FOUNDATION_AUDIT_TRAJECTORY.md) |
 | 119 | [The remediation register: the audits of 2026-11-05](119_REMEDIATION_REGISTER.md) |
 | 120 | [The coordinate: TUniversal inside the universe](120_THE_COORDINATE.md) |
+| 121 | [The magnetic coupling: the attractor and its inverse, and the shear that makes an orbit](121_MAGNETIC_COUPLING.md) |
 
 ## Era 0: the game, its civilizations and economy (01–77)
 

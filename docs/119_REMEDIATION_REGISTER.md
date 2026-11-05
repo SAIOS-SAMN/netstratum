@@ -132,6 +132,7 @@ inverse (S2 unless marked):**
 | C15 | pulse.rs:971, 631-953 | `unit` from the retired dispersal founding; `cascade` survives only to make `t_u` | Retire with C14 |
 | C16 | siting.rs:82-86 | Era-0 founding on a Kepler track with squares and cubes, still the fallback | Demolition (§F) |
 | C17 | flows (`Σ m·(ℓo + ℓ⊥)`), `ℓo = Σ|lk|` | Two planes' spins summed into one ledger number; plane spins summed in L1 into one reach | (F) |
+| C18 | ring (the turning law); flows::{shear, repel, fluid}; formation::Stretch::mu; the heart's push | Orbits are not defined by shear from the magnetic attractor with its inverse in repulsion: an orbit is the turning law alone (gravity's held share); attraction (opposite spins pairing in gas) and repulsion (open frames pushing, in the firmament and the heart) are separate laws in separate places, neither shaping an orbit; the shear that reaches the orbit is gravity's contrast and runs outward only | One signed magnetic coupling, attraction and repulsion one law and its inverse, its exchange on the turning lane the shear, the orbit its first-degree balance with gravity (docs/121) |
 
 ---
 
