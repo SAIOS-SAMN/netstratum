@@ -148,6 +148,23 @@ pub fn blend(parts: &[(Ratio, Ratio, Vec<Ratio>)]) -> Vec<Ratio> {
     tilt_from(&sums)
 }
 
+/// The shortest arc on the circle holding every phase in `orbit` (each in
+/// `[0, 1)`): one less the widest gap between neighbouring phases, the gap
+/// across 0 included. Zero for one phase or none.
+pub fn circular_extent(orbit: &mut [Ratio]) -> Ratio {
+    if orbit.len() < 2 {
+        return ratio(0, 1);
+    }
+    orbit.sort();
+    let first = orbit[0].clone();
+    let last = orbit[orbit.len() - 1].clone();
+    let widest = orbit
+        .windows(2)
+        .map(|w| w[1].clone() - w[0].clone())
+        .fold(first + ratio(1, 1) - last, |m, g| m.max(g));
+    ratio(1, 1) - widest
+}
+
 /// A reading's mean over the spatial planes (L1: their sum over three).
 pub fn space_mean(f: impl Fn(usize) -> Ratio) -> Ratio {
     SPACE.iter().fold(ratio(0, 1), |s, &k| s + f(k)) / ratio(3, 1)
@@ -626,63 +643,78 @@ pub fn collections(motes: &[Mote], moves: &[Vec<Ratio>]) -> Vec<Vec<usize>> {
         i
     }
     let mut any = vec![false; n];
-    // A certified screen before the exact test (the pairs are many, the
-    // bonds few): each condition of `bonded` is a tilt-weighted sum of
-    // in-step shares, each share 2-Lipschitz in its phases on the circle and
-    // the weights summing to one, so in floating point each sum stands
-    // within a few roundings of its exact value. A pair whose screened sum
-    // falls short of ½ by more than `MARGIN` (far past any rounding) fails
-    // the exact test too and is passed over; every other pair is read
-    // exactly. The bonds, and so the collections, are the exact ones.
-    const MARGIN: f64 = 1e-6;
-    struct Screen {
-        open: bool,
-        phase: [f64; 3],
-        tilt: [f64; 3],
-        moved: [f64; 3],
-    }
-    let f = |x: &Ratio| {
-        use num_traits::ToPrimitive;
-        x.to_f64().unwrap_or(f64::NAN)
+    // The bond test, exact, on whole numbers where it can be (the pairs are
+    // many): every phase, move and tilt share of a firmament mote stands on
+    // the spin grain, tilt shares split at most three ways, so each is a
+    // whole count of `1/D`, `D = 6·60⁶`. On that grid `in_step` is
+    // `D − 2·off` and each condition of `bonded` (a tilt-weighted sum of
+    // in-step shares at least ½) is `2·Σ t_k·i_k ≥ D²`, exact in i128
+    // (`D² < 2⁷⁷`). A mote with any value off the grid is read by the
+    // rational test instead. Either way the bonds are exactly `bonded`'s.
+    let grid = {
+        let d = num_bigint::BigInt::from(6) * num_bigint::BigInt::from(60).pow(6);
+        Ratio::from_integer(d)
     };
-    let screens: Vec<Screen> = (0..n)
+    let d_whole: i128 = 6 * 60i128.pow(6);
+    let whole = |x: &Ratio| -> Option<i128> {
+        use num_traits::ToPrimitive;
+        let c = x.clone() * grid.clone();
+        c.is_integer().then(|| c.to_integer().to_i128()).flatten()
+    };
+    struct Whole {
+        open: bool,
+        phase: [i128; 3],
+        tilt: [i128; 3],
+        moved: [i128; 3],
+    }
+    let wholes: Vec<Option<Whole>> = (0..n)
         .map(|i| {
             let x = &motes[i];
-            let at = |v: &[Ratio], k: usize| v.get(k).map_or(0.0, &f);
+            let zero = ratio(0, 1);
+            let at = |v: &[Ratio], k: usize| whole(v.get(k).unwrap_or(&zero));
             let t = tilt_of(&x.tilt);
-            Screen {
+            let mut w = Whole {
                 open: crate::chem::unpaired(&x.key) != 0,
-                phase: SPACE.map(|k| at(&x.phase, k)),
-                tilt: [f(&t[0]), f(&t[1]), f(&t[2])],
-                moved: SPACE.map(|k| at(&moves[i], k)),
+                phase: [0; 3],
+                tilt: [0; 3],
+                moved: [0; 3],
+            };
+            for (j, &k) in SPACE.iter().enumerate() {
+                w.phase[j] = at(&x.phase, k)?;
+                w.tilt[j] = whole(&t[j])?;
+                w.moved[j] = at(&moves[i], k)?;
             }
+            Some(w)
         })
         .collect();
-    let in_step_f = |a: f64, b: f64| {
-        let d = a - b;
-        let fr = d - d.floor();
-        1.0 - 2.0 * fr.min(1.0 - fr)
+    let in_step_w = |a: i128, b: i128| {
+        let d = (a - b).rem_euclid(d_whole);
+        d_whole - 2 * d.min(d_whole - d)
     };
-    let short = |t: &[f64; 3], a: &[f64; 3], b: &[f64; 3]| {
-        (0..3).map(|k| t[k] * in_step_f(a[k], b[k])).sum::<f64>() < 0.5 - MARGIN
+    let holds = |t: &[i128; 3], a: &[i128; 3], b: &[i128; 3]| {
+        2 * (0..3).map(|k| t[k] * in_step_w(a[k], b[k])).sum::<i128>() >= d_whole * d_whole
     };
-    let passed_over = |a: &Screen, b: &Screen| {
-        !a.open
-            || !b.open
-            || short(&a.tilt, &a.phase, &b.phase)
-            || short(&b.tilt, &b.phase, &a.phase)
-            || short(&a.tilt, &a.moved, &b.moved)
-            || short(&b.tilt, &a.moved, &b.moved)
+    let bonded_whole = |a: &Whole, b: &Whole| {
+        a.open
+            && b.open
+            && holds(&a.tilt, &a.phase, &b.phase)
+            && holds(&b.tilt, &b.phase, &a.phase)
+            && holds(&a.tilt, &a.moved, &b.moved)
+            && holds(&b.tilt, &a.moved, &b.moved)
     };
     for i in 0..n {
         if moves[i].is_empty() {
             continue;
         }
         for j in i + 1..n {
-            if moves[j].is_empty() || passed_over(&screens[i], &screens[j]) {
+            if moves[j].is_empty() {
                 continue;
             }
-            if bonded(&motes[i], &motes[j], &moves[i], &moves[j]) {
+            let bond = match (&wholes[i], &wholes[j]) {
+                (Some(a), Some(b)) => bonded_whole(a, b),
+                _ => bonded(&motes[i], &motes[j], &moves[i], &moves[j]),
+            };
+            if bond {
                 let (a, b) = (find(&mut root, i), find(&mut root, j));
                 if a != b {
                     root[a.max(b)] = a.min(b);
@@ -1781,14 +1813,16 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
             .expect("a member");
         let (d_in, d_out) = (delta_of(j_in, &lov[j_in]), delta_of(j_out, &hiv[j_out]));
         let t_edges = (d_in.clone() - d_out.clone()) / (d_in + d_out);
-        // Its extent round the orbit: in each spatial plane, their mean.
+        // Its extent round the orbit: in each spatial plane, the shortest
+        // arc that holds every member, on the circle (one less the widest
+        // gap between neighbouring members, the gap across 0 included),
+        // their mean over the planes.
         let extent = space_mean(|k| {
-            let orbit: Vec<Ratio> = members
+            let mut orbit: Vec<Ratio> = members
                 .iter()
                 .map(|&j| frac(motes[j].phase.get(k).unwrap_or(&ratio(0, 1))))
                 .collect();
-            orbit.iter().max().expect("a member").clone()
-                - orbit.iter().min().expect("a member").clone()
+            circular_extent(&mut orbit)
         });
         let apart = ratio(1, 1) - in_step(&extent, &ratio(0, 1)) * (ratio(1, 1) - t_edges);
         let reach_w = r_w / held.clone();
@@ -3454,7 +3488,10 @@ mod passage_tests {
             }
             let mut m = vec![ratio(0, 1); super::PLANES];
             for (j, &k) in super::SPACE.iter().enumerate() {
-                m[k] = ratio((i * (5 + j as i64)) % 13 - 6, 26);
+                // Half the moves on the spin grid (the whole-number test),
+                // half off it (the rational test).
+                let den = if i % 2 == 0 { 24 } else { 26 };
+                m[k] = ratio((i * (5 + j as i64)) % 13 - 6, den);
             }
             motes.push(x);
             moves.push(if i % 11 == 0 { Vec::new() } else { m });
@@ -3499,6 +3536,17 @@ mod passage_tests {
             super::collections(&motes, &moves),
             sets.into_values().collect::<Vec<_>>()
         );
+    }
+
+    #[test]
+    fn an_extent_is_read_on_the_circle_across_zero() {
+        let mut across = vec![ratio(19, 20), ratio(1, 20)];
+        assert_eq!(super::circular_extent(&mut across), ratio(1, 10));
+        let mut inside = vec![ratio(1, 4), ratio(1, 2), ratio(3, 8)];
+        assert_eq!(super::circular_extent(&mut inside), ratio(1, 4));
+        assert_eq!(super::circular_extent(&mut [ratio(1, 3)]), ratio(0, 1));
+        let mut even = vec![ratio(0, 1), ratio(1, 2)];
+        assert_eq!(super::circular_extent(&mut even), ratio(1, 2));
     }
 
     #[test]

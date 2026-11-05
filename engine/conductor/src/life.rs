@@ -119,12 +119,13 @@ pub fn read(
         return None;
     }
     let heat = heat.clone();
-    let atoms: Vec<(Atom, Ratio)> = matter
+    // Each atom with its holding and its nuclide's weight (the weight is what
+    // a cluster is built from and what holds; the atom's `z` is its charge).
+    let atoms: Vec<(Atom, Ratio, u32)> = matter
         .iter()
         .filter_map(|(k, g)| {
-            z_of(k)
-                .and_then(crate::chem::atom_of)
-                .map(|a| (a, g.clone()))
+            let w = z_of(k)?;
+            crate::chem::atom_of(w).map(|a| (a, g.clone(), w))
         })
         .collect();
     // Every kind's atoms are its size, a cluster's by its parts
@@ -152,8 +153,10 @@ pub fn read(
     // holding (`chem::hold`).
     let mut gases: Vec<(u32, Ratio)> = atoms
         .iter()
-        .filter(|(a, _)| volatile(a) || plasma(a))
-        .map(|(a, g)| (cfe::almanac::atom::hold(a.z), g.clone()))
+        .filter(|(a, _, _)| volatile(a) || plasma(a))
+        // Read by charge as before: under the weight convention hydrogen's
+        // hold is 0 (docs/119 B8, open), so this stays until that is settled.
+        .map(|(a, g, _)| (cfe::almanac::atom::hold(a.z), g.clone()))
         .collect();
     gases.extend(
         matter
@@ -192,17 +195,17 @@ pub fn read(
         }
     }
     let grip_units = heat.clone() / ratio(HYDROGEN_K, 1);
-    let bonders: Vec<&(Atom, Ratio)> = atoms
+    let bonders: Vec<&(Atom, Ratio, u32)> = atoms
         .iter()
-        .filter(|(a, _)| !plasma(a) && a.unpaired > 0)
+        .filter(|(a, _, _)| !plasma(a) && a.unpaired > 0)
         .collect();
-    for (i, (a, ga)) in bonders.iter().enumerate() {
-        for (b, gb) in bonders.iter().skip(i) {
+    for (i, (a, ga, wa)) in bonders.iter().enumerate() {
+        for (b, gb, wb) in bonders.iter().skip(i) {
             let (ua, ub) = (
                 cfe::almanac::atom::open_at(a.z, &grip_units),
                 cfe::almanac::atom::open_at(b.z, &grip_units),
             );
-            if crate::chem::closing(a.z, ua, b.z, ub).is_none() {
+            if crate::chem::closing(*wa, ua, *wb, ub).is_none() {
                 continue;
             }
             if grip(a).min(grip(b)) <= heat {
@@ -219,9 +222,9 @@ pub fn read(
     // A lattice holds a pattern by as many contacts as the former bonds.
     let lithic = atoms
         .iter()
-        .filter(|(a, _)| !plasma(a) && a.unpaired >= 2)
+        .filter(|(a, _, _)| !plasma(a) && a.unpaired >= 2)
         .max_by(|x, y| x.1.cmp(&y.1))
-        .map(|(a, _)| {
+        .map(|(a, _, _)| {
             a.tightness.clone() * ratio(CONTACT_K * i64::from(a.unpaired), 1) / heat.clone()
         });
     // Informational: the coupling's coherence over its slip, `rate / (1 − rate)`.
