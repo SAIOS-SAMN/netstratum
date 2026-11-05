@@ -45,9 +45,13 @@ this is its S1 and S2.
 docs/106 §1 books three, heat `a·m`, motion `m·ℓ` and potential `m·Φ`. The
 fourth is missing, and it is where heat and light come from:
 
-- **Bond** `B`: the energy held in a body's bonds, its nuclear rungs
-  (`u(z)` per nucleus, docs/97) and its chemical grip (a closing's
-  tightness, `chem::closing`), in grains of holding on the ledger unit.
+- **Bond** `B`: the energy held in a body's bonds: the dipole coupling's
+  closing work (docs/121 §9–§10). Magnetism is the open frames (ruling of
+  2026-10-15), so a bond forming is open frames pairing, poles closing. Its
+  energy is counted in the frames that close: a fusion pair closes
+  `2u(z) − u(2z)`, and a chemical closing its grip. Frames enter here as the
+  moments they are, never as a rate of radiation; radiation is by the face
+  (law 3), which retires `radiates` and `open` in cooling (register K5).
 
 Light is the fifth entry, energy in transit: made where heat leaves a
 body, received where a body takes it, drained where nothing does.
