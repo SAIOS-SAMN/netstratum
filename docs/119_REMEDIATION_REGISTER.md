@@ -108,7 +108,7 @@ inverse (S2 unless marked):**
 | B11 | flows.rs:1191 | `toward_rest` gets the swung reach and the stored `ell_o`: before and after are different quantities | One reach |
 | B12 | **done (#58)** pulse.rs:2037; breath.rs:484 | A tape with `t_u = 0` loops forever | Refuse it on read |
 | B13 | Body.load; breath.rs:2701 | `load` is read in the period law and never set by a law (always 0) | Derive its writer or retire it |
-| B14 | pulse.rs:2047-2056 | The legacy tag-19 read counts the firmament twice until the next cut | Retire the legacy read (§H, superseded layouts) |
+| B14 | pulse.rs:2047-2056 | The legacy tag-19 read counts the firmament twice until the next cut | Retire the legacy read (§H, superseded layouts). **done (#64)**: tags 2 and 19 refused |
 | B15 | formation.rs:2079-2086 | `read.residual` is zero by construction: a tautology, not a witness | Witness the books from both sides |
 | B16 | flows.rs (`luminal`, `shear`, `settle_disc`, `held`, `exits`, `beads`, `strands`, `band_pairs`, `fluid`) | Nine laws read vacuum motes on the continuum δ, while `turn` and `spin_torque` invert it | One face reading (B7) |
 
