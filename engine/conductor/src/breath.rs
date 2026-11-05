@@ -159,6 +159,13 @@ fn book_outflow(
     sys.ell = stored;
 }
 
+/// The spin matter carries as it crosses into the galaxy's flows as motes,
+/// `m·(ℓ_o + ℓ_⊥)`, at the spins the motes are made with (`ℓ_o` on the
+/// grain): what a passing's books take as carried.
+fn carried_spin(m: &crate::pulse::Manifest, at: &Ratio, orth: &Ratio, unit: &Ratio) -> Ratio {
+    mass(m) / unit.clone() * (crate::ring::grain(at) + orth.clone())
+}
+
 /// A star system's nested clock: its galaxy's share (none for the home) times
 /// its orbit's, the rings it receives at its reach, `1 − δ`, δ by its
 /// galaxy's one enclosure at its own spin (`galaxy_frame`).
@@ -1063,6 +1070,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         star_reach: sys.radius.clone(),
                         galaxy_reach: core.radius.clone(),
                     });
+                    let spin_was = subtree_spin(&sys, &unit);
                     let all = sys.total();
                     let worlds = std::mem::take(&mut sys.satellites);
                     let rest = all
@@ -1073,6 +1081,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     for w in &worlds {
                         less(&mut left, &w.total());
                     }
+                    // Its books (register B4): the left matter carries its
+                    // orbit share as motes; each world carries its orbit
+                    // share and its own spin on to its re-anchoring, booked
+                    // there; the rest (the system's medium spin) to the
+                    // galaxy's medium.
+                    let mut passed = carried_spin(&left, &own_of(&sys), &sys.ell_orth, &unit);
+                    for w in &worlds {
+                        passed += carried_spin(&w.total(), &own_of(&sys), &sys.ell_orth, &unit)
+                            + subtree_spin(w, &unit);
+                    }
+                    core.medium_spin += spin_was - passed;
                     if !left.is_empty() {
                         // Dissolved whole: it leaves at its own orbit.
                         shed.push((left, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
@@ -1313,7 +1332,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     star_reach: sys.radius.clone(),
                     galaxy_reach: core.radius.clone(),
                 });
-                core.medium_spin += subtree_spin(&sys, &unit);
+                // Its spin before; what the shed carries is taken off below,
+                // the rest booked to the medium once (register B4).
+                let spin_was = subtree_spin(&sys, &unit);
                 let mut all = sys.total();
                 // A dying heart's release (docs/97 §11, §13): its heat on its
                 // own clock, `ν·h_s − 1` (ν the rings it received this echo a
@@ -1329,6 +1350,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 crate::nuclides::capture_rapid(&mut all, &g_star, densest);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
+                core.medium_spin +=
+                    spin_was - carried_spin(&all, &own_of(&sys), &sys.ell_orth, &unit);
                 shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
                 dissolved += 1;
                 continue;
@@ -1347,9 +1370,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             less(&mut sys.kept, &back);
             returned += mass(&back) / unit.clone();
-            // The spin ledger (docs/83 Phase 0): shed matter carries its
-            // system's specific spin into the medium.
-            core.medium_spin += mass(&back) / unit.clone() * sys.ell.clone();
+            // The shed matter carries its spin with it, booked once by the
+            // outflow's book (register B4: it was booked to the medium too).
             let at = beyond(&sys);
             book_outflow(
                 &mut sys,
@@ -1373,7 +1395,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     star_reach: sys.radius.clone(),
                     galaxy_reach: core.radius.clone(),
                 });
-                core.medium_spin += subtree_spin(&sys, &unit);
+                // Its spin before; what the shed carries is taken off below,
+                // the rest booked to the medium once (register B4).
+                let spin_was = subtree_spin(&sys, &unit);
                 let mut all = sys.total();
                 // A dying heart's release (docs/97 §11, §13): its heat on its
                 // own clock, `ν·h_s − 1` (ν the rings it received this echo a
@@ -1389,6 +1413,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 crate::nuclides::capture_rapid(&mut all, &g_star, densest);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
+                core.medium_spin +=
+                    spin_was - carried_spin(&all, &own_of(&sys), &sys.ell_orth, &unit);
                 shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
                 dissolved += 1;
                 continue;
@@ -1609,6 +1635,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         w.phase[k] =
                             frac_of(w.phase[k].clone() + was[k].clone() - h.phase[k].clone());
                     }
+                    // Re-read against its new star, its orbit share about the
+                    // old one is no longer carried: booked to the medium.
+                    core.medium_spin += carried_spin(&w.total(), &at, &orth, &unit);
                     h.satellites.push(w)
                 }
                 None => {
@@ -1620,6 +1649,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             )
                         })
                         .collect();
+                    // Crossing as motes, it carries its orbit share; its own
+                    // spin (its orbit about its star and what turns in it)
+                    // is booked to the medium.
+                    core.medium_spin += subtree_spin(&w, &unit);
                     shed.push((w.total(), at, orth, place))
                 }
             }
