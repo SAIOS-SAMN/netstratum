@@ -577,18 +577,31 @@ The composed product keeps it, on the even algebra: scalar + generator +
 volume. A three-axis (Gibbs) product drops it, and so does any product
 taken plane by plane. That volume is the density §8.3 forbids losing.
 
-### 11.4 Reading a composed rate in degrees (resolved by docs/121 §10.4)
+### 11.4 A plane bends as it spins: torsion, never a rigid turn (operator, 2026-11-05)
 
-A rate is a velocity, a share `x ∈ (−1, 1)` of the luminal bound (one turn
-a bell, `SUBSTRATE_C`). Rates compose by the flow law, `(x + y)/(1 + x·y)`,
-the composition of velocities with `x` the share itself, never a tangent
-of an angle. So composition stays rational and exact. Its degree reading
-is `360°·x` a bell exactly, and the state advances `θ + 360°·x·bells`
-between events (docs/120 §2). Niven applies only to composing angles as
-rotors (`2·arctan b`). Here the angles are the state and the velocities are
-what compose. The Cayley form (§11.2) remains the composition of a body's
-orientation generators, read only as certified sectors where a rotor's
-angle is asked.
+The operator ruled: "adjust for the bend in the plane during the spin -
+its not a full rigid spin: its torsion". A plane is attached to the higher
+manifold (`S⁷`, with `S¹¹` riding on it). Its generator has its in-plane
+part and its parts between planes (`τ`, stored, §11.5 and T18), and they do
+not commute. So each bell's in-plane turning carries the plane's
+orientation through the other planes: torsion, the Einstein–Cartan
+coupling of docs/100 §8.
+
+- **One bell's motion** is the Cayley rotor of the whole generator (§11.2),
+  in-plane and between planes together, exact over ℚ, its volume part kept
+  (§11.3). Rates compose by the flow law as velocity shares of the luminal
+  bound (docs/121 §10.4).
+- **The phase on plane k is the plane-k reading of the composed motion,**
+  not `θ + 360°·x·bells`. The linear advance holds only where a body's
+  generator has no part between planes.
+- **Over n bells** the motion is that rotor composed n times. Multiplied
+  out, its denominators grow without bound (the class docs/61 refuses), so
+  it is held as its exact base and its formula: the generator and `n`. Its
+  readings (the plane's phases, the arcs of its extents) are rendered on
+  observation as certified sexagesimal sectors (the 2026-10-24 ruling:
+  zoom out, render exact only under observation).
+- **A rigid reading was recorded here first** (`θ + 360°·x·bells` for every
+  body, #94) and corrected (register K10).
 
 ### 11.5 The founding's lean is an inter-plane turning (Xylarium T18)
 
