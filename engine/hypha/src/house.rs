@@ -658,11 +658,10 @@ impl House {
         let held_now = self.attached_seats()?;
         if lines != self.lines || held_now != self.held_seats {
             self.held_seats = held_now;
-            // The latest epoch replaces: an epoch is the listing's time.
-            let now = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map(|d| d.as_secs())
-                .unwrap_or(0);
+            // The latest epoch replaces: an epoch is the listing's time, read
+            // on the court's clock (the last final TUniversal point's height,
+            // which only advances), never a wall clock (MU-RECURSION law 9).
+            let now = seat.tuniversal().map_or(0, |p| p.h);
             self.epoch = now.max(self.epoch + 1);
             self.lines = lines;
             // A seat whose line is gone is no longer held.

@@ -76,9 +76,13 @@ pub struct Reading {
 }
 
 impl Reading {
-    /// The court and the kernel read the same breaches, law by law.
+    /// The court and the kernel read the same breaches, law by law, and left
+    /// the same laws unmeasured. A law one side breaches and the other left
+    /// unmeasured is no agreement: unread is not broken, and not agreed
+    /// either (MU-RECURSION 78.121).
     pub fn agree(&self) -> bool {
         laws_of(&self.local) == laws_of(&self.court)
+            && unmeasured_of(&self.local) == unmeasured_of(&self.court)
     }
 }
 
@@ -94,6 +98,20 @@ pub fn laws_of(v: &TransitionVerdict) -> Vec<Law> {
         .breaches
         .iter()
         .filter(|(_, b)| !unmeasured(b))
+        .map(|(law, _)| *law)
+        .collect();
+    l.sort_by_key(|law| law.index());
+    l.dedup();
+    l
+}
+
+/// The laws a verdict left unmeasured (its stroke spent before it read
+/// them).
+pub fn unmeasured_of(v: &TransitionVerdict) -> Vec<Law> {
+    let mut l: Vec<Law> = v
+        .breaches
+        .iter()
+        .filter(|(_, b)| unmeasured(b))
         .map(|(law, _)| *law)
         .collect();
     l.sort_by_key(|law| law.index());
