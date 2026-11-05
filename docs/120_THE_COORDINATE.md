@@ -282,6 +282,17 @@ universe on a dimension as a vector". A lane is never one number:
   Mycelium before v0.4.0's tag; `conductor::coordinate` follows the agreed
   form.
 
+## 8b′. A plane closes on itself (operator, 2026-11-05)
+
+"Plane needs closure": a plane is a closed circle on the manifold (`S¹`
+inside `S⁷`), never an open plane. Its phase wraps at 360°, its whole turns
+counted by `K`, and a spin on it is a turning around that circle whose sign
+is the sense of travel. With per-plane spins (§6), each plane answers on
+its own circle. A component that passes zero carries the body through the
+centre on that plane alone (its phase there half a turn on, its magnitude
+kept), never on every plane at once by the summed spin
+(`flows::through_centre` today).
+
 ## 8c. A body's own enclosure: the volume a point collapsed (operator, 2026-11-05)
 
 The operator ruled: "identify the collapse and add the volume back both
