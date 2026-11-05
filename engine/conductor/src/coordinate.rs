@@ -423,18 +423,35 @@ impl Coordinate {
         }))
     }
 
-    /// A body carried into another enclosure across a throat (a re-origin):
-    /// written at `into`, its lanes kept and its passage recorded on T's
-    /// first component by `flux`. No reach moves (LAW-PASSAGE): S is
-    /// unchanged.
-    pub fn re_origined(&self, into: Origin, flux: &Ratio) -> Coordinate {
+    /// The passage through the throat (docs/117 §12): the pole swap, an exact
+    /// involution. The span on `S`'s first component reverses (its sheet
+    /// flips, its reach `|S|` kept: no reach moves), and `T`'s first
+    /// component gains the span's change, `−2·(A − Q)`.
+    pub fn passed(&self) -> Coordinate {
         let mut lanes = self.local.lanes.clone();
+        let span = lanes[Lane::S.place()]
+            .0
+            .first()
+            .cloned()
+            .unwrap_or_else(|| ratio(0, 1));
+        if let Some(s) = lanes[Lane::S.place()].0.first_mut() {
+            *s = -span.clone();
+        }
         if let Some(t) = lanes[Lane::T.place()].0.first_mut() {
-            *t += flux.clone();
+            *t -= ratio(2, 1) * span;
         }
         Coordinate {
-            origin: into,
+            origin: self.origin.clone(),
             local: Local::at(self.local.h, lanes),
+        }
+    }
+
+    /// A body carried into another enclosure across a throat (a re-origin):
+    /// its passage (`passed`), written at `into`.
+    pub fn re_origined(&self, into: Origin) -> Coordinate {
+        Coordinate {
+            origin: into,
+            ..self.passed()
         }
     }
 }
@@ -1032,13 +1049,21 @@ mod tests {
     }
 
     #[test]
-    fn a_re_origin_keeps_the_reach_and_records_the_passage() {
+    fn a_passage_is_the_pole_swap_and_writes_its_span_change_on_t() {
+        // docs/117 §12: span 3/5 crosses to −3/5, T gains −6/5; the return
+        // restores both exactly (M∘M = 1); at the throat nothing changes.
         let r = root();
+        let a = body(&r, 1, lanes(q(3, 5), q(0, 1), q(0, 1), q(0, 1)), vec![0]);
+        let once = a.passed();
+        assert_eq!(once.lane(Lane::S), &v(q(-3, 5)));
+        assert_eq!(once.lane(Lane::T), &v(q(-6, 5)));
+        assert_eq!(once.passed(), a);
+        let throat = body(&r, 1, lanes(q(0, 1), q(0, 1), q(0, 1), q(0, 1)), vec![0]);
+        assert_eq!(throat.passed(), throat);
+        // A re-origin is the passage written at the other enclosure.
         let inner = r.branch(Local::at(1, lanes(q(0, 1), q(0, 1), q(0, 1), q(0, 1))));
-        let a = body(&r, 1, lanes(q(1, 2), q(0, 1), q(0, 1), q(0, 1)), vec![0]);
-        let carried = a.re_origined(inner.clone(), &q(1, 1));
+        let carried = a.re_origined(inner.clone());
         assert_eq!(carried.origin, inner);
-        assert_eq!(carried.lane(Lane::S), a.lane(Lane::S));
-        assert_eq!(carried.lane(Lane::T), &v(q(1, 1)));
+        assert_eq!(carried.local, once.local);
     }
 }
