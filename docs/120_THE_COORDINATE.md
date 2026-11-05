@@ -282,6 +282,35 @@ universe on a dimension as a vector". A lane is never one number:
   Mycelium before v0.4.0's tag; `conductor::coordinate` follows the agreed
   form.
 
+## 8c. A body's own enclosure: the volume a point collapsed (operator, 2026-11-05)
+
+The operator ruled: "identify the collapse and add the volume back both
+semantically, and dimensionally". (Never "cells": ruling 2026-10-16.)
+
+- **The collapse.** A mote carries its holding as an amount at one reach,
+  one spin per orbit and one phase per plane: a point. The matter it stands
+  for occupies a volume, which the record already states. The dispersal
+  ruling (2026-10-16) has every kind spread over `R(1 ± p)`, and
+  `flows::held` reads a mote's held share as the part of `R(1 ± p)` inside
+  the throat. The volume lives in that one reading and is dropped
+  everywhere else. So every law that sets one reach for matter with extent
+  flattens it: the release's mirror (the inner edge), and either edge.
+- **Semantically: a mote is a body,** holding with its own enclosure, in the
+  grammar of stars and worlds (one grammar, coupled tiers). Its extent is
+  its own sphere about its place, the holding's own enclosure (the one
+  sphere LAW-FIELD admits). That sphere is the dispersal's half-width, `R·p`.
+- **Dimensionally: the extent is state,** carried on `S` beside the reach,
+  a component per plane of the base. A law reads how much of a body's
+  enclosure stands where: the held share, a capture, a bond and an exit are
+  each the part of the enclosure on one side of a boundary. None of them
+  compares a single reach.
+- **The release:** the core's released parcel stands at the throat (`R = 1`)
+  with its own enclosure spanning `± span·c`, both sides of the throat at
+  once, as the dispersal law states. Nothing is placed and nothing mirrored.
+  Its held share is read from it.
+- **A passage** exchanges reach and hold and carries the enclosure whole:
+  `H + R` is kept, so the volume is conserved through the crossing.
+
 ## 9. What is open
 
 1. **G's content.** That a hue move is a change of kind (the place on S¹¹)
