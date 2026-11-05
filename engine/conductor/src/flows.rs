@@ -764,6 +764,22 @@ pub fn own_enclosure(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
     })
 }
 
+/// A body's own enclosure in degrees on each plane of its orbit (register
+/// K3): its extent `d = R·e` (`e` the pinch share, `own_enclosure`) as an arc
+/// of its closed plane. Size is L1 (docs/118 F1), and the universe's own
+/// circle of radius `R` is the L1 diamond, `8R` a whole turn (docs/61), so
+/// the arc `d` is `d/(8R)` of a turn: `45°·e` on each side of its place.
+pub fn own_degrees(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
+    own_enclosure(mote, enc, whole).map(|e| ratio(45, 1) * e)
+}
+
+/// Whether two bodies' own enclosures meet on a plane: their separation
+/// there, in degrees on the closed circle (`[0°, 180°]`), at most the sum
+/// of their two half-arcs.
+pub fn enclosures_meet(separation: &Ratio, a: &Ratio, b: &Ratio) -> bool {
+    *separation <= a.clone() + b.clone()
+}
+
 /// The cut as A reading, by the one enclosure (one grammar: the hold the
 /// exits and the ring law read, `H(<ℓ)` with the throat its base, never a
 /// second hold of its own): a mote's held share in each plane, its reach
@@ -4122,5 +4138,38 @@ mod hold_by_place_tests {
             }
             assert_eq!(enc.hold_within(&r), by_hand, "at {r}");
         }
+    }
+}
+
+#[cfg(test)]
+mod extent_degree_tests {
+    use super::{enclosures_meet, own_degrees, own_enclosure, Enclosed, Mote};
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn an_extent_reads_45_degrees_of_its_pinch_share_a_side() {
+        // Register K3: an arc d of the L1 circle of radius R is d/(8R) of a
+        // turn; d = R*e, so 45 degrees times e on each side.
+        let x = Mote {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            amount: ratio(1, 1),
+            ell_o: ratio(1, 1),
+            ell_orth: ratio(1, 2),
+            phase: super::rest(ratio(1, 2)),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            tilt: Vec::new(),
+        };
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let e = own_enclosure(&x, &enc, &ratio(2, 1));
+        let deg = own_degrees(&x, &enc, &ratio(2, 1));
+        // Holding 1/2 against the hold 1: e = 1/3, so 15 degrees a side.
+        assert_eq!(e[0], ratio(1, 3));
+        assert_eq!(deg[0], ratio(15, 1));
+        assert!(enclosures_meet(&ratio(30, 1), &deg[0], &deg[0]));
+        assert!(!enclosures_meet(&ratio(31, 1), &deg[0], &deg[0]));
     }
 }
