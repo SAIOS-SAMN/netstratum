@@ -1333,8 +1333,7 @@ pub fn spin_torque(
     // Each plane's spin: its share of the orbit spin, its own torque and
     // its share of the band (radial). A plane torqued past zero carries the
     // mote through the centre in that plane (its phase there on half a
-    // turn), never piled at zero; the orbit spin is the L1 sum, the tilt
-    // re-read from the planes.
+    // turn), never piled at zero.
     let mut planes_l: Vec<Ratio> = Vec::with_capacity(t.len());
     for (j, tk) in t.iter().enumerate() {
         let lk = x.ell_o() * tk.clone()
@@ -1349,9 +1348,11 @@ pub fn spin_torque(
             planes_l.push(lk);
         }
     }
-    let raw = planes_l.iter().fold(ratio(0, 1), |s, l| s + l.clone());
-    let new_o = crate::ring::grain(&raw);
-    let tilt_new = tilt_from(&planes_l);
+    // Each plane keeps its own spin (docs/120 §8b′, a plane closes on
+    // itself): the components are the state, each on the grain, never summed
+    // into one spin and split again by a tilt.
+    let planes_l: Vec<Ratio> = planes_l.iter().map(crate::ring::grain).collect();
+    let new_o = planes_l.iter().fold(ratio(0, 1), |s, l| s + l.clone());
     let dl = new_o.clone() - x.ell_o();
     absorbed += m.clone()
         * if dl < ratio(0, 1) {
@@ -1360,7 +1361,7 @@ pub fn spin_torque(
             dl.clone()
         };
     given += m.clone() * dl;
-    x.spins = Mote::spins_of(&new_o, &tilt_new);
+    x.spins = planes_l;
     // The orthogonal spin (docs/90 D1): the release's torque in the orthogonal orbit's plane,
     // less the hold's return of the held half, `½·δ(R)·ℓ_⊥`, both from and
     // to the same reservoir as the orbit plane's (Σ m·(ℓ_o + ℓ_⊥) and the
