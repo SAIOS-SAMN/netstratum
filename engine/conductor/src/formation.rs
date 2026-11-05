@@ -31,7 +31,7 @@
 //!   of holding `λ · w*` as fit.
 use crate::pulse::{mass, Manifest};
 use cfe::ratio::{ratio, Ratio};
-use num_traits::Zero;
+use num_traits::{Signed, Zero};
 
 /// A shell of one escaped element, in the galaxy's own units.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1712,36 +1712,44 @@ pub fn settle_system(
     };
     let spin_before = spin_of(sys);
     let h_s = mass(&sys.kept) / total.clone();
-    let pool: Manifest = std::mem::take(&mut sys.medium);
-    sys.flows.clear();
+    // The system's medium is its motes (each spray and capture books both):
+    // each mote is read through the settle with its own state, its reach read
+    // by the system's enclosure from its own spin (register B3). Matter of
+    // the medium no mote carries is kept as it is and counted.
+    let frame = system_frame(sys, unit);
+    let mut pool: Manifest = std::mem::take(&mut sys.medium);
+    let motes = std::mem::take(&mut sys.flows);
+    for x in &motes {
+        if let Some(a) = pool.get_mut(&x.key) {
+            *a -= x.amount.clone();
+        }
+    }
+    let unmoted: Manifest = pool.into_iter().filter(|(_, a)| a.is_positive()).collect();
+    read.unmoted = mass(&unmoted);
     let mut mix = sys.kept.clone();
-    for (kind, a) in &pool {
+    for (kind, a) in motes
+        .iter()
+        .map(|x| (&x.key, &x.amount))
+        .chain(unmoted.iter())
+    {
         *mix.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
     }
-    let (extent, reach_of) = match heart_cut(&mix, &ratio(0, 1), &ratio(0, 1)) {
-        Some((held, _, h_k)) if !h_k.is_zero() => {
-            let reaches: Vec<(crate::chem::Kind, Ratio)> =
-                carried(&mix, &ratio(0, 1), &ratio(0, 1))
-                    .into_iter()
-                    .map(|(kind, l)| (kind, h_s.clone() * l / h_k.clone()))
-                    .collect();
-            let ext = reaches
-                .iter()
-                .filter(|(kind, _)| held.contains_key(kind))
-                .map(|(_, r)| r.clone())
-                .max()
-                .unwrap_or_else(|| ratio(0, 1));
-            (ext, reaches)
-        }
-        _ => (ratio(0, 1), Vec::new()),
+    let extent = match heart_cut(&mix, &ratio(0, 1), &ratio(0, 1)) {
+        Some((held, _, h_k)) if !h_k.is_zero() => carried(&mix, &ratio(0, 1), &ratio(0, 1))
+            .into_iter()
+            .filter(|(kind, _)| held.contains_key(kind))
+            .map(|(_, l)| h_s.clone() * l / h_k.clone())
+            .max()
+            .unwrap_or_else(|| ratio(0, 1)),
+        _ => ratio(0, 1),
     };
     let ring = h_s.clone();
     let rim = ratio(2, 1) * ring.clone();
     let b0 = if extent > ring { extent } else { ring.clone() };
-    // A small body: (reach, share, matter, phases, tilt, path, heat).
     // A small body: (reach, share, matter, phases, tilt, path, heat, the
-    // strike its joining gave it: the turning contrast of what met).
-    // And (docs/109 §4) the mind coupled to it, and whether its orbit is solid.
+    // strike its joining gave it: the turning contrast of what met), and
+    // (docs/109 §4) the mind coupled to it, whether its orbit is solid, and
+    // the motes it was read from.
     type Small = (
         Ratio,
         Ratio,
@@ -1753,14 +1761,15 @@ pub fn settle_system(
         Ratio,
         Option<[u8; 32]>,
         bool,
+        Vec<crate::flows::Mote>,
     );
     let mut bodies: Vec<Small> = Vec::new();
     let mut to_star = Manifest::new();
-    for (kind, a) in &pool {
-        let r = reach_of
-            .iter()
-            .find(|(c, _)| c == kind)
-            .map(|(_, r)| r.clone())
+    for x in motes {
+        // Its reach, read by the system's enclosure from its own spin.
+        let r = frame
+            .as_ref()
+            .map(|e| e.reach(&x.ell_o).0)
             .unwrap_or_else(|| b0.clone());
         // The return leg stands at its image through the ring.
         let r = if r < ring {
@@ -1769,31 +1778,28 @@ pub fn settle_system(
             r
         };
         if r > rim {
-            *escaped.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            *escaped.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
             continue;
         }
         if r < b0 {
-            *to_star.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            *to_star.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
             continue;
         }
-        let z_turn = ratio(i64::from(crate::chem::charge(kind)), 2);
-        let mut phase = crate::flows::rest(ratio(1, 2));
-        for &s in &crate::flows::SPACE {
-            phase[s] = crate::ring::grain(&frac(
-                sys.phase.get(s).cloned().unwrap_or_else(|| ratio(0, 1)) + z_turn.clone(),
-            ));
-        }
+        let matter: Manifest = [(x.key.clone(), x.amount.clone())].into();
+        let mut phase = x.phase.clone();
+        crate::flows::full(&mut phase);
         bodies.push((
             r,
-            mass(&[(kind.clone(), a.clone())].into()) / total.clone(),
-            [(kind.clone(), a.clone())].into(),
+            mass(&matter) / total.clone(),
+            matter,
             phase,
-            sys.tilt.clone(),
+            x.tilt.clone(),
             None,
-            ratio(0, 1),
+            x.agitation.clone(),
             ratio(0, 1),
             None,
             false,
+            vec![x],
         ));
     }
     for (kind, a) in to_star {
@@ -1819,6 +1825,7 @@ pub fn settle_system(
             ratio(0, 1),
             w.coupled,
             w.solid,
+            Vec::new(),
         ));
     }
     // Convergence: read every neighbouring pair at once; those failing the
@@ -1941,9 +1948,9 @@ pub fn settle_system(
                 .filter(|g| g.8.is_some())
                 .max_by(|a, b| a.1.cmp(&b.1))
                 .and_then(|g| g.8);
-            group.clear();
+            let from: Vec<crate::flows::Mote> = group.drain(..).flat_map(|g| g.10).collect();
             merged.push((
-                r, m, matter, phase, tilt, path, heat, strike, coupled, solid_now,
+                r, m, matter, phase, tilt, path, heat, strike, coupled, solid_now, from,
             ));
         }
         bodies = merged;
@@ -1958,7 +1965,8 @@ pub fn settle_system(
         .iter()
         .filter_map(|b| b.5.as_ref().and_then(|p| p.last().copied()))
         .collect();
-    for (r, m, matter, phase, tilt, path, heat, strike, coupled, was_solid) in bodies {
+    let mut belt_motes: Vec<crate::flows::Mote> = Vec::new();
+    for (r, m, matter, phase, tilt, path, heat, strike, coupled, was_solid, from) in bodies {
         let standing = path.is_some();
         let delta_at = inner.clone() / (r.clone() + inner.clone());
         // Ignition of A grown BODY (one accretion path; with Xylarium): it is
@@ -1991,6 +1999,36 @@ pub fn settle_system(
                 (bound, gone)
             }
         };
+        // The belts stay motes (register B3): a body that holds nothing
+        // returns the motes it was read from as they were; what a standing
+        // body's edge strips leaves as motes at its reach, phases, tilt and
+        // heat, turning at the balance there.
+        let mut loose = stripped.clone();
+        if matter.is_empty() {
+            for x in from {
+                if let Some(a) = loose.get_mut(&x.key) {
+                    *a -= x.amount.clone();
+                }
+                belt_motes.push(x);
+            }
+        }
+        for (kind, a) in loose {
+            if a.is_positive() {
+                belt_motes.push(crate::flows::Mote {
+                    key: kind,
+                    amount: a,
+                    ell_o: crate::ring::grain(&(r.clone() * inner.clone())),
+                    ell_orth: ratio(0, 1),
+                    phase: phase.clone(),
+                    agitation: heat.clone(),
+                    born: bell,
+                    vacuum: false,
+                    lever: Vec::new(),
+                    lever_place: ratio(0, 1),
+                    tilt: tilt.clone(),
+                });
+            }
+        }
         for (kind, a) in stripped {
             *belts.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
         }
@@ -2075,7 +2113,11 @@ pub fn settle_system(
         out.push(w);
     }
     sys.satellites = out;
+    for (kind, a) in unmoted {
+        *belts.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
+    }
     sys.medium = belts;
+    sys.flows = belt_motes;
     let medium_was = sys.medium_spin.clone();
     let moved = spin_of(sys) - spin_before.clone();
     sys.medium_spin -= moved.clone();
@@ -2103,6 +2145,9 @@ pub struct Settled {
     pub moved: Ratio,
     /// Its identity residual (zero where booked exactly).
     pub residual: Ratio,
+    /// The holding of the medium no mote carried (zero where every spray
+    /// and capture booked its motes).
+    pub unmoted: Ratio,
 }
 
 #[cfg(test)]

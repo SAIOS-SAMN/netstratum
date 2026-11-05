@@ -1100,7 +1100,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 ) = (
                     settled.joins,
                     0,
-                    vec![("system", settled.residual.clone())],
+                    vec![
+                        ("system", settled.residual.clone()),
+                        ("unmoted", settled.unmoted.clone()),
+                    ],
                     (settled.formed, settled.ignited, 0, 0),
                     [
                         ratio(0, 1),
@@ -1533,7 +1536,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             ) = (
                 settled.joins,
                 0,
-                vec![("system", settled.residual.clone())],
+                vec![
+                    ("system", settled.residual.clone()),
+                    ("unmoted", settled.unmoted.clone()),
+                ],
                 (settled.formed, settled.ignited, 0, 0),
                 [
                     ratio(0, 1),
