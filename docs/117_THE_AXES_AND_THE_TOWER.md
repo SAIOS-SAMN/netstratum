@@ -32,6 +32,11 @@ axis and five isoclinic planes (`11 = 1 + 2 × 5`). Netstratum's is
 
 ## 2. The signature
 
+> **Superseded in part (§10):** the basis below put Z and Q on orthonormal
+> axes and made the whole and the span the null directions. Z and Q are the
+> null poles; the whole and the span are the orthonormal axes. The
+> signature's form (one positive, one negative per plane) stands.
+
 Each frame plane `(Z_k, Q_k)` is hyperbolic: one of its poles squares to
 +1 and the other to −1, and R squares to +1. Which pole is negative is not
 fixed. It is state, plane by plane (operator 2026-11-05: "Q or Z could be
@@ -191,6 +196,12 @@ turning between the machine's fibre and the riding state. Not derived
    §3 and the degrees they exchange.
 
 ## 8. Velocity as the generator, drag as its contraction, the horizon
+
+> **Superseded in part (§10):** §8.1's direction and §8.4's horizon rest on
+> §2's orthonormal basis. In the pole basis the throat is the inversion's
+> fixed sphere (not null), the null states are the poles, and the coupling
+> web does not turn over at the throat. §8.2's velocity and drag shares and
+> §8.3's first-degree reading of a generator stand.
 
 Derived 2026-11-05 (operator: the per-plane flip "is just palindrome
 construction and deconstruction ... on a single dimensional traversing
@@ -413,4 +424,104 @@ whole's enclosure. It costs three enclosures where one is built now.
 Open from it: `q`'s scalar part was the one hold `H` (docs/114 §9.1); with a
 hold per plane, what `q`'s scalar part is, the whole's hold or the three
 planes' together, is not derived.
+
+## 10. The poles, R's plane and the state (correcting §2 and §8)
+
+Derived 2026-11-05 (operator: "using semantics like 'frame' and 'plane' -
+makes me think we are losing dimensionality somewhere in our
+calculations"). Each claim was checked in an exact Clifford algebra.
+
+### 10.1 Z and Q are an axis's poles
+
+A frame on axis k is closed or open: a state of the frame, not a
+direction. Its two states are the axis's two poles, the plane's null
+directions:
+
+    n_Z = e₊ + e₋,   n_Q = e₊ − e₋,   n_Z² = n_Q² = 0,   n_Z·n_Q + n_Q·n_Z = 4
+
+with `e₊² = +1` and `e₋² = −1` the plane's orthonormal axes. A frame state
+with `A` closed and `Q` open is
+
+    A·n_Z + Q·n_Q = (A + Q)·e₊ + (A − Q)·e₋
+
+the **whole** on the positive axis and the **span** on the negative axis.
+docs/95 §8's "the whole is A + Q, R is their span A − Q" is this, read off
+the algebra.
+
+- **The dilation is the conformal dilator.** The boost in the plane scales
+  `n_Z` by `1 − p` and `n_Q` by `1 + p`; it acts on the pole ratio
+  `t = Q/A`, Xylarium's pole coordinate (`t = U/W`), by `D(p)`. LAW-DILATION
+  is how a dilation acts on origin and infinity.
+- **The face inversion is the pole swap,** a reflection in `e₊` that
+  exchanges `n_Z` and `n_Q`, the inversion in the unit sphere exchanging
+  origin and infinity. It reverses the span, `A − Q ↦ Q − A`. So **the
+  sense of a crossing is the sign of the span**: docs/95 §2 declared it
+  ("`s` is the sign of R's motion"); here it is derived.
+- **The throat, `A = Q`, is the span at zero:** pure `e₊`, the fixed sphere
+  of the inversion. It is not null. The throat is the event horizon as the
+  inversion's fixed set.
+- **A frame state is null only at a pole,** wholly closed or wholly open
+  (`(A·n_Z + Q·n_Q)² = 4AQ`): the singularity and infinity. That is where
+  docs/117 §9.3's one-way passage stands (`v·v·q = 0`), not at the throat.
+- **The coupling web does not turn over at the throat.** Every interior
+  state (`A, Q > 0`) couples to another axis alike. The turnover of §8.4
+  came from §2's orthonormal basis.
+
+### 10.2 R's partner: the universe's own pole pair
+
+docs/95 §1 counted seven base axes (three frame planes and R, "paired with
+none") and §2 counted Mycelium's conformal pair `e₊, e₋` beside them. But R
+is reach, the scale between origin and infinity (docs/95 §2), and that is
+the conformal pair's own span. So R is not unpaired: its partner is the
+other member of the universe's pole pair.
+
+    ℝ⁸ = three frame planes (each axis's poles) + R's plane (the universe's
+         origin and infinity)
+
+Four hyperbolic planes, signature (4, 4). It is Xylarium's grammar
+("the axis plane and the five isoclinic planes"), whose pole axis holds Z
+at the origin and Q at infinity. S⁷ stays compact because size is read in
+L1, which no signature changes; the products follow the split signature.
+
+On R's plane the same law gives R's face: the universe's pole swap, the
+inversion exchanging origin and infinity, reverses R's span. "The vacuum
+leg runs R backward" is that reversal.
+
+### 10.3 The state over the eight axes, and what the code has set to zero
+
+- **Degree 1, the frames:** each plane's whole and span, eight components.
+  The code splits a kind's frames evenly over the three axes (`A/3, u/3`
+  each, docs/95 §6), so the per-axis closed and open counts carry no content
+  of their own.
+- **Degree 2, the motion:** 28 components. Within a plane the only motion is
+  its boost (four, the dilations). Between planes, axes of one sign turn and
+  of opposite signs boost (24). The code carries three plane spins with
+  their phases, and R's loop phase and orthogonal spin.
+- **A hyperbolic plane holds no turning.** Its one motion is a boost. So the
+  phase `ψ_k` the code turns on a circle "in plane k" cannot be a turning
+  inside that plane: a turning stands on two axes of one sign, in **two**
+  planes (`e₊ₖ ∧ e₊ₗ`). The three phases are readings of turnings between
+  planes, possibly with R's plane among them. Which pairs they are is not
+  derived. That is the dimension every phase calculation has lost.
+
+### 10.4 What this changes
+
+- docs/117 §8.1's direction, §8.4's horizon and §9.3's place of the one-way
+  passage move to the pole basis: the throat is the horizon, the poles are
+  null.
+- Mycelium's draft clause 2.11 states `v_k = H_k·e_Zk + R_k·e_Qk` on
+  orthonormal axes. In the pole basis a plane's state is
+  `A·n_Z + Q·n_Q`. The clause waits.
+- docs/114 §9's `q` and the passage `v_k·q` are restated on the pole basis
+  before anything is built.
+
+### 10.5 What is open
+
+1. Which pairs of planes the three phases' turnings stand on (§10.3).
+2. Whether a kind's frames part over the axes by a law (an even split is a
+   collapse, §10.3).
+3. The passage on the pole basis: what a crossing multiplies the state by,
+   now that the throat is the fixed sphere and the poles are null.
+4. The R plane's role in the tower: S⁴ as the ratio of two quaternions (§4)
+   reads anew with four hyperbolic planes.
 
