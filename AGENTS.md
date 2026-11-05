@@ -46,8 +46,13 @@ defined in [GLOSSARY.md](GLOSSARY.md), not by their everyday meaning.
 
 ## Workflow
 
-- Every change is made on a branch and lands on `main` by a pull request
-  that the maintainer merges after `scripts/check` passes.
+- Every change is made on a branch and lands on `main` by a pull request,
+  merged with `gh pr merge --merge --delete-branch` (git and gh over SSH).
+- A change is proved by its witnesses and, for a change of how the universe
+  moves, by a read of one founding before and after: re-derivation
+  identities and work counters (N against 4N), never byte identity or
+  wall-clock time (operator 2026-10-20). `scripts/check` is a tool to run
+  where useful, not a gate (operator 2026-11-04).
 - Commits follow [CONTRIBUTING.md](CONTRIBUTING.md#commits); a physics
   commit names its document section and its measured read.
 
@@ -55,7 +60,7 @@ defined in [GLOSSARY.md](GLOSSARY.md), not by their everyday meaning.
 
 | Command | Time | Notes |
 |---|---|---|
-| `scripts/check` | ~15-25 min | Everything a change passes: fmt, clippy `-D warnings`, tests, rustdoc `-D warnings`, links |
+| `scripts/check` | ~15-25 min | fmt, clippy `-D warnings`, tests, rustdoc `-D warnings`, links; a tool, not a gate |
 | `cargo test -p conductor --lib <name>` | Seconds | Run the changed module's tests while working |
 | `cargo build --release -p conductor --bin <bin>` | 1-3 min | The era-1 binaries: `pulse`, `breathe`, `observe` |
 | `target/release/pulse <dir> found 2^40` | ~3 min | Founds a universe; refuses an existing one |

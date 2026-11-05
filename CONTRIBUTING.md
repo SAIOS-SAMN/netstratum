@@ -13,13 +13,17 @@ matches the standards of the projects Netstratum publishes with
 - Linux or macOS. Era-1 readings are exact-rational and memory-hungry; long
   breaths want several GB free and are run one at a time.
 
-## Checks every change passes
+## Checks
+
+A change is proved by its witnesses (tests that state the law it
+changes) and, where it changes how the universe moves, by a read of one
+founding before and after, compared by its identities and work counters.
 
 ```
 scripts/check
 ```
 
-It runs, and requires clean: `cargo fmt --check`, `cargo clippy --workspace
+runs the mechanical checks: `cargo fmt --check`, `cargo clippy --workspace
 --all-targets -- -D warnings`, `cargo test --workspace`, `cargo doc
 --workspace --no-deps` with `-D warnings`, and `scripts/check-docs` (every
 relative link in the Markdown resolves). There is no hosted CI. Long physics
@@ -29,7 +33,7 @@ reads are time-boxed and are not part of the check.
 
 - Every change is made on a branch and lands on `main` by a pull request.
   `main` is protected: it takes no direct pushes, and the maintainer merges
-  once `scripts/check` passes.
+  it once its witnesses and read stand.
 - External contributions are pull requests, reviewed by the maintainer
   ([MAINTAINERS.md](MAINTAINERS.md)).
 - Releases are annotated `vX.Y.Z` tags on `main` (SemVer) with a GitHub
