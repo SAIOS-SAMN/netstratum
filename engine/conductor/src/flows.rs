@@ -792,6 +792,10 @@ pub fn held(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> Ratio {
 pub struct Enclosed {
     spins: Vec<Ratio>,
     held: Vec<Ratio>,
+    /// Each body's own reach (`ℓ/H(<ℓ)`), in order, with the holding standing
+    /// at or within it summed from the base: `hold_within` by bisection.
+    places: Vec<Ratio>,
+    within: Vec<Ratio>,
 }
 
 impl Enclosed {
@@ -808,9 +812,30 @@ impl Enclosed {
             run += crate::ring::grain(h);
             held.push(run.clone());
         }
+        let mut by_place: Vec<(Ratio, Ratio)> = bodies
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| !held[*i].is_zero())
+            .map(|(i, (l, _))| {
+                (
+                    l.clone() / held[i].clone(),
+                    held[i + 1].clone() - held[i].clone(),
+                )
+            })
+            .collect();
+        by_place.sort_by(|a, b| a.0.cmp(&b.0));
+        let mut within = Vec::with_capacity(by_place.len() + 1);
+        let mut run = held[0].clone();
+        within.push(run.clone());
+        for (_, h) in &by_place {
+            run += h.clone();
+            within.push(run.clone());
+        }
         Enclosed {
             spins: bodies.into_iter().map(|(l, _)| l).collect(),
             held,
+            places: by_place.into_iter().map(|(r, _)| r).collect(),
+            within,
         }
     }
 
@@ -851,14 +876,7 @@ impl Enclosed {
     /// within `r`, the hold a body standing at reach r turns about (the ring
     /// law's containment read by place, for a body known by where it stands).
     pub fn hold_within(&self, r: &Ratio) -> Ratio {
-        let mut h = self.held[0].clone();
-        for (i, l) in self.spins.iter().enumerate() {
-            let at = l.clone() / self.held[i].clone();
-            if at < *r {
-                h += self.held[i + 1].clone() - self.held[i].clone();
-            }
-        }
-        h
+        self.within[self.places.partition_point(|at| at < r)].clone()
     }
 
     /// The spin a body standing at reach `r` carries (register B11, one
@@ -4069,5 +4087,39 @@ mod one_reach_tests {
         let shared = ratio(12, 5);
         assert_eq!(enc.spin_at(&shared), ratio(3, 1));
         assert_eq!(enc.reach(&ratio(3, 1)).0, shared);
+    }
+}
+
+#[cfg(test)]
+mod hold_by_place_tests {
+    use super::Enclosed;
+    use cfe::ratio::{ratio, Ratio};
+
+    #[test]
+    fn the_hold_by_place_bisected_is_the_hold_counted_body_by_body() {
+        // Register A34: the same sum as testing every body's own reach.
+        let bodies: Vec<(Ratio, Ratio)> = (1..40i64)
+            .map(|i| (ratio((i * 37) % 53 + 1, 7), ratio(i % 5 + 1, 97)))
+            .collect();
+        let enc = Enclosed::new(ratio(1, 3), bodies.clone());
+        let mut sorted = bodies.clone();
+        sorted.sort_by(|a, b| a.0.cmp(&b.0));
+        for r in [
+            ratio(0, 1),
+            ratio(1, 2),
+            ratio(3, 1),
+            ratio(7, 2),
+            ratio(20, 1),
+        ] {
+            let mut by_hand = enc.hold(&ratio(0, 1));
+            let mut below = enc.hold(&ratio(0, 1));
+            for (l, h) in &sorted {
+                if l.clone() / below.clone() < r {
+                    by_hand += crate::ring::grain(h);
+                }
+                below += crate::ring::grain(h);
+            }
+            assert_eq!(enc.hold_within(&r), by_hand, "at {r}");
+        }
     }
 }
