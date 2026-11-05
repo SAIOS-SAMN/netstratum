@@ -4,9 +4,8 @@ Every remediation the audits of 2026-11-05 found, one row each, with where it
 stands, what is wrong and what remedies it. It is the register docs/118 Part IV
 works from, and it corrects docs/118 where the audits contradict it.
 
-**Status:** 7 of 9 audits recorded (§A–§H). The audit of the design record
-(docs/78–118) and the audit against MU-STANDARDS and MU-RECURSION are added
-as §I and §J when they report. Nothing here changes code.
+**Status:** 8 of 9 audits recorded (§A–§I). The audit against MU-STANDARDS
+and MU-RECURSION is added as §J when it reports. Nothing here changes code.
 
 **Method:** nine readers, read-only, against main `8e6f3d32` (the code is the
 same on `law/poles`), each reading its slice in full and citing file and
@@ -259,6 +258,111 @@ inverse (S2 unless marked):**
 
 ---
 
-## §I. The design record (docs/78–118): pending
+## §I. The design record against itself (docs/78–118)
+
+All 40 documents were read in full. The record contradicts itself on its most
+basic laws; every row below is S2 or S3 and is remedied by one statement
+in the foundation that the others are corrected to.
+
+**Contradictions on the base laws (S2):**
+
+| id | the question | the documents that disagree |
+|---|---|---|
+| I1 | One law at every tier? | docs/78 DL4 "One law at every tier" (never amended); docs/85 §5 "too linear"; docs/89 "one law ✔"; docs/118 F7 attributes "not one law" to docs/78, a misquote |
+| I2 | Stepped or closed form? | docs/78 DL5 and Decision 2 "never stepped", "circuitry, never steps"; docs/89 step 4 "the stepped `Body.phase`"; docs/94 K-steps |
+| I3 | The period | docs/83 `P = 1 + R/H`; docs/108 O2 still `P = r/M(<r)`; docs/101 §0, docs/107 still `r/(r + M(<r))` |
+| I4 | The exit | docs/96 §7 `R ≥ rim = 2·base` (built); docs/92, 104, 111, 112 `R ≥ H` |
+| I5 | Where matter stands | docs/92 inside the throat; docs/94 nothing orbits inside the ring; docs/99 outside; docs/103 most inside |
+| I6 | The release | docs/104 §3 heavy kinds more; docs/104 §1.2 and docs/112 §3.1 heavy kinds more slowly |
+| I7 | The faces | velocity `1 − δ` (docs/98) or `δ` (docs/117, 118); drag `1 − δ` (docs/83, 117) or `δ` (docs/104); the unlocked face `½(1 − δ)` (92, 96), `1 − δ` (102), `δ` (104) |
+| I8 | Which leg is the disc | docs/99 the disc is the continuum; docs/102 the vacuum leg runs home through the disc |
+| I9 | Does a star's heart have a throat | yes (docs/83 FL, 96 §2, 99); no (docs/91 C6, 92 §2, 111 §3.1) |
+| I10 | The throat | `R_b ≤ H_b` (docs/102, 111); `A = Q` (docs/117 §10, 118 F6); how the two relate is never derived |
+| I11 | Möbius and the passage | `M∘M = id` (docs/94, 97); "not an involution" (docs/114 T4); `−q` after two (docs/114 §9); `R → 2H − R` built (docs/89, 112), refused (docs/113, 114); `i·q` (docs/114 §9) against `v_k·q` (docs/117 §9.4) |
+| I12 | The bound share | phase-dependent count (docs/104 §1.1); the held share `g`, phase out (docs/105 §3) |
+| I13 | The neutron share | ¼ retired (docs/97 §9); "the constant ¼" (docs/105 §4.1); docs/97 §9's 6/7 and 1/6 inconsistent as written |
+| I14 | The push | five forms: `held/(1 + held)` (89), `½·Q/(A + Q)` (95), `½·u/hold` (96), `Q/(A + Q)` (104), `H_disc/(1 + H_disc)` (83) |
+| I15 | Twist | stands (docs/100 §2); grows outward (docs/104 §2–3) |
+| I16 | Closeness | two-sided owed (docs/85 §6b, before docs/99); one-sided built (docs/99 §2.2); a product over planes ruled (78 N1) and refused (85 §2) |
+| I17 | Planes | one turning per plane (85, 110); a plane holds no turning (117 §10); 180 planes and "capacity never restricted" (85) against three (95) against four over eight axes (117, 118) |
+| I18 | R | ten meanings (§I-terms); paired with none (95, 117 §1) against its own plane (117 §10, 118); backward on the vacuum leg (95) against always forward (114 T4) |
+| I19 | Z | the charge (docs/78, still the manifest's "nuclei per Z" in 84, 109, 118 F9) against the neutrons (97 onward) against the closed pole (95, 117, 118) |
+| I20 | Weight | `3Z` (95), `Q + Z` (97), `3Z − unpaired` (104) |
+| I21 | Coherence | a share (78 Br5) against an integer W (81) |
+| I22 | The rim and the universal period | rim `H`, `2·base`, `H(<R_rim)`; `T_u` 60, `2·base`, `2·a(R_rim)`, `4·R_rim` ≈ 5, stored 186 |
+| I23 | The home | the universal core's disc at `[]` (101) against core `[0]` (111, 112) against the heaviest core (89 B5) |
+| I24 | Galaxies | by the crest grammar (101) against by the pinch test (111) |
+| I25 | Flatness and squares | "never through flat space", "non-Euclidean" (78, 85) against "still flat" (114 §9.2); `ℓ·ℓ = r·H` rejected (83) but `R·R′ = H·H` "no square" (114 T1); docs/83's "no squares is geometry, not arithmetic" against docs/118 F1's arithmetic |
+| I26 | Rotors | the sandwich (docs/94) against one-sided, never the sandwich (114, 117) |
+| I27 | The signature | state (117 §2) against fixed (4, 4) (118 F2) |
+| I28 | Spin per plane | built (docs/96 §6) against two magnitudes and a tilt (docs/118 II.1) |
+| I29 | Wormholes and gates | none between galaxies (83) against throats between cores (78) against gates to other systems and the universal tier (109) |
+
+**Built, then called wrong by a later document, with the code still in place
+(S2):** `conductor::motion` (ω = M/r), the band atom and `A = 2Z`, the
+tidal mass split, the 279 K climate and seating, the seed-drawn torsion
+phase, life's K and grips, collisions by `s·D ≥ T`, the dispersal founding,
+the ½ regeneration, `life::wild`, `flows::{through, mobius, rest}`,
+`formation::infall`, the docs/92 reactor, the two-plane leftovers, the ½
+release, the libration, `echo_holds`, the static quarter and the 1200 cap,
+`held = (1 + R)/2`, the whole-mote luminal flip, the one-sided step,
+torsion's `/2`, `toward_rest` "compared on the squares", `ring::{inverted,
+tube}`, `horizons::read`, and the band's rest `R*·R*`. **Remediation:** each
+retired in code or restored in the record, never both standing.
+
+**Treated as settled while open, or the reverse (S3):** docs/79's
+Calabi–Yau "unproven" listed as established (docs/101 §0); the docs/80 Q
+lane (superseded) cited as a carrier; docs/100 §3's open coupling used in
+docs/101; docs/103 §5's inversion awaiting confirmation but applied as law
+in docs/104–111 (and docs/102 D1 still "confirm"); docs/95 §6's proposed
+even split built; docs/106's heat-as-state open but used in docs/110–111;
+docs/111 "not built" though docs/112 built §5.1; docs/112 §7.1 "closed"
+while the schedule runs on 186; docs/117 "changes no live physics" though
+`horizons::read` was built on it; docs/118 F1 "ruled" though newer than the
+laws it forbids and silent on compounding; docs/102 L5, L6 open but decided
+in docs/103 §9; docs/101 "nothing built"; docs/92 unbuilt but read as
+present by docs/94; docs/83's `L = r·v` refuted by its own SP1 and never
+withdrawn. **Remediation:** every document's status line re-read against
+the code.
+
+**Terms with two or more meanings across the record (S2 where the physics
+reads them):** R (ten), Z (three), Q (six), A (three), plane (eight),
+frame (nine), vacuum (eight), horizon (six), throat (eleven), ring (ten),
+coherence (four), κ, σ, τ, w, μ, λ, p (four or more each), push (five
+forms), unlocked face (five), held share (three), rim (four), shell (six),
+cell (forbidden, then defined), filament/strand/flow, binding/bond/clump,
+heart/reactor, home (four), bell (six), grain (three), equator (three),
+degree (two), rigidity (two), loop, state (three). **Remediation:** one
+meaning each in the GLOSSARY, the rest renamed (with §H1–H2).
+
+**Foundations the record assumes and never states (S2), each owed to the
+foundation (docs/118):**
+1. a body's full state (which fields are state, which readings);
+2. where heat lives and its unit;
+3. what the phases are;
+4. the bell and ring arithmetic ("two rings a bell", `ν = 2·r_echo/T_u`,
+   "a core ring = `T_u/4` bells");
+5. the unit of mass and hold at each tier;
+6. the enclosure's order (inside out as built, outside in as decided);
+7. what `T_u` is;
+8. whether the S^60 and S^360 tier spheres still stand beside the S⁷ tower;
+9. how the throat `R = H` relates to `A = Q`;
+10. the potential's zero and the energy ledger's unit;
+11. the manifest's key under the inverted nucleus (the hypha counts nuclei
+    "per Z" while Z is the neutrons);
+12. where electrons live, against `chem::unpaired`;
+13. what a pulse phase p is (`Body.bell`, `φ_LOOP − bell_LOOP`, `φ_⊥`);
+14. the court's algebra (Cl(n+1, 1) against Netstratum's (4, 4); docs/84's
+    `TURNING` and the sensorium on Cl(4, 1));
+15. who or what is an observer under "render on observation";
+16. which time is primary (closed forms, K-steps, proper time, the beat);
+17. whether compounding `(1 − s)ⁿ` is allowed under F1.
+
+**docs/118's own errors:** it misquotes docs/78 DL4 (I1); it cites
+"docs/117, proposed §11", which does not exist; its II.2 marks `push_of`
+and `band` "follows" (a ½ halving and a square); it audits neither the
+anchors (docs/92), θ (docs/81) nor the gauges of mind (docs/82).
+
+
 
 ## §J. MU-STANDARDS and MU-RECURSION: pending
