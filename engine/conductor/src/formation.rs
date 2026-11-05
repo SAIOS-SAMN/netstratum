@@ -1972,6 +1972,10 @@ pub fn settle_system(
     // What stands: a world where its core holds; otherwise the belts.
     bodies.sort_by(|a, b| a.0.cmp(&b.0));
     let mut out: Vec<crate::pulse::Body> = Vec::new();
+    // The star's load (register B13): its worlds' drag, each world's holding
+    // share times the drag share at its reach about the star, `Σ m·(1 − δ)`
+    // (the one face law's drag, docs/117 §8.2), in the system's own units.
+    let mut load = ratio(0, 1);
     let mut belts = Manifest::new();
     let mut formed = 0usize;
     let mut inner = mass(&sys.kept) / total.clone();
@@ -2101,6 +2105,7 @@ pub fn settle_system(
         } else {
             read.worlds_mass += mass(&w.kept);
             read.worlds_nuclei += w.kept.values().fold(ratio(0, 1), |s, a| s + a.clone());
+            load += m.clone() * crate::polarity::faces_on(&delta, crate::polarity::Axis::Open).1;
         }
         // CLOSED-form turning between events: `2δ` a ring over this echo's
         // rings, each spatial plane by its tilt, the loop whole.
@@ -2117,7 +2122,10 @@ pub fn settle_system(
         }
         if rang {
             w.heat = crate::ring::grain(
-                &(w.heat.clone() * (ratio(1, 1) - ratio(1, 2) * (ratio(1, 1) - delta))),
+                &(w.heat.clone()
+                    * (ratio(1, 1)
+                        - ratio(1, 2)
+                            * crate::polarity::faces_on(&delta, crate::polarity::Axis::Open).1)),
             );
         }
         if w.born == 0 {
@@ -2127,6 +2135,7 @@ pub fn settle_system(
         out.push(w);
     }
     sys.satellites = out;
+    sys.load = crate::ring::grain(&load);
     for (kind, a) in unmoted {
         *belts.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
     }
