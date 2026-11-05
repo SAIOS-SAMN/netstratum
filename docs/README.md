@@ -77,6 +77,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 116 | [The placeholders deduced](116_PLACEHOLDERS_DEDUCED.md) |
 | 117 | [The axes and the tower: S³ → S⁷ → S⁴, and S¹¹ = S⁷ ∗ S³](117_THE_AXES_AND_THE_TOWER.md) |
 | 118 | [The foundation, the audit and the trajectory](118_FOUNDATION_AUDIT_TRAJECTORY.md) |
+| 119 | [The remediation register: the audits of 2026-11-05](119_REMEDIATION_REGISTER.md) |
 
 ## Era 0: the game, its civilizations and economy (01–77)
 
