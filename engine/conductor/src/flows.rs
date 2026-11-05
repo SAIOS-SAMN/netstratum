@@ -769,6 +769,9 @@ pub fn own_enclosure(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
 /// of its closed plane. Size is L1 (docs/118 F1), and the universe's own
 /// circle of radius `R` is the L1 diamond, `8R` a whole turn (docs/61), so
 /// the arc `d` is `d/(8R)` of a turn: `45°·e` on each side of its place.
+/// It holds for an untwisted plane only; a plane bends as it spins (torsion,
+/// docs/117 §11.4), and a twisted plane's arcs are read from its composed
+/// motion (register K11).
 pub fn own_degrees(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
     own_enclosure(mote, enc, whole).map(|e| ratio(45, 1) * e)
 }
