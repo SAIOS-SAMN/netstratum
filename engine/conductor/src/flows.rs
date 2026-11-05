@@ -849,6 +849,21 @@ impl Enclosed {
         h
     }
 
+    /// The spin a body standing at reach `r` carries (register B11, one
+    /// reach): the exact inverse of `reach`, the least ℓ with `ℓ = r·H(<ℓ)`.
+    /// `H(<ℓ)` is constant between neighbouring spins and only grows, so the
+    /// steps' readings overlap and never leave a gap: each step is read once,
+    /// in order, and the first whose interval holds `r·H` is the answer.
+    pub fn spin_at(&self, r: &Ratio) -> Ratio {
+        for (k, h) in self.held.iter().enumerate() {
+            let ell = r.clone() * h.clone();
+            if self.spins.get(k).is_none_or(|top| ell <= *top) {
+                return ell;
+            }
+        }
+        r.clone() * self.whole()
+    }
+
     /// A body's reach and deficit at spin ℓ: `R = ℓ/H(<ℓ)`, `δ = H/(R + H)`,
     /// exact (operator 2026-10-23: "this is approximations leaking into an
     /// exact system"): readings, never stored, so never floored. ℓ and H
@@ -4013,5 +4028,34 @@ mod stream_tests {
             stream_delta(&d, true) + stream_delta(&d, false),
             ratio(1, 1)
         );
+    }
+}
+
+#[cfg(test)]
+mod one_reach_tests {
+    use super::Enclosed;
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn a_spin_set_at_a_reach_reads_back_that_reach() {
+        // Register B11: the spin a body is given at reach r reads back at r by
+        // the same enclosure, wherever a spin reads r exactly.
+        let enc = Enclosed::new(
+            ratio(1, 1),
+            vec![
+                (ratio(1, 2), ratio(1, 4)),
+                (ratio(3, 1), ratio(1, 2)),
+                (ratio(7, 1), ratio(1, 3)),
+            ],
+        );
+        for r in [ratio(1, 3), ratio(2, 1), ratio(9, 2), ratio(5, 1)] {
+            let ell = enc.spin_at(&r);
+            let (back, _) = enc.reach(&ell);
+            assert_eq!(back, r, "reach {r} read back");
+        }
+        // Where two spins read one reach (the steps overlap), the least.
+        let shared = ratio(12, 5);
+        assert_eq!(enc.spin_at(&shared), ratio(3, 1));
+        assert_eq!(enc.reach(&ratio(3, 1)).0, shared);
     }
 }

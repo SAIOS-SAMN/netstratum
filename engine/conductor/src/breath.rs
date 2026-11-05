@@ -1227,11 +1227,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         .into_iter()
                         .map(|(k, l)| {
                             let r = l / held_k.clone() * lambda.clone();
-                            let h = frame
+                            // One reach (register B11): the spin the
+                            // enclosure reads back at exactly `r`.
+                            let ell = frame
                                 .as_ref()
-                                .map(|e| e.hold_within(&r))
-                                .unwrap_or_else(|| lambda.clone());
-                            (k, r * h)
+                                .map(|e| e.spin_at(&r))
+                                .unwrap_or_else(|| r.clone() * lambda.clone());
+                            (k, ell)
                         })
                         .collect()
                 };
@@ -1835,11 +1837,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         kept_m.clone() / w_sys.clone()
                     };
                     crate::profile::mark("cap:frame");
-                    let h_at = crate::formation::system_frame_of(s, &unit, &w_sys, &kept_m)
-                        .map(|enc_s| enc_s.hold_within(&r_sys))
-                        .unwrap_or(h_sys);
+                    let at = crate::formation::system_frame_of(s, &unit, &w_sys, &kept_m)
+                        .map(|enc_s| enc_s.spin_at(&r_sys))
+                        .unwrap_or_else(|| r_sys.clone() * h_sys);
                     crate::profile::mark("cap:mote");
-                    let ell_o = crate::ring::grain(&(r_sys * h_at));
+                    let ell_o = crate::ring::grain(&at);
                     let phase: Vec<Ratio> = x
                         .phase
                         .iter()
@@ -1980,7 +1982,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let mirrored = crate::flows::through(&out, &ratio(1, 1));
                     let passed = mirrored < ratio(0, 1);
                     let r = if passed { -mirrored } else { mirrored };
-                    let ell = crate::ring::grain(&(r.clone() * enc_r.hold_within(&r)));
+                    let ell = crate::ring::grain(&enc_r.spin_at(&r));
                     let d_k = base.clone() / (c.clone() + base.clone());
                     let z = ratio(i64::from(crate::chem::charge(&k)), 2);
                     let base = frac(ratio(bell as i64, 1) * ratio(2, 3) * d_k + z.clone());
