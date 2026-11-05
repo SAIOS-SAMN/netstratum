@@ -322,11 +322,11 @@ pub fn recycle(
                 // Its carried spin goes with it into the container.
                 out.spun += x.clone()
                     * crate::flows::weight(&k)
-                    * (motes[i].ell_o.clone() + motes[i].ell_orth.clone());
+                    * (motes[i].ell_o() + motes[i].ell_orth.clone());
                 if at_throat.is_none() {
                     let mut m = motes[i].clone();
                     m.amount = ratio(0, 1);
-                    m.ell_o = ratio(0, 1);
+                    m.set_ell_o(ratio(0, 1));
                     m.ell_orth = ratio(0, 1);
                     m.agitation = ratio(0, 1);
                     m.born = bell;
@@ -364,7 +364,7 @@ mod tests {
         Mote {
             key: crate::chem::Kind::parse(key).expect("a kind"),
             amount,
-            ell_o: ratio(1, 2),
+            spins: Mote::spins_of(&ratio(1, 2), &[]),
             ell_orth: ratio(0, 1),
             phase: crate::flows::rest(ratio(1, 2)),
             agitation: ratio(0, 1),
@@ -372,7 +372,6 @@ mod tests {
             vacuum: true,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
-            tilt: Vec::new(),
         }
     }
 
@@ -456,7 +455,7 @@ mod tests {
         let mote = |key: &str| Mote {
             key: crate::chem::Kind::parse(key).expect("a kind"),
             amount: ratio(1000, 1),
-            ell_o: ratio(1, 2),
+            spins: Mote::spins_of(&ratio(1, 2), &[]),
             ell_orth: ratio(0, 1),
             phase: crate::flows::rest(ratio(1, 2)),
             agitation: ratio(0, 1),
@@ -464,7 +463,6 @@ mod tests {
             vacuum: true,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
-            tilt: Vec::new(),
         };
         let nucleons = |ms: &[Mote]| {
             ms.iter().fold(ratio(0, 1), |s, x| {

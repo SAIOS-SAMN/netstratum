@@ -99,7 +99,7 @@ pub fn galaxy_frame(u: &Universe, i: usize, unit: &Ratio) -> Option<crate::flows
     }
     let held = |x: &crate::flows::Mote| {
         (
-            x.ell_o.clone(),
+            x.ell_o(),
             x.amount.clone() * crate::flows::weight(&x.key) / g.clone(),
         )
     };
@@ -419,7 +419,7 @@ pub fn shine(
         w.heat = now;
     }
     for x in motes.iter_mut() {
-        let warm = l.clone() * unlocked(&x.ell_o, crate::polarity::Axis::of_stream(x.vacuum))
+        let warm = l.clone() * unlocked(&x.ell_o(), crate::polarity::Axis::of_stream(x.vacuum))
             / whole.clone();
         // What actually entered its heat (agitation still stands on the
         // coordinate's grain, docs/84 §3): the ledger counts that, so made =
@@ -574,7 +574,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let mut flowing: Vec<crate::flows::Mote> = Vec::new();
             for x in std::mem::take(&mut u.ocean) {
                 let r_m = match (&frame, x.vacuum) {
-                    (Some(f), true) => f.reach(&x.ell_o).0,
+                    (Some(f), true) => f.reach(&x.ell_o()).0,
                     _ => {
                         flowing.push(x);
                         continue;
@@ -596,7 +596,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     })
                     .map(|g| g.0);
                 if best == Some(i) && !f_g.is_zero() {
-                    let ell = from_universe(&x.ell_o, &ell_g, &f_g);
+                    let ell = from_universe(&x.ell_o(), &ell_g, &f_g);
                     let orth = from_universe(&x.ell_orth, &orth_g, &f_g);
                     if let (Some(ell), Some(orth)) = (ell, orth) {
                         landed.push((x, ell, orth));
@@ -700,7 +700,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let enc = pre.as_ref().filter(|_| !g_before.is_zero()).map(|_| {
             let motes = core.flows.iter().map(|x| {
                 (
-                    x.ell_o.clone(),
+                    x.ell_o(),
                     x.amount.clone() * crate::flows::weight(&x.key) / g_before.clone(),
                 )
             });
@@ -1273,7 +1273,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         .iter()
                         .filter(|x| x.vacuum)
                         .fold(ratio(0, 1), |acc, x| {
-                            let rx = enc.reach(&x.ell_o).0;
+                            let rx = enc.reach(&x.ell_o()).0;
                             if rx < lo || rx > hi {
                                 return acc;
                             }
@@ -1697,7 +1697,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // never a second orbit). Remnants do not capture.
         if let (Some(_), Some(enc), false) = (&pre, &enc, scale_pre.is_zero() || g_before.is_zero())
         {
-            let reach_m = |x: &crate::flows::Mote| enc.reach(&x.ell_o).0;
+            let reach_m = |x: &crate::flows::Mote| enc.reach(&x.ell_o()).0;
             let mut claims: Vec<Vec<usize>> = vec![Vec::new(); core.flows.len()];
             let mut by_reach: Vec<(Ratio, usize)> = core
                 .flows
@@ -1801,10 +1801,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             (own.clone() - star.clone()) / lam.clone()
                         }
                     };
-                    let ell_o = crate::ring::grain(&rel(&x.ell_o, &s.ell));
+                    let ell_o = crate::ring::grain(&rel(&x.ell_o(), &s.ell));
                     let ell_orth = crate::ring::grain(&rel(&x.ell_orth, &s.ell_orth));
                     let before = w_sys.clone() * (s.ell.clone() + s.ell_orth.clone())
-                        + m.clone() * (x.ell_o.clone() + x.ell_orth.clone());
+                        + m.clone() * (x.ell_o() + x.ell_orth.clone());
                     let after = (w_sys.clone() + m.clone()) * (s.ell.clone() + s.ell_orth.clone())
                         + m.clone() * lam.clone() * (ell_o.clone() + ell_orth.clone());
                     let rest = before.clone() - after.clone();
@@ -1824,14 +1824,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         key: key.clone(),
                         amount: take.clone(),
                         ell_orth,
-                        ell_o,
+                        spins: crate::flows::Mote::spins_of(&ell_o, &x.tilt()),
                         phase,
                         agitation: x.agitation.clone(),
                         born: bell,
                         vacuum: false,
                         lever: Vec::new(),
                         lever_place: ratio(0, 1),
-                        tilt: x.tilt.clone(),
                     };
                     if let Some((w, _)) = masses[si].as_mut() {
                         *w += take.clone() * crate::flows::weight(&key);
@@ -1875,7 +1874,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         .iter()
                         .map(|x| {
                             (
-                                x.ell_o.clone(),
+                                x.ell_o(),
                                 x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone(),
                             )
                         })
@@ -1975,7 +1974,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     core.flows.push(crate::flows::Mote {
                         key: k,
                         amount: take,
-                        ell_o: ell,
+                        spins: crate::flows::Mote::spins_of(&ell, &lead),
                         ell_orth: ratio(0, 1),
                         phase,
                         agitation: ratio(0, 1),
@@ -1983,7 +1982,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         vacuum: false,
                         lever: Vec::new(),
                         lever_place: ratio(0, 1),
-                        tilt: lead.clone(),
                     });
                 }
                 core.throat.retain(|_, a| *a > ratio(0, 1));
@@ -2005,7 +2003,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 core.flows.push(crate::flows::Mote {
                     key: k,
                     amount: a,
-                    ell_o: crate::ring::grain(&ell_o),
+                    spins: crate::flows::Mote::spins_of(&crate::ring::grain(&ell_o), &[]),
                     ell_orth: crate::ring::grain(&ell_orth),
                     phase: crate::flows::rest(ratio(1, 2)),
                     agitation,
@@ -2013,7 +2011,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     vacuum: true,
                     lever: Vec::new(),
                     lever_place: ratio(0, 1),
-                    tilt: Vec::new(),
                 });
             }
             // Shed matter crosses whole at the spins it left with, in the
@@ -2037,7 +2034,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     core.flows.push(crate::flows::Mote {
                         key: k,
                         amount: a,
-                        ell_o: crate::ring::grain(&at),
+                        spins: crate::flows::Mote::spins_of(&crate::ring::grain(&at), &[]),
                         ell_orth: orth.clone(),
                         phase,
                         agitation: ratio(0, 1),
@@ -2045,7 +2042,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         vacuum: false,
                         lever: Vec::new(),
                         lever_place: ratio(0, 1),
-                        tilt: Vec::new(),
                     });
                 }
             }
@@ -2076,7 +2072,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let ledger_sum = |core: &Body| {
                 core.flows.iter().fold(core.reservoir.clone(), |s, x| {
                     s + x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()
-                        * (x.ell_o.clone() + x.ell_orth.clone())
+                        * (x.ell_o() + x.ell_orth.clone())
                 })
             };
             let before = ledger_sum(core);
@@ -2254,11 +2250,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     mass(&core.total()) / whole_u.clone()
                 };
                 let (ell_u, orth_u) = (
-                    crate::ring::grain(&to_universe(&x.ell_o, &core.ell, &f_g)),
+                    crate::ring::grain(&to_universe(&x.ell_o(), &core.ell, &f_g)),
                     crate::ring::grain(&to_universe(&x.ell_orth, &core.ell_orth, &f_g)),
                 );
                 to_ocean.push(crate::flows::Mote {
-                    ell_o: ell_u,
+                    spins: crate::flows::Mote::spins_of(&ell_u, &x.tilt()),
                     ell_orth: orth_u,
                     phase,
                     vacuum: true,
@@ -2284,7 +2280,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // the source's own at the mote's reach.
             let push_at = |x: &crate::flows::Mote| match tide {
                 Some((rho, du)) => p.clone() * rho.clone() * du.clone(),
-                None => p.clone() * enc_now.reach(&x.ell_o).1,
+                None => p.clone() * enc_now.reach(&x.ell_o()).1,
             };
             circulation.4 = crate::flows::stream(&core.flows, &strands, &push_at);
             crate::profile::mark("breath:bindings");
@@ -2422,10 +2418,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         // cut (`formation::system`); its circulation is what it
                         // carried, its orthogonal spin against the binding's,
                         // as a share of its orbit spin.
-                        let carried_c = if x.ell_o.is_zero() {
+                        let carried_c = if x.ell_o().is_zero() {
                             ratio(0, 1)
                         } else {
-                            (x.ell_orth.clone() - orth_binding.clone()) / x.ell_o.clone()
+                            (x.ell_orth.clone() - orth_binding.clone()) / x.ell_o()
                         };
                         outside.push((
                             crate::flows::Mote {
@@ -2501,7 +2497,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     ratio(0, 1)
                 } else {
                     members.iter().fold(ratio(0, 1), |acc, x| {
-                        acc + x.amount.clone() * crate::flows::weight(&x.key) * x.ell_o.clone()
+                        acc + x.amount.clone() * crate::flows::weight(&x.key) * x.ell_o()
                     }) / mw.clone()
                 };
                 let taken = m_u.clone() * mean_own.clone();
@@ -2533,8 +2529,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             .map(|x| {
                                 (
                                     x.amount.clone() * crate::flows::weight(&x.key),
-                                    x.ell_o.clone(),
-                                    x.tilt.clone(),
+                                    x.ell_o(),
+                                    x.tilt(),
                                 )
                             })
                             .collect::<Vec<_>>(),
@@ -2600,8 +2596,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             .map(|x| {
                                 (
                                     x.amount.clone() * crate::flows::weight(&x.key),
-                                    x.ell_o.clone(),
-                                    x.tilt.clone(),
+                                    x.ell_o(),
+                                    x.tilt(),
                                 )
                             })
                             .collect::<Vec<_>>(),
@@ -2614,7 +2610,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         for x in &sys.flows {
                             let held = x.amount.clone() * crate::flows::weight(&x.key);
                             discs.0 += held.clone();
-                            if enc.reach(&x.ell_o).0 >= rho_birth {
+                            if enc.reach(&x.ell_o()).0 >= rho_birth {
                                 discs.1 += held;
                             }
                         }
@@ -2643,18 +2639,18 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     .iter()
                     .map(|x| {
                         (
-                            x.ell_o.clone(),
+                            x.ell_o(),
                             x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone(),
                         )
                     })
                     .collect(),
             );
             let place_of = |x: &crate::flows::Mote| {
-                let (r, _) = enc_m.reach(&x.ell_o);
+                let (r, _) = enc_m.reach(&x.ell_o());
                 crate::enfold::place(
                     &r,
                     &(x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()),
-                    &enc_m.hold(&x.ell_o),
+                    &enc_m.hold(&x.ell_o()),
                 )
             };
             crate::profile::mark("breath:merge");
@@ -2699,7 +2695,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     .iter()
                     .map(|x| {
                         (
-                            x.ell_o.clone(),
+                            x.ell_o(),
                             x.amount.clone() * crate::flows::weight(&x.key) / g_end.clone(),
                         )
                     })
@@ -2857,7 +2853,7 @@ mod tests {
         let mote = |ell: (i64, i64), amount: (i64, i64)| crate::flows::Mote {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(amount.0, amount.1),
-            ell_o: ratio(ell.0, ell.1),
+            spins: crate::flows::Mote::spins_of(&ratio(ell.0, ell.1), &[]),
             ell_orth: ratio(0, 1),
             phase: vec![ratio(0, 1), ratio(0, 1)],
             agitation: ratio(0, 1),
@@ -2865,7 +2861,6 @@ mod tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
-            tilt: Vec::new(),
         };
         let mut motes = vec![mote((1, 2), (1, 4)), mote((3, 1), (1, 8))];
         let l = ratio(1, 1000);

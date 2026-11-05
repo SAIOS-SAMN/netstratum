@@ -47,7 +47,7 @@ fn enclosure(core: &Body, unit: &Ratio, spin: &dyn Fn(&Ratio, &[Ratio]) -> Ratio
             .iter()
             .map(|x| {
                 (
-                    spin(&x.ell_o, &x.tilt),
+                    spin(&x.ell_o(), &x.tilt()),
                     x.amount.clone() * weight(&x.key) / unit.clone(),
                 )
             })
@@ -112,14 +112,14 @@ pub fn read(u: &Universe) -> Horizons {
             })
             .collect();
         for x in &core.flows {
-            let l = if x.ell_o < ratio(0, 1) {
-                -x.ell_o.clone()
+            let l = if x.ell_o() < ratio(0, 1) {
+                -x.ell_o()
             } else {
-                x.ell_o.clone()
+                x.ell_o()
             };
             let (r, _) = whole.reach(&l);
             let h = whole.hold(&l);
-            let t = tilt_of(&x.tilt);
+            let t = tilt_of(&x.tilt());
             out.motes += 1;
             if r < h {
                 out.whole_inside += 1;
@@ -160,7 +160,7 @@ mod tests {
         Mote {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
-            ell_o: ell,
+            spins: Mote::spins_of(&ell, &tilt),
             ell_orth: ratio(0, 1),
             phase: crate::flows::rest(ratio(1, 2)),
             agitation: ratio(0, 1),
@@ -168,7 +168,6 @@ mod tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
-            tilt,
         }
     }
 

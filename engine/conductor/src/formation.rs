@@ -1061,7 +1061,7 @@ pub fn system(
             let ell_o = crate::ring::grain(&(r.clone() * at.clone()));
             motes.push(crate::flows::Mote {
                 ell_orth: crate::ring::grain(&(c.clone() * ell_o.clone())),
-                ell_o,
+                spins: crate::flows::Mote::spins_of(&ell_o, &x.tilt()),
                 agitation: crate::ring::grain(&x.agitation.clone().max(disc_agitation.clone())),
                 ..x.clone()
             });
@@ -1109,7 +1109,7 @@ pub fn system(
     // its spins.
     let medium_spin = motes.iter().fold(ratio(0, 1), |s, x| {
         s + x.amount.clone() * crate::flows::weight(&x.key) / total.clone()
-            * (x.ell_o.clone() + x.ell_orth.clone())
+            * (x.ell_o() + x.ell_orth.clone())
     });
     Some((star, medium, medium_spin, motes))
 }
@@ -1239,7 +1239,7 @@ pub fn system_frame_of(
             .iter()
             .map(|x| {
                 (
-                    x.ell_o.clone(),
+                    x.ell_o(),
                     x.amount.clone() * crate::flows::weight(&x.key) / total.clone(),
                 )
             })
@@ -1712,7 +1712,7 @@ pub fn settle_system(
         b.satellites.iter().fold(ratio(0, 1), |s, w| {
             s + mass(&w.total()) / unit.clone() * w.ell.clone()
         }) + b.flows.iter().fold(ratio(0, 1), |s, x| {
-            s + x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * x.ell_o.clone()
+            s + x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * x.ell_o()
         })
     };
     let spin_before = spin_of(sys);
@@ -1774,7 +1774,7 @@ pub fn settle_system(
     // read once, as escaping, falling to the star or entering convergence,
     // each with its spin; their sum is checked against the spin read before.
     let mote_spin = |x: &crate::flows::Mote| {
-        x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * x.ell_o.clone()
+        x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * x.ell_o()
     };
     let mut parted = ratio(0, 1);
     for x in motes {
@@ -1782,7 +1782,7 @@ pub fn settle_system(
         // Its reach, read by the system's enclosure from its own spin.
         let r = frame
             .as_ref()
-            .map(|e| e.reach(&x.ell_o).0)
+            .map(|e| e.reach(&x.ell_o()).0)
             .unwrap_or_else(|| b0.clone());
         // No mirror (docs/117 §12): a mote's reach is read in this enclosure
         // and kept; one inside the star's ring belongs to the star.
@@ -1802,7 +1802,7 @@ pub fn settle_system(
             mass(&matter) / total.clone(),
             matter,
             phase,
-            x.tilt.clone(),
+            x.tilt(),
             None,
             x.agitation.clone(),
             ratio(0, 1),
@@ -2031,7 +2031,10 @@ pub fn settle_system(
                 belt_motes.push(crate::flows::Mote {
                     key: kind,
                     amount: a,
-                    ell_o: crate::ring::grain(&(r.clone() * inner.clone())),
+                    spins: crate::flows::Mote::spins_of(
+                        &crate::ring::grain(&(r.clone() * inner.clone())),
+                        &tilt,
+                    ),
                     ell_orth: ratio(0, 1),
                     phase: phase.clone(),
                     agitation: heat.clone(),
@@ -2039,7 +2042,6 @@ pub fn settle_system(
                     vacuum: false,
                     lever: Vec::new(),
                     lever_place: ratio(0, 1),
-                    tilt: tilt.clone(),
                 });
             }
         }
