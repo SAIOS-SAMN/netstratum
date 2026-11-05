@@ -261,6 +261,27 @@ what MU-RECURSION law 8 asks.
   enclosures. Its fixtures 1–6 hold by hand; they are read as tests when its
   form has an API.
 
+## 8b. A lane is a vector at every tick (operator, 2026-11-05)
+
+The operator ruled: "for each sexigesimal tick you contain your entire
+universe on a dimension as a vector". A lane is never one number:
+
+- **Each lane holds a vector on the axes,** the universe's whole content on
+  that dimension. `H` holds the per-plane phases and the turnings between
+  planes as one degree-2 generator on the poles basis (docs/117 §8, §10),
+  never a phase folded into a rational; `S`, `G` and `T` likewise hold their
+  components on the axes they move on.
+- **The sexagesimal reading reads the vector at each tick:** a sector at
+  depth `d` is the exact cell holding every component, never a reading of
+  one component or of a norm (no square, no scalar collapse).
+- **Order and ranges stay first degree:** the canonical key orders a lane by
+  its components in axis order, exactly; a range on a lane is a range on one
+  of its components, read by bisection as now.
+- **What this changes:** LAW-COORDINATE v1 (78.173) holds each lane as one
+  exact rational, so `H` across three planes is a scalar collapse. Brought to
+  Mycelium before v0.4.0's tag; `conductor::coordinate` follows the agreed
+  form.
+
 ## 9. What is open
 
 1. **G's content.** That a hue move is a change of kind (the place on S¹¹)
