@@ -63,6 +63,7 @@ use std::path::Path;
 // `overlay` the cognition uses; coefficients drive production, residual drives
 // research. Replaces the cartesian build cascade with the peel.
 pub mod civic;
+pub mod coordinate;
 // docs/61 G1 — a line's place about its core, in closed form.
 pub mod orbit;
 // docs/63 — a world is unrolled only while it is observed.
