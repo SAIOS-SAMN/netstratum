@@ -167,9 +167,10 @@ scored or capped form in them is refused.
 ## 6. Governance
 
 [ROADMAP.md](../ROADMAP.md) states what is built and where each part is heading,
-and the register in [102_ALIGNMENT.md](102_ALIGNMENT.md) lists every open item
-of the era-1 work with its dependencies. A law is written into its design
-document, with the test that proves it, before it is built
+the register in [119_REMEDIATION_REGISTER.md](119_REMEDIATION_REGISTER.md) lists
+every open item of the era-1 work, and [PLAN.md](PLAN.md) gives their order. A
+law is written into its design document, with the test that proves it, before
+it is built
 ([CONTRIBUTING.md](../CONTRIBUTING.md)). The repository's history is its git
 history.
 
