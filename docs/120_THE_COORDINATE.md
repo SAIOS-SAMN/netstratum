@@ -121,9 +121,13 @@ index keyed by coordinate.
 
 ## 4. Expansion and contraction are depth, not iteration
 
-READING floors a coordinate on base 60 to depth d (docs/84). The place of a
-body at depth d is the first d sexagesimal places of each lane. That is a
-path in a tree whose every node has sixty children:
+The sexagesimal reading at depth d (degrees, then five places of 60:
+Xylarium's protractor of 360 × 60⁵ marks) places a lane's exact value in a
+**sector**, the exact interval `[lo, lo + width)` that holds it, decided by
+exact comparison and never rounded (Mycelium's frame law: "never a floor on
+a grid"). The coordinate itself is kept whole. The sectors nest: a node at
+depth d holds its sixty children at depth d + 1 (360 at the first place), so
+they form a tree, and a node is a range on the lane:
 
 - **Contraction** (zooming out, the dynamic carriers ruling of 2026-10-24:
   "zoom out to certified sectors") is reading to fewer places: bodies whose
