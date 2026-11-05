@@ -222,3 +222,25 @@ The operator answered §8's first and third points:
    - the range's holding-weighted rate is kept where the field exchanges
      between neighbours;
    - a body alone in its range is untouched.
+
+## 11. Shear is the degree of modulation at every level (operator, 2026-11-05)
+
+The operator ruled: "shear needs to be the degree of modulation at any
+dimensional level (phase, quantum, state)".
+
+- **Shear is the degree of modulation:** the difference, in degrees a bell,
+  between a body's rate and its range's field's rate, composed by the flow
+  law (§10.4). It is not a spin exchange between neighbouring rings
+  (`flows::shear`'s reading, one level, one way).
+- **The same law at every level of the tower** (docs/117):
+  - **phase:** the turning on each plane, `H`'s components;
+  - **quantum:** the riding state's modulation on `S³ ⊂ S¹¹`, the change of
+    kind on `G`;
+  - **state:** the span's dilation on `S`, and the passages on `T`.
+- **Each level's rate is a share of its own luminal bound,** and each change
+  is booked on that level's own ledger: spin `Σ m·ℓ` at the phase level,
+  the span at the state level, the hue moves at the quantum level.
+  `coupling::pulled` is that one law; the level is which lane it reads.
+- **What the engine holds today:** the phase level, as spins and phases, and
+  the state level, as reach. `G` holds no rate yet (docs/120 §9 item 1), so
+  the quantum level is read where the code gains it.

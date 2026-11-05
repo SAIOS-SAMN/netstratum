@@ -8,6 +8,10 @@
 //! The field moves its rate by the flow law, bounded by the luminal rate.
 //! Attraction and repulsion are one law and its sign; nothing is halved,
 //! squared or placed.
+//!
+//! Shear is the degree of modulation at every level (docs/121 §11): phase,
+//! quantum and state. `pulled` composes any level's rate, a share of that
+//! level's luminal bound; the lane it reads is the level.
 
 use cfe::ratio::{ratio, Ratio};
 use num_traits::{Signed, Zero};
