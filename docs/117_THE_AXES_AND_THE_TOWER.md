@@ -506,8 +506,17 @@ leg runs R backward" is that reversal.
   phase `ψ_k` the code turns on a circle "in plane k" cannot be a turning
   inside that plane: a turning stands on two axes of one sign, in **two**
   planes (`e₊ₖ ∧ e₊ₗ`). The three phases are readings of turnings between
-  planes, possibly with R's plane among them. Which pairs they are is not
-  derived. That is the dimension every phase calculation has lost.
+  planes. Which pairs, by 3-space duality (2026-11-05, with Mycelium): the
+  phase the code turns "in plane k" is the turning about axis k, the plane
+  of the other two frame axes, `e₊ₗ∧e₊ₘ` (`{l, m}` the complement of k). So
+  the three are `e₊₂e₊₃`, `e₊₁e₊₃` and `e₊₁e₊₂`, the continuum's turnings,
+  with `e₋ₗe₋ₘ` the vacuum's (the inverted face). Each frame plane's own
+  motion, and each mixed pair `e₊ₖe₋ₗ`, is a boost, on `S`. R's loop phase
+  (the circulation) is not placed: open.
+- **The poles named by role:** `n_origin = n_Z` (wholly closed, the
+  singularity) and `n_∞ = n_Q` (wholly open). The standard conformal labels
+  (`e∞ = e₊ + e₋`, `e_o = ½(e₋ − e₊)`) differ from these by `e₋ ↦ −e₋`
+  (stated once in Mycelium 78.171 §1a).
 
 ### 10.4 What this changes
 
