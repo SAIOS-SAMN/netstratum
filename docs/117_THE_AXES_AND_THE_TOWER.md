@@ -236,6 +236,11 @@ exchange, which is the other face. A face is the axis a plane's state is
 read from. Toward an axis outside the plane the product is all velocity,
 with no drag.
 
+Built as `polarity::faces_on(δ, Axis)` (register B7): the continuum (its
+turning and drag, the light's warming, the strike, the received flux) is
+read from the open axis, the inverse (docs/104, the vacuum stream) from the
+closed.
+
 ### 8.3 B is read in first degree, never by its square
 
 `B²` folds 21 components into a rate and a degree-4 coupling, products of

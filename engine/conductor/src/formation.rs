@@ -683,7 +683,8 @@ pub fn struck_bands(
     let total = mass(kept);
     let face = |ell: &Ratio| {
         let r = ell.clone() / h.clone();
-        (ratio(1, 1) - h.clone() / (r + h.clone())) / ratio(2, 1)
+        let delta = h.clone() / (r + h.clone());
+        crate::polarity::faces_on(&delta, crate::polarity::Axis::Open).1 / ratio(2, 1)
     };
     // The holding-weighted mean face of what stands outside the core.
     let (fw, ww) = base.iter().filter(|(k, _)| !core.contains_key(k)).fold(
@@ -1010,14 +1011,18 @@ pub fn system(
         .map(|(_, l)| l)
         .unwrap_or_else(|| ratio(0, 1));
     let mid = (x.clone() + rim.clone()) / ratio(2, 1);
-    let unlocked = mid.clone() / (mid + x.clone());
+    let unlocked = crate::polarity::faces_on(
+        &(x.clone() / (mid + x.clone())),
+        crate::polarity::Axis::Open,
+    )
+    .1;
     let heat = light * unlocked.clone();
     // The received flux (with Xylarium): the galaxy's unlocked face where
     // the system stands, `1 − δ_gal` (operator: heat comes from the face the
     // core does not lock, never the held face; it had read `δ_gal`), times
     // the share the star leaves unlocked at the annulus; the channels add,
     // the binding's own agitation the floor.
-    let flux = (ratio(1, 1) - tide.clone()) * unlocked;
+    let flux = crate::polarity::faces_on(tide, crate::polarity::Axis::Open).1 * unlocked;
     let disc_agitation = (heat + flux).max(agitation.clone());
     // Worlds are grown, never placed (operators 2026-10-16/17, "never place
     // matter"; with Xylarium): the disc the heart releases becomes the
