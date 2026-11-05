@@ -749,8 +749,9 @@ fn held_share(r: &Ratio, h: &Ratio, p: &Ratio) -> Ratio {
 /// A body's own enclosure (docs/120 §8c, operator 2026-11-05), read and
 /// never stored: on each plane of its orbit (the orbit, the circulation),
 /// where its own pull meets its enclosure's, the pinch share `m/(m + H(<R))`
-/// of its reach (`ring::pinch_share`), in degrees: its degrees of separation
-/// there. `m` is its holding in the enclosure's unit `whole`.
+/// of its reach (`ring::pinch_share`), a share of its reach. Its reading in
+/// degrees is open (register K3). `m` is its holding in the enclosure's
+/// unit `whole`.
 pub fn own_enclosure(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
     let m = if whole.is_zero() {
         ratio(0, 1)
@@ -759,7 +760,7 @@ pub fn own_enclosure(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
     };
     [&mote.ell_o, &mote.ell_orth].map(|ell| {
         let h = enc.hold(&ell.abs());
-        ratio(360, 1) * crate::ring::pinch_share(&m, &h)
+        crate::ring::pinch_share(&m, &h)
     })
 }
 
@@ -774,7 +775,7 @@ pub fn held(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> Ratio {
     let plane = |ell: &Ratio, k: usize| {
         let l = ell.abs();
         let (r, _) = enc.reach(&l);
-        held_share(&r, &enc.hold(&l), &(own[k].clone() / ratio(360, 1)))
+        held_share(&r, &enc.hold(&l), &own[k])
     };
     plane(&mote.ell_o, 0) * plane(&mote.ell_orth, 1)
 }

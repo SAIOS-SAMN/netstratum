@@ -566,7 +566,7 @@ rotor.
 - **On one elliptic plane** it is `(b₁ + b₂)/(1 − b₁b₂)`.
 - **Across planes** it does not commute. The commutator of the two
   generators is the turning between planes, `τ`.
-- **A split between planes** is hold-weighted: plane 1 takes `t·2h₂/(h₁ +
+- **A split between planes** is hold-weighted (proposed, register K6): plane 1 takes `t·2h₂/(h₁ +
   h₂)` and plane 2 takes `−t·2h₁/(h₁ + h₂)`, equal only where the holds are.
 
 ### 11.3 The volume is kept
@@ -608,9 +608,10 @@ open (78.173 §7). Operator, 2026-11-05: the flux is "the span's change".
    `A − Q` the span before the pass. This is first degree and signed, and it
    carries the crossing's size. A pass and its immediate return cancel on
    `T` (`−2s` then `−2·(−s)`), as `M∘M = 1` cancels on the state.
-5. **At a pole the passage is one-way** (§9.3, §10.1): the state is null
-   there, and the swap carries it into the singularity or out to infinity
-   with no return. That is the event horizon of a pole. The throat
+5. **At a pole the state is null** (§10.1): the swap carries a pole to the
+   other pole, singularity and infinity exchanged, and a second pass
+   returns it; it never stands in the interior. Calling this one-way, an
+   event horizon, is a reading, not a theorem (register K4). The throat
    (`A = Q`) has span zero: a passage there writes nothing on `T` and flips
    a sheet of no width.
 6. **The frame state in the code's terms (operator 2026-11-05):** `(A, Q) =
@@ -621,8 +622,10 @@ open (78.173 §7). Operator, 2026-11-05: the flux is "the span's change".
    square and no reach mapped into the old frame.
    - **Within one enclosure** the passage is the face exchange alone, which
      is the stream reading (`flows::stream_delta`, register B16).
-   - **Across a throat** it is the re-origin, the roles exchanged in the new
-     enclosure.
+   - **Across a throat** it is the re-origin, the roles exchanged: the body
+     stands at reach `H` about hold `R` in the new enclosure. The hold there
+     is read from the body, never its reach from the new enclosure's hold;
+     `ℓ/H′(<ℓ)` returns `H` only if `H′(<ℓ) = R` (register K2).
    - Read inside the old frame, the passage can only appear as the
      reflection `2H − R` or the inversion `H²/R`, and both are ruled out.
      The sites that use `flows::through` today (the vacuum's band, the

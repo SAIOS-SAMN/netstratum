@@ -312,9 +312,10 @@ semantically, and dimensionally". (Never "cells": ruling 2026-10-16.)
   `H + R` is kept, so the volume is conserved through the crossing.
 - **The extent is derived, never set** (operator 2026-11-05: "let the
   codebase derive the degrees of separation"): `flows::own_enclosure` reads
-  a body's degrees of separation on each plane of its orbit. They are where
-  its own pull meets its enclosure's, the pinch share `m/(m + H(<R))`
-  (`ring::pinch_share`), as `360°·m/(m + H(<R))`. Nothing stores a width. The
+  a body's extent on each plane of its orbit, where its own pull meets its
+  enclosure's, the pinch share `m/(m + H(<R))` of its reach
+  (`ring::pinch_share`). Nothing stores a width. Its reading in degrees is
+  open: a ratio of reaches is not a fraction of a turn (register K3). The
   cut's held share (`flows::held`) reads the part of that enclosure within
   the hold; captures and bonds follow.
 

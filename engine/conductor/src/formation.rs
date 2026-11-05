@@ -1968,7 +1968,7 @@ pub fn settle_system(
     // What stands: a world where its core holds; otherwise the belts.
     bodies.sort_by(|a, b| a.0.cmp(&b.0));
     let mut out: Vec<crate::pulse::Body> = Vec::new();
-    // The star's load (register B13): its worlds' drag, each world's holding
+    // The star's load (register B13; proposed, K7): its worlds' drag, each world's holding
     // share times the drag share at its reach about the star, `Σ m·(1 − δ)`
     // (the one face law's drag, docs/117 §8.2), in the system's own units.
     let mut load = ratio(0, 1);

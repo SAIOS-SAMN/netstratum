@@ -1783,8 +1783,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let s = &mut keep[si];
                     let key = x.key.clone();
                     let m = take.clone() * crate::flows::weight(&key);
-                    // The capture is a re-origin (docs/117 §12; operator
-                    // 2026-11-05), split as two bodies: the star's orbit keeps
+                    // The capture split as two bodies (operator 2026-11-05;
+                    // register K1: a two-body split under the exit's frame law,
+                    // not the pole swap): the star's orbit keeps
                     // its specific spin (its holding grows by the mote's),
                     // and the mote keeps its motion relative to the star,
                     // carried into the system by the system's share of the
