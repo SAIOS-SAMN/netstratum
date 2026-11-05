@@ -153,3 +153,31 @@ sense and step filtered within it.
    rest changes how the universe moves; it is read before and after on a
    fresh founding, conservation and every identity exact, before it is
    built.
+
+## 9. Rulings of 2026-11-05: dipoles, and the range's field as one
+
+The operator answered §8's first and third points:
+- the sense is "both - as dipoles";
+- many neighbours act through "the range's field as one".
+
+1. **A body's moment is a dipole on each plane.** Its orientation on plane
+   k is its turning there, the component of H, in degrees. Its pole is its
+   electrons' phase state (bound or freed, docs/97 §3), so magnetism stays
+   where its open frames are. Its strength is its open frames, `m`. A dipole
+   is never a bare sign: two dipoles couple by how they stand to each other
+   on each plane, their separation in degrees, read as a share on the
+   manifold. It is not a product of two signs. Attraction and repulsion
+   remain one law: dipoles standing opposed draw together, and aligned
+   dipoles push apart.
+2. **The range's field acts as one.** The dipoles of the bodies in a body's
+   range (a range on S, §6) sum into one field, each weighted by its
+   nearness `M/(|g| + M)`. The body's dipole answers that one field, and
+   its exchange is against the range's whole holding, which conserves the
+   holding-weighted reach and turning across the range.
+3. **What remains open.** First, the dipole's coupling as a share of its
+   separation on each plane, which must be read on the manifold (the
+   turning composed by Cayley, docs/117 §11), never as a flat
+   `1 − off/180°`. Second, the electrons' pole in the coordinate's lanes.
+   Both are derived before the coupling replaces `repel`, `shear`, the
+   field exchange and the band (with its `½`, its halved step and its
+   squared rest).
