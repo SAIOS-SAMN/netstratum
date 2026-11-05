@@ -404,3 +404,44 @@ designation (78.138); conservation witnessed internally (78.89, though
 never stated as L0 `Flux`). Of J1–J17, three were not in Netstratum's own
 record: J2, J3 and J13.
 
+
+## §K. The day's axioms, theorems and proofs, verified (2026-11-05)
+
+Requested by the operator ("verify your axioms, theorems and the proof
+structure"). Each claim is classed as proved (from the algebra, with
+its witness), an axiom (ruled), or assumed (introduced without
+derivation). Wrong or mislabelled claims are rows with their remedy.
+
+**Proved:**
+- the pole swap's algebra (docs/117 §12): `e₊·x·e₊` takes `n_Z` to `n_Q`,
+  keeps `A + Q`, reverses `A − Q`; two passes are the identity on the frame
+  and on the spinor;
+- the arrival as the exit's inverse (B5);
+- `Enclosed::spin_at` as the least spin reading `r` (the steps overlap,
+  never a gap);
+- `hold_within` by bisection equals the scan;
+- the bond theorem (`step_with ≥ ½` ⟺ `Σ t_k·off_k ≤ 90°`), relative to
+  its axiom;
+- Cayley composition (tanh and tan addition; the composed rotor keeps its
+  grade-4 part, and its generator is a bivector);
+- the coordinate's fixtures 1–16 and the passage's fixtures 1–6, by hand.
+
+**Axioms, ruled:**
+- the poles basis;
+- `(A, Q) = (H, R)`;
+- T's flux `−2·(A − Q)`;
+- vector lanes with H in degrees;
+- the face law on two axes;
+- the dipoles, and the range's field as one.
+
+| # | claim | finding | remedy |
+|---|---|---|---|
+| K1 | Capture is "a re-origin (docs/117 §12)" (#79) | It is a two-body split (`ℓ_s` kept, the relative motion scaled by `λ`, the exit's frame law), not the pole swap. Its `settle` identity is zero by construction, and it books the grain's remainder to the body ledger, which excludes motes | Cite the split and the frame law; a two-sided witness read from the state before and after the capture **done (#85)** |
+| K2 | "A re-origin keeps ℓ and reads the reach in the new enclosure" | Not the swap: the swap puts the body at reach `H` about hold `R`; reading `ℓ/H′(<ℓ)` returns `H` only if `H′(<ℓ) = R` | docs/117 §12.6 corrected: across a throat the body stands at reach `H` about hold `R`, the new enclosure's hold read from the body, never the reverse **done (#85)** |
+| K3 | `own_enclosure` gives "degrees of separation" (`×360`) | The pinch share `m/(m + H)` is a ratio of reaches; calling it a fraction of a turn is not derived (`held` divides it out) | The `×360` removed: it returns the pinch share; the degree reading of an extent is open **done (#85)** |
+| K4 | The passage at a pole is "one-way, the event horizon" | The swap takes a pole to the other pole, and two passes return it; "one-way" is a reading | docs/117 §12.5 corrected **done (#85)** |
+| K5 | docs/122's bond energy `u(z)` | The open-frame count, the frames reading the operator rejected | docs/122 is held; the bond's energy is to be derived without frames |
+| K6 | The hold-weighted split `t·2h₂/(h₁ + h₂)` (docs/117 §11.2) | Introduced, not derived | Marked proposed |
+| K7 | The load writer `Σ m·(1 − δ)` (B13) | Introduced: Xylarium holds no source for the 10-17 ruling's `x_k` | Marked proposed |
+| K8 | The bond theorem's axiom `in_step = 1 − off/180°`, a product over planes | Flat per plane (the operator's critique); the 90° is correct only relative to it | Held with A29; replaced by the dipole coupling's reading on the manifold (docs/121 §9) |
+| K9 | The band's `½`, `toward_rest`'s halving, its squared rest `R·R = 2q` | Inherited, not derived | Replaced by the dipole coupling (docs/121), never patched |
