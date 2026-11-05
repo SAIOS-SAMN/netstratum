@@ -165,6 +165,18 @@ A body's `origin` is its enclosure. The tiers nest as origins nest:
   enclosure into the one above is written at the new origin, its lanes read
   across the passage (docs/117 §9.3–§9.4): the null flux `T` records the
   crossing, and no reach moves (LAW-PASSAGE).
+  - **Between a galaxy and the ocean** (register B5, 2026-11-05): an exit
+    carries a mote's spin into the universe by its galaxy's share `f`,
+    `ℓ_u = ℓ_g + ℓ·f` in each orbit (`ℓ_g` the galaxy's own); the arrival is
+    its inverse, signed, `ℓ = (ℓ_u − ℓ_g)/f`. Nothing is placed and nothing
+    is paid: the mote's spin about the universal core is kept exactly, a
+    round trip returns it, and a mote counter-turning against the galaxy it
+    lands in lands counter-turning (the dynamic signature, docs/117). It
+    replaced an arrival that read `|ℓ_m − ℓ_g|/f` (the sign lost) under the
+    galaxy's clock and added a fresh landing balance `r·H(<r)` (a placement)
+    and the swing's radial share across the orbit. A galaxy holding nothing
+    (`f = 0`) takes no arrival. The phases are still re-set at both
+    crossings (the exit writes the galaxy's, the arrival `½`): open.
 - **Coordinates of two origins are never compared** (TU-5). A reading across
   tiers goes through the origins: a body is compared with another in a
   different enclosure by carrying one to the other's origin, through the
