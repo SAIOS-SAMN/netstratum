@@ -149,6 +149,10 @@ the star: the radial drift barrier. The missing term is the back-reaction:
 
 ## 7. MHD coupling: the field moves turning (what drives accretion)
 
+**Superseded (register C18):** the field's exchange between rings was retired
+from `flows::fluid`. The field moves turning by the one dipole coupling,
+`flows::shear` (docs/121), signed; the rings' pressure exchange remains.
+
 - **Magnetic shear**: between neighbouring rings the field transfers turning
   by the exchange law, its share the interface's field over the pair's
   moment, `c_B = |B_bc| / (u_b + u_c)` (a saturating share, ≤ 1), times their

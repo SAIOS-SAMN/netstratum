@@ -328,10 +328,11 @@ pub struct Event {
     /// units of the deepest hole), and what the throat still holds after.
     pub released: (usize, Ratio, Ratio),
     /// The circulation this echo (docs/94, docs/96): the spin the shear moved
-    /// outward, the pressure's and the field's, in holding units of the
-    /// ledger; the motes the luminal bound turned onto the Möbius leg, and
-    /// the motes the stream reads on the vacuum.
-    pub circulation: (Ratio, Ratio, Ratio, usize, usize, Ratio, usize),
+    /// and the pressure's, in holding units of the ledger; the motes the
+    /// luminal bound turned onto the Möbius leg; the motes the stream reads
+    /// on the vacuum; the spin moved around the shells' circles; the shell
+    /// planes that parted.
+    pub circulation: (Ratio, Ratio, usize, usize, Ratio, usize),
     /// The stars' own bells that rang this echo (each a torque on its whole
     /// system, an outburst's cut, a decoherence front's check), of the stars
     /// read.
@@ -693,7 +694,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut motes_in = [0usize; 6];
         let mut released = (0usize, ratio(0, 1), ratio(0, 1));
         let mut circulation = (
-            ratio(0, 1),
             ratio(0, 1),
             ratio(0, 1),
             0usize,
@@ -2338,14 +2338,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // the vacuum leg, never orbiting faster than a turn a bell.
             let enc_f = galaxy_enc(core);
             crate::profile::mark("breath:fluid");
-            let (by_pressure, by_field, around, parted) =
+            let (by_pressure, around, parted) =
                 crate::flows::fluid(&mut core.flows, &enc_f, &ledger_unit);
             circulation.1 = by_pressure;
-            circulation.2 = by_field;
-            circulation.5 = around;
-            circulation.6 = parted;
+            circulation.4 = around;
+            circulation.5 = parted;
             crate::profile::mark("breath:luminal");
-            circulation.3 = crate::flows::luminal(&mut core.flows, &enc_f);
+            circulation.2 = crate::flows::luminal(&mut core.flows, &enc_f);
             // The exits: the jet (along the axis) and radial escape cross
             // whole into the ocean (their state's onward carriage owed: the
             // ocean is not yet motes).
@@ -2400,7 +2399,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 Some((rho, du)) => p.clone() * rho.clone() * du.clone(),
                 None => p.clone() * enc_now.reach(&x.ell_o()).1,
             };
-            circulation.4 = crate::flows::stream(&core.flows, &strands, &push_at);
+            circulation.3 = crate::flows::stream(&core.flows, &strands, &push_at);
             crate::profile::mark("breath:bindings");
             // The GALAXY settles its stars (docs/96; operator 2026-10-26): its
             // band pairs on the strip, never the stepped filaments' bindings.

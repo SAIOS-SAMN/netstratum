@@ -128,7 +128,7 @@ sense and step filtered within it.
 |---|---|
 | `flows::repel` (open frames push, firmament only, its result discarded, a box clamp per axis) | the coupling with matching senses. **Done:** retired; the firmament's motes are the home's flows, which `flows::shear` already couples |
 | `formation::Stretch::mu` (the gas attractor, in binding only) | the coupling with opposite senses, read in the binding's own enclosure |
-| `flows::shear`, the field exchange in `flows::fluid` (outward only) | the coupling on the turning lane, signed |
+| `flows::shear`, the field exchange in `flows::fluid` (outward only) | the coupling on the turning lane, signed. **Done:** `shear` is the coupling (#103–#116); the field exchange in `fluid` is retired, its pressure exchange (the hydrostatic balance, signed) kept |
 | the heart's push as "electromagnetic repulsion" | the coupling between the heart and its open frames, with its sense |
 | the band's rest `R·R = 2q` | the balance of §5, first degree |
 
