@@ -258,8 +258,15 @@ boost).
      core's (ruling: "the electromagnetic repulsion gripping open frames"),
      `k·n`, with `k = o_m·o_c` the two open shares and `n = M/(R + M)` the ring
      law's nearness of their moments `M`.
-2. **The rest is where they balance:** `k·M/(R + M) = H/(R + H)`, first degree
-   in `R`:
+2. **Refuted by its witness (2026-11-06).** The balance below solves exactly,
+   but the rest is unstable. Both shares are ring-law shares falling as
+   `1/R`: near the centre the return tends to 1 and the push to `k < 1`, so
+   gravity wins; far out the push wins wherever a rest exists (`k·M > H`).
+   Example: `k = ½, M = 6, H = 1` gives `R* = 3/2`; at `R = 1` the net pull is
+   inward (`3/7 − ½`), at `R = 3` outward (`⅓ − ¼`). The band is stable
+   because its return grows with reach (`½·g·R·H` on the held face, a
+   spring). So the state level needs a return that grows with reach, and
+   this section's balance is not built:
 
        R* = H·M·(1 − k)/(k·M − H)
 
@@ -274,7 +281,7 @@ boost).
      the horizon, so no step is halved.
 4. **The vacuum is the same law with reach and hold exchanged,** `(A, Q) =
    (H, R)` (docs/117 §12.6).
-5. **What it replaces:** the band's value and rest (`flows::band`,
+5. **What it would replace once corrected:** the band's value and rest (`flows::band`,
    `toward_rest`) and `through` at the vacuum's band. The core's release
    follows: its parcel is carried by the boost from the throat, never
    mirrored.
