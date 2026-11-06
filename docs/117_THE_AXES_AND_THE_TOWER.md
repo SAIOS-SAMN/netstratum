@@ -553,6 +553,20 @@ Xylarium (T18) adds three points: a split between two planes is
 antisymmetric and weighted by each plane's own hold; the turning between two
 planes, `τ`, is its own stored generator; and composition does not commute.
 
+**Derived 2026-11-07: what H holds.** docs/120 §8d (operator 2026-11-06)
+keeps degrees as the state; §11.4 (operator 2026-11-05) holds a motion over
+`n` bells as its exact base and its formula, the generator and `n`, with each
+plane's phase a reading of the composed motion. Together:
+- **H holds** the base turnings in degrees (§8d), the generator `B` of its
+  motion (§11.2) and the bells `n`, with each plane's winding `K` kept per
+  plane.
+- **Each plane's phase at bell `n` is a reading** of the base composed with
+  the motion, rendered as a certified sector, never stored back as degrees:
+  a composed motion's per-plane degrees do not give the motion back (Mycelium
+  78.173 fixture 11b-ii: `4/7`, `3/7` against `½`, `⅓`).
+- Mycelium holds its base as the rational rotor R instead (78.173 §8, its
+  operator 2026-11-07). Whether netstratum's base moves to R is issue #128.
+
 ### 11.1 The state in degrees
 
 `H`'s components are stored in degrees, as exact rationals, with the plane
@@ -654,8 +668,29 @@ squares", and ruled separation by isoclinic degrees.
 6. **The certified trigonometry** (`conductor::geodesic`: π, cos and sin of
    degrees, the rotor) remains for rendering a rotor's readings on
    observation. It is never the alignment a law acts on.
+7. **The phase origin is the shared unit (derived 2026-11-07, agreed with
+   Mycelium for 78.171 §8).** Every axis's turning with R shares `e₊R` (item
+   2's dual pairs), so each such phase is measured from `e₊R`. Then reversing
+   one axis, `t ↦ −t`, is the reflection in that axis's unit `e₊ᵢ`. It
+   negates only the `e₊ᵢ` component, which no other axis's plane holds, so
+   every other axis is fixed. It counts `{e₊ᵢ: 1}` on P. Measured from `e₊ᵢ`
+   instead, the only reversing normal would be the shared `e₊R`, which moves
+   every axis. Fixture (`n = 2`, shared unit `e₊₃`): `3/5 e₊₃ + 4/5 e₊₁ +
+   1/2 e₊₂` reflects in `e₊₁` to `3/5 e₊₃ − 4/5 e₊₁ + 1/2 e₊₂`.
 
 ## 12. The passage is the pole swap; its flux on T is the span's change
+
+**Derived 2026-11-07: the passage counts on P.** The passage is the
+reflection in `e₊ₖ` (item 1 below, operator 2026-11-05), an odd versor.
+Reflections are carried on their own lane, P (Mycelium 78.178, its
+operator's ruling 2026-11-05). So each passage counts on P at its normal
+`e₊ₖ`, beside T's `−2·(A − Q)`. Its sign is the crossing's sense, the sign
+of the span (§10.1: "the sense of a crossing is the sign of the span"). A
+pass and its immediate return therefore write `+1` then `−1`, cancelling on
+P as they cancel on T. P's parity is then the sheet (item 3 below), read
+from the count and never kept as a flag. Mycelium's statement that `M∘M`
+"reads as a count of 2" counts two passes in one sense; reconciling the two
+readings is issue #128.
 
 This section closes §9.3's open return and the passage flux Mycelium held
 open (78.173 §7). Operator, 2026-11-05: the flux is "the span's change".
