@@ -171,6 +171,16 @@ pub fn hold(kind: &Kind) -> u32 {
     weight(kind).saturating_sub(unpaired(kind))
 }
 
+/// Its frames (docs/95 §8; register B8): one frame of each proton on each
+/// of three axes, `3Z`, of which its unpaired electrons are open: `(held,
+/// open) = (3Z − U, U)`, the frame state's two poles. Frames are never its
+/// mass: `weight` is its nucleons.
+pub fn frames(kind: &Kind) -> (u32, u32) {
+    let z: u32 = kind.parts().iter().map(|(n, w)| n * protons(*w)).sum();
+    let open = unpaired(kind);
+    ((3 * z).saturating_sub(open), open)
+}
+
 /// Its weight as mass (docs/97): its nucleons, `Σ n·w`, the one weight that
 /// gravity pulls and inertia answers by. Conserved through every bond,
 /// fusion and peel.
@@ -303,5 +313,16 @@ mod tests {
         // Water is bent by oxygen's one lone pair: its dipole 2/15.
         assert_eq!(dipole(&water), ratio(2, 15));
         assert_eq!(dipole(&ox), ratio(0, 1));
+    }
+}
+
+#[cfg(test)]
+mod frames_tests {
+    use super::{frames, hydrogen};
+
+    #[test]
+    fn hydrogen_holds_two_frames_and_opens_one() {
+        // docs/95 §8, agreed with Xylarium: 3Z frames, U open.
+        assert_eq!(frames(&hydrogen()), (2, 1));
     }
 }

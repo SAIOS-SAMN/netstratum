@@ -1427,14 +1427,27 @@ fn shear_booked(
             x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1) / total.clone()
         })
         .collect();
-    let pole: Vec<i8> = motes
+    // The dipole on its 3Z frames (docs/121 §10.1; Mycelium F1 with
+    // Xylarium): its pole the sign of held against open, its strength the
+    // open share of its frames, `U/3Z`.
+    let pole: Vec<Ratio> = motes
         .iter()
         .map(|x| {
-            let q = x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1);
-            crate::coupling::pole(&(x.amount.clone() * weight(&x.key) - q.clone()), &q)
+            let (a, q) = crate::chem::frames(&x.key);
+            crate::coupling::pole(&ratio(i64::from(a), 1), &ratio(i64::from(q), 1))
         })
         .collect();
-    let o: Vec<Ratio> = motes.iter().map(|x| open(&x.key)).collect();
+    let o: Vec<Ratio> = motes
+        .iter()
+        .map(|x| {
+            let (a, q) = crate::chem::frames(&x.key);
+            if a + q == 0 {
+                ratio(0, 1)
+            } else {
+                ratio(i64::from(q), i64::from(a + q))
+            }
+        })
+        .collect();
     let mut reach = Vec::with_capacity(n);
     let mut extent = Vec::with_capacity(n);
     let mut rate: Vec<Vec<Ratio>> = Vec::with_capacity(n);
@@ -1490,7 +1503,7 @@ fn shear_booked(
                     .iter()
                     .map(|&j| crate::coupling::Neighbour {
                         holding: w[j].clone(),
-                        pole: pole[j],
+                        pole: pole[j].clone(),
                         open: o[j].clone(),
                         nearness: crate::coupling::nearness(
                             &(reach[i].clone() - reach[j].clone()),
@@ -1500,7 +1513,7 @@ fn shear_booked(
                     })
                     .collect::<Vec<_>>(),
             );
-            let Some(x2) = crate::coupling::pulled(x, &xbar, pole[i], &o[i], &field) else {
+            let Some(x2) = crate::coupling::pulled(x, &xbar, &pole[i], &o[i], &field) else {
                 continue;
             };
             if x2 == *x {
@@ -4271,10 +4284,11 @@ mod coupling_tests {
 
     #[test]
     fn a_component_past_zero_flips_its_own_planes_phase_only() {
-        // Two hydrogen motes (open frames outweigh closed: pole −1), aligned:
-        // they repel. The outer turns hardly at all on the first plane, its
-        // rate there far under the inner's, so the push carries that
-        // component past zero: through the centre on that plane alone.
+        // Two hydrogen motes (3Z frames: two held, one open, pole +1/3 by
+        // degrees), aligned: they repel. The outer turns hardly at all on the
+        // first plane, its rate there far under the inner's, so the push
+        // carries that component past zero: through the centre on that plane
+        // alone.
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let total = ratio(2, 1);
         let mut motes = vec![
@@ -4289,7 +4303,7 @@ mod coupling_tests {
                 "W0001",
                 ratio(1, 1),
                 ratio(3, 5),
-                &[ratio(1, 100), ratio(99, 200), ratio(99, 200)],
+                &[ratio(1, 100000), ratio(99999, 200000), ratio(99999, 200000)],
                 super::rest(ratio(0, 1)),
             ),
         ];

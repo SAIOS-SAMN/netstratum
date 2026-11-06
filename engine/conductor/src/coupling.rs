@@ -16,28 +16,40 @@
 use cfe::ratio::{ratio, Ratio};
 use num_traits::{Signed, Zero};
 
-/// A dipole's pole: the sign of its span `A − Q`, its closed frames against
-/// its open (docs/121 §10.1).
-pub fn pole(closed: &Ratio, open: &Ratio) -> i8 {
-    match closed.cmp(open) {
-        std::cmp::Ordering::Greater => 1,
-        std::cmp::Ordering::Less => -1,
-        std::cmp::Ordering::Equal => 0,
+/// The L1 circle's cosine (docs/118 F1, size L1; docs/61, the universe's
+/// circle the L1 diamond, `8R` a turn): a point at `θ ∈ [0°, 180°]` from its
+/// axis projects onto it by `1 − θ/90°`, first degree and exact.
+pub fn cosine(theta: &Ratio) -> Ratio {
+    ratio(1, 1) - theta.clone() / ratio(90, 1)
+}
+
+/// A frame state's angle between its Z pole (0°) and its Q pole (180°),
+/// the throat at 90° (docs/117 §10.1): `θ = 180°·Q/(A + Q)`.
+pub fn pole_angle(closed: &Ratio, open: &Ratio) -> Ratio {
+    let whole = closed.clone() + open.clone();
+    if whole.is_zero() {
+        ratio(90, 1)
+    } else {
+        ratio(180, 1) * open.clone() / whole
     }
 }
 
-/// The hemisphere law on one plane (docs/121 §10.2): two orientations,
-/// in turns, aligned (`+1`) where they stand within 90° of each other,
-/// opposed (`−1`) past 90°, uncoupled (`0`) at 90°.
-pub fn hemisphere(a: &Ratio, b: &Ratio) -> i8 {
+/// A dipole's pole, opened by degrees (operator 2026-11-06): the L1 cosine of
+/// its frame angle, `1 − θ/90° = (A − Q)/(A + Q)`, its span over its whole,
+/// in `[−1, 1]`; never a bare sign.
+pub fn pole(closed: &Ratio, open: &Ratio) -> Ratio {
+    cosine(&pole_angle(closed, open))
+}
+
+/// Two orientations' alignment on one plane, opened by degrees (operator
+/// 2026-11-06): their separation `Δ ∈ [0°, 180°]` on the closed circle (the
+/// orientations in turns), read by the L1 cosine, `1 − Δ/90°`: full at 0°,
+/// none at 90°, opposed at 180°, every degree between.
+pub fn hemisphere(a: &Ratio, b: &Ratio) -> Ratio {
     let d = a.clone() - b.clone();
     let f = d.clone() - d.floor();
     let off = if f > ratio(1, 2) { ratio(1, 1) - f } else { f };
-    match off.cmp(&ratio(1, 4)) {
-        std::cmp::Ordering::Less => 1,
-        std::cmp::Ordering::Greater => -1,
-        std::cmp::Ordering::Equal => 0,
-    }
+    cosine(&(ratio(360, 1) * off))
 }
 
 /// The ring law's nearness of a pair at gap `g` with moments `m`:
@@ -56,10 +68,10 @@ pub fn nearness(gap: &Ratio, m: &Ratio) -> Ratio {
 #[derive(Debug, Clone)]
 pub struct Neighbour {
     pub holding: Ratio,
-    pub pole: i8,
+    pub pole: Ratio,
     pub open: Ratio,
     pub nearness: Ratio,
-    pub side: i8,
+    pub side: Ratio,
 }
 
 /// The field of a body's range on one plane, as one, against the range's
@@ -72,7 +84,8 @@ pub fn field(range: &[Neighbour]) -> Ratio {
     }
     range.iter().fold(ratio(0, 1), |f, n| {
         f + n.holding.clone()
-            * Ratio::from_integer((i64::from(n.pole) * i64::from(n.side)).into())
+            * n.pole.clone()
+            * n.side.clone()
             * n.open.clone()
             * n.nearness.clone()
     }) / whole
@@ -91,13 +104,12 @@ fn minus(x: &Ratio, y: &Ratio) -> Option<Ratio> {
 pub fn pulled(
     x: &Ratio,
     range_rate: &Ratio,
-    own_pole: i8,
+    own_pole: &Ratio,
     own_open: &Ratio,
     f: &Ratio,
 ) -> Option<Ratio> {
     let toward = minus(range_rate, x)?;
-    let y =
-        -Ratio::from_integer(i64::from(own_pole).into()) * f.clone() * own_open.clone() * toward;
+    let y = -own_pole.clone() * f.clone() * own_open.clone() * toward;
     crate::ring::compose(x, &y)
 }
 
@@ -106,14 +118,30 @@ mod tests {
     use super::*;
 
     #[test]
-    fn the_pole_is_the_spans_sign_and_the_hemisphere_law_a_sign() {
-        assert_eq!(pole(&ratio(3, 1), &ratio(1, 1)), 1);
-        assert_eq!(pole(&ratio(1, 1), &ratio(3, 1)), -1);
-        assert_eq!(pole(&ratio(2, 1), &ratio(2, 1)), 0);
-        assert_eq!(hemisphere(&ratio(0, 1), &ratio(1, 8)), 1);
-        assert_eq!(hemisphere(&ratio(0, 1), &ratio(3, 8)), -1);
-        assert_eq!(hemisphere(&ratio(0, 1), &ratio(1, 4)), 0);
-        assert_eq!(hemisphere(&ratio(1, 16), &ratio(15, 16)), 1, "across 0");
+    fn the_pole_and_the_alignment_open_by_degrees() {
+        // The L1 circle's cosine, 1 - theta/90 degrees, exact.
+        assert_eq!(pole_angle(&ratio(2, 1), &ratio(1, 1)), ratio(60, 1));
+        assert_eq!(pole(&ratio(2, 1), &ratio(1, 1)), ratio(1, 3), "hydrogen");
+        assert_eq!(pole(&ratio(3, 1), &ratio(1, 1)), ratio(1, 2));
+        assert_eq!(pole(&ratio(2, 1), &ratio(2, 1)), ratio(0, 1), "the throat");
+        assert_eq!(
+            pole(&ratio(0, 1), &ratio(1, 1)),
+            ratio(-1, 1),
+            "a pure Q pole"
+        );
+        assert_eq!(hemisphere(&ratio(0, 1), &ratio(0, 1)), ratio(1, 1));
+        assert_eq!(
+            hemisphere(&ratio(0, 1), &ratio(1, 8)),
+            ratio(1, 2),
+            "45 degrees"
+        );
+        assert_eq!(hemisphere(&ratio(0, 1), &ratio(1, 4)), ratio(0, 1));
+        assert_eq!(hemisphere(&ratio(0, 1), &ratio(1, 2)), ratio(-1, 1));
+        assert_eq!(
+            hemisphere(&ratio(1, 16), &ratio(15, 16)),
+            ratio(1, 2),
+            "across 0"
+        );
     }
 
     #[test]
@@ -122,38 +150,49 @@ mod tests {
         // Opposed (σ·F < 0): the rate is drawn toward the range's.
         let opposed = field(&[Neighbour {
             holding: ratio(1, 1),
-            pole: -1,
+            pole: ratio(-1, 1),
             open: ratio(1, 2),
             nearness: ratio(2, 3),
-            side: 1,
+            side: ratio(1, 1),
         }]);
-        let locked = pulled(&x, &xbar, 1, &o, &opposed).expect("in the bound");
+        let one = ratio(1, 1);
+        let locked = pulled(&x, &xbar, &one, &o, &opposed).expect("in the bound");
+        assert_eq!(locked, ratio(23, 91));
         assert!(x < locked && locked < xbar);
         // Aligned (σ·F > 0): pushed away from it.
         let aligned = -opposed.clone();
-        let split = pulled(&x, &xbar, 1, &o, &aligned).expect("in the bound");
+        let split = pulled(&x, &xbar, &one, &o, &aligned).expect("in the bound");
         assert!(split < x);
         // A body alone in its range is untouched.
-        assert_eq!(pulled(&x, &xbar, 1, &o, &field(&[])), Some(x.clone()));
+        assert_eq!(pulled(&x, &xbar, &one, &o, &field(&[])), Some(x.clone()));
+        // At 45 degrees the opposed neighbour pulls by half: 41/181.
+        let half = field(&[Neighbour {
+            holding: ratio(1, 1),
+            pole: ratio(-1, 1),
+            open: ratio(1, 2),
+            nearness: ratio(2, 3),
+            side: ratio(1, 2),
+        }]);
+        assert_eq!(pulled(&x, &xbar, &one, &o, &half), Some(ratio(41, 181)));
     }
 
     #[test]
     fn the_flow_law_never_carries_a_rate_past_the_luminal_bound() {
         // The strongest field a range can hold, both signs, against rates
         // near the bound: every result stays within (−1, 1).
-        let n = |pole: i8, side: i8| Neighbour {
+        let n = |pole: i64, side: i64| Neighbour {
             holding: ratio(3, 1),
-            pole,
+            pole: ratio(pole, 1),
             open: ratio(1, 1),
             nearness: ratio(1, 1),
-            side,
+            side: ratio(side, 1),
         };
         let strongest = [field(&[n(1, 1), n(1, 1)]), field(&[n(-1, 1), n(1, -1)])];
         assert_eq!(strongest, [ratio(1, 1), ratio(-1, 1)]);
         for x in [ratio(9, 10), ratio(-9, 10), ratio(99, 100), ratio(0, 1)] {
             for xbar in [ratio(-99, 100), ratio(99, 100)] {
                 for f in &strongest {
-                    let y = pulled(&x, &xbar, 1, &ratio(1, 1), f).expect("in the bound");
+                    let y = pulled(&x, &xbar, &ratio(1, 1), &ratio(1, 1), f).expect("in the bound");
                     assert!(
                         y > ratio(-1, 1) && y < ratio(1, 1),
                         "{x} to {xbar} by {f}: {y}"
