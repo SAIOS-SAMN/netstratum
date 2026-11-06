@@ -91,6 +91,7 @@ pub mod enfold;
 pub mod flows;
 pub mod formation;
 pub mod gauges;
+pub mod geodesic;
 pub mod horizons;
 pub mod life;
 pub mod motion;
