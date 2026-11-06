@@ -309,6 +309,7 @@ fn main() {
     let unit = breath::unit_mass(&u);
     let births: usize = events.iter().map(|e| e.stars).sum();
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();
+    let reignited: usize = events.iter().map(|e| e.reignited).sum();
     let returned = events
         .iter()
         .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
@@ -415,7 +416,7 @@ fn main() {
     for (name, spent) in conductor::profile::drain() {
         eprintln!("PROFILE {name}: {:.1}s", spent.as_secs_f64());
     }
-    println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up)", until, events.len(), returned.round());
+    println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up); {reignited} remnants reignited", until, events.len(), returned.round());
     for (i, c) in u.cores.iter().enumerate() {
         let echoes = events
             .iter()
@@ -894,6 +895,73 @@ fn main() {
             "SWING — the bodies' orthogonal spin on the ledger, Σ m·ℓ_⊥ = {}",
             conductor::reading::sector(&orth_spin)
         );
+    }
+    // The fuel (issue #119): where hydrogen stands at the end, read from the
+    // universe's own state: the stars' kept matter, the galaxies' flows and
+    // throats, the ocean; and each star's lightest kept element.
+    {
+        let h = conductor::chem::Kind::atom(1).expect("hydrogen");
+        let he = conductor::chem::Kind::atom(2).expect("weight 2");
+        let of = |m: &pulse::Manifest, k: &conductor::chem::Kind| {
+            m.get(k).cloned().unwrap_or_else(|| cfe::ratio::ratio(0, 1))
+        };
+        let (mut kept, mut flows, mut throats, mut stars, mut holding_h) = (
+            cfe::ratio::ratio(0, 1),
+            cfe::ratio::ratio(0, 1),
+            cfe::ratio::ratio(0, 1),
+            0usize,
+            0usize,
+        );
+        let mut lightest: std::collections::BTreeMap<u32, usize> = std::collections::BTreeMap::new();
+        let mut kept_he = cfe::ratio::ratio(0, 1);
+        let mut held_by: Vec<String> = Vec::new();
+        for core in &u.cores {
+            throats += of(&core.throat, &h);
+            flows += core
+                .flows
+                .iter()
+                .filter(|x| x.key == h)
+                .fold(cfe::ratio::ratio(0, 1), |a, x| a + x.amount.clone());
+            for s in &core.satellites {
+                stars += 1;
+                kept += of(&s.kept, &h);
+                kept_he += of(&s.kept, &he);
+                if of(&s.kept, &h) > cfe::ratio::ratio(0, 1) {
+                    holding_h += 1;
+                    held_by.push(format!(
+                        "{:?} remnant {} born {} hydrogen {} of kept {}",
+                        s.path,
+                        s.remnant,
+                        s.born,
+                        conductor::reading::sector(&of(&s.kept, &h)),
+                        conductor::reading::sector(&pulse::mass(&s.kept))
+                    ));
+                }
+                if let Some(z) = s.kept.keys().filter_map(conductor::chem::atom_w).min() {
+                    *lightest.entry(z).or_insert(0) += 1;
+                }
+            }
+        }
+        let ocean = u
+            .ocean
+            .iter()
+            .filter(|x| x.key == h)
+            .fold(cfe::ratio::ratio(0, 1), |a, x| a + x.amount.clone());
+        let f = |x: &cfe::ratio::Ratio| conductor::reading::sector(x).to_string();
+        println!(
+            "FUEL — weight 1, hydrogen (grains): the stars keep {} ({} of {} stars hold any; weight 2 kept {}), the galaxies' flows {}, their throats {}, the ocean {}; the stars' lightest kept kind, by weight: {:?}",
+            f(&kept),
+            holding_h,
+            stars,
+            f(&kept_he),
+            f(&flows),
+            f(&throats),
+            f(&ocean),
+            lightest
+        );
+        for line in &held_by {
+            println!("FUEL — a star holding hydrogen: {line}");
+        }
     }
     // The joint READ (concordance 2.10, the landing rule): each star's burn
     // as the form holds it, its runs `(1 − x_i, n_i)` on its own clock in the
