@@ -626,6 +626,35 @@ between planes is needed for any separation; T18 says its form, and the
 lean has that form. With per-plane spins (docs/120 §6), it is stored as
 that turning.
 
+### 11.6 Separation by isoclinic degrees, never a squared cosine (operator, 2026-11-06)
+
+The operator refused `cos Ω = 2·cos²(Ω/2) − 1` as "stuck in two dimensional
+squares", and ruled separation by isoclinic degrees.
+
+1. **The four axes** of the continuum's `S³` are the three spatial positive
+   axes `e₊₁, e₊₂, e₊₃` and R's positive axis `e₊R`. R's loop, the
+   circulation, is the turning that involves R.
+2. **Spin(4) is a left-isoclinic family times a right-isoclinic family,** and
+   the two commute. An isoclinic rotation turns both planes of a dual pair by
+   one angle: Xylarium's T18, isoclinic planes turning together. The dual
+   pairs are `(e₂₃, e₁R)`, `(e₃₁, e₂R)` and `(e₁₂, e₃R)`.
+3. **On a pair with plane angles `θ` and `θ′` (degrees),** the left angle is
+   `α = (θ + θ′)/2` and the right angle is `β = (θ − θ′)/2`, an exact linear
+   combination of degrees. A separation within one pair is the pair of
+   exact differences `(Δα, Δβ)`: no cosine, no square, no half-angle of a
+   composed rotor. Alignment is read on each by the degree law.
+4. **Non-commutation stays where it lives:** between different pairs of one
+   family, the inter-plane turnings `τ` (§11.5). Composing across pairs is
+   the open part.
+5. **The gap in the state.** The isoclinic reading needs six plane angles,
+   the three spatial turnings and the three turnings with R (`θ₁R`, `θ₂R`,
+   `θ₃R`, one circulation per axis). The code carries three spatial phases
+   and one loop phase. The three R-plane turnings are state to add, each
+   founded isoclinic with its spatial partner (T18).
+6. **The certified trigonometry** (`conductor::geodesic`: π, cos and sin of
+   degrees, the rotor) remains for rendering a rotor's readings on
+   observation. It is never the alignment a law acts on.
+
 ## 12. The passage is the pole swap; its flux on T is the span's change
 
 This section closes §9.3's open return and the passage flux Mycelium held
