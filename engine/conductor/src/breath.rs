@@ -1415,8 +1415,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         for (k, a) in sys.kept.clone() {
                             let left =
                                 a.clone() - back.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
+                            // Its open share as the star holds it, at its
+                            // heart's heat (the cut's reading, `heart_cut`; a
+                            // ringing heart strips hydrogen, heat 1), never
+                            // the cold atom's: one reading per quantity.
                             let w = crate::pulse::nucleus(
-                                &(left.clone() * crate::flows::open(&k) * chi.clone()),
+                                &(left.clone()
+                                    * crate::flows::open_hot(&k, &ratio(1, 1))
+                                    * chi.clone()),
                             )
                             .min(left);
                             if w > ratio(0, 1) {
