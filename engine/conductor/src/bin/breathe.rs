@@ -309,7 +309,7 @@ fn main() {
     let unit = breath::unit_mass(&u);
     let births: usize = events.iter().map(|e| e.stars).sum();
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();
-    let reignited: usize = events.iter().map(|e| e.reignited).sum();
+    let novae: usize = events.iter().map(|e| e.novae).sum();
     let returned = events
         .iter()
         .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
@@ -416,7 +416,7 @@ fn main() {
     for (name, spent) in conductor::profile::drain() {
         eprintln!("PROFILE {name}: {:.1}s", spent.as_secs_f64());
     }
-    println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up); {reignited} remnants reignited", until, events.len(), returned.round());
+    println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up); {novae} novae (a remnant's gathered fuel thrown off)", until, events.len(), returned.round());
     for (i, c) in u.cores.iter().enumerate() {
         let echoes = events
             .iter()
@@ -962,6 +962,23 @@ fn main() {
         for line in &held_by {
             println!("FUEL — a star holding hydrogen: {line}");
         }
+        // Each birth's own record: hydrogen's share by mass of what fell, of
+        // it after the fibres' transition, and of what the star keeps.
+        let births: Vec<&(cfe::ratio::Ratio, cfe::ratio::Ratio, cfe::ratio::Ratio)> =
+            events.iter().flat_map(|e| e.births_h.iter()).collect();
+        let zero = cfe::ratio::ratio(0, 1);
+        let none = |k: usize| births.iter().filter(|b| [&b.0, &b.1, &b.2][k] == &zero).count();
+        let most = |k: usize| births.iter().map(|b| [&b.0, &b.1, &b.2][k].clone()).max().unwrap_or_else(|| zero.clone());
+        println!(
+            "FUEL — births: {}; hydrogen absent from what fell in {}, after the fibres' transition in {}, from the star kept in {}; the greatest hydrogen share by mass, fell {}, after the transition {}, kept {}",
+            births.len(),
+            none(0),
+            none(1),
+            none(2),
+            f(&most(0)),
+            f(&most(1)),
+            f(&most(2))
+        );
     }
     // The joint READ (concordance 2.10, the landing rule): each star's burn
     // as the form holds it, its runs `(1 − x_i, n_i)` on its own clock in the
