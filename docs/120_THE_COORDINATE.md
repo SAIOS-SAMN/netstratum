@@ -346,11 +346,13 @@ The operator ruled the torus be re-volumized in non-Euclidean spheres:
 - **A body's orientation is one rotor on `S³`,** its three turnings
   (`e₊₂e₊₃`, `e₊₃e₊₁`, `e₊₁e₊₂`, cyclic) composed in a fixed order, which does
   not commute.
-- **The separation of two bodies is the geodesic angle of their relative
-  rotor,** a certified reading: π, the cosines and the products are held as
-  exact rational bounds. The laws read it at the coordinate's sexagesimal
-  depth, the lower bound of the `60⁻⁶` sector it falls in, so it is exact
-  and deterministic.
+- **The separation of two bodies is read by isoclinic degrees** (docs/117
+  §11.6): on each dual pair, the left and right angles `(θ ± θ′)/2`, and
+  their exact differences `(Δα, Δβ)`, with no cosine and no square (the
+  operator refused the squared cosine of the relative rotor). Where a law
+  needs a value from a certified interval, it acts on the bound the caller
+  states, the one nearer zero, and never on a sexagesimal sector (base 60 is
+  display only); where the interval straddles zero, it does not act.
 
 **Built so far:** none in the laws. The certified geodesic module is in
 progress. The coupling's alignment, its range and the bond test move onto it
