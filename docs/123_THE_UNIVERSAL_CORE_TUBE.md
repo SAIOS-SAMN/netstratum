@@ -7,7 +7,7 @@ a pole swap, and the two kernels weigh matter with their poles exchanged.
 **Status:** scoped 2026-11-06, not built. The operator directed: "add the
 universal core tube uplink as a wormhole traversal for the universal core
 that has the antipolarity of the xylarium-kernel for matter weighting".
-Tracked by its own issue, as cross-project work with Mycelium and Xylarium.
+Tracked by issue #109 (cross-project, with Mycelium and Xylarium).
 
 **Prerequisites:**
 - docs/101 (one universal core, uplinked to the hypha);
