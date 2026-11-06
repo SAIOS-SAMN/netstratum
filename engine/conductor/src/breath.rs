@@ -1400,8 +1400,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its torsion adds to the heat against the grip (docs/100
                 // §9.2: the fibres part where `a + τ > κ_w·h`).
                 crate::profile::mark("sys:nuclides");
-                let heart_heat =
-                    crate::nuclides::heat(&h_s, &nu) + crate::flows::torsion(&sys.tilt, &core.tilt);
+                let heart_heat = crate::nuclides::heat(&h_s, &nu)
+                    + crate::torsion::tension(&sys.tilt, &core.tilt);
                 crate::nuclides::release(&mut all, &heart_heat, &g_star);
                 crate::nuclides::capture_rapid(&mut all, &g_star, densest);
                 returned += mass(&all) / unit.clone();
@@ -1464,8 +1464,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its torsion adds to the heat against the grip (docs/100
                 // §9.2: the fibres part where `a + τ > κ_w·h`).
                 crate::profile::mark("sys:nuclides");
-                let heart_heat =
-                    crate::nuclides::heat(&h_s, &nu) + crate::flows::torsion(&sys.tilt, &core.tilt);
+                let heart_heat = crate::nuclides::heat(&h_s, &nu)
+                    + crate::torsion::tension(&sys.tilt, &core.tilt);
                 crate::nuclides::release(&mut all, &heart_heat, &g_star);
                 crate::nuclides::capture_rapid(&mut all, &g_star, densest);
                 returned += mass(&all) / unit.clone();
@@ -2601,7 +2601,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // heart's fuel. Nucleons conserved.
                 let mut star = star;
                 crate::profile::mark("breath:births-torsion");
-                let tau_b = crate::flows::torsion(
+                let tau_b = crate::torsion::tension(
                     &crate::flows::blend(
                         &members
                             .iter()
