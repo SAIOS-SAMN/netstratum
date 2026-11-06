@@ -1529,10 +1529,22 @@ fn shear_booked(
             }
             let given = m[i].clone() * step.clone();
             dl[i][k] += step;
+            // Each neighbour pays by its holding, `given·w_j/(whole·m_j)`,
+            // which is `given·total/whole` for every one of them, held on the
+            // grain as the step is (each range has its own `whole`, so a
+            // neighbour's exact payments from many ranges compound their
+            // denominators without bound); what the grain leaves is booked
+            // with the shear's remainder.
+            let pay = crate::ring::grain(&(given.clone() * total.clone() / whole.clone()));
+            let mut paid = ratio(0, 1);
             for &j in near {
                 if !m[j].is_zero() {
-                    dl[j][k] -= given.clone() * w[j].clone() / whole.clone() / m[j].clone();
+                    dl[j][k] -= pay.clone();
+                    paid += m[j].clone() * pay.clone();
                 }
+            }
+            if book {
+                left[k] += given.clone() - paid;
             }
             moved += given.abs();
         }
@@ -1702,8 +1714,9 @@ impl Strand {
 
 /// The chains of a galaxy's disc leg (operators 2026-10-18: membership is
 /// the chain, never a centre; with Xylarium). Motes on one face (the same
-/// hemisphere in every plane, the S⁰ face test) whose dispersal bands
-/// `r(1 ± p)` overlap link, and the links are transitive: a chain is a
+/// hemisphere in every plane, the S⁰ face test) whose own extents
+/// `r(1 ± e)` (`e` its pinch share) overlap link, and the links are
+/// transitive: a chain is a
 /// connected run of overlapping bands on one face, read whole, no centre
 /// chosen, no order (each face class sorted by its bands' inner edges, read
 /// at n·log n). Each chain is judged by the filament law against its own
@@ -1790,7 +1803,7 @@ pub fn within_reach<'a>(
 /// The beads (ruling of 2026-10-18: the individual fibres are beaded, then
 /// the fibres braided together): the matter's own gatherings, read every
 /// echo. A FIBRE is one kind's run on one face (the same hemisphere in every
-/// plane), motes whose dispersal bands `r(1 ± p)` overlap, linked
+/// plane), motes whose own extents `r(1 ± e)` overlap, linked
 /// transitively; it pinches where its hold gathers (each local maximum) and
 /// parts at the minima between. Each bead is one body of gas. Returned by
 /// face: (its members, the reach where it pinches). Read by the one
@@ -1801,7 +1814,6 @@ pub fn within_reach<'a>(
 pub fn beads(
     motes: &[Mote],
     enc: &Enclosed,
-    p: &Ratio,
     total: &Ratio,
     disc_leg: bool,
 ) -> std::collections::BTreeMap<Vec<bool>, Vec<(Vec<usize>, Ratio)>> {
@@ -1811,18 +1823,32 @@ pub fn beads(
         return beads_by_face;
     }
     let half = ratio(1, 2);
-    let (down, up) = (
-        ratio(1, 1) - p.clone().min(ratio(1, 1)),
-        ratio(1, 1) + p.clone(),
-    );
     let hh: Vec<Ratio> = motes.iter().map(|x| enc.hold(&x.ell_o())).collect();
     let rr: Vec<Ratio> = motes
         .iter()
         .zip(&hh)
         .map(|(x, h)| x.ell_o() / h.clone())
         .collect();
-    let lov: Vec<Ratio> = rr.iter().map(|r| r.clone() * down.clone()).collect();
-    let hiv: Vec<Ratio> = rr.iter().map(|r| r.clone() * up.clone()).collect();
+    // Each mote's own extent about its reach (docs/120 §8c): its pinch share
+    // `e = m/(m + H(<ℓ))` of its reach on each side, derived, never one band
+    // for the galaxy.
+    let ee: Vec<Ratio> = motes
+        .iter()
+        .zip(&hh)
+        .map(|(x, h)| {
+            crate::ring::pinch_share(&(x.amount.clone() * weight(&x.key) / total.clone()), h)
+        })
+        .collect();
+    let lov: Vec<Ratio> = rr
+        .iter()
+        .zip(&ee)
+        .map(|(r, e)| r.clone() * (ratio(1, 1) - e.clone()))
+        .collect();
+    let hiv: Vec<Ratio> = rr
+        .iter()
+        .zip(&ee)
+        .map(|(r, e)| r.clone() * (ratio(1, 1) + e.clone()))
+        .collect();
     let delta_of = |j: usize, r: &Ratio| {
         stream_delta(
             &(hh[j].clone() / (r.clone() + hh[j].clone())),
@@ -1920,25 +1946,39 @@ pub fn beads(
     beads_by_face
 }
 
-pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<Strand> {
+pub fn strands(motes: &[Mote], enc: &Enclosed, total: &Ratio) -> Vec<Strand> {
     if total.is_zero() {
         return Vec::new();
     }
     // Each mote's reach and band, read once by the one enclosure (exact;
     // recomputing them at every use was most of the cost): its reach `ℓ/H(<ℓ)`
     // and the hold it turns about.
-    let (down, up) = (
-        ratio(1, 1) - p.clone().min(ratio(1, 1)),
-        ratio(1, 1) + p.clone(),
-    );
     let hh: Vec<Ratio> = motes.iter().map(|x| enc.hold(&x.ell_o())).collect();
     let rr: Vec<Ratio> = motes
         .iter()
         .zip(&hh)
         .map(|(x, h)| x.ell_o() / h.clone())
         .collect();
-    let lov: Vec<Ratio> = rr.iter().map(|r| r.clone() * down.clone()).collect();
-    let hiv: Vec<Ratio> = rr.iter().map(|r| r.clone() * up.clone()).collect();
+    // Each mote's own extent about its reach (docs/120 §8c): its pinch share
+    // `e = m/(m + H(<ℓ))` of its reach on each side, derived, never one band
+    // for the galaxy.
+    let ee: Vec<Ratio> = motes
+        .iter()
+        .zip(&hh)
+        .map(|(x, h)| {
+            crate::ring::pinch_share(&(x.amount.clone() * weight(&x.key) / total.clone()), h)
+        })
+        .collect();
+    let lov: Vec<Ratio> = rr
+        .iter()
+        .zip(&ee)
+        .map(|(r, e)| r.clone() * (ratio(1, 1) - e.clone()))
+        .collect();
+    let hiv: Vec<Ratio> = rr
+        .iter()
+        .zip(&ee)
+        .map(|(r, e)| r.clone() * (ratio(1, 1) + e.clone()))
+        .collect();
     // The deficit at a reach about the hold a member turns about.
     let delta_of = |j: usize, r: &Ratio| {
         stream_delta(
@@ -2007,7 +2047,7 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, p: &Ratio, total: &Ratio) -> Vec<
             apart,
         })
     };
-    let beads_by_face = beads(motes, enc, p, total, true);
+    let beads_by_face = beads(motes, enc, total, true);
     // The braid: beads of different fibres twine where each one's pinch
     // stands within the other's extent (mutual, so no order), and the
     // twining carries across; each braid is read whole by the filament law.
@@ -2150,7 +2190,7 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
 /// image through the ring; each band steps by the push of what stands inside
 /// its pair against the pull of what stands outside, `k(ρ) = (S/G)·(1 +
 /// ρ)/(1 − ρ)`, opening at the ring's own dispersal pair `(S − G)/(S + G)`
-/// at ρ = 0. Each mote's matter is spread over its band `r(1 ± p)`. A band's
+/// at ρ = 0. Each mote's matter is spread over its own extent `r(1 ± e)`. A band's
 /// pair holds where its matter's bond meets its heat and the tide across
 /// it (`formation::crest_collapse`, docs/96 §8); a band where a
 /// star already stands is that star's (its capture reads it). Returns the
@@ -2159,7 +2199,6 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
 pub fn band_pairs(
     motes: &[Mote],
     enc: &Enclosed,
-    p: &Ratio,
     plane: &[Ratio],
     g_total: &Ratio,
 ) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
@@ -2169,7 +2208,6 @@ pub fn band_pairs(
         return Vec::new();
     }
     let total = holding(motes);
-    let p = p.clone().max(ratio(0, 1)).min(ratio(1, 2));
     let share_in = |lo: &Ratio, hi: &Ratio, a: &Ratio, b: &Ratio| -> Ratio {
         if hi <= lo {
             return if lo >= a && lo < b {
@@ -2202,12 +2240,11 @@ pub fn band_pairs(
             ring.clone() * (ratio(1, 1) + x.clone()),
         )
     };
+    // Each mote's own extent about its reach (docs/120 §8c), its pinch share.
     let band = |i: usize| {
         let r = enc.reach(&motes[i].ell_o()).0;
-        (
-            r.clone() * (ratio(1, 1) - p.clone()),
-            r * (ratio(1, 1) + p.clone()),
-        )
+        let e = own_enclosure(&motes[i], enc, g_total)[0].clone();
+        (r.clone() * (ratio(1, 1) - e.clone()), r * (ratio(1, 1) + e))
     };
     let bands_all: Vec<(Ratio, Ratio)> = (0..motes.len()).map(band).collect();
     // What stands inside the pair at `x`: the ring's own share and every
@@ -2683,8 +2720,8 @@ pub fn luminal(motes: &mut [Mote], enc: &Enclosed) -> usize {
 /// the missing components - fluid-MHD and UMD overlay"; "build it"). The
 /// rings are the fluid's own beads (`beads`, one kind on one face). Each
 /// ring reads, never stores: its holding `m`, its spin `ℓ̄` and heat `ā`
-/// (holding-weighted), its reach `R` (its pinch), its width `2pR` (its
-/// band's spread), its density `ρ = m/(2pR)`, its pressure `P = ρ·ā` plus its
+/// (holding-weighted), its reach `R` (its pinch), its width (its members'
+/// own extents `R(1 ± e)`, edge to edge), its density `ρ = m/width`, its pressure `P = ρ·ā` plus its
 /// magnetic pressure, and its magnetization `M = Σ u·in_step(φ, φ̄)` (each
 /// member's open frames by its field phase's in-step with the ring's mean,
 /// the field phase its circulation phase, frozen into the particle, so the
@@ -2702,13 +2739,12 @@ pub fn luminal(motes: &mut [Mote], enc: &Enclosed) -> usize {
 pub fn fluid(
     motes: &mut [Mote],
     enc: &Enclosed,
-    p: &Ratio,
     total: &Ratio,
 ) -> (Ratio, Ratio, Ratio, usize) {
     if total.is_zero() || motes.len() < 2 {
         return (ratio(0, 1), ratio(0, 1), ratio(0, 1), 0);
     }
-    let rings_by_face = beads(motes, enc, p, total, false);
+    let rings_by_face = beads(motes, enc, total, false);
     let share = |x: &Mote| x.amount.clone() * weight(&x.key) / total.clone();
     let mut dl = vec![ratio(0, 1); motes.len()];
     let (mut moved_p, mut moved_b) = (ratio(0, 1), ratio(0, 1));
@@ -2754,7 +2790,15 @@ pub fn fluid(
                         / total.clone()
                         * in_step(motes[i].phase.get(1).unwrap_or(&ratio(0, 1)), &field_mean)
                 });
-                let width = ratio(2, 1) * p.clone() * pinch.clone();
+                // Its width, its members' own extents edge to edge (each
+                // `R(1 ± e)`, `e` its pinch share), never one band.
+                let edge = |i: usize, sign: i64| {
+                    let r = enc.reach(&motes[i].ell_o()).0;
+                    let e = own_enclosure(&motes[i], enc, total)[0].clone();
+                    r.clone() * (ratio(1, 1) + ratio(sign, 1) * e)
+                };
+                let width = members.iter().map(|&i| edge(i, 1)).max().unwrap_or_else(|| ratio(0, 1))
+                    - members.iter().map(|&i| edge(i, -1)).min().unwrap_or_else(|| ratio(0, 1));
                 let pressure = if width.is_zero() {
                     ratio(0, 1)
                 } else {
@@ -2838,7 +2882,7 @@ pub fn fluid(
             }
         }
         // docs/110: the balance on each shell's fibre. A shell is the motes of
-        // this face whose bands `R(1 ± p)` overlap (connected by their bands,
+        // this face whose own extents `R(1 ± e)` overlap (connected by their bands,
         // the band of `band_pairs`); within it, cell against cell around
         // each spatial plane's circle.
         let column_of: std::collections::BTreeMap<usize, Ratio> = read
@@ -2856,23 +2900,25 @@ pub fn fluid(
             })
             .collect();
         on_face.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
+        // Each member's own extent about its reach (`R(1 ± e)`).
         let one = ratio(1, 1);
-        let lo = |r: &Ratio| r.clone() * (one.clone() - p.clone());
-        let hi = |r: &Ratio| r.clone() * (one.clone() + p.clone());
+        let ext = |i: usize| own_enclosure(&motes[i], enc, total)[0].clone();
+        let lo = |i: usize, r: &Ratio| r.clone() * (one.clone() - ext(i));
+        let hi = |i: usize, r: &Ratio| r.clone() * (one.clone() + ext(i));
         let mut shells: Vec<Vec<(usize, Ratio, Ratio)>> = Vec::new();
         let mut reach_hi = ratio(-1, 1);
         for m in on_face {
-            if shells.is_empty() || lo(&m.1) > reach_hi {
+            if shells.is_empty() || lo(m.0, &m.1) > reach_hi {
                 shells.push(Vec::new());
             }
-            if hi(&m.1) > reach_hi {
-                reach_hi = hi(&m.1);
+            if hi(m.0, &m.1) > reach_hi {
+                reach_hi = hi(m.0, &m.1);
             }
             shells.last_mut().expect("a shell").push(m);
         }
         for shell in shells.iter().filter(|s| s.len() >= 2) {
-            let width = hi(&shell.iter().map(|m| m.1.clone()).max().expect("members"))
-                - lo(&shell.iter().map(|m| m.1.clone()).min().expect("members"));
+            let width = shell.iter().map(|m| hi(m.0, &m.1)).max().expect("members")
+                - shell.iter().map(|m| lo(m.0, &m.1)).min().expect("members");
             if width <= ratio(0, 1) {
                 continue;
             }
@@ -3891,7 +3937,6 @@ mod passage_tests {
         let bindings = band_pairs(
             &motes,
             &enc,
-            &ratio(1, 10),
             &[ratio(1, 1), ratio(0, 1), ratio(0, 1)],
             &g,
         );

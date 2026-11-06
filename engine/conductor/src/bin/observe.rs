@@ -362,7 +362,7 @@ fn main() {
             else {
                 return println!("no frame");
             };
-            let chains = conductor::flows::strands(&c.flows, &enc, &p, &total);
+            let chains = conductor::flows::strands(&c.flows, &enc, &total);
             let holding = chains.iter().filter(|x| x.holds()).count();
             if let Some(best) = chains.iter().max_by(|a, b| {
                 (a.bind.clone() - a.agitation.clone() - a.face.clone())

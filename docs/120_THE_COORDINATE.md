@@ -329,6 +329,16 @@ semantically, and dimensionally". (Never "cells": ruling 2026-10-16.)
   open: a ratio of reaches is not a fraction of a turn (register K3). The
   cut's held share (`flows::held`) reads the part of that enclosure within
   the hold; captures and bonds follow.
+- **Built on every gathering** (`own-extents`): the beads, the strands, the
+  band pairs and the fluid's rings and shells read each mote over its own
+  extent `R(1 ± e)` (`e` its pinch share), never over one band `R(1 ± p)`
+  for the galaxy. The push `p` no longer enters a width anywhere. The
+  shear's payments are held on the grain beside its step: each range pays
+  `given·total/whole`, and a neighbour's exact payments from many ranges
+  compounded their denominators until one echo would not complete.
+  Read on one 2^40 founding over 580 bells (an observation of that run):
+  every identity exact; 19 worlds (14 before); 20 systems (30), none stuck
+  at its rim (443).
 
 ## 8d. The torus found flat, and re-volumized (operator, 2026-11-06)
 
