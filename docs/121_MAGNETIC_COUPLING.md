@@ -244,3 +244,43 @@ dimensional level (phase, quantum, state)".
 - **What the engine holds today:** the phase level, as spins and phases, and
   the state level, as reach. `G` holds no rate yet (docs/120 §9 item 1), so
   the quantum level is read where the code gains it.
+
+## 12. The state level: the reach's rest and its boost (replacing the band)
+
+The band (docs/104 §6: the push `q·u` against the pull back `½·g·R·H`, its
+rest `R·R = 2q`, `flows::toward_rest`'s halved step) is restated on the
+coupling at the state level, where the rate is the reach's dilation (`S`, a
+boost).
+
+1. **The two shares:**
+   - Gravity's return at reach `R` is the held share `δ = H/(R + H)`.
+   - The heart's push is the coupling between the mote's open frames and the
+     core's (ruling: "the electromagnetic repulsion gripping open frames"),
+     `k·n`, with `k = o_m·o_c` the two open shares and `n = M/(R + M)` the ring
+     law's nearness of their moments `M`.
+2. **The rest is where they balance:** `k·M/(R + M) = H/(R + H)`, first degree
+   in `R`:
+
+       R* = H·M·(1 − k)/(k·M − H)
+
+   A rest exists where the repulsion can outweigh the hold (`k·M > H`). It
+   differs by kind through the kind's open share and its moment, with no
+   square and no `½`.
+3. **Motion toward the rest is a boost:**
+   - The net pull `y = k·n − δ` lies in `(−1, 1)`.
+   - The reach's rate composes by the flow law, `x′ = x ⊕ y`, and the reach
+     dilates by LAW-DILATION, `R′ = R·(1 + x′)/(1 − x′)`.
+   - At the rest `y = 0`. A boost never carries the reach through zero or past
+     the horizon, so no step is halved.
+4. **The vacuum is the same law with reach and hold exchanged,** `(A, Q) =
+   (H, R)` (docs/117 §12.6).
+5. **What it replaces:** the band's value and rest (`flows::band`,
+   `toward_rest`) and `through` at the vacuum's band. The core's release
+   follows: its parcel is carried by the boost from the throat, never
+   mirrored.
+6. **Witnesses before it is built:**
+   - the rest solves the balance exactly;
+   - the boost composes by the flow law and stays inside the horizon;
+   - a mote at its rest stays;
+   - inside the rest it is driven out, past it drawn in;
+   - the vacuum's rest is the continuum's with reach and hold exchanged.
