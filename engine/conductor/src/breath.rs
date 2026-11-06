@@ -172,6 +172,42 @@ fn carried_spin(m: &crate::pulse::Manifest, at: &Ratio, orth: &Ratio, unit: &Rat
     mass(m) / unit.clone() * (crate::ring::grain(at) + orth.clone())
 }
 
+/// The closed limit, read (docs/111 §3.2; the ruling of 2026-10-18): a star
+/// can burn where some kind it keeps fuses at least one pair of nuclei within
+/// an echo in full step. Matter is counted in nuclei, so a burn slower than
+/// that makes nothing, ever, at its rate; an echo that brought no ring is
+/// read as one, its passage itself. It fuses a pair when the fuel the echo's
+/// rings take, `a − a·(1 − feed)^r`, reaches a pair; a slow burn of a large
+/// stock still fuses a great many nuclei. Read every echo, for a star and a
+/// remnant alike.
+fn can_burn(sys: &Body, r_echo: u64) -> bool {
+    use num_traits::Zero as _;
+    let share_now = if mass(&sys.total()).is_zero() {
+        ratio(0, 1)
+    } else {
+        mass(&sys.kept) / mass(&sys.total())
+    };
+    let rings_echo = r_echo.max(1);
+    let pair = Ratio::new(
+        2.into(),
+        crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024),
+    );
+    sys.kept.iter().any(|(k, a)| {
+        *a >= pair
+            && crate::chem::atom_w(k).is_some_and(|z| {
+                crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1))
+                    .and_then(|(feed, _)| {
+                        crate::compound::read(
+                            a,
+                            &crate::compound::after(&feed, rings_echo)?,
+                            |left| a.clone() - left.clone() >= pair,
+                        )
+                    })
+                    .unwrap_or(false)
+            })
+    })
+}
+
 /// A galaxy's frame map for a mote's spin, the exit (register B5): carried
 /// into the universe by its galaxy's share `f`, `ℓ_u = ℓ_g + ℓ·f`.
 pub fn to_universe(ell: &Ratio, ell_g: &Ratio, f: &Ratio) -> Ratio {
@@ -294,6 +330,8 @@ pub struct Event {
     pub returned: Ratio,
     /// Stars dissolved at this echo.
     pub dissolved: usize,
+    /// Remnants that gathered fuel they can burn and stand as stars again.
+    pub reignited: usize,
     /// Star encounters at this echo: mergers (sticks) and bounces.
     pub merged: usize,
     pub encounters: usize,
@@ -684,6 +722,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let core = &mut u.cores[i];
         let mut returned = ratio(0, 1);
         let mut dissolved = 0;
+        let mut reignited = 0usize;
         let mut grown = (0usize, 0usize, 0usize, 0usize);
         let mut escaped_all = ratio(0, 1);
         let mut fates = (0usize, 0usize, 0usize, 0usize);
@@ -1228,6 +1267,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     );
                     shed.push((escaped, at, sys.ell_orth.clone(), sys.phase.clone()));
                 }
+                // The closed limit is a reading, never a latch: a remnant that
+                // has gathered fuel it can burn (infall in its settle, a merge)
+                // stands as a star again, its closing mass no longer its state.
+                if can_burn(&sys, r_echo) {
+                    sys.remnant = false;
+                    sys.state = ratio(0, 1);
+                    reignited += 1;
+                }
                 enclosed_in += mass(&sys.total()) / unit.clone();
                 keep.push(sys);
                 continue;
@@ -1577,38 +1624,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The CLOSED limit: no kind it holds can burn on (whatever its
             // rhythm), so it is spent and becomes a remnant, its closing mass
             // recorded.
-            let share_now = if mass(&sys.total()).is_zero() {
-                ratio(0, 1)
-            } else {
-                mass(&sys.kept) / mass(&sys.total())
-            };
-            // Spent means it cannot fuse one pair of nuclei within an echo even
-            // in full step: matter is counted in nuclei, so a burn slower
-            // than that makes nothing, ever, at its rate.
-            // An echo that brought no ring is read as one, its passage itself.
-            let rings_echo = r_echo.max(1);
-            let pair = Ratio::new(
-                2.into(),
-                crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024),
-            );
-            // It fuses at least one pair in an echo when the fuel the echo's
-            // rings take, `a − a·(1 − feed)^r`, reaches a pair; a slow burn
-            // of a large stock still fuses a great many nuclei.
-            let can_burn = sys.kept.iter().any(|(k, a)| {
-                *a >= pair
-                    && crate::chem::atom_w(k).is_some_and(|z| {
-                        crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1))
-                            .and_then(|(feed, _)| {
-                                crate::compound::read(
-                                    a,
-                                    &crate::compound::after(&feed, rings_echo)?,
-                                    |left| a.clone() - left.clone() >= pair,
-                                )
-                            })
-                            .unwrap_or(false)
-                    })
-            });
-            if !can_burn && !sys.kept.is_empty() {
+            if !can_burn(&sys, r_echo) && !sys.kept.is_empty() {
                 sys.remnant = true;
                 sys.state = mass(&sys.kept);
             }
@@ -2854,6 +2870,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             jets,
             returned,
             dissolved,
+            reignited,
             merged,
             encounters,
             grown,
@@ -2884,6 +2901,45 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_closed_limit_is_read_never_latched() {
+        // docs/111 §3.2: a star can burn where some kind it keeps fuses a pair
+        // within an echo. Weight 4 (Q 2, closed) makes weight 8 by a rung
+        // that transduces no magnetism into holding, so it cannot burn; a
+        // remnant that then gathers hydrogen can.
+        let kind = |w: &str| crate::chem::Kind::parse(w).expect("a kind");
+        let mut s = Body {
+            solid: false,
+            coupled: None,
+            ell_orth: ratio(0, 1),
+            path: vec![1, 1],
+            radius: ratio(0, 1),
+            period: ratio(0, 1),
+            kept: [(kind("W0004"), ratio(500, 1))].into(),
+            satellites: Vec::new(),
+            medium: crate::pulse::Manifest::new(),
+            ell: ratio(0, 1),
+            medium_spin: ratio(0, 1),
+            gas: Vec::new(),
+            born: 0,
+            state: ratio(500, 1),
+            flows: Vec::new(),
+            reservoir: ratio(0, 1),
+            turning: ratio(0, 1),
+            phase: Vec::new(),
+            load: ratio(0, 1),
+            bell: Vec::new(),
+            remnant: true,
+            heat: ratio(0, 1),
+            tilt: Vec::new(),
+            throat: Default::default(),
+            antipole: Vec::new(),
+        };
+        assert!(!can_burn(&s, 3), "closed: nothing it keeps burns");
+        s.kept.insert(kind("W0001"), ratio(300, 1));
+        assert!(can_burn(&s, 3), "hydrogen gathered: it burns again");
+    }
 
     #[test]
     fn a_systems_unit_dilates_its_galaxy_reading_kept_to_the_grain() {
