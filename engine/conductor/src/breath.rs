@@ -2339,7 +2339,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let enc_f = galaxy_enc(core);
             crate::profile::mark("breath:fluid");
             let (by_pressure, by_field, around, parted) =
-                crate::flows::fluid(&mut core.flows, &enc_f, &p, &ledger_unit);
+                crate::flows::fluid(&mut core.flows, &enc_f, &ledger_unit);
             circulation.1 = by_pressure;
             circulation.2 = by_field;
             circulation.5 = around;
@@ -2391,7 +2391,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The galaxy's one enclosure as its motes now stand.
             let enc_now = galaxy_enc(core);
             crate::profile::mark("breath:chains");
-            let strands = crate::flows::strands(&core.flows, &enc_now, &p, &g_mass);
+            let strands = crate::flows::strands(&core.flows, &enc_now, &g_mass);
             // The stream of every mote, read by force against its strand (a
             // reading: the face is the luminal bound's alone).
             // The pulse at a mote: a galaxy's received tide, or, in the home,
@@ -2405,7 +2405,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The GALAXY settles its stars (docs/96; operator 2026-10-26): its
             // band pairs on the strip, never the stepped filaments' bindings.
             let _ = strands;
-            let bindings = crate::flows::band_pairs(&core.flows, &enc_now, &p, &core.tilt, &g_mass);
+            let bindings = crate::flows::band_pairs(&core.flows, &enc_now, &core.tilt, &g_mass);
             // Each take: (reach, what fell, the disc outside it, the whole
             // binding's holding, agitation, the star's own spin, phases, its
             // orthogonal spin, the members as they were).
@@ -2776,7 +2776,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let held_before = core.flows.len();
             // Merged by the galaxy's own gatherings, its beads (no grid).
             let gathered_beads =
-                crate::flows::beads(&core.flows, &galaxy_enc(core), &p, &g_mass, false);
+                crate::flows::beads(&core.flows, &galaxy_enc(core), &g_mass, false);
             let remainder = crate::flows::merge(
                 &mut core.flows,
                 &gathered_beads,
