@@ -1966,6 +1966,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     g_rate.clone().unwrap_or_else(|| ratio(1, 1)) * ratio(bell as i64, 1);
                 let twist_t = crate::flows::tilt_of(&core.tilt);
                 let lead = core.tilt.clone();
+                // The twist's pressure on the expungement (crate::torsion;
+                // operator 2026-11-06): the core's plane rates are its twist
+                // per ring, `2δ·t_k` with `δ = ½` (docs/100 §2), each pair's
+                // pressure the throat's share of the core's holding times the
+                // pair's twist rate, each plane's the composition of its two
+                // pairs'. It sets how much leaves (the share) and how it
+                // leaves (each plane's rate).
+                let rho = if mass(&core.total()).is_zero() {
+                    ratio(0, 1)
+                } else {
+                    mass(&core.throat) / mass(&core.total())
+                };
+                let twist_rates = [twist_t[0].clone(), twist_t[1].clone(), twist_t[2].clone()];
+                let planes_p = crate::torsion::pair_pressures(&twist_rates, &rho)
+                    .and_then(|pairs| crate::torsion::plane_pressures(&pairs));
                 let ledger_r = if home {
                     ledger_u.clone()
                 } else {
@@ -1986,6 +2001,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         continue;
                     }
                     let s = ratio(1, 2) * c.clone() / (c.clone() + base.clone());
+                    let s = planes_p
+                        .as_ref()
+                        .and_then(|pl| crate::torsion::released_share(&s, pl))
+                        .map(|v| v.min(ratio(1, 1)))
+                        .unwrap_or(s);
                     let take = crate::pulse::nucleus(&(a.clone() * s)).min(a.clone());
                     if take <= ratio(0, 1) {
                         continue;
@@ -2007,15 +2027,38 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     if let Some(x) = core.throat.get_mut(&k) {
                         *x -= take.clone();
                     }
+                    let spins: Vec<Ratio> = {
+                        // Each plane's rate taken with its plane's pressure,
+                        // `x_k ⊕ P_k`, its spin following at its reach.
+                        let base_spins = crate::flows::Mote::spins_of(&ell, &lead);
+                        match planes_p.as_ref() {
+                            Some(pl) => base_spins
+                                .iter()
+                                .enumerate()
+                                .map(|(kp, l)| {
+                                    let x = twist_t[kp].clone();
+                                    match crate::ring::compose(&x, &pl[kp]) {
+                                        Some(x2) if !x.is_zero() => {
+                                            crate::ring::grain(&(l.clone() * x2 / x))
+                                        }
+                                        _ => l.clone(),
+                                    }
+                                })
+                                .collect(),
+                            None => base_spins,
+                        }
+                    };
+                    // The reservoir pays the spin it actually leaves with.
+                    let given = spins.iter().fold(ratio(0, 1), |a, l| a + l.clone());
                     if !ledger_r.is_zero() {
-                        core.reservoir -= take.clone() * w.clone() / ledger_r.clone() * ell.clone();
+                        core.reservoir -= take.clone() * w.clone() / ledger_r.clone() * given;
                     }
                     released.0 += 1;
                     released.1 += take.clone() * w / unit.clone();
                     core.flows.push(crate::flows::Mote {
                         key: k,
                         amount: take,
-                        spins: crate::flows::Mote::spins_of(&ell, &lead),
+                        spins: spins.clone(),
                         ell_orth: ratio(0, 1),
                         phase,
                         agitation: ratio(0, 1),
