@@ -133,6 +133,7 @@ fn book_outflow(
     m: &Ratio,
     at: &Ratio,
     unit: &Ratio,
+    galaxy: &Ratio,
     medium_spin: &mut Ratio,
     identity: &mut Vec<(&'static str, Ratio)>,
 ) {
@@ -141,6 +142,11 @@ fn book_outflow(
     if after.is_zero() || m.is_zero() || unit.is_zero() {
         return;
     }
+    // Its unit dilates as its holding falls from `W + m` to `W` (register
+    // K1): every spin it holds re-expressed in the new unit, the grain's loss
+    // to the galaxy's medium.
+    *medium_spin +=
+        dilate_system(sys, &(after.clone() + m.clone()), &-m.clone(), galaxy) / unit.clone();
     let whole = after.clone() + m.clone();
     let before = whole * sys.ell.clone();
     let exact = (before.clone() - m.clone() * at.clone()) / after.clone();
@@ -1097,6 +1103,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         &mass(&out),
                         &at,
                         &unit,
+                        &g_before,
                         &mut core.medium_spin,
                         &mut identity,
                     );
@@ -1212,6 +1219,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         &mass(&escaped),
                         &at,
                         &unit,
+                        &g_before,
                         &mut core.medium_spin,
                         &mut identity,
                     );
@@ -1431,6 +1439,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &mass(&back),
                 &at,
                 &unit,
+                &g_before,
                 &mut core.medium_spin,
                 &mut identity,
             );
@@ -1658,6 +1667,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     &mass(&escaped),
                     &at,
                     &unit,
+                    &g_before,
                     &mut core.medium_spin,
                     &mut identity,
                 );
