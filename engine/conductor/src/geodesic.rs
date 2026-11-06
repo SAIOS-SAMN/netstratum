@@ -1,23 +1,18 @@
 // AI-GENERATED CONTENT — see DISCLAIMER.md.
 //
-//! The geodesic between two orientations, as a certified reading (docs/117
-//! §11; operator 2026-11-05).
+//! Certified trigonometry of degrees, for rendering readings on observation
+//! (docs/117 §11.6; operator 2026-11-06).
 //!
 //! - **Degrees are the state** (docs/117 §11.1): rotation angles on the
 //!   round Clifford turning planes, exact rationals in degrees, the plane
 //!   named.
-//! - **A body's orientation is one rotor on S³**, built from its three
-//!   turnings on `e₂₃`, `e₃₁`, `e₁₂` in cyclic order: the turnings about
-//!   axes 1, 2 and 3. Each turning is the half-angle rotor
-//!   `cos(θ/2) + sin(θ/2)·B_k`; they are composed in the fixed order `e₂₃`
-//!   first, then `e₃₁`, then `e₁₂`, `R = R₁₂·R₃₁·R₂₃` (a vector turns as
-//!   `x ↦ R x R̃`, the rightmost factor acting first). The planes' rotors do
-//!   not commute, so the order is part of the orientation's meaning.
-//! - **The geodesic between two bodies is a certified reading**: exact
-//!   rational bounds, never a float, never a stored real (docs/78 law 11,
-//!   [`Span`]). It is the angle `Ω` of the relative rotation `R̃_a·R_b`, read
-//!   as `cos Ω = 2·cos²(Ω/2) − 1`, `cos(Ω/2) = |⟨R̃_a R_b⟩₀|`. That square is
-//!   the reading of a bounded interval, never state.
+//! - **Separations are read by isoclinic degrees** (docs/117 §11.6), exact,
+//!   never through a cosine or a square. This module renders a rotor's
+//!   readings (π, cos and sin of degrees, the rotor of three turnings) as
+//!   certified spans when one is asked for on observation; no law acts on it.
+//! - **A rotor of three turnings** on `e₂₃`, `e₃₁`, `e₁₂` (cyclic), each the
+//!   half-angle rotor `cos(θ/2) + sin(θ/2)·B_k`, composed in the fixed order
+//!   `R = R₁₂·R₃₁·R₂₃`; the planes' rotors do not commute.
 //!
 //! The trigonometric values are spans: π by Machin's formula and cos, sin by
 //! their Taylor series, each an alternating series whose partial sums
@@ -310,47 +305,10 @@ fn rotor_within(turns: &[Ratio; 3], pi: &Span, eps: &Ratio) -> Rotor {
         })
 }
 
-/// `cos Ω` of the relative rotation `R̃_a·R_b` between two rotors, as a span:
-/// `cos(Ω/2) = |⟨R̃_a R_b⟩₀|`, `cos Ω = 2·cos²(Ω/2) − 1`, the square the
-/// reading of the bounded span, met with `[−1, 1]` where the value lies.
-pub fn between(a: &Rotor, b: &Rotor) -> Span {
-    let w = a.reverse().mul(b).scalar;
-    let half = match (w.lo().is_negative(), w.hi().is_negative()) {
-        (false, _) => w,
-        (true, true) => neg(&w),
-        (true, false) => Span::between(Ratio::zero(), w.lo().abs().max(w.hi().clone())),
-    };
-    let sq = Span::between(half.lo() * half.lo(), half.hi() * half.hi());
-    let c = Span::between(
-        ratio(2, 1) * sq.lo() - Ratio::one(),
-        ratio(2, 1) * sq.hi() - Ratio::one(),
-    );
-    c.meet(&Span::between(ratio(-1, 1), Ratio::one()))
-        .unwrap_or(c)
-}
-
-/// Certified bounds of `cos Ω`, `Ω` the angle between the orientations `a`
-/// and `b` (each three plane turnings in degrees, [`rotor_of`]), narrower
-/// than `60⁻ᵈᵉᵖᵗʰ`: the rotors are read deeper, one sexagesimal place at a
-/// time, until the reading's width is under it (stopped by the width, never
-/// by a fixed depth).
-pub fn geodesic(a: [Ratio; 3], b: [Ratio; 3], depth: u32) -> (Ratio, Ratio) {
-    let want = grain(depth);
-    let mut d = depth + 1;
-    loop {
-        let eps = grain(d);
-        let (pi, _) = pi_within(&(&eps / ratio(2, 1)));
-        let c = between(&rotor_within(&a, &pi, &eps), &rotor_within(&b, &pi, &eps));
-        if c.extent() < want {
-            return (c.lo().clone(), c.hi().clone());
-        }
-        d += 1;
-    }
-}
-
-/// The sexagesimal reading of a certified span at `depth`: when both bounds
-/// fall in one `60⁻ᵈᵉᵖᵗʰ` sector, that sector's lower bound, exact; None
-/// when the span straddles a sector boundary (the caller refines).
+/// The sexagesimal display of a certified span at `depth` (base 60 is
+/// display only; a law decides on the bound its caller states): when both
+/// bounds fall in one `60⁻ᵈᵉᵖᵗʰ` sector, that sector's lower bound; None when
+/// the span straddles a sector boundary.
 pub fn reading(bounds: &(Ratio, Ratio), depth: u32) -> Option<Ratio> {
     let lo = Sector::holding(&bounds.0, depth);
     let hi = Sector::holding(&bounds.1, depth);
@@ -479,50 +437,6 @@ mod tests {
     }
 
     #[test]
-    fn identical_orientations_are_at_no_angle() {
-        let a = [deg(10), ratio(-37, 3), deg(200)];
-        let g = geodesic(a.clone(), a, 4);
-        assert!(holds(&g, &Ratio::one()) && narrow(&g, 4));
-    }
-
-    #[test]
-    fn one_plane_apart_reads_that_angle() {
-        let half = ratio(1, 2);
-        let zero = Ratio::zero();
-        for k in 0..3 {
-            let a = [deg(10), deg(20), deg(30)];
-            let mut b = a.clone();
-            b[k] += deg(60);
-            let g = geodesic(a.clone(), b, 4);
-            assert!(holds(&g, &half) && narrow(&g, 4), "plane {k}");
-            let mut b = a.clone();
-            b[k] += deg(90);
-            let g = geodesic(a, b, 4);
-            assert!(holds(&g, &zero) && narrow(&g, 4), "plane {k}");
-        }
-    }
-
-    #[test]
-    fn the_geodesic_is_symmetric() {
-        let a = [deg(15), ratio(7, 2), deg(-80)];
-        let b = [deg(100), deg(33), ratio(1, 9)];
-        assert_eq!(geodesic(a.clone(), b.clone(), 3), geodesic(b, a, 3));
-    }
-
-    #[test]
-    fn plane_turnings_do_not_commute() {
-        let one_then_two = Rotor::plane(1, &deg(90), 5).mul(&Rotor::plane(0, &deg(90), 5));
-        let two_then_one = Rotor::plane(0, &deg(90), 5).mul(&Rotor::plane(1, &deg(90), 5));
-        let c = between(&one_then_two, &two_then_one);
-        // Not at no angle: cos Ω stands wholly below 1 (Ω = 120°, cos −½).
-        assert!(*c.hi() < Ratio::one());
-        assert!(c.contains(&ratio(-1, 2)));
-        // rotor_of's fixed order is the first.
-        let r = rotor_of([deg(90), deg(90), deg(0)], 5);
-        assert!(between(&r, &one_then_two).contains(&Ratio::one()));
-    }
-
-    #[test]
     fn a_reading_is_given_inside_one_sector_and_refused_across() {
         let (lo, hi) = pi_bounds(6);
         let r = reading(&(lo.clone(), hi.clone()), 3);
@@ -533,5 +447,19 @@ mod tests {
         let across = (&edge - ratio(1, 7200), &edge + ratio(1, 7200));
         assert_eq!(reading(&across, 1), None);
         assert_eq!(reading(&across, 0), Some(Ratio::zero()));
+    }
+
+    #[test]
+    fn plane_turnings_do_not_commute() {
+        // A quarter turn on e23 then on e31, against the reverse order: the
+        // rotors' bivector parts differ, by their certified bounds.
+        let q = deg(90);
+        let (a, b) = (Rotor::plane(0, &q, 6), Rotor::plane(1, &q, 6));
+        let (ab, ba) = (b.mul(&a), a.mul(&b));
+        let apart = |x: &Span, y: &Span| x.hi() < y.lo() || y.hi() < x.lo();
+        assert!(
+            (0..3).any(|k| apart(&ab.planes[k], &ba.planes[k])),
+            "the order is part of the rotor"
+        );
     }
 }
