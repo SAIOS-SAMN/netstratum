@@ -129,6 +129,23 @@ ledger closing; the identities; the carrier's widths.
    130 and 158). docs/97 §3 reads the open frames from the electrons, which
    is `L_e`; changing magnetism to it moves every push. To decide before the
    build.
+
+   **Derived 2026-11-07 from docs/97 §3–§4 and docs/104 §1.1.** The two
+   counts carry two roles the docs already assign:
+   - **The open frames** (magnetism, the push, the dipole's frames `(3Z − U,
+     U)`, and the ends a bond pairs) are `chem::unpaired`, read from
+     `atom(Q)`. docs/97 §4: "the atom, unpaired frames, hold and tightness:
+     read from `atom(Q)` as now". `atom(Q)` is the electrons' own harmonic
+     atom on S¹¹ (operators 2026-10-18, `cfe::almanac::atom`), so this is
+     the reading from the electrons that §3 asks for. It is not era 0's.
+   - **The lone ends `L_e`** of the convergence count the electrons' bound
+     share, `h = (F_e + L_e·in_step)/Q` (docs/104 §1.1), with R's amplitude
+     `κ_e` (docs/97 §3). They are the bound/free state, not the frames.
+   
+   Bonds therefore pair open frames `U`, and nothing in the code changes.
+   Open (issue #128): one set of electrons carries two lone counts that
+   differ at 1213 of 1495 weights; whether the two S¹¹ constructions must
+   agree is not decided by the docs.
 2. **Clusters that stay open.** `chem::closing` pairs every end, so every
    cluster is closed and bonds no further; larger matter would grow only by
    collections, not chemistry. Bonding a cluster that keeps open ends needs
