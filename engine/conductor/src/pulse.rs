@@ -338,6 +338,13 @@ pub struct Body {
     /// bounces have not yet released. Each bounce's tide releases its share
     /// onto the continuum; empty for every other body.
     pub throat: Manifest,
+    /// Its antipole (tag 30; docs/100 §8.2): per spatial plane, the spin its
+    /// disc's attractor moved off that plane, taken by the core with the
+    /// opposite sign (`Σ amount·w·ℓ_k`, extensive), so its matter's plane
+    /// spin and its antipole are constant per plane through the settle; the
+    /// release pays the twist it gives out of it. It sums to nothing over the
+    /// planes. Empty for a body that holds none.
+    pub antipole: Vec<Ratio>,
     /// Whether its orbit is solid (tag 26; docs/96 §8.2): a standing world
     /// once round since it stood (`formation::solid`). A world stays solid.
     pub solid: bool,
@@ -994,6 +1001,7 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
         heat: ratio(0, 1),
         tilt: Vec::new(),
         throat: manifest.clone(),
+        antipole: Vec::new(),
     };
     let densest = manifest
         .keys()
@@ -1107,14 +1115,19 @@ pub fn ocean_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
     ))
 }
 
-pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>, Collective) {
+pub fn orbit_galaxies(
+    u: &mut Universe,
+) -> (crate::enfold::Cross, Option<Ratio>, Collective, Vec<Vec<Ratio>>) {
     let mut cross = crate::enfold::Cross::default();
     let mut collective = Collective::default();
     let whole = mass(&u.total());
     if whole.is_zero() {
-        return (cross, None, collective);
+        return (cross, None, collective, Vec::new());
     }
     let bells = ratio(u.t_u as i64, 4);
+    // The ocean's perturbations this bounce (docs/111 §4.1): each mote's
+    // displacement by the universal bounce's torque, read once it has moved.
+    let mut ocean_moves: Vec<Vec<Ratio>> = Vec::new();
     let planes = crate::flows::PLANES;
     let mut order: Vec<usize> = (0..u.cores.len()).collect();
     order.sort_by(|&a, &b| u.cores[a].ell.cmp(&u.cores[b].ell).then(a.cmp(&b)));
@@ -1302,6 +1315,7 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
                 })
             };
             let before = ledger(&u.ocean);
+            let phases_was: Vec<Vec<Ratio>> = u.ocean.iter().map(|x| x.phase.clone()).collect();
             crate::profile::mark("orbit:ocean");
             let (given, _) = crate::flows::torque(
                 &mut u.ocean,
@@ -1311,6 +1325,20 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
                 &ledger_u,
                 &mut cross,
             );
+            if phases_was.len() == u.ocean.len() {
+                ocean_moves = u
+                    .ocean
+                    .iter()
+                    .zip(&phases_was)
+                    .map(|(x, was)| {
+                        x.phase
+                            .iter()
+                            .zip(was)
+                            .map(|(a, b)| crate::flows::signed(&(a.clone() - b.clone())))
+                            .collect()
+                    })
+                    .collect();
+            }
             let moved = ledger(&u.ocean) - before;
             if let Some(home) = u.cores.iter_mut().find(|c| is_home(c)) {
                 let was = home.reservoir.clone();
@@ -1350,7 +1378,338 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
         }
         inside += ratio(2, 1) * share;
     }
-    (cross, identity, collective)
+    (cross, identity, collective, ocean_moves)
+}
+
+/// One plane's pinch reading of a collection (docs/111 §5.4), recorded by
+/// the step that read it: its mean spin's reach `R̄`, the hold inside it but
+/// itself, its pinch `d = R̄·H_b/(H_b + H_inside)`, and its widest member's
+/// extent from `R̄`, `max |R_i ± d_i − R̄|` outward and back.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct PinchReading {
+    pub reach: Ratio,
+    pub inside: Ratio,
+    pub pinch: Ratio,
+    pub widest: Ratio,
+}
+
+/// One collection's reading: its members, its holding `H_b` (a share of
+/// the whole), each orbit plane's pinch, and whether it held its reach.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct GroupReading {
+    pub members: usize,
+    pub holding: Ratio,
+    pub planes: [PinchReading; 2],
+    pub self_held: bool,
+}
+
+/// The formation step's own record (MU-CONCORDANCE 4.4: a step carries its
+/// derivation): the candidates it read, every collection of two or more with
+/// its pinch on each plane and its verdict, the galaxies formed, and the
+/// grain's remainder it gave the singularity's reservoir.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Formation {
+    pub candidates: usize,
+    pub groups: Vec<GroupReading>,
+    pub formed: usize,
+    pub rest: Ratio,
+}
+
+/// The pinch judged on one plane from its readings alone: the reach `R̄`,
+/// the hold inside it, the collection's holding, and each member's (reach,
+/// own extent). The step and any reconstruction of it read the verdict by
+/// this one function.
+pub fn judge(reach: Ratio, inside: Ratio, holding: &Ratio, members: &[(Ratio, Ratio)]) -> PinchReading {
+    let pinch = crate::ring::pinch(&reach, holding, &inside);
+    let widest = members.iter().fold(ratio(0, 1), |w, (ri, di)| {
+        let out = ri.clone() + di.clone() - reach.clone();
+        let back = reach.clone() - (ri.clone() - di.clone());
+        w.max(out).max(back)
+    });
+    PinchReading {
+        reach,
+        inside,
+        pinch,
+        widest,
+    }
+}
+
+/// The galaxies form (docs/111 §5.4): where escaped collections hold their
+/// own reach about the universal core, read live in one universal enclosure
+/// (the singularity's state 1, every body at its spin about the universal
+/// core, `ℓ_u`, by its share of the whole; a galaxy's core by its state and
+/// its matter). The escaped matter is the ocean's motes; a collection is a
+/// connected set of their bonds (`flows::collections`, docs/111 §4.2: on one
+/// held hemisphere, moved together by this bounce's torque, both with open
+/// frames), read from the bounce's perturbations `moves`, never by lengths.
+/// Each member stands at its reach `R = ℓ_u/H(<ℓ_u)` with its own extent
+/// `d = R·e` about it on both orbit planes (`e` its pinch share). A
+/// collection whose extent lies within its pinch, `|R_i ± d_i − R̄| ≤
+/// R̄·H_b/(H_b + H_inside)` (`judge`, its holding `H_b`, `H_inside` what
+/// stands inside its mean spin but itself), is self-held: it becomes a core,
+/// a branch of the universal core at its own mean spin `ℓ_g`
+/// (holding-weighted, on the grain), and each member is re-origined into it
+/// by the arrival map `ℓ = (ℓ_u − ℓ_g)/f` (`f` its share of the whole), so
+/// `Σ m·ℓ_u` is kept with the grain's remainder to the singularity's
+/// reservoir. The zero galaxy's outer medium is not a candidate: its
+/// perturbations are not read at the universal bounce. Returns the step's
+/// own record (`Formation`).
+pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Formation {
+    use num_traits::Signed as _;
+    let whole = mass(&u.total());
+    let Some(h) = u.cores.iter().position(is_home) else {
+        return Formation::default();
+    };
+    if whole.is_zero() {
+        return Formation::default();
+    }
+    let share = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
+    let f_home = mass(&u.cores[h].total()) / whole.clone();
+    // Every candidate, an ocean mote: (in the home, its index, its universal
+    // orbit and circulation spins).
+    let cand: Vec<(bool, usize, Ratio, Ratio)> = u
+        .ocean
+        .iter()
+        .enumerate()
+        .map(|(j, x)| (false, j, x.ell_o(), x.ell_orth.clone()))
+        .collect();
+    if cand.len() < 2 {
+        return Formation::default();
+    }
+    let mote = |c: &(bool, usize, Ratio, Ratio)| {
+        if c.0 {
+            &u.cores[h].flows[c.1]
+        } else {
+            &u.ocean[c.1]
+        }
+    };
+    // The one universal enclosure, in `ℓ_u`.
+    let enc = crate::flows::Enclosed::new(
+        ratio(1, 1),
+        u.cores[h]
+            .flows
+            .iter()
+            .map(|x| {
+                (
+                    crate::breath::to_universe(&x.ell_o(), &u.cores[h].ell, &f_home),
+                    share(x),
+                )
+            })
+            .chain(u.ocean.iter().map(|x| (x.ell_o(), share(x))))
+            .chain(
+                u.cores
+                    .iter()
+                    .filter(|c| !is_home(c))
+                    .map(|c| (c.ell.clone(), ratio(2, 1) * mass(&c.total()) / whole.clone())),
+            )
+            .collect(),
+    );
+    // Each candidate's reach and own extent on both orbit planes.
+    let place = |ell: &Ratio, m: &Ratio| {
+        let l = ell.abs();
+        let r = enc.reach(&l).0;
+        let e = crate::ring::pinch_share(m, &enc.hold(&l));
+        (r.clone(), r * e)
+    };
+    let read: Vec<[(Ratio, Ratio); 2]> = cand
+        .iter()
+        .map(|c| {
+            let m = share(mote(c));
+            [place(&c.2, &m), place(&c.3, &m)]
+        })
+        .collect();
+    // Its collections, read from this bounce's perturbations (the indices of
+    // the candidates are the ocean's).
+    let groups: Vec<Vec<usize>> = if moves.len() == u.ocean.len() {
+        crate::flows::collections(&u.ocean, moves)
+    } else {
+        Vec::new()
+    }
+    .into_iter()
+    .filter(|g| g.len() >= 2)
+    .collect();
+    // The pinch on each, read and recorded: self-held where every member's
+    // extent lies within it on both planes.
+    let mut record = Formation {
+        candidates: cand.len(),
+        ..Formation::default()
+    };
+    let mut held: Vec<Vec<usize>> = Vec::new();
+    for g in groups {
+        let hb = g.iter().fold(ratio(0, 1), |s, &i| s + share(mote(&cand[i])));
+        if hb.is_zero() {
+            continue;
+        }
+        let plane = |k: usize| {
+            let spin = |i: usize| if k == 0 { cand[i].2.abs() } else { cand[i].3.abs() };
+            let mean = g
+                .iter()
+                .fold(ratio(0, 1), |s, &i| s + share(mote(&cand[i])) * spin(i))
+                / hb.clone();
+            let own_inside = g
+                .iter()
+                .filter(|&&i| spin(i) < mean)
+                .fold(ratio(0, 1), |s, &i| s + share(mote(&cand[i])));
+            let reach = enc.reach(&mean).0;
+            let members: Vec<(Ratio, Ratio)> = g.iter().map(|&i| read[i][k].clone()).collect();
+            judge(reach, enc.hold(&mean) - own_inside, &hb, &members)
+        };
+        let planes = [plane(0), plane(1)];
+        let self_held = planes.iter().all(|p| p.widest <= p.pinch);
+        if self_held {
+            held.push(g.clone());
+        }
+        record.groups.push(GroupReading {
+            members: g.len(),
+            holding: hb,
+            planes,
+            self_held,
+        });
+    }
+    if held.is_empty() {
+        return record;
+    }
+    // Each self-held collection becomes a core: its members leave the home
+    // and the ocean, re-origined into it.
+    let mut next = u.cores.iter().filter_map(|c| c.path.first().copied()).max().unwrap_or(0) + 1;
+    let mut take_home: std::collections::BTreeSet<usize> = std::collections::BTreeSet::new();
+    let mut take_ocean: std::collections::BTreeSet<usize> = std::collections::BTreeSet::new();
+    let mut born: Vec<Body> = Vec::new();
+    let mut rest = ratio(0, 1);
+    for g in &held {
+        let members: Vec<(crate::flows::Mote, Ratio, Ratio)> = g
+            .iter()
+            .map(|&i| (mote(&cand[i]).clone(), cand[i].2.clone(), cand[i].3.clone()))
+            .collect();
+        let m: Vec<Ratio> = members.iter().map(|(x, _, _)| share(x)).collect();
+        let hb = m.iter().fold(ratio(0, 1), |s, x| s + x.clone());
+        let mean = |f: &dyn Fn(usize) -> Ratio| {
+            (0..members.len()).fold(ratio(0, 1), |s, i| s + m[i].clone() * f(i)) / hb.clone()
+        };
+        let ell_g = crate::ring::grain(&mean(&|i| members[i].1.clone()));
+        let orth_g = crate::ring::grain(&mean(&|i| members[i].2.clone()));
+        let before = (0..members.len()).fold(ratio(0, 1), |s, i| {
+            s + m[i].clone() * (members[i].1.clone() + members[i].2.clone())
+        });
+        let mut flows = Vec::with_capacity(members.len());
+        let mut after = hb.clone() * (ell_g.clone() + orth_g.clone());
+        let mut grains = Manifest::new();
+        for (i, (x, lu, ou)) in members.iter().enumerate() {
+            let ell = crate::breath::from_universe(lu, &ell_g, &hb).map(|l| crate::ring::grain(&l));
+            let orth =
+                crate::breath::from_universe(ou, &orth_g, &hb).map(|l| crate::ring::grain(&l));
+            let (Some(ell), Some(orth)) = (ell, orth) else {
+                continue;
+            };
+            after += m[i].clone() * hb.clone() * (ell.clone() + orth.clone());
+            *grains.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+            flows.push(crate::flows::Mote {
+                spins: crate::flows::Mote::spins_of(&ell, &x.tilt()),
+                ell_orth: orth,
+                ..x.clone()
+            });
+        }
+        // `Σ m·ℓ_u = H_b·ℓ_g + f·Σ m·ℓ`, with `f = H_b`: what the grain
+        // leaves goes to the singularity's reservoir.
+        rest += before - after;
+        let planes = crate::flows::PLANES;
+        let phase: Vec<Ratio> = (0..planes)
+            .map(|k| {
+                crate::flows::circle_mean(
+                    &members
+                        .iter()
+                        .zip(&m)
+                        .map(|((x, _, _), w)| {
+                            (w.clone(), x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))
+                        })
+                        .collect::<Vec<_>>(),
+                )
+            })
+            .collect();
+        let tilt: Vec<Ratio> = (0..crate::flows::SPACE.len())
+            .map(|k| {
+                let t = |i: usize| {
+                    crate::flows::tilt_of(&members[i].0.tilt())
+                        .get(k)
+                        .cloned()
+                        .unwrap_or_else(|| ratio(0, 1))
+                };
+                mean(&t)
+            })
+            .collect();
+        for &i in g {
+            if cand[i].0 {
+                take_home.insert(cand[i].1);
+            } else {
+                take_ocean.insert(cand[i].1);
+            }
+        }
+        born.push(Body {
+            solid: false,
+            coupled: None,
+            ell_orth: orth_g,
+            path: vec![next],
+            radius: ratio(0, 1),
+            period: ratio(0, 1),
+            kept: Manifest::new(),
+            satellites: Vec::new(),
+            medium: grains,
+            ell: ell_g,
+            medium_spin: ratio(0, 1),
+            gas: Vec::new(),
+            born: bell,
+            state: ratio(0, 1),
+            flows,
+            reservoir: ratio(0, 1),
+            turning: ratio(0, 1),
+            phase,
+            load: ratio(0, 1),
+            bell: Vec::new(),
+            remnant: false,
+            heat: ratio(0, 1),
+            tilt,
+            throat: Manifest::new(),
+            antipole: Vec::new(),
+        });
+        next += 1;
+    }
+    // The members' grains leave the home's books (its medium first, then
+    // what it kept) and the ocean.
+    let home = &mut u.cores[h];
+    let gone: Vec<crate::flows::Mote> = take_home
+        .iter()
+        .map(|&j| home.flows[j].clone())
+        .collect();
+    let mut j = 0;
+    home.flows.retain(|_| {
+        let go = take_home.contains(&j);
+        j += 1;
+        !go
+    });
+    for x in &gone {
+        let mut left = x.amount.clone();
+        for book in [&mut home.medium, &mut home.kept] {
+            if let Some(a) = book.get_mut(&x.key) {
+                let t = left.clone().min(a.clone());
+                *a -= t.clone();
+                left -= t;
+                if a.is_zero() {
+                    book.remove(&x.key);
+                }
+            }
+        }
+    }
+    home.reservoir += rest.clone();
+    let mut j = 0;
+    u.ocean.retain(|_| {
+        let go = take_ocean.contains(&j);
+        j += 1;
+        !go
+    });
+    record.formed = born.len();
+    record.rest = rest;
+    u.cores.extend(born);
+    record
 }
 
 /// The firmament's collective read at one bounce (docs/111 §4): its motes,
@@ -1718,6 +2077,13 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         }
         cfe::tlv::put(22, &w, out);
     }
+    if !b.antipole.is_empty() {
+        let mut w = vec![b.antipole.len() as u8];
+        for r in &b.antipole {
+            cfe::ratio::encode(r, &mut w);
+        }
+        cfe::tlv::put(30, &w, out);
+    }
     if b.solid {
         cfe::tlv::put(26, &[1], out);
     }
@@ -1852,6 +2218,7 @@ fn get_body(v: &[u8]) -> Option<Body> {
         heat: ratio(0, 1),
         tilt: Vec::new(),
         throat: Default::default(),
+        antipole: Vec::new(),
     })
 }
 
@@ -1888,7 +2255,7 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
         at += used;
         lever.push(x);
     }
-    // Its tilt, where the tape carries one (docs/96 step 1).
+    // Its tilt, where the pulse file carries one (docs/96 step 1).
     let mut tilt = Vec::new();
     if let Some(&t) = v.get(at) {
         at += 1;
@@ -1997,7 +2364,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             27 => flat.last_mut()?.coupled = Some(v.try_into().ok()?),
             18 => flat.last_mut()?.heat = cfe::ratio::decode(v)?.0,
             23 => flat.last_mut()?.throat = get_manifest(v, &mut 0)?,
-            13 | 15 | 22 => {
+            13 | 15 | 22 | 30 => {
                 let n = *v.first()? as usize;
                 let mut at = 1;
                 let mut ph = Vec::with_capacity(n.min(16));
@@ -2009,6 +2376,7 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
                 match t {
                     13 => flat.last_mut()?.phase = ph,
                     15 => flat.last_mut()?.bell = ph,
+                    30 => flat.last_mut()?.antipole = ph,
                     _ => flat.last_mut()?.tilt = ph,
                 }
             }
@@ -2251,7 +2619,76 @@ mod tests {
     }
 
     #[test]
-    fn a_tape_with_no_period_is_refused() {
+    fn a_self_held_collection_forms_a_galaxy_and_keeps_its_books() {
+        // docs/111 §5.4: two bonded ocean motes at one spin hold their reach
+        // about the universal core (their pinch passes their extents); a mote
+        // bonded to none forms nothing. The grains and `Σ m·ℓ_u + reservoir` are kept.
+        let table: Manifest = [("W0001", 3000), ("W0004", 900), ("W0012", 40)]
+            .iter()
+            .map(|(k, a)| (crate::chem::Kind::parse(k).expect("a kind"), ratio(*a, 1)))
+            .collect();
+        let mut u = deploy(&table).expect("a universe");
+        let at = |ell: Ratio, amount: i64| crate::flows::Mote {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            amount: ratio(amount, 1),
+            spins: crate::flows::Mote::spins_of(&ell, &[]),
+            ell_orth: ratio(1, 7),
+            phase: vec![ratio(0, 1); crate::flows::PLANES],
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: true,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+        };
+        // The pair in step, moved together; the lone mote half a turn off.
+        let mut lone = at(ratio(50, 1), 30);
+        lone.phase = vec![ratio(1, 2); crate::flows::PLANES];
+        u.ocean = vec![at(ratio(5, 1), 60), at(ratio(5, 1), 40), lone];
+        let moves = vec![vec![ratio(1, 60); crate::flows::PLANES]; 3];
+        let whole = mass(&u.total());
+        let books = |u: &Universe| {
+            let w = mass(&u.total());
+            let m = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / w.clone();
+            let ocean = u
+                .ocean
+                .iter()
+                .fold(ratio(0, 1), |s, x| s + m(x) * (x.ell_o() + x.ell_orth.clone()));
+            u.cores.iter().fold(ocean, |s, c| {
+                let f = mass(&c.total()) / w.clone();
+                let own = if is_home(c) {
+                    c.reservoir.clone()
+                } else {
+                    f.clone() * (c.ell.clone() + c.ell_orth.clone())
+                };
+                c.flows.iter().fold(s + own, |s, x| {
+                    let lift = if is_home(c) { ratio(1, 1) } else { f.clone() };
+                    s + m(x) * lift * (x.ell_o() + x.ell_orth.clone())
+                })
+            })
+        };
+        let before = books(&u);
+        let record = form_galaxies(&mut u, 9, &moves);
+        assert_eq!(record.formed, 1, "the pair forms one galaxy");
+        // The record reconstructs its own verdict: each plane's pinch from
+        // its recorded reach, inside hold and holding, and the verdict from
+        // the pinch against the widest extent.
+        assert_eq!(record.groups.len(), 1, "the lone mote is no collection");
+        let g = &record.groups[0];
+        for p in &g.planes {
+            assert_eq!(p.pinch, crate::ring::pinch(&p.reach, &g.holding, &p.inside));
+        }
+        assert_eq!(g.self_held, g.planes.iter().all(|p| p.widest <= p.pinch));
+        assert_eq!(u.cores.len(), 2);
+        assert_eq!(u.ocean.len(), 1, "the lone mote flows on");
+        let g = &u.cores[1];
+        assert_eq!((g.path.clone(), g.born, g.flows.len()), (vec![1], 9, 2));
+        assert_eq!(g.ell, ratio(5, 1), "at its members' mean spin");
+        assert_eq!(mass(&u.total()), whole, "the grains kept");
+        assert_eq!(books(&u), before, "the spin books kept exactly");
+    }
+
+    #[test]
+    fn a_pulse_file_with_no_period_is_refused() {
         let table: Manifest = [("W0001", 3000), ("W0004", 900), ("W0012", 40)]
             .iter()
             .map(|(k, a)| (crate::chem::Kind::parse(k).expect("a kind"), ratio(*a, 1)))
@@ -2309,6 +2746,7 @@ mod tests {
             heat: ratio(0, 1),
             tilt: Vec::new(),
             throat: Default::default(),
+            antipole: Vec::new(),
         };
         let sys = Body {
             solid: false,
@@ -2339,6 +2777,7 @@ mod tests {
             heat: ratio(0, 1),
             tilt: Vec::new(),
             throat: Default::default(),
+            antipole: Vec::new(),
         };
         let core = Body {
             solid: false,
@@ -2373,6 +2812,7 @@ mod tests {
             heat: ratio(0, 1),
             tilt: Vec::new(),
             throat: Default::default(),
+            antipole: Vec::new(),
         };
         let u = Universe {
             cores: vec![core],

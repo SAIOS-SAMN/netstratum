@@ -735,6 +735,48 @@ fn main() {
             println!("COLLECTIVE — {} bounces read; the last: {} motes, {} collections ({} motes bonded, the largest {}), {} of the holding bonded; at most {} collections; the transmission τ {}; weights held {}..={}, the collective's mean {}", read.len(), last.motes, last.collections, last.bonded, last.largest, conductor::reading::sector(&share), most, conductor::reading::sector(&last.tau), last.lightest, last.heaviest, conductor::reading::sector(&last.mean));
         }
     }
+    // The galaxies' formation (docs/111 §5.4), from each bounce's own record:
+    // its candidates, its collections of two or more, the self-held and the
+    // formed, and the collection nearest its pinch (its widest extent over its
+    // pinch on its worse plane; at most 1 holds).
+    for (n, f) in events.iter().filter_map(|e| e.formation.as_ref()).enumerate() {
+        let worst = |g: &pulse::GroupReading| {
+            g.planes
+                .iter()
+                .map(|p| {
+                    if p.pinch == cfe::ratio::ratio(0, 1) {
+                        None
+                    } else {
+                        Some(p.widest.clone() / p.pinch.clone())
+                    }
+                })
+                .max_by(|a, b| match (a, b) {
+                    (None, None) => std::cmp::Ordering::Equal,
+                    (None, _) => std::cmp::Ordering::Greater,
+                    (_, None) => std::cmp::Ordering::Less,
+                    (Some(x), Some(y)) => x.cmp(y),
+                })
+                .flatten()
+        };
+        let nearest = f
+            .groups
+            .iter()
+            .filter_map(|g| worst(g).map(|w| (w, g.members)))
+            .min_by(|a, b| a.0.cmp(&b.0));
+        let held = f.groups.iter().filter(|g| g.self_held).count();
+        println!(
+            "FORMATION — bounce {}: {} candidates, {} collections of two or more, {} self-held, {} formed; the nearest its pinch {}",
+            n + 1,
+            f.candidates,
+            f.groups.len(),
+            held,
+            f.formed,
+            match nearest {
+                Some((w, m)) => format!("{} of its pinch ({} members)", conductor::reading::sector(&w), m),
+                None => "none".to_string(),
+            }
+        );
+    }
     // The tolls: every star that passed, struck on its own bell.
     {
         let tolls: Vec<&breath::Toll> = events.iter().flat_map(|e| e.tolls.iter()).collect();

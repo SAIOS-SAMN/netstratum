@@ -2089,6 +2089,7 @@ pub fn settle_system(
             heat,
             tilt,
             throat: Default::default(),
+            antipole: Vec::new(),
         };
         w.state = mass(&w.kept);
         // Its orbit state (docs/96 §8.2, docs/109 §4): a standing world once
