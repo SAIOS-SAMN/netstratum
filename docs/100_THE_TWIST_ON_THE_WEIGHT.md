@@ -227,9 +227,12 @@ from the twist, per plane, and keeps until its own turning relaxes it.
 - **Relaxed by its own turning:** each ring it keeps `turned/(d + turned)`
   of it (`turned = 2δ`, `d = 1 − δ` at its reach; the attractor law of
   `settle_disc`): torsion relaxes outward, read, never set.
-- **The torsion a body carries,** `τ = Σ_k |t_k − t̄_k|/2` (L1, half the
-  displacement of its plane shares, in `[0, 1]`): 0 settled, 1 wound wholly
-  into a plane its enclosure does not turn in.
+- **The torsion a body carries** is a bivector, one signed component per
+  pair of planes, `d_j ⊖ d_k` with `d = t − t̄` its lead over its
+  enclosure's plane (`crate::torsion`, E36); a body reads it on its
+  tightest-wound pair, `max |d_j ⊖ d_k|` (`torsion::tension`): 0 settled,
+  1 wound wholly into a plane its enclosure does not turn in. (The L1 sum
+  `Σ_k |t_k − t̄_k|/2` it replaced is retired.)
 - **Spin couples to it:** the winding's sense per plane is the twist's
   (forward on the continuum leg, backward on the vacuum leg, docs/98), so a
   Möbius pass reverses the helix and the torsion's sign with it.
@@ -327,7 +330,7 @@ given or taken. Nucleons conserved; weight unchanged; the table unchanged.
    owed). Witness: a
    released mote's tilt is the core's; it relaxes by the attractor law; the
    Möbius pass reverses its sense.
-5. **Quantum torsion** (§8, built: `flows::torsion`, `torsion_signed`): `τ` read from the lead; spin's sense by leg.
+5. **Quantum torsion** (§8, built: `torsion::tension`, `flows::torsion_signed`): `τ` read from the lead on its tightest-wound pair; spin's sense by leg.
    Witness: a settled mote reads 0; a Möbius pass reverses the winding's
    sign; relaxation by the attractor law, exact.
 6. **Twist in the bond and the fibres' transition** (§5, §9.2, built: the

@@ -1744,8 +1744,9 @@ pair of planes (`crate::torsion`).
 
 the flow-law difference of two planes' rates, signed and bounded. A fibre
 reads the pair it is wound tightest on, `max |d_j ⊖ d_k|` with `d = t − t̄`
-its lead over its enclosure's plane. The scalar `Σ_k |t_k − t̄_k|/2`
-(`flows::torsion`) still stands inside `torsion_signed` and the merge.
+its lead over its enclosure's plane. The scalar `Σ_k |t_k − t̄_k|/2` is
+retired: `flows::torsion_signed` and the band pairs' torsion read the
+tightest pair.
 
 **E37 · The Möbius pass.** Built. `flows::mobius`, `flows::torsion_signed`.
 
