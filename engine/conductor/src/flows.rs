@@ -422,27 +422,14 @@ pub fn in_step(a: &Ratio, b: &Ratio) -> Ratio {
     ratio(1, 1) - ratio(2, 1) * off(&(a.clone() - b.clone()))
 }
 
-/// Quantum torsion (docs/100 §8; the bounce is Einstein–Cartan, torsion
-/// couples to spin): the winding a quantum state keeps from the twist, its
-/// lead between planes against its enclosure's plane, `τ = Σ_k |t_k −
-/// t̄_k|/2` (L1, in `[0, 1]`: 0 settled, 1 wound wholly into a plane its
-/// enclosure does not turn in). Kept as the tilt, relaxed by the attractor
-/// law (`settle_disc`), never a scalar of its own.
-pub fn torsion(tilt: &[Ratio], plane: &[Ratio]) -> Ratio {
-    let (t, p) = (tilt_of(tilt), tilt_of(plane));
-    t.iter().zip(&p).fold(ratio(0, 1), |s, (a, b)| {
-        s + if a > b {
-            a.clone() - b.clone()
-        } else {
-            b.clone() - a.clone()
-        }
-    }) / ratio(2, 1)
-}
-
-/// Its sense (docs/100 §8): the winding turns with the route, forward on the
-/// continuum leg, backward on the vacuum leg, so a Möbius pass reverses it.
+/// Its torsion's sense (docs/100 §8): the tension on its tightest-wound
+/// pair of planes against its enclosure's plane (`torsion::tension`, the
+/// bivector read on the pair it is wound tightest on), turning with the
+/// route, forward on the continuum leg and backward on the vacuum leg, so a
+/// Möbius pass reverses it. Kept as the tilt, relaxed by the attractor law
+/// (`settle_disc`), never a scalar of its own.
 pub fn torsion_signed(x: &Mote, plane: &[Ratio]) -> Ratio {
-    let t = torsion(&x.tilt(), plane);
+    let t = crate::torsion::tension(&x.tilt(), plane);
     if x.vacuum {
         -t
     } else {
@@ -2370,7 +2357,9 @@ pub fn band_pairs(
                 .map(|(i, s)| (held_of(*i, s), motes[*i].ell_o(), motes[*i].tilt()))
                 .collect::<Vec<_>>(),
         );
-        let tau = m.clone() * torsion(&lead, plane);
+        // Its torsion, on the pair its lead is wound tightest on (the bivector
+        // read per pair, `torsion::tension`), by holding.
+        let tau = m.clone() * crate::torsion::tension(&lead, plane);
         // The nuclear layer ν: the members' holding by their nuclei's grip at
         // each one's held share `g = 1 − δ`. Summed exactly, its denominator
         // grows with every member (each δ its own), so it is read certified
@@ -3803,9 +3792,13 @@ mod passage_tests {
 
     #[test]
     fn torsion_is_the_lead_kept_it_relaxes_by_the_attractor_and_turns_with_the_leg() {
-        use super::{mobius, settle_disc, torsion, torsion_signed, Enclosed, Mote};
+        use super::{mobius, settle_disc, torsion_signed, Enclosed, Mote};
+        use crate::torsion::tension as torsion;
         let flat = vec![ratio(1, 1), ratio(0, 1), ratio(0, 1)];
-        // Settled in its enclosure's plane: none; wound wholly into another: 1.
+        // Settled in its enclosure's plane: none; wound wholly into another,
+        // the luminal bound on that pair: 1. Half wound: its leads (−½, ½, 0),
+        // the tightest pair (1,2) at `−½ ⊖ ½ = −4/5`, read 4/5, never the L1
+        // sum's ½.
         assert_eq!(torsion(&flat, &flat), ratio(0, 1));
         assert_eq!(
             torsion(&[ratio(0, 1), ratio(1, 1), ratio(0, 1)], &flat),
@@ -3813,7 +3806,7 @@ mod passage_tests {
         );
         assert_eq!(
             torsion(&[ratio(1, 2), ratio(1, 2), ratio(0, 1)], &flat),
-            ratio(1, 2)
+            ratio(4, 5)
         );
         // The Möbius pass reverses its sense.
         let mut x = Mote {

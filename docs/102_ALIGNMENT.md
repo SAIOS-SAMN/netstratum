@@ -51,7 +51,7 @@ earlier working tree; they are not in this repository's history.
 | **firmament** | the universal core's held cut: the heaviest and node-shell kinds | `Universe.firmament` (folds in, docs/101) |
 | **home** | the universal core's own disc, unique by its elements | core `[0]` today (rebuilt, docs/101) |
 | **twist** | a core's winding per plane, `½·t_k` a ring | `quantum::twist` |
-| **torsion τ** | the lead a body keeps between its planes against its enclosure's | `flows::torsion` |
+| **torsion τ** | the lead a body keeps between its planes against its enclosure's | `torsion::tension` (the tightest pair; the scalar `flows::torsion` retired) |
 | **nuclide** | weight `w = Q + Z` on the convergence; Q the open protons, Z the fibred neutrons, R the electrons' phase | `nuclides::*` |
 | **place** | a nuclide's turning, open degree, claimed and paired shares | `nuclides::place` |
 | **densest** | the founding's heaviest nuclide, where every climb stops | `Universe.densest` |

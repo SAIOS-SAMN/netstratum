@@ -85,7 +85,7 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
 ### 1.5 The work of 2026-10-26/27, against the same test
 
 - Reuses, no parallel: `quantum::twist` (the nested clock), `flows::step_with`
-  (`in_step`), `flows::torsion` (the tilt), `Universe.densest` (a reading), the
+  (`in_step`), `torsion::tension` (the tilt; was `flows::torsion`), `Universe.densest` (a reading), the
   symmetric luminal bound, the phase infall.
 - Parallel, to fold: `formation::echo_holds` (worlds: `m/(r + m) ≥ |Δω|`) is
   the crest's hold law one tier down written as a second function.
