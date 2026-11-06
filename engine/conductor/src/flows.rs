@@ -2577,28 +2577,27 @@ pub fn luminal(motes: &mut [Mote], enc: &Enclosed) -> usize {
 /// member's open frames by its field phase's in-step with the ring's mean,
 /// the field phase its circulation phase, frozen into the particle, so the
 /// rings' differential turning winds the field). Between neighbouring rings
-/// on a face (the inner at the lesser reach) two exchanges move turning
-/// outward by the exchange law (the outer gains `u·m_in`, the inner gives
-/// `u·m_out`, `u = share·(ℓ̄_out − ℓ̄_in)/(m_in + m_out)`, Σ m·ℓ unchanged):
-/// the pressure's, whichever ring presses harder expanding, its share
-/// `|P_in − P_out|/(P_in + P_out)`; and the field's (magnetic shear), its
-/// share `|M_in − M_out|/(M_in + M_out)` times the rings' gear contrast
-/// `|δ_in − δ_out|/(δ_in + δ_out)`. First degree, L1, saturating shares;
-/// every member of a ring moves alike. Returns (the pressure's spin moved,
-/// the field's spin moved, the spin moved around the shells' circles, and the
-/// number of shell planes that parted into cells), by holding.
+/// on a face (the inner at the lesser reach) the pressure's exchange moves
+/// turning by the exchange law (the outer gains `u·m_in`, the inner gives
+/// `u·m_out`, `u = share·(ℓ̄_out − ℓ̄_in)/(m_in + m_out)`, Σ m·ℓ unchanged),
+/// its share the hydrostatic balance restoring the pair, signed. The field
+/// between rings is the one dipole coupling (`shear`, register C18): no
+/// second, outward-only magnetic exchange stands here. Every member of a
+/// ring moves alike. Returns (the pressure's spin moved, the spin moved
+/// around the shells' circles, and the number of shell planes that parted
+/// into cells), by holding.
 pub fn fluid(
     motes: &mut [Mote],
     enc: &Enclosed,
     total: &Ratio,
-) -> (Ratio, Ratio, Ratio, usize) {
+) -> (Ratio, Ratio, usize) {
     if total.is_zero() || motes.len() < 2 {
-        return (ratio(0, 1), ratio(0, 1), ratio(0, 1), 0);
+        return (ratio(0, 1), ratio(0, 1), 0);
     }
     let rings_by_face = beads(motes, enc, total, false);
     let share = |x: &Mote| x.amount.clone() * weight(&x.key) / total.clone();
     let mut dl = vec![ratio(0, 1); motes.len()];
-    let (mut moved_p, mut moved_b) = (ratio(0, 1), ratio(0, 1));
+    let mut moved_p = ratio(0, 1);
     // docs/110: the spin the balance around the shells' circles moved, and
     // how many shell planes parted into two or more cells.
     let (mut moved_around, mut parted) = (ratio(0, 1), 0usize);
@@ -2692,22 +2691,11 @@ pub fn fluid(
             if gap <= ratio(0, 1) || m_ij.is_zero() {
                 continue;
             }
-            let contrast = |a: &Ratio, b: &Ratio| {
-                let s = a.clone() + b.clone();
-                if s.is_zero() {
-                    ratio(0, 1)
-                } else {
-                    (if a > b {
-                        a.clone() - b.clone()
-                    } else {
-                        b.clone() - a.clone()
-                    }) / s
-                }
-            };
             // S3 (docs/106 §2): the pressure's exchange is the hydrostatic
             // balance restoring the pair, signed (outward where the inner
-            // ring is over-pressured, inward where under), zero at balance;
-            // the field's (magnetic shear) stays the contrast, outward.
+            // ring is over-pressured, inward where under), zero at balance.
+            // The field's coupling between rings is the one dipole coupling
+            // (`shear`, register C18), never a second exchange here.
             let one = ratio(1, 1);
             let s_p = restoring(
                 &inn.4,
@@ -2715,8 +2703,8 @@ pub fn fluid(
                 &(one.clone() - inn.6.clone()),
                 &(one - out.6.clone()),
             );
-            let s_b = contrast(&inn.5, &out.5) * contrast(&inn.6, &out.6);
-            for (s, moved) in [(s_p, &mut moved_p), (s_b, &mut moved_b)] {
+            {
+                let (s, moved) = (s_p, &mut moved_p);
                 if s.is_zero() {
                     continue;
                 }
@@ -2866,7 +2854,7 @@ pub fn fluid(
             x.set_ell_o(ell);
         }
     }
-    (moved_p, moved_b, moved_around, parted)
+    (moved_p, moved_around, parted)
 }
 
 /// The hydrostatic balance across a ring pair (docs/106 §2, S3), as a signed
