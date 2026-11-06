@@ -234,6 +234,31 @@ from the twist, per plane, and keeps until its own turning relaxes it.
   (forward on the continuum leg, backward on the vacuum leg, docs/98), so a
   Möbius pass reverses the helix and the torsion's sign with it.
 
+### 8.1 The attractor's keep (E38)
+
+The keep is `turned/(drag + turned) = 2δ/(1 + δ)`, which is `1 − 1/D(δ)`
+with `D` LAW-DILATION (`flows::attractor_keep`): ⅔ at the throat, where
+`D(½) = 3`.
+
+### 8.2 The antipole (E39)
+
+Each body keeps its own share `1 − 1/D(δ_i)`, so the settle moves spin
+between the planes: `ΔS_k`, with `Σ_k ΔS_k = 0` because each tilt is a
+partition of one. The core takes what moves with the opposite sign,
+`A_k′ = A_k − ΔS_k` (`Body.antipole`, tag 30), so `S_k + A_k` is constant on
+every plane through the settle. The breath books it as the identity
+`antipole`, the greatest residual over the planes.
+
+### 8.3 The winding returned (E39)
+
+The release reads the core's twist as its wound plane, `t_k + A_k/ΣS`, which
+sums to one. A parcel leaves on that plane, its rates composed with the
+twist's pressure (`crate::torsion`). The twist it carries off the plane,
+`d_k = s_k − t_k·Σs`, comes out of the antipole, `A_k −= amount·w·d_k`. The
+settle winds the core and the release unwinds it. Whether the two stand at
+a torsion `τ* = w·(D(δ) − 1)` (`w` the winding a ring) is open: it is read from the
+antipole per plane, not yet derived.
+
 ## 9. Sub-atomic phase transitions
 
 A phase transition is a state crossing a hemisphere boundary (a single

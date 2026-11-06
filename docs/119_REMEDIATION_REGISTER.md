@@ -95,7 +95,7 @@ inverse (S2 unless marked):**
 
 | id | where | finding | remediation |
 |---|---|---|---|
-| B1 | pulse.rs:1005 | No law ever creates a galaxy: only the founding makes a core (the home), so every non-home branch (galaxy orbits, tides, galaxy clocks) is dead in a fresh universe. Every read so far happened inside the home galaxy | Derive and build galaxy formation from released matter (issue #7), or state that one galaxy is the scope |
+| B1 | pulse.rs:1005 | No law ever creates a galaxy: only the founding makes a core (the home), so every non-home branch (galaxy orbits, tides, galaxy clocks) is dead in a fresh universe. Every read so far happened inside the home galaxy | Derive and build galaxy formation from released matter (issue #7), or state that one galaxy is the scope **Built**: `pulse::form_galaxies` (docs/111 §5.4), the ocean's collections by the bond law, the pinch per plane, its own record. Read: no ocean collection holds its pinch in a 2^40 founding (nearest ≈ `3·60⁹` of it) |
 | B2 | breath.rs:556-570; ocean.rs:69-80 | The ocean never lands: the home's reach is 0, so its swing is `(0, 0)`; matter exiting to the ocean never returns | Landing on the plane state (§A12), or a home swing derived from its own reach |
 | B3 | formation.rs:1715-1716, 2078 | `settle_system` clears a system's motes and writes back only a manifest: the spray, captured motes, birth discs, warming and residue shifts lose their state at each settle | Keep the system's motes through the settle. **done (#66)**: each mote read with its own state; the belts written back as motes |
 | B4 | breath.rs:1341-1343 vs 1036, 1129, 1562; 1305, 1365; 1048-1078 | Spin books disagree: the slip shed books twice or the other three book too little; decohered and spent stars credit spin to the medium while their motes also carry it; an emptied remnant credits nothing | One outflow book; an identity on every passing path. **done (#67)**: the slip shed booked once; a passing credits the medium only what its motes and worlds do not carry (`carried_spin`). The decohered, spent and emptied paths are not yet exercised by a read |
@@ -106,7 +106,7 @@ inverse (S2 unless marked):**
 | B9 | breath.rs:1433 vs formation.rs:441 | Two starlight laws: live light is `made·rung_light(z)`; `burn`'s own light feeds only `system()` and printouts | One Derived in docs/122: the burn's bond energy into the star's heat, its starlight its emission. Not built |
 | B10 | **done (#58)** life.rs:205 | `chem::closing(a.z, …)` passes protons where weights are expected | Pass weights |
 | B11 | flows.rs:1191 | `toward_rest` gets the swung reach and the stored `ell_o`: before and after are different quantities | One reach |
-| B12 | **done (#58)** pulse.rs:2037; breath.rs:484 | A tape with `t_u = 0` loops forever | Refuse it on read |
+| B12 | **done (#58)** pulse.rs:2037; breath.rs:484 | A pulse file with `t_u = 0` loops forever | Refuse it on read |
 | B13 | Body.load; breath.rs:2701 | `load` is read in the period law and never set by a law (always 0) | Derive its writer or retire it **done (#72)**: written in the settle, the worlds' drag `Σ m·(1 − δ)` (the one face law's drag) in the system's units. The period it stretches feeds readings only (the enclosure's turn, seating, motion), so the breath's read is unchanged |
 | B14 | pulse.rs:2047-2056 | The legacy tag-19 read counts the firmament twice until the next cut | Retire the legacy read (§H, superseded layouts). **done (#64)**: tags 2 and 19 refused |
 | B15 | formation.rs:2079-2086 | `read.residual` is zero by construction: a tautology, not a witness | Witness the books from both sides. **done (#68)**: the input partition of every mote and world against the spin before, and the matter identity (held after + escaped = held before), IDENTITY system and settle matter |
@@ -190,7 +190,7 @@ inverse (S2 unless marked):**
 | E14 | nuclides `grip`, `survival`, captures, `release`; breath.rs:1274-1277, 1308-1311 | a pulse phase `p` | a held share |
 | E15 | formation `bond`, `burn`, `heart_cut`, `collapse` docs | old laws (no τ, ν; `3Z_product`; cumulative hold; "smallest" vs "largest") | the current laws |
 | E16 | breath.rs:5-27, 495-496, 769-773, 1003-1004, 1165-1167, 1256-1258, 640-641, 1987-1988, 2210-2212 | the module header's shedding and compression; phases advance by the clock; infall loop ½; spin by the square; spin-down covers outflow | none of these as stated |
-| E17 | pulse.rs:16-17, 1053-1067, 1732-1734, 291, 329 | era-0 tiering; the tape's tags; state and heat zero for other bodies | stale |
+| E17 | pulse.rs:16-17, 1053-1067, 1732-1734, 291, 329 | era-0 tiering; the pulse file's tags; state and heat zero for other bodies | stale |
 | E18 | ocean.rs:11-21; places.rs:13-14; recycle.rs:24-25; life.rs:21; motion.rs ("nothing is stepped") | retired crests; distance by route; peel cost at z 67, 106; mass by A = 2Z | stale |
 | E19 | Cargo.toml | flows reads Mycelium's `physics::source` | no such call |
 | E20 | Event fields `impacts`, `grown.1`, `fates.2`/`.3`, `weights[0]`/`[1]`; `Write::Parallel` | reported | always zero; never built |

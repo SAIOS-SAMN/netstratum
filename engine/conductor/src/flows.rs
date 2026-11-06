@@ -24,7 +24,7 @@
 //! - **The spin ledger**: every Δℓ given to a mote of holding m is −m·Δℓ to
 //!   its core's turning reservoir, so `Σ m·ℓ + reservoir` is exact.
 //! - **The cut is a reading**: a mote's held share is the part of its
-//!   dispersal band (`R(1 ± p)`) within the throat, in both planes,
+//!   own extent (`R(1 ± e)`, `e` its pinch share) within the throat, in both planes,
 //!   `f_o · f_c`; the rest is the galaxy's gas.
 //! - **Two exits, by state**: the jet, `ℓ_⊥` carrying the axial reading past
 //!   the throat (`ℓ_⊥/H ≥ H`), along the torsion axis; radial escape, `R ≥ H`
@@ -2090,6 +2090,19 @@ pub fn stream(motes: &[Mote], strands: &[Strand], push: &dyn Fn(&Mote) -> Ratio)
         .count()
 }
 
+/// The attractor's keep at deficit δ (docs/100 §8.1, E38): a displacement
+/// keeps `turned/(drag + turned)` a bell, `turned = 2δ`, `drag = 1 − δ`,
+/// which is `1 − 1/D(δ)` with `D` LAW-DILATION (`ring::dilation`): at the
+/// throat `D(½) = 3`, a keep of ⅔. None at `δ = 1`, where nothing drags and
+/// the whole displacement is kept.
+pub fn attractor_keep(delta: &Ratio) -> Option<Ratio> {
+    let d = crate::ring::dilation(delta)?;
+    if d.is_zero() {
+        return None;
+    }
+    Some(ratio(1, 1) - ratio(1, 1) / d)
+}
+
 /// The bindings of chains already read: those that hold collapse.
 /// The disc forms (ruling of 2026-10-26: this is why galaxies form discs;
 /// align on nature): angular momentum is kept while the motion off
@@ -2114,12 +2127,9 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
     }
     for x in motes.iter_mut() {
         let d = stream_delta(&enc.reach(&x.ell_o()).1, x.vacuum);
-        let drag = ratio(1, 1) - d.clone();
-        let turned = ratio(2, 1) * d;
-        if (drag.clone() + turned.clone()).is_zero() {
+        let Some(keep) = attractor_keep(&d) else {
             continue;
-        }
-        let keep = turned.clone() / (drag + turned);
+        };
         let t = tilt_of(&x.tilt());
         let moved: Vec<Ratio> = t
             .iter()

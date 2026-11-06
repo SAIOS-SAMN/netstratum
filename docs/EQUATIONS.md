@@ -1732,6 +1732,43 @@ passage (R is not compact).
 A mote turns `2δ = 2/(1 + x)` a bell, past one turn exactly inside the
 throat; a tube is open while both mouths are throats, `R_b ≤ H_b`.
 
+### §8.3 Torsion
+
+Rows E36–E39 (docs/100 §8). Torsion is a bivector, one signed component per
+pair of planes (`crate::torsion`).
+
+**E36 · The torsion a body carries.** Built. `torsion::pair_rate`,
+`torsion::tension`.
+
+    x_jk = x_j ⊖ x_k,   pairs (1,2), (2,3), (3,1)
+
+the flow-law difference of two planes' rates, signed and bounded. A fibre
+reads the pair it is wound tightest on, `max |d_j ⊖ d_k|` with `d = t − t̄`
+its lead over its enclosure's plane. The scalar `Σ_k |t_k − t̄_k|/2`
+(`flows::torsion`) still stands inside `torsion_signed` and the merge.
+
+**E37 · The Möbius pass.** Built. `flows::mobius`, `flows::torsion_signed`.
+
+    (δ, ψ, s) ↦ (1 − δ, ψ + ½, −s)
+
+**E38 · The attractor's keep.** Built. `flows::attractor_keep`,
+`flows::settle_disc`.
+
+    keep = 2δ/(1 + δ) = 1 − 1/D(δ)
+
+`D` LAW-DILATION; ⅔ at the throat.
+
+**E39 · The antipole and the wound plane.** Built. `torsion::plane_spin`,
+`torsion::antipole_take`, `torsion::wound`, `torsion::carried_twist`;
+`Body.antipole` (tag 30).
+
+    S_k = Σ amount·w·ℓ_k,   A_k′ = A_k − ΔS_k   (S_k + A_k constant per plane)
+    wound_k = t_k + A_k/ΣS,   d_k = s_k − t_k·Σs,   A_k −= amount·w·d_k
+
+What the attractor draws off a plane the core holds with the opposite sign.
+The release reads the wound plane as its twist and pays the twist each
+parcel carries off the plane out of the antipole. `Σ_k A_k = 0`.
+
 ### §8.4 Bonds
 
 Rows E40–E44 (docs/115). Derived, not built.

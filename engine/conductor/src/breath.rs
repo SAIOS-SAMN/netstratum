@@ -366,6 +366,9 @@ pub struct Event {
     /// The firmament's collective at the universal bounce this event
     /// follows (docs/111 §4), carried into the first arrival's record.
     pub collective: Option<crate::pulse::Collective>,
+    /// The galaxies' formation at that bounce (docs/111 §5.4), its own
+    /// record, carried with the collective.
+    pub formation: Option<crate::pulse::Formation>,
 }
 
 /// How a star passed.
@@ -536,12 +539,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
     let mut pending = crate::enfold::Cross::default();
     let mut pending_firm: Option<Ratio> = None;
     let mut pending_collective: Option<crate::pulse::Collective> = None;
+    let mut pending_formation: Option<crate::pulse::Formation> = None;
     if t_u > 0 && until / t_u > from / t_u {
         crate::profile::mark("orbit:collective");
-        let (c, firm, coll) = crate::pulse::orbit_galaxies(u);
+        let (c, firm, coll, ocean_moves) = crate::pulse::orbit_galaxies(u);
         pending = c;
         pending_firm = firm;
         pending_collective = Some(coll);
+        // The galaxies form where the escaped matter and the zero galaxy's
+        // outer medium hold their own reach (docs/111 §5.4).
+        crate::profile::mark("orbit:form");
+        pending_formation = Some(crate::pulse::form_galaxies(u, until / t_u * t_u, &ocean_moves));
     }
     // Every echo's arrival, in time order.
     let mut arrivals: Vec<(u64, usize, u64)> = Vec::new();
@@ -1964,7 +1972,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 };
                 let rings_now =
                     g_rate.clone().unwrap_or_else(|| ratio(1, 1)) * ratio(bell as i64, 1);
-                let twist_t = crate::flows::tilt_of(&core.tilt);
+                // The core's twist is its wound plane: its disc's plane with
+                // the antipole the settle gave it (docs/100 §8.3).
+                let disc_spin = crate::torsion::plane_spin(&core.flows)
+                    .iter()
+                    .fold(ratio(0, 1), |a, l| a + l.clone());
+                let twist_t = crate::torsion::wound(&core.tilt, &core.antipole, &disc_spin);
                 let lead = core.tilt.clone();
                 // The twist's pressure on the expungement (crate::torsion;
                 // operator 2026-11-06): the core's plane rates are its twist
@@ -2030,7 +2043,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let spins: Vec<Ratio> = {
                         // Each plane's rate taken with its plane's pressure,
                         // `x_k ⊕ P_k`, its spin following at its reach.
-                        let base_spins = crate::flows::Mote::spins_of(&ell, &lead);
+                        let base_spins = crate::flows::Mote::spins_of(&ell, &twist_t);
                         match planes_p.as_ref() {
                             Some(pl) => base_spins
                                 .iter()
@@ -2048,8 +2061,19 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             None => base_spins,
                         }
                     };
-                    // The reservoir pays the spin it actually leaves with.
+                    // The reservoir pays the spin it actually leaves with; the
+                    // antipole pays the twist it carries off the plane, plane
+                    // by plane (docs/100 §8.3).
                     let given = spins.iter().fold(ratio(0, 1), |a, l| a + l.clone());
+                    if core.antipole.len() == spins.len() {
+                        for (a, d) in core
+                            .antipole
+                            .iter_mut()
+                            .zip(crate::torsion::carried_twist(&spins, &lead))
+                        {
+                            *a -= take.clone() * w.clone() * d;
+                        }
+                    }
                     if !ledger_r.is_zero() {
                         core.reservoir -= take.clone() * w.clone() / ledger_r.clone() * given;
                     }
@@ -2172,7 +2196,22 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // plane (`flows::settle_disc`). A core whose disc holds nothing
             // turning keeps its own lean (its founding orientation, `pulse::
             // orient`), never reset to none.
+            // What the attractor moves off each plane the core takes as its
+            // antipole (docs/100 §8.2): `S_k + A_k` constant on every plane.
+            let spin_before = crate::torsion::plane_spin(&core.flows);
             let plane = crate::flows::settle_disc(&mut core.flows, enc.as_ref().unwrap_or(&throat));
+            let spin_after = crate::torsion::plane_spin(&core.flows);
+            let taken = crate::torsion::antipole_take(&core.antipole, &spin_before, &spin_after);
+            let was_a = core.antipole.clone();
+            let residual = (0..taken.len()).fold(ratio(0, 1), |r, k| {
+                let a0 = was_a.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
+                let off = spin_after[k].clone() + taken[k].clone() - spin_before[k].clone() - a0;
+                r.max(if off < ratio(0, 1) { -off } else { off })
+            });
+            identity.push(("antipole", residual));
+            if taken.iter().any(|a| !a.is_zero()) {
+                core.antipole = taken;
+            }
             if !plane.is_empty() {
                 core.tilt = plane;
             }
@@ -2682,6 +2721,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             .collect::<Vec<_>>(),
                     ),
                     throat: Default::default(),
+                    antipole: Vec::new(),
                 };
                 {
                     // Read by the system's one enclosure, as its meetings read it.
@@ -2836,6 +2876,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             tolls,
             identity,
             collective: pending_collective.take(),
+            formation: pending_formation.take(),
         });
     }
     events
@@ -2875,6 +2916,7 @@ mod tests {
             heat: ratio(0, 1),
             tilt: Vec::new(),
             throat: Default::default(),
+            antipole: Vec::new(),
         };
         let mut y = crate::flows::Mote {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
@@ -2927,6 +2969,7 @@ mod tests {
             heat: ratio(0, 1),
             tilt: Vec::new(),
             throat: Default::default(),
+            antipole: Vec::new(),
         };
         let mut z = s.flows[0].clone();
         z.spins = vec![ratio(7, 1), ratio(0, 1), ratio(0, 1)];
@@ -2980,6 +3023,7 @@ mod tests {
             heat: ratio(0, 1),
             tilt: Vec::new(),
             throat: Default::default(),
+            antipole: Vec::new(),
         };
         let h = || crate::chem::Kind::parse("W0001").expect("a kind");
         let star = body(
@@ -3075,6 +3119,7 @@ mod tests {
             heat: ratio(0, 1),
             tilt: Vec::new(),
             throat: Default::default(),
+            antipole: Vec::new(),
         };
         // A system of a star and one world, at reach 2 in a galaxy of hold 1/2
         // (its spin `R·H` = 1, kept in the galaxy's frame); the world turning
@@ -3131,6 +3176,7 @@ mod tests {
             heat: ratio(0, 1),
             tilt: Vec::new(),
             throat: Default::default(),
+            antipole: Vec::new(),
         };
         let u = Universe {
             cores: vec![core(vec![1], ratio(5, 1)), core(vec![2], ratio(9, 1))],

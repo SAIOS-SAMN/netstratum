@@ -220,6 +220,28 @@ The firmament's matter moves as **collections**, not as single motes.
    core then becomes a surface (σ = 1), and the front it receives is its
    bounce.
 
+   **Built** (`pulse::form_galaxies`, at every universal bounce). The
+   candidates are the ocean's motes. Their collections are read by the
+   collective's own bond law (§4.2, `flows::collections`), from the
+   perturbations the bounce's torque gave them, never by lengths. A
+   collection's pinch is judged on both orbit planes in one universal
+   enclosure (`pulse::judge`): its widest member extent from its mean reach
+   against `R̄·H_b/(H_b + H_inside)`. A self-held collection becomes a core,
+   a branch of the universal core at its members' mean spin, each member
+   re-origined by the arrival map, `Σ m·ℓ_u` kept with the grain's
+   remainder to the singularity's reservoir. The step returns its own
+   record (`pulse::Formation`): its candidates, every collection with its
+   pinch per plane and its verdict, what formed. The zero galaxy's outer
+   medium is not yet a candidate: its perturbations are not read at the
+   universal bounce.
+
+   **Read** (2^40 grains, 580 bells, the step's record): at the second
+   bounce 9 ocean motes in 2 collections, at the third 70 in 1 collection
+   of 67. None self-held: the nearest's widest extent stands at about
+   `3·60⁹` of its pinch. The ocean's collections hold in phase but are
+   spread over reaches far beyond what their holding pinches against the
+   hold inside them, so no galaxy forms in this founding.
+
 ## 6. Build order
 
 - **W1. Statement.** Rewrite the `ring.rs` header to §2 and §3. Add
