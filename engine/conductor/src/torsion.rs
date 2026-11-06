@@ -81,6 +81,26 @@ pub fn released_share(s: &Ratio, planes: &[Ratio; 3]) -> Option<Ratio> {
     Some(v.max(ratio(0, 1)))
 }
 
+/// The tension a fibre carries (docs/100 §9.2, read per pair): its leads
+/// over its enclosure's plane on each plane, `d_k = t_k − t̄_k`, their twist
+/// on each pair `d_j ⊖ d_k`, and the tightest-wound pair's: a fibre parts
+/// where its heat and the tension on any one pair pass its grip, so the test
+/// reads that pair, never a sum of pairs.
+pub fn tension(tilt: &[Ratio], plane: &[Ratio]) -> Ratio {
+    let (t, p) = (crate::flows::tilt_of(tilt), crate::flows::tilt_of(plane));
+    let lead: Vec<Ratio> = t
+        .iter()
+        .zip(&p)
+        .map(|(a, b)| a.clone() - b.clone())
+        .collect();
+    PAIRS
+        .iter()
+        .filter_map(|(j, k)| pair_rate(&lead[*j], &lead[*k]))
+        .map(|x| if x < ratio(0, 1) { -x } else { x })
+        .max()
+        .unwrap_or_else(|| ratio(0, 1))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -111,5 +131,18 @@ mod tests {
         // The release share moves with the twist and stays a share.
         let s = released_share(&ratio(1, 4), &planes).expect("in the bound");
         assert!(s >= ratio(0, 1) && s < ratio(1, 1));
+    }
+
+    #[test]
+    fn a_fibre_reads_the_tension_on_its_tightest_pair() {
+        let plane = vec![ratio(1, 3), ratio(1, 3), ratio(1, 3)];
+        assert_eq!(tension(&plane, &plane), ratio(0, 1), "settled");
+        let wound = vec![ratio(1, 2), ratio(1, 3), ratio(1, 6)];
+        // Leads 1/6, 0, -1/6: the tightest pair is (1,3), 1/6 (-) -1/6.
+        let (a, b) = (ratio(1, 6), ratio(-1, 6));
+        assert_eq!(
+            tension(&wound, &plane),
+            pair_rate(&a, &b).expect("in the bound")
+        );
     }
 }
