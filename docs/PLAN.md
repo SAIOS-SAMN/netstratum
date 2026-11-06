@@ -65,6 +65,14 @@ how the universe moves, so each read before and after:
 | Expansion and contraction as one advance and one re-origin | A17–A27 |
 | The schedule on events solved from the lanes; the stored period retired | C14, C15, J4 |
 
+### 3a. The sphere and the tube (operator, 2026-11-06)
+
+| step | where |
+|---|---|
+| Re-volumize the flat torus: orientation as one rotor on S³, separations as certified geodesics; the coupling's alignment, its range and the bond test on them | docs/120 §8d |
+| Frames per plane as state (3Q): `(z_k, q_k)` founded evenly, moved by bonds and peels on one plane | docs/121 §9, Mycelium 78.175 F1 |
+| The universal core tube as a wormhole to Xylarium's universal core, the antipolar kernel: crossings as pole swaps, frames exchanged, 3Z conserved | docs/123 |
+
 ### 4. The physics against the foundation, and one law per quantity
 
 The register's §C and §D. The old consolidation issues (#28 one deficit and

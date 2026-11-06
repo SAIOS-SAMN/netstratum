@@ -330,6 +330,32 @@ semantically, and dimensionally". (Never "cells": ruling 2026-10-16.)
   cut's held share (`flows::held`) reads the part of that enclosure within
   the hold; captures and bonds follow.
 
+## 8d. The torus found flat, and re-volumized (operator, 2026-11-06)
+
+**Found:** the engine's positions and separations were non-volumetric.
+- A body's place was one reach on a radial line plus three independent
+  phases, one per plane: a flat 3-torus `S¹ × S¹ × S¹` times a line, never
+  a sphere.
+- Separations were read plane by plane: the coupling's alignment, the bond's
+  in-step product, and `|R_i − R_j|` on reach. On a sphere they are one
+  geodesic that couples the planes.
+
+The operator ruled the torus be re-volumized in non-Euclidean spheres:
+- **Degrees stay the state** (round rotation angles on the turning planes,
+  §8b; the L1 projection a named reading only).
+- **A body's orientation is one rotor on `S³`,** its three turnings
+  (`e₊₂e₊₃`, `e₊₃e₊₁`, `e₊₁e₊₂`, cyclic) composed in a fixed order, which does
+  not commute.
+- **The separation of two bodies is the geodesic angle of their relative
+  rotor,** a certified reading: π, the cosines and the products are held as
+  exact rational bounds. The laws read it at the coordinate's sexagesimal
+  depth, the lower bound of the `60⁻⁶` sector it falls in, so it is exact
+  and deterministic.
+
+**Built so far:** none in the laws. The certified geodesic module is in
+progress. The coupling's alignment, its range and the bond test move onto it
+in turn, each with a read.
+
 ## 9. What is open
 
 1. **G's content.** That a hue move is a change of kind (the place on S¹¹)
