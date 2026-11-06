@@ -65,7 +65,7 @@ inverse (S2 unless marked):**
 | A22 | `ring::inverted`, `tube` (unused) | `flows::through` (live) | Two throat inversions coexist. **`inverted` and `tube` removed (#63)**; `through` (2H − R, ruled out 11-05) gone from the settle (#80, worlds formed by motion: 16, main had 14 by the mirror); it remains at the throat release and the vacuum band |
 | A23 | nuclide release, nuclides.rs:284-309 | captures, nuclides.rs:367-397, 404-429 | Three pieces with opposite fill orders; `nuclides::exchange` is the one-law form |
 | A24 | recycle press, recycle.rs:149-184 | recycle peel, recycle.rs:185-262, trap 284-320 | Two laws, each with a fill order |
-| A25 | outward transport: `shear`, `fluid`'s field share, `formation::exchange` | none | Hard-coded "outer gains"; only `restoring` is signed both ways |
+| A25 | outward transport: `shear`, `fluid`'s field share, `formation::exchange` | none | Hard-coded "outer gains"; only `restoring` is signed both ways `shear` signed both ways **(#100)**; `fluid`'s field share and `formation::exchange` remain |
 | A26 | dilation into a frame, breath.rs:1185, 1764-1769; formation.rs:1806 | out of it, formation.rs:2018, 1452; pulse.rs:1340 | Hand-multiplied at every site; `ring::dilation` unused |
 | A27 | `merge`, flows.rs:2277-2366 | none but `recycle::part` | One-way |
 
@@ -135,7 +135,7 @@ inverse (S2 unless marked):**
 | C15 | pulse.rs:971, 631-953 | `unit` from the retired dispersal founding; `cascade` survives only to make `t_u` | Retire with C14 |
 | C16 | siting.rs:82-86 | Era-0 founding on a Kepler track with squares and cubes, still the fallback | Demolition (§F) |
 | C17 | flows (`Σ m·(ℓo + ℓ⊥)`), `ℓo = Σ|lk|` | Two planes' spins summed into one ledger number; plane spins summed in L1 into one reach | (F) |
-| C18 | ring (the turning law); flows::{shear, repel, fluid}; formation::Stretch::mu; the heart's push | Orbits are not defined by shear from the magnetic attractor with its inverse in repulsion: an orbit is the turning law alone (gravity's held share); attraction (opposite spins pairing in gas) and repulsion (open frames pushing, in the firmament and the heart) are separate laws in separate places, neither shaping an orbit; the shear that reaches the orbit is gravity's contrast and runs outward only | One signed magnetic coupling, attraction and repulsion one law and its inverse, its exchange on the turning lane the shear, the orbit its first-degree balance with gravity (docs/121) |
+| C18 | ring (the turning law); flows::{shear, repel, fluid}; formation::Stretch::mu; the heart's push | Orbits are not defined by shear from the magnetic attractor with its inverse in repulsion: an orbit is the turning law alone (gravity's held share); attraction (opposite spins pairing in gas) and repulsion (open frames pushing, in the firmament and the heart) are separate laws in separate places, neither shaping an orbit; the shear that reaches the orbit is gravity's contrast and runs outward only | One signed magnetic coupling, attraction and repulsion one law and its inverse, its exchange on the turning lane the shear, the orbit its first-degree balance with gravity (docs/121) **Phase level done (#100)**: `flows::shear` is the dipole coupling (docs/121 §10–§11); `repel`, `fluid`'s field exchange, `Stretch::mu`, the heart's push and the state level (the band's rest, `through` at the release and the vacuum band) remain |
 
 ---
 
