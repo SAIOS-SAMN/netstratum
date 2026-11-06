@@ -179,6 +179,43 @@ pub fn from_universe(ell_u: &Ratio, ell_g: &Ratio, f: &Ratio) -> Option<Ratio> {
     (!f.is_zero()).then(|| (ell_u.clone() - ell_g.clone()) / f.clone())
 }
 
+/// A system's unit dilates (LAW-DILATION; register K1): its spins are shares
+/// of its holding `W`, so as it grows to `W + m` every spin it holds (its
+/// motes' and its worlds') is re-expressed in the new unit, `ℓ·W/(W + m)`,
+/// its galaxy reading `λ·ℓ` (`λ = W/g`) unchanged. Returns what the grain
+/// leaves of that reading, for the galaxy's medium.
+fn dilate_system(s: &mut Body, w: &Ratio, m: &Ratio, g: &Ratio) -> Ratio {
+    use num_traits::Zero as _;
+    if (w.clone() + m.clone()).is_zero() || g.is_zero() {
+        return ratio(0, 1);
+    }
+    let read = |s: &Body, lam: &Ratio| -> Ratio {
+        lam.clone()
+            * (s.flows.iter().fold(ratio(0, 1), |a, y| {
+                a + y.amount.clone()
+                    * crate::flows::weight(&y.key)
+                    * (y.ell_o() + y.ell_orth.clone())
+            }) + s.satellites.iter().fold(ratio(0, 1), |a, x| {
+                a + mass(&x.total()) * (x.ell.clone() + x.ell_orth.clone())
+            }))
+    };
+    let factor = w.clone() / (w.clone() + m.clone());
+    let was = read(s, &(w.clone() / g.clone()));
+    for y in s.flows.iter_mut() {
+        y.spins = y
+            .spins
+            .iter()
+            .map(|c| crate::ring::grain(&(c.clone() * factor.clone())))
+            .collect();
+        y.ell_orth = crate::ring::grain(&(y.ell_orth.clone() * factor.clone()));
+    }
+    for x in s.satellites.iter_mut() {
+        x.ell = crate::ring::grain(&(x.ell.clone() * factor.clone()));
+        x.ell_orth = crate::ring::grain(&(x.ell_orth.clone() * factor.clone()));
+    }
+    was - read(s, &((w.clone() + m.clone()) / g.clone()))
+}
+
 /// A star system's nested clock: its galaxy's share (none for the home) times
 /// its orbit's, the rings it receives at its reach, `1 − δ`, δ by its
 /// galaxy's one enclosure at its own spin (`galaxy_frame`).
@@ -1793,7 +1830,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     // nowhere. `W·ℓ_s + m·ℓ_m` is kept exactly; the grain's
                     // remainder goes to the galaxy's medium spin.
                     crate::profile::mark("cap:book");
+                    // The system's unit dilates (LAW-DILATION; register K1):
+                    // its spins are shares of its holding `W`, so as the
+                    // capture grows it to `W + m`, every spin it holds is
+                    // re-expressed in the new unit, `ℓ·W/(W + m)`, its
+                    // galaxy reading `λ·ℓ` unchanged; the grain's remainder
+                    // to the galaxy's medium spin.
                     let lam = w_sys.clone() / g_before.clone();
+                    let rest_d = dilate_system(s, &w_sys, &m, &g_before);
+                    core.medium_spin += rest_d / unit.clone();
                     let rel = |own: &Ratio, star: &Ratio| {
                         if lam.is_zero() {
                             ratio(0, 1)
@@ -2765,6 +2810,99 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_systems_unit_dilates_its_galaxy_reading_kept_to_the_grain() {
+        // Register K1: re-expressed in the grown unit, a system's spins read
+        // the same in the galaxy; what is returned is only the grain's loss,
+        // less than one grain mark a unit of holding.
+        let mut s = Body {
+            solid: false,
+            coupled: None,
+            ell_orth: ratio(0, 1),
+            path: vec![1, 1],
+            radius: ratio(0, 1),
+            period: ratio(0, 1),
+            kept: crate::pulse::Manifest::new(),
+            satellites: Vec::new(),
+            medium: crate::pulse::Manifest::new(),
+            ell: ratio(0, 1),
+            medium_spin: ratio(0, 1),
+            gas: Vec::new(),
+            born: 0,
+            state: ratio(0, 1),
+            flows: Vec::new(),
+            reservoir: ratio(0, 1),
+            turning: ratio(0, 1),
+            phase: Vec::new(),
+            load: ratio(0, 1),
+            bell: Vec::new(),
+            remnant: false,
+            heat: ratio(0, 1),
+            tilt: Vec::new(),
+            throat: Default::default(),
+        };
+        let mut y = crate::flows::Mote {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            amount: ratio(3, 1),
+            spins: crate::flows::Mote::spins_of(&ratio(7, 11), &[]),
+            ell_orth: ratio(2, 13),
+            phase: crate::flows::rest(ratio(1, 2)),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+        };
+        s.flows.push(y.clone());
+        y.amount = ratio(1, 1);
+        s.flows.push(y);
+        let (w, m, g) = (ratio(5, 1), ratio(2, 1), ratio(40, 1));
+        let left = dilate_system(&mut s, &w, &m, &g);
+        let mark = crate::ring::grain_step();
+        let holding = ratio(4, 1);
+        let bound = (w.clone() + m.clone()) / g.clone() * holding * ratio(4, 1) * mark;
+        assert!(
+            left.clone() >= -bound.clone() && left <= bound,
+            "only the grain's loss: {left}"
+        );
+        // Exact where no grain is lost: spins already on a multiple of the
+        // factor's denominator.
+        let mut t = Body {
+            solid: false,
+            coupled: None,
+            ell_orth: ratio(0, 1),
+            path: vec![1, 1],
+            radius: ratio(0, 1),
+            period: ratio(0, 1),
+            kept: crate::pulse::Manifest::new(),
+            satellites: Vec::new(),
+            medium: crate::pulse::Manifest::new(),
+            ell: ratio(0, 1),
+            medium_spin: ratio(0, 1),
+            gas: Vec::new(),
+            born: 0,
+            state: ratio(0, 1),
+            flows: Vec::new(),
+            reservoir: ratio(0, 1),
+            turning: ratio(0, 1),
+            phase: Vec::new(),
+            load: ratio(0, 1),
+            bell: Vec::new(),
+            remnant: false,
+            heat: ratio(0, 1),
+            tilt: Vec::new(),
+            throat: Default::default(),
+        };
+        let mut z = s.flows[0].clone();
+        z.spins = vec![ratio(7, 1), ratio(0, 1), ratio(0, 1)];
+        z.ell_orth = ratio(0, 1);
+        t.flows.push(z);
+        assert_eq!(
+            dilate_system(&mut t, &ratio(5, 1), &ratio(2, 1), &g),
+            ratio(0, 1)
+        );
+    }
 
     #[test]
     fn an_arrival_is_the_exits_inverse_signed() {
