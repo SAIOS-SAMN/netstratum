@@ -99,9 +99,18 @@ clause of LAW-PASSAGE.
 2. **Which mouth's units** read the crossing body on arrival. The far
    kernel's own enclosure is proposed (re-origin), its hold read from the
    body (`H′ = R`).
-3. **Whether Xylarium confirms the exchanged frames** `(z_k, q_k) ↦
-   (q_k, z_k)` as its matter weighting, and whether its pole coordinate
-   `t = U/W` reads the inverse `1/t` of Netstratum's for one kind.
+3. **Xylarium's mathematics confirmed (2026-11-06).** Its frames are `W =
+   3Z − U` held and `U` open, so the swap is `U ↔ W`, with `3Z` kept. Its
+   pole `t = U/W ↦ 1/t` is its axis inversion (`circuit::axis_antipole`),
+   fixing only the throat. `σ ↦ −σ`, `o ↦ 1 − o` (its viscosity reversion),
+   and fusion and fission exchange. **The architecture is open:** whether
+   Xylarium's universal core is the tube's antipolar face is its operator's
+   ruling. Its model (T16) already pairs its core's white face with a
+   parent's black face across each bounce, so the tube would make
+   Netstratum's universal core that parent face, or a third face. The
+   fixtures are stated as mathematics, not yet as Xylarium-confirmed.
+   Xylarium's separations are one geodesic on `S²` (through a square root);
+   lifting them to the relative rotor's geodesic on `S³` is its item 40.
 4. **The fixtures:**
    - a body's traversal out and back as the identity;
    - its frames exchanged with `3Z` kept;
