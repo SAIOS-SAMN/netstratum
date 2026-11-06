@@ -509,7 +509,7 @@ leg runs R backward" is that reversal.
   planes. Which pairs, by 3-space duality (2026-11-05, with Mycelium): the
   phase the code turns "in plane k" is the turning about axis k, the plane
   of the other two frame axes, `e₊ₗ∧e₊ₘ` (`{l, m}` the complement of k). So
-  the three are `e₊₂e₊₃`, `e₊₁e₊₃` and `e₊₁e₊₂`, the continuum's turnings,
+  the three are `e₊₂e₊₃`, `e₊₃e₊₁` and `e₊₁e₊₂` (cyclic: about axes 1, 2 and 3, one sense for all; `e₊₃e₊₁ = −e₊₁e₊₃`), the continuum's turnings,
   with `e₋ₗe₋ₘ` the vacuum's (the inverted face). Each frame plane's own
   motion, and each mixed pair `e₊ₖe₋ₗ`, is a boost, on `S`. R's loop phase
   (the circulation) is not placed: open.
