@@ -1147,10 +1147,10 @@ pub fn orbit_galaxies(
     // The singularity's reservoir and the firmament's spins are booked in the
     // home's fixed ledger unit; the hold is read in shares of the whole.
     let ledger_u = universal_ledger(u);
-    // The firmament's order (B1): the universal core's held cut is torqued
-    // with the rest of its flows by the one torque law (`breath`); here only
-    // its order, matter pushing matter apart by its open frames
-    // (`flows::repel`, at the bounce's push), on the motes within its throat.
+    // The firmament (B1): the universal core's held cut is torqued and
+    // coupled with the rest of its flows by the one torque and the one
+    // dipole coupling (`breath`); here its collective is read and its
+    // collections move as one.
     let held_at = firmament_of(u);
     if let Some(&(i, _)) = held_at.first() {
         let held: Vec<usize> = held_at.iter().map(|&(_, j)| j).collect();
@@ -1270,12 +1270,10 @@ pub fn orbit_galaxies(
             mean: ratio(0, 1),
         };
         let _ = founded;
-        // The order (B1): matter pushing matter apart by its open frames
-        // (`flows::repel`, at the bounce's push).
-        crate::profile::mark("orbit:order");
-        if firm.len() > 1 {
-            let _ = crate::flows::repel(&mut firm, &ratio(1, 2));
-        }
+        // The firmament's order is the one dipole coupling (docs/121 §7,
+        // register C18): its motes are the home's flows, so the home's breath
+        // moves them by `flows::shear` with every other mote, aligned dipoles
+        // splitting and opposed ones locking. No second law pushes them here.
         for (&j, x) in held.iter().zip(firm) {
             u.cores[i].flows[j] = x;
         }

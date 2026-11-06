@@ -27,7 +27,7 @@ wavefront, the equator, shells and cells).
 | The universal period | `pulse::cascade`, `Universe::t_u` | `T_u = 2(R_out + H)`, a ring out to the outermost galaxy shell and back. |
 | The founding | `pulse::deploy` | Every bead of the cascade's shells that holds its spread stands as a galaxy at `t = 0`. Only beads that cannot hold it join the home. |
 | Arrivals at a galaxy | `breath::breathe` | A fixed schedule `k·T_u + ⌊R_i⌋`, read from each galaxy's radius once per call. |
-| The firmament | `pulse::firmament_of`, `flows::repel` | The home's motes that its throat holds wholly. Each echo they repel one another (order only). They never bond. |
+| The firmament | `pulse::firmament_of` | The home's motes that its throat holds wholly. They are coupled with every other home mote by the one dipole coupling (`flows::repel` retired). They never bond. |
 | Escape | `flows::exits` | A single mote crosses one tier up by its jet (`ℓ_⊥/H ≥ H`) or radially (`R ≥ H`). |
 | A star's bell | `breath` (`rang`) | It rings on the star's own whole turns. It is not driven by any front. |
 
@@ -160,11 +160,12 @@ The firmament's matter moves as **collections**, not as single motes.
 1. **The collective.** The firmament's motes are one quantum collective. Each
    contained bounce does two things to it:
    - torques it, by the existing firmament torque;
-   - orders it, by `flows::repel`.
+   - orders it, by the one dipole coupling (`flows::shear` in the home's
+     breath; `flows::repel`, a second law pushing open frames apart, is
+     retired, register C18).
    
    A mote's **perturbation** on plane `k` this bounce is the displacement the
-   bounce gave it, `Δφ_k`, read once all the moves are known (as `repel`
-   reads them).
+   bounce gave it, `Δφ_k`, read once all the moves are known.
 2. **Bonding.** Two motes bond where all three hold:
    - they stand on one held hemisphere, `step_with ≥ ½` (docs/99 §2.2);
    - the bounce moved them together: the tilt-weighted in-step share of

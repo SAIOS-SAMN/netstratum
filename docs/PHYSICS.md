@@ -41,8 +41,8 @@ where era 1 does not yet provide a quantity it reads era 0's through a bridge
 
 1. **`breath::breathe`** (`main.rs:357`), in order:
    - on each universal echo, `pulse::orbit_galaxies`: the galaxies re-read
-     their orbits; the firmament's collective, its collections and its order
-     (`flows::repel`); the ocean's torque;
+     their orbits; the firmament's collective and its collections (its order
+     is the home breath's dipole coupling); the ocean's torque;
    - each arrival: the ocean's hold and swing (`ocean`), the core's push
      (`pulse::home_push`, `pulse::galaxy_push`), star encounters
      (`formation::collide_stars`);
@@ -93,7 +93,7 @@ places. Reducing each to one law is planned in [PLAN.md](PLAN.md).
 | Coherence `1 − 2·off` | `breath::coherence`, `flows::in_step`, `flows::response`, `chronometry::Keeper::read`, `nuclides::electron_phase` | Breath uses two coherences in one loop: an `in_step` product for shedding, `coherence(slip)` for burning |
 | Slip behind the universal clock | `breath::slip`, `chronometry::Keeper::read`, `life.rs:880` | |
 | The universe's hold | `pulse::universal_state`, `pulse::universal_ledger` (the same body), `ocean::universe_hold` (normalised by core states) | |
-| The core's push | `pulse::push_of` (½·Q/(A + Q)), `pulse::push_cut` (held/(1 + held)), literal ½ at `home_push`, the collective push, `repel` and the ocean's torque; ½·c/(c + 1) at `breath.rs:1872`; `flows::band` | |
+| The core's push | `pulse::push_of` (½·Q/(A + Q)), `pulse::push_cut` (held/(1 + held)), literal ½ at `home_push`, the collective push and the ocean's torque; ½·c/(c + 1) at `breath.rs:1872`; `flows::band` | |
 | Heat | `nuclides::heat` (max(0, ν·δ − 1)), `breath::shine` (l·(1 − δ)/M), `formation.rs:820` (heat·δ), `formation.rs:1013`, `life.rs:871` (heat × `HYDROGEN_K` in kelvin), `life.rs:852` (a star's luminosity ½(1 + M/M_home)) | |
 | Release | `nuclides::release`, the throat release (`breath.rs:1866-1890`), `recycle::recycle`, `formation::heart_cut`, the remnant drain δ/2 (`breath.rs:1006`) | |
 | Burn and lifetime | `breath.rs:1397` (live, per rung, in phase); `main.rs:478` and `formation.rs:1009` (Z = 1, coherence 1) | The readout's lifetime is not the live burn |
