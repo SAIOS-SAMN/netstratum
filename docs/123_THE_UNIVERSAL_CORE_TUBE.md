@@ -74,6 +74,24 @@ inverted face, and the reverse.
 | enforcement at the tube (`NotThroughCore`, `NotSignatory`) | Mycelium track 24 B3/B4 |
 | a body crossing the tube from Netstratum's universal core to Xylarium's | not built |
 
+## 3a. The standard: LAW-TRAVERSAL v1 (Mycelium proposal 78.176)
+
+Agreed with Mycelium 2026-11-06: a traversal is its own standard, never a
+clause of LAW-PASSAGE.
+- **Why:** the passage is universal, one throat's pole swap. A traversal
+  composes two passages through the court's vertex and a map between the
+  two kernels. That map is a property of the pair, not of every throat.
+- **What 78.176 states:**
+  - it composes LAW-PASSAGE v3 with FORMS-COORDINATE v4's re-origin;
+  - each kernel declares its polarity as data, so the antipolar exchange
+    `(z_k, q_k) ↦ (q_k, z_k)` is one case of the law;
+  - the court reconstructs a traversal at the vertex as a track 24 B3
+    crossing kind (`NotThroughCore` and `NotSignatory` are live).
+- **The checks:** under the exchange `σ ↦ −σ` and `o ↦ 1 − o`, `z_k + q_k`
+  is kept per plane, and out and back is the identity.
+- **When:** drafted once Xylarium confirms its antipolarity; the wire framing
+  comes with v0.5.0 (issue #92).
+
 ## 4. Open
 
 1. **What crosses.** Matter only, or also μ and attached minds' acts
