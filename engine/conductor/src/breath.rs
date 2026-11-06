@@ -178,9 +178,17 @@ fn carried_spin(m: &crate::pulse::Manifest, at: &Ratio, orth: &Ratio, unit: &Rat
 /// that makes nothing, ever, at its rate; an echo that brought no ring is
 /// read as one, its passage itself. It fuses a pair when the fuel the echo's
 /// rings take, `a − a·(1 − feed)^r`, reaches a pair; a slow burn of a large
-/// stock still fuses a great many nuclei. Read every echo, for a star and a
-/// remnant alike.
+/// stock still fuses a great many nuclei. Read every echo for a star; a
+/// remnant never burns again (a dead star does not restart), and what it
+/// gathers that could burn flashes off (`burnable`).
 fn can_burn(sys: &Body, r_echo: u64) -> bool {
+    !burnable(sys, r_echo).is_empty()
+}
+
+/// The kinds a body keeps that can burn (the closed limit's reading, kind by
+/// kind): each that fuses at least one pair within an echo in full step,
+/// whole.
+fn burnable(sys: &Body, r_echo: u64) -> crate::pulse::Manifest {
     use num_traits::Zero as _;
     let share_now = if mass(&sys.total()).is_zero() {
         ratio(0, 1)
@@ -192,20 +200,24 @@ fn can_burn(sys: &Body, r_echo: u64) -> bool {
         2.into(),
         crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024),
     );
-    sys.kept.iter().any(|(k, a)| {
-        *a >= pair
-            && crate::chem::atom_w(k).is_some_and(|z| {
-                crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1))
-                    .and_then(|(feed, _)| {
-                        crate::compound::read(
-                            a,
-                            &crate::compound::after(&feed, rings_echo)?,
-                            |left| a.clone() - left.clone() >= pair,
-                        )
-                    })
-                    .unwrap_or(false)
-            })
-    })
+    sys.kept
+        .iter()
+        .filter(|(k, a)| {
+            **a >= pair
+                && crate::chem::atom_w(k).is_some_and(|z| {
+                    crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1))
+                        .and_then(|(feed, _)| {
+                            crate::compound::read(
+                                a,
+                                &crate::compound::after(&feed, rings_echo)?,
+                                |left| (*a).clone() - left.clone() >= pair,
+                            )
+                        })
+                        .unwrap_or(false)
+                })
+        })
+        .map(|(k, a)| (k.clone(), a.clone()))
+        .collect()
 }
 
 /// A galaxy's frame map for a mote's spin, the exit (register B5): carried
@@ -323,6 +335,10 @@ pub struct Event {
     /// Stars born at this echo: gas that cooled enough to collapse
     /// (docs/83 formation).
     pub stars: usize,
+    /// Each birth's own record (issue #119): the hydrogen share by mass of
+    /// what fell, of it after the fibres' transition at ignition, and of what
+    /// the new star keeps.
+    pub births_h: Vec<(Ratio, Ratio, Ratio)>,
     /// Jet batches that landed at the rim at this echo.
     pub jets: usize,
     /// The mass the galaxy's stars returned to its medium at this echo
@@ -330,8 +346,8 @@ pub struct Event {
     pub returned: Ratio,
     /// Stars dissolved at this echo.
     pub dissolved: usize,
-    /// Remnants that gathered fuel they can burn and stand as stars again.
-    pub reignited: usize,
+    /// Remnants whose gathered fuel flashed off this echo (novae).
+    pub novae: usize,
     /// Star encounters at this echo: mergers (sticks) and bounces.
     pub merged: usize,
     pub encounters: usize,
@@ -722,7 +738,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let core = &mut u.cores[i];
         let mut returned = ratio(0, 1);
         let mut dissolved = 0;
-        let mut reignited = 0usize;
+        let mut novae = 0usize;
+        let mut births_h: Vec<(Ratio, Ratio, Ratio)> = Vec::new();
         let mut grown = (0usize, 0usize, 0usize, 0usize);
         let mut escaped_all = ratio(0, 1);
         let mut fates = (0usize, 0usize, 0usize, 0usize);
@@ -1267,13 +1284,28 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     );
                     shed.push((escaped, at, sys.ell_orth.clone(), sys.phase.clone()));
                 }
-                // The closed limit is a reading, never a latch: a remnant that
-                // has gathered fuel it can burn (infall in its settle, a merge)
-                // stands as a star again, its closing mass no longer its state.
-                if can_burn(&sys, r_echo) {
-                    sys.remnant = false;
-                    sys.state = ratio(0, 1);
-                    reignited += 1;
+                // The flash (as nature: a nova; operator 2026-11-07, "align
+                // this with nature"): a remnant never burns again. What it
+                // gathers that can still burn (infall in its settle, a merge)
+                // is a layer on it, not its own closed matter; the layer
+                // ignites and is thrown off whole into the galaxy, booked by
+                // the outflow law, and the remnant stays a remnant. The
+                // galaxy's flows carry it on to the systems that form there.
+                let layer = burnable(&sys, r_echo);
+                if !layer.is_empty() {
+                    less(&mut sys.kept, &layer);
+                    let at = beyond(&sys);
+                    book_outflow(
+                        &mut sys,
+                        &mass(&layer),
+                        &at,
+                        &unit,
+                        &g_before,
+                        &mut core.medium_spin,
+                        &mut identity,
+                    );
+                    shed.push((layer, at, sys.ell_orth.clone(), sys.phase.clone()));
+                    novae += 1;
                 }
                 enclosed_in += mass(&sys.total()) / unit.clone();
                 keep.push(sys);
@@ -2654,6 +2686,18 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // nuclei's grip, read at the binding's held share; the parted stand as hydrogen, the new
                 // heart's fuel. Nucleons conserved.
                 let mut star = star;
+                let h_share = |m: &crate::pulse::Manifest| {
+                    let whole = mass(m);
+                    if whole.is_zero() {
+                        ratio(0, 1)
+                    } else {
+                        m.get(&crate::chem::Kind::atom(1).expect("hydrogen"))
+                            .cloned()
+                            .unwrap_or_else(|| ratio(0, 1))
+                            / whole
+                    }
+                };
+                let fell_h = h_share(&star);
                 crate::profile::mark("breath:births-torsion");
                 let tau_b = crate::torsion::tension(
                     &crate::flows::blend(
@@ -2685,6 +2729,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         &tide,
                     )
                 });
+                let parted_h = h_share(&star);
+                if let Some((kept, _, _, _)) = &lit {
+                    births_h.push((fell_h.clone(), parted_h.clone(), h_share(kept)));
+                }
                 let Some((kept, medium, medium_spin, disc_motes)) = lit else {
                     // No heart: the members go on as they were.
                     motes_in[3] += members.len();
@@ -2870,7 +2918,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             jets,
             returned,
             dissolved,
-            reignited,
+            novae,
+            births_h,
             merged,
             encounters,
             grown,
@@ -2903,11 +2952,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn the_closed_limit_is_read_never_latched() {
-        // docs/111 §3.2: a star can burn where some kind it keeps fuses a pair
+    fn a_remnants_gathered_fuel_is_its_layer_never_its_own_matter() {
+        // docs/111 §3.2: a body can burn where some kind it keeps fuses a pair
         // within an echo. Weight 4 (Q 2, closed) makes weight 8 by a rung
-        // that transduces no magnetism into holding, so it cannot burn; a
-        // remnant that then gathers hydrogen can.
+        // that transduces no magnetism into holding, so it cannot burn: the
+        // remnant's own matter. Hydrogen it gathers is its burnable layer,
+        // exactly what flashes off; the closed matter stays.
         let kind = |w: &str| crate::chem::Kind::parse(w).expect("a kind");
         let mut s = Body {
             solid: false,
@@ -2937,8 +2987,12 @@ mod tests {
             antipole: Vec::new(),
         };
         assert!(!can_burn(&s, 3), "closed: nothing it keeps burns");
+        assert!(burnable(&s, 3).is_empty());
         s.kept.insert(kind("W0001"), ratio(300, 1));
-        assert!(can_burn(&s, 3), "hydrogen gathered: it burns again");
+        let layer = burnable(&s, 3);
+        assert_eq!(layer, [(kind("W0001"), ratio(300, 1))].into(), "the layer is the hydrogen, whole");
+        less(&mut s.kept, &layer);
+        assert_eq!(s.kept, [(kind("W0004"), ratio(500, 1))].into(), "the closed matter stays");
     }
 
     #[test]
