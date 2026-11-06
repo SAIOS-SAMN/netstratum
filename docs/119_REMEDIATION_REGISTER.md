@@ -42,7 +42,7 @@ for the plane state and one generator for motion (docs/118 F2–F4).
 | A5 | S2 | breath.rs:916-954; flows.rs:1927-1942 (`settle_disc`); formation.rs:2055-2065 | Phases returned, tilts relaxed and worlds turned component by component | (F) As A2 |
 | A6 | S1 | pulse.rs:1347-1350 (`orbit_galaxies`) | Every spatial plane gets the same `+4δ`, ignoring tilt; inconsistent with `turn`'s `2δ·t_k` | One turning law for cores and motes |
 | A7 | S2 | flows.rs:441-450 (`step_with`), 604-609 (`bonded`), 413-422 (`torsion`), 152-154 (`space_mean`), 1326-1334 (`shear`); formation.rs:1159-1169 (`meetings`) | Closeness as sums of per-axis differences (L1 sums, means over three axes) | (F) Closeness as one reading of two plane states |
-| A8 | S2 | flows.rs:556-571 (`pair_sums`), 497-507 (`repel`); breath.rs:697-709, 1234-1236, 1271-1273 | Products over four planes (a fourth power when the planes are alike); `repel` clamps each axis to ±½, a box | (F) As A7 |
+| A8 | S2 | flows.rs:556-571 (`pair_sums`), 497-507 (`repel`); breath.rs:697-709, 1234-1236, 1271-1273 | Products over four planes (a fourth power when the planes are alike); `repel` clamps each axis to ±½, a box | (F) As A7 **Retired with `repel` and `pair_sums`** (the firmament's order is the one dipole coupling, C18) |
 | A9 | S2 | flows.rs:1669-1680 (`beads`) | Fibres keyed by 16 orthants; a fibre straddling ½ on any axis is cut. Feeds `merge` and `fluid` | Gather by the plane state's hemispheres, not each axis's |
 | A10 | S2 | flows.rs:2191-2210 (`band_pairs`) | The disc picked by largest tilt index; members binned on `⌊phase·count⌋`, a fixed grid anchored at phase 0 (against the 2026-10-23 "no grids" ruling) | Arcs by gaps on the plane state (as `phase_beads` does) |
 | A11 | **done (#58)** S1 | flows.rs:1785-1792 (`strands`) | Extent as a bounding box over axes, and it ignores the wrap at phase 0: a strand straddling 0 reads an extent near 1 | Circular spread; fix the wrap now |
@@ -73,7 +73,7 @@ inverse (S2 unless marked):**
 
 | id | where | size |
 |---|---|---|
-| A28 | flows.rs:547-582 `pair_sums` (via `repel`) | n(n−1)·4 over the firmament, BigInt | Read 2026-11-05: not a range: every pair contributes (in step is never negative) and the product over planes does not separate, so no bisection gives the same sum; it runs once, at the founding (`pulse.rs` firmament) |
+| A28 | flows.rs:547-582 `pair_sums` (via `repel`) | n(n−1)·4 over the firmament, BigInt | Read 2026-11-05: not a range: every pair contributes (in step is never negative) and the product over planes does not separate, so no bisection gives the same sum; it runs once, at the founding (`pulse.rs` firmament) **Retired with `repel` and `pair_sums`** (the firmament's order is the one dipole coupling, C18) |
 | A29 | flows.rs:677-694 `collections` | n²/2, screened |
 | A30 | pulse.rs:746-785, 906-913 `cascade` | K²/2 over founding kinds; Σ run² for density (once) |
 | A31 | breath.rs:548-570 | ocean motes × galaxies inside the arrival loop |
@@ -135,7 +135,7 @@ inverse (S2 unless marked):**
 | C15 | pulse.rs:971, 631-953 | `unit` from the retired dispersal founding; `cascade` survives only to make `t_u` | Retire with C14 |
 | C16 | siting.rs:82-86 | Era-0 founding on a Kepler track with squares and cubes, still the fallback | Demolition (§F) |
 | C17 | flows (`Σ m·(ℓo + ℓ⊥)`), `ℓo = Σ|lk|` | Two planes' spins summed into one ledger number; plane spins summed in L1 into one reach | (F) |
-| C18 | ring (the turning law); flows::{shear, repel, fluid}; formation::Stretch::mu; the heart's push | Orbits are not defined by shear from the magnetic attractor with its inverse in repulsion: an orbit is the turning law alone (gravity's held share); attraction (opposite spins pairing in gas) and repulsion (open frames pushing, in the firmament and the heart) are separate laws in separate places, neither shaping an orbit; the shear that reaches the orbit is gravity's contrast and runs outward only | One signed magnetic coupling, attraction and repulsion one law and its inverse, its exchange on the turning lane the shear, the orbit its first-degree balance with gravity (docs/121) **Phase level done (#100)**: `flows::shear` is the dipole coupling (docs/121 §10–§11); `repel`, `fluid`'s field exchange, `Stretch::mu`, the heart's push and the state level (the band's rest, `through` at the release and the vacuum band) remain |
+| C18 | ring (the turning law); flows::{shear, repel, fluid}; formation::Stretch::mu; the heart's push | Orbits are not defined by shear from the magnetic attractor with its inverse in repulsion: an orbit is the turning law alone (gravity's held share); attraction (opposite spins pairing in gas) and repulsion (open frames pushing, in the firmament and the heart) are separate laws in separate places, neither shaping an orbit; the shear that reaches the orbit is gravity's contrast and runs outward only | One signed magnetic coupling, attraction and repulsion one law and its inverse, its exchange on the turning lane the shear, the orbit its first-degree balance with gravity (docs/121) **Phase level done (#100)**: `flows::shear` is the dipole coupling (docs/121 §10–§11); `repel`, `fluid`'s field exchange, `Stretch::mu`, the heart's push and the state level (the band's rest, `through` at the release and the vacuum band) remain **`repel` retired**: the firmament is coupled by `shear` with the home's other motes; open: `fluid`'s field exchange, `Stretch::mu`, the heart's push |
 
 ---
 
@@ -151,7 +151,7 @@ inverse (S2 unless marked):**
 | D6 | the tilt attractor `2δ/(1+δ)` | `settle_disc`, the star return near breath.rs:870 |
 | D7 | the band overlap share | `held_share`, `band_pairs::share_in` |
 | D8 | the spin exchange `u = s·gap/m` | `shear`, `fluid`, `around` (only `shear` guards overdraw) |
-| D9 | closeness on the sphere | `repel`/`pair_sums` (Π over four planes), `step_with`/`bonded` (Σ over three) |
+| D9 | closeness on the sphere | `repel`/`pair_sums` (Π over four planes), `step_with`/`bonded` (Σ over three) **Retired with `repel` and `pair_sums`** (the firmament's order is the one dipole coupling, C18) |
 | D10 | coherence | `breath::coherence`, `flows::in_step` (one formula), the clock coherence, `Π in_step` |
 | D11 | the ring law | inline at formation.rs:83, 602, 686, 820, 1837, 1963, ocean.rs:107 (δ); 1056, 2023 (ℓ); 601, 652, 709 (R), while `ring::spin`, `radius` are orphans |
 | D12 | the rung law `2u(z) > u(2z)` | recycle.rs:62-65, formation::burn 402-411 |
@@ -177,7 +177,7 @@ inverse (S2 unless marked):**
 | E1 | flows.rs:29-32, 1454-1456; docs/104 §6.3 | two exits, R ≥ H | one exit, on `ℓ_o` at `2·base` (docs/96 §7) |
 | E2 | flows.rs:175-181 | `vacuum` never reassigned | four laws write it |
 | E3 | flows.rs:185 | the lever never more than half | capped at the amount |
-| E4 | flows.rs:614 | collections from `repel`'s moves | from the whole bounce's phase deltas; `repel`'s return discarded (pulse.rs:1264) |
+| E4 | flows.rs:614 | collections from `repel`'s moves | from the whole bounce's phase deltas; `repel`'s return discarded (pulse.rs:1264) **Retired with `repel` and `pair_sums`** (the firmament's order is the one dipole coupling, C18) |
 | E5 | flows.rs:2130 | opposed leads cancel | tilts are unsigned partitions |
 | E6 | flows.rs:972-973 | the orbit phase stands half a turn on | only the reading is antipoded |
 | E7 | flows.rs:2499-2500 (`fluid`) | a pressure contrast | signed `restoring` plus a column |

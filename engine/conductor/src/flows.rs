@@ -454,148 +454,10 @@ pub fn step_with(x: &Mote, psi: &[Ratio]) -> Ratio {
     })
 }
 
-/// The firmament's order (ruling of 2026-10-19: the pulses over time and the
-/// reverberation/pulsation of the bouncing antipoles move the firmament
-/// into order, a dodecahedron-like order derived from the mathematics, never
-/// set as a dodecahedron; the firmament is to be built). The heart's own law, one tier up: matter pushes matter by
-/// the electromagnetic repulsion gripping its open frames. On each pulse,
-/// every mote is pushed away from every other in each plane, by the other's
-/// open charge (`a·e`, its amount times its open frames) times their
-/// closeness on the sphere (the product over planes of their in-step
-/// shares), signed away from it; summed over the whole charge, it moves by
-/// the bounce's `push` times its own carried share `(e/ē)·(w̄/w)` (its open
-/// frames over the mean, the mean weight over its own: the heaviest barely
-/// move), at most half a turn. All read at once, then moved. Equal charges
-/// pushing apart on a sphere settle into the polyhedra (the Thomson
-/// arrangements): whatever order forms is the mathematics', never set.
-pub fn repel(motes: &mut [Mote], push: &Ratio) -> Vec<Vec<Ratio>> {
-    let n = motes.len();
-    if n < 2 {
-        return Vec::new();
-    }
-    let planes = motes.iter().map(|x| x.phase.len()).min().unwrap_or(0);
-    let open = |x: &Mote| ratio(i64::from(crate::chem::unpaired(&x.key)), 1);
-    let amount = motes.iter().fold(ratio(0, 1), |s, x| s + x.amount.clone());
-    let charge = motes
-        .iter()
-        .fold(ratio(0, 1), |s, x| s + x.amount.clone() * open(x));
-    let held = motes
-        .iter()
-        .fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key));
-    if amount.is_zero() || charge.is_zero() || held.is_zero() || planes == 0 {
-        return Vec::new();
-    }
-    let (e_mean, w_mean) = (charge.clone() / amount.clone(), held / amount);
-    let half = ratio(1, 2);
-    // Each mote's pushed sum, `Σ_j q_j·Π_k in_step(φ_i, φ_j)·sign_k`, read
-    // exactly on the phases' common denominator (`pair_sums`).
-    let sums = pair_sums(motes, planes, &open);
-    let mut moves: Vec<Vec<Ratio>> = vec![vec![ratio(0, 1); planes]; n];
-    for i in 0..n {
-        let e_i = open(&motes[i]);
-        if e_i.is_zero() {
-            continue;
-        }
-        let carried =
-            push.clone() * (e_i / e_mean.clone()) * (w_mean.clone() / weight(&motes[i].key));
-        moves[i] = sums[i].clone();
-        for k in 0..planes {
-            let m = (carried.clone() * moves[i][k].clone() / charge.clone())
-                .max(-half.clone())
-                .min(half.clone());
-            moves[i][k] = m;
-        }
-    }
-    for (x, m) in motes.iter_mut().zip(&moves) {
-        for k in 0..planes {
-            x.phase[k] = crate::ring::grain(&frac(&(x.phase[k].clone() + m[k].clone())));
-        }
-    }
-    moves
-}
-
-/// The collective's pushed sums (docs/111 §4.1, `repel`): for each mote i
-/// with open frames and each plane k, `Σ_{j≠i} q_j·Π_l in_step(φ_i^l, φ_j^l)·
-/// sign(φ_i^k − φ_j^k)`, `q_j = a_j·open_j`. Every phase is held on a 60-adic
-/// place (`enfold`, `ring::grain`), so on the phases' common denominator `D`
-/// each in-step share is an integer over `D`, and the whole sum an integer
-/// over `D^planes` times the amounts' denominator: the same exact value as
-/// the rational sum, without reducing each term.
-fn pair_sums(motes: &[Mote], planes: usize, open: &dyn Fn(&Mote) -> Ratio) -> Vec<Vec<Ratio>> {
-    use num_bigint::BigInt;
-    use num_integer::Integer;
-    use num_traits::One;
-    let n = motes.len();
-    let lcm = |vals: &mut dyn Iterator<Item = BigInt>| vals.fold(BigInt::one(), |l, d| l.lcm(&d));
-    let d = lcm(&mut motes
-        .iter()
-        .flat_map(|x| x.phase.iter().take(planes).map(|p| p.denom().clone())));
-    let qd = lcm(&mut motes.iter().map(|x| x.amount.denom().clone()));
-    let wrap = |p: &Ratio| -> BigInt {
-        let v = p.numer() * (&d / p.denom());
-        v.mod_floor(&d)
-    };
-    let ph: Vec<Vec<BigInt>> = motes
-        .iter()
-        .map(|x| x.phase.iter().take(planes).map(&wrap).collect())
-        .collect();
-    let q: Vec<BigInt> = motes
-        .iter()
-        .map(|x| {
-            let a = x.amount.clone() * open(x) * Ratio::from_integer(qd.clone());
-            a.to_integer()
-        })
-        .collect();
-    let two = BigInt::from(2);
-    let mut out = vec![vec![ratio(0, 1); planes]; n];
-    let scale = Ratio::from_integer(qd.clone() * num_traits::pow(d.clone(), planes));
-    for i in 0..n {
-        if open(&motes[i]).is_zero() {
-            continue;
-        }
-        let mut acc = vec![BigInt::from(0); planes];
-        for j in 0..n {
-            if i == j || q[j].is_zero() {
-                continue;
-            }
-            let mut close = q[j].clone();
-            let mut sg = vec![0i8; planes];
-            for k in 0..planes {
-                let f = (&ph[i][k] - &ph[j][k]).mod_floor(&d);
-                let back = &d - &f;
-                let near = if f <= back { f.clone() } else { back };
-                close *= &d - &two * near;
-                let twice = &two * &f;
-                sg[k] = if f.is_zero() || twice == d {
-                    0
-                } else if twice < d {
-                    1
-                } else {
-                    -1
-                };
-            }
-            if close.is_zero() {
-                continue;
-            }
-            for k in 0..planes {
-                match sg[k] {
-                    1 => acc[k] += &close,
-                    -1 => acc[k] -= &close,
-                    _ => {}
-                }
-            }
-        }
-        for k in 0..planes {
-            out[i][k] = Ratio::new(acc[k].clone(), BigInt::one()) / scale.clone();
-        }
-    }
-    out
-}
-
 /// Two motes of a collective are BONDED (docs/111 §4.2) where they stand on
 /// one held hemisphere (`step_with ≥ ½`, each against the other), both carry
 /// open frames, and the bounce moved them together: their perturbations
-/// `Δφ` (the displacements `repel` gave them) in step, tilt-weighted,
+/// `Δφ` (the displacements the bounce gave them) in step, tilt-weighted,
 /// `C_Δ = Σ_k t_k · in_step(Δφ_k^i, Δφ_k^j) ≥ ½`, by each one's tilt.
 pub fn bonded(a: &Mote, b: &Mote, da: &[Ratio], db: &[Ratio]) -> bool {
     let half = ratio(1, 2);
@@ -616,7 +478,7 @@ pub fn bonded(a: &Mote, b: &Mote, da: &[Ratio], db: &[Ratio]) -> bool {
 }
 
 /// A collective's COLLECTIONS (docs/111 §4.2): the connected sets of its
-/// bonds, read from one bounce's perturbations (`repel`'s moves), never
+/// bonds, read from one bounce's perturbations (each mote's displacement), never
 /// assigned. Each collection is its members' indices, ascending; a mote
 /// bonded to none is in none.
 pub fn collections(motes: &[Mote], moves: &[Vec<Ratio>]) -> Vec<Vec<usize>> {
@@ -3324,65 +3186,6 @@ mod passage_tests {
                 exact_at(&nu),
                 "ν = {k}/97"
             );
-        }
-    }
-
-    #[test]
-    fn the_collectives_pair_sums_are_the_rational_sums_exactly() {
-        // `repel`'s pushed sums on the phases' common denominator equal the
-        // term-by-term rational sums, value for value.
-        use super::{in_step, Mote};
-        let mote = |w: &str, a: i64, ph: [(i64, i64); 4]| Mote {
-            key: crate::chem::Kind::parse(w).expect("a kind"),
-            amount: ratio(a, 7),
-            spins: Mote::spins_of(&ratio(1, 1), &[]),
-            ell_orth: ratio(0, 1),
-            phase: ph.iter().map(|&(n, d)| ratio(n, d)).collect(),
-            agitation: ratio(0, 1),
-            born: 0,
-            vacuum: false,
-            lever: Vec::new(),
-            lever_place: ratio(0, 1),
-        };
-        let motes = vec![
-            mote("W0007", 3, [(1, 60), (7, 3600), (59, 60), (1, 2)]),
-            mote("W0012", 5, [(13, 216000), (1, 4), (2, 3), (1, 6)]),
-            mote("W0016", 11, [(1, 2), (31, 60), (1, 60), (5, 12)]),
-            mote("W0001", 2, [(0, 1), (1, 3), (7, 12), (11, 60)]),
-        ];
-        let open = |x: &Mote| ratio(i64::from(crate::chem::unpaired(&x.key)), 1);
-        let fast = super::pair_sums(&motes, 4, &open);
-        let half = ratio(1, 2);
-        let away = |d: &Ratio| {
-            let f = d.clone() - d.floor();
-            if f.is_zero() || f == half {
-                ratio(0, 1)
-            } else if f < half {
-                ratio(1, 1)
-            } else {
-                ratio(-1, 1)
-            }
-        };
-        for i in 0..motes.len() {
-            if open(&motes[i]).is_zero() {
-                continue;
-            }
-            let mut want = vec![ratio(0, 1); 4];
-            for j in 0..motes.len() {
-                if i == j {
-                    continue;
-                }
-                let q = motes[j].amount.clone() * open(&motes[j]);
-                let close = (0..4).fold(ratio(1, 1), |c, k| {
-                    c * in_step(&motes[i].phase[k], &motes[j].phase[k])
-                });
-                for k in 0..4 {
-                    want[k] += q.clone()
-                        * close.clone()
-                        * away(&(motes[i].phase[k].clone() - motes[j].phase[k].clone()));
-                }
-            }
-            assert_eq!(fast[i], want, "mote {i}");
         }
     }
 
