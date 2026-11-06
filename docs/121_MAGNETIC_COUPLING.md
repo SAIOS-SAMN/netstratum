@@ -291,3 +291,16 @@ boost).
    - a mote at its rest stays;
    - inside the rest it is driven out, past it drawn in;
    - the vacuum's rest is the continuum's with reach and hold exchanged.
+
+## 13. The state level is the spin balance (operator, 2026-11-06)
+
+The operator ruled the state level carries no radial law: a body's reach is
+the reading `R = ℓ/H(<ℓ)` of its spin, and its orbit stands where its spin
+and the hold enclosed balance. The coupling acts on spin alone (§10, the
+phase level). Retired with it (#107): the band (`flows::band`,
+`toward_rest`, its `½`, its halved step and its squared rest), and
+`flows::through`, the `2H − R` mirror, at the vacuum's band and the core's
+release. The release gives its parcel the push's carried spin,
+`ℓ = p·w̄/w` (`pulse::push_cut`), and the galaxy reads its reach. The band's
+sorting by weight is that carriage at release, not a restoring force.
+
