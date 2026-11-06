@@ -1367,34 +1367,35 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
 }
 
 /// The motes whose own enclosures meet each one's on reach, itself excluded:
-/// `|R_i − R_j| ≤ x_i + x_j` with `x = R·e` its extent. Read by bisection over
-/// the reaches in order, bounded by the widest extent, then filtered exactly;
-/// never a test of every pair.
+/// `|R_i − R_j| ≤ x_i + x_j` with `x = R·e` its extent, which is that their
+/// spans `[R − x, R + x]` overlap. The spans in order of their lower ends: each
+/// meets exactly the spans after it whose lower end stands within its upper
+/// end, so one walk forward from each finds every meeting pair once, in
+/// `n log n` plus the pairs, never a test of every pair (register A28).
 fn meeting(reach: &[Ratio], extent: &[Ratio]) -> Vec<Vec<usize>> {
     let n = reach.len();
+    let lo: Vec<Ratio> = (0..n)
+        .map(|i| reach[i].clone() - extent[i].clone())
+        .collect();
+    let hi: Vec<Ratio> = (0..n)
+        .map(|i| reach[i].clone() + extent[i].clone())
+        .collect();
     let mut order: Vec<usize> = (0..n).collect();
-    order.sort_by(|a, b| reach[*a].cmp(&reach[*b]).then(a.cmp(b)));
-    let sorted: Vec<&Ratio> = order.iter().map(|&i| &reach[i]).collect();
-    let widest = extent.iter().max().cloned().unwrap_or_else(|| ratio(0, 1));
-    (0..n)
-        .map(|i| {
-            let span = extent[i].clone() + widest.clone();
-            let (lo, hi) = (reach[i].clone() - span.clone(), reach[i].clone() + span);
-            let a = sorted.partition_point(|r| **r < lo);
-            let b = sorted.partition_point(|r| **r <= hi);
-            let mut met: Vec<usize> = order[a..b]
-                .iter()
-                .copied()
-                .filter(|&j| {
-                    j != i
-                        && (reach[i].clone() - reach[j].clone()).abs()
-                            <= extent[i].clone() + extent[j].clone()
-                })
-                .collect();
-            met.sort_unstable();
-            met
-        })
-        .collect()
+    order.sort_by(|a, b| lo[*a].cmp(&lo[*b]).then(a.cmp(b)));
+    let mut met: Vec<Vec<usize>> = vec![Vec::new(); n];
+    for (p, &i) in order.iter().enumerate() {
+        for &j in &order[p + 1..] {
+            if lo[j] > hi[i] {
+                break;
+            }
+            met[i].push(j);
+            met[j].push(i);
+        }
+    }
+    for m in met.iter_mut() {
+        m.sort_unstable();
+    }
+    met
 }
 
 /// The shear with its grain remainder per plane, `Σ m·(stored − exact)` in
