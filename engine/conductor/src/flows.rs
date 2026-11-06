@@ -326,38 +326,6 @@ pub fn open(k: &crate::chem::Kind) -> Ratio {
     )
 }
 
-/// The band at reach R about the hold H for a kind carried `q = ½·w̄_c/w`
-/// (docs/104 §6.2): `q·u − ½·g·R·H` on the faces `(g, u)` at
-/// `δ = H/(R + H)`; zero at `R·R = 2q` whatever H holds (§6.3).
-pub fn band(q: &Ratio, r: &Ratio, h: &Ratio) -> Ratio {
-    let (g, u) = crate::polarity::faces(&(h.clone() / (r.clone() + h.clone())));
-    q.clone() * u - ratio(1, 2) * g * r.clone() * h.clone()
-}
-
-/// The band as an attractor (docs/112 F3): its step at reach R, never
-/// carrying a mote of spin ℓ past its rest point (`R·R = 2q`, read exactly
-/// on the squares, never by a root): where a whole step would cross it, the
-/// step is halved until it does not, so the motion converges on the rest
-/// and never swings through it. What is not given stays with the core.
-pub fn toward_rest(q: &Ratio, r: &Ratio, h: &Ratio, ell: &Ratio) -> Ratio {
-    let mut step = band(q, r, h);
-    if h.is_zero() || step.is_zero() {
-        return step;
-    }
-    let rest = ratio(2, 1) * q.clone();
-    let side = |reach: &Ratio| (reach.clone() * reach.clone()).cmp(&rest);
-    let now = side(r);
-    for _ in 0..64 {
-        let after = (ell.clone() + step.clone()) / h.clone();
-        let then = side(&after);
-        if then == now || then == std::cmp::Ordering::Equal || now == std::cmp::Ordering::Equal {
-            return step;
-        }
-        step /= ratio(2, 1);
-    }
-    ratio(0, 1)
-}
-
 /// A phase difference as a signed displacement in `(−½, ½]`.
 pub fn signed(d: &Ratio) -> Ratio {
     let f = frac(d);
@@ -1126,7 +1094,6 @@ pub fn torque(
     p: &Ratio,
     tide: Option<(&Ratio, &Ratio)>,
     total: &Ratio,
-    heart_push: Option<&Ratio>,
     cross: &mut crate::enfold::Cross,
 ) -> (Ratio, Ratio) {
     let mut given = ratio(0, 1);
@@ -1147,7 +1114,7 @@ pub fn torque(
     };
     for x in motes.iter_mut() {
         if lo == hi {
-            let (g, ab) = torque_one(x, enc, &lo, tide, total, heart_push, cross);
+            let (g, ab) = torque_one(x, enc, &lo, tide, total, cross);
             given += g;
             absorbed += ab;
             continue;
@@ -1157,15 +1124,15 @@ pub fn torque(
             crate::enfold::Cross::default(),
             crate::enfold::Cross::default(),
         );
-        let (ga, aa) = torque_one(&mut xa, enc, &lo, tide, total, heart_push, &mut ca);
-        let (gb, ab) = torque_one(&mut xb, enc, &hi, tide, total, heart_push, &mut cb);
+        let (ga, aa) = torque_one(&mut xa, enc, &lo, tide, total, &mut ca);
+        let (gb, ab) = torque_one(&mut xb, enc, &hi, tide, total, &mut cb);
         if xa == xb && ca == cb && ga == gb && aa == ab {
             *x = xa;
             cross.join(&ca);
             given += ga;
             absorbed += aa;
         } else {
-            let (g, ab) = torque_one(x, enc, p, tide, total, heart_push, cross);
+            let (g, ab) = torque_one(x, enc, p, tide, total, cross);
             given += g;
             absorbed += ab;
         }
@@ -1183,7 +1150,6 @@ fn torque_one(
     p: &Ratio,
     tide: Option<(&Ratio, &Ratio)>,
     total: &Ratio,
-    heart_push: Option<&Ratio>,
     cross: &mut crate::enfold::Cross,
 ) -> (Ratio, Ratio) {
     // Each turns by what is enclosed inside it (the core and all inside),
@@ -1224,18 +1190,7 @@ fn torque_one(
         &heat_was,
         cross,
     );
-    let (g, ab) = spin_torque(
-        x,
-        &from,
-        &h,
-        &r_o,
-        &d_o,
-        p,
-        &torque_orth,
-        heart_push,
-        &m,
-        &scar,
-    );
+    let (g, ab) = spin_torque(x, &from, &d_o, p, &torque_orth, &m, &scar);
     // Descent: its weight past its round stands one place past its mark.
     settle(x, &levers, place.as_ref(), cross);
     (g, ab)
@@ -1245,7 +1200,7 @@ fn torque_one(
 /// every tier (a galaxy's core on its motes, a star on its system's): from
 /// the orbit phase it stood at (`from`) and the reach and deficit it turns
 /// at (`r_o`, `d_o`, inside the hold `h`), the own family's push in the orbit
-/// plane, the band's push and return (`heart_push`), the parent's push along
+/// plane, the parent's push along
 /// the orthogonal orbit (`torque_orth`) less the hold's return, and what is
 /// not delivered in step left as heat. Returns the spin given (Σ m·Δℓ, the
 /// antipole's to pay) and the pulse absorbed (Σ m·|Δℓ|).
@@ -1253,12 +1208,9 @@ fn torque_one(
 pub fn spin_torque(
     x: &mut Mote,
     from: &[Ratio],
-    h: &Ratio,
-    r_o: &Ratio,
     d_o: &Ratio,
     p: &Ratio,
     torque_orth: &Ratio,
-    heart_push: Option<&Ratio>,
     m: &Ratio,
     scar: &Ratio,
 ) -> (Ratio, Ratio) {
@@ -1301,35 +1253,12 @@ pub fn spin_torque(
     let keep = (ratio(1, 1) - open(&x.key).min(ratio(1, 1))) * (ratio(1, 1) - d_o.clone());
     x.agitation =
         crate::ring::grain(&((x.agitation.clone() + heat) * keep.clone() * keep + scar.clone()));
-    // The band (one grammar: the firmament's, a galaxy's, a star's): the
-    // core's bounce pushes each kind out, `q = push/w` (`push = ½·w̄_c`, the
-    // mean weight of the collective the core holds), and its hold returns it,
-    // so its held matter rests in a band (docs/104 §6). The vacuum feels the
-    // same law reflected through the throat, which stands at the core's
-    // state, R = 1 (the enclosed law's base: throat 1, rim 2 in the
-    // enclosure's own units): `R → 2 − R` (`through`). Past the rim the
-    // vacuum stands outside this sphere.
-    let throat = ratio(1, 1);
-    let band = match heart_push {
-        Some(push) if !h.is_zero() => {
-            // On the inverse faces (docs/104 §6.2): the push on the unlocked
-            // face u, the pull back on the held face g by the spin ℓ = R·H;
-            // at rest where `R·R = w̄_c/w` (§6.3).
-            let q = push.clone() / weight(&x.key);
-            let at = |reach: &Ratio| band(&q, reach, h);
-            if !x.vacuum {
-                toward_rest(&q, r_o, h, &x.ell_o())
-            } else {
-                let mirrored = through(r_o, &throat);
-                if mirrored > ratio(0, 1) {
-                    -at(&mirrored)
-                } else {
-                    ratio(0, 1)
-                }
-            }
-        }
-        _ => ratio(0, 1),
-    };
+    // No radial law at the state level (operator 2026-11-06: the spin
+    // balance): a mote's reach is the reading `ℓ/H(<ℓ)` of its spin, and its
+    // orbit stands where its spin and the hold enclosed balance; the band
+    // (docs/104 §6) and its rest are retired (register K12), the coupling
+    // acting on spin alone (`shear`, docs/121 §10).
+    let band = ratio(0, 1);
     // Each plane's spin: its share of the orbit spin, its own torque and
     // its share of the band (radial). A plane torqued past zero carries the
     // mote through the centre in that plane (its phase there on half a
@@ -1625,15 +1554,6 @@ fn shear_booked(
         }
     }
     (moved, left)
-}
-
-/// The throat's inversion on the sphere (ruling of 2026-10-21: the second
-/// double inversion must not be flattened): with the polar angle `θ =
-/// 90°·R/H` (the throat at 90°, where δ = ½; the rim at 180°), inverting
-/// through the throat reflects `θ → 180° − θ`, so `R → 2H − R`: the core and
-/// the rim change places, the throat stands. Linear, exact, no square.
-pub fn through(r: &Ratio, h: &Ratio) -> Ratio {
-    ratio(2, 1) * h.clone() - r.clone()
 }
 
 /// The spray (with Xylarium; the founding epoch one tier down): matter a
@@ -3302,14 +3222,6 @@ mod passage_tests {
     use num_traits::Zero;
 
     #[test]
-    fn the_throats_inversion_exchanges_core_and_rim() {
-        // The throat's reflection: the core and the rim change places, the
-        // throat stands.
-        assert_eq!(super::through(&ratio(0, 1), &ratio(1, 1)), ratio(2, 1));
-        assert_eq!(super::through(&ratio(1, 1), &ratio(1, 1)), ratio(1, 1));
-    }
-
-    #[test]
     fn the_strips_step_rises_with_what_stands_inside() {
         // The order the certified strip relies on: Held, then edges never
         // narrower, then Whole, as the inside share rises.
@@ -3454,46 +3366,6 @@ mod passage_tests {
             &mut cross,
         );
         assert_eq!(true_phase(&x, 0), ratio(1, 60) - ratio(1, 240));
-    }
-
-    #[test]
-    fn the_band_rests_where_the_reach_squared_is_the_collectives_mean_over_the_weight() {
-        // docs/104 §6.3: w̄_c/w = 4/9, so R* = 2/3 at any hold.
-        let q = ratio(1, 2) * ratio(4, 9);
-        for h in [ratio(1, 1), ratio(3, 1), ratio(1, 7)] {
-            assert_eq!(super::band(&q, &ratio(2, 3), &h), ratio(0, 1));
-            assert!(
-                super::band(&q, &ratio(1, 3), &h) > ratio(0, 1),
-                "inside, the push wins"
-            );
-            assert!(
-                super::band(&q, &ratio(1, 1), &h) < ratio(0, 1),
-                "outside, the pull wins"
-            );
-        }
-        // A kind lighter than the mean rests beyond the throat (R* > 1).
-        let light = ratio(1, 2) * ratio(9, 4);
-        assert!(super::band(&light, &ratio(1, 1), &ratio(1, 1)) > ratio(0, 1));
-        assert_eq!(
-            crate::polarity::faces(&ratio(1, 2)),
-            (ratio(1, 2), ratio(1, 2)),
-            "the faces balance at the ring"
-        );
-    }
-
-    #[test]
-    fn the_band_as_an_attractor_converges_on_its_rest_without_crossing_it() {
-        // docs/112 F3: R* = 2/3 about H = 1 (q = 2/9); from R = 1/10 the
-        // spin climbs toward ℓ* = 2/3 and never passes it.
-        let (q, h) = (ratio(1, 2) * ratio(4, 9), ratio(1, 1));
-        let mut ell = ratio(1, 10);
-        for _ in 0..60 {
-            let r = ell.clone() / h.clone();
-            // On the grain each bell, as the torque holds its spins.
-            ell = crate::ring::grain(&(ell.clone() + super::toward_rest(&q, &r, &h, &ell)));
-            assert!(ell <= ratio(2, 3), "never past the rest");
-        }
-        assert!(ratio(2, 3) - ell.clone() < ratio(1, 1000), "it converges");
     }
 
     #[test]
@@ -3818,12 +3690,9 @@ mod passage_tests {
         let _ = spin_torque(
             &mut x,
             &from,
-            &ratio(1, 1),
-            &ratio(1, 2),
             &ratio(2, 3),
             &ratio(1, 4),
             &ratio(0, 1),
-            None,
             &ratio(1, 1),
             &ratio(0, 1),
         );
@@ -3860,23 +3729,6 @@ mod passage_tests {
         );
         mobius(&mut x);
         assert_eq!(x, was, "two passes close");
-    }
-
-    #[test]
-    fn the_passage_reads_the_courts_law_passage_fixtures() {
-        // Mycelium's LAW-PASSAGE v1 (proposal 78.172 §5): the court's
-        // fixtures, which this kernel's passage must reach exactly.
-        assert_eq!(super::through(&ratio(1, 2), &ratio(3, 2)), ratio(5, 2));
-        assert_eq!(super::through(&ratio(5, 2), &ratio(3, 2)), ratio(1, 2));
-        assert_eq!(super::through(&ratio(7, 3), &ratio(7, 3)), ratio(7, 3));
-        // On a share, the face read across the throat.
-        assert_eq!(ratio(1, 1) - ratio(1, 5), ratio(4, 5));
-        // Never the sphere's inversion: H²/R would read 4 here, the passage 3.
-        assert_eq!(super::through(&ratio(1, 1), &ratio(2, 1)), ratio(3, 1));
-        // Past 2H the passage is signed (the centre passed), and the reverse
-        // returns the reach: the involution holds only on the sign.
-        assert_eq!(super::through(&ratio(3, 1), &ratio(1, 1)), ratio(-1, 1));
-        assert_eq!(super::through(&ratio(-1, 1), &ratio(1, 1)), ratio(3, 1));
     }
 
     #[test]

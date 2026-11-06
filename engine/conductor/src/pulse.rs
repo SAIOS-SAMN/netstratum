@@ -1309,7 +1309,6 @@ pub fn orbit_galaxies(u: &mut Universe) -> (crate::enfold::Cross, Option<Ratio>,
                 &ratio(1, 2),
                 None,
                 &ledger_u,
-                None,
                 &mut cross,
             );
             let moved = ledger(&u.ocean) - before;

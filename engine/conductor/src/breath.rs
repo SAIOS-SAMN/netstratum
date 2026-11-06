@@ -671,11 +671,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         } else {
             None
         };
-        let collective_push = if home {
-            crate::pulse::collective_mean(u).map(|w| ratio(1, 2) * w)
-        } else {
-            None
-        };
         let centre = centre_state(u, i);
         let core = &mut u.cores[i];
         let mut returned = ratio(0, 1);
@@ -1971,7 +1966,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     g_rate.clone().unwrap_or_else(|| ratio(1, 1)) * ratio(bell as i64, 1);
                 let twist_t = crate::flows::tilt_of(&core.tilt);
                 let lead = core.tilt.clone();
-                let enc_r = galaxy_enc(core);
                 let ledger_r = if home {
                     ledger_u.clone()
                 } else {
@@ -1996,16 +1990,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     if take <= ratio(0, 1) {
                         continue;
                     }
-                    // Released inside the core (docs/112 §3.1): its
-                    // dispersal reach `1 + span·c` read through the throat
-                    // on the inverse face, `R → 2 − R`; a kind carried past
-                    // the centre stands at the magnitude on the far side
-                    // (the light pass through, the heavy stay within).
-                    let out = ratio(1, 1) + span_r.clone() * c.clone();
-                    let mirrored = crate::flows::through(&out, &ratio(1, 1));
-                    let passed = mirrored < ratio(0, 1);
-                    let r = if passed { -mirrored } else { mirrored };
-                    let ell = crate::ring::grain(&enc_r.spin_at(&r));
+                    // Released with the push's carried spin (docs/121 §12,
+                    // the spin balance; `pulse::push_cut`: a nucleus of weight
+                    // w is carried `ℓ = p·w̄/w`), its reach the galaxy's
+                    // reading of it, never placed and never mirrored.
+                    let ell = crate::ring::grain(&(span_r.clone() * c.clone()));
                     let d_k = base.clone() / (c.clone() + base.clone());
                     let z = ratio(i64::from(crate::chem::charge(&k)), 2);
                     let base = frac(ratio(bell as i64, 1) * ratio(2, 3) * d_k + z.clone());
@@ -2014,9 +2003,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         phase[sp] = crate::ring::grain(&frac(
                             base.clone() + ratio(1, 2) * twist_t[j].clone() * rings_now.clone(),
                         ));
-                    }
-                    if passed {
-                        crate::flows::antipode(&mut phase);
                     }
                     if let Some(x) = core.throat.get_mut(&k) {
                         *x -= take.clone();
@@ -2131,17 +2117,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 })
             };
             let before = ledger_sum(core);
-            // The universal core's band (docs/104 §6): its held collective
-            // pushed on the unlocked face and pulled back on the held face,
-            // scaled by the collective's own bonds, `½·w̄_c`.
-            let band_push = if home { collective_push.clone() } else { None };
             let (given, absorbed) = crate::flows::torque(
                 &mut core.flows,
                 enc.as_ref().unwrap_or(&throat),
                 &p,
                 tide,
                 &ledger_unit,
-                band_push.as_ref(),
                 &mut cross,
             );
             // The disc forms: each mote's tilt returns toward its galaxy's spin
