@@ -304,3 +304,58 @@ release. The release gives its parcel the push's carried spin,
 `ℓ = p·w̄/w` (`pulse::push_cut`), and the galaxy reads its reach. The band's
 sorting by weight is that carriage at release, not a restoring force.
 
+
+## 14. Gravity pulls and pushes like a magnet: the dipole on reach (operator, 2026-11-07)
+
+The operator ruled: "gravity doesnt fall in space/time, gravity pulls and
+pushs much more like a magnet", accepted this law, and accepted the
+correction below (2026-11-07).
+
+1. **Why §12 had no stable rest.** Its pull `H/(R + H)` and push
+   `k·M/(R + M)` are both monopole ring-law shares. Where they balance, the
+   net share's slope is `s·(1/(R + H) − 1/(R + M))`, restoring only where
+   `M < H`; a rest exists only where `kM > H`, so `M > H`. The two exclude
+   each other.
+2. **Gravity is already in the orbit.** The spin balance `R_ℓ = ℓ/H(<ℓ)`
+   (§13) is where gravity's pull and the spin's outward share meet. A
+   second gravity share on reach counts it twice. The restoring part of a
+   radial law is a body's offset from its spin balance, the pair contrast
+   `(R − R_ℓ)/(R + R_ℓ)`: zero on the orbit, growing with the offset, first
+   degree. It is §12.2's missing "return that grows with reach".
+3. **The magnet is a dipole.** Its share is the ring law's contrast across
+   the body's own extent `d = R·e` (docs/120 §8c), the difference of two
+   pole pulls `d` apart:
+
+       n_d = M/(R − d + M) − M/(R + d + M)
+
+   with `M` the open frames enclosed. It falls off faster than a monopole
+   share, so it acts near and the offset's return acts far. It is signed
+   by the poles, `s = −σ_i·σ_c` (opposed pull, aligned push, §3, §10), and
+   gripped by both fluidities, `κ = o_i·o_c` (Mycelium 78.175 F1), `σ_c`
+   and `o_c` the frames enclosed.
+4. **The law.** The inward share on body `i`,
+
+       y = (R − R_ℓ)/(R + R_ℓ) + s·κ·n_d,   in (−1, 1)
+
+   moves its reach by a boost, `R′ = R·(1 − y)/(1 + y)` (LAW-DILATION),
+   never through zero and never past the horizon. Its rest is where the
+   magnet's pull or push balances its offset from the spin balance, read
+   where `y` vanishes, never solved for. Aligned, the rest stands outside
+   the orbit; opposed, inside; with no open frames (`o = 0`), on it.
+5. **Spin is kept.** A radial pull or push exerts no torque: the boost moves
+   the reach and leaves `ℓ` unchanged, so `Σ m·ℓ + reservoir` is untouched
+   by it.
+6. **Reach becomes state.** Off its spin balance, a body's reach is no
+   longer a reading of its spin. Each mote carries its displacement on the
+   S lane (docs/120 §1, register #117) as a lift `u ∈ (−1, 1)`,
+   `R = R_ℓ·D(u)`, `D` LAW-DILATION, 0 on the orbit. Every law that read a
+   mote's reach as `ℓ/H(<ℓ)` reads the carried reach.
+7. **One law at two levels** (§11): the dipole's sign `−σ·σ` acts on reach
+   here and on rates in `flows::shear`; both stand.
+8. **Build order, each with its read:**
+   1. the lift, 0 everywhere, every mote reach read through it (nothing
+      moves);
+   2. the boost, its witnesses: aligned, inside its rest driven out and
+      outside drawn in; at its rest it stays; `o = 0` stays on its orbit;
+      the boost inside the horizon; spin unchanged by it; the vacuum's
+      law the continuum's with reach and hold exchanged (docs/117 §12.6).
