@@ -112,16 +112,22 @@ fn lane_text(q: &Ratio) -> String {
     )
 }
 
-/// The whole turns of each of `H`'s components, both senses counted:
-/// `⌊|θ|/360⌋`.
-fn closed(h: &Value) -> Vec<u64> {
+/// The whole turns of each of `H`'s components, signed and truncated toward
+/// zero (agreed with Mycelium for the shared H writing, 78.173 §8, point 2):
+/// `K = sign(θ)·⌊|θ|/360⌋`, so −810° holds `K = −2` with residual −90°.
+fn closed(h: &Value) -> Vec<i64> {
     h.0.iter()
         .map(|th| {
-            (th.abs() / Ratio::from_integer(TURN.into()))
+            let whole: i64 = (th.abs() / Ratio::from_integer(TURN.into()))
                 .floor()
                 .to_integer()
                 .try_into()
-                .unwrap_or(u64::MAX)
+                .unwrap_or(i64::MAX);
+            if *th < Ratio::from_integer(0.into()) {
+                -whole
+            } else {
+                whole
+            }
         })
         .collect()
 }
@@ -132,7 +138,7 @@ fn closed(h: &Value) -> Vec<u64> {
 pub struct Local {
     pub h: u64,
     pub lanes: [Value; 4],
-    pub k: Vec<u64>,
+    pub k: Vec<i64>,
 }
 
 impl Local {
@@ -152,7 +158,19 @@ impl Local {
     pub fn written(&self) -> String {
         let mut fields = vec![format!("{:016x}", self.h)];
         fields.extend(self.lanes.iter().map(Value::written));
-        let k: Vec<String> = self.k.iter().map(|k| format!("{k:016x}")).collect();
+        // Sixteen hex digits a component; a negative one signed `-` on its
+        // magnitude.
+        let k: Vec<String> = self
+            .k
+            .iter()
+            .map(|k| {
+                if *k < 0 {
+                    format!("-{:016x}", k.unsigned_abs())
+                } else {
+                    format!("{k:016x}")
+                }
+            })
+            .collect();
         fields.push(match k.as_slice() {
             [one] => one.clone(),
             [] => format!("{:016x}", 0),
@@ -704,7 +722,7 @@ mod tests {
         [v(s), v(g), v(t), v(h)]
     }
 
-    fn body(origin: &Origin, h: u64, lanes: [Value; 4], k: Vec<u64>) -> Coordinate {
+    fn body(origin: &Origin, h: u64, lanes: [Value; 4], k: Vec<i64>) -> Coordinate {
         Coordinate {
             origin: origin.clone(),
             local: Local { h, lanes, k },
@@ -906,6 +924,17 @@ mod tests {
             let bound = 2 * (63 - (n as u64).leading_zeros() + 1);
             assert!(read.probes <= bound, "{} probes over {n}", read.probes);
         }
+    }
+
+    #[test]
+    fn the_winding_is_signed_and_truncated_toward_zero() {
+        // Agreed with Mycelium (78.173 §8, point 2): −810° is K = −2 with
+        // residual −90°; 810° is K = 2; a turn short of zero is K = 0.
+        let k = |deg: i64| super::closed(&Value::one(q(deg, 1)));
+        assert_eq!(k(-810), vec![-2]);
+        assert_eq!(k(810), vec![2]);
+        assert_eq!(k(-359), vec![0]);
+        assert_eq!(k(-360), vec![-1]);
     }
 
     #[test]
