@@ -348,6 +348,9 @@ pub struct Event {
     pub dissolved: usize,
     /// Remnants whose gathered fuel flashed off this echo (novae).
     pub novae: usize,
+    /// The magnet on reach this echo (docs/121 §14): the motes whose lift
+    /// moved and the sum of the lifts' change.
+    pub lifted: (usize, Ratio),
     /// Star encounters at this echo: mergers (sticks) and bounces.
     pub merged: usize,
     pub encounters: usize,
@@ -739,6 +742,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut returned = ratio(0, 1);
         let mut dissolved = 0;
         let mut novae = 0usize;
+        let mut lifted = (0usize, ratio(0, 1));
         let mut births_h: Vec<(Ratio, Ratio, Ratio)> = Vec::new();
         let mut grown = (0usize, 0usize, 0usize, 0usize);
         let mut escaped_all = ratio(0, 1);
@@ -2275,6 +2279,30 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             core.reservoir -= given;
             identity.push(("torque", ledger_sum(core) - before));
+            // The magnet on reach (docs/121 §14): every mote's lift stands at
+            // the dipole's share where it stands; its spin is not touched.
+            crate::profile::mark("breath:magnet");
+            {
+                let enc_m = enc.as_ref().unwrap_or(&throat);
+                let base = enc_m.base();
+                // The base's frames: the core's state, in proportion to its
+                // throat's frames; a closed pole where its throat holds none.
+                let (a_t, q_t) = core.throat.iter().fold((ratio(0, 1), ratio(0, 1)), |(a, q), (k, n)| {
+                    let (fa, fq) = crate::chem::frames(k);
+                    (a + n.clone() * ratio(i64::from(fa), 1), q + n.clone() * ratio(i64::from(fq), 1))
+                });
+                let whole_t = a_t.clone() + q_t.clone();
+                let base_frames = if whole_t.is_zero() {
+                    (base.clone(), ratio(0, 1))
+                } else {
+                    (base.clone() * a_t / whole_t.clone(), base * q_t / whole_t)
+                };
+                let spin_was = ledger_sum(core);
+                let (n_m, du) = crate::flows::magnet(&mut core.flows, enc_m, &ledger_unit, &base_frames);
+                lifted.0 += n_m;
+                lifted.1 += du;
+                identity.push(("magnet spin", ledger_sum(core) - spin_was));
+            }
             crate::profile::mark("breath:recycle");
             // Recycling (`crate::recycle`; Xylarium 11.0 (18)): after the
             // torques (torques are motion, recycling the residue), the bounce the
@@ -2931,6 +2959,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             returned,
             dissolved,
             novae,
+            lifted,
             births_h,
             merged,
             encounters,

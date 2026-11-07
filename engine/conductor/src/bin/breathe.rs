@@ -310,6 +310,8 @@ fn main() {
     let births: usize = events.iter().map(|e| e.stars).sum();
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();
     let novae: usize = events.iter().map(|e| e.novae).sum();
+    let lifted_n: usize = events.iter().map(|e| e.lifted.0).sum();
+    let lifted_du = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.lifted.1.clone());
     let returned = events
         .iter()
         .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
@@ -416,7 +418,7 @@ fn main() {
     for (name, spent) in conductor::profile::drain() {
         eprintln!("PROFILE {name}: {:.1}s", spent.as_secs_f64());
     }
-    println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up); {novae} novae (a remnant's gathered fuel thrown off)", until, events.len(), returned.round());
+    println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up); {novae} novae (a remnant's gathered fuel thrown off); the magnet on reach moved {lifted_n} lifts by {} in all", until, events.len(), returned.round(), conductor::reading::sector(&lifted_du));
     for (i, c) in u.cores.iter().enumerate() {
         let echoes = events
             .iter()

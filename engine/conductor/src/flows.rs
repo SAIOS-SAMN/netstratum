@@ -657,6 +657,129 @@ pub fn lifted(enc: &Enclosed, ell: &Ratio, lift: &Ratio) -> (Ratio, Ratio, Ratio
     (r, h, d)
 }
 
+/// The magnet's share on a body at reach `R` (docs/121 §14.3): the dipole
+/// contrast of the ring law across its own extent `d`, `n_d = M/(R − d + M) −
+/// M/(R + d + M)` (`M` the open frames enclosed), signed by the poles `s =
+/// −σ_i·σ_c` and gripped by the fluidities `κ = o_i·o_c`: `m = s·κ·n_d`,
+/// inward positive, in `(−1, 1)`. None where the contrast is undefined.
+pub fn magnet_share(r: &Ratio, d: &Ratio, m: &Ratio, s: &Ratio, kappa: &Ratio) -> Option<Ratio> {
+    let near = r.clone() - d.clone() + m.clone();
+    let far = r.clone() + d.clone() + m.clone();
+    if near <= ratio(0, 1) || far <= ratio(0, 1) {
+        return None;
+    }
+    let n_d = m.clone() / near - m.clone() / far;
+    Some(s.clone() * kappa.clone() * n_d)
+}
+
+/// The boost on reach (docs/121 §14.4): the inward share `y = u ⊕ m` (the
+/// offset from the spin balance, which is the lift `u` itself, composed with
+/// the magnet's share by the flow law), and the reach dilated by it,
+/// `R′ = R/D(y)`, which is the lift `u′ = u ⊖ y`. The two compose to `−m`:
+/// each bell the lift stands at the magnet's share where the body stands;
+/// with no magnet (`m = 0`) it is back on its orbit. Spin is not touched.
+/// None outside the flow law's domain.
+pub fn boosted(u: &Ratio, m: &Ratio) -> Option<Ratio> {
+    let y = crate::ring::compose(u, m)?;
+    crate::ring::compose(u, &-y)
+}
+
+/// The magnet on reach for every mote of an enclosure (docs/121 §14), read
+/// at once from where they stand, then moved. Each mote at reach `R` (its
+/// spin balance lifted, `reach_in`), its own extent `d = R·e`, its pole and
+/// fluidity on its frames `(3Z − U, U)` (on the vacuum leg exchanged, the
+/// passage's pole swap: `σ ↦ −σ`, `o ↦ 1 − o`); what stands within `R`:
+/// the base (the core's state, its frames the throat's composition, a
+/// closed pole where its throat holds nothing) and every mote whose reach is
+/// below `R`, each by its holding share, its frames in proportion. Each lift
+/// moves by `boosted`, held on the grain. Returns the motes moved and the sum
+/// of their lifts' change.
+pub fn magnet(
+    motes: &mut [Mote],
+    enc: &Enclosed,
+    total: &Ratio,
+    base_frames: &(Ratio, Ratio),
+) -> (usize, Ratio) {
+    let n = motes.len();
+    if n == 0 || total.is_zero() {
+        return (0, ratio(0, 1));
+    }
+    let frames_of = |x: &Mote| {
+        let (a, q) = crate::chem::frames(&x.key);
+        let (a, q) = (ratio(i64::from(a), 1), ratio(i64::from(q), 1));
+        if x.vacuum {
+            (q, a)
+        } else {
+            (a, q)
+        }
+    };
+    // Each mote's reach, extent, holding and frames, at the bell's start.
+    let reach: Vec<Ratio> = motes.iter().map(|x| x.reach_in(enc).0).collect();
+    let mut by: Vec<usize> = (0..n).collect();
+    by.sort_by(|&a, &b| reach[a].cmp(&reach[b]).then(a.cmp(&b)));
+    let held: Vec<(Ratio, Ratio)> = motes
+        .iter()
+        .map(|x| {
+            let h = x.amount.clone() * weight(&x.key) / total.clone();
+            let (a, q) = frames_of(x);
+            let whole = a.clone() + q.clone();
+            if whole.is_zero() {
+                (h, ratio(0, 1))
+            } else {
+                (h.clone() * a / whole.clone(), h * q / whole)
+            }
+        })
+        .collect();
+    // Prefix sums by reach: the frames standing below each mote.
+    let mut inside: Vec<(Ratio, Ratio)> = vec![(ratio(0, 1), ratio(0, 1)); n];
+    let (mut a_run, mut q_run) = base_frames.clone();
+    let mut j = 0;
+    while j < n {
+        // Motes at one reach stand beside each other, not inside.
+        let mut k = j;
+        while k < n && reach[by[k]] == reach[by[j]] {
+            inside[by[k]] = (a_run.clone(), q_run.clone());
+            k += 1;
+        }
+        for &i in &by[j..k] {
+            a_run += held[i].0.clone();
+            q_run += held[i].1.clone();
+        }
+        j = k;
+    }
+    let mut lifts = Vec::with_capacity(n);
+    for (i, x) in motes.iter().enumerate() {
+        let (a, q) = frames_of(x);
+        let whole = a.clone() + q.clone();
+        let (ac, qc) = &inside[i];
+        let enclosed = ac.clone() + qc.clone();
+        let next = if whole.is_zero() || enclosed.is_zero() {
+            None
+        } else {
+            let (s_i, o_i) = ((a.clone() - q.clone()) / whole.clone(), q.clone() / whole);
+            let (s_c, o_c) = (
+                (ac.clone() - qc.clone()) / enclosed.clone(),
+                qc.clone() / enclosed,
+            );
+            let d = reach[i].clone() * own_enclosure(x, enc, total)[0].clone();
+            magnet_share(&reach[i], &d, qc, &-(s_i * s_c), &(o_i * o_c))
+                .and_then(|m| boosted(&x.lift, &m))
+        };
+        lifts.push(next.map(|u| crate::ring::grain(&u)));
+    }
+    let (mut moved, mut change) = (0usize, ratio(0, 1));
+    for (x, u) in motes.iter_mut().zip(lifts) {
+        let Some(u) = u else { continue };
+        if u != x.lift && u > ratio(-1, 1) && u < ratio(1, 1) {
+            let d = u.clone() - x.lift.clone();
+            change += if d < ratio(0, 1) { -d } else { d };
+            x.lift = u;
+            moved += 1;
+        }
+    }
+    (moved, change)
+}
+
 /// A body's own enclosure (docs/120 §8c, operator 2026-11-05), read and
 /// never stored: on each plane of its orbit (the orbit, the circulation),
 /// where its own pull meets its enclosure's, the pinch share `m/(m + H(<R))`
@@ -3647,6 +3770,45 @@ mod passage_tests {
         assert_eq!(super::open(&k(1)), ratio(1, 1), "cold hydrogen");
         assert_eq!(super::open_hot(&k(1), &ratio(1, 1)), ratio(0, 1), "stripped");
         assert_eq!(super::open_hot(&k(1), &ratio(0, 1)), super::open(&k(1)), "heat 0 is the atom");
+    }
+
+    #[test]
+    fn the_magnet_on_reach_pushes_aligned_poles_out_and_rests_where_it_balances() {
+        // docs/121 §14: the dipole contrast falls faster than a monopole, and
+        // the boost leaves the lift at the magnet's share where the body
+        // stands (u' = u ⊖ (u ⊕ m) = −m).
+        use super::{boosted, magnet_share};
+        let (r, d, m) = (ratio(3, 1), ratio(1, 10), ratio(1, 2));
+        let kappa = ratio(1, 9);
+        // Aligned (s < 0): an outward share, the lift raised past the orbit.
+        let push = magnet_share(&r, &d, &m, &ratio(-1, 3), &kappa).expect("defined");
+        assert!(push < ratio(0, 1));
+        assert_eq!(boosted(&ratio(0, 1), &push), Some(-push.clone()), "lifted out by the push");
+        // From inside its rest (below −m) it is driven out; from outside drawn in.
+        let rest = -push.clone();
+        let inside = rest.clone() - ratio(1, 100);
+        let outside = rest.clone() + ratio(1, 100);
+        assert!(boosted(&inside, &push).expect("in") > inside, "driven out");
+        assert!(boosted(&outside, &push).expect("in") < outside, "drawn in");
+        assert_eq!(boosted(&rest, &push), Some(rest.clone()), "at its rest it stays");
+        // Opposed (s > 0): inward, inside the orbit.
+        let pull = magnet_share(&r, &d, &m, &ratio(1, 3), &kappa).expect("defined");
+        assert!(pull > ratio(0, 1) && boosted(&ratio(0, 1), &pull).expect("in") < ratio(0, 1));
+        // No open frames: back on its orbit.
+        let none = magnet_share(&r, &d, &m, &ratio(1, 3), &ratio(0, 1)).expect("defined");
+        assert_eq!(boosted(&ratio(1, 5), &none), Some(ratio(0, 1)), "o = 0: on its orbit");
+        // The dipole falls faster than the monopole share it is measured against.
+        let far = ratio(30, 1);
+        let mono = |r: &Ratio| m.clone() / (r.clone() + m.clone());
+        let dip = |r: &Ratio| magnet_share(r, &d, &m, &ratio(1, 1), &ratio(1, 1)).expect("defined");
+        assert!(dip(&far) / dip(&r) < mono(&far) / mono(&r), "the dipole falls faster");
+        // The boost stays inside the horizon for the strongest share.
+        for u in [ratio(-9, 10), ratio(0, 1), ratio(9, 10)] {
+            for s in [ratio(-99, 100), ratio(99, 100)] {
+                let v = boosted(&u, &s).expect("in");
+                assert!(v > ratio(-1, 1) && v < ratio(1, 1));
+            }
+        }
     }
 
     #[test]
