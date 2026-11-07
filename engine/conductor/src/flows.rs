@@ -326,6 +326,21 @@ pub fn open(k: &crate::chem::Kind) -> Ratio {
     )
 }
 
+/// A kind's open share at a heat (the hot reading of `open`, register §D:
+/// one reading per quantity): an atom's open frames are what its windings
+/// keep at that heat (`atom::open_at`; hydrogen is stripped at heat 1, heavy
+/// kinds keep their deep windings), over its weight. A cluster has no
+/// windings of its own and reads `open`.
+pub fn open_hot(k: &crate::chem::Kind, heat: &Ratio) -> Ratio {
+    match crate::chem::atom_w(k) {
+        Some(w) => ratio(
+            i64::from(cfe::almanac::atom::open_at(crate::chem::protons(w), heat)),
+            i64::from(crate::chem::weight(k).max(1)),
+        ),
+        None => open(k),
+    }
+}
+
 /// A phase difference as a signed displacement in `(−½, ½]`.
 pub fn signed(d: &Ratio) -> Ratio {
     let f = frac(d);
@@ -3579,6 +3594,17 @@ mod passage_tests {
         );
         mobius(&mut x);
         assert_eq!(x, was, "two passes close");
+    }
+
+    #[test]
+    fn a_hot_star_holds_its_hydrogen_against_the_wind() {
+        // One reading per quantity: at the heart's heat hydrogen is stripped
+        // (no open frames for the wind to take); cold it is wholly open; a
+        // heavy kind keeps its deep windings' open frames at that heat.
+        let k = |w: u32| crate::chem::Kind::atom(w).expect("a kind");
+        assert_eq!(super::open(&k(1)), ratio(1, 1), "cold hydrogen");
+        assert_eq!(super::open_hot(&k(1), &ratio(1, 1)), ratio(0, 1), "stripped");
+        assert_eq!(super::open_hot(&k(1), &ratio(0, 1)), super::open(&k(1)), "heat 0 is the atom");
     }
 
     #[test]
