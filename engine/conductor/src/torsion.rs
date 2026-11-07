@@ -180,6 +180,7 @@ mod tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         let mut disc = vec![mote(1, [4, 1, 1]), mote(5, [1, 1, 4])];
         let enc = crate::flows::Enclosed::new(

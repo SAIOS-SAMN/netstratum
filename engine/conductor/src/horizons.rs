@@ -168,6 +168,7 @@ mod tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         }
     }
 

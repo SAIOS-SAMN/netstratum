@@ -680,7 +680,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let mut flowing: Vec<crate::flows::Mote> = Vec::new();
             for x in std::mem::take(&mut u.ocean) {
                 let r_m = match (&frame, x.vacuum) {
-                    (Some(f), true) => f.reach(&x.ell_o()).0,
+                    (Some(f), true) => x.reach_in(&f).0,
                     _ => {
                         flowing.push(x);
                         continue;
@@ -1400,7 +1400,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         .iter()
                         .filter(|x| x.vacuum)
                         .fold(ratio(0, 1), |acc, x| {
-                            let rx = enc.reach(&x.ell_o()).0;
+                            let rx = x.reach_in(&enc).0;
                             if rx < lo || rx > hi {
                                 return acc;
                             }
@@ -1801,7 +1801,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // never a second orbit). Remnants do not capture.
         if let (Some(_), Some(enc), false) = (&pre, &enc, scale_pre.is_zero() || g_before.is_zero())
         {
-            let reach_m = |x: &crate::flows::Mote| enc.reach(&x.ell_o()).0;
+            let reach_m = |x: &crate::flows::Mote| x.reach_in(&enc).0;
             let mut claims: Vec<Vec<usize>> = vec![Vec::new(); core.flows.len()];
             let mut by_reach: Vec<(Ratio, usize)> = core
                 .flows
@@ -1943,6 +1943,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         vacuum: false,
                         lever: Vec::new(),
                         lever_place: ratio(0, 1),
+                        lift: ratio(0, 1),
                     };
                     if let Some((w, _)) = masses[si].as_mut() {
                         *w += take.clone() * crate::flows::weight(&key);
@@ -2144,6 +2145,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         vacuum: false,
                         lever: Vec::new(),
                         lever_place: ratio(0, 1),
+                        lift: ratio(0, 1),
                     });
                 }
                 core.throat.retain(|_, a| *a > ratio(0, 1));
@@ -2173,6 +2175,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     vacuum: true,
                     lever: Vec::new(),
                     lever_place: ratio(0, 1),
+                    lift: ratio(0, 1),
                 });
             }
             // Shed matter crosses whole at the spins it left with, in the
@@ -2204,6 +2207,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         vacuum: false,
                         lever: Vec::new(),
                         lever_place: ratio(0, 1),
+                        lift: ratio(0, 1),
                     });
                 }
             }
@@ -2432,6 +2436,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     born: bell,
                     lever: Vec::new(),
                     lever_place: ratio(0, 1),
+                    lift: ratio(0, 1),
                     ..x
                 });
                 jets += 1;
@@ -2451,7 +2456,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // the source's own at the mote's reach.
             let push_at = |x: &crate::flows::Mote| match tide {
                 Some((rho, du)) => p.clone() * rho.clone() * du.clone(),
-                None => p.clone() * enc_now.reach(&x.ell_o()).1,
+                None => p.clone() * x.reach_in(&enc_now).1,
             };
             circulation.3 = crate::flows::stream(&core.flows, &strands, &push_at);
             crate::profile::mark("breath:bindings");
@@ -2492,6 +2497,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         amount,
                         lever: Vec::new(),
                         lever_place: ratio(0, 1),
+                        lift: ratio(0, 1),
                         ..x.clone()
                     });
                 }
@@ -2798,7 +2804,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         for x in &sys.flows {
                             let held = x.amount.clone() * crate::flows::weight(&x.key);
                             discs.0 += held.clone();
-                            if enc.reach(&x.ell_o()).0 >= rho_birth {
+                            if x.reach_in(&enc).0 >= rho_birth {
                                 discs.1 += held;
                             }
                         }
@@ -2834,11 +2840,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     .collect(),
             );
             let place_of = |x: &crate::flows::Mote| {
-                let (r, _) = enc_m.reach(&x.ell_o());
+                let (r, _) = x.reach_in(&enc_m);
                 crate::enfold::place(
                     &r,
                     &(x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()),
-                    &enc_m.hold(&x.ell_o()),
+                    &x.hold_in(&enc_m),
                 )
             };
             crate::profile::mark("breath:merge");
@@ -3044,6 +3050,7 @@ mod tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         s.flows.push(y.clone());
         y.amount = ratio(1, 1);
@@ -3192,6 +3199,7 @@ mod tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         let mut motes = vec![mote((1, 2), (1, 4)), mote((3, 1), (1, 8))];
         let l = ratio(1, 1000);

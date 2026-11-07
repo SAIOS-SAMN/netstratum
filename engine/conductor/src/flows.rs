@@ -213,6 +213,11 @@ pub struct Mote {
     pub lever: Vec<Ratio>,
     /// The place its lever is counted in (a share of a turn).
     pub lever_place: Ratio,
+    /// Its lift (docs/121 §14.6, the S lane): its reach's displacement from
+    /// its spin balance as a dilation share `u ∈ (−1, 1)`, its reach
+    /// `R = R_ℓ·D(u)` (`D` LAW-DILATION, `R_ℓ = ℓ/H(<ℓ)`); 0 on its orbit.
+    /// The magnet's boost moves it; spin is never touched by it.
+    pub lift: Ratio,
 }
 
 impl Mote {
@@ -236,6 +241,21 @@ impl Mote {
             return Vec::new();
         }
         self.spins.iter().map(|l| l.clone() / ell.clone()).collect()
+    }
+
+    /// Its reach in an enclosure and the held share there (docs/121 §14.6):
+    /// on its orbit (lift 0) the spin balance `ℓ/H(<ℓ)` and its deficit, as
+    /// `Enclosed::reach` reads them; lifted, `R_ℓ·D(u)` and the hold standing
+    /// within that reach, `δ = H(≤R)/(R + H(≤R))`.
+    pub fn reach_in(&self, enc: &Enclosed) -> (Ratio, Ratio) {
+        let (r, _, delta) = lifted(enc, &self.ell_o().abs(), &self.lift);
+        (r, delta)
+    }
+
+    /// The hold it turns about at its reach (docs/121 §14.6): `H(<ℓ)` on its
+    /// orbit, the hold standing within its reach when lifted.
+    pub fn hold_in(&self, enc: &Enclosed) -> Ratio {
+        lifted(enc, &self.ell_o().abs(), &self.lift).1
     }
 
     /// Sets its orbit spin, keeping its tilt.
@@ -610,6 +630,33 @@ fn held_share(r: &Ratio, h: &Ratio, p: &Ratio) -> Ratio {
     ((h.clone() - lo) / span).max(ratio(0, 1)).min(ratio(1, 1))
 }
 
+/// A reach read off its spin balance by a lift (docs/121 §14.6): at spin `ℓ`
+/// with lift `u`, (its reach, the hold it turns about there, its deficit).
+/// On the orbit (`u = 0`) the spin balance `ℓ/H(<ℓ)` and `H(<ℓ)`, as
+/// `Enclosed::reach` reads them; lifted, `R = R_ℓ·D(u)` and the hold standing
+/// within `R`. A lift outside `(−1, 1)` reads the orbit.
+pub fn lifted(enc: &Enclosed, ell: &Ratio, lift: &Ratio) -> (Ratio, Ratio, Ratio) {
+    let on_orbit = || {
+        let h = enc.hold(ell);
+        let (r, d) = enc.reach(ell);
+        (r, h, d)
+    };
+    if lift.is_zero() {
+        return on_orbit();
+    }
+    let Some(dil) = crate::ring::dilation(lift) else {
+        return on_orbit();
+    };
+    let r = enc.reach(ell).0 * dil;
+    let h = enc.hold_within(&r);
+    let d = if (r.clone() + h.clone()).is_zero() {
+        ratio(0, 1)
+    } else {
+        h.clone() / (r.clone() + h.clone())
+    };
+    (r, h, d)
+}
+
 /// A body's own enclosure (docs/120 §8c, operator 2026-11-05), read and
 /// never stored: on each plane of its orbit (the orbit, the circulation),
 /// where its own pull meets its enclosure's, the pinch share `m/(m + H(<R))`
@@ -622,10 +669,10 @@ pub fn own_enclosure(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
     } else {
         mote.amount.clone() * weight(&mote.key) / whole.clone()
     };
-    [&mote.ell_o(), &mote.ell_orth].map(|ell| {
-        let h = enc.hold(&ell.abs());
-        crate::ring::pinch_share(&m, &h)
-    })
+    [
+        crate::ring::pinch_share(&m, &mote.hold_in(enc)),
+        crate::ring::pinch_share(&m, &enc.hold(&mote.ell_orth.abs())),
+    ]
 }
 
 /// A body's own enclosure in degrees on each plane of its orbit (register
@@ -655,12 +702,9 @@ pub fn enclosures_meet(separation: &Ratio, a: &Ratio, b: &Ratio) -> bool {
 /// direction, never a reach.
 pub fn held(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> Ratio {
     let own = own_enclosure(mote, enc, whole);
-    let plane = |ell: &Ratio, k: usize| {
-        let l = ell.abs();
-        let (r, _) = enc.reach(&l);
-        held_share(&r, &enc.hold(&l), &own[k])
-    };
-    plane(&mote.ell_o(), 0) * plane(&mote.ell_orth, 1)
+    let (r_o, h_o, _) = lifted(enc, &mote.ell_o().abs(), &mote.lift);
+    let l = mote.ell_orth.abs();
+    held_share(&r_o, &h_o, &own[0]) * held_share(&enc.reach(&l).0, &enc.hold(&l), &own[1])
 }
 
 /// The enclosed holding (the ring-density law, Xylarium 11.0: a ring is
@@ -1022,8 +1066,7 @@ fn torque_one(
     // slower outward; through the centre where the swing passes zero.
     full(&mut x.phase);
     let (now, through_c) = swung(&x.ell_o(), &x.ell_orth, &x.phase[LOOP]);
-    let h = enc.hold(&now);
-    let (r_o, d_o) = enc.reach(&now);
+    let (r_o, h, d_o) = lifted(enc, &now, &x.lift);
     // Ascent: the bell turns the mote from where it truly stands, its
     // lever read back onto its marks.
     for k in 0..x.phase.len() {
@@ -1317,7 +1360,7 @@ fn shear_booked(
     let mut rate: Vec<Vec<Ratio>> = Vec::with_capacity(n);
     for x in motes.iter() {
         let ell = x.ell_o();
-        let (r, delta) = enc.reach(&ell.abs());
+        let (r, delta) = x.reach_in(enc);
         let d = stream_delta(&delta, x.vacuum);
         extent.push(r.clone() * own_enclosure(x, enc, total)[0].clone());
         reach.push(r);
@@ -1493,6 +1536,7 @@ pub fn spray(
                 vacuum: false,
                 lever: Vec::new(),
                 lever_place: ratio(0, 1),
+                lift: ratio(0, 1),
             })
         })
         .collect()
@@ -1523,7 +1567,7 @@ pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
     let rim = ratio(2, 1) * enc.base();
     let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes)
         .into_iter()
-        .partition(|x| enc.reach(&x.ell_o()).0 >= rim);
+        .partition(|x| x.reach_in(&enc).0 >= rim);
     *motes = stay;
     gone
 }
@@ -1687,12 +1731,8 @@ pub fn beads(
         return beads_by_face;
     }
     let half = ratio(1, 2);
-    let hh: Vec<Ratio> = motes.iter().map(|x| enc.hold(&x.ell_o())).collect();
-    let rr: Vec<Ratio> = motes
-        .iter()
-        .zip(&hh)
-        .map(|(x, h)| x.ell_o() / h.clone())
-        .collect();
+    let hh: Vec<Ratio> = motes.iter().map(|x| x.hold_in(enc)).collect();
+    let rr: Vec<Ratio> = motes.iter().map(|x| x.reach_in(enc).0).collect();
     // Each mote's own extent about its reach (docs/120 §8c): its pinch share
     // `e = m/(m + H(<ℓ))` of its reach on each side, derived, never one band
     // for the galaxy.
@@ -1817,12 +1857,8 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, total: &Ratio) -> Vec<Strand> {
     // Each mote's reach and band, read once by the one enclosure (exact;
     // recomputing them at every use was most of the cost): its reach `ℓ/H(<ℓ)`
     // and the hold it turns about.
-    let hh: Vec<Ratio> = motes.iter().map(|x| enc.hold(&x.ell_o())).collect();
-    let rr: Vec<Ratio> = motes
-        .iter()
-        .zip(&hh)
-        .map(|(x, h)| x.ell_o() / h.clone())
-        .collect();
+    let hh: Vec<Ratio> = motes.iter().map(|x| x.hold_in(enc)).collect();
+    let rr: Vec<Ratio> = motes.iter().map(|x| x.reach_in(enc).0).collect();
     // Each mote's own extent about its reach (docs/120 §8c): its pinch share
     // `e = m/(m + H(<ℓ))` of its reach on each side, derived, never one band
     // for the galaxy.
@@ -2030,7 +2066,7 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
         return plane;
     }
     for x in motes.iter_mut() {
-        let d = stream_delta(&enc.reach(&x.ell_o()).1, x.vacuum);
+        let d = stream_delta(&x.reach_in(&enc).1, x.vacuum);
         let Some(keep) = attractor_keep(&d) else {
             continue;
         };
@@ -2106,7 +2142,7 @@ pub fn band_pairs(
     };
     // Each mote's own extent about its reach (docs/120 §8c), its pinch share.
     let band = |i: usize| {
-        let r = enc.reach(&motes[i].ell_o()).0;
+        let r = motes[i].reach_in(&enc).0;
         let e = own_enclosure(&motes[i], enc, g_total)[0].clone();
         (r.clone() * (ratio(1, 1) - e.clone()), r * (ratio(1, 1) + e))
     };
@@ -2246,7 +2282,7 @@ pub fn band_pairs(
         crate::profile::mark("pairs:nu");
         let g_of = |i: usize| {
             crate::polarity::faces(&stream_delta(
-                &enc.reach(&motes[i].ell_o()).1,
+                &motes[i].reach_in(&enc).1,
                 motes[i].vacuum,
             ))
             .0
@@ -2544,6 +2580,7 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
                     vacuum: false,
                     lever: Vec::new(),
                     lever_place: ratio(0, 1),
+                    lift: ratio(0, 1),
                 }
             })
             .collect(),
@@ -2572,7 +2609,7 @@ pub fn mobius(x: &mut Mote) {
 pub fn luminal(motes: &mut [Mote], enc: &Enclosed) -> usize {
     let mut n = 0;
     for x in motes.iter_mut() {
-        let d = enc.reach(&x.ell_o()).1;
+        let d = x.reach_in(&enc).1;
         let share = if x.vacuum { ratio(1, 1) - d } else { d };
         if share > ratio(1, 2) {
             mobius(x);
@@ -2658,7 +2695,7 @@ pub fn fluid(
                 // Its width, its members' own extents edge to edge (each
                 // `R(1 ± e)`, `e` its pinch share), never one band.
                 let edge = |i: usize, sign: i64| {
-                    let r = enc.reach(&motes[i].ell_o()).0;
+                    let r = motes[i].reach_in(&enc).0;
                     let e = own_enclosure(&motes[i], enc, total)[0].clone();
                     r.clone() * (ratio(1, 1) + ratio(sign, 1) * e)
                 };
@@ -2749,7 +2786,7 @@ pub fn fluid(
             .iter()
             .flat_map(|r| r.0.iter().copied())
             .map(|i| {
-                let (r, d) = enc.reach(&motes[i].ell_o());
+                let (r, d) = motes[i].reach_in(&enc);
                 (i, r, stream_delta(&d, motes[i].vacuum))
             })
             .collect();
@@ -3206,6 +3243,7 @@ mod passage_tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         let p = ratio(1, 60);
         let mut cross = crate::enfold::Cross::default();
@@ -3247,6 +3285,7 @@ mod passage_tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         let (a, b, c) = (
             mote("W0001", (0, 1)),
@@ -3393,6 +3432,7 @@ mod passage_tests {
                 vacuum: false,
                 lever: Vec::new(),
                 lever_place: ratio(0, 1),
+                lift: ratio(0, 1),
             };
             for (j, &k) in super::SPACE.iter().enumerate() {
                 x.phase[k] = ratio((i * (7 + j as i64)) % 24, 24);
@@ -3548,6 +3588,7 @@ mod passage_tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         x.phase[0] = ratio(1, 10);
         x.phase[2] = ratio(7, 10);
@@ -3585,6 +3626,7 @@ mod passage_tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         let was = x.clone();
         mobius(&mut x);
@@ -3605,6 +3647,37 @@ mod passage_tests {
         assert_eq!(super::open(&k(1)), ratio(1, 1), "cold hydrogen");
         assert_eq!(super::open_hot(&k(1), &ratio(1, 1)), ratio(0, 1), "stripped");
         assert_eq!(super::open_hot(&k(1), &ratio(0, 1)), super::open(&k(1)), "heat 0 is the atom");
+    }
+
+    #[test]
+    fn a_motes_reach_is_its_spin_balance_lifted_on_the_s_lane() {
+        // docs/121 §14.6: on its orbit (lift 0) a mote reads exactly the spin
+        // balance; lifted by u it stands at R_ℓ·D(u), its hold the hold within
+        // that reach, its spin untouched.
+        use super::{Enclosed, Mote};
+        let enc = Enclosed::new(ratio(1, 1), vec![(ratio(1, 2), ratio(1, 4)), (ratio(3, 1), ratio(1, 2))]);
+        let mut x = Mote {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            amount: ratio(1, 1),
+            spins: Mote::spins_of(&ratio(2, 1), &[]),
+            ell_orth: ratio(0, 1),
+            phase: super::rest(ratio(0, 1)),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        };
+        assert_eq!(x.reach_in(&enc), enc.reach(&ratio(2, 1)), "on its orbit");
+        assert_eq!(x.hold_in(&enc), enc.hold(&ratio(2, 1)));
+        let spin = x.ell_o();
+        x.lift = ratio(1, 3);
+        let (r, delta) = x.reach_in(&enc);
+        assert_eq!(r, enc.reach(&ratio(2, 1)).0 * ratio(2, 1), "D(1/3) = 2");
+        let h = enc.hold_within(&r);
+        assert_eq!(delta, h.clone() / (r + h));
+        assert_eq!(x.ell_o(), spin, "spin untouched");
     }
 
     #[test]
@@ -3637,6 +3710,7 @@ mod passage_tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         let before = torsion_signed(&x, &flat);
         mobius(&mut x);
@@ -3673,6 +3747,7 @@ mod passage_tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         let centre = vec![ratio(0, 1); super::PLANES];
         let flat = vec![ratio(1, 1), ratio(0, 1), ratio(0, 1)];
@@ -3707,6 +3782,7 @@ mod passage_tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         // The seal at 28 grips 9/14 in step with its echo, its own reading.
         let g = ratio(3, 5);
@@ -3737,6 +3813,7 @@ mod passage_tests {
                 vacuum: false,
                 lever: Vec::new(),
                 lever_place: ratio(0, 1),
+                lift: ratio(0, 1),
             }
         };
         let motes: Vec<Mote> = (0..40)
@@ -3777,6 +3854,7 @@ mod passage_tests {
             vacuum,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         let mut motes = vec![mote((1, 3), false), mote((3, 1), false)];
         luminal(&mut motes, &enc);
@@ -3811,6 +3889,7 @@ mod passage_tests {
             vacuum,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         // Outside the ring a vacuum mote reads ¾ and takes the pass; a
         // continuum mote reads ¼ and stays. Inside, the other way.
@@ -3826,7 +3905,7 @@ mod passage_tests {
             vec![false, false, true, true]
         );
         for x in &motes {
-            let d = enc.reach(&x.ell_o()).1;
+            let d = x.reach_in(&enc).1;
             let share = if x.vacuum { ratio(1, 1) - d } else { d };
             assert!(
                 share <= ratio(1, 2),
@@ -3976,6 +4055,7 @@ mod extent_degree_tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let e = own_enclosure(&x, &enc, &ratio(2, 1));
@@ -4006,6 +4086,7 @@ mod coupling_tests {
             vacuum: false,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         }
     }
 
@@ -4204,7 +4285,7 @@ mod coupling_tests {
             .map(|x| (x.ell_o(), x.amount.clone() * weight(&x.key) / total.clone()))
             .collect();
         let enc = Enclosed::new(ratio(1, 3), bodies);
-        let reach: Vec<Ratio> = motes.iter().map(|x| enc.reach(&x.ell_o()).0).collect();
+        let reach: Vec<Ratio> = motes.iter().map(|x| x.reach_in(&enc).0).collect();
         let extent: Vec<Ratio> = motes
             .iter()
             .zip(&reach)
