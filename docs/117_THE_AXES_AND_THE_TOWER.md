@@ -571,8 +571,10 @@ plane's phase a reading of the composed motion. Together:
 
 `H`'s components are stored in degrees, as exact rationals, with the plane
 named. A quarter turn is 90° on a named plane, never a word. Each plane's
-phase is stored, and so is each turning between planes (`τ₁₂`, ...). `K_c =
-⌊|θ_c|/360⌋` per component. Within one plane, motion is the closed-form
+phase is stored, and so is each turning between planes (`τ₁₂`, ...). `K_c` per
+component, signed and truncated toward zero, `K_c = sign(θ_c)·⌊|θ_c|/360⌋`
+(agreed with Mycelium 2026-11-07, 78.173 §8: −810° is `K = −2`, residual
+−90°). Within one plane, motion is the closed-form
 advance, `θ + ω·bells` (docs/120 §2), and it commutes there.
 
 ### 11.2 The rate is the generator; motions compose by Cayley
