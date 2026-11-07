@@ -1100,16 +1100,18 @@ pub fn ocean_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
             (
                 c.ell.clone(),
                 ratio(2, 1) * mass(&c.total()) / whole.clone(),
+                ratio(0, 1),
             )
         })
         .chain(u.ocean.iter().map(|x| {
             (
                 x.ell_o(),
                 x.amount.clone() * crate::flows::weight(&x.key) / whole.clone(),
+                x.lift.clone(),
             )
         }))
         .collect();
-    Some(crate::flows::Enclosed::new(
+    Some(crate::flows::Enclosed::with_lifts(
         ratio(1, 1) + firm + home,
         bodies,
     ))
@@ -2018,6 +2020,8 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         for t in &tilt {
             cfe::ratio::encode(t, &mut w);
         }
+        // Its lift on the S lane (docs/121 §14.6).
+        cfe::ratio::encode(&x.lift, &mut w);
         cfe::tlv::put(10, &w, out);
     }
     if !b.reservoir.is_zero() {
@@ -2147,6 +2151,8 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
         for t in &tilt {
             cfe::ratio::encode(t, &mut w);
         }
+        // Its lift on the S lane (docs/121 §14.6).
+        cfe::ratio::encode(&x.lift, &mut w);
         cfe::tlv::put(tag, &w, &mut out);
     }
     std::fs::create_dir_all(var_root)?;
@@ -2263,6 +2269,12 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
             tilt.push(x);
         }
     }
+    // Its lift, where the pulse file carries one (docs/121 §14.6); 0 on its
+    // orbit otherwise.
+    let lift = match v.get(at..).filter(|rest| !rest.is_empty()) {
+        Some(rest) => cfe::ratio::decode(rest)?.0,
+        None => ratio(0, 1),
+    };
     let mut r = r.into_iter();
     Some(crate::flows::Mote {
         key,
@@ -2275,6 +2287,7 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
         vacuum,
         lever,
         lever_place,
+        lift,
     })
 }
 
@@ -2455,6 +2468,7 @@ mod tests {
                 vacuum: true,
                 lever: Vec::new(),
                 lever_place: ratio(0, 1),
+                lift: ratio(0, 1),
             }],
             unit: ratio(1, 2),
             t_u: 15,
@@ -2637,6 +2651,7 @@ mod tests {
             vacuum: true,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         // The pair in step, moved together; the lone mote half a turn off.
         let mut lone = at(ratio(50, 1), 30);
@@ -2828,6 +2843,7 @@ mod tests {
                 vacuum: true,
                 lever: Vec::new(),
                 lever_place: ratio(0, 1),
+                lift: ratio(2, 7),
             }],
             unit: ratio(1, 2),
             t_u: 15,

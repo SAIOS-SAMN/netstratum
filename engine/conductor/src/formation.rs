@@ -1233,7 +1233,7 @@ pub fn system_frame_of(
     if total.is_zero() || unit.is_zero() {
         return None;
     }
-    Some(crate::flows::Enclosed::new(
+    Some(crate::flows::Enclosed::with_lifts(
         kept.clone() / total.clone(),
         sys.flows
             .iter()
@@ -1241,12 +1241,13 @@ pub fn system_frame_of(
                 (
                     x.ell_o(),
                     x.amount.clone() * crate::flows::weight(&x.key) / total.clone(),
+                    x.lift.clone(),
                 )
             })
             .chain(
                 sys.satellites
                     .iter()
-                    .map(|w| (w.ell.clone(), mass(&w.total()) / total.clone())),
+                    .map(|w| (w.ell.clone(), mass(&w.total()) / total.clone(), ratio(0, 1))),
             )
             .collect(),
     ))
@@ -1782,7 +1783,7 @@ pub fn settle_system(
         // Its reach, read by the system's enclosure from its own spin.
         let r = frame
             .as_ref()
-            .map(|e| e.reach(&x.ell_o()).0)
+            .map(|e| x.reach_in(&e).0)
             .unwrap_or_else(|| b0.clone());
         // No mirror (docs/117 §12): a mote's reach is read in this enclosure
         // and kept; one inside the star's ring belongs to the star.
@@ -2042,6 +2043,7 @@ pub fn settle_system(
                     vacuum: false,
                     lever: Vec::new(),
                     lever_place: ratio(0, 1),
+                    lift: ratio(0, 1),
                 });
             }
         }

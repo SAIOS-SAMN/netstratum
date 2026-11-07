@@ -372,6 +372,7 @@ mod tests {
             vacuum: true,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         }
     }
 
@@ -463,6 +464,7 @@ mod tests {
             vacuum: true,
             lever: Vec::new(),
             lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
         };
         let nucleons = |ms: &[Mote]| {
             ms.iter().fold(ratio(0, 1), |s, x| {
