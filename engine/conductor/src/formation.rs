@@ -1233,7 +1233,7 @@ pub fn system_frame_of(
     if total.is_zero() || unit.is_zero() {
         return None;
     }
-    Some(crate::flows::Enclosed::new(
+    Some(crate::flows::Enclosed::with_lifts(
         kept.clone() / total.clone(),
         sys.flows
             .iter()
@@ -1241,12 +1241,13 @@ pub fn system_frame_of(
                 (
                     x.ell_o(),
                     x.amount.clone() * crate::flows::weight(&x.key) / total.clone(),
+                    x.lift.clone(),
                 )
             })
             .chain(
                 sys.satellites
                     .iter()
-                    .map(|w| (w.ell.clone(), mass(&w.total()) / total.clone())),
+                    .map(|w| (w.ell.clone(), mass(&w.total()) / total.clone(), ratio(0, 1))),
             )
             .collect(),
     ))

@@ -1100,16 +1100,18 @@ pub fn ocean_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
             (
                 c.ell.clone(),
                 ratio(2, 1) * mass(&c.total()) / whole.clone(),
+                ratio(0, 1),
             )
         })
         .chain(u.ocean.iter().map(|x| {
             (
                 x.ell_o(),
                 x.amount.clone() * crate::flows::weight(&x.key) / whole.clone(),
+                x.lift.clone(),
             )
         }))
         .collect();
-    Some(crate::flows::Enclosed::new(
+    Some(crate::flows::Enclosed::with_lifts(
         ratio(1, 1) + firm + home,
         bodies,
     ))

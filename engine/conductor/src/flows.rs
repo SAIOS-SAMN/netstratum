@@ -851,7 +851,19 @@ pub struct Enclosed {
 
 impl Enclosed {
     /// From the base and each body's (spin ℓ, holding), in one unit.
-    pub fn new(base: Ratio, mut bodies: Vec<(Ratio, Ratio)>) -> Enclosed {
+    pub fn new(base: Ratio, bodies: Vec<(Ratio, Ratio)>) -> Enclosed {
+        Enclosed::with_lifts(
+            base,
+            bodies.into_iter().map(|(l, h)| (l, h, ratio(0, 1))).collect(),
+        )
+    }
+
+    /// From the base and each body's (spin ℓ, holding, lift), in one unit
+    /// (docs/121 §14.6): the hold by spin as `new`, each body placed at its
+    /// spin balance lifted, `ℓ/H(<ℓ)·D(u)`, so the hold within a reach counts
+    /// a lifted body where it stands. A lift outside `(−1, 1)` places it on
+    /// its orbit.
+    pub fn with_lifts(base: Ratio, mut bodies: Vec<(Ratio, Ratio, Ratio)>) -> Enclosed {
         bodies.sort_by(|a, b| a.0.cmp(&b.0));
         let mut held = Vec::with_capacity(bodies.len() + 1);
         let mut run = crate::ring::grain(&base);
@@ -859,7 +871,7 @@ impl Enclosed {
         // On the coordinate's grain (the carrier, never law): an exact sum of
         // thousands of holdings otherwise grows its denominators without
         // bound, and every reach, contact and torque inherits them.
-        for (_, h) in &bodies {
+        for (_, h, _) in &bodies {
             run += crate::ring::grain(h);
             held.push(run.clone());
         }
@@ -867,9 +879,14 @@ impl Enclosed {
             .iter()
             .enumerate()
             .filter(|(i, _)| !held[*i].is_zero())
-            .map(|(i, (l, _))| {
+            .map(|(i, (l, _, u))| {
+                let on = l.clone() / held[i].clone();
                 (
-                    l.clone() / held[i].clone(),
+                    if u.is_zero() {
+                        on
+                    } else {
+                        crate::ring::dilation(u).map_or(on.clone(), |d| on * d)
+                    },
                     held[i + 1].clone() - held[i].clone(),
                 )
             })
@@ -883,7 +900,7 @@ impl Enclosed {
             within.push(run.clone());
         }
         Enclosed {
-            spins: bodies.into_iter().map(|(l, _)| l).collect(),
+            spins: bodies.into_iter().map(|(l, _, _)| l).collect(),
             held,
             places: by_place.into_iter().map(|(r, _)| r).collect(),
             within,

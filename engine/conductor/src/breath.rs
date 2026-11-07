@@ -101,12 +101,13 @@ pub fn galaxy_frame(u: &Universe, i: usize, unit: &Ratio) -> Option<crate::flows
         (
             x.ell_o(),
             x.amount.clone() * crate::flows::weight(&x.key) / g.clone(),
+            x.lift.clone(),
         )
     };
     // The base: the core's state, 1, set at the bounce and never drained. It
     // is the throat's grains, so the throat's unreleased hold is never added
     // again (counted twice it inflated the ring; docs/96 §7).
-    Some(crate::flows::Enclosed::new(
+    Some(crate::flows::Enclosed::with_lifts(
         ratio(1, 1),
         core.flows
             .iter()
@@ -114,7 +115,7 @@ pub fn galaxy_frame(u: &Universe, i: usize, unit: &Ratio) -> Option<crate::flows
             .chain(
                 core.satellites
                     .iter()
-                    .map(|b| (b.ell.clone(), mass(&b.total()) / g.clone())),
+                    .map(|b| (b.ell.clone(), mass(&b.total()) / g.clone(), ratio(0, 1))),
             )
             .collect(),
     ))
@@ -808,13 +809,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 (
                     x.ell_o(),
                     x.amount.clone() * crate::flows::weight(&x.key) / g_before.clone(),
+                    x.lift.clone(),
                 )
             });
             let stars = core
                 .satellites
                 .iter()
-                .map(|b| (own_of(b), mass(&b.total()) / g_before.clone()));
-            crate::flows::Enclosed::new(ratio(1, 1), motes.chain(stars).collect())
+                .map(|b| (own_of(b), mass(&b.total()) / g_before.clone(), ratio(0, 1)));
+            crate::flows::Enclosed::with_lifts(ratio(1, 1), motes.chain(stars).collect())
         });
         // Stars collide (operator 2026-10-18; with Xylarium): the one
         // collide law among the galaxy's stars, before each reads its echo;
@@ -1985,7 +1987,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // Its base the core's state, 1 (docs/96 §7: the throat's grains,
             // never counted twice).
             let galaxy_enc = |core: &Body| {
-                crate::flows::Enclosed::new(
+                crate::flows::Enclosed::with_lifts(
                     ratio(1, 1),
                     core.flows
                         .iter()
@@ -1993,12 +1995,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             (
                                 x.ell_o(),
                                 x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone(),
+                                x.lift.clone(),
                             )
                         })
                         .chain(
                             core.satellites
                                 .iter()
-                                .map(|b| (b.ell.clone(), mass(&b.total()) / g_mass.clone())),
+                                .map(|b| (b.ell.clone(), mass(&b.total()) / g_mass.clone(), ratio(0, 1))),
                         )
                         .collect(),
                 )
@@ -2855,7 +2858,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // Each mote's place for the condensation: the cap its own gravity
             // holds in the galaxy's enclosure.
             crate::profile::mark("breath:births-enclose");
-            let enc_m = crate::flows::Enclosed::new(
+            let enc_m = crate::flows::Enclosed::with_lifts(
                 ratio(1, 1),
                 core.flows
                     .iter()
@@ -2863,6 +2866,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         (
                             x.ell_o(),
                             x.amount.clone() * crate::flows::weight(&x.key) / g_mass.clone(),
+                            x.lift.clone(),
                         )
                     })
                     .collect(),
@@ -2911,7 +2915,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         if !g_end.is_zero() && !unit.is_zero() {
             let scale_end = g_end.clone() / unit.clone();
 
-            let enc_end = crate::flows::Enclosed::new(
+            let enc_end = crate::flows::Enclosed::with_lifts(
                 ratio(1, 1),
                 core.flows
                     .iter()
@@ -2919,12 +2923,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         (
                             x.ell_o(),
                             x.amount.clone() * crate::flows::weight(&x.key) / g_end.clone(),
+                            x.lift.clone(),
                         )
                     })
                     .chain(
                         core.satellites
                             .iter()
-                            .map(|b| (b.ell.clone(), mass(&b.total()) / g_end.clone())),
+                            .map(|b| (b.ell.clone(), mass(&b.total()) / g_end.clone(), ratio(0, 1))),
                     )
                     .collect(),
             );
