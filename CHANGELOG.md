@@ -101,6 +101,11 @@ change is named here.
 
 ### Changed
 
+- Names follow nature's terminology (register H12): "heart" is now the
+  **star core** (astronomy's stellar core) in code and docs:
+  `formation::heart_cut` → `formation::star_core_cut`; the `observe`
+  commands `hearts` and `heartbeat` → `star-cores` and `burn`; the
+  conductor's "heartbeat" → its `beat`. No law changes.
 - Bounces are cheaper, the universe unchanged to every reading (#5):
   capture carries each star's mass forward instead of re-reading every
   holding per captured mote; the peel walks its rungs on whole numbers; the

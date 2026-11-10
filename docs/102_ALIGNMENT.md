@@ -45,9 +45,9 @@ earlier working tree; they are not in this repository's history.
 | **bond** | `λ/(1 + λ)`, `λ = 2(m + μ + τ)/R`: holding, magnetism, torsion | `formation::bond` (read by the crest, strands, ignition, worlds) |
 | **binding** | elements of one ring bound into one body where the bond meets heat and tide | band_pairs' output |
 | **step** | a member's in-step share with its binding's phase, `C = Σ t_k·in_step` | `flows::step_with` |
-| **heart** | what falls (C ≥ ½); its cut keeps what its hold holds | `formation::heart_cut` |
+| **star core** | what falls (C ≥ ½); its cut keeps what its hold holds | `formation::star_core_cut` |
 | **disc** | a binding's members off the held hemisphere, placed by their phase | `formation::system` |
-| **ignition** | a heart that holds against its heat becomes a core one tier down | `ignition_share` |
+| **ignition** | a star core that holds against its heat becomes a core one tier down | `ignition_share` |
 | **firmament** | the universal core's held cut: the heaviest and node-shell kinds | `Universe.firmament` (folds in, docs/101) |
 | **home** | the universal core's own disc, unique by its elements | core `[0]` today (rebuilt, docs/101) |
 | **twist** | a core's winding per plane, `½·t_k` a ring | `quantum::twist` |

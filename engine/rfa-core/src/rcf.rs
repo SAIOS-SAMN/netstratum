@@ -12,7 +12,7 @@
 //! over the polynomial ring `Rat[x]`. Same conjugacy class ⟺ same
 //! invariant factors, exactly.
 //!
-//! This is the angle-free heart of the singularity law (16_UNIT §4a):
+//! This is the angle-free core of the singularity law (16_UNIT §4a):
 //! the RCF quotients out the frame of approach, so the fold gate's
 //! verdict cannot depend on which frame a state arrived in.
 //!

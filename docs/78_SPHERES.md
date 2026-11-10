@@ -802,7 +802,7 @@ windings are counted and the phases flow: no frames, no lattice.
   are shell 2, Z 29 to 150 shell 3; sub-closures (none unpaired) at Z = 4,
   30 and 54; unpaired peaks at 12 (Z = 16, 42) and 77 (Z = 131). Few noble
   kinds, wide open shells, much magnetism. Hold (`2Z + (Z − unpaired)`),
-  bonding, the burn ladder and every heart's cut read it; era 0's readings
+  bonding, the burn ladder and every star core's cut read it; era 0's readings
   moved with it (tests may move with the cut). Xylarium reads the same table
   (c985228).
 

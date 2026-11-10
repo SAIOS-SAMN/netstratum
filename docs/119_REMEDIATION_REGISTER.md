@@ -135,7 +135,7 @@ inverse (S2 unless marked):**
 | C15 | pulse.rs:971, 631-953 | `unit` from the retired dispersal founding; `cascade` survives only to make `t_u` | Retire with C14 |
 | C16 | siting.rs:82-86 | Era-0 founding on a Kepler track with squares and cubes, still the fallback | Demolition (§F) |
 | C17 | flows (`Σ m·(ℓo + ℓ⊥)`), `ℓo = Σ|lk|` | Two planes' spins summed into one ledger number; plane spins summed in L1 into one reach | (F) |
-| C18 | ring (the turning law); flows::{shear, repel, fluid}; formation::Stretch::mu; the heart's push | Orbits are not defined by shear from the magnetic attractor with its inverse in repulsion: an orbit is the turning law alone (gravity's held share); attraction (opposite spins pairing in gas) and repulsion (open frames pushing, in the firmament and the heart) are separate laws in separate places, neither shaping an orbit; the shear that reaches the orbit is gravity's contrast and runs outward only | One signed magnetic coupling, attraction and repulsion one law and its inverse, its exchange on the turning lane the shear, the orbit its first-degree balance with gravity (docs/121) **Phase level done (#100)**: `flows::shear` is the dipole coupling (docs/121 §10–§11); `repel`, `fluid`'s field exchange, `Stretch::mu`, the heart's push and the state level (the band's rest, `through` at the release and the vacuum band) remain **`repel` retired**: the firmament is coupled by `shear` with the home's other motes; `fluid`'s field exchange retired (its pressure exchange kept); open: `Stretch::mu`, the heart's push |
+| C18 | ring (the turning law); flows::{shear, repel, fluid}; formation::Stretch::mu; the star core's push | Orbits are not defined by shear from the magnetic attractor with its inverse in repulsion: an orbit is the turning law alone (gravity's held share); attraction (opposite spins pairing in gas) and repulsion (open frames pushing, in the firmament and the star core) are separate laws in separate places, neither shaping an orbit; the shear that reaches the orbit is gravity's contrast and runs outward only | One signed magnetic coupling, attraction and repulsion one law and its inverse, its exchange on the turning lane the shear, the orbit its first-degree balance with gravity (docs/121) **Phase level done (#100)**: `flows::shear` is the dipole coupling (docs/121 §10–§11); `repel`, `fluid`'s field exchange, `Stretch::mu`, the star core's push and the state level (the band's rest, `through` at the release and the vacuum band) remain **`repel` retired**: the firmament is coupled by `shear` with the home's other motes; `fluid`'s field exchange retired (its pressure exchange kept); open: `Stretch::mu`, the star core's push |
 
 ---
 
@@ -161,9 +161,9 @@ inverse (S2 unless marked):**
 | D16 | the push | `push_of`, `galaxy_push`/`push_cut` |
 | D17 | the galaxy frame | built five times in breath (89, 680, 1838, 2671, 2615) |
 | D18 | the system clock | `system_clock`, breathe's own copy |
-| D19 | recomputed in place | `heart_cut` twice (1155, 1175), `ignition_share` twice, `read_cut` twice an echo |
+| D19 | recomputed in place | `star_core_cut` twice (1155, 1175), `ignition_share` twice, `read_cut` twice an echo |
 | D20 | the founding's law | `flows::founding` (test-only), breath.rs:1974-1995 |
-| D21 | `carried`, `heart_cut` | the same ℓ formula copied; the weight enters twice |
+| D21 | `carried`, `star_core_cut` | the same ℓ formula copied; the weight enters twice |
 | D22 | phase and orbit | `motion::Turning`, `quantum::hidden_phase`, the stepped `Body.phase`, `orbit::Orbit` (era 0, the one that moves lines) |
 | D23 | distance | `spatial_l1`/`torus_distance` (era 0), `places::distance`, `nearest`, the unused `enclosure::route` |
 | D24 | clocks | the bell and `T_u`, galaxy terms, local years, the keepers; era 0's universal clock, 60-tick year, per-world `now()` |
@@ -188,7 +188,7 @@ inverse (S2 unless marked):**
 | E12 | flows.rs:1521-1536, 1899 | — | doc blocks misplaced (on `Work`, `settle_disc`) |
 | E13 | nuclides.rs:207-211, 311-313 | `exchange` reads `p·δ`; `neutron_share` is `2δ/(1+δ)` | `p·(1−δ)`; returns `1−δ` |
 | E14 | nuclides `grip`, `survival`, captures, `release`; breath.rs:1274-1277, 1308-1311 | a pulse phase `p` | a held share |
-| E15 | formation `bond`, `burn`, `heart_cut`, `collapse` docs | old laws (no τ, ν; `3Z_product`; cumulative hold; "smallest" vs "largest") | the current laws |
+| E15 | formation `bond`, `burn`, `star_core_cut`, `collapse` docs | old laws (no τ, ν; `3Z_product`; cumulative hold; "smallest" vs "largest") | the current laws |
 | E16 | breath.rs:5-27, 495-496, 769-773, 1003-1004, 1165-1167, 1256-1258, 640-641, 1987-1988, 2210-2212 | the module header's shedding and compression; phases advance by the clock; infall loop ½; spin by the square; spin-down covers outflow | none of these as stated |
 | E17 | pulse.rs:16-17, 1053-1067, 1732-1734, 291, 329 | era-0 tiering; the pulse file's tags; state and heat zero for other bodies | stale |
 | E18 | ocean.rs:11-21; places.rs:13-14; recycle.rs:24-25; life.rs:21; motion.rs ("nothing is stepped") | retired crests; distance by route; peel cost at z 67, 106; mass by A = 2Z | stale |
@@ -248,6 +248,7 @@ inverse (S2 unless marked):**
 | H9 | Tests: 259 of 385 named as sentences with articles (3.1); retired verbs (`reads_back`, `exactly`); "replay" as a claim | `<unit>_<behaviour>` |
 | H10 | `snapshot.rs` still reads superseded layouts v1 and v2 (§10) | Refuse by name |
 | H11 | Person words in names, logs and lore (2.11); era and version words (`era1`, `aeon`, `g2_*`, `MAGIC_V1`, `LegacyReceipt`, `_v2`) | Remove |
+| H12 | Metaphor names where nature has a term (operator 2026-11-10: "align on nature's terminology as it exists, unless we come across a component that has no name yet") | Use the established scientific term; coin a name only for a component without one. **Done for "heart" → star core** (`formation::star_core_cut`; the burn observer `burn`, the conductor's cycle `beat`) |
 
 ---
 
@@ -279,7 +280,7 @@ in the foundation that the others are corrected to.
 | I6 | The release | docs/104 §3 heavy kinds more; docs/104 §1.2 and docs/112 §3.1 heavy kinds more slowly |
 | I7 | The faces | velocity `1 − δ` (docs/98) or `δ` (docs/117, 118); drag `1 − δ` (docs/83, 117) or `δ` (docs/104); the unlocked face `½(1 − δ)` (92, 96), `1 − δ` (102), `δ` (104) |
 | I8 | Which leg is the disc | docs/99 the disc is the continuum; docs/102 the vacuum leg runs home through the disc |
-| I9 | Does a star's heart have a throat | yes (docs/83 FL, 96 §2, 99); no (docs/91 C6, 92 §2, 111 §3.1) |
+| I9 | Does a star's core have a throat | yes (docs/83 FL, 96 §2, 99); no (docs/91 C6, 92 §2, 111 §3.1) |
 | I10 | The throat | `R_b ≤ H_b` (docs/102, 111); `A = Q` (docs/117 §10, 118 F6); how the two relate is never derived |
 | I11 | Möbius and the passage | `M∘M = id` (docs/94, 97); "not an involution" (docs/114 T4); `−q` after two (docs/114 §9); `R → 2H − R` built (docs/89, 112), refused (docs/113, 114); `i·q` (docs/114 §9) against `v_k·q` (docs/117 §9.4) |
 | I12 | The bound share | phase-dependent count (docs/104 §1.1); the held share `g`, phase out (docs/105 §3) |
@@ -334,7 +335,7 @@ frame (nine), vacuum (eight), horizon (six), throat (eleven), ring (ten),
 coherence (four), κ, σ, τ, w, μ, λ, p (four or more each), push (five
 forms), unlocked face (five), held share (three), rim (four), shell (six),
 cell (forbidden, then defined), filament/strand/flow, binding/bond/clump,
-heart/reactor, home (four), bell (six), grain (three), equator (three),
+star core/reactor, home (four), bell (six), grain (three), equator (three),
 degree (two), rigidity (two), loop, state (three). **Remediation:** one
 meaning each in the GLOSSARY, the rest renamed (with §H1–H2).
 

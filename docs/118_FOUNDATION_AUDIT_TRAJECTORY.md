@@ -211,7 +211,7 @@ partition); the riding state `q`; R's plane as a plane; frames per axis.
 | `breath::{galaxy_rate, nested, system_clock, slip, rungs}` | clocks as products of shares (F7) | follows |
 | `breath::coherence` | `1 − 2·|Δ − round Δ|` on a phase | through a collapse |
 | `breath::{shine, shine_systems}` | light on the unlocked face (F4 shares) | follows |
-| `formation::{shells, collapse, bond, ignition_share, coupling, burn, tunnelling, heart_cut, carried}` | share laws on manifests | follows |
+| `formation::{shells, collapse, bond, ignition_share, coupling, burn, tunnelling, star_core_cut, carried}` | share laws on manifests | follows |
 | `formation::{collide_stars, settle_system}`, layers and strikes | meetings by band and hemisphere (phases) | through a collapse (phases) |
 | `recycle::*` | exact counts at the throat | follows |
 | `ocean::{swing, pump, radial_share}` | a galaxy's swing on the scalar reach | through a collapse (R's plane not carried) |
@@ -263,7 +263,7 @@ the inverted nucleons is open research.
 | T1 the bounce and release | the core's push releases matter by the tide | built; the release folds matter back through `through` | F6's passage |
 | T2 the table | nucleosynthesis, captures, burns, recycling, to the densest element | built on S¹¹ | F8 (frames per axis) |
 | T3 the firmament and galaxies | the collective, its collections and order; the galaxies' orbits | built; costly (#5) | the phases (II.3) |
-| T4 stars and systems | binding, ignition, the heart, burning, capture, settling | built | the phases; F6 |
+| T4 stars and systems | binding, ignition, the star core, burning, capture, settling | built | the phases; F6 |
 | T5 worlds | layers, strikes, chemistry inside a world | built in part | the phases; light to worlds (docs/89 B2) |
 | T6 the disc | the planes coming apart; whether a disc forms | the lean grows (docs/100 §4.1); a disc not read | cost (#5); F2–F4 |
 | T7 chemistry and bonds | bonds from nucleons and electrons (docs/115) | derived, not built | one count of open ends; F8 |

@@ -1630,14 +1630,14 @@ fn shear_booked(
 }
 
 /// The spray (with Xylarium; the founding epoch one tier down): matter a
-/// heart throws out (an outburst, or the kinds a new star's heart releases)
+/// star core throws out (an outburst, or the kinds a new star's core releases)
 /// leaves over directions, each kind at its own capture phase, `Z·p` with p
 /// the star's own push share (the founding's ½ one tier up), `½ + Z·p` on the
 /// orthogonal orbit. Thrown, never placed (operator 2026-10-22: "gravity and
 /// physics should supply the required motion"): each kind leaves at the spin
-/// the heart's cut carried it with (`carried`, in its system's units), which
+/// the star core's cut carried it with (`carried`, in its system's units), which
 /// already stands past the throat (the cut released it where its reach
-/// outran the heart's hold, the double inversion's far face, operator
+/// outran the star core's hold, the double inversion's far face, operator
 /// 2026-10-21); its system's enclosure reads its reach, and the star's torque
 /// and hold settle it bell by bell, by its own weight.
 pub fn spray(
@@ -3780,7 +3780,7 @@ mod passage_tests {
 
     #[test]
     fn a_hot_star_holds_its_hydrogen_against_the_wind() {
-        // One reading per quantity: at the heart's heat hydrogen is stripped
+        // One reading per quantity: at the star core's heat hydrogen is stripped
         // (no open frames for the wind to take); cold it is wholly open; a
         // heavy kind keeps its deep windings' open frames at that heat.
         let k = |w: u32| crate::chem::Kind::atom(w).expect("a kind");

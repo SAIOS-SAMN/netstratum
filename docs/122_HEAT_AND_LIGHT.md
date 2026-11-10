@@ -128,5 +128,5 @@ alike: the still point of docs/106 §5.
 - The chemical grip's energy in ledger units (`chem::closing` gives a
   tightness, a share; its energy is that share of what).
 - Where a star's emitted light starts its passage: at its surface (its
-  reach) or at its heart.
+  reach) or at its star core.
 - Potential's zero (docs/106 §7).

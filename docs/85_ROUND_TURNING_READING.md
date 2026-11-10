@@ -249,9 +249,9 @@ inside them grows. It is linear, with no squares and no stated order.
 What it reads, checked against laws already built:
 
 - **Shell 1 is the centre** (R = 0). It holds only shape 0, the round
-  winding, as the atom's shell 1 does: the heart, or the galactic core.
+  winding, as the atom's shell 1 does: the star core, or the galactic core.
 - **Shell 2 ends at the throat**, R = H, where δ = ½: the throat condition
-  the heart forms at (`formation::ignition_share`: w = m, deficit ½) and the
+  the star core forms at (`formation::ignition_share`: w = m, deficit ½) and the
   rim law's deficit ½. So the throat is the outer edge of shell 2, read,
   never placed.
 - **Worlds and stars about a core stand from shell 3 outward.**
@@ -313,8 +313,8 @@ within a hemisphere: two caps of half-angle 90° or more always meet,
 wherever they stand, so no arrangement of places can separate them, and
 only orthogonal patterns can. A half-angle of 90° is `180·a = 90`, so
 **a = ½**. That is the threshold `formation::ignition_share` already sets:
-"None at a ≥ ½: light pushes back before the heart forms". Matter at
-a < ½ can gather into a heart and stand as a localised body; matter at
+"None at a ≥ ½: light pushes back before the star core forms". Matter at
+a < ½ can gather into a star core and stand as a localised body; matter at
 a ≥ ½ cannot, and stays a flow.
 
 **So, one grammar in two regimes:**
@@ -699,7 +699,7 @@ By what the value carries:
 |---|---|---|
 | a phase (place) in plane j | the body's own enclosure frame, turned by `r/k` in its throat plane | the place is the tier map's turning (§7) |
 | a reach | the frame's dilation, offset by the residue in the inner unit (`× H_outer/H_inner`) | the tier map's dilation converts reach by the holds (§7′ step 4) |
-| a spin ℓ | the body's own internal turning (its heart's spin) | the spin ledger: `Σ m·ℓ` is conserved within the body, never pooled up a tier |
+| a spin ℓ | the body's own internal turning (its star core's spin) | the spin ledger: `Σ m·ℓ` is conserved within the body, never pooled up a tier |
 | agitation | the turning of its own matter's atoms, plane by plane | heat below a tier's resolution is the motion of what the body is made of |
 
 ### E3. The frames are tier values too: the residue descends to the atom

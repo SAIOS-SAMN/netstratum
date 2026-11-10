@@ -1068,7 +1068,7 @@ lock forbids the fold.
 (blake3 fingerprint, commitment-binding only). Two states are `≅_RCF`
 iff their characteristic matrices `(xI − A)` share invariant factors —
 the Smith-Normal-Form signature over `Q[x]`, computed per fiber layer.
-The angle-free heart of the singularity law (16_UNIT §4a): a frame
+The angle-free core of the singularity law (16_UNIT §4a): a frame
 change (`A ↦ PAP⁻¹`) leaves the signature identical, so the fold
 verdict cannot depend on the frame of approach. The proportional law
 does not touch it (a canonical form, not an aggregator of difference);
@@ -1693,8 +1693,8 @@ Slow: each ring, every nuclide passes `f_H·c·σ_{w+1}` of itself to `w + 1`
 (heaviest first). Rapid: returned matter climbs at once, each weight passing
 `σ_{w+1}` upward, until its hydrogen is spent. Nucleons conserved.
 
-**E29 · A dying heart's release.** `nuclides::release`. Each nuclide whose
-grip at the heart's pulse phase its heat exceeds breaks into nucleons,
+**E29 · A dying star core's release.** `nuclides::release`. Each nuclide whose
+grip at the star core's pulse phase its heat exceeds breaks into nucleons,
 standing as hydrogen. Nucleons conserved.
 
 **E30 · Recycling at the throat.** `recycle::recycle`. Matter standing in

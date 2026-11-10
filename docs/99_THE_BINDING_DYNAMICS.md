@@ -14,9 +14,9 @@ the hold law), docs/97 (Q, Z, R), docs/98 (the inverse faces).
 
 - 12 systems, 10 companions, 8 worlds by bell 1500; galaxy 163 has heard no
   echo (it stands ~3780 bells out).
-- No binding was refused at ignition (0 by heat, 0 by heart).
+- No binding was refused at ignition (0 by heat, 0 by star core).
 - 49683 members returned from bindings in which nothing fell; by bell 900,
-  59 such bindings, 16876 members; the nearest member a median 118 heart
+  59 such bindings, 16876 members; the nearest member a median 118 star core
   extents out (10^1 to 10^5).
 
 ## 1. The chain, stage by stage
@@ -34,9 +34,9 @@ reading, and its state.
 | 5 | rings | band pairs `k(ρ) = (S/G)(1+ρ)/(1−ρ)` on the strip | galaxy | G/P balance | ring fixed (½ both faces) | built |
 | 6 | the crest | bond `λ/(1+λ)`, `λ = 2(m+μ)/R` ≥ heat + tide `w/(2(R+H))`; `⌊R/w_max⌋` bindings by disc-plane phase | the binding's own enclosure | G contrast (tide) | tide symmetric (`|Δδ| = |Δ(1−δ)|`) | built |
 | 7 | membership | ring band × disc-plane arc | galaxy | — | — | built — **misaligned (§2.1, §2.2)** |
-| 8 | infall | member falls where its distance ≤ `λ_f·R_max` (the heart's extent), fixed point from all fallen down | a dilated frame (`× g/m`) | G (heart cut `δ ≥ ½`) | the held heart is the vacuum face (containment), coherent | built — **broken; to phases (§2.2)** |
+| 8 | infall | member falls where its distance ≤ `λ_f·R_max` (the star core's extent), fixed point from all fallen down | a dilated frame (`× g/m`) | G (star core cut `δ ≥ ½`) | the held star core is the vacuum face (containment), coherent | built — **broken; to phases (§2.2)** |
 | 9 | ignition | `a < ½`, share `(1−2a)/(1+2a)` | binding | — | — | built |
-| 10 | heart cut | kind held where `H/(R + H) ≥ ½` | the star's own | G inside the throat | inside the throat the vacuum face holds (docs/98 §5) | built |
+| 10 | star core cut | kind held where `H/(R + H) ≥ ½` | the star's own | G inside the throat | inside the throat the vacuum face holds (docs/98 §5) | built |
 | 11 | disc → system | disc motes at `ℓ = r·H(<r)`, warmed by light × unlocked + galaxy flux `1 − δ_gal` | system | P (heat) | heat on the push face | built |
 | 12 | worlds | echo hold `max m/(r + max m) ≥ |Δω|`, solid orbits never meet | system | G (`ω = δ`) | admitted face | built 40b4ad5 |
 | 13 | burn | barrier `Z + Z`, `τ = 1/(1 + 2z)` | star | — | **reads weight where its law says charge** (§2.5) | built — **misread** |
@@ -58,7 +58,7 @@ half a loop from the disc. **Law:** a binding gathers on the disc leg only
 
 The infall turns each member's phase offsets into lengths (`r_c·|Δψ_k|`),
 dilates them into a frame (`× g/m`, the binding's "own units") and compares
-them with a heart's extent read in that frame. Both the frame and the
+them with a star core's extent read in that frame. Both the frame and the
 dilation retire: a member's place in its binding is its phase, and closeness
 is the in-step share, the same measure the chains, the coherence and the
 torque already read (S¹'s linear measure, `in_step = 1 − 2|Δψ|`).
@@ -103,10 +103,10 @@ The driver stays over the product's nucleons `2w`.
   ½ (docs/98): outside the ring the continuum face (δ < ½), inside it the
   vacuum face (1 − δ < ½). This universe's released matter stands outside
 the ring, so
-  bodies form on the admitted face and read δ; the hearts hold inside their
+  bodies form on the admitted face and read δ; the star cores hold inside their
   own throats, where the admitted face is the vacuum's: containment is the
   vacuum's kind (Xylarium: "a star is quantum gravity containment, its
-  holding face the vacuum's"). So in this universe the heart is the vacuum
+  holding face the vacuum's"). So in this universe the star core is the vacuum
   and the disc the continuum, each read on its admitted face: the inversion
   is carried by where matter stands, never by a second law.
 - **What the inversion changes in a law:** only where a law reads a face
@@ -134,7 +134,7 @@ the ring, so
    spin booked exactly; every disc member's phase offset from its star kept.
 4. **§2.5 the burn's barrier by charge** (built, `formation::tunnelling`). Witness: H + H 1/3, He + He 1/5.
 5. **Read:** re-found, breathe to bell 1500 (and 3000 for galaxy 163's first
-   echoes): bindings formed, hearts formed, stars, worlds per star, every
+   echoes): bindings formed, star cores formed, stars, worlds per star, every
    identity.
 
 ## 5. Open

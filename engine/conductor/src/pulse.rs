@@ -280,7 +280,7 @@ pub struct Body {
     /// shell where the bounce's push left it, a jet batch where it landed),
     /// in the galaxy's own units; empty for every other body.
     pub gas: Vec<crate::formation::Shell>,
-    /// The bell a star was born (its heart formed, docs/83); 0 for bodies
+    /// The bell a star was born (its star core formed, docs/83); 0 for bodies
     /// laid down at the founding and for every other body.
     pub born: u64,
     /// A galactic core's STATE (with Xylarium, 2026-10-16): set at the

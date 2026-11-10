@@ -62,7 +62,7 @@ The `.service` files are deployment examples, not installed services. Both
 assume a checkout at `/opt/netstratum`; edit `WorkingDirectory` and executable
 paths for the actual host before installing them.
 
-- `netstratum-conductor.service` runs the G2 conductor heartbeat against
+- `netstratum-conductor.service` runs the G2 conductor beat against
   `var-g2`, leaving the `var/` archive untouched. It expects the release
   `conductor` binary under `target/release/`.
 - `netstratum-follow.service` describes the Mycelium hypha follower. It is

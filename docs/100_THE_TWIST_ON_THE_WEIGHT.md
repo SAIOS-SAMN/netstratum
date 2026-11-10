@@ -309,7 +309,7 @@ given or taken. Nucleons conserved; weight unchanged; the table unchanged.
 | state | crossing | in | yields |
 |---|---|---|---|
 | electrons | `R = 0` at `frac(p) = ½` | every body, its own pulse phase | light (the line), chemistry opening or closing |
-| fibres | `a + τ = κ_w·h` | stars' hearts, the jets, bindings | fission to hydrogen / capture |
+| fibres | `a + τ = κ_w·h` | stars' cores, the jets, bindings | fission to hydrogen / capture |
 | poles | torsion phase through ½ | wound lone ends | an R quantum; the nuclide returns to its line |
 
 ## 10. Build order (each with its witness)
@@ -335,7 +335,7 @@ given or taken. Nucleons conserved; weight unchanged; the table unchanged.
    sign; relaxation by the attractor law, exact.
 6. **Twist in the bond and the fibres' transition** (§5, §9.2, built: the
    crest's `λ = 2(m + μ + τ)/R`, τ the members' net lead by holding; the
-   fibres part at ignition and in a dying heart where `a + τ > κ_w·h`): bond with
+   fibres part at ignition and in a dying star core where `a + τ > κ_w·h`): bond with
    the in-step lead; nuclei part where `a + τ > κ_w·h`. Witness: nucleons
    conserved; an unwound sealed nucleus never parts at `a < h`.
 7. **The electrons' transition on the ledgers** (§9.1): chemistry and light

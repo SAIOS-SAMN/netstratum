@@ -11,7 +11,7 @@ enclosure, never a catalogue of pairs.
 attractor with its inverse the in repulsion"; "derive the magnetic
 coupling"). The audit found the pieces apart (docs/119 C18): an orbit is
 the turning law alone; attraction (opposite spins pairing in gas) and
-repulsion (open frames pushing, in the firmament and the heart) stand in
+repulsion (open frames pushing, in the firmament and the star core) stand in
 separate laws; the shear that reaches the orbit is gravity's and runs one
 way. Its conservation and its rest were checked by exact arithmetic. Open
 points are in §8.
@@ -25,9 +25,9 @@ points are in §8.
 - **Its share** is the open pole's share of the whole, `o = Q/(A + Q)`
   (docs/95 §8, `flows::open`), first degree.
 - **Opposite spins pair** in free gas: "full spin magnetism attractors in the
-  gases", the antipole of the heart's push (`formation::Stretch::mu`).
+  gases", the antipole of the star core's push (`formation::Stretch::mu`).
 - **Open frames repel**: "matter pushing matter apart by its open frames"
-  (ruling of 2026-10-19, `flows::repel`); a heart pushes by "the
+  (ruling of 2026-10-19, `flows::repel`); a star core pushes by "the
   electromagnetic repulsion gripping open frames" (`formation`).
 - **The shear makes the orbit**: "the kinematic pressure is sheared as an
   attractor on opposing hemispheres to provide the shear on the orbit, which
@@ -129,7 +129,7 @@ sense and step filtered within it.
 | `flows::repel` (open frames push, firmament only, its result discarded, a box clamp per axis) | the coupling with matching senses. **Done:** retired; the firmament's motes are the home's flows, which `flows::shear` already couples |
 | `formation::Stretch::mu` (the gas attractor, in binding only) | the coupling with opposite senses, read in the binding's own enclosure |
 | `flows::shear`, the field exchange in `flows::fluid` (outward only) | the coupling on the turning lane, signed. **Done:** `shear` is the coupling (#103–#116); the field exchange in `fluid` is retired, its pressure exchange (the hydrostatic balance, signed) kept |
-| the heart's push as "electromagnetic repulsion" | the coupling between the heart and its open frames, with its sense |
+| the star core's push as "electromagnetic repulsion" | the coupling between the star core and its open frames, with its sense |
 | the band's rest `R·R = 2q` | the balance of §5, first degree |
 
 ## 8. What is open
@@ -254,7 +254,7 @@ boost).
 
 1. **The two shares:**
    - Gravity's return at reach `R` is the held share `δ = H/(R + H)`.
-   - The heart's push is the coupling between the mote's open frames and the
+   - The star core's push is the coupling between the mote's open frames and the
      core's (ruling: "the electromagnetic repulsion gripping open frames"),
      `k·n`, with `k = o_m·o_c` the two open shares and `n = M/(R + M)` the ring
      law's nearness of their moments `M`.

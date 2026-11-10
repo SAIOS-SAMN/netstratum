@@ -373,7 +373,7 @@ pub struct Event {
     /// of it that stood at or past its system's rim when released.
     pub discs: (Ratio, Ratio),
     /// The infall (docs/91): the bindings' holding this echo, and of it what
-    /// fell into the hearts (the rest stayed out as their discs).
+    /// fell into the star cores (the rest stayed out as their discs).
     pub collapse: (Ratio, Ratio),
     /// The motes' ledger this echo (the carrier's growth, read): the motes
     /// that entered the galaxy's flows from the ocean's arrivals, from what
@@ -433,7 +433,7 @@ pub struct Event {
 /// How a star passed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Passing {
-    /// Its slip from its galaxy's bell held below its heart's share across a
+    /// Its slip from its galaxy's bell held below its star core's share across a
     /// full turn of its own bell: it came apart whole.
     Decohered,
     /// It shed and burned all it held.
@@ -897,7 +897,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The star's bell (with Xylarium): its own spin turns it,
             // `ω_s = δ(ℓ_s/H_s)` a ring; its phases advance by the rings its
             // clock received this echo. One FRAME: its spin is kept in its
-            // system's units (its heart cut carries it there), so its hold is
+            // system's units (its star core cut carries it there), so its hold is
             // read there too, its share of its system's holding.
             if sys.phase.len() < planes {
                 sys.phase = vec![ratio(0, 1); planes];
@@ -1319,17 +1319,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             let kept_before = mass(&sys.kept);
             // The outburst (operator: made in the star; with Xylarium): on
-            // its bell, the heart re-cut on its burning mix throws out what
+            // its bell, the star core re-cut on its burning mix throws out what
             // the new cut no longer holds.
             // The outburst lands in the system's own medium (with Xylarium):
             // motes at each kind's carried spin and the star's phases.
             // The outburst is thrown cool (operator 2026-10-18: "heat
-            // dissipates into the void/vacuum"): only the deep heart is hot;
+            // dissipates into the void/vacuum"): only the deep star core is hot;
             // the outer layers it is thrown from hold whole atoms.
-            crate::profile::mark("sys:heart");
+            crate::profile::mark("sys:star_core");
             let heat = ratio(0, 1);
             let burst = if rang {
-                crate::formation::heart_cut(&sys.kept, &ratio(0, 1), &heat)
+                crate::formation::star_core_cut(&sys.kept, &ratio(0, 1), &heat)
                     .map(|(_, released, _)| released)
                     .unwrap_or_default()
             } else {
@@ -1342,14 +1342,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // hold alike, so spin by the square of the dilation's two
                 // readings, `λ·λ`, λ the star's share of its system).
                 // Two readings, each moved once (no square): its reach in the
-                // heart's units, `ℓ_z/H*`, as a length by λ (the star's share of
+                // star core's units, `ℓ_z/H*`, as a length by λ (the star's share of
                 // its system), and the system's hold at that reach.
                 let lambda = if mass(&sys.total()).is_zero() {
                     ratio(0, 1)
                 } else {
                     mass(&sys.kept) / mass(&sys.total())
                 };
-                let held_k = crate::formation::heart_cut(&sys.kept, &ratio(0, 1), &heat)
+                let held_k = crate::formation::star_core_cut(&sys.kept, &ratio(0, 1), &heat)
                     .map(|(_, _, h)| h)
                     .unwrap_or_else(|| ratio(0, 1));
                 let frame = crate::formation::system_frame(&sys, &unit);
@@ -1422,8 +1422,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             let left =
                                 a.clone() - back.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
                             // Its open share as the star holds it, at its
-                            // heart's heat (the cut's reading, `heart_cut`; a
-                            // ringing heart strips hydrogen, heat 1), never
+                            // star core's heat (the cut's reading, `star_core_cut`; a
+                            // ringing star core strips hydrogen, heat 1), never
                             // the cold atom's: one reading per quantity.
                             let w = crate::pulse::nucleus(
                                 &(left.clone()
@@ -1449,8 +1449,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // with Xylarium): the star's coherence with its galaxy's bell,
             // the product over planes of its phases' in-step shares against
             // the bell, `C_sg`. As it slips it sheds gradually, the share
-            // `1 − C_sg` of what its heart holds above its ignition share;
-            // where `C_sg` falls below its heart's hold share (what it holds
+            // `1 − C_sg` of what its star core holds above its ignition share;
+            // where `C_sg` falls below its star core's hold share (what it holds
             // of its system), the decoherence front: it comes apart whole and
             // everything returns to the galaxy's flows with its state.
             let c_sg = (0..planes).fold(ratio(1, 1), |c, k| {
@@ -1468,7 +1468,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             };
             let nu = ratio(2, 1) * as_ratio(r_echo) / as_ratio(t_u.max(1));
             let sys_total = mass(&sys.total());
-            let heart_share = if sys_total.is_zero() {
+            let star_core_share = if sys_total.is_zero() {
                 ratio(0, 1)
             } else {
                 mass(&sys.kept) / sys_total
@@ -1476,7 +1476,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The front needs the slip held across a full bell of the star's
             // own (with Xylarium): out of step at both ends of a ring it
             // completed, never an instantaneous dip.
-            if rang && c_before < heart_share && c_sg < heart_share {
+            if rang && c_before < star_core_share && c_sg < star_core_share {
                 tolls.push(Toll {
                     star: sys.path.clone(),
                     bell,
@@ -1491,7 +1491,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // the rest booked to the medium once (register B4).
                 let spin_was = subtree_spin(&sys, &unit);
                 let mut all = sys.total();
-                // A dying heart's release (docs/97 §11, §13): its heat on its
+                // A dying star core's release (docs/97 §11, §13): its heat on its
                 // own clock, `ν·h_s − 1` (ν the rings it received this echo a
                 // bell, on both legs), breaks what it out-grips at its pulse
                 // phase into nucleons; the rapid capture (§10) then runs on
@@ -1499,9 +1499,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its torsion adds to the heat against the grip (docs/100
                 // §9.2: the fibres part where `a + τ > κ_w·h`).
                 crate::profile::mark("sys:nuclides");
-                let heart_heat = crate::nuclides::heat(&h_s, &nu)
+                let star_core_heat = crate::nuclides::heat(&h_s, &nu)
                     + crate::torsion::tension(&sys.tilt, &core.tilt);
-                crate::nuclides::release(&mut all, &heart_heat, &g_star);
+                crate::nuclides::release(&mut all, &star_core_heat, &g_star);
                 crate::nuclides::capture_rapid(&mut all, &g_star, densest);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
@@ -1555,7 +1555,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // the rest booked to the medium once (register B4).
                 let spin_was = subtree_spin(&sys, &unit);
                 let mut all = sys.total();
-                // A dying heart's release (docs/97 §11, §13): its heat on its
+                // A dying star core's release (docs/97 §11, §13): its heat on its
                 // own clock, `ν·h_s − 1` (ν the rings it received this echo a
                 // bell, on both legs), breaks what it out-grips at its pulse
                 // phase into nucleons; the rapid capture (§10) then runs on
@@ -1563,9 +1563,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Its torsion adds to the heat against the grip (docs/100
                 // §9.2: the fibres part where `a + τ > κ_w·h`).
                 crate::profile::mark("sys:nuclides");
-                let heart_heat = crate::nuclides::heat(&h_s, &nu)
+                let star_core_heat = crate::nuclides::heat(&h_s, &nu)
                     + crate::torsion::tension(&sys.tilt, &core.tilt);
-                crate::nuclides::release(&mut all, &heart_heat, &g_star);
+                crate::nuclides::release(&mut all, &star_core_heat, &g_star);
                 crate::nuclides::capture_rapid(&mut all, &g_star, densest);
                 returned += mass(&all) / unit.clone();
                 // Dissolved whole: it leaves at its own orbit.
@@ -1647,7 +1647,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
             }
             // The slow capture (docs/97 §10): each ring its clock received this
-            // echo, its heart's nuclides capture its hydrogen, one nucleon a
+            // echo, its star core's nuclides capture its hydrogen, one nucleon a
             // ring, kept by the hemisphere law at its pulse phase.
             crate::profile::mark("sys:capture-slow");
             crate::nuclides::capture_slow(&mut sys.kept, r_echo, &in_phase, &g_star, densest);
@@ -2321,7 +2321,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     in_throat.push(j);
                 }
             }
-            // Clusters part in the throat's heat (1, as the newborn heart's
+            // Clusters part in the throat's heat (1, as the newborn star core's
             // cut) before they split (with Xylarium).
             crate::profile::mark("rec:part");
             in_throat = crate::recycle::part(&mut core.flows, &in_throat);
@@ -2548,7 +2548,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // hemisphere, `C ≥ ½`; on the open hemisphere it is the disc.
                 // Read once, each against the binding's phase: no length, no
                 // frame, no extent that shrinks with what fell. Its place in
-                // the binding is its phase off step, `1 − C`: the heart's
+                // the binding is its phase off step, `1 − C`: the star core's
                 // half in `[0, ½]`, the disc's in `(½, 1]` out to the
                 // system's rim, the whole turn.
                 let psi_c: Vec<Ratio> = (0..crate::flows::PLANES)
@@ -2601,7 +2601,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let mut fell_spins: Vec<(Ratio, Ratio, Ratio)> = Vec::new();
                 let mut outside: Vec<(crate::flows::Mote, Ratio, Ratio)> = Vec::new();
                 // The system's rim is the whole turn (`1 − C ≤ 1` always):
-                // every member off the heart's hemisphere is its disc.
+                // every member off the star core's hemisphere is its disc.
                 let rho_birth = ratio(1, 1);
                 for (idx, (x, f)) in members.iter().zip(&fallen).enumerate() {
                     let w = held_of(x);
@@ -2622,7 +2622,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         }
                     } else {
                         // The disc: it stays at its phase place off step, its
-                        // spins read at the system's birth once the heart is
+                        // spins read at the system's birth once the star core is
                         // cut (`formation::system`); its circulation is what it
                         // carried, its orthogonal spin against the binding's,
                         // as a share of its orbit spin.
@@ -2722,12 +2722,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     crate::ring::birth_key(bell, &r_guess, &held, &siblings),
                 ];
                 // Carried SPINS add: the star's own spin, captured from the
-                // spread of what fell, is the turning its heart cut adds to
+                // spread of what fell, is the turning its star core cut adds to
                 // every kind (no weight ratio).
                 // The fibres' transition AT ignition (docs/100 §9.2): what fell
                 // parts where its heat and its members' torsion pass its
                 // nuclei's grip, read at the binding's held share; the parted stand as hydrogen, the new
-                // heart's fuel. Nucleons conserved.
+                // star core's fuel. Nucleons conserved.
                 let mut star = star;
                 let h_share = |m: &crate::pulse::Manifest| {
                     let whole = mass(m);
@@ -2777,15 +2777,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     births_h.push((fell_h.clone(), parted_h.clone(), h_share(kept)));
                 }
                 let Some((kept, medium, medium_spin, disc_motes)) = lit else {
-                    // No heart: the members go on as they were.
+                    // No star core: the members go on as they were.
                     motes_in[3] += members.len();
                     core.flows.extend(members);
                     continue;
                 };
-                // Its STATE is its holding at birth (a heart's state, set at
+                // Its STATE is its holding at birth (a star core's state, set at
                 // its forming, never drained); its own spin and phases.
                 let held_at_birth = mass(&kept);
-                // A star keeps its ignition share (the heart's share at its
+                // A star keeps its ignition share (the star core's share at its
                 // throat condition) in `reservoir`: decoherence sheds only
                 // what it holds above it.
                 let Some(ignition) = crate::formation::ignition_share(&a_binding) else {

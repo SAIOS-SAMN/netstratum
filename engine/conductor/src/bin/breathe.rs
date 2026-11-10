@@ -341,7 +341,7 @@ fn main() {
             |s, e| (s.0 + e.collapse.0.clone(), s.1 + e.collapse.1.clone()),
         );
         println!(
-            "INFALL — bindings {} (holding); fell into the hearts {}, the rest their discs",
+            "INFALL — bindings {} (holding); fell into the star cores {}, the rest their discs",
             conductor::reading::sector(&cl),
             conductor::reading::sector(&fell)
         );

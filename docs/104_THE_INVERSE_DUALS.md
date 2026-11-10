@@ -43,7 +43,7 @@ inverse held share (inverse gravity); `u = δ` the inverse unlocked share;
 
 | pair | forward (Xylarium) | inverse (Netstratum) | in code now | change |
 |---|---|---|---|---|
-| **pull** (gravity's hold) | `δ` | `g = 1 − δ` | `Enclosed::reach`, heart cut `H/(R + H) ≥ p` | the enclosure by share from the outside in (docs/103 §5); the cut held where `g ≥ p` |
+| **pull** (gravity's hold) | `δ` | `g = 1 − δ` | `Enclosed::reach`, star core cut `H/(R + H) ≥ p` | the enclosure by share from the outside in (docs/103 §5); the cut held where `g ≥ p` |
 | **push** (the bounce's carriage) | on the unlocked face `1 − δ` | on the inverse unlocked face `u = δ` | release `s = ½·c/(c + base)` (`breath`) | `s = p·c/(c + base)`, `p = S/(S + T)` the core's pair share (§1.2) |
 | **heating** (the face not locked heats) | `½(1 − δ)` | `u·e` (§1.2) | the light warms bodies by `1 − δ` (`breath::shine`); torque heat `p·δ·(1 − |k|)` | warmth by `u·e`; torque heat by the face pushed, `p·u·(1 − |k|)` |
 | **cooling** (heat leaves) | light `e` and the vacuum's pull back `δ`, keep `(1 − e)(1 − δ)` a ring | light `e` and the inverse pull back `g`, keep `(1 − e)(1 − g) = (1 − e)·δ` | keep `(1 − e)(1 − δ)` (`flows::spin_torque`) | keep `(1 − e)·u`, and the counterweight (§2) |
@@ -182,7 +182,7 @@ A fresh 2^40 universe:
 
 - The firmament is 48 kinds of weight 160–208, at reaches 0.40–0.52 throat
   radii.
-- The live torque passes no band (`heart_push = None`; the galaxies' band is
+- The live torque passes no band (`star_core_push = None`; the galaxies' band is
   held back as static). The bounce's in-step push acts, and nothing pulls the
   held matter back.
 - The band as written is forward on both faces: push `q = ½·w̄/w` with no face

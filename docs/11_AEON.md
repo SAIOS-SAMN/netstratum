@@ -208,7 +208,7 @@ Retracted the bash slop. Control is first-class conductor subcommands,
 deterministic and witnessable:
 
 - `conductor run [--cadence]` — beat (default).
-- `conductor status` — read the heartbeat (`var/state.json`: live worlds,
+- `conductor status` — read the beat (`var/state.json`: live worlds,
   aeon voice, occupancy) without attaching.
 - `conductor halt` — **graceful**: an in-process signal handler finishes the
   current beat, flushes the lens, seals the tail — no torn tails from

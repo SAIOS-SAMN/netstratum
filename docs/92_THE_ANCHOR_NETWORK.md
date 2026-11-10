@@ -24,7 +24,7 @@ crossing the pinch `R·h/(h + H)`). Every grain stands inside its parent's
 throat, `R < H`, because the exits remove `R ≥ H` (`flows::exits`). So
 `x < h` for every star: a star outpulls its core only within less than its
 own hold-length. In the system's own units that is the breathing rim,
-`ρ = R_s/(h_s + H) < 1` (41f9c2d), and the heart's own extent fills it:
+`ρ = R_s/(h_s + H) < 1` (41f9c2d), and the star core's own extent fills it:
 whatever stands inside `ρ` falls.
 
 Read, both carriers, 2026-10-25:
@@ -36,7 +36,7 @@ Read, both carriers, 2026-10-25:
 | worlds | 0 | 351 → 18 under the same change (set aside) |
 
 So it is not a reach, a membership rule or the rim's derivation: no body
-inside its parent's throat can hold anything beyond its own heart. The
+inside its parent's throat can hold anything beyond its own star core. The
 core chains everything in its galaxy; nothing beyond it can be a star's.
 
 ## 2. The words (one word was carrying three things)
@@ -46,7 +46,7 @@ core chains everything in its galaxy; nothing beyond it can be a star's.
   holds ("the state holds only where there is a throat"); a galactic core
   is a throat, so its state stays the enclosure's base, 1 (docs/83,
   2026-10-15, stands).
-- **Reactor**: a star's heart. It holds what it has gathered and pushes;
+- **Reactor**: a star's core. It holds what it has gathered and pushes;
   it has no throat (2026-10-17) and no state. What falls into it is read by
   its own extent, never by the throat condition.
 - **Anchor**: what connects core → reactor → planet: the tether chain
@@ -85,11 +85,11 @@ Beyond `R_d` the core holds only through its first coordination:
 
 So the network is a tree: core → disc → first stars → theirs.
 
-### 3.3 What falls into a newborn heart (built, 12574d0)
+### 3.3 What falls into a newborn star core (built, 12574d0)
 
 A member falls where its place stands within the reactor's extent,
 `λ·R_max`: `λ` the fallen share of the binding, `R_max` the outermost kind the
-dark cut of what has fallen holds (`heart_cut` at turning 0, heat 0, push
+dark cut of what has fallen holds (`star_core_cut` at turning 0, heat 0, push
 ½), order-free to the fixed point. Read: 56 % of each binding falls (the
 throat test took ~88 %).
 
@@ -168,7 +168,7 @@ the books close by construction; a star with locked worlds spins slower.
 The planets' phases read against the star's own bell, never its galaxy
 orbit: their plane is the star's spin plane, independent of the galaxy's
 disc. It waits on §3.1–3.5 (inside a throat it could act only within the
-heart).
+star core).
 
 ## 4. Scope in the code
 

@@ -1,8 +1,8 @@
-//! N-CONDUCTOR + N-LINEAGE — the heartbeat and the lineage graph.
+//! N-CONDUCTOR + N-LINEAGE — the beat and the lineage graph.
 //!
 //! Scripted civilizations play their colonies autonomously, each
 //! through a contained agent (NS-6: granted scopes, every receipt
-//! attributed `by#agent` — automation on a leash). Each heartbeat a
+//! attributed `by#agent` — automation on a leash). Each beat a
 //! world: drains the steward inbox, plays its policy, ticks,
 //! collects, grinds the forge (its own latest receipt digest seeds
 //! the puzzle — Charter §9), and keeps the ledger.
@@ -798,7 +798,7 @@ pub fn market_step(worlds: &mut [Polity], beat: u64, span: &Ratio) -> Vec<(Strin
 /// Where A LINE is going — read from its own measured yield, never set
 /// by a constant.
 ///
-/// `SEARCH_BUDGET` bounds one heartbeat so a single beat cannot run
+/// `SEARCH_BUDGET` bounds one beat so a single beat cannot run
 /// away; it was never a statement about whether spending is worth it.
 /// This is. Every branch below cites a number from
 /// `solver/examples/forge_reach.rs`, measured over 200 forged tasks per
@@ -5305,7 +5305,7 @@ impl Polity {
         }
     }
 
-    /// One full heartbeat. A growth returns the newborn's spec —
+    /// One full beat. A growth returns the newborn's spec —
     /// the era loop gives it a world of its own.
     ///
     /// **Cycle topology (operator lock 2026-08-07 + Wave-1 + C1.6):**
