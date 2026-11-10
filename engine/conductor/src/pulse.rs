@@ -1213,10 +1213,7 @@ pub fn orbit_galaxies(
                 _ => Vec::new(),
             })
             .collect();
-        u.firm_prev = firm
-            .iter()
-            .map(|x| (x.key.clone(), x.phase()))
-            .collect();
+        u.firm_prev = firm.iter().map(|x| (x.key.clone(), x.phase())).collect();
         // Its collections (docs/111 §4.2) move as one (§4.3): one specific
         // spin in each orbit, the holding-weighted mean, held on the grain
         // with what flooring leaves to the singularity's reservoir (Σ m·ℓ +
@@ -1663,9 +1660,7 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
                     &members
                         .iter()
                         .zip(&m)
-                        .map(|((x, _, _), w)| {
-                            (w.clone(), x.phase_at(k))
-                        })
+                        .map(|((x, _, _), w)| (w.clone(), x.phase_at(k)))
                         .collect::<Vec<_>>(),
                 )
             })
@@ -2505,7 +2500,9 @@ mod tests {
                 amount: ratio(1, 1),
                 spins: crate::flows::Mote::spins_of(&ratio(1, 3), &[]),
                 ell_orth: ratio(0, 1),
-                orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(1, 2))),
+                orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(
+                    ratio(1, 2),
+                )),
                 agitation: ratio(0, 1),
                 born: 0,
                 vacuum: true,
@@ -2688,7 +2685,10 @@ mod tests {
             amount: ratio(amount, 1),
             spins: crate::flows::Mote::spins_of(&ell, &[]),
             ell_orth: ratio(1, 7),
-            orientation: crate::orientation::Orientation::from_phases(&vec![ratio(0, 1); crate::flows::PLANES]),
+            orientation: crate::orientation::Orientation::from_phases(&vec![
+                ratio(0, 1);
+                crate::flows::PLANES
+            ]),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: true,
@@ -2881,7 +2881,9 @@ mod tests {
                     &[ratio(1, 2), ratio(1, 3), ratio(1, 6)],
                 ),
                 ell_orth: ratio(0, 1),
-                orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(1, 2))),
+                orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(
+                    ratio(1, 2),
+                )),
                 agitation: ratio(0, 1),
                 born: 0,
                 vacuum: true,

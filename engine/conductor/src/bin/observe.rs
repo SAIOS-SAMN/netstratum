@@ -340,14 +340,7 @@ fn main() {
                 .count();
             let reaches: Vec<Ratio> = c.flows.iter().map(|x| x.ell_o() / h.clone()).collect();
             let phases: Vec<String> = (0..conductor::flows::PLANES)
-                .map(|k| {
-                    span(
-                        &c.flows
-                            .iter()
-                            .map(|x| x.phase_at(k))
-                            .collect::<Vec<_>>(),
-                    )
-                })
+                .map(|k| span(&c.flows.iter().map(|x| x.phase_at(k)).collect::<Vec<_>>()))
                 .collect();
             let circ = span(
                 &c.flows
@@ -469,15 +462,12 @@ fn main() {
                         (0..n)
                             .filter(|&j| j != i)
                             .map(|j| {
-                                let c = (0..conductor::flows::PLANES).fold(
-                                    ratio(1, 1),
-                                    |c, k| {
-                                        c * conductor::flows::in_step(
-                                            &ms[i].phase_at(k),
-                                            &ms[j].phase_at(k),
-                                        )
-                                    },
-                                );
+                                let c = (0..conductor::flows::PLANES).fold(ratio(1, 1), |c, k| {
+                                    c * conductor::flows::in_step(
+                                        &ms[i].phase_at(k),
+                                        &ms[j].phase_at(k),
+                                    )
+                                });
                                 ratio(1, 1) - c
                             })
                             .min()

@@ -494,11 +494,7 @@ pub fn torsion_signed(x: &Mote, plane: &[Ratio]) -> Ratio {
 pub fn step_with(x: &Mote, psi: &[Ratio]) -> Ratio {
     let t = tilt_of(&x.tilt());
     SPACE.iter().zip(&t).fold(ratio(0, 1), |c, (&k, tk)| {
-        c + tk.clone()
-            * in_step(
-                &x.phase_at(k),
-                psi.get(k).unwrap_or(&ratio(0, 1)),
-            )
+        c + tk.clone() * in_step(&x.phase_at(k), psi.get(k).unwrap_or(&ratio(0, 1)))
     })
 }
 
@@ -1399,9 +1395,7 @@ fn torque_one(
     let swing: Vec<Ratio> = (0..SPACE.len())
         .map(|j| {
             x.spins.get(j).cloned().unwrap_or_else(|| ratio(0, 1))
-                + t[j].clone()
-                    * x.ell_orth.clone()
-                    * response(&x.orientation.circulation(j))
+                + t[j].clone() * x.ell_orth.clone() * response(&x.orientation.circulation(j))
         })
         .collect();
     let now = swing.iter().fold(ratio(0, 1), |a, s| a + s.abs());
@@ -2119,9 +2113,7 @@ pub fn beads(
         if (!disc_leg || on_disc_leg(x)) && !rr[i].is_zero() {
             fibres
                 .entry((
-                    (0..PLANES)
-                        .map(|k| frac(&x.phase_at(k)) < half)
-                        .collect(),
+                    (0..PLANES).map(|k| frac(&x.phase_at(k)) < half).collect(),
                     x.key.clone(),
                 ))
                 .or_default()
@@ -3018,12 +3010,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio
                 let field_mean = circle_mean(
                     &members
                         .iter()
-                        .map(|&i| {
-                            (
-                                share(&motes[i]),
-                                motes[i].phase_at(LOOP),
-                            )
-                        })
+                        .map(|&i| (share(&motes[i]), motes[i].phase_at(LOOP)))
                         .collect::<Vec<_>>(),
                 );
                 let magnet = members.iter().fold(ratio(0, 1), |a, &i| {
@@ -3167,12 +3154,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio
             let field_mean = circle_mean(
                 &members
                     .iter()
-                    .map(|&i| {
-                        (
-                            share(&motes[i]),
-                            motes[i].phase_at(LOOP),
-                        )
-                    })
+                    .map(|&i| (share(&motes[i]), motes[i].phase_at(LOOP)))
                     .collect::<Vec<_>>(),
             );
             for (j, &k) in SPACE.iter().enumerate() {
@@ -3211,10 +3193,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio
                             a + motes[i].amount.clone()
                                 * ratio(i64::from(crate::chem::unpaired(&motes[i].key)), 1)
                                 / total.clone()
-                                * in_step(
-                                    &motes[i].phase_at(1),
-                                    &field_mean,
-                                )
+                                * in_step(&motes[i].phase_at(1), &field_mean)
                         });
                         let pressure = if arc.is_zero() {
                             column.clone()
@@ -3628,7 +3607,11 @@ mod passage_tests {
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(1, 1), &[]),
             ell_orth: ratio(0, 1),
-            orientation: crate::orientation::Orientation::from_phases(&[ratio(ph.0, ph.1), ratio(0, 1), ratio(0, 1)]),
+            orientation: crate::orientation::Orientation::from_phases(&[
+                ratio(ph.0, ph.1),
+                ratio(0, 1),
+                ratio(0, 1),
+            ]),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,
@@ -3784,7 +3767,8 @@ mod passage_tests {
                 lift: ratio(0, 1),
             };
             for (j, &k) in super::SPACE.iter().enumerate() {
-                x.orientation.hold_phase(k, &ratio((i * (7 + j as i64)) % 24, 24));
+                x.orientation
+                    .hold_phase(k, &ratio((i * (7 + j as i64)) % 24, 24));
             }
             let mut m = vec![ratio(0, 1); super::PLANES];
             for (j, &k) in super::SPACE.iter().enumerate() {
@@ -4218,7 +4202,9 @@ mod passage_tests {
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(1, 1), &[]),
             ell_orth: ratio(0, 1),
-            orientation: crate::orientation::Orientation::from_phases(&super::rest(ratio(loop_at.0, loop_at.1))),
+            orientation: crate::orientation::Orientation::from_phases(&super::rest(ratio(
+                loop_at.0, loop_at.1,
+            ))),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,
