@@ -30,7 +30,9 @@
 //!   (`tan(θ/4) = g`) are rendered on observation only.
 use crate::turning::{base_axis, Clifford, TurningRefusal};
 use cfe::ratio::{ratio, Ratio};
-use num_traits::{Signed, Zero};
+use num_bigint::BigInt;
+use num_integer::Integer;
+use num_traits::{One, Signed, Zero};
 
 /// The six turning planes: the units each joins (1–3 spatial, 4 = R).
 /// Spatial first in `flows::SPACE` order, then each one's R-plane partner.
@@ -115,6 +117,168 @@ pub fn of_reading(psi: &Ratio) -> Ratio {
     }
 }
 
+/// One half of the even algebra of `Cl(4, 0)`: the even algebra is the
+/// direct sum of two quaternion algebras, its isoclinic halves (docs/117
+/// §11.6), cut by the central idempotents `P± = (1 ± I)/2` (`I` the volume,
+/// `I² = +1`). On each half the units are `i = e₂₃P±`, `j = e₃₁P±`,
+/// `k = e₁₂P±`, with `i² = j² = k² = −1` and `ij = −k` (`e₂₃e₃₁ = −e₁₂`), so
+/// the product carries the cross product with a minus sign.
+///
+/// Held as integer numerators over one positive denominator, so a product
+/// is integer products alone (no reduction between them); a generator
+/// divides once.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct Half {
+    n: [BigInt; 4],
+    d: BigInt,
+}
+
+impl Half {
+    fn product(&self, o: &Half) -> Half {
+        let (a, b) = (&self.n, &o.n);
+        let dot = &a[1] * &b[1] + &a[2] * &b[2] + &a[3] * &b[3];
+        let cross = [
+            &a[2] * &b[3] - &a[3] * &b[2],
+            &a[3] * &b[1] - &a[1] * &b[3],
+            &a[1] * &b[2] - &a[2] * &b[1],
+        ];
+        Half {
+            n: [
+                &a[0] * &b[0] - dot,
+                &a[0] * &b[1] + &b[0] * &a[1] - &cross[0],
+                &a[0] * &b[2] + &b[0] * &a[2] - &cross[1],
+                &a[0] * &b[3] + &b[0] * &a[3] - &cross[2],
+            ],
+            d: &self.d * &o.d,
+        }
+    }
+
+    /// The Cayley motion of a pure `u`: `(1 + u)(1 − u)⁻¹ = (1 − |u|² +
+    /// 2u)/(1 + |u|²)`, since `(1 − u)(1 + u) = 1 + |u|²` (the algebra's own
+    /// product, never a norm read by a law). Over the common denominator `D`
+    /// of `u = k/D`: `(D² − Σk², 2Dk)/(D² + Σk²)`.
+    fn motion(u: &[Ratio; 3]) -> Half {
+        let dd = u.iter().fold(BigInt::one(), |l, x| l.lcm(x.denom()));
+        let k: [BigInt; 3] =
+            std::array::from_fn(|i| (u[i].clone() * Ratio::from_integer(dd.clone())).to_integer());
+        let kk = &k[0] * &k[0] + &k[1] * &k[1] + &k[2] * &k[2];
+        let d2 = &dd * &dd;
+        let two_d = &dd * BigInt::from(2);
+        Half {
+            n: [&d2 - &kk, &two_d * &k[0], &two_d * &k[1], &two_d * &k[2]],
+            d: d2 + kk,
+        }
+    }
+
+    /// The generator of a unit `r`: `(r − 1)(r + 1)⁻¹ = r_v/(1 + r₀)`; none
+    /// where `r₀ = −1`.
+    #[cfg(test)]
+    fn generator(&self) -> Option<[Ratio; 3]> {
+        let d = &self.d + &self.n[0];
+        if d.is_zero() {
+            return None;
+        }
+        Some(std::array::from_fn(|i| {
+            Ratio::new(self.n[i + 1].clone(), d.clone())
+        }))
+    }
+
+    fn negated(&self) -> Half {
+        Half {
+            n: std::array::from_fn(|k| -self.n[k].clone()),
+            d: self.d.clone(),
+        }
+    }
+}
+
+/// A generator on [`PLANES`] split into its halves: on `P±` the components
+/// `g₂₃ ∓ g₁R`, `g₃₁ ∓ g₂R`, `g₁₂ ∓ g₃R` (`e₁R = −e₂₃I`, `e₂R = −e₃₁I`,
+/// `e₃R = −e₁₂I`).
+fn halves(g: &[Ratio; 6]) -> ([Ratio; 3], [Ratio; 3]) {
+    let plus = std::array::from_fn(|k| g[k].clone() - g[3 + k].clone());
+    let minus = std::array::from_fn(|k| g[k].clone() + g[3 + k].clone());
+    (plus, minus)
+}
+
+#[cfg(test)]
+/// The generator on [`PLANES`] from its halves.
+fn joined(plus: &[Ratio; 3], minus: &[Ratio; 3]) -> [Ratio; 6] {
+    let two = ratio(2, 1);
+    std::array::from_fn(|p| {
+        if p < 3 {
+            (plus[p].clone() + minus[p].clone()) / two.clone()
+        } else {
+            (minus[p - 3].clone() - plus[p - 3].clone()) / two.clone()
+        }
+    })
+}
+
+/// A motion on the two halves.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct Motion(Half, Half);
+
+impl Motion {
+    fn of(g: &[Ratio; 6]) -> Motion {
+        let (p, m) = halves(g);
+        Motion(Half::motion(&p), Half::motion(&m))
+    }
+
+    fn then(&self, o: &Motion) -> Motion {
+        Motion(self.0.product(&o.0), self.1.product(&o.1))
+    }
+
+    /// Its scalar part, `(r₊₀ + r₋₀)/2`.
+    fn scalar(&self) -> Ratio {
+        (Ratio::new(self.0.n[0].clone(), self.0.d.clone())
+            + Ratio::new(self.1.n[0].clone(), self.1.d.clone()))
+            / ratio(2, 1)
+    }
+
+    fn negated(&self) -> Motion {
+        Motion(self.0.negated(), self.1.negated())
+    }
+
+    /// Its generator on [`PLANES`], each component floored onto the grain
+    /// in integers: on the halves `v± = n±/(d± + n±₀)`, a spatial component
+    /// `(v₊ + v₋)/2` and its R partner `(v₋ − v₊)/2`, read as `⌊num·60⁶/den⌋`
+    /// over `60⁶`, the same value `ring::grain` gives the exact generator.
+    fn generator_on_grain(&self) -> Result<[Ratio; 6], TurningRefusal> {
+        let dp = &self.0.d + &self.0.n[0];
+        let dm = &self.1.d + &self.1.n[0];
+        if dp.is_zero() || dm.is_zero() {
+            return Err(TurningRefusal::NoGenerator);
+        }
+        let places = BigInt::from(60).pow(6);
+        let den = BigInt::from(2) * &dp * &dm;
+        let (den, flip) = if den < BigInt::zero() {
+            (-den, true)
+        } else {
+            (den, false)
+        };
+        let on_grain = |num: BigInt| {
+            let num = if flip { -num } else { num };
+            Ratio::new((num * &places).div_floor(&den), places.clone())
+        };
+        Ok(std::array::from_fn(|p| {
+            let k = p % 3 + 1;
+            let (a, b) = (&self.0.n[k] * &dm, &self.1.n[k] * &dp);
+            if p < 3 {
+                on_grain(a + b)
+            } else {
+                on_grain(b - a)
+            }
+        }))
+    }
+
+    #[cfg(test)]
+    fn generator(&self) -> Result<[Ratio; 6], TurningRefusal> {
+        match (self.0.generator(), self.1.generator()) {
+            (Some(p), Some(m)) => Ok(joined(&p, &m)),
+            _ => Err(TurningRefusal::NoGenerator),
+        }
+    }
+}
+
 /// A body's orientation: its generator's components on [`PLANES`], each on
 /// the grain, and its windings per plane.
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
@@ -146,35 +310,37 @@ impl Orientation {
     /// whose reading falls has passed a whole turn (`K + 1`); driven
     /// backward, a reading that rises is a turn back (`K − 1`).
     pub fn advance(&mut self, b: &[Ratio; 6]) -> Result<(), TurningRefusal> {
-        if b.iter().all(Zero::is_zero) {
+        self.advance_by(b, 1)
+    }
+
+    /// `rings` motions of rate `b` composed after the orientation at once,
+    /// `cayley(G)·cayley(B)^rings`, its generator read back once.
+    fn advance_by(&mut self, b: &[Ratio; 6], rings: u32) -> Result<(), TurningRefusal> {
+        if b.iter().all(Zero::is_zero) || rings == 0 {
             return Ok(());
         }
         let was = self.readings();
-        let r = crate::turning::motion(&bivector(&self.g))?
-            .product(&crate::turning::motion(&bivector(b))?)?;
+        let step = Motion::of(b);
+        let mut r = Motion::of(&self.g);
+        for _ in 0..rings {
+            r = r.then(&step);
+        }
         // One cover: `R` and `−R` turn every vector alike, so the motion is
         // held as the one whose scalar part is not negative; a whole turn of
         // the vector (`R ↦ −R`) then gives the components back and is
         // counted in `K`, never carried in `G`.
-        let minus = Clifford::blade(0, 0, ratio(-1, 1));
-        let scalar = r
-            .terms()
-            .find(|(m, _)| *m == 0)
-            .map(|(_, c)| c.clone())
-            .unwrap_or_else(|| ratio(0, 1));
-        let r = if scalar < ratio(0, 1) {
-            r.product(&minus)?
+        let r = if r.scalar() < ratio(0, 1) {
+            r.negated()
         } else {
             r
         };
-        let g = match crate::turning::generator(&r) {
+        let g = match r.generator_on_grain() {
             Ok(g) => g,
-            // `R + 1` singular on one plane: held as `−R`, the same sandwich.
-            Err(TurningRefusal::NoGenerator) => crate::turning::generator(&r.product(&minus)?)?,
+            // `R + 1` singular on one half: held as `−R`, the same sandwich.
+            Err(TurningRefusal::NoGenerator) => r.negated().generator_on_grain()?,
             Err(e) => return Err(e),
         };
-        let g = components(&g)?;
-        self.g = std::array::from_fn(|p| crate::ring::grain(&g[p]));
+        self.g = g;
         let now = self.readings();
         for p in 0..6 {
             if b[p] > ratio(0, 1) && now[p] < was[p] {
@@ -277,25 +443,29 @@ impl Orientation {
         }
     }
 
-    /// One ring of a body's turning, in the phase layout's turns: each
+    /// One bell of a body's turning, in the phase layout's turns: each
     /// spatial plane by its own `space[j]` turns, the circulation by `circ`
     /// turns on each R-plane alike (one circulation seen in every pair, its
     /// spin shared by the tilt where the swing reads it). Whole turns wind
-    /// the planes they turn on; the rest composes whole.
-    pub fn ring(&mut self, space: &[Ratio], circ: &Ratio) -> Result<(), TurningRefusal> {
+    /// the planes they turn on; the rest, under a turn, is the bell's two
+    /// rings, each at the rate of half of it held on the grain (the carrier,
+    /// as every rate), composed whole: `cayley(G)·cayley(B)²`.
+    pub fn bell(&mut self, space: &[Ratio], circ: &Ratio) -> Result<(), TurningRefusal> {
+        let ring_rate =
+            |rest: &Ratio| crate::ring::grain(&signed_rate(&(rest.clone() / ratio(2, 1))));
         let mut b: [Ratio; 6] = std::array::from_fn(|_| ratio(0, 1));
         for j in 0..3 {
             let (n, rest) = whole_and_rest(space.get(j).unwrap_or(&ratio(0, 1)));
             self.windings[SPATIAL[j]] += n;
-            b[SPATIAL[j]] = signed_rate(&rest);
+            b[SPATIAL[j]] = ring_rate(&rest);
         }
         let (n, rest) = whole_and_rest(circ);
-        let c = signed_rate(&rest);
+        let c = ring_rate(&rest);
         for p in PARTNER {
             self.windings[p] += n;
             b[p] = c.clone();
         }
-        self.advance(&b)
+        self.advance_by(&b, 2)
     }
 
     /// Plane `k` (phase layout) through the centre on its own: half a turn
@@ -516,6 +686,37 @@ mod tests {
     }
 
     #[test]
+    fn the_closed_form_is_the_turning_law_value_for_value() {
+        // The orientation's own arithmetic against `conductor::turning` (the
+        // mirror of Mycelium's FORMS-TURNING v1) on mixed generators over all
+        // six planes: the same composite generator, exactly.
+        let cases: [[i64; 6]; 4] = [
+            [1, 2, 3, 4, 5, 6],
+            [-7, 3, 0, 2, -1, 5],
+            [9, -4, 11, 0, 0, 3],
+            [0, 0, 13, -6, 2, 0],
+        ];
+        for (n, a) in cases.iter().enumerate() {
+            let b = cases[(n + 1) % cases.len()];
+            let ga: [Ratio; 6] = std::array::from_fn(|p| ratio(a[p], 17));
+            let gb: [Ratio; 6] = std::array::from_fn(|p| ratio(b[p], 23));
+            let mirror =
+                crate::turning::compose_rates(&bivector(&ga), &bivector(&gb)).expect("composed");
+            let own = Motion::of(&ga)
+                .then(&Motion::of(&gb))
+                .generator()
+                .expect("composed");
+            assert_eq!(components(&mirror).expect("planes"), own, "case {n}");
+            let composed = Motion::of(&ga).then(&Motion::of(&gb));
+            let grained: [Ratio; 6] = std::array::from_fn(|p| crate::ring::grain(&own[p]));
+            assert_eq!(
+                composed.generator_on_grain().expect("on the grain"),
+                grained
+            );
+        }
+    }
+
+    #[test]
     fn the_record_holds_the_orientation_and_refuses_a_flat_torus() {
         let mut o = Orientation::default();
         let mut b = zero();
@@ -560,3 +761,4 @@ mod tests {
         assert_eq!(reading(&ratio(-1, 1)), ratio(1, 2));
     }
 }
+
