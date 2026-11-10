@@ -922,10 +922,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // The stars' meetings make heat (docs/122 law 2): read as the change
         // in their heat across the collide law, booked by name.
         {
-            let made = met
-                .iter()
-                .fold(ratio(0, 1), |h, (b, _)| h + star_heat(b))
-                - heat_was;
+            let made = met.iter().fold(ratio(0, 1), |h, (b, _)| h + star_heat(b)) - heat_was;
             if !made.is_zero() && !unit.is_zero() {
                 heat_made.push(("encounters", made / unit.clone()));
             }
@@ -2457,7 +2454,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The torque's heat is the push's too (docs/122 law 2): what it did
             // not deliver in step warmed the motes and is not carried on.
             let bounce = p.clone() - absorbed - heated.clone();
-            heat_made.push(("torque", heated.clone() * ledger_unit.clone() / unit.clone()));
+            heat_made.push((
+                "torque",
+                heated.clone() * ledger_unit.clone() / unit.clone(),
+            ));
             // What stood in the throat as it entered, to tell how each leaves.
             let entered: Vec<(usize, crate::chem::Kind, Ratio)> = in_throat
                 .iter()

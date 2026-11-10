@@ -121,6 +121,14 @@ change is named here.
 
 ### Changed
 
+- Friction is booked (docs/122 law 2, step 4; EQUATIONS E20, E56): the
+  torque's undelivered share is paid by the push (the bounce carries on
+  `p − Σ m·|Δℓ| − heated`); an encounter's heat is the relative motion its
+  grip ends, the pair's first-degree spread about their mean turning, and a
+  merged star's heat its members' whole spread (the deficit contrast stays
+  the stick test only); the ocean's torque heat is a named source.
+  `breathe`'s energy line names every heat source and the heat still
+  unaccounted.
 - Bonds release into heat (docs/122 law 1, step 3; EQUATIONS E55): at the
   throat the peels draw on the bounce's work first and then on the press's
   release, and what the release has left warms the throat's matter (its light was spent on peels and shone

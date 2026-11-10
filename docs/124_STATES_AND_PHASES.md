@@ -81,7 +81,10 @@ never a lane of its own.**
   squares, so the spread is the mean absolute deviation, not nature's
   second-degree variance; both vanish together and order bodies alike).
 - **Friction is decoherence:** a share of motion that leaves step becomes
-  heat; `motion + heat` is unchanged (docs/122 law 2). The reverse, heat
+  heat (docs/122 law 2). Motion in step is booked as `Σ m·ℓ`, which friction
+  never changes; what it spends is the relative motion, the spread about
+  the mean: two bodies meeting lose `γ·S` of `S = Σ m_k·|ℓ_k − ℓ̄|` to heat
+  (EQUATIONS E56), and a merged body's heat is its members' whole spread. The reverse, heat
   ordered into step, is work done by a pressure contrast (docs/106 §3).
 - **Temperature** is heat per unit of holding, the share `a`. A body of one
   part has no spread and so no heat of its own; it carries the heat it was

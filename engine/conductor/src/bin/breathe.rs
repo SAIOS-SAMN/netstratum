@@ -1099,7 +1099,10 @@ fn energy_line(
     let s = conductor::reading::sector;
     let dh = b.heat() - a.heat();
     let unaccounted = dh.clone() - named.clone() - got.clone() + (made.clone() - throat_light);
-    let row: Vec<String> = sources.iter().map(|(k, v)| format!("{k} {}", s(v))).collect();
+    let row: Vec<String> = sources
+        .iter()
+        .map(|(k, v)| format!("{k} {}", s(v)))
+        .collect();
     format!(
         "energy {when}: heat {} (motes {}, stars {}, worlds {}), change {}; made by {} (named {}), received {}, emitted {}, unaccounted {}; potential {}, change {}; bond {}, closed {}; light made {}, received {}, drained {}",
         s(&b.heat()),

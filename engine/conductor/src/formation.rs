@@ -1172,6 +1172,38 @@ fn meetings(
     (rt, dl)
 }
 
+/// Friction in an encounter (docs/122 law 2, docs/124 §3): the grip `γ`
+/// decoheres that share of a pair's relative motion in one orbit, their
+/// spread about their mean turning, `S = m_i·|ℓ_i − ℓ̄| + m_j·|ℓ_j − ℓ̄|`
+/// (each spin its own `ell` plus its change so far `dl`). Both move toward
+/// the mean by `γ`, so `Σ m·ℓ` is unchanged and `S` falls by `γ·S` exactly;
+/// returns `γ·S`, the heat the grip makes.
+fn decohere(
+    ell: &[Ratio],
+    dl: &mut [Ratio],
+    i: usize,
+    j: usize,
+    mi: &Ratio,
+    mj: &Ratio,
+    gamma: &Ratio,
+) -> Ratio {
+    let m_ij = mi.clone() + mj.clone();
+    if m_ij.is_zero() {
+        return ratio(0, 1);
+    }
+    let abs = |x: Ratio| if x < ratio(0, 1) { -x } else { x };
+    let (li, lj) = (
+        ell[i].clone() + dl[i].clone(),
+        ell[j].clone() + dl[j].clone(),
+    );
+    let mean = (mi.clone() * li.clone() + mj.clone() * lj.clone()) / m_ij;
+    let spread =
+        mi.clone() * abs(li.clone() - mean.clone()) + mj.clone() * abs(lj.clone() - mean.clone());
+    dl[i] -= gamma.clone() * (li - mean.clone());
+    dl[j] -= gamma.clone() * (lj - mean);
+    gamma.clone() * spread
+}
+
 /// The bounce's spin exchange (one law at every tier): the outer gains and
 /// the inner gives, each by the other's mass share of the unkept motion
 /// times their spin gap, `Σ m·ℓ` unchanged; the inner never gives more than
@@ -1426,14 +1458,22 @@ pub fn collide_stars(
                     if a != b {
                         parent[a] = b;
                     }
-                    // The merger's gripped motion, `T`, heats each by the
-                    // other's mass share.
-                    heat[i] += t.clone() * m[j].clone() / m_ij.clone();
-                    heat[j] += t * m[i].clone() / m_ij;
+                    // The merger's heat is its members' motion out of step,
+                    // read when the group joins (docs/124 §3): nothing here.
                     *sticks += 1;
                 } else {
-                    heat[i] += bind.clone() * c.clone() * m[j].clone() / m_ij.clone();
-                    heat[j] += bind.clone() * c.clone() * m[i].clone() / m_ij.clone();
+                    // Friction (docs/122 law 2, docs/124 §3): the grip `γ =
+                    // bind·c` decoheres that share of the pair's relative
+                    // motion, their spread about their mean turning in each
+                    // orbit, `S = m_i·|ℓ_i − ℓ̄| + m_j·|ℓ_j − ℓ̄|`: both spins
+                    // move toward the mean by `γ` (`Σ m·ℓ` unchanged, `S`
+                    // falls by `γ·S` exactly) and `γ·S` is their heat, a share
+                    // of their joint holding each.
+                    let gamma = bind.clone() * c.clone();
+                    let gripped = decohere(ell, dl, i, j, &m[i], &m[j], &gamma)
+                        + decohere(own_c, dl_c, i, j, &m[i], &m[j], &gamma);
+                    heat[i] += gripped.clone() / m_ij.clone();
+                    heat[j] += gripped / m_ij.clone();
                     let unkept = (t - bind) * c.clone();
                     // The unkept motion parts them in each plane by the one
                     // exchange law: their orbit spins and their orthogonal spins.
@@ -1489,7 +1529,33 @@ pub fn collide_stars(
                 a + x.clone() * (agit(slots[i].as_ref().expect("each star once")) + heat[i].clone())
             }) / wt.clone()
         };
-        let hot = idx.iter().any(|&i| !heat[i].is_zero());
+        // A joined group's members' motion out of step is its heat (docs/124
+        // §3): their spread about their mean turning in both orbits, first
+        // degree, the relative motion the merger ends (`Σ m·ℓ` kept by the
+        // mean).
+        let spread = if idx.len() > 1 && !wt.is_zero() {
+            let star = |i: usize| slots[i].as_ref().expect("each star once");
+            let mean = |f: &dyn Fn(&crate::pulse::Body) -> Ratio| {
+                idx.iter()
+                    .zip(&w)
+                    .fold(ratio(0, 1), |a, (&i, x)| a + x.clone() * f(star(i)))
+                    / wt.clone()
+            };
+            let (lo, lc) = (mean(&|b| b.ell.clone()), mean(&|b| b.ell_orth.clone()));
+            idx.iter().zip(&w).fold(ratio(0, 1), |a, (&i, x)| {
+                a + x.clone()
+                    * (abs(&(star(i).ell.clone() - lo.clone()))
+                        + abs(&(star(i).ell_orth.clone() - lc.clone())))
+            })
+        } else {
+            ratio(0, 1)
+        };
+        let a_g = if wt.is_zero() {
+            a_g
+        } else {
+            a_g + spread.clone() / wt.clone()
+        };
+        let hot = idx.iter().any(|&i| !heat[i].is_zero()) || !spread.is_zero();
         let mut head = slots[idx[0]].take().expect("each star once");
         if idx.len() > 1 {
             let members: Vec<crate::pulse::Body> = idx[1..]
@@ -2386,5 +2452,41 @@ mod tests {
         assert_eq!(contact(&ratio(0, 1), &ratio(1, 4)), ratio(3, 4));
         // Across the bell: from −¼ to ¼ passes the peak, mean ¾.
         assert_eq!(contact(&ratio(-1, 4), &ratio(1, 2)), ratio(3, 4));
+    }
+}
+
+#[cfg(test)]
+mod encounter_tests {
+    use super::decohere;
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn a_grip_turns_its_share_of_relative_motion_into_heat() {
+        // docs/122 law 2 on docs/124 §3: `Σ m·ℓ` unchanged; the pair's spread
+        // falls by exactly the heat made, `γ·S`; a full grip leaves none.
+        let ell = vec![ratio(3, 1), ratio(-1, 2), ratio(7, 5)];
+        let (mi, mj) = (ratio(2, 1), ratio(5, 3));
+        let spread = |d: &[cfe::ratio::Ratio]| {
+            let (li, lj) = (ell[0].clone() + d[0].clone(), ell[2].clone() + d[2].clone());
+            let mean =
+                (mi.clone() * li.clone() + mj.clone() * lj.clone()) / (mi.clone() + mj.clone());
+            let abs = |x: cfe::ratio::Ratio| if x < ratio(0, 1) { -x } else { x };
+            mi.clone() * abs(li - mean.clone()) + mj.clone() * abs(lj - mean)
+        };
+        let momentum = |d: &[cfe::ratio::Ratio]| {
+            mi.clone() * (ell[0].clone() + d[0].clone())
+                + mj.clone() * (ell[2].clone() + d[2].clone())
+        };
+        for gamma in [ratio(1, 4), ratio(1, 1)] {
+            let mut dl = vec![ratio(1, 10), ratio(0, 1), ratio(0, 1)];
+            let (s0, p0) = (spread(&dl), momentum(&dl));
+            let heat = decohere(&ell, &mut dl, 0, 2, &mi, &mj, &gamma);
+            assert_eq!(momentum(&dl), p0);
+            assert_eq!(s0.clone() - spread(&dl), heat);
+            assert_eq!(heat, gamma.clone() * s0);
+        }
+        let mut dl = vec![ratio(0, 1); 3];
+        decohere(&ell, &mut dl, 0, 2, &mi, &mj, &ratio(1, 1));
+        assert_eq!(spread(&dl), ratio(0, 1));
     }
 }
