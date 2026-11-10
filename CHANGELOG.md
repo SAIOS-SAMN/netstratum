@@ -12,6 +12,15 @@ change is named here.
 
 ### Added
 
+- `conductor::energy`, the energy book read only (docs/122 step 1,
+  docs/106 S1): heat (motes, stars, worlds), potential `m·(1 − δ)` and bond
+  (open frames) over every mote and body, and an `ENERGY` line per
+  universal echo and over the run in `breathe`, beside the light made,
+  received and drained. Witnesses: reading leaves the universe as it was; a
+  mote split in two leaves the book as it was; a fusion pair lowers the bond
+  by its rung light. Read (2^40, 580 bells): heat 0 → 0.0265 unit masses,
+  1.2 % of it light received, the rest unbooked; potential 0 → 0.123; the
+  bond rose 39 % while 0.0037 of light was made.
 - docs/124, States and phases (derived, not built): each form of energy
   on one level of the coordinate and named by nature's term (register
   H12): motion and heat on the phase level (heat is motion out of step, the
