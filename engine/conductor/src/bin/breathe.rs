@@ -44,7 +44,7 @@ fn main() {
         let mut widest = 0u64;
         let mut see = |x: &conductor::flows::Mote| {
             widest = widest.max(bits(&x.ell_o())).max(bits(&x.ell_orth));
-            for p in &x.orientation.g {
+            for p in x.orientation.g() {
                 widest = widest.max(bits(p));
             }
         };
@@ -107,7 +107,7 @@ fn main() {
                 ] {
                     put(format!("{tier}.mote.{n}"), r);
                 }
-                for p in x.orientation.g.iter() {
+                for p in x.orientation.g().iter() {
                     put(format!("{tier}.mote.orientation"), p);
                 }
                 for l in x.lever.iter() {
@@ -124,7 +124,7 @@ fn main() {
             ] {
                 put(format!("ocean.{n}"), r);
             }
-            for p in x.orientation.g.iter() {
+            for p in x.orientation.g().iter() {
                 put("ocean.orientation".into(), p);
             }
         }
@@ -700,7 +700,7 @@ fn main() {
             amounts = amounts.max(bits(&x.amount));
             spins = spins.max(bits(&x.ell_o())).max(bits(&x.ell_orth));
             agitation = agitation.max(bits(&x.agitation));
-            for p in &x.orientation.g {
+            for p in x.orientation.g() {
                 phases = phases.max(bits(p));
             }
         }
