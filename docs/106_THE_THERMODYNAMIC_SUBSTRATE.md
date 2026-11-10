@@ -103,7 +103,7 @@ At each place (a mote's reach in its enclosure, a ring, a body):
 |---|---|
 | `flows::torque` / `spin_torque` as a source | the substrate's contrast transported; the torque the potential's payment |
 | agitation as the torque's residue | heat as state, its pair equilibrium, booked |
-| cooling `keep·keep`, no counterweight | the heat pair with the counterweight on the other face |
+| cooling `keep·keep`, no counterweight | the heat pair with the counterweight on the other face; the keep is now emission by the face, booked as light (docs/122 law 3, 2026-11-10) |
 | `flows::fluid`'s pressure from agitation | P as state (hydrostatic, thermal, magnetic) |
 | the spin exchange by pressure contrast as a law | the coupling's reading (motion from the substrate) |
 | docs/103's layers as peers | stacked: substrate → kinematics → form |

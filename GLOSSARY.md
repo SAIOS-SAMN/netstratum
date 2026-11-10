@@ -94,7 +94,7 @@ and releases are exchanged under the inversion `δ ↦ 1 − δ`.
 | **star core / ignition** | A star's core (astronomy's stellar core): a collapsing binding's centre, where it holds its matter and burns; it ignites as a star where it holds against its own heat. Distinct from the universal core (docs/101). Formerly "heart". | `formation.rs` |
 | **remnant** | A star whose burn has ended. Its extent is re-read without heat: within its equator its throat opens and it is a core whose tube's other face is its galactic core; outside, it stays closed. | `Body::remnant`, docs/111 §3.2 |
 | **recycling** | Shed and spent matter returns through the cores and the ocean; total mass never changes. | `recycle.rs`, `ocean.rs` |
-| **heat** (of a world) | The agitation of the bonds that built it, cooling through its unlocked face; its thermal band `r(1 ± heat)` decides which neighbours it meets. | `Body::heat` |
+| **heat** (of a world) | The agitation of the bonds that built it, emitted as light through its unlocked face (docs/122 law 3); its thermal band `r(1 ± heat)` decides which neighbours it meets. | `Body::heat` |
 
 ## 7. The game (era 0)
 

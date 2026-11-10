@@ -6,7 +6,7 @@ body's unlocked face, and one ledger books it across bond, heat, motion,
 potential and light. It replaces the frame-count readings that set cooling
 and starlight today, and the two starlight laws.
 
-**Status:** derived (2026-11-05); step 1, the read-only ledger, built (2026-11-10). It answers register docs/119
+**Status:** derived (2026-11-05); steps 1 (the read-only ledger) and 2 (emission by the face) built (2026-11-10). It answers register docs/119
 B8 and B9 and the open decision "hydrogen's hold" (docs/PLAN.md). The
 operator said on 2026-11-05: "why are we still stuck in frames :: where
 does irradiation as heat and light come from? bonds+friction - sounds like
@@ -129,7 +129,20 @@ alike: the still point of docs/106 §5.
    made = received + drained exactly.
 2. **Emission by the face** (law 3), retiring `open` in `keep` and
    `radiates`. Witness: a body's heat approaches `q/u` in closed form, at N
-   and 4N rings; hydrogen emits.
+   and 4N rings; hydrogen emits. **Built (2026-11-10):** `flows::emission`, `flows::emit`,
+   `flows::heat_after` (EQUATIONS E54): the torque only makes heat; galaxy
+   and ocean motes emit over the torque's two rings, a system's motes and
+   worlds on its star's bell, the light shone on the continuum face and
+   booked; `keep = (1 − open)(1 − δ)` and `formation::radiates` retired (the
+   gas shells keep `δ` a ring; their saved record moved from tag 6, now
+   refused, to 31). Witnesses: the closed form at N and 4N rings; every grain
+   of heat booked as light; hydrogen emits; the vacuum stream keeps the
+   exchanged face. Read on the same founding (2^40, 580 bells) before and
+   after: light made 0.0037 → 0.110 unit masses (received 0.018, drained
+   0.092, balanced); the heat the unbooked sources make, now visible beside
+   its emission, 0.026 → 0.126; stars born 26 → 11, those holding hydrogen
+   1 of 21 → 8 of 9 (births with no hydrogen falling in 17 → 2); hydrogen
+   burned 0 in both (the star core's heat is step 5); every identity exact.
 3. **Bonds into heat** (law 1): fusion's rung energy and the throat's press
    into heat; peels and dissociation from it; one starlight law. Witness:
    `B + heat` unchanged by every bond change; the ledger's bond and heat

@@ -1980,13 +1980,12 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
             &p.inner,
             &p.outer,
             &p.agitation,
-            &p.radiates,
             &p.vacuum,
         ] {
             cfe::ratio::encode(r, &mut g);
         }
         g.extend_from_slice(&p.born.to_le_bytes());
-        cfe::tlv::put(6, &g, out);
+        cfe::tlv::put(31, &g, out);
     }
     if b.born > 0 {
         cfe::tlv::put(7, &b.born.to_le_bytes(), out);
@@ -2291,13 +2290,13 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
     })
 }
 
-/// A gas mote (tag 6), attached to the body read before it.
+/// A gas mote (tag 31; tag 6 refused), attached to the body read before it.
 fn get_mote(v: &[u8]) -> Option<crate::formation::Shell> {
     let len = u16::from_le_bytes(v.get(0..2)?.try_into().ok()?) as usize;
     let key = crate::chem::Kind::parse(std::str::from_utf8(v.get(2..2 + len)?).ok()?)?;
     let mut at = 2 + len;
     let mut r = Vec::new();
-    for _ in 0..6 {
+    for _ in 0..5 {
         let (x, used) = cfe::ratio::decode(v.get(at..)?)?;
         at += used;
         r.push(x);
@@ -2310,7 +2309,6 @@ fn get_mote(v: &[u8]) -> Option<crate::formation::Shell> {
         inner: r.next()?,
         outer: r.next()?,
         agitation: r.next()?,
-        radiates: r.next()?,
         vacuum: r.next()?,
         born,
     })
@@ -2340,11 +2338,12 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
             // a manifest (tag 2) and the firmament as its own list (tag 19,
             // before B1) are refused, never migrated (operator 2026-10-14:
             // the universe data is test data); a skipped tag would lose
-            // their matter.
-            2 | 19 => return None,
+            // their matter. The gas mote with its frame-count cooling share
+            // (tag 6, before docs/122 law 3) is refused the same way.
+            2 | 6 | 19 => return None,
             24 => ocean.push(get_flow(v)?),
             1 => flat.push(get_body(v)?),
-            6 => flat.last_mut()?.gas.push(get_mote(v)?),
+            31 => flat.last_mut()?.gas.push(get_mote(v)?),
             7 => flat.last_mut()?.born = u64::from_le_bytes(v.try_into().ok()?),
             8 => unit = Some(cfe::ratio::decode(v)?.0),
             17 => t_u = Some(u64::from_le_bytes(v.try_into().ok()?)),
@@ -2726,7 +2725,6 @@ mod tests {
             inner: ratio(1, 3),
             outer: ratio(2, 3),
             agitation: ratio(1, 2),
-            radiates: ratio(1, 2),
             born: 7,
             vacuum: ratio(3, 7),
         };

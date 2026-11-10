@@ -479,6 +479,39 @@ impl Toll {
     }
 }
 
+/// A system's own glow on its star's bell (docs/122 laws 3–4): its motes
+/// emit by their faces over the ring, its worlds' emission (`emitted`, read
+/// by `settle_system`) joins it, and the light crosses the system on the
+/// continuum face, what no body takes drained. Booked in unit masses.
+fn system_glow(sys: &mut Body, emitted: &Ratio, rang: bool, unit: &Ratio) -> Light {
+    use num_traits::Zero as _;
+    if unit.is_zero() {
+        return Light::default();
+    }
+    let Some(enc_s) = crate::formation::system_frame(sys, unit) else {
+        return Light {
+            made: emitted.clone() / unit.clone(),
+            received: ratio(0, 1),
+            drained: emitted.clone() / unit.clone(),
+        };
+    };
+    let glow = if rang {
+        crate::flows::emit(&mut sys.flows, &enc_s, 1)
+    } else {
+        ratio(0, 1)
+    } + emitted.clone();
+    if glow.is_zero() {
+        return Light::default();
+    }
+    let whole = mass(&sys.total());
+    let (got, gone) = shine(&mut sys.flows, &mut sys.satellites, &enc_s, &glow, &whole);
+    Light {
+        made: glow / unit.clone(),
+        received: got / unit.clone(),
+        drained: gone / unit.clone(),
+    }
+}
+
 /// The light ledger's three entries.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Light {
@@ -599,6 +632,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
     let mut pending_firm: Option<Ratio> = None;
     let mut pending_collective: Option<crate::pulse::Collective> = None;
     let mut pending_formation: Option<crate::pulse::Formation> = None;
+    let mut pending_ocean_light: Option<Light> = None;
     if t_u > 0 && until / t_u > from / t_u {
         crate::profile::mark("orbit:collective");
         let (c, firm, coll, ocean_moves) = crate::pulse::orbit_galaxies(u);
@@ -609,6 +643,24 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // outer medium hold their own reach (docs/111 §5.4).
         crate::profile::mark("orbit:form");
         pending_formation = Some(crate::pulse::form_galaxies(u, until / t_u * t_u, &ocean_moves));
+        // The ocean's motes emit by their face over the universal torque's two
+        // rings (docs/122 law 3); the light crosses the ocean on the
+        // continuum face, what no mote takes drained. Booked with the echo's
+        // first arrival.
+        crate::profile::mark("orbit:emit");
+        if let Some(enc_o) = crate::pulse::ocean_frame(u) {
+            let glow = crate::flows::emit(&mut u.ocean, &enc_o, 2);
+            let unit = unit_mass(u);
+            if !glow.is_zero() && !unit.is_zero() {
+                let whole = mass(&u.medium());
+                let (got, gone) = shine(&mut u.ocean, &mut [], &enc_o, &glow, &whole);
+                pending_ocean_light = Some(Light {
+                    made: glow / unit.clone(),
+                    received: got / unit.clone(),
+                    drained: gone / unit,
+                });
+            }
+        }
     }
     // Every echo's arrival, in time order.
     let mut arrivals: Vec<(u64, usize, u64)> = Vec::new();
@@ -778,7 +830,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut burned = crate::pulse::Manifest::new();
         let mut burns: Vec<(Vec<u64>, u32, Ratio, u64)> = Vec::new();
         let mut cross = std::mem::take(&mut pending);
-        let mut light = Light::default();
+        let mut light = pending_ocean_light.take().unwrap_or_default();
         let mut tolls: Vec<Toll> = Vec::new();
         let mut identity: Vec<(&'static str, Ratio)> = Vec::new();
         if let Some(r) = pending_firm.take() {
@@ -1231,6 +1283,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // oversteps the rim crosses into the galaxy.
                 let (escaped, settled) =
                     crate::formation::settle_system(&mut sys, &unit, r_echo, rang, bell);
+                {
+                    let l = system_glow(&mut sys, &settled.emitted, rang, &unit);
+                    light.made += l.made;
+                    light.received += l.received;
+                    light.drained += l.drained;
+                }
                 let (st, bo, star_identity, made, weighs, met_by): (
                     usize,
                     usize,
@@ -1677,6 +1735,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // overreaches the system's rim crosses into the galaxy.
             let (escaped, settled) =
                 crate::formation::settle_system(&mut sys, &unit, r_echo, rang, bell);
+            {
+                let l = system_glow(&mut sys, &settled.emitted, rang, &unit);
+                light.made += l.made;
+                light.received += l.received;
+                light.drained += l.drained;
+            }
             let (st, bo, star_identity, made, weighs, met_by): (
                 usize,
                 usize,
@@ -2282,6 +2346,23 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             }
             core.reservoir -= given;
             identity.push(("torque", ledger_sum(core) - before));
+            // Emission by the face (docs/122 law 3): the motes' heat leaves as
+            // light over the torque's two rings and crosses the galaxy on the
+            // continuum face like the throat's light (law 4), what no body
+            // takes drained.
+            crate::profile::mark("breath:emit");
+            {
+                let glow = crate::flows::emit(&mut core.flows, enc.as_ref().unwrap_or(&throat), 2);
+                if !glow.is_zero() {
+                    let enc_l = galaxy_enc(core);
+                    let (got, _) = shine(&mut core.flows, &mut [], &enc_l, &glow, &g_mass);
+                    let (inside, _) =
+                        shine_systems(&mut core.satellites, &glow, &enc_l, &g_mass, &unit);
+                    light.made += glow.clone() / unit.clone();
+                    light.received += (got.clone() + inside.clone()) / unit.clone();
+                    light.drained += (glow - got - inside) / unit.clone();
+                }
+            }
             // The magnet on reach (docs/121 §14): every mote's lift stands at
             // the dipole's share where it stands; its spin is not touched.
             crate::profile::mark("breath:magnet");
@@ -2989,6 +3070,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             collective: pending_collective.take(),
             formation: pending_formation.take(),
         });
+    }
+    // An echo with no arrival still books the ocean's light (on its last
+    // event; with no event at all there is nothing to carry it).
+    if let (Some(l), Some(e)) = (pending_ocean_light.take(), events.last_mut()) {
+        e.light.made += l.made;
+        e.light.received += l.received;
+        e.light.drained += l.drained;
     }
     events
 }
