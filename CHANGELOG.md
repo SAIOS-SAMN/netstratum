@@ -138,6 +138,10 @@ change is named here.
 
 ### Changed
 
+- The energy book (`conductor::energy`) sums its terms in a balanced tree:
+  the same exact values, without the running sum whose denominator grew
+  with every mote (amounts carry wide denominators). At bell 186 on the
+  2^40 founding, the read fell from 15 s of the echo's 26 s to under 1 s.
 - H's state is the generator (docs/117 §11.7, derived, not built; amends
   docs/120 §8d): a mote's and a body's orientation is held as the generator
   `G` over six elliptic planes with `K` per plane, its rate a ring the hold
