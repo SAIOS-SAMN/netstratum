@@ -133,6 +133,11 @@ change is named here.
 
 ### Changed
 
+- H's state is the generator (docs/117 §11.7, derived, not built; amends
+  docs/120 §8d): a mote's and a body's orientation is held as the generator
+  `G` over six elliptic planes with `K` per plane, its rate a ring the hold
+  over the reach, `b = H/R`, and each plane's phase a reading. Register K6's
+  split is retired: the composition makes it.
 - Friction is booked (docs/122 law 2, step 4; EQUATIONS E20, E56): the
   torque's undelivered share is paid by the push (the bounce carries on
   `p − Σ m·|Δℓ| − heated`); an encounter's heat is the relative motion its

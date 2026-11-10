@@ -353,6 +353,14 @@ semantically, and dimensionally". (Never "cells": ruling 2026-10-16.)
 The operator ruled the torus be re-volumized in non-Euclidean spheres:
 - **Degrees stay the state** (round rotation angles on the turning planes,
   §8b; the L1 projection a named reading only).
+  **Amended 2026-11-10 (docs/117 §11.7, operator: "derive the answer …
+  rationale for opening up that vent"):** the stored state is the
+  generator `G`, the hyper-dimensional object degrees are a reading of.
+  Its components are the round turnings' Cayley rates, `tan(θ/4) = g`, and
+  it also holds the turnings between planes and the volume, which degrees
+  cannot. Rational degrees have no exact rotor except at `0°` and `180°`
+  (78.173 §8.3). Degrees remain every reading, rendered as certified
+  sectors.
 - **A body's orientation is one rotor on `S³`,** its three turnings
   (`e₊₂e₊₃`, `e₊₃e₊₁`, `e₊₁e₊₂`, cyclic) composed in a fixed order, which does
   not commute.
