@@ -169,10 +169,7 @@ mod tests {
         let mote = |ell: i64, tilt: [i64; 3]| crate::flows::Mote {
             key: crate::chem::Kind::parse("W0004").expect("a kind"),
             amount: ratio(3, 1),
-            spins: crate::flows::Mote::spins_of(
-                &ratio(ell, 1),
-                &tilt.map(|t| ratio(t, 6)),
-            ),
+            spins: crate::flows::Mote::spins_of(&ratio(ell, 1), &tilt.map(|t| ratio(t, 6))),
             ell_orth: ratio(0, 1),
             phase: vec![ratio(0, 1); crate::flows::PLANES],
             agitation: ratio(0, 1),
@@ -206,7 +203,11 @@ mod tests {
         let d = carried_twist(&spins, &plane);
         assert_eq!(sum(&d), ratio(0, 1));
         for k in 0..3 {
-            assert_eq!(d[k].clone() > ratio(0, 1), a[k].clone() > ratio(0, 1), "plane {k}");
+            assert_eq!(
+                d[k].clone() > ratio(0, 1),
+                a[k].clone() > ratio(0, 1),
+                "plane {k}"
+            );
         }
     }
 

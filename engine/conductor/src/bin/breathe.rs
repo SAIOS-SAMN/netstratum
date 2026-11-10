@@ -330,7 +330,9 @@ fn main() {
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();
     let novae: usize = events.iter().map(|e| e.novae).sum();
     let lifted_n: usize = events.iter().map(|e| e.lifted.0).sum();
-    let lifted_du = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.lifted.1.clone());
+    let lifted_du = events
+        .iter()
+        .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.lifted.1.clone());
     let returned = events
         .iter()
         .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
@@ -769,7 +771,11 @@ fn main() {
     // its candidates, its collections of two or more, the self-held and the
     // formed, and the collection nearest its pinch (its widest extent over its
     // pinch on its worse plane; at most 1 holds).
-    for (n, f) in events.iter().filter_map(|e| e.formation.as_ref()).enumerate() {
+    for (n, f) in events
+        .iter()
+        .filter_map(|e| e.formation.as_ref())
+        .enumerate()
+    {
         let worst = |g: &pulse::GroupReading| {
             g.planes
                 .iter()
@@ -941,7 +947,8 @@ fn main() {
             0usize,
             0usize,
         );
-        let mut lightest: std::collections::BTreeMap<u32, usize> = std::collections::BTreeMap::new();
+        let mut lightest: std::collections::BTreeMap<u32, usize> =
+            std::collections::BTreeMap::new();
         let mut kept_he = cfe::ratio::ratio(0, 1);
         let mut held_by: Vec<String> = Vec::new();
         for core in &u.cores {
@@ -1026,8 +1033,19 @@ fn main() {
         let births: Vec<&(cfe::ratio::Ratio, cfe::ratio::Ratio, cfe::ratio::Ratio)> =
             events.iter().flat_map(|e| e.births_h.iter()).collect();
         let zero = cfe::ratio::ratio(0, 1);
-        let none = |k: usize| births.iter().filter(|b| [&b.0, &b.1, &b.2][k] == &zero).count();
-        let most = |k: usize| births.iter().map(|b| [&b.0, &b.1, &b.2][k].clone()).max().unwrap_or_else(|| zero.clone());
+        let none = |k: usize| {
+            births
+                .iter()
+                .filter(|b| [&b.0, &b.1, &b.2][k] == &zero)
+                .count()
+        };
+        let most = |k: usize| {
+            births
+                .iter()
+                .map(|b| [&b.0, &b.1, &b.2][k].clone())
+                .max()
+                .unwrap_or_else(|| zero.clone())
+        };
         println!(
             "fuel — births: {}; hydrogen absent from what fell in {}, after the fibres' transition in {}, from the star kept in {}; the greatest hydrogen share by mass, fell {}, after the transition {}, kept {}",
             births.len(),
