@@ -569,6 +569,10 @@ plane's phase a reading of the composed motion. Together:
 
 ### 11.1 The state in degrees
 
+**Amended by §11.7 (2026-11-10):** the stored state is the generator `G`.
+The degrees below are its readings, and `K` per component stands as
+written.
+
 `H`'s components are stored in degrees, as exact rationals, with the plane
 named. A quarter turn is 90° on a named plane, never a word. Each plane's
 phase is stored, and so is each turning between planes (`τ₁₂`, ...). `K_c` per
@@ -690,6 +694,170 @@ squares", and ruled separation by isoclinic degrees.
    instead, the only reversing normal would be the shared `e₊R`, which moves
    every axis. Fixture (`n = 2`, shared unit `e₊₃`): `3/5 e₊₃ + 4/5 e₊₁ +
    1/2 e₊₂` reflects in `e₊₁` to `3/5 e₊₃ − 4/5 e₊₁ + 1/2 e₊₂`.
+
+### 11.7 H on motes and bodies: the generator is the state (#117 step 2)
+
+**Derived 2026-11-10, not built.** The operator, asked whether the rate
+should replace degrees as the stored state, ruled: "derive the answer in
+accordance with our documentation and architecture — it sounds like you
+need more information of a hyper-dimensional object outside of just
+degrees, which needs documentation updates as well — rationale for opening
+up that vent". This section is that derivation. It amends docs/120 §8d's
+"degrees stay the state" and leaves the rest of §8d standing.
+
+#### 11.7.1 Why the vent opens
+
+1. **The reading shows the collapse.** The heat-by-component reading (#153,
+   `conductor::dispersion`) found the three spatial planes never
+   independent: their dispersions are identical in every collapsing binding.
+   The cause is in the state. `flows::turn` advances each plane's phase by
+   its tilt's share, `2δ·t_k` turns, plane by plane, a sum. A sum of
+   per-plane degrees is a flat 3-torus (register K13). Equal rates on three
+   planes are one turning about the diagonal, yet the torus reads them as
+   three equal, independent advances. No law then makes the planes differ.
+2. **Degrees cannot hold a composite.** A composite of turnings on planes
+   that share a unit has a part on the third plane, its sign set by the
+   order. A composite on disjoint planes has a volume. Neither part is a
+   per-plane degree (Mycelium 78.173 fixtures 11b-i and 11b-ii; §11.2–§11.3
+   here).
+3. **Rational degrees have no exact motion.** A turning's rotor is
+   rational exactly when `tan(θ/4)` is rational. At a rational number of
+   degrees that happens only at `0°` and `180°` (78.173 §8.3). A degree base
+   is exact over `ℚ(ζ_L)`. On the grain `L` runs to the order of `60⁶`, and
+   no product over such a field can be computed. Re-reading degrees every
+   bell from certified bounds would render every mote every bell, which the
+   2026-10-24 ruling keeps for observation alone.
+4. **The object is the generator.** The generator `B` is the
+   hyper-dimensional object degrees are a reading of. It has one component
+   per plane, its turnings between planes are its components on the planes
+   between, and its Cayley rotor carries the volume. It is exact over ℚ,
+   composes whole (`conductor::turning`), and is the form shared across the
+   core tube (78.173 §8.4). Netstratum's base becomes the case `L = 1`,
+   which §8.4 already admits.
+
+**What §8d keeps.**
+- The turnings stay round rotations. `b = tan(θ/4)` is the stereographic
+  coordinate of the round angle, not an L1 projection.
+- Degrees remain the reading every report and every certified sector shows.
+- Separation is still read by isoclinic degrees (§11.6), now read from `B`.
+
+#### 11.7.2 What a mote and a body hold
+
+- **The orientation `G`:** a generator over the four continuum axes `e₊₁,
+  e₊₂, e₊₃, e₊R`, so six elliptic planes. The three spatial planes are
+  `e₊₂e₊₃, e₊₃e₊₁, e₊₁e₊₂`. Each has its R-plane partner, the dual pair of
+  §11.6: `e₊₁e₊R, e₊₂e₊R, e₊₃e₊R`. Each component is held on the grain, and
+  any bivector is a valid generator, so the grain never breaks the motion.
+  This closes §11.6 item 5's gap: the one loop phase becomes the three
+  R-planes, each founded isoclinic with its spatial partner (T18), so the
+  circulation of plane `e₊ᵢe₊ⱼ` turns on `e₊ₖe₊R`.
+- **The windings `K`:** a keyed vector over the planes (78.173 §8.3). A
+  plane's count rises by one each time its component passes `∞`, the
+  vector's whole turn at `θ = 360°`, where `R = −1` on that plane. The
+  orientation is then held as `−R`'s generator, the same sandwich, so `G`
+  always exists. A composite's new plane starts at `K = 0`.
+- **The spins `ℓ_k` stay** per spatial plane, and `ℓ_⊥` splits by the same
+  tilt onto the R-planes. They are the momentum, and `Σ m·ℓ` is unchanged as
+  a witness. The rate is read from them, never stored.
+- **Retired as state:** `Mote::phase`, `Body::phase` and the levers'
+  per-plane phase marks. Each plane's phase is a reading of `G` (§11.7.4).
+
+#### 11.7.3 The rate per ring
+
+The motion law turns a body `δ` turns a ring (docs/120 §2). That linear
+advance is an L1 reading, and §8d keeps L1 as a named reading only. Its
+structure is three fixed points:
+- `δ = 0`: rest;
+- `δ = ½`: half a turn a ring, the rim's 1:1 lock with the bell;
+- `δ → 1`: the throat, where `R = −1` has no generator.
+
+One first-degree (linear-fractional) map of `δ` sends `0, ½, 1` to the
+rates `0, 1, ∞`:
+
+    b = δ/(1 − δ) = H/R        (the hold over the reach)
+
+- **The rate is the hold over the reach.** It is first degree, with no
+  square, and is the Cayley rate of the ring's turning, `tan(θ/4) = b`. It
+  holds per spatial plane at that plane's share: `b_k = δ_k/(1 − δ_k)` with
+  `δ_k = δ·t_k`. A body turning on one plane alone turns by the motion law's
+  fixed points exactly.
+- **The vacuum's inversion is the reciprocal.** `δ ↦ 1 − δ` gives `b ↦ 1/b`,
+  which is `θ ↦ 360° − θ`, the far face: an exact identity, a witness.
+- **One bell is two rings:** `B_bell = b ⊕ b = 2b/(1 − b²)` per plane on its
+  own. On several planes it is `cayley(B_ring)²` read back whole.
+- **The change from today, stated.** Between the fixed points the round
+  turning differs from the linear one. At `δ = ¼` it reads `73.7°` a ring,
+  not `90°`. Far out (`δ → 0`) it is `2/π` of the linear rate. The
+  before/after read measures what this does to the orbits. If the read
+  refutes it, the fixed points stand and the map between them is reopened
+  (§11.7.7 item 1).
+
+#### 11.7.4 Each motion law, restated on `G`
+
+docs/120 §9 item 3 asks every law that sets motion to be restated as
+setting the generator.
+
+| law | today | on `G` |
+|---|---|---|
+| the advance (`turn`) | each plane's phase `+ 2δ·t_k`, summed | `G ← generator(cayley(G)·cayley(B_bell))`, whole. Its parts on the planes between are the turnings `τ` (§11.4), made by the composition itself |
+| the circulation (`orth_push`) | one loop phase and one `ℓ_⊥` | the same push on each R-plane at its partner's share; the swing (`swung`) reads each pair |
+| through the centre (one plane) | that plane's phase `+ ½` | compose with that plane's half-turn, `b = 1` on it, which is exact |
+| the torque (`spin_torque`) | each plane's response over its passage, read at its phase | unchanged in form, each plane's passage read from `G` (below) |
+| the shear (`shear`) | per-plane spin steps paid by the range | unchanged: it moves spins, and the rate follows |
+| the merger (`join`) | holding-weighted mean of true phases | holding-weighted mean of the generators, first degree |
+| the place and its levers (`enfold::leaf`) | each phase held to the body's place | each component of `G` held to the place, its lever the component's residue |
+
+**Reading a plane's phase.** The laws that read a phase (the response, the
+hemisphere, `in_step`) read plane `k`'s turning from `G`'s component on `k`:
+- **The hemisphere is exact and rational:** `0 ≤ g < 1` is `[0°, 180°)`;
+  `g ≥ 1` is `[180°, 360°)`; `g < 0` is the negative branch.
+- **A value in turns** is the certified reading `θ = 4·atan(g)` on the
+  grain, and a law acts on the bound nearer zero (§8d). This is the one
+  certified function the step adds: `atan` in `conductor::geodesic`, beside
+  its `cos` and `sin`.
+
+#### 11.7.5 K6, the split between planes, retired
+
+Register K6's hold-weighted split, `t·2h₂/(h₁ + h₂)`, was introduced to make
+the planes separate. On `G` no split is written:
+- Composing turnings on two planes that share a unit puts a part on the
+  third plane, antisymmetric in their order (11b-i).
+- Its size is the product of the two rates. Each rate is its plane's hold
+  over its reach (§11.7.3), so the part is hold-weighted by construction.
+- T18's antisymmetric, hold-weighted split is therefore what the
+  composition does, and K6 is retired, not derived.
+
+The founding lean (§11.5) is written as the one-grain turning it already
+is, a component on the plane between the leading and lagging planes.
+
+#### 11.7.6 Witnesses
+
+- **One plane:** a body turning on one plane alone reads `0°` at rest and
+  exactly `180°` a ring at `δ = ½`, and its vacuum twin reads `360° − θ`.
+- **Composition:** a mote turning on two planes gains the part on the
+  third plane, its sign reversed with the order (Mycelium 11b-i, through
+  the mote).
+- **Momentum:** `Σ m·ℓ` per plane is unchanged by the advance, which turns
+  orientation and never spin.
+- **The grain:** `G`'s components on the grain compose to a valid
+  generator. Where a plane passes `R = −1`, its `K` rises by one and `G`
+  exists.
+- **One founding read before and after** (`.testtmp/energy/u`, 2^40, 580
+  bells): the re-derivation identities and the work counters (N against
+  4N), and the heat-by-component reading (#153), whose three spatial-plane
+  dispersions must now differ.
+
+#### 11.7.7 Open
+
+1. **The map between the fixed points.** `b = H/R` is the one
+   linear-fractional map through rest, the rim and the throat. If the read
+   shows the `2/π` slowing far out is wrong for the orbits, the motion law's
+   own rate is to be re-derived on `b`, never patched with a factor.
+2. **The boosts.** The hyperbolic planes (`e₊ₖe₋ₖ`, the S lane's lift)
+   join `G` when the lift is restated as a boost. Until then the lift stays
+   on `S` (docs/121 §14.6).
+3. **Bodies.** Stars and worlds take `G` in the same step, after motes,
+   with the same witnesses.
 
 ## 12. The passage is the pole swap; its flux on T is the span's change
 
