@@ -1199,7 +1199,7 @@ pub fn torque(
 /// emits). Returns (the heat kept, the share emitted), exact: kept + emitted
 /// is the heat it had.
 pub fn emission(heat: &Ratio, held: &Ratio, rings: u32) -> (Ratio, Ratio) {
-    let kept = (0..rings).fold(heat.clone(), |a, _| a * held.clone());
+    let kept = heat.clone() * held.pow(i32::try_from(rings).unwrap_or(i32::MAX));
     let emitted = heat.clone() - kept.clone();
     (kept, emitted)
 }

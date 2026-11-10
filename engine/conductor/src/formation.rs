@@ -369,11 +369,14 @@ pub fn tunnelling(w: u32) -> Option<Ratio> {
 /// - its RHYTHM the star core's coherence c with the echo (a reading of phase).
 ///   Each received ring fuses the share `feed = (|Δm|/3Z_p)·τ·s/Q̄·c` of the
 ///   fuel that remains, compounding (`crate::compound`): n rings leave
-///   `(1 − feed)^n` of it. The light per received ring is the transduced flux,
-///   `feed × fuel share × |Δm|`. Returns (the share a ring, light a ring);
-///   None where the rung does not run, or its share lies past the whole.
-pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option<(Ratio, Ratio)> {
-    let fuel = star.get(&crate::chem::Kind::atom(z)?)?.clone();
+///   `(1 − feed)^n` of it. Each pair fused closes `|Δm|` open frames, its
+///   bond's release, which warms the star (docs/122 law 1); its starlight is
+///   the star's emission by its face (law 3), one starlight law (B9).
+///   Returns the share a ring; None where the rung does not run, or its
+///   share lies past the whole.
+pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option<Ratio> {
+    // A rung burns only the fuel the star holds.
+    star.get(&crate::chem::Kind::atom(z)?)?;
     let total = mass(star);
     if total.is_zero() || coherence.is_zero() {
         return None;
@@ -412,12 +415,7 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
     if feed.is_zero() || feed > ratio(1, 1) {
         return None;
     }
-    let fuel_share =
-        fuel * ratio(
-            i64::from(crate::chem::hold(&crate::chem::Kind::atom(z)?)),
-            1,
-        ) / total;
-    Some((feed.clone(), feed * fuel_share * ratio(dm, 1)))
+    Some(feed)
 }
 
 /// A star's system AT ignition (docs/83; planets from the star's own disc):
@@ -473,6 +471,27 @@ pub fn dissociate(m: &Manifest) -> Manifest {
         }
     }
     out
+}
+
+/// A star's glow (docs/122 laws 1 and 3): the bond its burn released
+/// (`released`, holding units) warms its kept matter, and the star, standing
+/// at its system's throat where the faces are equal (`δ = ½`, docs/122 §4),
+/// keeps ½ of its heat a ring over `rings` rings and emits the rest, its
+/// starlight, on the grain (the floor's remainder is light too). Returns
+/// the light: `heat·m + released` before is `heat·m + light` after,
+/// exactly. A star with nothing kept emits what it released.
+pub fn star_glow(sys: &mut crate::pulse::Body, released: &Ratio, rings: u64) -> Ratio {
+    let kept_m = mass(&sys.kept);
+    if kept_m.is_zero() {
+        return released.clone();
+    }
+    let risen = sys.heat.clone() + released.clone() / kept_m.clone();
+    // Past 4096 rings `½ⁿ` of any heat below `2^4096·60⁻⁶` floors to nothing
+    // on the grain, so the count stops there exactly.
+    let rings = u32::try_from(rings.min(4096)).unwrap_or(4096);
+    let (kept_h, _) = crate::flows::emission(&risen, &ratio(1, 2), rings);
+    sys.heat = crate::ring::grain(&kept_h);
+    (risen - sys.heat.clone()) * kept_m
 }
 
 /// A star's agitation read back from its ignition share `x = (1 − 2a)/(1 + 2a)`.
@@ -985,24 +1004,21 @@ pub fn system(
     let h_s = held.clone();
     let x = h_s.clone();
     let rim = ratio(1, 1);
-    // At ignition the system is the binding: the star's share of it.
-    let light = burn(&star, &(mass(&star) / total.clone()), 1, &ratio(1, 1))
-        .map(|(_, l)| l)
-        .unwrap_or_else(|| ratio(0, 1));
     let mid = (x.clone() + rim.clone()) / ratio(2, 1);
     let unlocked = crate::polarity::faces_on(
         &(x.clone() / (mid + x.clone())),
         crate::polarity::Axis::Open,
     )
     .1;
-    let heat = light * unlocked.clone();
     // The received flux (with Xylarium): the galaxy's unlocked face where
     // the system stands, `1 − δ_gal` (operator: heat comes from the face the
     // core does not lock, never the held face; it had read `δ_gal`), times
     // the share the star leaves unlocked at the annulus; the channels add,
     // the binding's own agitation the floor.
     let flux = crate::polarity::faces_on(tide, crate::polarity::Axis::Open).1 * unlocked;
-    let disc_agitation = (heat + flux).max(agitation.clone());
+    // No starlight at ignition (docs/122 B9): the newborn has burned nothing,
+    // and its heat is the contraction's (docs/124 §5, docs/122 step 5).
+    let disc_agitation = flux.max(agitation.clone());
     // Worlds are grown, never placed (operators 2026-10-16/17, "never place
     // matter"; with Xylarium): the disc the star core releases becomes the
     // system's own medium, motes carrying their state (each kind's carried

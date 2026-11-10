@@ -200,8 +200,8 @@ fn main() {
             println!("  matter: {}", composition(&sys.kept, 8));
             println!("  orbit: reach {}, period {} rings, spin ℓ {}; clock {}, {received} rings received since birth", f(&sys.radius), f(&sys.period), f(&sys.ell), f(&rate));
             match formation::burn(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), 1, &ratio(1, 1)) {
-                Some((feed, light)) => match conductor::compound::after(&feed, received).and_then(|left| conductor::compound::read(&ratio(1, 1), &left, f)) {
-                    Some(left) => println!("  burn: each received ring fuses {} of the fuel that remains; fuel left {left}; light {} per received ring", f(&feed), f(&light)),
+                Some(feed) => match conductor::compound::after(&feed, received).and_then(|left| conductor::compound::read(&ratio(1, 1), &left, f)) {
+                    Some(left) => println!("  burn: each received ring fuses {} of the fuel that remains; fuel left {left}; heat {} (its starlight is its emission, half a ring)", f(&feed), f(&sys.heat)),
                     None => println!("  burn: refused: the burn's share lies outside the whole"),
                 },
                 None => println!("  burn: no hydrogen fuel"),
@@ -735,14 +735,10 @@ fn main() {
                         s.kept.keys().take(4).collect::<Vec<_>>()
                     );
                 }
-                let flux = s
-                    .kept
-                    .keys()
-                    .filter_map(conductor::chem::atom_w)
-                    .filter_map(|z| {
-                        formation::burn(&s.kept, &share, z, &ratio(1, 1)).map(|(_, l)| l)
-                    })
-                    .fold(ratio(0, 1), |a, b| a + b);
+                // Its emission a ring (docs/122 law 3): the star at its
+                // system's throat emits half its heat a ring.
+                let _ = share;
+                let flux = s.heat.clone() * pulse::mass(&s.kept) / u.unit.clone() / ratio(2, 1);
                 let scale = tot / u.unit.clone();
                 for w in s.satellites.iter().filter(|w| w.born == 0) {
                     let r = if scale == ratio(0, 1) {
@@ -1059,12 +1055,12 @@ fn main() {
                         1,
                         &ratio(1, 1),
                     );
-                    if let Some((feed, light, left)) = burn.and_then(|(feed, light)| {
+                    if let Some((feed, left)) = burn.and_then(|feed| {
                         conductor::compound::after(&feed, received)
                             .and_then(|left| conductor::compound::read(&ratio(1, 1), &left, f))
-                            .map(|left| (feed, light, left))
+                            .map(|left| (feed, left))
                     }) {
-                        println!("  star {:?}: born {}, {received} rings, fuses {} a ring, fuel left {left}, light {}, He {}", sys.path, sys.born, f(&feed), f(&light), f(&(conductor::chem::Kind::atom(2).and_then(|he| sys.kept.get(&he).cloned()).unwrap_or_else(|| ratio(0, 1)) * ratio(6, 1) / pulse::mass(&sys.kept))));
+                        println!("  star {:?}: born {}, {received} rings, fuses {} a ring, fuel left {left}, heat {}, He {}", sys.path, sys.born, f(&feed), f(&sys.heat), f(&(conductor::chem::Kind::atom(2).and_then(|he| sys.kept.get(&he).cloned()).unwrap_or_else(|| ratio(0, 1)) * ratio(6, 1) / pulse::mass(&sys.kept))));
                     }
                 }
             }

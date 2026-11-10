@@ -475,7 +475,7 @@ fn main() {
                     .to_integer()
                     .try_into()
                     .unwrap_or(0u64);
-                    if let Some((feed, _)) = conductor::formation::burn(
+                    if let Some(feed) = conductor::formation::burn(
                         &sys.kept,
                         &(conductor::pulse::mass(&sys.kept) / conductor::pulse::mass(&sys.total())),
                         1,

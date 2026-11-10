@@ -207,7 +207,7 @@ fn burnable(sys: &Body, r_echo: u64) -> crate::pulse::Manifest {
             **a >= pair
                 && crate::chem::atom_w(k).is_some_and(|z| {
                     crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1))
-                        .and_then(|(feed, _)| {
+                        .and_then(|feed| {
                             crate::compound::read(
                                 a,
                                 &crate::compound::after(&feed, rings_echo)?,
@@ -1661,7 +1661,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 if !sys.kept.contains_key(&key) {
                     continue;
                 }
-                if let (Some((feed, _)), Some(fuel)) = (
+                if let (Some(feed), Some(fuel)) = (
                     crate::formation::burn(
                         &sys.kept,
                         &(mass(&sys.kept) / mass(&sys.total())),
@@ -1710,6 +1710,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             crate::profile::mark("sys:capture-slow");
             crate::nuclides::capture_slow(&mut sys.kept, r_echo, &in_phase, &g_star, densest);
             crate::profile::mark("sys:light");
+            // Bonds release into heat (docs/122 law 1): the burn's release
+            // warms the star, and the star emits by its face (law 3). A star
+            // stands at its system's throat, `δ = ½`, where the faces are
+            // equal (docs/122 §4): it keeps ½ of its heat a ring over the
+            // echo's rings and emits the rest, its starlight, on the grain
+            // (the floor's remainder is light too). One starlight law (B9).
+            let shone = crate::formation::star_glow(&mut sys, &shone, r_echo);
             // Its light crosses its own system on the continuum face.
             if !shone.is_zero() {
                 let whole = mass(&sys.total());
@@ -2468,7 +2475,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 cross.note(crate::flows::LOOP, crate::enfold::Fate::Cauterized, &scar);
             }
             crate::profile::mark("rec:light");
-            // The throat's light crosses the galaxy on the continuum face.
+            // What the grain's floor left of the throat's heat crosses the
+            // galaxy as light on the continuum face (docs/122 law 1: the rest
+            // is the throat's matter's heat, emitted by its face, law 3).
             if !r.light.is_zero() {
                 // By the galaxy's one enclosure as it stands.
                 let enc_l = galaxy_enc(core);
@@ -2488,6 +2497,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             recycled = crate::recycle::Recycled {
                 pressed: r.pressed,
                 light: r.light / unit.clone(),
+                heat: r.heat / unit.clone(),
+                worked: r.worked / unit.clone(),
                 peeled: r.peeled,
                 spent: r.spent / unit.clone(),
                 trapped: r.trapped / unit.clone(),
