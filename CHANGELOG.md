@@ -122,8 +122,8 @@ change is named here.
 ### Changed
 
 - Bonds release into heat (docs/122 law 1, step 3; EQUATIONS E55): at the
-  throat the press's release and the bounce's work pay the peels and the
-  rest warms the throat's matter (its light was spent on peels and shone
+  throat the peels draw on the bounce's work first and then on the press's
+  release, and what the release has left warms the throat's matter (its light was spent on peels and shone
   whole, used twice); trapped matter carries its heat into the container.
   A star's burn warms the star, which emits from its system's throat, ½ a
   ring (`formation::star_glow`): one starlight law, `formation::burn`'s

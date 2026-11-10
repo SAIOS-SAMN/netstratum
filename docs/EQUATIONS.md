@@ -1705,8 +1705,8 @@ standing as hydrogen. Nucleons conserved.
 the throat is recycled under the bounce `b = p − Σ m·|Δℓ|`; the heaviest
 products join the container while it stays within the weight of the rest of
 its galaxy, carrying their heat, the rest leave; carried spin passes to the
-core. The press's release and the bounce's work `e = b·s` pay the peels; the
-rest warms the throat's matter (E55).
+core. The peels draw on the bounce's work `e = b·s` first, then on the
+press's release; what the release has left warms the throat's matter (E55).
 
 ### §8.2 The tube
 
@@ -1856,10 +1856,14 @@ Retired: `keep = (1 − open)(1 − δ)` and `formation::radiates`.
 `formation::star_glow` (docs/122 law 1, docs/124 §2). A bond formed releases
 its open frames' closing into the heat of the body it formed in; a bond
 broken takes its cost from it. At the throat the press releases
-`pairs·(2u(z) − u(2z))`, the bounce brings its work `e = b·s`, and the peels
-cost `n·(u(z − k) + k·u(1) − u(z))`:
+`pairs·(2u(z) − u(2z))`, the bounce offers its work `e = b·s`, and the peels
+cost `n·(u(z − k) + k·u(1) − u(z))`, paid from the bounce's work first:
 
-    Δ(Σ a·m) = e + released − spent,    bond + heat + light after = bond + heat + e before
+    worked = min(spent, e),    Δ(Σ a·m) = released − (spent − worked)
+    bond + heat + light after = bond + heat + worked before
+
+Only the work done on matter passes to it; the push's unused work stays the
+core's, which re-pulses whole each bell (regeneration).
 
 the rise laid on every grain of the throat's matter alike, floored, the
 floor's remainder leaving as light. In a star the burn's release warms its

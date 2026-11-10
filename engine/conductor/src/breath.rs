@@ -2498,6 +2498,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 pressed: r.pressed,
                 light: r.light / unit.clone(),
                 heat: r.heat / unit.clone(),
+                worked: r.worked / unit.clone(),
                 peeled: r.peeled,
                 spent: r.spent / unit.clone(),
                 trapped: r.trapped / unit.clone(),

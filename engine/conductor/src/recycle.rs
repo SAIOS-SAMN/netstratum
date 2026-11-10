@@ -74,9 +74,14 @@ pub struct Recycled {
     /// into the heat of the throat's matter; the floored remainder leaves as
     /// light.
     pub light: Ratio,
-    /// The heat the throat's matter took: the press's bond release and the
-    /// bounce's work less what the peels cost (docs/122 law 1).
+    /// The heat the throat's matter took: what the press's bond release has
+    /// left once the peels the bounce's work could not pay are paid
+    /// (docs/122 law 1).
     pub heat: Ratio,
+    /// The bounce's work the peels used, `min(spent, e)`: only the work done
+    /// on matter passes to it; the rest of the push stays the core's, which
+    /// re-pulses whole each bell (regeneration).
+    pub worked: Ratio,
     /// Nuclei peeled (deconstructed), and the holding the peels opened.
     pub peeled: Ratio,
     pub spent: Ratio,
@@ -191,8 +196,8 @@ pub fn recycle(
     crate::profile::mark("rec:peel");
     // Deconstructed: the reverberation with construction's light, shared by
     // holding over the load, each kind peeled loosest first.
-    let input = e.clone() + light.clone();
-    let pool = e + light;
+    let bounce_work = e.clone();
+    let pool = e + light.clone();
     let whole = load.iter().fold(ratio(0, 1), |acc, (_, z, n)| {
         acc + n.clone() * ratio(i64::from(nuclide_hold(*z)), 1)
     });
@@ -358,13 +363,16 @@ pub fn recycle(
             trapped_at.push(motes.len() - 1);
         }
     }
-    // Bonds release into heat (docs/122 law 1): the press's release and the
-    // bounce's work, less what the peels cost, warm every grain of the
-    // throat's matter alike, the rise on the grain (`Σ a·m` rises by it);
-    // what the floor leaves goes as light. `bond + heat + light` after is `bond + heat` before plus the
-    // bounce's work, exactly.
+    // Bonds release into heat (docs/122 law 1). The peels draw on the
+    // bounce's work first and on the press's release after it; what the
+    // release has left warms every grain of the throat's matter alike, the
+    // rise on the grain (`Σ a·m` rises by it), and what the floor leaves goes
+    // as light. The bounce's unused work never reaches the matter: the push
+    // is the core's, re-pulsed whole each bell. `bond + heat + light` after
+    // is `bond + heat` before plus the work the peels used, exactly.
     crate::profile::mark("rec:heat");
-    let released = input - out.spent.clone();
+    out.worked = out.spent.clone().min(bounce_work);
+    let released = light - (out.spent.clone() - out.worked.clone());
     let mut warm: Vec<usize> = stack
         .iter()
         .copied()
@@ -496,12 +504,13 @@ mod tests {
     }
 
     #[test]
-    fn the_throat_books_its_bonds_into_heat_and_the_bounce_pays_the_rest() {
-        // docs/122 law 1: the press's release and the bounce's work `e = b·s`
-        // pay the peels, and the rest warms the throat's matter; the grain's
-        // floor leaves as light. `bond + heat + light` after is `bond +
-        // heat + e` before, exactly, with some matter trapped (its heat
-        // carried with it) and some hot to begin with.
+    fn the_throat_books_its_bonds_into_heat_and_the_bounce_pays_its_work() {
+        // docs/122 law 1: the peels draw on the bounce's work `e = b·s`
+        // first, then on the press's release; what the release has left
+        // warms the throat's matter; the grain's floor leaves as light.
+        // `bond + heat + light` after is `bond + heat` before plus the work
+        // the peels used, exactly, with some matter trapped (its heat carried
+        // with it) and some hot to begin with.
         let bond = |ms: &[Mote]| {
             ms.iter().fold(ratio(0, 1), |s, x| {
                 s + x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1)
@@ -520,17 +529,19 @@ mod tests {
         ms[1].agitation = ratio(1, 7);
         ms[2].agitation = ratio(2, 9);
         let (b, s) = (ratio(1, 3), ratio(5, 1));
-        let before = bond(&ms) + heat(&ms) + b.clone() * s.clone();
+        let before = bond(&ms) + heat(&ms);
         let r = recycle(&mut ms, &[0, 1, 2], &b, &s, &ratio(200, 1), 1, 1612);
         assert!(r.pressed > ratio(0, 1) && r.peeled > ratio(0, 1));
         assert!(r.trapped > ratio(0, 1));
-        assert_eq!(bond(&ms) + heat(&ms) + r.light, before);
-        // With nothing to peel the press's release and the bounce's work all
-        // warm the throat's matter.
+        assert!(r.worked <= b.clone() * s.clone());
+        assert_eq!(bond(&ms) + heat(&ms) + r.light, before + r.worked);
+        // With nothing to peel the press's release all warms the throat's
+        // matter, and the bounce does no work.
         let mut hs = vec![mote("W0001", ratio(40, 1))];
-        let before = bond(&hs) + heat(&hs) + b.clone() * s.clone();
+        let before = bond(&hs) + heat(&hs);
         let r = recycle(&mut hs, &[0], &b, &s, &ratio(200, 1), 1, 1612);
         assert!(r.pressed > ratio(0, 1) && r.heat > ratio(0, 1) && r.spent == ratio(0, 1));
+        assert_eq!(r.worked, ratio(0, 1));
         assert_eq!(bond(&hs) + heat(&hs) + r.light, before);
     }
 
