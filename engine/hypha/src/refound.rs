@@ -64,7 +64,8 @@ pub fn load_key(home: &Path, file: &str) -> io::Result<ed25519_dalek::SigningKey
     Ok(ed25519_dalek::SigningKey::from_bytes(&seed))
 }
 
-fn nonce() -> io::Result<[u8; 32]> {
+/// Thirty-two fresh bytes: a nonce, or a carrier fold's fresh prefix.
+pub fn fresh() -> io::Result<[u8; 32]> {
     use std::io::Read;
     let mut n = [0u8; 32];
     std::fs::File::open("/dev/urandom")?.read_exact(&mut n)?;
@@ -136,7 +137,7 @@ pub fn ledger_frame(
         point,
         parent,
         applied: Default::default(),
-        nonce: nonce()?,
+        nonce: fresh()?,
     };
     Ok((encode_ledger(&entry.sign(reserve)), records.len()))
 }
@@ -288,7 +289,7 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
             &Reservation {
                 domain: id,
                 tier,
-                nonce: nonce()?,
+                nonce: fresh()?,
             }
             .sign(&domain),
         )?;
@@ -443,7 +444,7 @@ pub fn post_manifest(
     let signed = Manifest {
         domain,
         nuclei,
-        nonce: nonce()?,
+        nonce: fresh()?,
     }
     .sign(reserve)
     .ok_or_else(unwritten_manifest)?;
@@ -551,7 +552,7 @@ pub fn map_frame(
             domain,
             point,
             record,
-            nonce: nonce()?,
+            nonce: fresh()?,
         }
         .sign(reserve),
     ))
