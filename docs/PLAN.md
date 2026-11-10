@@ -58,6 +58,7 @@ how the universe moves, so each read before and after:
 | step | rows |
 |---|---|
 | The module, `conductor::coordinate` (PR #57), replaced by Mycelium's `forms::coordinate` when LAW-COORDINATE v1 lands | J1 |
+| The composition of turnings: `conductor::turning`, interim mirror of Mycelium's FORMS-TURNING v1 (#117 step 1, built) | J1 |
 | The state type: each body's point; the existing fields become readings of it | A1, C17 |
 | The magnetic coupling on it (docs/121), replacing `repel`, the gas attractor, `shear`'s and the field's one-way exchange and the band's squared rest | C18, C3, A8, A25 |
 | The collective's bonds and the captures as ranges on one lane | A28, A29, A12, A32 |

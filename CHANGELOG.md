@@ -12,6 +12,12 @@ change is named here.
 
 ### Added
 
+- `conductor::turning` (#117 step 1, docs/117 §11.2–§11.3): the exact
+  Clifford value over ℚ with the signature as data, and the Cayley motion
+  `R = (1 + B)(1 − B)⁻¹`, its generator and the composition `R₁R₂`. An
+  interim mirror of Mycelium's FORMS-TURNING v1, conformed by its fixtures
+  (11b-i to 11b-iii, the one-plane closed forms, the refusals) value for
+  value, to be replaced by the import at Mycelium v0.4.0.
 - `conductor::dispersion` (#143, read only): heat by component, the
   dispersion of a body's parts about its motion in step on each plane's
   phase, each spatial plane's spin, between planes and on the orthogonal
