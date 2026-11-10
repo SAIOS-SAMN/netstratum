@@ -494,6 +494,15 @@ pub fn star_glow(sys: &mut crate::pulse::Body, released: &Ratio, rings: u64) -> 
     (risen - sys.heat.clone()) * kept_m
 }
 
+/// The star core's heat (docs/124 §5): the heat its members carried in,
+/// read back from its ignition share, and what it has gained since (its
+/// contraction, its burn's release, its encounters) less what it emitted.
+/// One reading for every cut of what the star holds: at ignition, at each
+/// outburst, and in the wind. The same heat the energy book counts.
+pub fn core_heat(sys: &crate::pulse::Body) -> Ratio {
+    agitation_of(&sys.reservoir) + sys.heat.clone()
+}
+
 /// A star's agitation read back from its ignition share `x = (1 − 2a)/(1 + 2a)`.
 pub fn agitation_of(ignition: &Ratio) -> Ratio {
     let x = ignition.clone().max(ratio(0, 1)).min(ratio(1, 1));
@@ -948,6 +957,7 @@ pub fn system(
     fell_spins: &[(Ratio, Ratio, Ratio)],
     path: &[u64],
     tide: &Ratio,
+    core_heat: &Ratio,
 ) -> Option<(Manifest, Manifest, Ratio, Vec<crate::flows::Mote>)> {
     // Ignition: a binding at a ≥ ½ never forms a star core.
     ignition_share(agitation)?;
@@ -983,13 +993,12 @@ pub fn system(
             a + w.clone() * r.clone() * (h.clone() / lambda.clone())
         }) / fw
     };
-    // The new star core is hot: its heat strips the loosest windings (hydrogen
-    // first), so it keeps its fuel.
-    // The newborn star core is hot (ruling of 2026-10-18, the recommendation
-    // approved): its turning in whole turns of its bell, at most one;
-    // a star core that rings strips what is held as loosely as hydrogen's lone
-    // electron, so it keeps its hydrogen to burn.
-    let ionizing = ratio(1, 1);
+    // The new star core's heat is its own (docs/124 §5): the heat its
+    // members carried in and their motion out of step that the contraction
+    // ended (`core_heat`, read by the caller); its state of matter is read
+    // from it, never set: a winding at or below it is stripped (`open_at`),
+    // so a core hot enough keeps its hydrogen as fuel.
+    let ionizing = core_heat.clone();
     let _ = agitation;
     // Dissociation (the chemistry layer): the hot star core breaks every molecule
     // back to its parts (hydrogen's winding, tightness 1, is stripped), so a
@@ -1202,6 +1211,27 @@ fn decohere(
     dl[i] -= gamma.clone() * (li - mean.clone());
     dl[j] -= gamma.clone() * (lj - mean);
     gamma.clone() * spread
+}
+
+/// Bodies joining into one (docs/124 §3, one law at every tier): their
+/// motion out of step, the spread of their turnings about their
+/// holding-weighted mean, first degree, `S = Σ w·|ℓ − ℓ̄|`, which the join
+/// turns into the joined body's heat (`Σ w·ℓ` kept by the mean): stars
+/// sticking (EQUATIONS E56) and a binding contracting into a star (docs/124
+/// §5). `parts` are (holding, turning). Zero where nothing is held.
+pub fn spread(parts: &[(Ratio, Ratio)]) -> Ratio {
+    let w = parts.iter().fold(ratio(0, 1), |a, (x, _)| a + x.clone());
+    if w.is_zero() {
+        return ratio(0, 1);
+    }
+    let mean = parts
+        .iter()
+        .fold(ratio(0, 1), |a, (x, l)| a + x.clone() * l.clone())
+        / w;
+    parts.iter().fold(ratio(0, 1), |a, (x, l)| {
+        let d = l.clone() - mean.clone();
+        a + x.clone() * if d < ratio(0, 1) { -d } else { d }
+    })
 }
 
 /// The bounce's spin exchange (one law at every tier): the outer gains and
@@ -1533,29 +1563,26 @@ pub fn collide_stars(
         // §3): their spread about their mean turning in both orbits, first
         // degree, the relative motion the merger ends (`Σ m·ℓ` kept by the
         // mean).
-        let spread = if idx.len() > 1 && !wt.is_zero() {
+        let joined = if idx.len() > 1 && !wt.is_zero() {
             let star = |i: usize| slots[i].as_ref().expect("each star once");
-            let mean = |f: &dyn Fn(&crate::pulse::Body) -> Ratio| {
-                idx.iter()
-                    .zip(&w)
-                    .fold(ratio(0, 1), |a, (&i, x)| a + x.clone() * f(star(i)))
-                    / wt.clone()
+            let of = |f: &dyn Fn(&crate::pulse::Body) -> Ratio| {
+                spread(
+                    &idx.iter()
+                        .zip(&w)
+                        .map(|(&i, x)| (x.clone(), f(star(i))))
+                        .collect::<Vec<_>>(),
+                )
             };
-            let (lo, lc) = (mean(&|b| b.ell.clone()), mean(&|b| b.ell_orth.clone()));
-            idx.iter().zip(&w).fold(ratio(0, 1), |a, (&i, x)| {
-                a + x.clone()
-                    * (abs(&(star(i).ell.clone() - lo.clone()))
-                        + abs(&(star(i).ell_orth.clone() - lc.clone())))
-            })
+            of(&|b| b.ell.clone()) + of(&|b| b.ell_orth.clone())
         } else {
             ratio(0, 1)
         };
         let a_g = if wt.is_zero() {
             a_g
         } else {
-            a_g + spread.clone() / wt.clone()
+            a_g + joined.clone() / wt.clone()
         };
-        let hot = idx.iter().any(|&i| !heat[i].is_zero()) || !spread.is_zero();
+        let hot = idx.iter().any(|&i| !heat[i].is_zero()) || !joined.is_zero();
         let mut head = slots[idx[0]].take().expect("each star once");
         if idx.len() > 1 {
             let members: Vec<crate::pulse::Body> = idx[1..]
@@ -2457,8 +2484,64 @@ mod tests {
 
 #[cfg(test)]
 mod encounter_tests {
-    use super::decohere;
+    use super::{decohere, spread, star_core_cut};
     use cfe::ratio::ratio;
+
+    #[test]
+    fn joining_turns_the_parts_spread_into_heat_one_law_at_every_tier() {
+        // docs/124 §3: parts turning alike have no spread; the same turning
+        // added to every part leaves it; a stick's heat is a full grip's.
+        let parts = vec![
+            (ratio(2, 1), ratio(3, 1)),
+            (ratio(5, 3), ratio(7, 5)),
+            (ratio(1, 4), ratio(-1, 2)),
+        ];
+        assert_eq!(
+            spread(
+                &parts
+                    .iter()
+                    .map(|(w, _)| (w.clone(), ratio(4, 9)))
+                    .collect::<Vec<_>>()
+            ),
+            ratio(0, 1)
+        );
+        let shifted: Vec<_> = parts
+            .iter()
+            .map(|(w, l)| (w.clone(), l.clone() + ratio(11, 7)))
+            .collect();
+        assert_eq!(spread(&shifted), spread(&parts));
+        let ell = vec![parts[0].1.clone(), parts[1].1.clone()];
+        let mut dl = vec![ratio(0, 1); 2];
+        let heat = decohere(&ell, &mut dl, 0, 1, &parts[0].0, &parts[1].0, &ratio(1, 1));
+        assert_eq!(heat, spread(&parts[..2]));
+    }
+
+    #[test]
+    fn a_star_core_hot_enough_keeps_its_hydrogen_and_a_cold_one_throws_it() {
+        // docs/124 §5 (issue #119): the cut reads the core's own heat. Cold,
+        // hydrogen's lone electron stays open and is carried out of the hold;
+        // at its winding's tightness it is stripped and held as fuel.
+        let h = crate::chem::Kind::atom(1).expect("hydrogen");
+        let binding: crate::pulse::Manifest = [
+            (h.clone(), ratio(900, 1)),
+            (
+                crate::chem::Kind::parse("W0004").expect("a kind"),
+                ratio(300, 1),
+            ),
+            (
+                crate::chem::Kind::parse("W0016").expect("a kind"),
+                ratio(20, 1),
+            ),
+        ]
+        .into();
+        let held = |heat| {
+            star_core_cut(&binding, &ratio(0, 1), &heat)
+                .and_then(|(star, _, _)| star.get(&h).cloned())
+                .unwrap_or_else(|| ratio(0, 1))
+        };
+        assert_eq!(held(ratio(1, 1)), ratio(900, 1));
+        assert!(held(ratio(0, 1)) < ratio(900, 1));
+    }
 
     #[test]
     fn a_grip_turns_its_share_of_relative_motion_into_heat() {
