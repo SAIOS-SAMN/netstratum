@@ -745,7 +745,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let mut flowing: Vec<crate::flows::Mote> = Vec::new();
             for x in std::mem::take(&mut u.ocean) {
                 let r_m = match (&frame, x.vacuum) {
-                    (Some(f), true) => x.reach_in(&f).0,
+                    (Some(f), true) => x.reach_in(f).0,
                     _ => {
                         flowing.push(x);
                         continue;
@@ -1147,9 +1147,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                                 *ph = x.clone() - x.floor();
                             };
                             for x in sys.flows.iter_mut() {
-                                if let Some(ph) = x.phase.get_mut(k) {
-                                    shift(ph);
-                                }
+                                x.orientation
+                                    .shift(k, &residue)
+                                    .expect("a turning is a motion");
                             }
                             for w in sys.satellites.iter_mut() {
                                 if let Some(ph) = w.phase.get_mut(k) {
@@ -1490,12 +1490,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         .iter()
                         .filter(|x| x.vacuum)
                         .fold(ratio(0, 1), |acc, x| {
-                            let rx = x.reach_in(&enc).0;
+                            let rx = x.reach_in(enc).0;
                             if rx < lo || rx > hi {
                                 return acc;
                             }
                             let c = (0..planes).fold(ratio(1, 1), |c, k| {
-                                c * crate::flows::in_step(&x.phase[k], &sys.phase[k])
+                                c * crate::flows::in_step(&x.phase_at(k), &sys.phase[k])
                             });
                             acc + x.amount.clone() * crate::flows::weight(&x.key) / g_before.clone()
                                 * c
@@ -1907,7 +1907,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // never a second orbit). Remnants do not capture.
         if let (Some(_), Some(enc), false) = (&pre, &enc, scale_pre.is_zero() || g_before.is_zero())
         {
-            let reach_m = |x: &crate::flows::Mote| x.reach_in(&enc).0;
+            let reach_m = |x: &crate::flows::Mote| x.reach_in(enc).0;
             let mut claims: Vec<Vec<usize>> = vec![Vec::new(); core.flows.len()];
             let mut by_reach: Vec<(Ratio, usize)> = core
                 .flows
@@ -2029,21 +2029,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     core.medium_spin += rest.clone() / unit.clone();
                     identity.push(("settle", after + rest - before));
                     crate::profile::mark("cap:mote");
-                    let phase: Vec<Ratio> = x
-                        .phase
-                        .iter()
-                        .zip(&s.phase)
-                        .map(|(a, b)| {
-                            let f = a.clone() - b.clone();
-                            crate::ring::grain(&(f.clone() - f.floor()))
-                        })
-                        .collect();
+                    // Its orientation in the star's frame: each plane turned
+                    // back by the star's own phase there (#159: the star's
+                    // phases until it holds an orientation).
+                    let mut orientation = x.orientation.clone();
+                    for (k, b) in s.phase.iter().enumerate() {
+                        orientation
+                            .shift(k, &-b.clone())
+                            .expect("a turning is a motion");
+                    }
                     let mote = crate::flows::Mote {
                         key: key.clone(),
                         amount: take.clone(),
                         ell_orth,
                         spins: crate::flows::Mote::spins_of(&ell_o, &x.tilt()),
-                        phase,
+                        orientation,
                         agitation: x.agitation.clone(),
                         born: bell,
                         vacuum: false,
@@ -2246,7 +2246,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         amount: take,
                         spins: spins.clone(),
                         ell_orth: ratio(0, 1),
-                        phase,
+                        orientation: crate::orientation::Orientation::from_phases(&phase),
                         agitation: ratio(0, 1),
                         born: bell,
                         vacuum: false,
@@ -2276,7 +2276,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     amount: a,
                     spins: crate::flows::Mote::spins_of(&crate::ring::grain(&ell_o), &[]),
                     ell_orth: crate::ring::grain(&ell_orth),
-                    phase: crate::flows::rest(ratio(1, 2)),
+                    orientation: crate::orientation::Orientation::from_phases(
+                        &crate::flows::rest(ratio(1, 2)),
+                    ),
                     agitation,
                     born: bell,
                     vacuum: true,
@@ -2308,7 +2310,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         amount: a,
                         spins: crate::flows::Mote::spins_of(&crate::ring::grain(&at), &[]),
                         ell_orth: orth.clone(),
-                        phase,
+                        orientation: crate::orientation::Orientation::from_phases(&phase),
                         agitation: ratio(0, 1),
                         born: bell,
                         vacuum: false,
@@ -2337,8 +2339,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 .flows
                 .iter()
                 .enumerate()
-                .filter(|(_, x)| x.vacuum && x.phase.len() > crate::flows::LOOP)
-                .map(|(j, x)| (j, x.phase[crate::flows::LOOP].clone()))
+                .filter(|(_, x)| x.vacuum)
+                .map(|(j, x)| (j, x.phase_at(crate::flows::LOOP)))
                 .collect();
             // The galaxy's band (push and return, `flows::torque`) stands held
             // back (operator 2026-10-21: "pull it back and make it static").
@@ -2433,7 +2435,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             for (j, was) in orth_was {
                 let to_half = frac(was.clone() - ratio(1, 2));
                 if to_half > ratio(0, 1)
-                    && to_half <= frac(was - core.flows[j].phase[crate::flows::LOOP].clone())
+                    && to_half <= frac(was - core.flows[j].phase_at(crate::flows::LOOP))
                 {
                     in_throat.push(j);
                 }
@@ -2573,10 +2575,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // It leaves whole, keeping its state, co-moving with its
                 // galaxy about the universal core (its galaxy's orbit spins
                 // and phases), on the vacuum leg home.
-                let phase = if core.phase.len() == crate::flows::PLANES {
-                    core.phase.clone()
+                let orientation = if core.phase.len() == crate::flows::PLANES {
+                    crate::orientation::Orientation::from_phases(&core.phase)
                 } else {
-                    x.phase.clone()
+                    x.orientation.clone()
                 };
                 // Its own spin carried across by its galaxy's share, once
                 // (with Xylarium): `ℓ_u = ℓ_g + ℓ_m·f` in each plane.
@@ -2592,7 +2594,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 to_ocean.push(crate::flows::Mote {
                     spins: crate::flows::Mote::spins_of(&ell_u, &x.tilt()),
                     ell_orth: orth_u,
-                    phase,
+                    orientation,
                     vacuum: true,
                     born: bell,
                     lever: Vec::new(),
@@ -2689,7 +2691,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                                 .map(|x| {
                                     (
                                         held_of(x),
-                                        x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)),
+                                        x.phase_at(k),
                                     )
                                 })
                                 .collect::<Vec<_>>(),
@@ -2747,7 +2749,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         for k in 0..crate::flows::PLANES {
                             ph[k].push((
                                 w.clone(),
-                                x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)),
+                                x.phase_at(k),
                             ));
                         }
                     } else {
@@ -3226,7 +3228,7 @@ mod tests {
             amount: ratio(3, 1),
             spins: crate::flows::Mote::spins_of(&ratio(7, 11), &[]),
             ell_orth: ratio(2, 13),
-            phase: crate::flows::rest(ratio(1, 2)),
+            orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(1, 2))),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,
@@ -3375,7 +3377,7 @@ mod tests {
             amount: ratio(amount.0, amount.1),
             spins: crate::flows::Mote::spins_of(&ratio(ell.0, ell.1), &[]),
             ell_orth: ratio(0, 1),
-            phase: vec![ratio(0, 1), ratio(0, 1)],
+            orientation: crate::orientation::Orientation::from_phases(&[ratio(0, 1), ratio(0, 1)]),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,

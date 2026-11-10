@@ -174,7 +174,7 @@ mod tests {
                 &tilt.map(|t| ratio(t, 6)),
             ),
             ell_orth: ratio(0, 1),
-            phase: vec![ratio(0, 1); crate::flows::PLANES],
+            orientation: crate::orientation::Orientation::from_phases(&vec![ratio(0, 1); crate::flows::PLANES]),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,

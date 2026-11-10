@@ -344,7 +344,7 @@ fn main() {
                     span(
                         &c.flows
                             .iter()
-                            .map(|x| x.phase[k].clone())
+                            .map(|x| x.phase_at(k))
                             .collect::<Vec<_>>(),
                     )
                 })
@@ -469,12 +469,12 @@ fn main() {
                         (0..n)
                             .filter(|&j| j != i)
                             .map(|j| {
-                                let c = (0..ms[i].phase.len().min(ms[j].phase.len())).fold(
+                                let c = (0..conductor::flows::PLANES).fold(
                                     ratio(1, 1),
                                     |c, k| {
                                         c * conductor::flows::in_step(
-                                            &ms[i].phase[k],
-                                            &ms[j].phase[k],
+                                            &ms[i].phase_at(k),
+                                            &ms[j].phase_at(k),
                                         )
                                     },
                                 );
@@ -562,7 +562,7 @@ fn main() {
                     .iter()
                     .map(|x| {
                         (
-                            x.phase[0].clone(),
+                            x.phase_at(0),
                             x.amount.clone() * conductor::flows::weight(&x.key),
                             conductor::chem::charge(&x.key),
                         )

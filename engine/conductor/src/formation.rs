@@ -1651,9 +1651,9 @@ pub fn collide_stars(
                         }
                     }
                     for x in flows.iter_mut() {
-                        if let Some(ph) = x.phase.get_mut(k) {
-                            *ph = frac_of(ph.clone() + shift.clone());
-                        }
+                        x.orientation
+                            .shift(k, &shift)
+                            .expect("a turning is a motion");
                     }
                 }
             };
@@ -1844,7 +1844,7 @@ pub fn settle_system(
         // Its reach, read by the system's enclosure from its own spin.
         let r = frame
             .as_ref()
-            .map(|e| x.reach_in(&e).0)
+            .map(|e| x.reach_in(e).0)
             .unwrap_or_else(|| b0.clone());
         // No mirror (docs/117 §12): a mote's reach is read in this enclosure
         // and kept; one inside the star's ring belongs to the star.
@@ -1857,8 +1857,7 @@ pub fn settle_system(
             continue;
         }
         let matter: Manifest = [(x.key.clone(), x.amount.clone())].into();
-        let mut phase = x.phase.clone();
-        crate::flows::full(&mut phase);
+        let phase = x.phase();
         bodies.push((
             r,
             mass(&matter) / total.clone(),
@@ -2098,7 +2097,7 @@ pub fn settle_system(
                         &tilt,
                     ),
                     ell_orth: ratio(0, 1),
-                    phase: phase.clone(),
+                    orientation: crate::orientation::Orientation::from_phases(&phase),
                     agitation: heat.clone(),
                     born: bell,
                     vacuum: false,
