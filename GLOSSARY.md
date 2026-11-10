@@ -56,6 +56,7 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 |---|---|---|
 | **turning** | Each received ring turns a body by its deficit: `ω = δ` turns per ring, so one turn takes `P = 1 + R / H` rings. A body's phase at bell `n` is `φ + n/P`, in closed form. | `motion.rs`, `flows::turn` |
 | **spin** `ℓ` | Reach times holding, `ℓ = R · H`; angular momentum is mass times `ℓ`. Motes carry it in the orbit plane (`ell_o`) and across it (`ell_orth`). | `ring.rs`, `flows::Mote` |
+| **generator** `B` | A motion's rate: a bivector with exact components on the planes, each plane's square read from its units (turning where it squares to −1, boost where +1). Its motion is the Cayley form `R = (1 + B)(1 − B)⁻¹`; motions compose as `R₁R₂`, never plane by plane. The form shared across the core tube, with `K` per plane. | `conductor::turning`, docs/117 §11.2 |
 | **phase** | A position on a turn, as a share in `[0, 1)`, one per plane. Membership and closeness are read from phases, never from lengths in a fixed frame. Never a state of matter (docs/124 §4). | `flows::Mote::phase` |
 | **the three planes** | Space is three spatial planes plus the R coordinate; a mote's tilt is its spin's share in each plane. | docs/95, `flows::space_of` |
 | **pulse** and **push** `p` | Each bell a core re-pulses at full strength. Its push share is `p = ½·Q/(A + Q)` (`Q` its open frames' magnetism, `A` its holding); matter is held where `H/(R + H) ≥ p`. | `pulse::galaxy_push` |

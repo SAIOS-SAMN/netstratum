@@ -594,6 +594,17 @@ rotor.
 - **A split between planes** is hold-weighted (proposed, register K6): plane 1 takes `t·2h₂/(h₁ +
   h₂)` and plane 2 takes `−t·2h₁/(h₁ + h₂)`, equal only where the holds are.
 
+**Built (2026-11-10, #117 step 1):** `conductor::turning`, the exact
+Clifford value over ℚ with the signature as data and the Cayley motion,
+generator and composition `R₁R₂`. An interim mirror of Mycelium's
+FORMS-TURNING v1 (on its main, in no tagged release), conformed by its
+fixtures 11b-i to 11b-iii, the one-plane closed forms and the refusals, value
+for value. It is deleted for the import when Mycelium v0.4.0 is tagged. The
+shared form across the core tube is `B` with `K` per plane, and each kernel
+keeps its own base (78.173 §8.4, confirmed by both operators 2026-11-10).
+The degrees reading (`tan(θ/4) = b` as certified sectors) is not mirrored
+yet. No body carries `B` yet.
+
 ### 11.3 The volume is kept
 
 A rotor on one plane is flat. In four or more axes the Cayley rotor of a
