@@ -203,7 +203,7 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     let colonies = load_key(home, "tier-colonies.key")?;
     let id = domain.verifying_key().to_bytes();
     // 0. The contract.
-    let (agreed, mut said) = concord(session, &domain)?;
+    let (agreed, mut said) = concord(session, &[&domain, &union, &colonies])?;
     if !agreed {
         return Ok((false, said));
     }
@@ -276,18 +276,26 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     if !stands {
         return Ok((false, said));
     }
-    // 3. The reserve: the union tier, held for stillcold (docs/68).
-    let reserved = session.reserve(
-        &Reservation {
-            domain: id,
-            tier: union.verifying_key().to_bytes(),
-            nonce: nonce()?,
+    // 3. The reserve: the union tier, held for stillcold (docs/68). A domain
+    // designates once (Mycelium v0.4.0): where the court already reads the
+    // union as the sitting reserve, it stands and is not asked again.
+    let tier = union.verifying_key().to_bytes();
+    let sitting = session.reserve_reading(id)?;
+    if sitting.current == Some(tier) {
+        said.push("3 reserve: the union sits already".into());
+    } else {
+        let reserved = session.reserve(
+            &Reservation {
+                domain: id,
+                tier,
+                nonce: nonce()?,
+            }
+            .sign(&domain),
+        )?;
+        said.push(format!("3 reserve: {reserved:?}"));
+        if !matches!(reserved, Founded::Reserved { .. }) {
+            return Ok((false, said));
         }
-        .sign(&domain),
-    )?;
-    said.push(format!("3 reserve: {reserved:?}"));
-    if !matches!(reserved, Founded::Reserved { .. }) {
-        return Ok((false, said));
     }
     // The manifest: the universe's nuclei per Z, signed by the sitting
     // reserve. Granted, or refused by the court's standing (short, granted
@@ -342,14 +350,17 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
 
 /// THE CONTRACT, the re-founding's step 0 (Mycelium's KERNEL profile): the
 /// statement the hypha serves against the pinned SDK's, then the clause
-/// register it serves (ACT_LAWS mode 7) signed by reconstruction (mode 8):
+/// register it serves (ACT_LAWS mode 7) signed by reconstruction (mode 8) by
+/// every key the domain acts with (the court admits an act only from a
+/// signatory of the register, Mycelium v0.4.0 `Boundary::NotSignatory`):
 /// each clause enabled, carrying this kernel's reconstruction of each of its
-/// fixtures (`sign_concordance`), and the verdict read back. Agreed only
-/// where the statement is the pinned one and every served clause is
-/// admitted; what each read said.
+/// fixtures (`sign_concordance`), the verdict read back, and each key's
+/// alignment read (mode 9). Agreed only where the statement is the pinned
+/// one and every served clause is admitted for every key; what each read
+/// said.
 pub fn concord(
     session: &Session,
-    domain: &ed25519_dalek::SigningKey,
+    keys: &[&ed25519_dalek::SigningKey],
 ) -> io::Result<(bool, Vec<String>)> {
     use mycelium_sdk::conformance::{
         decode_statement_reply, encode_statement_request, StatementRead, STATEMENT,
@@ -381,29 +392,34 @@ pub fn concord(
         }
     };
     said.push(format!("0 concordance: {} clauses served", served.len()));
-    let Some(signed) = sign_concordance(domain, &served, |_| Assent::Enabled) else {
-        said.push("0 signature: a served fixture does not reconstruct here".into());
-        return Ok((false, said));
-    };
-    let judged = decode_signature_reply(&session.speak(encode_signature_request(&signed))?);
-    let all = matches!(&judged, Some(Ok(a)) if a.len() == served.len());
-    said.push(format!("0 signature: {judged:?}"));
-    // The key's alignment read back from the hypha's ledger (mode 9): each
-    // clause as this kernel's signing left it.
-    let kernel = domain.verifying_key().to_bytes();
-    match decode_alignment_reply(&session.speak(encode_alignment_request(Some(&kernel)))?) {
-        Some(Ok(read)) => {
-            let ours = read.kernels.iter().find(|k| k.kernel == kernel);
-            said.push(format!(
-                "0 alignment: {}",
-                ours.map_or("this kernel unread".to_string(), |k| format!(
-                    "{} clauses read for this kernel",
-                    k.clauses.len()
-                ))
-            ));
+    let mut all = true;
+    for key in keys {
+        let kernel = key.verifying_key().to_bytes();
+        let named: String = kernel.iter().take(4).map(|b| format!("{b:02x}")).collect();
+        let Some(signed) = sign_concordance(key, &served, |_| Assent::Enabled) else {
+            said.push("0 signature: a served fixture does not reconstruct here".into());
+            return Ok((false, said));
+        };
+        let judged = decode_signature_reply(&session.speak(encode_signature_request(&signed))?);
+        all &= matches!(&judged, Some(Ok(a)) if a.len() == served.len());
+        said.push(format!("0 signature {named}: {judged:?}"));
+        // The key's alignment read back from the hypha's ledger (mode 9):
+        // each clause as this key's signing left it.
+        match decode_alignment_reply(&session.speak(encode_alignment_request(Some(&kernel)))?) {
+            Some(Ok(read)) => {
+                let ours = read.kernels.iter().find(|k| k.kernel == kernel);
+                said.push(format!(
+                    "0 alignment {named}: {}",
+                    ours.map_or("unread".to_string(), |k| format!(
+                        "{} clauses read, {:?}",
+                        k.clauses.len(),
+                        k.clauses
+                    ))
+                ));
+            }
+            Some(Err(why)) => said.push(format!("0 alignment {named}: refused {why:?}")),
+            None => said.push(format!("0 alignment {named}: no reading")),
         }
-        Some(Err(why)) => said.push(format!("0 alignment: refused {why:?}")),
-        None => said.push("0 alignment: no reading".into()),
     }
     Ok((all, said))
 }
