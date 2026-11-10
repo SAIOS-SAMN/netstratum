@@ -2276,9 +2276,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     amount: a,
                     spins: crate::flows::Mote::spins_of(&crate::ring::grain(&ell_o), &[]),
                     ell_orth: crate::ring::grain(&ell_orth),
-                    orientation: crate::orientation::Orientation::from_phases(
-                        &crate::flows::rest(ratio(1, 2)),
-                    ),
+                    orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(
+                        ratio(1, 2),
+                    )),
                     agitation,
                     born: bell,
                     vacuum: true,
@@ -2688,12 +2688,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         crate::flows::circle_mean(
                             &members
                                 .iter()
-                                .map(|x| {
-                                    (
-                                        held_of(x),
-                                        x.phase_at(k),
-                                    )
-                                })
+                                .map(|x| (held_of(x), x.phase_at(k)))
                                 .collect::<Vec<_>>(),
                         )
                     })
@@ -2747,10 +2742,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         fell_spins.push((w.clone(), place.clone(), hold_c(&place)));
                         orth_held += w.clone() * x.ell_orth.clone();
                         for k in 0..crate::flows::PLANES {
-                            ph[k].push((
-                                w.clone(),
-                                x.phase_at(k),
-                            ));
+                            ph[k].push((w.clone(), x.phase_at(k)));
                         }
                     } else {
                         // The disc: it stays at its phase place off step, its
@@ -3228,7 +3220,9 @@ mod tests {
             amount: ratio(3, 1),
             spins: crate::flows::Mote::spins_of(&ratio(7, 11), &[]),
             ell_orth: ratio(2, 13),
-            orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(1, 2))),
+            orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
+                1, 2,
+            ))),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,

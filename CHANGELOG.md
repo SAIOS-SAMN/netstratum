@@ -138,6 +138,12 @@ change is named here.
 
 ### Changed
 
+- Motes carry the orientation `G` (#117 step 2b, #157; docs/117 §11.7):
+  `Mote::phase` is retired, its phases now readings of `G`. The bell's two
+  rings compose whole at `b = δ/(1 − δ)` a plane, and the swing is read pair
+  by pair, so a plane passes through the centre alone. The mote record holds
+  twelve values, and a record of per-plane phases is refused. Stars and
+  worlds follow (#159).
 - H's state is the generator (docs/117 §11.7, derived, not built; amends
   docs/120 §8d): a mote's and a body's orientation is held as the generator
   `G` over six elliptic planes with `K` per plane, its rate a ring the hold

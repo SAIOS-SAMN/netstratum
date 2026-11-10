@@ -141,7 +141,9 @@ mod tests {
             amount,
             spins: Mote::spins_of(&ell, &[]),
             ell_orth: ratio(0, 1),
-            orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(1, 2))),
+            orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
+                1, 2,
+            ))),
             agitation,
             born: 0,
             vacuum: false,

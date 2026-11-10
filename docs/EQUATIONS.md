@@ -1902,5 +1902,7 @@ Each component of `G` is held on the grain. A plane's reading, the one the
 laws act on, is `ψ = g/(1 + |g|)` turns. One ring from rest gives back `δ`,
 and the vacuum's `1 − δ` is the reciprocal rate. Turnings on planes that
 share a unit gain the plane between them, its sign set by the order
-(register K6 retired). Built as a module; motes and bodies do not carry it
-yet (#117 step 2b).
+(register K6 retired). The motion is held on one cover (the rotor's scalar
+part not negative), and a held reading is exact. Motes carry it
+(`flows::torque_one`, `flows::turning_of`, `flows::hold_to_place`; #157),
+with the swing read pair by pair. Stars and worlds do not yet (#159).

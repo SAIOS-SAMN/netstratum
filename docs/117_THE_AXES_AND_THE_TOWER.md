@@ -751,11 +751,16 @@ up that vent". This section is that derivation. It amends docs/120 §8d's
   This closes §11.6 item 5's gap: the one loop phase becomes the three
   R-planes, each founded isoclinic with its spatial partner (T18), so the
   circulation of plane `e₊ᵢe₊ⱼ` turns on `e₊ₖe₊R`.
-- **The windings `K`:** a keyed vector over the planes (78.173 §8.3). A
-  plane's count rises by one each time its component passes `∞`, the
-  vector's whole turn at `θ = 360°`, where `R = −1` on that plane. The
-  orientation is then held as `−R`'s generator, the same sandwich, so `G`
-  always exists. A composite's new plane starts at `K = 0`.
+- **One cover, and the windings `K`:** `R` and `−R` turn every vector
+  alike. The motion is held as the one whose scalar part is not negative,
+  so a plane alone stands at `|g| ≤ 1`, and a whole turn of the vector gives
+  `G`'s components back. `K` is a keyed vector over the planes (78.173 §8.3).
+  A plane's count rises by one when its reading passes 0 under a forward
+  drive and falls on a pass backward. That is exact for a plane turned
+  alone (`K = ⌊θ/360°⌋`, §11.1), and a reading of the plane's component
+  where other planes turn with it. Where `R + 1` is singular on one plane,
+  `−R` is held, so `G` always exists. A composite's new plane starts at
+  `K = 0`.
 - **The spins `ℓ_k` stay** per spatial plane, and `ℓ_⊥` splits by the same
   tilt onto the R-planes. They are the momentum, and `Σ m·ℓ` is unchanged as
   a witness. The rate is read from them, never stored.
@@ -812,9 +817,12 @@ hemisphere, `in_step`) read plane `k`'s turning from `G`'s component on `k`
 by the L1 reading §8d names, `ψ = g/(1 + |g|)` turns (taken into `[0, 1)`),
 the inverse of the rate's own map:
 - **Rational and cheap:** no series runs in a law.
-- **Exact where the laws turn:** `g = 0` and `g = 1` are `0` and `½` a turn,
-  the hemisphere kinks, so `0 ≤ g < 1` is the first half and `g ≥ 1` (with
-  the negative branch) the second.
+- **Exact where the laws turn:** on the one cover `g = 0` is `0` and
+  `g = ±1` is `½` a turn, the hemisphere kinks. So `0 ≤ g < 1` is the first
+  half and `−1 ≤ g < 0` the second.
+- **A held reading is exact:** a reading `a/q` held to a place is the
+  component `a/(q − a)` (or `(a − q)/a` past half a turn), its denominator
+  bounded by the place's. Only a composition floors onto the grain again.
 - **True to the motion law at one ring:** one ring from rest at `δ` reads `δ`
   turns exactly. Rings composed read the round turning, which is the change
   §11.7.3 states.
@@ -827,7 +835,31 @@ components on the six planes, the rate, the reading, the whole advance and
 `K` per plane, witnessed by: the fixed points; the reciprocal; one ring from
 rest; two rim rings as one wound turn; Mycelium's 11b-i and 11b-ii through
 the orientation; and a one-grain lean parting planes that equal rates turn.
-Motes and bodies do not carry it yet (#117 step 2b).
+
+**Built (2026-11-10, #117 step 2b, #157): motes carry `G`.** `Mote::phase`
+is retired. A mote's phases are readings of its orientation, and the save
+record holds its twelve values (six components, six windings), refusing a
+record of per-plane phases.
+- **The advance:** `torque_one` composes the bell's two rings whole on `G`.
+  `flows::turning_of` gives the bell's turnings and `flows::hold_to_place`
+  holds each reading to its place.
+- **The swing, pair by pair:** each spatial plane's swing is `ℓ_k +
+  t_k·ℓ_⊥·response(ψ_kR)`, read with its own R partner. A plane whose swing
+  passes zero passes through the centre alone (docs/120 §8b′).
+- **Through the centre on one plane** (the torque, the shear) composes that
+  plane's half turn. A frame's residue, a capture into a star's frame and a
+  collection's shared move each compose on their planes. The merger is the
+  holding-weighted mean of the generators.
+
+Still interim:
+- **The circulation** turns alike on the three R-planes. The laws that read
+  one circulation (the disc leg, the throat, the band, the field) read their
+  mean until each is restated on its pair (#158).
+- **The Möbius leg and the summed spin's pass through the centre** move the
+  readings half a turn, the flat torus's antipode. Three half turns on the
+  spatial planes compose to the identity, so the round counterpart is a
+  half turn in the orbit's own plane, which is not yet derived (#158).
+- **Stars and worlds** still sum their phases (#159).
 
 #### 11.7.5 K6, the split between planes, retired
 
