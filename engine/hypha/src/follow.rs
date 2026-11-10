@@ -22,13 +22,11 @@
 //!     it is only read later).
 
 use crate::census::{self, Census, Step, Stepper};
-use crate::fold::{fold, tier_key};
+use crate::fold::{at_key, at_of, fold, tier_key};
 use crate::line::{decode_entry, FoldLog, FoldMark, TierLine};
 use crate::Uplink;
 use cfe::persist::{read_tail, TailCursor};
 use mycelium_sdk::house::challenge::{ChallengeRefusal, Challenged, Finality};
-use mycelium_sdk::house::uplink::Uplinked;
-use mycelium_sdk::house::Stamp;
 use std::collections::BTreeMap;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -66,7 +64,7 @@ pub fn publish_fold(
     mark: &FoldMark,
 ) -> io::Result<Challenged> {
     let bad = |why: &str| io::Error::new(io::ErrorKind::InvalidData, why.to_string());
-    let at = Stamp::from_key(&mark.at).ok_or_else(|| bad("an unreadable fold stamp"))?;
+    let at = at_of(&mark.at).ok_or_else(|| bad("an unreadable fold position"))?;
     if mark.first < line.offset || mark.first + mark.count > line.total() {
         return Err(bad("the fold's entries are not on the hot line"));
     }
@@ -99,8 +97,8 @@ pub fn prune(
 ) -> io::Result<(usize, Option<String>)> {
     let mut unread = None;
     let n = log.prunable(line, |f| {
-        let read = Stamp::from_key(&f.at)
-            .ok_or_else(|| "an unreadable stamp".to_string())
+        let read = at_of(&f.at)
+            .ok_or_else(|| "an unreadable fold position".to_string())
             .and_then(|at| up.finality(at).map_err(|e| e.to_string()));
         match read {
             Ok((Finality::Final { .. } | Finality::PreLine, _)) => true,
@@ -198,6 +196,10 @@ pub struct Follower {
     root: PathBuf,
     home: PathBuf,
     key: ed25519_dalek::SigningKey,
+    /// The domain's sitting reserve, whose fold carries the colonies' to the
+    /// court (v0.4.0, 78.138), and the domain it sits for.
+    reserve: ed25519_dalek::SigningKey,
+    domain: [u8; 32],
     peoples: BTreeMap<String, Followed>,
     /// At most this many folds go to the court in one round, so a backfill
     /// paces itself across rounds instead of landing on a soak court at once.
@@ -210,6 +212,8 @@ impl Follower {
             root: root.to_path_buf(),
             home: home.to_path_buf(),
             key: tier_key(home, "colonies")?,
+            reserve: tier_key(home, "union")?,
+            domain: tier_key(home, "domain")?.verifying_key().to_bytes(),
             peoples: BTreeMap::new(),
             per_round: 8,
         })
@@ -455,7 +459,7 @@ impl Follower {
                         .push(format!("{people}: HALTED — local continuity broken: {d:?}"));
                     break;
                 }
-                let reply = match up.uplink_fold(&signed) {
+                let reply = match up.carry_fold(self.domain, &self.reserve, &signed) {
                     Ok(reply) => reply,
                     Err(e) => {
                         // The court is away: keep this chunk and the rest pending.
@@ -467,15 +471,32 @@ impl Follower {
                         return Err(e);
                     }
                 };
-                let Uplinked::Admitted { at, .. } = reply else {
-                    f.halted = Some(format!("the court refused: {reply:?}"));
-                    round.notes.push(format!(
-                        "{people}: HALTED — the court refused a fold: {reply:?}"
-                    ));
-                    break;
+                let at = match reply {
+                    Ok(at) => at,
+                    // The reserve cannot bond the line (it holds too little
+                    // μ): the reserve's standing, not a fault in the fold.
+                    // The steps stay pending and fold again next round.
+                    Err(Ok(founded)) => {
+                        f.pending = chunk
+                            .steps
+                            .into_iter()
+                            .chain(chunks.by_ref().flat_map(|c| c.steps))
+                            .collect();
+                        round.notes.push(format!(
+                            "{people}: waiting — the reserve did not bond the colonies line: {founded:?}"
+                        ));
+                        break;
+                    }
+                    Err(Err(reply)) => {
+                        f.halted = Some(format!("the court refused: {reply:?}"));
+                        round.notes.push(format!(
+                            "{people}: HALTED — the court refused a fold: {reply:?}"
+                        ));
+                        break;
+                    }
                 };
                 let mark = FoldMark {
-                    at: at.key(),
+                    at: at_key(&at),
                     first: line.total(),
                     count: batch.len() as u64,
                 };
@@ -489,11 +510,12 @@ impl Follower {
                     Ok(c) if answered(&c) => round.published += 1,
                     Ok(c) => round.notes.push(format!(
                         "{people}: fold at h {} NOT UPHELD on publication: {c:?}",
-                        at.h
+                        at.stamp.h
                     )),
-                    Err(e) => round
-                        .notes
-                        .push(format!("{people}: fold at h {} not published: {e}", at.h)),
+                    Err(e) => round.notes.push(format!(
+                        "{people}: fold at h {} not published: {e}",
+                        at.stamp.h
+                    )),
                 }
             }
         }
