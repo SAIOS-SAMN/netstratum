@@ -382,7 +382,7 @@ in turn, each with a read.
    that sets a generator now (the torque, the band, the push) is to be
    restated as that reading.
 4. **The signed lanes against the court's non-negative ones** (§1, §8).
-5. **Heat.** Agitation has no lane here. Whether heat is a reading of the
+5. **Heat.** Answered by docs/124 §3 (2026-11-10): heat is a reading, the spread of a body's turning about its own step, never a lane. Agitation has no lane here. Whether heat is a reading of the
    coordinate (the spread of a body's lanes) or a lane of its own is the
    same open question docs/118 left (Part I item 5).
 6. **The index's own cost** when a body's lanes advance at different rates:

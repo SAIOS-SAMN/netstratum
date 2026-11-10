@@ -49,7 +49,7 @@ how the universe moves, so each read before and after:
 | B3 | a star system keeps its motes through its settle | — |
 | B4, B5 | one outflow book; an identity on every passing, arrival and exit | — |
 | B7, B16 | one face law, read from a plane's axis (docs/117 §8.2) | — |
-| B8, B9 | heat and light from bonds and friction; one starlight law | docs/122, the operator's read |
+| B8, B9 | heat and light from bonds and friction; one starlight law; the star core's heat from contraction | docs/122, its semantics docs/124 (aligned with the operator 2026-11-10) |
 | B11, B13, B14, B15 | `toward_rest`'s reach; `Body.load`; the legacy read; a witness from both sides | — |
 | B1, B2 | galaxies form as branches; the ocean lands by a range on S | the coordinate (step 3) |
 
@@ -104,10 +104,8 @@ crossings at the vertex (docs/113). #35 (`tongue`), #36 (`TPoint::parse`),
 
 Only what no document decides; each is stated where it arises.
 
-- Heat and light from bonds and friction, out by the face (B8, B9): derived in [docs/122](122_HEAT_AND_LIGHT.md), awaiting the operator's read; it dissolves hydrogen's hold as a question.
 - A body's magnetic sense: its turning's sign or the electrons' phase
   (docs/121 §8).
 - The signed lanes inside a universe against the court's non-negative ones
   at the vertex (docs/120 §9, with Mycelium).
-- Where heat lives (docs/118 Part I item 5, docs/120 §9).
 - Whether compounding `(1 − s)ⁿ` stands under first degree (C11).

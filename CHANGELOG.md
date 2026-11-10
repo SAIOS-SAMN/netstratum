@@ -12,6 +12,17 @@ change is named here.
 
 ### Added
 
+- docs/124, States and phases (derived, not built): each form of energy
+  on one level of the coordinate and named by nature's term (register
+  H12): motion and heat on the phase level (heat is motion out of step, the
+  spread of a body's turning, answering docs/120 §9 item 5), bond energy on
+  the quantum level, potential on the state level, light in transit on no
+  lane, the sink where it drains. States of matter (molecular, atomic gas,
+  plasma) read heat against bonds. The star core's heat is derived from
+  contraction (Kelvin–Helmholtz), added to docs/122 as build step 5; it
+  retires the constant heats at ignition and at the outburst re-cut.
+  GLOSSARY: heat, temperature, state of matter, transition, emission,
+  absorption and irradiance, sink, contraction heating.
 - `horizons::read` and a `HORIZON` line per echo in `breathe` (docs/117
   §8–§9, readings only): for each galaxy mote, which planes stand inside
   their horizons (`|R·t_k| < H`), against the whole enclosure's hold and each
