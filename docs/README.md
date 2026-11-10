@@ -80,6 +80,9 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 119 | [The remediation register: the audits of 2026-11-05](119_REMEDIATION_REGISTER.md) |
 | 120 | [The coordinate: TUniversal inside the universe](120_THE_COORDINATE.md) |
 | 121 | [The magnetic coupling: the attractor and its inverse, and the shear that makes an orbit](121_MAGNETIC_COUPLING.md) |
+| 122 | [Heat and light: from bonds and friction, out by the face](122_HEAT_AND_LIGHT.md) |
+| 123 | [The universal core tube: a wormhole between antipolar kernels](123_THE_UNIVERSAL_CORE_TUBE.md) |
+| 124 | [States and phases: where each form of energy lives](124_STATES_AND_PHASES.md) |
 
 ## Era 0: the game, its civilizations and economy (01–77)
 

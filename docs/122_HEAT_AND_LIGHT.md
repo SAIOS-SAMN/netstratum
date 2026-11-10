@@ -14,6 +14,13 @@ we are missing physics". It supersedes docs/106 §2's heat pair where that
 pair heats and cools "on the open frames"; the rest of docs/106 stands, and
 this is its S1 and S2.
 
+**Semantics (2026-11-10):** docs/124 places each form on its level and
+names it by nature's term: heat is motion out of step (the spread of a
+body's turning), bond energy is the quantum level's, potential the state
+level's, and light is in transit on no lane. Its §5 derives the star core's
+heat from contraction, which this document's build order now carries
+(step 5).
+
 **Prerequisites:** docs/106 (the substrate and its ledger), docs/117 §8.2
 (the one face law, `polarity::faces_on`), docs/104 (the inverse), docs/97
 (the nuclear rungs, `u(z)`).
@@ -64,7 +71,8 @@ body, received where a body takes it, drained where nothing does.
    cost from that body's heat (a peel `u(z − k) + k·u(1) − u(z)`, a
    dissociation). `B + heat` is unchanged by a bond's change.
 2. **Friction moves motion into heat.** The share of a motion not delivered
-   in step leaves motion for heat: the torque's undelivered share, an
+   in step leaves motion for heat (decoherence: heat is motion out of
+   step, docs/124 §3): the torque's undelivered share, an
    encounter's grip, the shear's unkept share. `motion + heat` is unchanged
    (docs/106 §3: heat is never a residue).
 3. **Heat leaves as light through the unlocked face.** A body's heat `a`
@@ -120,8 +128,15 @@ alike: the still point of docs/106 §5.
 4. **Friction booked** (law 2): the torque's undelivered share, encounters
    and the shear's unkept share, motion to heat. Witness: `motion + heat`
    unchanged by each.
-5. **Scars to remainders** (J10). Witness: no rounding enters heat.
-6. A read of one founding before and after each step.
+5. **Contraction heating** (docs/124 §5): a collapse's released
+   potential, less the motion kept in step, into the star core's heat; the
+   ignition cut and the outburst re-cut read `open_at` at that heat,
+   retiring `ionizing = 1`, the re-cut's heat 0 and the `hot-heart`
+   constant. Witness: `potential + motion + heat` unchanged across a
+   collapse; a core deep enough strips its hydrogen and keeps it, one too
+   shallow does not ignite.
+6. **Scars to remainders** (J10). Witness: no rounding enters heat.
+7. A read of one founding before and after each step.
 
 ## 6. Open
 
@@ -129,4 +144,5 @@ alike: the still point of docs/106 §5.
   tightness, a share; its energy is that share of what).
 - Where a star's emitted light starts its passage: at its surface (its
   reach) or at its star core.
+- The scale on which heat meets a winding's tightness (docs/124 §8 item 1).
 - Potential's zero (docs/106 §7).

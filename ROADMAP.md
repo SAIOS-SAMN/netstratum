@@ -146,7 +146,10 @@ operators of the network.
   surfaces, contained by the firmament until bonded collections of its
   matter escape, with the zero galaxy first and every body's extent and
   throat read by one law (docs/111, EQUATIONS §8); the thermodynamic
-  substrate (pressure, energy and heat as state, docs/106); then the
+  substrate (pressure, energy and heat as state, docs/106), with each form
+  of energy on its level and named by nature's term (docs/124: heat is
+  motion out of step; the star core's heat from contraction, docs/122
+  step 5); then the
   remaining layers (docs/102 register), then the
   game moved fully onto it.
 

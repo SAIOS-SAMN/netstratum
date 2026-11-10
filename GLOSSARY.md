@@ -56,11 +56,18 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 |---|---|---|
 | **turning** | Each received ring turns a body by its deficit: `ω = δ` turns per ring, so one turn takes `P = 1 + R / H` rings. A body's phase at bell `n` is `φ + n/P`, in closed form. | `motion.rs`, `flows::turn` |
 | **spin** `ℓ` | Reach times holding, `ℓ = R · H`; angular momentum is mass times `ℓ`. Motes carry it in the orbit plane (`ell_o`) and across it (`ell_orth`). | `ring.rs`, `flows::Mote` |
-| **phase** | A position on a turn, as a share in `[0, 1)`, one per plane. Membership and closeness are read from phases, never from lengths in a fixed frame. | `flows::Mote::phase` |
+| **phase** | A position on a turn, as a share in `[0, 1)`, one per plane. Membership and closeness are read from phases, never from lengths in a fixed frame. Never a state of matter (docs/124 §4). | `flows::Mote::phase` |
 | **the three planes** | Space is three spatial planes plus the R coordinate; a mote's tilt is its spin's share in each plane. | docs/95, `flows::space_of` |
 | **pulse** and **push** `p` | Each bell a core re-pulses at full strength. Its push share is `p = ½·Q/(A + Q)` (`Q` its open frames' magnetism, `A` its holding); matter is held where `H/(R + H) ≥ p`. | `pulse::galaxy_push` |
 | **torque** | The pulse's effect on a mote's spin: it adds spin on one hemisphere of the bell and removes it on the other; what does not land in step becomes heat. Always paired with the hold's return. | `flows::torque`, `flows::spin_torque` |
 | **agitation** | A mote's heat: the share of its turning absorbed and not re-locked. | `flows::Mote::agitation` |
+| **heat** | Motion out of step: the spread of a body's turning about its own mean, first degree (docs/124 §3). Friction is decoherence, motion leaving step for heat. | docs/124; `flows::Mote::agitation` |
+| **temperature** | Heat per unit of holding, the share `a`. | docs/124 §3 |
+| **state of matter** | Molecular, atomic gas or plasma: a body's heat read against its kind's bonds. A change between them is a **transition** (dissociation, ionization, recombination, association). | docs/124 §4, `atom::open_at`, `formation::dissociate` |
+| **emission** | Heat leaving a body as light through its unlocked face. | docs/122 law 3 |
+| **absorption**, **irradiance** | Light taken into a body's heat by its unlocked face; the light falling on it. | docs/122 law 4 |
+| **sink** | Where light drains, the vacuum face: the absence of irradiance ("darkness" is not a quantity). | docs/122 §4, docs/124 §2 |
+| **contraction heating** | A collapse's released potential, less the motion kept in step, into the star core's heat (nature's Kelvin–Helmholtz mechanism). | docs/124 §5 |
 | **lever** | Per plane, the part of a mote's holding standing one place past its phase mark, so that its centre is its true position. | `flows::true_phase` |
 
 ## 5. The faces (inverse physics)
