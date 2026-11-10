@@ -281,22 +281,56 @@ impl Motion {
 
 /// A body's orientation: its generator's components on [`PLANES`], each on
 /// the grain, and its windings per plane.
-#[derive(Clone, Debug, PartialEq, Eq, Default)]
+///
+/// Its readings in the phase layout are kept beside it, refreshed at every
+/// write of `G` (the laws read them inside their pair loops; a reading is a
+/// division, so it is taken once per change, never per read). They are a
+/// reading of `G`, never saved and never written on their own.
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Orientation {
-    pub g: [Ratio; 6],
+    g: [Ratio; 6],
     pub windings: [i64; 6],
+    phases: Vec<Ratio>,
+}
+
+impl Default for Orientation {
+    fn default() -> Orientation {
+        Orientation::of_generator(std::array::from_fn(|_| ratio(0, 1)), [0; 6])
+    }
 }
 
 impl Orientation {
+    /// From a generator's components on [`PLANES`] and its windings.
+    pub fn of_generator(g: [Ratio; 6], windings: [i64; 6]) -> Orientation {
+        let mut o = Orientation {
+            g,
+            windings,
+            phases: Vec::new(),
+        };
+        o.refresh();
+        o
+    }
+
+    /// Its generator's components on [`PLANES`].
+    pub fn g(&self) -> &[Ratio; 6] {
+        &self.g
+    }
+
+    fn refresh(&mut self) {
+        let mut v = vec![ratio(0, 1); crate::flows::PLANES];
+        for (j, &k) in crate::flows::SPACE.iter().enumerate() {
+            v[k] = reading(&self.g[SPATIAL[j]]);
+        }
+        v[crate::flows::LOOP] = reading(&self.loop_mean());
+        self.phases = v;
+    }
+
     /// At the readings `psi` (turns) on each plane, unwound: the founding's
     /// form, each plane on its own (no part between planes yet), exact (a
     /// reading `a/q` is the component `a/(q − a)`, its denominator bounded
     /// by the reading's).
     pub fn at(psi: &[Ratio; 6]) -> Orientation {
-        Orientation {
-            g: std::array::from_fn(|p| of_reading(&psi[p])),
-            windings: [0; 6],
-        }
+        Orientation::of_generator(std::array::from_fn(|p| of_reading(&psi[p])), [0; 6])
     }
 
     /// Each plane's reading in turns.
@@ -341,6 +375,7 @@ impl Orientation {
             Err(e) => return Err(e),
         };
         self.g = g;
+        self.refresh();
         let now = self.readings();
         for p in 0..6 {
             if b[p] > ratio(0, 1) && now[p] < was[p] {
@@ -384,20 +419,12 @@ impl Orientation {
     /// the reading of its R-planes' mean, first degree (docs/117 §11.7.2;
     /// the laws that still read one circulation, until each reads its pair).
     pub fn phases(&self) -> Vec<Ratio> {
-        let mut v = vec![ratio(0, 1); crate::flows::PLANES];
-        for (j, &k) in crate::flows::SPACE.iter().enumerate() {
-            v[k] = reading(&self.g[SPATIAL[j]]);
-        }
-        v[crate::flows::LOOP] = reading(&self.loop_mean());
-        v
+        self.phases.clone()
     }
 
     /// One reading in the phase layout.
     pub fn phase(&self, k: usize) -> Ratio {
-        match crate::flows::SPACE.iter().position(|&s| s == k) {
-            Some(j) => reading(&self.g[SPATIAL[j]]),
-            None => reading(&self.loop_mean()),
-        }
+        self.phases.get(k).cloned().unwrap_or_else(|| ratio(0, 1))
     }
 
     fn loop_mean(&self) -> Ratio {
@@ -422,8 +449,9 @@ impl Orientation {
         match crate::flows::SPACE.iter().position(|&s| s == k) {
             Some(j) => {
                 let p = SPATIAL[j];
-                if reading(&self.g[p]) != *v {
+                if self.phase(k) != *v {
                     self.g[p] = of_reading(v);
+                    self.refresh();
                 }
             }
             None => {
@@ -439,6 +467,7 @@ impl Orientation {
                         self.g[p].clone() * to.clone() / mean.clone()
                     };
                 }
+                self.refresh();
             }
         }
     }
@@ -498,6 +527,7 @@ impl Orientation {
         if let Some((o, _)) = parts.iter().max_by(|a, b| a.1.cmp(&b.1)) {
             out.windings = o.windings;
         }
+        out.refresh();
         out
     }
 
@@ -566,6 +596,7 @@ impl Orientation {
             }
             o.windings[p] = i64::try_from(v[6 + p].to_integer()).ok()?;
         }
+        o.refresh();
         Some(o)
     }
 }
@@ -674,8 +705,9 @@ mod tests {
             b
         };
         let mut even = Orientation::default();
-        let mut lean = Orientation::default();
-        lean.g[0] = crate::ring::grain_step();
+        let mut g0: [Ratio; 6] = zero();
+        g0[0] = crate::ring::grain_step();
+        let mut lean = Orientation::of_generator(g0, [0; 6]);
         for _ in 0..12 {
             even.advance(&b).expect("even");
             lean.advance(&b).expect("lean");
