@@ -120,6 +120,8 @@ pub fn fold(
         declared,
         children: Vec::new(),
         handoffs: Vec::new(),
+        // No crossing of the universal core tube is stated by a census.
+        transitions: Vec::new(),
     }
     .sign(key)
 }

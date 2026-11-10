@@ -14,10 +14,11 @@
 //!
 //! Every call goes to a real `mycelium-server` (78.59, "no mock").
 
-use mycelium_sdk::house::HyphaKey;
 use mycelium_sdk::house::Undecomposed;
-use mycelium_sdk::house::{Breach, Law, Transition, TransitionVerdict};
+use mycelium_sdk::house::{Breach, Transition, TransitionVerdict};
+use mycelium_sdk::laws::Law;
 use mycelium_sdk::session::Session;
+use mycelium_sdk::voice::VoiceKey as HyphaKey;
 use std::io;
 use std::path::Path;
 
@@ -45,6 +46,7 @@ pub const SPOKEN: &[&str] = &[
     "laws statement",
     "laws concordance",
     "laws signature",
+    "laws alignment",
     "laws clock",
     "laws verify",
     "laws lexicon",
@@ -177,8 +179,8 @@ impl Uplink {
         &self.session
     }
 
-    pub fn laws(&self) -> io::Result<Vec<mycelium_sdk::house::Served>> {
-        use mycelium_sdk::house::{decode_register_reply, encode_register_request};
+    pub fn laws(&self) -> io::Result<Vec<mycelium_sdk::laws::Served>> {
+        use mycelium_sdk::laws::{decode_register_reply, encode_register_request};
         decode_register_reply(&self.session.speak(encode_register_request())?).ok_or_else(|| {
             io::Error::new(
                 io::ErrorKind::InvalidData,

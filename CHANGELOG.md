@@ -138,6 +138,17 @@ change is named here.
 
 ### Changed
 
+- Mycelium pinned at v0.4.0-rc.1 (#163; wire 0x0200, law version 5), a
+  contract change. The uplink speaks the v0.4.0 SDK:
+  - samples on the alphabet's section (`rule::SectionSample`, `TaskSection`)
+    in place of rasters, admitted at the boundary;
+  - the moved paths (`voice::VoiceKey`, `laws::`, `rule::Mv`,
+    `house::membrane_at`, `Step::symmetry_motion`, `Coord::Cells`,
+    `Symmetry::RotateE2E1By*`);
+  - `TierFold::transitions`, and the court's `Boundary` refusals named;
+  - the contract's step 0 signs the served clause register by reconstruction
+    (ACT_LAWS mode 8) and reads the key's alignment (mode 9, a MUST act of
+    the KERNEL profile), in place of the retired Concordance hash.
 - The energy book (`conductor::energy`) sums its terms in a balanced tree:
   the same exact values, without the running sum whose denominator grew
   with every mote (amounts carry wide denominators). At bell 186 on the

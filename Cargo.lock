@@ -13,6 +13,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "algebra"
+version = "0.4.0-rc.1"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.4.0-rc.1#31440d67ae37135a6c405df423968649e105f9d4"
+dependencies = [
+ "num-bigint",
+ "num-rational",
+ "num-traits",
+]
+
+[[package]]
 name = "arrayvec"
 version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -345,9 +355,10 @@ checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
 
 [[package]]
 name = "forms"
-version = "0.3.0-rc.3"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0#534297944f83fc20fed690d6c6ab233a522ab239"
+version = "0.4.0-rc.1"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.4.0-rc.1#31440d67ae37135a6c405df423968649e105f9d4"
 dependencies = [
+ "algebra",
  "num-bigint",
  "num-rational",
  "num-traits",
@@ -491,12 +502,14 @@ dependencies = [
 
 [[package]]
 name = "mycelium"
-version = "0.3.0-rc.3"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0#534297944f83fc20fed690d6c6ab233a522ab239"
+version = "0.4.0-rc.1"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.4.0-rc.1#31440d67ae37135a6c405df423968649e105f9d4"
 dependencies = [
+ "algebra",
  "blake3",
  "ctrlc",
  "ed25519-dalek",
+ "forms",
  "fs2",
  "getrandom 0.2.17",
  "inotify",
@@ -516,8 +529,8 @@ dependencies = [
 
 [[package]]
 name = "mycelium-sdk"
-version = "0.3.0-rc.3"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.3.0#534297944f83fc20fed690d6c6ab233a522ab239"
+version = "0.4.0-rc.1"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.4.0-rc.1#31440d67ae37135a6c405df423968649e105f9d4"
 dependencies = [
  "ed25519-dalek",
  "forms",
