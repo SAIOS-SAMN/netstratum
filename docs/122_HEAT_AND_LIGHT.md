@@ -6,7 +6,7 @@ body's unlocked face, and one ledger books it across bond, heat, motion,
 potential and light. It replaces the frame-count readings that set cooling
 and starlight today, and the two starlight laws.
 
-**Status:** derived (2026-11-05); steps 1 (the read-only ledger), 2 (emission by the face) and 3 (bonds into heat, nuclear) built (2026-11-10). It answers register docs/119
+**Status:** derived (2026-11-05); steps 1 (the read-only ledger), 2 (emission by the face), 3 (bonds into heat, nuclear) and 4 (friction booked) built (2026-11-10). It answers register docs/119
 B8 and B9 and the open decision "hydrogen's hold" (docs/PLAN.md). The
 operator said on 2026-11-05: "why are we still stuck in frames :: where
 does irradiation as heat and light come from? bonds+friction - sounds like
@@ -149,7 +149,17 @@ alike: the still point of docs/106 §5.
    terms close.
 4. **Friction booked** (law 2): the torque's undelivered share, encounters
    and the shear's unkept share, motion to heat. Witness: `motion + heat`
-   unchanged by each.
+   unchanged by each. **Built (2026-11-10):** motion is booked as `Σ m·ℓ`, which
+   is angular momentum and stays exact under every spin identity, so the
+   payer is read from docs/124 §3 instead: friction turns motion *out of
+   step* into heat. The torque's undelivered share is paid by the push (the
+   bounce carries on `p − Σ m·|Δℓ| − heated`, EQUATIONS E20); an encounter's
+   heat is the relative motion its grip ends, the pair's first-degree spread
+   about their mean turning (E56); the ocean's torque, with no bounce
+   downstream, is a named source. `Event::heat_made` names every source and
+   `breathe`'s energy line reports the heat still unaccounted. Open: the
+   payer of a bounce's parting (the state level), the shear's unkept share
+   (the shear keeps `Σ m·ℓ` and makes no heat today).
 5. **Contraction heating** (docs/124 §5): a collapse's released
    potential, less the motion kept in step, into the star core's heat; the
    ignition cut and the outburst re-cut read `open_at` at that heat,

@@ -1656,8 +1656,9 @@ stepped toward its rest and never past it (docs/104 §6, docs/112 F3).
 **E20 · The torque.** `flows::torque`, `flows::spin_torque`. Each mote's
 spin moves by the in-step response of the core's push over its passage
 (its tilt's share of `2δ` a plane) and the band (E19); what is not delivered
-in step is heat, `p·δ·(1 − |k|)`; the torque only makes it, and it leaves by
-emission (E54). The spin
+in step is heat, `p·δ·(1 − |k|)` on the grain, booked `heated = Σ m·heat`
+and paid by the push: the bounce carried on is `b = p − Σ m·|Δℓ| − heated`
+(docs/122 law 2). It leaves by emission (E54). The spin
 given is the core's reservoir's to pay: `Σ m·ℓ + reservoir` is exact.
 
 **E21 · The luminal bound.** `flows::luminal`. A mote turns `2·share` a
@@ -1873,3 +1874,18 @@ kept matter, and the star, standing at its system's throat (`δ = ½`, docs/122
 the captures change bonds without heat yet (the chemical grip's energy in
 ledger units is open, docs/122 §6).
 
+**E56 · Friction in an encounter.** `formation::decohere`,
+`formation::collide_stars` (docs/122 law 2, docs/124 §3). Two stars' joint
+motion in step is their mean turning `ℓ̄ = Σ m·ℓ/Σ m`; their relative
+motion is their spread about it, first degree, in each orbit:
+
+    S = Σ m_k·|ℓ_k − ℓ̄|
+
+A bounce's grip `γ = bind·c` moves both spins toward the mean by `γ`
+(`Σ m·ℓ` unchanged, `S` falls by `γ·S` exactly) and `γ·S` is their heat. A
+stick ends the relative motion: the joined body's heat is its members'
+spread about their mean in both orbits (docs/124 §3's heat of a body),
+replacing the deficit contrast `|δ_i − δ_j|/(δ_i + δ_j)` as the heat (it
+stays the stick test). The bounce's parting (the exchange of the unkept share)
+then widens their spins; what pays it is the state level's (potential),
+not derived yet.

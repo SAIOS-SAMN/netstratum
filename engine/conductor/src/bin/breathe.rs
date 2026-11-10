@@ -184,24 +184,13 @@ fn main() {
                 .sum();
             {
                 let book = conductor::energy::read(&u);
-                let since = &events[light_from..];
-                let lit = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| {
-                    since.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e))
-                };
-                let (made, got, gone) = (
-                    lit(&|e| e.light.made.clone()),
-                    lit(&|e| e.light.received.clone()),
-                    lit(&|e| e.light.drained.clone()),
-                );
                 eprintln!(
                     "{}",
                     energy_line(
                         &format!("at bell {}", b + 1),
                         &book_prev,
                         &book,
-                        &made,
-                        &got,
-                        &gone
+                        &events[light_from..]
                     )
                 );
                 book_prev = book;
@@ -740,20 +729,10 @@ fn main() {
     }
     // The energy book over the run (docs/122 step 1, read only).
     {
-        let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| {
-            events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e))
-        };
         let book = conductor::energy::read(&u);
         println!(
             "{}",
-            energy_line(
-                "over the run",
-                &book_start,
-                &book,
-                &sum(&|e| e.light.made.clone()),
-                &sum(&|e| e.light.received.clone()),
-                &sum(&|e| e.light.drained.clone()),
-            )
+            energy_line("over the run", &book_start, &book, &events)
         );
     }
     // The light ledger: light made (the ℚ → ℤ transduction's flux), received
@@ -1081,37 +1060,67 @@ fn main() {
     }
 }
 
-/// One energy line (docs/122 step 1): each form's change between two books,
-/// beside the light made, received and drained between them. Heat's change
-/// less the light received is the heat made or lost by every other channel
-/// (the torque, encounters, rounding, cooling), none of it booked yet; the
-/// bond closed beside the light made shows how much starlight its bonds
-/// account for. The forms do not share one unit yet (docs/124 §8), so no
-/// sum is claimed to close.
+/// One energy line (docs/122 steps 1–4): each form's change between two
+/// books, beside the light made, received and drained between them and the
+/// heat its named sources made (`Event::heat_made`: the torque, the ocean's
+/// torque, encounters, the burn's release, the throat's). The heat left
+/// unaccounted is its change less the named sources and the light received,
+/// plus the light emitted (all light made but the throat's floor, which
+/// never was heat): every channel still unbooked (rounding scars, merges,
+/// ignition, matter born cold). The forms do not share one unit yet
+/// (docs/124 §8), so no sum across forms is claimed to close.
 fn energy_line(
     when: &str,
     a: &conductor::energy::Book,
     b: &conductor::energy::Book,
-    made: &cfe::ratio::Ratio,
-    got: &cfe::ratio::Ratio,
-    gone: &cfe::ratio::Ratio,
+    events: &[breath::Event],
 ) -> String {
+    use std::collections::BTreeMap;
+    let zero = || cfe::ratio::ratio(0, 1);
+    let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| {
+        events.iter().fold(zero(), |s, e| s + f(e))
+    };
+    let (made, got, gone) = (
+        sum(&|e| e.light.made.clone()),
+        sum(&|e| e.light.received.clone()),
+        sum(&|e| e.light.drained.clone()),
+    );
+    let throat_light = sum(&|e| e.recycled.light.clone());
+    let mut sources: BTreeMap<&str, cfe::ratio::Ratio> = BTreeMap::new();
+    for e in events {
+        for (k, v) in &e.heat_made {
+            *sources.entry(k).or_insert_with(zero) += v.clone();
+        }
+        if let Some(c) = &e.collective {
+            *sources.entry("ocean torque").or_insert_with(zero) += c.ocean_heat.clone();
+        }
+    }
+    let named = sources.values().fold(zero(), |s, v| s + v.clone());
     let s = conductor::reading::sector;
     let dh = b.heat() - a.heat();
+    let unaccounted = dh.clone() - named.clone() - got.clone() + (made.clone() - throat_light);
+    let row: Vec<String> = sources
+        .iter()
+        .map(|(k, v)| format!("{k} {}", s(v)))
+        .collect();
     format!(
-        "energy {when}: heat {} (motes {}, stars {}, worlds {}), change {}, less light received {}; potential {}, change {}; bond {}, closed {}; light made {}, received {}, drained {}",
+        "energy {when}: heat {} (motes {}, stars {}, worlds {}), change {}; made by {} (named {}), received {}, emitted {}, unaccounted {}; potential {}, change {}; bond {}, closed {}; light made {}, received {}, drained {}",
         s(&b.heat()),
         s(&b.heat_motes),
         s(&b.heat_stars),
         s(&b.heat_worlds),
         s(&dh),
-        s(&(dh.clone() - got.clone())),
+        if row.is_empty() { "none".to_string() } else { row.join(", ") },
+        s(&named),
+        s(&got),
+        s(&(made.clone() - sum(&|e| e.recycled.light.clone()))),
+        s(&unaccounted),
         s(&b.potential),
         s(&(b.potential.clone() - a.potential.clone())),
         s(&b.bond),
         s(&(a.bond.clone() - b.bond.clone())),
-        s(made),
-        s(got),
-        s(gone),
+        s(&made),
+        s(&got),
+        s(&gone),
     )
 }

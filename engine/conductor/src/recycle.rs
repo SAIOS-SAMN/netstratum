@@ -551,12 +551,20 @@ mod tests {
         // system's throat it keeps ½ a ring and emits the rest. `heat·m +
         // released` before is `heat·m + light` after, exactly.
         let mut sys = crate::pulse::deploy(
-            &[(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(900, 1))].into(),
+            &[(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(900, 1),
+            )]
+            .into(),
         )
         .expect("a universe")
         .cores
         .remove(0);
-        sys.kept = [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(900, 1))].into();
+        sys.kept = [(
+            crate::chem::Kind::parse("W0001").expect("a kind"),
+            ratio(900, 1),
+        )]
+        .into();
         sys.heat = ratio(1, 5);
         let m = crate::pulse::mass(&sys.kept);
         assert!(m > ratio(0, 1));

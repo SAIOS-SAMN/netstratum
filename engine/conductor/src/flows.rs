@@ -1143,9 +1143,10 @@ pub fn torque(
     tide: Option<(&Ratio, &Ratio)>,
     total: &Ratio,
     cross: &mut crate::enfold::Cross,
-) -> (Ratio, Ratio) {
+) -> (Ratio, Ratio, Ratio) {
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
+    let mut heated = ratio(0, 1);
     // The push, certified (design law 11; operator 2026-10-23: "build the
     // certified intervals"): the push is read from the ledger's totals, its
     // exact denominator the ledger's, and it multiplies every mote's torque.
@@ -1162,9 +1163,10 @@ pub fn torque(
     };
     for x in motes.iter_mut() {
         if lo == hi {
-            let (g, ab) = torque_one(x, enc, &lo, tide, total, cross);
+            let (g, ab, ht) = torque_one(x, enc, &lo, tide, total, cross);
             given += g;
             absorbed += ab;
+            heated += ht;
             continue;
         }
         let (mut xa, mut xb) = (x.clone(), x.clone());
@@ -1172,20 +1174,22 @@ pub fn torque(
             crate::enfold::Cross::default(),
             crate::enfold::Cross::default(),
         );
-        let (ga, aa) = torque_one(&mut xa, enc, &lo, tide, total, &mut ca);
-        let (gb, ab) = torque_one(&mut xb, enc, &hi, tide, total, &mut cb);
-        if xa == xb && ca == cb && ga == gb && aa == ab {
+        let (ga, aa, ha) = torque_one(&mut xa, enc, &lo, tide, total, &mut ca);
+        let (gb, ab, hb) = torque_one(&mut xb, enc, &hi, tide, total, &mut cb);
+        if xa == xb && ca == cb && ga == gb && aa == ab && ha == hb {
             *x = xa;
             cross.join(&ca);
             given += ga;
             absorbed += aa;
+            heated += ha;
         } else {
-            let (g, ab) = torque_one(x, enc, p, tide, total, cross);
+            let (g, ab, ht) = torque_one(x, enc, p, tide, total, cross);
             given += g;
             absorbed += ab;
+            heated += ht;
         }
     }
-    (given, absorbed)
+    (given, absorbed, heated)
 }
 
 /// One mote's bell: its phases turned and its spins torqued (`turn`,
@@ -1248,7 +1252,7 @@ fn torque_one(
     tide: Option<(&Ratio, &Ratio)>,
     total: &Ratio,
     cross: &mut crate::enfold::Cross,
-) -> (Ratio, Ratio) {
+) -> (Ratio, Ratio, Ratio) {
     // Each turns by what is enclosed inside it (the core and all inside),
     // at the reach its orthogonal orbit swings it to this bell (docs/90 D2): the
     // motion law at its present reach, so it turns faster inward and
@@ -1286,10 +1290,10 @@ fn torque_one(
         &heat_was,
         cross,
     );
-    let (g, ab) = spin_torque(x, &from, &d_o, p, &torque_orth, &m, &scar);
+    let (g, ab, ht) = spin_torque(x, &from, &d_o, p, &torque_orth, &m, &scar);
     // Descent: its weight past its round stands one place past its mark.
     settle(x, &levers, place.as_ref(), cross);
-    (g, ab)
+    (g, ab, ht)
 }
 
 /// The torque on one mote's SPINS over one bell's passage, the one law at
@@ -1309,7 +1313,7 @@ pub fn spin_torque(
     torque_orth: &Ratio,
     m: &Ratio,
     scar: &Ratio,
-) -> (Ratio, Ratio) {
+) -> (Ratio, Ratio, Ratio) {
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
     // Over its whole passage this bell, never at one instant; a vacuum
@@ -1340,8 +1344,15 @@ pub fn spin_torque(
     // step (docs/124 §3). The heat leaves by emission through the face
     // (`emit`, docs/122 law 3), never here: the torque only makes it.
     let coherent = if k < ratio(0, 1) { -k } else { k };
-    let heat = p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)));
-    x.agitation = crate::ring::grain(&(x.agitation.clone() + heat + scar.clone()));
+    // The push pays it (docs/122 law 2): what the torque does not deliver in
+    // step is heat, booked `m·heat` (`heated`) and taken from the bounce the
+    // push carries on, `B = p − Σ m·|Δℓ| − Σ m·heat`, so motion and heat and
+    // the bounce are the push, never more.
+    let heat = crate::ring::grain(
+        &(p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)))),
+    );
+    let heated = m.clone() * heat.clone();
+    x.agitation = crate::ring::grain(&(x.agitation.clone() + scar.clone())) + heat;
     // No radial law at the state level (operator 2026-11-06: the spin
     // balance): a mote's reach is the reading `ℓ/H(<ℓ)` of its spin, and its
     // orbit stands where its spin and the hold enclosed balance; the band
@@ -1397,7 +1408,7 @@ pub fn spin_torque(
         };
     given += m.clone() * dl_c;
     x.ell_orth = new_c;
-    (given, absorbed)
+    (given, absorbed, heated)
 }
 
 /// The contact of A pair over one echo (operators 2026-10-18, with
@@ -4615,5 +4626,41 @@ mod emission_tests {
             vac[0].agitation,
             crate::ring::grain(&(ratio(1, 2) * (ratio(1, 1) - delta)))
         );
+    }
+}
+
+#[cfg(test)]
+mod friction_tests {
+    use super::*;
+
+    #[test]
+    fn the_torques_heat_is_booked_and_bounded_by_the_push() {
+        // docs/122 law 2: what the torque does not deliver in step warms the
+        // mote, `m·Δa` booked exactly as `heated`, never more than the push
+        // over the passage, `m·p·δ`; the bounce carries on `p − absorbed −
+        // heated` (breath).
+        for (phase0, m) in [(ratio(1, 10), ratio(1, 1)), (ratio(3, 7), ratio(2, 5))] {
+            let mut x = Mote {
+                key: crate::chem::Kind::parse("W0001").expect("a kind"),
+                amount: ratio(1, 1),
+                spins: Mote::spins_of(&ratio(1, 2), &[ratio(1, 2), ratio(1, 3), ratio(1, 6)]),
+                ell_orth: ratio(0, 1),
+                phase: rest(ratio(1, 2)),
+                agitation: crate::ring::grain(&ratio(1, 9)),
+                born: 0,
+                vacuum: false,
+                lever: Vec::new(),
+                lever_place: ratio(0, 1),
+                lift: ratio(0, 1),
+            };
+            x.phase[0] = phase0;
+            let from = space_of(&x.phase);
+            let (d_o, p) = (ratio(2, 3), ratio(1, 4));
+            let was = x.agitation.clone();
+            let (_, _, heated) =
+                spin_torque(&mut x, &from, &d_o, &p, &ratio(0, 1), &m, &ratio(0, 1));
+            assert_eq!(m.clone() * (x.agitation.clone() - was), heated);
+            assert!(heated >= ratio(0, 1) && heated <= m * p * d_o);
+        }
     }
 }
