@@ -6,7 +6,7 @@ body's unlocked face, and one ledger books it across bond, heat, motion,
 potential and light. It replaces the frame-count readings that set cooling
 and starlight today, and the two starlight laws.
 
-**Status:** derived, not built (2026-11-05). It answers register docs/119
+**Status:** derived (2026-11-05); step 1, the read-only ledger, built (2026-11-10). It answers register docs/119
 B8 and B9 and the open decision "hydrogen's hold" (docs/PLAN.md). The
 operator said on 2026-11-05: "why are we still stuck in frames :: where
 does irradiation as heat and light come from? bonds+friction - sounds like
@@ -117,7 +117,16 @@ alike: the still point of docs/106 §5.
 
 1. **The ledger, read only** (docs/106 S1, with the bond form). Witness: its
    closure per echo reported; the first reading is the size of today's
-   leak.
+   leak. **Built (2026-11-10):** `conductor::energy::read`, an `ENERGY` line
+   per universal echo and over the run in `breathe`; heat, potential and bond
+   booked, motion left to the spin identities; no sum claimed to close until
+   the forms share a unit (docs/124 §8). First read (2^40, 580 bells): heat
+   0 → 0.0265 unit masses, of which light received is 0.00032 (1.2 %), the
+   other 98.8 % from channels booked nowhere (the torque, rounding,
+   encounters); potential 0 → 0.123; the bond (open frames) *rose* 0.302 →
+   0.420 (+39 %) while 0.0037 of light was made: frames are unpaired far
+   faster than fusion closes them (the throat's peels, `recycle`); light
+   made = received + drained exactly.
 2. **Emission by the face** (law 3), retiring `open` in `keep` and
    `radiates`. Witness: a body's heat approaches `q/u` in closed form, at N
    and 4N rings; hydrogen emits.

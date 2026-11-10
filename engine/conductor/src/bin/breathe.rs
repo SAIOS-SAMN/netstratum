@@ -149,6 +149,11 @@ fn main() {
     let started = std::time::Instant::now();
     let mut grown_past: Option<u64> = None;
     let mut last_motes = carrier(&u).0;
+    // The energy book (docs/122 step 1, read only): each form's change per
+    // universal echo against the light made, received and drained in it.
+    let book_start = conductor::energy::read(&u);
+    let mut book_prev = book_start.clone();
+    let mut light_from = events.len();
     for b in start..until {
         events.extend(breath::breathe(&mut u, &seed, t_u, b, b + 1));
         // Progress by the universe's own count, never a clock: each tenth
@@ -177,6 +182,31 @@ fn main() {
                 .flat_map(|c| &c.satellites)
                 .map(|s| s.satellites.len())
                 .sum();
+            {
+                let book = conductor::energy::read(&u);
+                let since = &events[light_from..];
+                let lit = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| {
+                    since.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e))
+                };
+                let (made, got, gone) = (
+                    lit(&|e| e.light.made.clone()),
+                    lit(&|e| e.light.received.clone()),
+                    lit(&|e| e.light.drained.clone()),
+                );
+                eprintln!(
+                    "{}",
+                    energy_line(
+                        &format!("at bell {}", b + 1),
+                        &book_prev,
+                        &book,
+                        &made,
+                        &got,
+                        &gone
+                    )
+                );
+                book_prev = book;
+                light_from = events.len();
+            }
             if let Some((t_e, r_rim)) = pulse::established_period(&u) {
                 eprintln!(
                     "RIM at bell {}: R_rim {}, established period T_u = 2·a(R_rim) = {} bells; stored T_u {}; whole holding {}, within the rim {}",
@@ -708,6 +738,24 @@ fn main() {
             }
         );
     }
+    // The energy book over the run (docs/122 step 1, read only).
+    {
+        let sum = |f: &dyn Fn(&breath::Event) -> cfe::ratio::Ratio| {
+            events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + f(e))
+        };
+        let book = conductor::energy::read(&u);
+        println!(
+            "{}",
+            energy_line(
+                "over the run",
+                &book_start,
+                &book,
+                &sum(&|e| e.light.made.clone()),
+                &sum(&|e| e.light.received.clone()),
+                &sum(&|e| e.light.drained.clone()),
+            )
+        );
+    }
     // The light ledger: light made (the ℚ → ℤ transduction's flux), received
     // as heat by the bodies on its continuum face, drained into the vacuum.
     {
@@ -1031,4 +1079,39 @@ fn main() {
         let _ = pulse::write(Path::new(era1), &seed, &u);
         let _ = std::fs::write(Path::new(era1).join("conductor.beat"), until.to_string());
     }
+}
+
+/// One energy line (docs/122 step 1): each form's change between two books,
+/// beside the light made, received and drained between them. Heat's change
+/// less the light received is the heat made or lost by every other channel
+/// (the torque, encounters, rounding, cooling), none of it booked yet; the
+/// bond closed beside the light made shows how much starlight its bonds
+/// account for. The forms do not share one unit yet (docs/124 §8), so no
+/// sum is claimed to close.
+fn energy_line(
+    when: &str,
+    a: &conductor::energy::Book,
+    b: &conductor::energy::Book,
+    made: &cfe::ratio::Ratio,
+    got: &cfe::ratio::Ratio,
+    gone: &cfe::ratio::Ratio,
+) -> String {
+    let s = conductor::reading::sector;
+    let dh = b.heat() - a.heat();
+    format!(
+        "ENERGY {when}: heat {} (motes {}, stars {}, worlds {}), change {}, less light received {}; potential {}, change {}; bond {}, closed {}; light made {}, received {}, drained {}",
+        s(&b.heat()),
+        s(&b.heat_motes),
+        s(&b.heat_stars),
+        s(&b.heat_worlds),
+        s(&dh),
+        s(&(dh.clone() - got.clone())),
+        s(&b.potential),
+        s(&(b.potential.clone() - a.potential.clone())),
+        s(&b.bond),
+        s(&(a.bond.clone() - b.bond.clone())),
+        s(made),
+        s(got),
+        s(gone),
+    )
 }

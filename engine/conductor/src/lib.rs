@@ -88,6 +88,7 @@ pub mod compound;
 pub mod cores;
 pub mod decide;
 pub mod enclosure;
+pub mod energy;
 pub mod enfold;
 pub mod flows;
 pub mod formation;

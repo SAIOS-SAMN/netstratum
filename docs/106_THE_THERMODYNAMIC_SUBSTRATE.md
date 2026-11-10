@@ -7,7 +7,7 @@ and pressure are residues of it, so there is no restoring force and no
 stable equilibrium; the substrate supplies the restoring force (hydrostatic
 balance).
 
-**Status:** S3 built (§2, the hydrostatic balance as the restoring law, in
+**Status:** S1 read only (`conductor::energy`, docs/122 step 1, 2026-11-10); S3 built (§2, the hydrostatic balance as the restoring law, in
 `flows::restoring` and `flows::fluid`); S1, S2, S4 and S5 open. Thermal
 pressure reads agitation as the heat until S2 makes heat state.
 
