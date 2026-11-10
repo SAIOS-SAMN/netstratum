@@ -862,6 +862,16 @@ is, a component on the plane between the leading and lagging planes.
 
 #### 11.7.7 Open
 
+0. **Read 2026-11-11 (#167, draft): the build is refuted as it stands.** On
+   the 2^40 founding over 580 bells, motes carrying `G` gave 7 stars against
+   14, none keeping hydrogen against 11 of 12, 3.5× the motes, and heat
+   unaccounted at −12.7% of the named against −0.46%. The three spatial
+   planes' dispersions stayed identical. Composition couples planes that
+   already differ and never makes them differ: the founded `G` is
+   isoclinic and the rates are isotropic, so both lie on the diagonal and
+   commute, and a one-grain lean is too small to grow. What drives the
+   planes apart is still to be derived (the founding, the tilt or each
+   plane's response), and so is item 1's map. #157 stays open.
 1. **The map between the fixed points.** `b = H/R` is the one
    linear-fractional map through rest, the rim and the throat. If the read
    shows the `2/π` slowing far out is wrong for the orbits, the motion law's
