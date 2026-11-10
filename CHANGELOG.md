@@ -12,6 +12,11 @@ change is named here.
 
 ### Added
 
+- `conductor::orientation` (#117 step 2a, docs/117 §11.7, EQUATIONS E57):
+  the orientation held as the generator `G` over six elliptic planes with
+  windings `K` per plane; the rate a ring `b = δ/(1 − δ)`; the whole
+  advance through `conductor::turning`; the L1 reading `g/(1 + |g|)` the
+  laws act on. Not yet carried by motes or bodies.
 - `conductor::turning` (#117 step 1, docs/117 §11.2–§11.3): the exact
   Clifford value over ℚ with the signature as data, and the Cayley motion
   `R = (1 + B)(1 − B)⁻¹`, its generator and the composition `R₁R₂`. An

@@ -65,6 +65,7 @@ use std::path::Path;
 pub mod civic;
 pub mod coordinate;
 pub mod coupling;
+pub mod orientation;
 pub mod torsion;
 pub mod turning;
 // docs/61 G1 — a line's place about its core, in closed form.
