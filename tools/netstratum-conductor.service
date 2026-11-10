@@ -1,10 +1,10 @@
 # Example deployment unit: paths assume a checkout at /opt/netstratum; adjust
 # WorkingDirectory and ExecStart to the local clone before installing.
-# The board's heartbeat — G2, Netstratum's fresh universe (docs/57_GENESIS_G2.md).
+# The board's beat — G2, Netstratum's fresh universe (docs/57_GENESIS_G2.md).
 # Civilizations found, think, trade and cleave in var-g2; the archive (var/)
 # is never touched. The network link is netstratum-follow.service, not this.
 [Unit]
-Description=netstratum conductor (G2 universe heartbeat)
+Description=netstratum conductor (G2 universe beat)
 [Service]
 WorkingDirectory=/opt/netstratum
 Environment=NETSTRATUM_PROFILE=1

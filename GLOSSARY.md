@@ -84,7 +84,7 @@ and releases are exchanged under the inversion `δ ↦ 1 − δ`.
 | **binding** | Matter on one band of a disc bound into one body, where its bond meets its heat and the tide across it. | `flows::band_pairs` |
 | **bond** | A binding's strength, `λ/(1 + λ)` with `λ = 2(m + μ + τ)/R`: holding, open-frame magnetism and twist over reach (docs/103 composes it from all layers). | `formation::bond`, docs/103 |
 | **shell / stretch** | A ring of a galaxy's gas, and a span of it that can collapse. | `formation::Shell`, `formation::Stretch` |
-| **heart / ignition** | A collapsing binding's centre; it ignites as a star where it holds against its own heat. | `formation.rs` |
+| **star core / ignition** | A star's core (astronomy's stellar core): a collapsing binding's centre, where it holds its matter and burns; it ignites as a star where it holds against its own heat. Distinct from the universal core (docs/101). Formerly "heart". | `formation.rs` |
 | **remnant** | A star whose burn has ended. Its extent is re-read without heat: within its equator its throat opens and it is a core whose tube's other face is its galactic core; outside, it stays closed. | `Body::remnant`, docs/111 §3.2 |
 | **recycling** | Shed and spent matter returns through the cores and the ocean; total mass never changes. | `recycle.rs`, `ocean.rs` |
 | **heat** (of a world) | The agitation of the bonds that built it, cooling through its unlocked face; its thermal band `r(1 ± heat)` decides which neighbours it meets. | `Body::heat` |
@@ -96,7 +96,7 @@ and releases are exchanged under the inversion `δ ↦ 1 − δ`.
 | **world** | One playable planet with its own chronicle. | `engine/cfe/src/world/` |
 | **orb** | A self-contained game object with provenance (NS-1 DOP): a colony, sector or profile. | `engine/cfe/src/dop.rs` |
 | **line** / **civilization** | A people playing one or more worlds, with its axes (disposition, metabolism, perception). | `ledger::registry`, `conductor::polities` |
-| **beat** | One heartbeat of the conductor: every world is played and ticked once. | `conductor/src/main.rs` |
+| **beat** | One cycle of the conductor: every world is played and ticked once. | `conductor/src/main.rs` |
 | **receipt** | The NS-3 record of one completed action, linked to its predecessor. | `engine/cfe` |
 | **chronicle** | A world's append-only sequence of receipts; it is the world's state of record. | `engine/cfe` |
 | **update function** | `kernel::admits(prior, next, step)`: decides whether a step lawfully produces `next` from `prior`. | `engine/kernel/src/lib.rs` |

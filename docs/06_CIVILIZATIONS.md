@@ -84,7 +84,7 @@ hyper-thermal 600–1500°) or a cross-band deep regime (mantle, deep rock).
   of ages.
 - **Physiology:** a distributed sub-surface collective inhabiting the pore
   spaces of solid rock, signalling by ultra-slow chemical/electronic
-  gradients; an eon-scale metabolism (a heartbeat of a century) that drops to
+  gradients; an eon-scale metabolism (a beat of a century) that drops to
   a zero-energy dormancy under cold or drought and cannot be starved out.
 - **Band / regime:** deep rock / moons (cross-band, buffered from surface
   flux).

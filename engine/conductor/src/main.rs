@@ -1,4 +1,4 @@
-//! The conductor binary — the board's heartbeat.
+//! The conductor binary — the board's beat.
 //!
 //! Usage:
 //!   conductor [--var var] [--cycles N] [--cadence seconds] [--fold]
@@ -219,7 +219,7 @@ fn main() {
         if cycles == 0 {
             format!("beating every {cadence_secs}s (Ctrl-C to stop)")
         } else {
-            format!("running {cycles} heartbeats")
+            format!("running {cycles} beats")
         }
     );
     // Block-buffered stdout under systemd otherwise sits on this line for
@@ -461,8 +461,8 @@ fn main() {
                 _ => "none".to_string(),
             };
             println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {}, gas {} of the universe in {motes} motes; coupling κ {kappa}", universe.cores.len(), f(&discs), f(&gas_share));
-            // The heartbeat observer (docs/83): each star's interface burn
-            // on the rings it has received since its heart formed (its
+            // The burn observer (docs/83): each star's interface burn
+            // on the rings it has received since its star core formed (its
             // nested clock: the galaxy's rate times its orbit's).
             let mut lives: Vec<cfe::ratio::Ratio> = Vec::new();
             let (mut burning, mut spent) = (0usize, 0usize);
@@ -511,7 +511,7 @@ fn main() {
             }
             lives.sort();
             if let (Some(a), Some(b)) = (lives.first(), lives.last()) {
-                println!("beat {beat}: HEARTBEAT — {burning} stars burning, {spent} spent; lifetimes {}..{} bells (median {})", f(a), f(b), f(&lives[lives.len() / 2]));
+                println!("beat {beat}: BURN — {burning} stars burning, {spent} spent; lifetimes {}..{} bells (median {})", f(a), f(b), f(&lives[lives.len() / 2]));
             }
             println!("beat {beat}: ENCLOSURES — {} galaxies on S^360 (own rings {gs}), {} systems on S^60 (own rings {ss}); {inversion}", gal.len(), sys.len());
         }
@@ -1402,7 +1402,7 @@ fn main() {
         "COGNITION-1/2 probe: {choice_points} genuine settlement choices, {lookahead_decided} decided by the lookahead"
     );
     println!(
-        "era complete: {beat} heartbeats, {} civilizations live",
+        "era complete: {beat} beats, {} civilizations live",
         worlds.len()
     );
 }

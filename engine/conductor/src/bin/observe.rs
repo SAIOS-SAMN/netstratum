@@ -4,12 +4,12 @@
 //! `observe [--var var-e1] <view> [args]`, views:
 //! - `universe`               the whole: galaxies, stars, worlds, gas, ledger
 //! - `galaxy G`               one galaxy: its core, disc, gas, systems, clock
-//! - `star G S`               one star: matter, orbit, heartbeat, coupling
+//! - `star G S`               one star: matter, orbit, burn, coupling
 //! - `world G S W`            one world: matter, orbit, what it offers life
 //! - `gas G [bell]`           a galaxy's gas, stretch by stretch: why it
 //!   does or does not collapse
 //! - `formation`              each galaxy's cut, gas, echo and stars
-//! - `heartbeat`              every star's burn: fuel left, life, light
+//! - `burn`                   every star's burn: fuel left, life, light
 //! - `worlds`                 every world "held down to Z" (the planetary
 //!   cores' cut): how many worlds hold down to each
 //! - `clock`                  the keepers, epicenter to rims; the time
@@ -201,10 +201,10 @@ fn main() {
             println!("  orbit: reach {}, period {} rings, spin ℓ {}; clock {}, {received} rings received since birth", f(&sys.radius), f(&sys.period), f(&sys.ell), f(&rate));
             match formation::burn(&sys.kept, &(pulse::mass(&sys.kept) / pulse::mass(&sys.total())), 1, &ratio(1, 1)) {
                 Some((feed, light)) => match conductor::compound::after(&feed, received).and_then(|left| conductor::compound::read(&ratio(1, 1), &left, f)) {
-                    Some(left) => println!("  HEARTBEAT: each received ring fuses {} of the fuel that remains; fuel left {left}; light {} per received ring", f(&feed), f(&light)),
-                    None => println!("  HEARTBEAT: refused: the burn's share lies outside the whole"),
+                    Some(left) => println!("  BURN: each received ring fuses {} of the fuel that remains; fuel left {left}; light {} per received ring", f(&feed), f(&light)),
+                    None => println!("  BURN: refused: the burn's share lies outside the whole"),
                 },
-                None => println!("  HEARTBEAT: no hydrogen fuel"),
+                None => println!("  BURN: no hydrogen fuel"),
             }
             println!(
                 "  coupling κ {}",
@@ -729,7 +729,7 @@ fn main() {
                 let share = h_s.clone();
                 if s.satellites.iter().any(|w| w.born == 0) {
                     println!(
-                        "  HOST star {:?}: {}, heart {:?}",
+                        "  HOST star {:?}: {}, star core {:?}",
                         s.path,
                         if s.remnant { "a REMNANT" } else { "burning" },
                         s.kept.keys().take(4).collect::<Vec<_>>()
@@ -922,10 +922,10 @@ fn main() {
             );
             let _ = total;
         }
-        "hearts" => {
-            // What a galaxy's stars hold: each heart's top kinds by share.
+        "star-cores" => {
+            // What a galaxy's stars hold: each star core's top kinds by share.
             let Some(i) = num(1).and_then(galaxy) else {
-                return println!("hearts G");
+                return println!("star-cores G");
             };
             for s in u.cores[i].satellites.iter().take(8) {
                 let m = pulse::mass(&s.kept);
@@ -944,7 +944,7 @@ fn main() {
                     })
                     .collect();
                 println!(
-                    "  star born {} remnant {} heart {}: {}",
+                    "  star born {} remnant {} star core {}: {}",
                     s.born,
                     s.remnant,
                     f(&m),
@@ -1007,7 +1007,7 @@ fn main() {
                 e.1 += pulse::mass(&o.kept) / unit.clone();
             }
             println!("WORLDS at beat {now}: {n} (and {companions} grown bodies ignited as companion stars), by the lightest kind each holds (hold, Z: worlds, their holding)");
-            // The hearts' share of their systems (what each star holds of
+            // The star cores' share of their systems (what each star holds of
             // all it and its worlds and belts hold): with worlds vs without.
             let mut shares: Vec<(Ratio, bool)> = u
                 .cores
@@ -1032,7 +1032,7 @@ fn main() {
                 _ => "—".to_string(),
             };
             println!(
-                "  heart share of its system (min/median/max): with worlds {}, without {}",
+                "  star core share of its system (min/median/max): with worlds {}, without {}",
                 q(&with),
                 q(&without)
             );
@@ -1043,7 +1043,7 @@ fn main() {
                 );
             }
         }
-        "heartbeat" => {
+        "burn" => {
             for (i, c) in u.cores.iter().enumerate() {
                 for (k, sys) in c.satellites.iter().enumerate() {
                     let rate = system_rate(&u, i, k, &unit);
@@ -1254,7 +1254,7 @@ fn events(n: usize) {
         "A MIND WAKES",
         "COLLAPSE",
         "FORMATION",
-        "HEARTBEAT",
+        "BURN",
         "LEDGER",
         "ENCLOSURES",
         "BREATH",

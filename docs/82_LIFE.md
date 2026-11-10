@@ -359,7 +359,7 @@ every world and lifeform by the same formula.
 **Owed to test it:** worlds forming under the flows (0 in the current
 reads: read 2026-10-17 with Xylarium, the founding's capture phases put odd
 and even Z on the loop's opposite legs, and with only two planes staged the
-stars form from one parity group, single-kind hearts holding everything;
+stars form from one parity group, single-kind star cores holding everything;
 both nodes read worlds as waiting on Mycelium's n-dimensional source, the
 per-plane phases on S^60/S^360 mixing kinds that share most planes, not on
 a law change); worlds carrying their phases and locks (the star's bell is built);

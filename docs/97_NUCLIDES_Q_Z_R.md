@@ -207,8 +207,8 @@ there (28, 208, 1092), the abundance peaks read off the process. Every capture
 draws one hydrogen nucleus, so nucleons are conserved exactly.
 
 - **The slow capture (in a burning star):** each ring its clock receives, every
-  nuclide w its heart holds passes `f_H·c·σ_{w+1}` of itself to w + 1, f_H
-  hydrogen's share of the heart's nuclei, c the star's coherence with the echo
+  nuclide w its star core holds passes `f_H·c·σ_{w+1}` of itself to w + 1, f_H
+  hydrogen's share of the star core's nuclei, c the star's coherence with the echo
   (`nuclides::capture_slow`).
 - **The rapid capture (at a star's death):** the matter a star returns whole
   (spent or decohered) runs the chain at once, each weight in turn passing
@@ -234,8 +234,8 @@ read on the body's own clock.
   most; unsealed heavy ones part first. A nuclide holds while `a < ½·κ_w`.
 - **The bounce's seal window** is where deuterium (κ = 1) first holds on the
   source's clock: `ν·δ − 1 = ½`, δ = 3/(2ν) (¾ at ν = 2), now read, never set.
-- **A dying star's release:** each nuclide of its heart whose grip its heart's
-  heat exceeds (`a = ν_star·h_s − 1`, ν_star its own clock, h_s its heart's
+- **A dying star's release:** each nuclide of its star core whose grip its star core's
+  heat exceeds (`a = ν_star·h_s − 1`, ν_star its own clock, h_s its star core's
   share, its deficit at its centre) breaks into its nucleons; they are the
   rapid capture's fuel for the rest. Nucleons conserved.
 
@@ -297,8 +297,8 @@ of p. Read at the body's own phase instead:
   this echo, `ν = 2·r_echo/T_u` (the 2 the double pass: each ring is read on
   both legs of the loop), never `2·rate`.
 
-The founding, the slow and rapid captures, and a dying heart's release all
-read h at their own p. A heart in step with its echo (p near 0) holds its
+The founding, the slow and rapid captures, and a dying star core's release all
+read h at their own p. A star core in step with its echo (p near 0) holds its
 electrons bound (R → κ_e) and climbs further; one slipping toward the
 opposite face frees them (R < 0) and its captures part.
 

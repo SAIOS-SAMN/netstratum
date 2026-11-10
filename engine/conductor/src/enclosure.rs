@@ -50,7 +50,7 @@ impl Enclosure {
 /// The rim law (operator 2026-10-16, with Xylarium): an enclosure's rim, its
 /// half circumference where the pulse refocuses, is its own holding, where the
 /// vacuum's hold equals the continuum's push (deficit ½, as at the throat):
-/// a galaxy's its core's state plus its grains, a star system's its heart's
+/// a galaxy's its core's state plus its grains, a star system's its star core's
 /// state (its grains) plus its grains. With the state equal to the grains,
 /// every enclosure spans [throat 1, rim 2] of its own units.
 fn rim_of(centre: &Body, galaxy: bool, unit: &Ratio) -> Option<Ratio> {

@@ -285,19 +285,19 @@ bells 300 to 3,540) the gas that has cooled enough is partitioned by the
 galaxy's shear into bindings (`⌊W/w*⌋`, by the echo's coherent share), and
 each binding ignites:
 
-- **The quantum heart** (with Xylarium): a star is the core's
+- **The quantum star core** (with Xylarium): a star is the core's
   pair one tier down, a containment ring at its centre holding its body's
   grains as one ring of its own. A collapsing binding runs away to the
-  throat condition `w = m` (deficit ½), where the heart forms, and the star
+  throat condition `w = m` (deficit ½), where the star core forms, and the star
   holds `(1 − 2a)/(1 + 2a)` of its binding (a the agitation at ignition); at
   `a ≥ ½` light pushes back first and the binding stays gas.
 - **The coupling, derived** (derived, never set at founding): read at
-  each star's interface, its heart's hold (the star's share of the
+  each star's interface, its star core's hold (the star's share of the
   universe's holding on the core's clock) against its atoms' charge hold
   (each nucleus's outer band's enclosed charge, over its nuclei):
   `κ = (star_hold / universe_hold) / Σ nuclei·Q_out`. The universe's nucleus
   count survives in it. Read in the formation observer line; it enters
-  fusion's yield and burn (the heartbeat, with Xylarium, next), not the
+  fusion's yield and burn (the burn, with Xylarium, next), not the
   star's size.
 - **Atom size** (the opacity question) is set aside: a star's size comes
   from ignition and its binding (where it stands), not opacity.
@@ -316,21 +316,21 @@ holding (H + H → He: holding +2, magnetism −2); unpairing transduces holding
 into magnetism (He + He → Be: holding −2, magnetism +2). The light a fusion
 releases is the transduction's flux through the continuum face, never
 mass. The ledger line carries magnetism and the conserved sum
-(`pulse::magnetism`). Open: the burning rate (the heartbeat, with
+(`pulse::magnetism`). Open: the burning rate (the burn, with
 Xylarium); transmutation against Mycelium's element account (nuclei per Z
 as granted).
 
-**Resolved and built (2026-10-16).** The heartbeat (with Xylarium): a
-star burns at its interface, the share `κ·n_star = s_star/Q̄` its heart's
+**Resolved and built (2026-10-16).** The burn (with Xylarium): a
+star burns at its interface, the share `κ·n_star = s_star/Q̄` its star core's
 gravity reaches against its atoms' charge; each received ring feeds the
 fuel's open share e of it, held as halvings (`⌈Q̄/(e·s_star)⌉` rings a
 halving); heavier stars burn faster, deeper ones faster still; the share is
 scale-free and the absolute rate comes through the ring flow. Built for the
-first rung, H + H → He, on each echo (`formation::heartbeat`; a star's birth
+first rung, H + H → He, on each echo (`formation::burn`; a star's birth
 bell persisted). Transmutation (Mycelium, 78.155b): the element account
 stays the crossing record; fusion is the universe's own physics, never
 reported; a crossing out is checked by nucleon and Z-weighted totals only.
-Observers: heartbeat (burning, spent, lifetimes) and the ledger's
+Observers: burn (burning, spent, lifetimes) and the ledger's
 mass + magnetism.
 
 ### Built offline after the host crash (2026-10-16; services kept down)
@@ -794,7 +794,7 @@ small star on the outer rim.
 
 - **A spent star becomes a remnant** (option (a)), so that the stars' recycling stays as complete as possible and the universe is self-sustaining. A closed star falls to its throat condition and becomes
   a small throat whose other face is its own galactic core. What falls in
-  comes out in the core's jetstream. It closes when the heart's push no
+  comes out in the core's jetstream. It closes when the star core's push no
   longer meets its hold (the ignition test read backwards), never at exact
   zero flux. Its throat is its own pinch, read from its push, never from its
   held share. Released worlds re-anchor to the anchor's system. Built by

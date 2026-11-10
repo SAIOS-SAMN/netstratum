@@ -150,7 +150,7 @@ pub struct Stretch {
     /// Its magnetism per unit reach (`μ = Σ λ_z·e_z`, e_z a kind's open
     /// share, unpaired over hold): the open frames that attract each other in
     /// free gas, opposite spins pairing (operator: "full spin magnetism
-    /// attractors in the gases"; the antipole of the heart's push on them).
+    /// attractors in the gases"; the antipole of the star core's push on them).
     pub mu: Ratio,
     pub agitation: Ratio,
     /// The members' holding shares of this stretch: (shell index, holding).
@@ -313,15 +313,15 @@ pub fn crest_collapse(
     Some((w, count))
 }
 
-/// Ignition, the quantum heart (operator 2026-10-15; with Xylarium): a
+/// Ignition, the quantum star core (operator 2026-10-15; with Xylarium): a
 /// star is the core's pair one tier down, a containment ring at its centre
-/// (its heart) holding its body's grains as one ring of its own, at reach =
+/// (its star core) holding its body's grains as one ring of its own, at reach =
 /// hold. A collapsing binding runs away (its deficit `m/(w + m)` rising as its
-/// width falls) to the throat condition `w = m`, deficit ½, where the heart
-/// forms. There `λ = 1`, and the largest part that holds about the heart
+/// width falls) to the throat condition `w = m`, deficit ½, where the star core
+/// forms. There `λ = 1`, and the largest part that holds about the star core
 /// (`½ ≥ a + x/(x + m)`) is `x* = m (½ − a)/(½ + a)`: the star holds the
 /// share `(1 − 2a)/(1 + 2a)` of its binding, a the agitation at ignition.
-/// None at `a ≥ ½`: light pushes back before the heart forms.
+/// None at `a ≥ ½`: light pushes back before the star core forms.
 pub fn ignition_share(agitation: &Ratio) -> Option<Ratio> {
     let half = ratio(1, 2);
     (*agitation < half).then(|| {
@@ -331,7 +331,7 @@ pub fn ignition_share(agitation: &Ratio) -> Option<Ratio> {
 }
 
 /// The coupling, derived at a star's interface (operator 2026-10-15): its
-/// heart's hold against its atoms' charge hold. Gravity is the star's share
+/// star core's hold against its atoms' charge hold. Gravity is the star's share
 /// of the universe's holding on the core's clock (`star_hold / universe_hold`,
 /// the weights `atom::hold`); charge is each nucleus's outer band's enclosed
 /// charge, counted over the star's nuclei (`nuclei_per_grain` a grain). So
@@ -368,7 +368,7 @@ pub fn product(z: u32) -> Option<crate::chem::Kind> {
 
 /// Tunnelling through the barrier (docs/99 §2.5): the barrier is the charge
 /// the two nuclei bring, their protons `Q + Q` (docs/97: the charge is Q, the
-/// weight w = Q + Z), and the heart's hold (1, regenerated) tunnels it by its
+/// weight w = Q + Z), and the star core's hold (1, regenerated) tunnels it by its
 /// pair share, `τ = 1/(1 + 2Q(w))`: H + H 1/3, He + He 1/5.
 pub fn tunnelling(w: u32) -> Option<Ratio> {
     Some(ratio(1, 1 + 2 * i64::from(crate::nuclides::protons(w)?)))
@@ -378,7 +378,7 @@ pub fn tunnelling(w: u32) -> Option<Ratio> {
 /// rung fusing fuel Z into 2Z:
 /// - the barrier is the charge the two nuclei bring, `Z + Z` (enclosed
 ///   charges add; never `Z·Z`, a reading times itself);
-/// - Tunnelling is the heart's hold against it, a pair share,
+/// - Tunnelling is the star core's hold against it, a pair share,
 ///   `τ = h/(h + 2Z)` (h = 1 regenerated): H + H 1/3, He + He 1/5;
 /// - the driver is the magnetism the reaction transduces (3Z conserved),
 ///   `|Δm|/3Z_product`: H + H → He closes 2 of 6, 1/3; He + He → Be opens 2
@@ -387,7 +387,7 @@ pub fn tunnelling(w: u32) -> Option<Ratio> {
 ///   holding (operator: every share is read in the body's own enclosure; a
 ///   star is a tiny part of the universe, a large part of its galaxy, the
 ///   greater part of its system), never of the universe's;
-/// - its RHYTHM the heart's coherence c with the echo (a reading of phase).
+/// - its RHYTHM the star core's coherence c with the echo (a reading of phase).
 ///   Each received ring fuses the share `feed = (|Δm|/3Z_p)·τ·s/Q̄·c` of the
 ///   fuel that remains, compounding (`crate::compound`): n rings leave
 ///   `(1 − feed)^n` of it. The light per received ring is the transduced flux,
@@ -443,15 +443,15 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
 
 /// A star's system AT ignition (docs/83; planets from the star's own disc):
 /// in the binding's own units (holding 1, its ignition extent w = m = 1), the
-/// heart holds the star, the share `x* = (½ − a)/(½ + a)` within reach x*;
-/// what lies between the heart's reach and the binding's edge, `[x*, 1]`, is
+/// star core holds the star, the share `x* = (½ − a)/(½ + a)` within reach x*;
+/// what lies between the star core's reach and the binding's edge, `[x*, 1]`, is
 /// the star's disc (the binding's own mix, `λ = 1`), anchored on the star
 /// (H = x*). It fragments by the same collapse test (`collapse`): as many
 /// worlds of holding `w*` as fit, standing at their places in the annulus;
 /// what does not fragment stays as the system's medium (its belts). Read in
 /// the transition units by the binding's holding; orbits by the motion law.
-/// The heart's cut, one law for a star and a world (with Xylarium; W1–W4):
-/// a heart pushes by the electromagnetic repulsion gripping open frames, at
+/// The star core's cut, one law for a star and a world (with Xylarium; W1–W4):
+/// a star core pushes by the electromagnetic repulsion gripping open frames, at
 /// full amplitude in its own units (½, regenerated; its state holds 1), so
 /// kind z is carried `ℓ_z = p·(e_z/ē)·(w̄/w_z) + turning`, the turning the
 /// place adds to every kind alike (a star's convection circulation; a
@@ -477,7 +477,7 @@ pub fn open_mass(m: &Manifest, heat: &Ratio) -> Ratio {
 }
 
 /// A mix with every molecule broken back to its parts (the chemistry layer:
-/// what a hot heart does). Charge and the 3Z ledger are unchanged.
+/// what a hot star core does). Charge and the 3Z ledger are unchanged.
 pub fn dissociate(m: &Manifest) -> Manifest {
     let mut out = Manifest::new();
     for (k, a) in m {
@@ -502,7 +502,7 @@ pub fn agitation_of(ignition: &Ratio) -> Ratio {
     (ratio(1, 1) - x.clone()) / (ratio(2, 1) * (ratio(1, 1) + x))
 }
 
-/// Each kind's carried spin in a heart's binding (own units), the push on its
+/// Each kind's carried spin in a star core's binding (own units), the push on its
 /// open frames plus the place's turning: `ℓ_z = p·(e_z/ē)·(w̄/w_z) + turning`.
 pub fn carried(
     binding: &Manifest,
@@ -538,7 +538,7 @@ pub fn carried(
         .collect()
 }
 
-pub fn heart_cut(
+pub fn star_core_cut(
     binding: &Manifest,
     turning: &Ratio,
     heat: &Ratio,
@@ -549,7 +549,7 @@ pub fn heart_cut(
         return None;
     }
     let open_mean = open_mass(binding, heat) / total.clone();
-    // Regeneration (operator ruling (i), with Xylarium): the heart pushes
+    // Regeneration (operator ruling (i), with Xylarium): the star core pushes
     // at full amplitude in its own units, its pair's ½; a tide enters as
     // agitation, never as a weaker push, or it would be counted twice.
     let push = ratio(1, 2);
@@ -578,7 +578,7 @@ pub fn heart_cut(
         })
         .collect();
     kinds.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
-    // No throat, no STATE (operators 2026-10-17, with Xylarium): a heart
+    // No throat, no STATE (operators 2026-10-17, with Xylarium): a star core
     // (torsion) and a planetary core (magnetism) have no bounce, so they
     // hold only by what they have gathered, `H = held`; the state holds only
     // at a throat (the universal and galactic cores). The held set is
@@ -594,7 +594,7 @@ pub fn heart_cut(
     loop {
         let mut changed = false;
         for (i, (_, ell, share)) in kinds.iter().enumerate() {
-            // Held where the heart's deficit at the kind's reach meets its
+            // Held where the star core's deficit at the kind's reach meets its
             // push: `H/(R + H) ≥ p`, `R = ℓ/H` (the deficit law; never a
             // reach against the hold's own square).
             let lost = held.is_zero() || {
@@ -626,8 +626,8 @@ pub fn heart_cut(
 }
 
 /// The PLANET keeps its layers (with Xylarium, c0dbfae; 11.0 (16)): a world's
-/// layers are a reading of its kept mix by its own cut (`heart_cut`, the
-/// heart's push ½, its heat the turning, its atoms whole). The core's held
+/// layers are a reading of its kept mix by its own cut (`star_core_cut`, the
+/// star core's push ½, its heat the turning, its atoms whole). The core's held
 /// kinds stand at the centre; each other kind at `R_z = ℓ_z/H` in the
 /// planet's own unit (H the held share, no throat), spread `R_z(1 ± ½)`. The
 /// share within its edge stays bound (mantle, crust, the lightest bound
@@ -638,7 +638,7 @@ pub fn layer_bands(
     kept: &Manifest,
     heat: &Ratio,
 ) -> Option<(Vec<(crate::chem::Kind, Ratio, Ratio)>, Ratio)> {
-    let (core, _, h) = heart_cut(kept, heat, &ratio(0, 1))?;
+    let (core, _, h) = star_core_cut(kept, heat, &ratio(0, 1))?;
     if h.is_zero() {
         return None;
     }
@@ -674,7 +674,7 @@ pub fn struck_bands(
     heat: &Ratio,
     strike: &Ratio,
 ) -> Option<(Vec<(crate::chem::Kind, Ratio, Ratio, Ratio)>, Ratio)> {
-    let (core, _, h) = heart_cut(kept, heat, &ratio(0, 1))?;
+    let (core, _, h) = star_core_cut(kept, heat, &ratio(0, 1))?;
     if h.is_zero() {
         return None;
     }
@@ -931,11 +931,11 @@ pub fn lightest(m: &Manifest) -> Option<crate::chem::Kind> {
 }
 
 /// A star's system AT ignition (docs/91: the disc from the collapse, the wind
-/// from the heart): `binding` is what fell into the heart (`collapse`), `outside`
+/// from the star core): `binding` is what fell into the star core (`collapse`), `outside`
 /// the members that did not, each with its distance in its orbit's plane and
 /// its offset on its orthogonal orbit in the system's units, `whole` the
 /// whole binding's holding (the system at
-/// ignition). The heart is cut in the fallen matter's own units; every
+/// ignition). The star core is cut in the fallen matter's own units; every
 /// crossing between those units and the system's is read as a product of
 /// two readings, each moved once (no square, operator 2026-10-23): a reach
 /// as a length by λ, the fallen share, and a hold read in the frame it lands
@@ -951,17 +951,17 @@ pub fn system(
     path: &[u64],
     tide: &Ratio,
 ) -> Option<(Manifest, Manifest, Ratio, Vec<crate::flows::Mote>)> {
-    // Ignition: a binding at a ≥ ½ never forms a heart.
+    // Ignition: a binding at a ≥ ½ never forms a star core.
     ignition_share(agitation)?;
-    // The heart's torsion, the cut one tier down (operator, with Xylarium,
-    // 2026-10-16): a heart has no bounce but twists; its push is the
+    // The star core's torsion, the cut one tier down (operator, with Xylarium,
+    // 2026-10-16): a star core has no bounce but twists; its push is the
     // electromagnetic repulsion, which grips the open frames (the magnetic
-    // moments). In the binding's own units (its grains hold 1, the heart's
+    // moments). In the binding's own units (its grains hold 1, the star core's
     // state holds 1) the push share is the pair law's ½ restarted at the
     // star's point (`½·ρ_sys`), and each kind is carried
     // `ℓ_z = p·(e_z/ē)·(w̄/w_z)` (e_z its open share, unpaired over
     // hold; ē the binding's). Read in order of the spin carried (the noble
-    // first: carried none), the heart's hold grows, `H = 1 + held`, and a
+    // first: carried none), the star core's hold grows, `H = 1 + held`, and a
     // kind is held in the star where it stands within its hold,
     // `R_z = ℓ_z/H ≤ H`; past it, it is the disc, spun to orbit. One
     // crossing on the cumulative hold. A binding with no open frames (ē = 0)
@@ -985,19 +985,19 @@ pub fn system(
             a + w.clone() * r.clone() * (h.clone() / lambda.clone())
         }) / fw
     };
-    // The new heart is hot: its heat strips the loosest windings (hydrogen
+    // The new star core is hot: its heat strips the loosest windings (hydrogen
     // first), so it keeps its fuel.
-    // The newborn heart is hot (ruling of 2026-10-18, the recommendation
+    // The newborn star core is hot (ruling of 2026-10-18, the recommendation
     // approved): its turning in whole turns of its bell, at most one;
-    // a heart that rings strips what is held as loosely as hydrogen's lone
+    // a star core that rings strips what is held as loosely as hydrogen's lone
     // electron, so it keeps its hydrogen to burn.
     let ionizing = ratio(1, 1);
     let _ = agitation;
-    // Dissociation (the chemistry layer): the hot heart breaks every molecule
+    // Dissociation (the chemistry layer): the hot star core breaks every molecule
     // back to its parts (hydrogen's winding, tightness 1, is stripped), so a
     // star never holds molecules and its hydrogen is fuel.
     let binding = &dissociate(binding);
-    let (star, disc, held_f) = heart_cut(binding, &circulation_f, &ionizing)?;
+    let (star, disc, held_f) = star_core_cut(binding, &circulation_f, &ionizing)?;
     let held = mass(&star) / total.clone();
     // The star's hold, gathered (no throat): `H_s = held`, a share of the
     // binding; the disc is the rest, `1 − H_s`, over the annulus from the
@@ -1025,17 +1025,17 @@ pub fn system(
     let flux = crate::polarity::faces_on(tide, crate::polarity::Axis::Open).1 * unlocked;
     let disc_agitation = (heat + flux).max(agitation.clone());
     // Worlds are grown, never placed (operators 2026-10-16/17, "never place
-    // matter"; with Xylarium): the disc the heart releases becomes the
+    // matter"; with Xylarium): the disc the star core releases becomes the
     // system's own medium, motes carrying their state (each kind's carried
     // spin, the star's phases, the disc's agitation), which meet over time
     // (`collide_system`) and grow bodies. How many worlds a star holds, and
     // where, is its disc's own (operator 2026-10-21: "a random number of
     // planets attached to each star, for diversity"; 2026-10-22: by physics,
     // never a draw).
-    // The heart's released kinds leave as a spray over directions.
-    // The newborn star's push: ½ × its hot heart's open share.
+    // The star core's released kinds leave as a spray over directions.
+    // The newborn star's push: ½ × its hot star core's open share.
     // The spray leaves from the star's cool outer layers: their push (whole
-    // atoms), never the hot heart's stripped share.
+    // atoms), never the hot star core's stripped share.
     let star_push = crate::pulse::push_of(&star);
     // The disc (read first: the wind's hold counts it): what never fell, where it stands, turning at the balance of
     // its place in each plane, `ℓ = r·H(<r)` (the ring law: reach × the hold
@@ -1069,8 +1069,8 @@ pub fn system(
         }
         i = j;
     }
-    // The wind: what the heart releases leaves at the spin its cut carried it
-    // with, read in the system as two readings: its reach in the heart's units
+    // The wind: what the star core releases leaves at the spin its cut carried it
+    // with, read in the system as two readings: its reach in the star core's units
     // (`ℓ_z/H*`) moved once as a length (by λ), and the system's hold at that
     // reach (the star and the disc nearer).
     let hold_at = |r: &Ratio| {
@@ -1680,14 +1680,14 @@ fn solid(standing: bool, omega: &Ratio, r_echo: u64) -> bool {
 /// converge and they join, but only where at least one is still forming its
 /// orbit; two solid orbits never meet (`solid`).
 /// The system's loose matter starts as small bodies, each kind at the reach
-/// its heart's cut carries it to, with every world already standing; pairs
+/// its star core's cut carries it to, with every world already standing; pairs
 /// that fail the test join (all at once, then read again) until every
 /// neighbour passes. What stands is the system: the number and spacing of
 /// its worlds are outcomes, no ruler and no dice. The double pass stays:
 /// nothing rests on one leg (`M∘M = id`), so matter on the return leg inside
 /// the ring stands at its image `2H − R` through the ring (`flows::through`),
 /// the loop closing at `2H`; what lies past it leaves for the galaxy, and
-/// what the heart holds (inside its extent) returns to the star. A body whose
+/// what the star core holds (inside its extent) returns to the star. A body whose
 /// core holds nothing is no world: its matter stays the belts. Each world
 /// stands at its reach, turning at the balance there about the star and
 /// every world inside it, in closed form between events. The spin the
@@ -1740,7 +1740,7 @@ pub fn settle_system(
     {
         *mix.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
     }
-    let extent = match heart_cut(&mix, &ratio(0, 1), &ratio(0, 1)) {
+    let extent = match star_core_cut(&mix, &ratio(0, 1), &ratio(0, 1)) {
         Some((held, _, h_k)) if !h_k.is_zero() => carried(&mix, &ratio(0, 1), &ratio(0, 1))
             .into_iter()
             .filter(|(kind, _)| held.contains_key(kind))
@@ -2000,7 +2000,7 @@ pub fn settle_system(
         // the stripped is the belts.
         let (matter, stripped) = if ignites {
             (matter, Manifest::new())
-        } else if heart_cut(&matter, &heat, &ratio(0, 1))
+        } else if star_core_cut(&matter, &heat, &ratio(0, 1))
             .map(|(held, _, _)| held.is_empty())
             .unwrap_or(true)
         {

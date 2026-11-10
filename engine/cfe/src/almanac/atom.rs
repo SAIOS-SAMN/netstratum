@@ -113,7 +113,7 @@ pub fn windings(z: u32) -> Option<(Atom, Vec<Winding>)> {
 }
 
 /// Ionization by heat (operators 2026-10-18: the missing layer, "let there
-/// be light"; with Xylarium): in a hot place (a star's heart) every winding
+/// be light"; with Xylarium): in a hot place (a star's core) every winding
 /// held less tightly than the heat, both in hydrogen's own unit, is
 /// stripped (at or below), its electrons gone. Returns the open (unpaired)
 /// count of what remains. Hydrogen (tightness 1) is stripped at heat 1;
@@ -123,7 +123,7 @@ pub fn open_at(z: u32, heat: &Ratio) -> u32 {
     if *heat <= ratio(0, 1) {
         return a.unpaired;
     }
-    // Stripped AT or below the heat (operator, 2026-10-18): a heart that
+    // Stripped AT or below the heat (operator, 2026-10-18): a star core that
     // rings strips what is held as loosely as hydrogen's lone electron.
     let left: u64 = ws
         .iter()

@@ -69,7 +69,7 @@ light `2u(z) − u(2z)`, which shines on the core's motes (`breath::shine`).
 Unchanged matter exits sealed; changed matter cauterized with a scar. ✔
 
 **Stars are born from its gas** (`breath`, `formation`): a binding ignites
-where `ignition_share(a + ½(1 − δ))` holds; the heart cut (`heart_cut`, the
+where `ignition_share(a + ½(1 − δ))` holds; the star core cut (`star_core_cut`, the
 push ½) keeps what binds; the star's own spin is its members' spread of
 orbital spin (`Body.turning`), its phases their holding-weighted mean.
 Stars ride their galaxy (bell, gyroscope return), meet (`collide_stars`:
@@ -91,7 +91,7 @@ Outbursts, winds, remnants, decoherence. ✔
 
 ### 4. A world
 
-A world is a layered body (`Body.kept`; core by `heart_cut`, kinds in bands
+A world is a layered body (`Body.kept`; core by `star_core_cut`, kinds in bands
 `R_z(1 ± ½)`), carrying its heat (`Body.heat`, born from its disc's light and
 the unlocked face, cooling `·(1 − ½(1 − δ))` each bell). ✔ **Water is made
 here**: `layer_chemistry` closes overlapping atom bands at the layer's own

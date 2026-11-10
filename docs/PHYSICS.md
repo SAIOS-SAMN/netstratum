@@ -47,7 +47,7 @@ where era 1 does not yet provide a quantity it reads era 0's through a bridge
      (`pulse::home_push`, `pulse::galaxy_push`), star encounters
      (`formation::collide_stars`);
    - each star: its turning and place (`flows::turn`, `enfold`), settling
-     (`formation::settle_system`), its heart (`formation::heart_cut`),
+     (`formation::settle_system`), its star core (`formation::star_core_cut`),
      shedding by its faces (`polarity::faces`, `nuclides::heat`,
      `nuclides::release`, `nuclides::capture_rapid`), burning
      (`formation::burn`, `compound`, `recycle::rung_light`,
@@ -95,7 +95,7 @@ places. Reducing each to one law is planned in [PLAN.md](PLAN.md).
 | The universe's hold | `pulse::universal_state`, `pulse::universal_ledger` (the same body), `ocean::universe_hold` (normalised by core states) | |
 | The core's push | `pulse::push_of` (½·Q/(A + Q)), `pulse::push_cut` (held/(1 + held)), literal ½ at `home_push`, the collective push and the ocean's torque; ½·c/(c + 1) at `breath.rs:1872`; `flows::band` | |
 | Heat | `nuclides::heat` (max(0, ν·δ − 1)), `breath::shine` (l·(1 − δ)/M), `formation.rs:820` (heat·δ), `formation.rs:1013`, `life.rs:871` (heat × `HYDROGEN_K` in kelvin), `life.rs:852` (a star's luminosity ½(1 + M/M_home)) | |
-| Release | `nuclides::release`, the throat release (`breath.rs:1866-1890`), `recycle::recycle`, `formation::heart_cut`, the remnant drain δ/2 (`breath.rs:1006`) | |
+| Release | `nuclides::release`, the throat release (`breath.rs:1866-1890`), `recycle::recycle`, `formation::star_core_cut`, the remnant drain δ/2 (`breath.rs:1006`) | |
 | Burn and lifetime | `breath.rs:1397` (live, per rung, in phase); `main.rs:478` and `formation.rs:1009` (Z = 1, coherence 1) | The readout's lifetime is not the live burn |
 | The rim | `enclosure::rim_of`, `Enclosed::whole` (rim = H), `settle_system` (2H), `chronometry` (2 × the last satellite's radius) | `chronometry` also picks the home by kept mass, not `pulse::is_home` |
 | A ring in bells (`T_u/4`) | `breath.rs:510`, `pulse.rs:1064`, `bin/breathe.rs:341` | |

@@ -67,7 +67,7 @@ Each term in plain words, then what it is in Netstratum's laws.
 
 | | universe | galaxy | system |
 |---|---|---|---|
-| core / throat | the Wellspring | its core | its star's heart |
+| core / throat | the Wellspring | its core | its star's core |
 | bounce | the universal bell | the core's bell | the star's bell |
 | push | `½` (regenerated) | `p_g = ½·u/hold` | `p_s = ½·u/hold` |
 | tide (unlocked face) | `½(1 − δ_u)` | `½(1 − δ_g)` | `½(1 − δ_s)` |

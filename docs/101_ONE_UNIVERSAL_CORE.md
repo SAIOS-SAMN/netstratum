@@ -119,7 +119,7 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
 - **Its satellites are the galaxies; they form, never placed:** the universe
   tier's own mechanism, in the crest's grammar: where the flow on its strip
   holds a bond against its heat and the tide (`crest_collapse`, `band_pairs`
-  read in this enclosure), the flow binds; a binding whose heart reaches its
+  read in this enclosure), the flow binds; a binding whose star core reaches its
   throat condition is a galactic core (its throat the binding's matter, its
   state set then). Its composition is what was flowing there: unique by place
   and history.
@@ -135,7 +135,7 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
 | retires | folds into the universal core | stays |
 |---|---|---|
 | `pulse::cascade` (its shells, stacks, filter, beads) | `Universe.firmament` → its held cut | `pulse::founding` (the nuclides) |
-| `pulse::deploy` (placement, standing test, whole-mix, home remainder, slight beads, core rings) | `Universe.ocean` → its flows | the breath's galaxy tier (release, luminal, rings, crest, bindings, infall, heart cut) |
+| `pulse::deploy` (placement, standing test, whole-mix, home remainder, slight beads, core rings) | `Universe.ocean` → its flows | the breath's galaxy tier (release, luminal, rings, crest, bindings, infall, star core cut) |
 | `orbit_galaxies`' core rings (`inside += 2w`) | core `[0]` → its disc | the nested clocks (`galaxy_rate`, `nested`, `system_clock`) |
 | `core_state`'s 0 for the home; `home_push`; the span branch | the nine readings → one `core_state`, one enclosure | `ocean::swing`, `radial_share` (the landing, read in the single enclosure) |
 | `life::home` / `chronometry::keepers`' heaviest-kept home | — | `Universe.unit`, `densest` |

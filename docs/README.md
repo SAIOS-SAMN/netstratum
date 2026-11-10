@@ -50,7 +50,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 88 | [The equipotential figure (superseded by 89)](88_THE_GEOID.md) |
 | 89 | [One story: from the universal core to a mind, and where it breaks](89_ONE_STORY.md) |
 | 90 | [The erratic core: the orthogonal release and the first layer of order](90_ERRATIC_CORE.md) |
-| 91 | [The disc from the collapse, the wind from the heart](91_DISC_FROM_THE_COLLAPSE.md) |
+| 91 | [The disc from the collapse, the wind from the star core](91_DISC_FROM_THE_COLLAPSE.md) |
 | 92 | [The anchor network: the core held to its accretion disc, stars chained by gravity](92_THE_ANCHOR_NETWORK.md) |
 | 94 | [Particles in flow: fluid-MHD under the UMD overlay](94_PARTICLE_FLUID_MHD_UMD.md) |
 | 95 | [The spatial dimension: three planes of 3Z/3Q and R](95_SPATIAL_DIMENSION.md) |

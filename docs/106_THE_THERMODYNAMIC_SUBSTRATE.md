@@ -20,7 +20,7 @@ against ipsal-autic
 ## 0. The stack, and how Netstratum's stands inverted
 
 ```
-UMD / form           bodies, bindings, hearts, worlds       shaped by
+UMD / form           bodies, bindings, star cores, worlds       shaped by
 KINEMATICS           motion, transport, SUBSTRATE_C          propagated FROM
 THERMODYNAMICS       pressure, potential, energy             ← the substrate
 ```

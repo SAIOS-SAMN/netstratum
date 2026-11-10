@@ -80,9 +80,9 @@ unchanged (Q the proton, Z the neutron, pole = leg).
 
 ## 6. Open
 
-What refuses the galaxies' bindings (49683 members returned with no heart by
+What refuses the galaxies' bindings (49683 members returned with no star core by
 bell 1500) is measured next: `ignition_share` (heat ≥ ½) or
-`formation::system` (no heart cut).
+`formation::system` (no star core cut).
 
 ## 7. Read (2026-10-27, 2^55 grains)
 
@@ -92,7 +92,7 @@ bell 1500) is measured next: `ignition_share` (heat ≥ ½) or
 - No binding was refused at ignition (0 by `ignition_share` or
   `formation::system`). The 49683 "returned" members are bindings in which
   nothing fell (`formation::infall`): by bell 900, 59 bindings and 16876
-  members. The heart's extent reads about ½ in the binding's own units; the
+  members. The star core's extent reads about ½ in the binding's own units; the
   members' distances, the galaxy offsets times `g/m` (the galaxy's holding
   over the binding's), read 10^1–10^5: the nearest member stands a median
   118 extents out. The binding holds over its arc (the crest, `w_max` of

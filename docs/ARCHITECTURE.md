@@ -66,7 +66,7 @@ codec  kernel  ledger ◄── physics            │                    │
 | `tongue` | 0.2k | Solver programs expressed as Mycelium rule elements |
 | `hypha` (`ns-hypha`) | 4k | The uplink to a Mycelium hypha: verification and settlement with the network, and the house that seats council minds and attached minds |
 | `attach` | 0.6k | Attachment (docs/109): the interface's constants, the file exchange between the house and the conductor, and the client library an external agent uses |
-| `conductor` | 28k | The heartbeat that plays the game's civilizations, and the whole era-1 universe model |
+| `conductor` | 28k | The beat that plays the game's civilizations, and the whole era-1 universe model |
 | `clients/cli` (`netstratum-cli`) | 15k | The game client: the map, the commands, presentation only |
 | `xtask` | 0.1k | Workspace tasks |
 
@@ -173,7 +173,7 @@ request ──► inbox ──► kernel::admits(prior, next, step) ──► Ok
   the previous receipt's digest, so replaying the chronicle reproduces every
   outcome (Charter §9).
 
-### 4.2 The heartbeat
+### 4.2 The beat
 
 The `conductor` binary (`engine/conductor/src/main.rs`) runs the game. Each
 beat, for every world, it drains the steward inbox, plays the

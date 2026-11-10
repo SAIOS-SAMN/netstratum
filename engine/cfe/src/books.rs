@@ -67,7 +67,7 @@
 use crate::ratio::{ratio, Ratio};
 
 /// The four the charter keeps, in canonical order. Named here once so
-/// no other module has to know them by heart.
+/// no other module has to know them.
 pub const CHARTER_BOOKS: [&str; 4] = ["TRADE-1", "ABSORB-1", "BOND-1", "COVENANT-1"];
 
 /// The IDENTITY of A BOOK KIND — content-addressed over the normalized

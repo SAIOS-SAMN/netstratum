@@ -277,8 +277,8 @@ pub fn seal_window(nu: &cfe::ratio::Ratio) -> cfe::ratio::Ratio {
         / nu.clone()
 }
 
-/// A dying heart's release (docs/97 §11): each nuclide whose grip at the
-/// heart's pulse phase `p` its heat exceeds breaks into its nucleons, standing as hydrogen (the exchange
+/// A dying star core's release (docs/97 §11): each nuclide whose grip at the
+/// star core's pulse phase `p` its heat exceeds breaks into its nucleons, standing as hydrogen (the exchange
 /// returns their neutrons to the continuum): the fuel of the rapid capture.
 /// Nucleons conserved. Returns the nucleons released.
 pub fn release(
@@ -360,12 +360,12 @@ fn climb(m: &mut crate::pulse::Manifest, w: u32, share: &cfe::ratio::Ratio) -> c
 }
 
 /// The slow capture (docs/97 §10): over `rings` rings of a burning star's
-/// clock at coherence `c` and pulse phase `p`, every nuclide its heart holds passes
+/// clock at coherence `c` and pulse phase `p`, every nuclide its star core holds passes
 /// `f_H·c·σ_{w+1}` of itself to `w + 1` each ring (read at the ring's start,
 /// heaviest first so no nucleus climbs twice in one ring), f_H hydrogen's
-/// share of the heart's nuclei. Nucleons conserved. Returns the nuclei moved.
+/// share of the star core's nuclei. Nucleons conserved. Returns the nuclei moved.
 pub fn capture_slow(
-    heart: &mut crate::pulse::Manifest,
+    star_core: &mut crate::pulse::Manifest,
     rings: u64,
     c: &cfe::ratio::Ratio,
     p: &cfe::ratio::Ratio,
@@ -375,22 +375,22 @@ pub fn capture_slow(
     use num_traits::Zero;
     let mut moved = ratio(0, 1);
     for _ in 0..rings {
-        let count = heart.values().fold(ratio(0, 1), |s, a| s + a.clone());
+        let count = star_core.values().fold(ratio(0, 1), |s, a| s + a.clone());
         let h = crate::chem::Kind::atom(1)
-            .and_then(|k| heart.get(&k).cloned())
+            .and_then(|k| star_core.get(&k).cloned())
             .unwrap_or_else(|| ratio(0, 1));
         if count.is_zero() || h.is_zero() {
             break;
         }
         let f_h = h / count;
-        let mut weights: Vec<u32> = heart.keys().filter_map(crate::chem::atom_w).collect();
+        let mut weights: Vec<u32> = star_core.keys().filter_map(crate::chem::atom_w).collect();
         weights.sort_by(|a, b| b.cmp(a));
         // Hydrogen is the fuel the heavier seeds capture, never a seed.
         for w in weights.into_iter().filter(|&w| w >= 2 && w < densest) {
             let Some(s) = survival(w + 1, p) else {
                 continue;
             };
-            moved += climb(heart, w, &(f_h.clone() * c.clone() * s));
+            moved += climb(star_core, w, &(f_h.clone() * c.clone() * s));
         }
     }
     moved
@@ -611,7 +611,7 @@ mod tests {
         let mut m: crate::pulse::Manifest =
             [(k(1), ratio(1_000_000, 1)), (k(4), ratio(1, 1))].into();
         let before = nucleons(&m);
-        // A dying heart's heat breaks what it out-grips into nucleons.
+        // A dying star core's heat breaks what it out-grips into nucleons.
         let mut spent: crate::pulse::Manifest =
             [(k(7), ratio(10, 1)), (k(28), ratio(10, 1))].into();
         let was = nucleons(&spent);
@@ -648,14 +648,14 @@ mod tests {
             again > top,
             "the next generation climbs higher: {top} then {again}"
         );
-        // A burning heart captures slowly and conserves too.
-        let mut heart: crate::pulse::Manifest =
+        // A burning star core captures slowly and conserves too.
+        let mut star_core: crate::pulse::Manifest =
             [(k(1), ratio(1000, 1)), (k(4), ratio(100, 1))].into();
-        let before = nucleons(&heart);
-        let moved = capture_slow(&mut heart, 10, &ratio(1, 1), &g_throat, 1200);
+        let before = nucleons(&star_core);
+        let moved = capture_slow(&mut star_core, 10, &ratio(1, 1), &g_throat, 1200);
         assert!(moved > ratio(0, 1));
-        assert_eq!(nucleons(&heart), before);
-        assert!(heart.keys().filter_map(crate::chem::atom_w).max() > Some(4));
+        assert_eq!(nucleons(&star_core), before);
+        assert!(star_core.keys().filter_map(crate::chem::atom_w).max() > Some(4));
     }
 
     #[test]
