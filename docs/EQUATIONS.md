@@ -1889,3 +1889,18 @@ replacing the deficit contrast `|δ_i − δ_j|/(δ_i + δ_j)` as the heat (it
 stays the stick test). The bounce's parting (the exchange of the unkept share)
 then widens their spins; what pays it is the state level's (potential),
 not derived yet.
+
+**E57 · The orientation is the generator.** `orientation::Orientation`,
+`orientation::rate`, `orientation::reading` (docs/117 §11.7, #117 step 2).
+A body's orientation is one generator `G` over six elliptic planes (three
+spatial, each with its R partner), with windings `K` per plane. A ring's
+rate is the hold over the reach, and the advance composes whole:
+
+    b = δ/(1 − δ) = H/R        G ← generator(cayley(G)·cayley(B))
+
+Each component of `G` is held on the grain. A plane's reading, the one the
+laws act on, is `ψ = g/(1 + |g|)` turns. One ring from rest gives back `δ`,
+and the vacuum's `1 − δ` is the reciprocal rate. Turnings on planes that
+share a unit gain the plane between them, its sign set by the order
+(register K6 retired). Built as a module; motes and bodies do not carry it
+yet (#117 step 2b).

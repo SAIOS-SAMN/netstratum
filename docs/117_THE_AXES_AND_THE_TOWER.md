@@ -808,13 +808,26 @@ setting the generator.
 | the place and its levers (`enfold::leaf`) | each phase held to the body's place | each component of `G` held to the place, its lever the component's residue |
 
 **Reading a plane's phase.** The laws that read a phase (the response, the
-hemisphere, `in_step`) read plane `k`'s turning from `G`'s component on `k`:
-- **The hemisphere is exact and rational:** `0 ≤ g < 1` is `[0°, 180°)`;
-  `g ≥ 1` is `[180°, 360°)`; `g < 0` is the negative branch.
-- **A value in turns** is the certified reading `θ = 4·atan(g)` on the
-  grain, and a law acts on the bound nearer zero (§8d). This is the one
-  certified function the step adds: `atan` in `conductor::geodesic`, beside
-  its `cos` and `sin`.
+hemisphere, `in_step`) read plane `k`'s turning from `G`'s component on `k`
+by the L1 reading §8d names, `ψ = g/(1 + |g|)` turns (taken into `[0, 1)`),
+the inverse of the rate's own map:
+- **Rational and cheap:** no series runs in a law.
+- **Exact where the laws turn:** `g = 0` and `g = 1` are `0` and `½` a turn,
+  the hemisphere kinks, so `0 ≤ g < 1` is the first half and `g ≥ 1` (with
+  the negative branch) the second.
+- **True to the motion law at one ring:** one ring from rest at `δ` reads `δ`
+  turns exactly. Rings composed read the round turning, which is the change
+  §11.7.3 states.
+
+Degrees, `θ = 4·atan(g)`, are rendered as certified sectors on observation
+only (`conductor::geodesic`, which holds the arctangent series).
+
+**Built (2026-11-10):** `conductor::orientation` (E57), with the generator's
+components on the six planes, the rate, the reading, the whole advance and
+`K` per plane, witnessed by: the fixed points; the reciprocal; one ring from
+rest; two rim rings as one wound turn; Mycelium's 11b-i and 11b-ii through
+the orientation; and a one-grain lean parting planes that equal rates turn.
+Motes and bodies do not carry it yet (#117 step 2b).
 
 #### 11.7.5 K6, the split between planes, retired
 
