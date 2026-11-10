@@ -74,7 +74,7 @@ impl Seat {
     /// plain text (`home/tasks/<id>.task`: `train` pairs then `test` inputs,
     /// grids as hue digits), so Netstratum's minds can be measured on the
     /// court's own tasks offline, never only on self-forged ones.
-    fn keep(&self, id: &[u8], task: &mycelium_sdk::task::TaskRasters) {
+    fn keep(&self, id: &[u8], task: &mycelium_sdk::task::TaskSection) {
         let Some(home) = &self.home else { return };
         let dir = home.join("tasks");
         let hex: String = id.iter().map(|b| format!("{b:02x}")).collect();
@@ -90,10 +90,14 @@ impl Seat {
         }
         let mut out = format!("id {hex}\n");
         for (a, b) in &task.train {
-            out.push_str(&format!("train\n{}\n--\n{}\n", grid_text(a), grid_text(b)));
+            out.push_str(&format!(
+                "train\n{}\n--\n{}\n",
+                grid_text(&a.raster()),
+                grid_text(&b.raster())
+            ));
         }
         for t in &task.tests {
-            out.push_str(&format!("test\n{}\n", grid_text(t)));
+            out.push_str(&format!("test\n{}\n", grid_text(&t.raster())));
         }
         if let Err(e) = std::fs::write(&path, out) {
             eprintln!("seat: task {named} not kept: {e}");
@@ -120,7 +124,7 @@ impl Seat {
         // Signed (78.141): the seat signs its solves with Netstratum's voice
         // key — held in trust, never minted here (a missing key is an error,
         // not a new identity).
-        let key = mycelium_sdk::house::HyphaKey::load_only(key).ok_or_else(|| {
+        let key = mycelium_sdk::voice::VoiceKey::load_only(key).ok_or_else(|| {
             io::Error::new(
                 io::ErrorKind::NotFound,
                 "netstratum's voice key is not in the seat's home",
@@ -155,16 +159,15 @@ impl Seat {
         self.tally.pulled += 1;
         let id = task.id;
         let name: String = id.iter().take(6).map(|b| format!("{b:02x}")).collect();
-        // The minds perceive rasters (rank 2, width 1; Mycelium v0.3.0's
-        // raster intake): a task of samples of another rank or width is
-        // refused by name, never read as something it is not.
-        let task = match task.rasters() {
+        // The minds perceive samples on the alphabet's section (Mycelium
+        // v0.4.0): a task whose samples stand off it is refused by name,
+        // never read as something it is not.
+        let task = match task.section() {
             Ok(task) => task,
-            Err(n) => {
+            Err(why) => {
                 return Ok(Some(format!(
-                    "task {name}: samples of rank {} and width {}, no raster; not before the minds",
-                    n.rank, n.width
-                )))
+                "task {name}: samples off the alphabet's section ({why:?}); not before the minds"
+            )))
             }
         };
         self.keep(&id, &task);

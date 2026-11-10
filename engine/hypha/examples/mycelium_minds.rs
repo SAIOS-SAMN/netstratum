@@ -64,6 +64,20 @@ fn main() {
         let Some((train, _)) = read(&text) else {
             continue;
         };
+        // The word machinery reads samples on the alphabet's section
+        // (Mycelium v0.4.0): a pair off it is no task here.
+        let Some(train) = train
+            .iter()
+            .map(|(a, b)| {
+                Some((
+                    rule::SectionSample::of_lines(a).ok()?,
+                    rule::SectionSample::of_lines(b).ok()?,
+                ))
+            })
+            .collect::<Option<Vec<_>>>()
+        else {
+            continue;
+        };
         tasks += 1;
         let frames = rule::perceive_family(&train);
         let spend = rule::extraction_spend(&train, &frames);
@@ -75,7 +89,7 @@ fn main() {
         let closes = rule.as_ref().is_some_and(|r| {
             train.iter().all(|(a, b)| {
                 rule::speak_rule(r, a, &NoCrystal)
-                    .and_then(|s| s.grid())
+                    .and_then(|s| s.sample())
                     .as_ref()
                     == Some(b)
             })

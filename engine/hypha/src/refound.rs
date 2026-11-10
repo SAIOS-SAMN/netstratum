@@ -165,6 +165,9 @@ pub fn post_ledger(session: &Session, home: &Path, var_root: &Path, u: u64) -> i
             ))
         }
         Some(Ledgered::Refused(why)) => Ok(format!("LEDGER refused: {why:?}")),
+        // Mycelium v0.4.0: refused at the court's boundary (the act not
+        // through its core, not its signatory), named.
+        Some(Ledgered::Boundary(why)) => Ok(format!("LEDGER refused at the boundary: {why:?}")),
         None => Err(io::Error::other("the ledger reply did not decode")),
     }
 }
@@ -338,9 +341,12 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
 }
 
 /// THE CONTRACT, the re-founding's step 0 (Mycelium's KERNEL profile): the
-/// statement the hypha serves and its Concordance's hash, each against the
-/// pinned SDK's, then the domain's signature over the hash presented and
-/// judged. Agreed only where all three hold; what each read said.
+/// statement the hypha serves against the pinned SDK's, then the clause
+/// register it serves (ACT_LAWS mode 7) signed by reconstruction (mode 8):
+/// each clause enabled, carrying this kernel's reconstruction of each of its
+/// fixtures (`sign_concordance`), and the verdict read back. Agreed only
+/// where the statement is the pinned one and every served clause is
+/// admitted; what each read said.
 pub fn concord(
     session: &Session,
     domain: &ed25519_dalek::SigningKey,
@@ -349,8 +355,9 @@ pub fn concord(
         decode_statement_reply, encode_statement_request, StatementRead, STATEMENT,
     };
     use mycelium_sdk::house::{
-        decode_concordance_reply, decode_signature_reply, encode_concordance_request,
-        encode_signature_request, ConcordanceSignature, CONCORDANCE_HASH,
+        decode_alignment_reply, decode_concordance_reply, decode_signature_reply,
+        encode_alignment_request, encode_concordance_request, encode_signature_request,
+        sign_concordance, Assent,
     };
     let mut said = Vec::new();
     let stated = decode_statement_reply(&session.speak(encode_statement_request())?);
@@ -359,17 +366,46 @@ pub fn concord(
         return Ok((false, said));
     }
     said.push("0 statement: the pinned contract".into());
-    if decode_concordance_reply(&session.speak(encode_concordance_request())?)
-        != Some(CONCORDANCE_HASH)
-    {
-        said.push("0 concordance: another version".into());
+    let served = match decode_concordance_reply(&session.speak(encode_concordance_request())?) {
+        Some(Ok(served)) => served,
+        Some(Err(r)) => {
+            said.push(format!(
+                "0 concordance: the hypha cannot read clause {:?} of its register",
+                r.id
+            ));
+            return Ok((false, said));
+        }
+        None => {
+            said.push("0 concordance: no clause register".into());
+            return Ok((false, said));
+        }
+    };
+    said.push(format!("0 concordance: {} clauses served", served.len()));
+    let Some(signed) = sign_concordance(domain, &served, |_| Assent::Enabled) else {
+        said.push("0 signature: a served fixture does not reconstruct here".into());
         return Ok((false, said));
-    }
-    said.push("0 concordance: the pinned hash".into());
-    let signed = ConcordanceSignature::sign(domain, CONCORDANCE_HASH);
+    };
     let judged = decode_signature_reply(&session.speak(encode_signature_request(&signed))?);
+    let all = matches!(&judged, Some(Ok(a)) if a.len() == served.len());
     said.push(format!("0 signature: {judged:?}"));
-    Ok((matches!(judged, Some(Ok(()))), said))
+    // The key's alignment read back from the hypha's ledger (mode 9): each
+    // clause as this kernel's signing left it.
+    let kernel = domain.verifying_key().to_bytes();
+    match decode_alignment_reply(&session.speak(encode_alignment_request(Some(&kernel)))?) {
+        Some(Ok(read)) => {
+            let ours = read.kernels.iter().find(|k| k.kernel == kernel);
+            said.push(format!(
+                "0 alignment: {}",
+                ours.map_or("this kernel unread".to_string(), |k| format!(
+                    "{} clauses read for this kernel",
+                    k.clauses.len()
+                ))
+            ));
+        }
+        Some(Err(why)) => said.push(format!("0 alignment: refused {why:?}")),
+        None => said.push("0 alignment: no reading".into()),
+    }
+    Ok((all, said))
 }
 
 /// THE MANIFEST: the universe's nuclei per Z (`conductor::pulse::nuclei_by_z`
@@ -550,6 +586,9 @@ pub fn map_gates(
             Some(Mapped::Refused(why)) => {
                 unknown |= matches!(why, MapRefusal::UnknownDomain);
                 said.push(format!("GATE {} not mapped: {why:?}", end.id));
+            }
+            Some(Mapped::Boundary(why)) => {
+                said.push(format!("GATE {} refused at the boundary: {why:?}", end.id));
             }
             None => said.push(format!("GATE {}: the reply did not decode", end.id)),
         }

@@ -8,7 +8,7 @@
 pub use mycelium_sdk;
 
 use mycelium_sdk::rule::Element;
-use mycelium_sdk::rule::{sentence, Step, Symmetry};
+use mycelium_sdk::rule::{sentence, SectionSample, Step, Symmetry};
 use mycelium_sdk::rule::{Crystal, NoCrystal};
 use solver::Op;
 
@@ -114,7 +114,19 @@ pub fn translate(
         }
         at = next;
     }
-    sentence(&steps, train, crystal).map_err(|why| Untranslated::Refused(format!("{why:?}")))
+    // The court's word machinery reads samples on the alphabet's section
+    // (Mycelium v0.4.0, `rule::SectionSample`): each raster pair admitted
+    // there, refused by name where it is no sample.
+    let family = train
+        .iter()
+        .map(|(a, b)| {
+            let on = |g: &Vec<Vec<u8>>| {
+                SectionSample::of_lines(g).map_err(|why| Untranslated::Refused(format!("{why:?}")))
+            };
+            Ok((on(a)?, on(b)?))
+        })
+        .collect::<Result<Vec<_>, Untranslated>>()?;
+    sentence(&steps, &family, crystal).map_err(|why| Untranslated::Refused(format!("{why:?}")))
 }
 
 /// A projector's predicate in the court's select language, where it has one:

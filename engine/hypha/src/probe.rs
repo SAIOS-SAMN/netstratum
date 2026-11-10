@@ -2,8 +2,9 @@
 //! kernel does: a lawful turn, and the same turn with time standing still.
 
 use mycelium_sdk::house::{carried_body, BodyMoments};
-use mycelium_sdk::house::{rotator, sphere_at, Mv};
+use mycelium_sdk::house::{membrane_at as sphere_at, rotator};
 use mycelium_sdk::house::{BodyState, Transition};
+use mycelium_sdk::rule::Mv;
 use num_bigint::BigInt;
 use num_rational::BigRational;
 
@@ -35,7 +36,7 @@ pub fn carried(motion: &Mv) -> Option<Vec<(BodyState, BodyState)>> {
         .iter()
         .map(|&c| {
             let b = body(c);
-            let nucleus = sphere_at(&b.centre, &q(1));
+            let nucleus = sphere_at(&b.centre, &q(1))?;
             let after = BodyState {
                 nucleus: motion.sandwich(&nucleus),
                 body: carried_body(&b, motion)?,

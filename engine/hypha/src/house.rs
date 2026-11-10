@@ -585,7 +585,7 @@ impl House {
         let mut at = 0;
         let rule =
             mycelium_sdk::rule::Element::from_bytes(tape, &mut at).filter(|_| at == tape.len());
-        // The outputs as samples (Mycelium v0.3.0), read at the raster
+        // The outputs as samples (Mycelium v0.4.0's section), read at the raster
         // intake (the SDK's one public reader of a sample as a raster is the
         // envelope's); a stated ground after them is the mind's and not read
         // here.
@@ -597,9 +597,9 @@ impl House {
                     train: Vec::new(),
                     tests,
                 }
-                .rasters()
+                .section()
                 .ok()
-                .map(|r| r.tests)
+                .map(|r| r.tests.iter().map(|t| t.raster()).collect::<Vec<_>>())
             });
         // The tape must read whole as a rule; it is filed as the mind sent it.
         let (Some(_), Some(outputs)) = (rule, outputs) else {
