@@ -1191,6 +1191,55 @@ pub fn torque(
 /// One mote's bell: its phases turned and its spins torqued (`turn`,
 /// `spin_torque`), its lever settled; returns the spin given and the pulse
 /// absorbed.
+/// Emission by the face (docs/122 law 3, docs/124 §2): over `rings` rings a
+/// body keeps `g` of its heat each ring, `g` the held face it stands on
+/// (`polarity::faces_on`, read on its own axis: the continuum `δ`, the vacuum
+/// stream `1 − δ`), and emits the rest as light, its unlocked face `u = 1 − g`.
+/// Every kind emits by where it stands, never by its frames (hydrogen
+/// emits). Returns (the heat kept, the share emitted), exact: kept + emitted
+/// is the heat it had.
+pub fn emission(heat: &Ratio, held: &Ratio, rings: u32) -> (Ratio, Ratio) {
+    let kept = (0..rings).fold(heat.clone(), |a, _| a * held.clone());
+    let emitted = heat.clone() - kept.clone();
+    (kept, emitted)
+}
+
+/// A body's heat after `n` rings of a steady source `q` a ring and emission
+/// by its unlocked face `u` (docs/122 law 5): `a* + (a₀ − a*)·(1 − u)ⁿ`,
+/// `a* = q/u`, in closed form. None where nothing is emitted (`u = 0`), where
+/// heat has no standing point.
+pub fn heat_after(a0: &Ratio, q: &Ratio, u: &Ratio, n: u32) -> Option<Ratio> {
+    if u.is_zero() {
+        return None;
+    }
+    let star = q.clone() / u.clone();
+    let g = ratio(1, 1) - u.clone();
+    let gn = (0..n).fold(ratio(1, 1), |a, _| a * g.clone());
+    Some(star.clone() + (a0.clone() - star) * gn)
+}
+
+/// Every mote's emission over `rings` rings in `enc` (docs/122 law 3): each
+/// mote keeps its held face's share of its heat a ring, on the grain
+/// (floored, so what the grain leaves is light too), and the light it
+/// emits, its heat's fall times its holding, is returned to be shone and
+/// booked (law 4). `Σ a·m` before is `Σ a·m` after plus the light, exactly.
+pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32) -> Ratio {
+    let mut light = ratio(0, 1);
+    for x in motes.iter_mut() {
+        if x.agitation.is_zero() {
+            continue;
+        }
+        let (_, delta) = x.reach_in(enc);
+        let held =
+            crate::polarity::faces_on(&delta, crate::polarity::Axis::of_stream(x.vacuum)).0;
+        let (kept, _) = emission(&x.agitation, &held, rings);
+        let kept = crate::ring::grain(&kept);
+        light += (x.agitation.clone() - kept.clone()) * x.amount.clone() * weight(&x.key);
+        x.agitation = kept;
+    }
+    light
+}
+
 #[allow(clippy::too_many_arguments)]
 fn torque_one(
     x: &mut Mote,
@@ -1285,21 +1334,14 @@ pub fn spin_torque(
         .zip(&t)
         .fold(ratio(0, 1), |s, (r, tk)| s + r.clone() * tk.clone());
     // Dissipation (ruling of 2026-10-19: heat dissipation to the void is read
-    // from the current physics, mimicking nature; with
-    // Xylarium): what the torque does not deliver in step becomes heat,
-    // `p·δ·(1 − |k|)` (k its signed mean over the passage, the coherent
-    // share), and heat leaves by the built cooling law's two channels
-    // over the passage's two rings: the light through its open frames
-    // (`e`, open over held, a ring) and the vacuum's pull back (`δ` at its
-    // reach, a ring). The keep `(1 − e)(1 − δ)` is applied once per ring of
-    // the double pass (compounding over the two passes, as `(1 − s)ⁿ`
-    // compounds the release; never a square of a quantity):
-    // `a ← (a + heat)·keep·keep`.
+    // from the current physics, mimicking nature; with Xylarium): what the
+    // torque does not deliver in step becomes heat, `p·δ·(1 − |k|)` (k its
+    // signed mean over the passage, the coherent share): motion leaving
+    // step (docs/124 §3). The heat leaves by emission through the face
+    // (`emit`, docs/122 law 3), never here: the torque only makes it.
     let coherent = if k < ratio(0, 1) { -k } else { k };
     let heat = p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)));
-    let keep = (ratio(1, 1) - open(&x.key).min(ratio(1, 1))) * (ratio(1, 1) - d_o.clone());
-    x.agitation =
-        crate::ring::grain(&((x.agitation.clone() + heat) * keep.clone() * keep + scar.clone()));
+    x.agitation = crate::ring::grain(&(x.agitation.clone() + heat + scar.clone()));
     // No radial law at the state level (operator 2026-11-06: the spin
     // balance): a mote's reach is the reading `ℓ/H(<ℓ)` of its spin, and its
     // orbit stands where its spin and the hold enclosed balance; the band
@@ -4484,5 +4526,94 @@ mod coupling_tests {
             assert_eq!(by_bisection[i], every, "mote {i}");
         }
         assert!(met > 0 && met < motes.len() * (motes.len() - 1));
+    }
+}
+
+#[cfg(test)]
+mod emission_tests {
+    use super::*;
+
+    fn hot(kind: &str, ell: Ratio, heat: Ratio, vacuum: bool) -> Mote {
+        Mote {
+            key: crate::chem::Kind::parse(kind).expect("a kind"),
+            amount: ratio(3, 1),
+            spins: Mote::spins_of(&ell, &[]),
+            ell_orth: ratio(0, 1),
+            phase: rest(ratio(1, 2)),
+            agitation: heat,
+            born: 0,
+            vacuum,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        }
+    }
+
+    #[test]
+    fn heat_approaches_its_standing_point_in_closed_form_at_n_and_4n_rings() {
+        // A source q a ring and emission by the face u (docs/122 law 5): the
+        // ring-by-ring law and the closed form agree at N and 4N, and the
+        // heat closes on q/u.
+        let (a0, q, u) = (ratio(0, 1), ratio(1, 10), ratio(1, 4));
+        let g = ratio(1, 1) - u.clone();
+        for n in [5u32, 20] {
+            let stepped = (0..n).fold(a0.clone(), |a, _| emission(&a, &g, 1).0 + q.clone());
+            assert_eq!(Some(stepped), heat_after(&a0, &q, &u, n));
+        }
+        let star = q.clone() / u.clone();
+        let gap = |n| star.clone() - heat_after(&a0, &q, &u, n).expect("a standing point");
+        assert!(gap(20) < gap(5) && gap(20) > ratio(0, 1));
+    }
+
+    #[test]
+    fn emission_books_every_grain_of_heat_as_light() {
+        // Σ a·m before is Σ a·m after plus the light, exactly, the grain's
+        // floor included.
+        let mut motes = vec![
+            hot("W0001", ratio(1, 2), ratio(1, 3), false),
+            hot("W0004", ratio(3, 1), ratio(2, 7), false),
+            hot("W0001", ratio(5, 2), ratio(1, 5), true),
+        ];
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let held = |m: &[Mote]| {
+            m.iter().fold(ratio(0, 1), |s, x| {
+                s + x.agitation.clone() * x.amount.clone() * weight(&x.key)
+            })
+        };
+        let before = held(&motes);
+        let light = emit(&mut motes, &enc, 2);
+        assert!(light > ratio(0, 1));
+        assert_eq!(before, held(&motes) + light);
+    }
+
+    #[test]
+    fn hydrogen_emits_by_where_it_stands() {
+        // Its open frames no longer wipe its heat unbooked: a hydrogen mote
+        // keeps its held face's share and emits the rest.
+        let mut motes = vec![hot("W0001", ratio(1, 1), ratio(1, 2), false)];
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let (_, delta) = motes[0].reach_in(&enc);
+        let light = emit(&mut motes, &enc, 1);
+        assert_eq!(motes[0].agitation, crate::ring::grain(&(ratio(1, 2) * delta)));
+        assert!(light > ratio(0, 1) && motes[0].agitation > ratio(0, 1));
+    }
+
+    #[test]
+    fn the_vacuum_stream_keeps_the_exchanged_face() {
+        // On the closed axis the faces exchange (docs/122 §4): a vacuum
+        // mote keeps `1 − δ` where its continuum twin keeps `δ`.
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let mut cont = vec![hot("W0001", ratio(3, 1), ratio(1, 2), false)];
+        let mut vac = vec![hot("W0001", ratio(3, 1), ratio(1, 2), true)];
+        let (_, delta) = cont[0].reach_in(&enc);
+        let (_, delta_v) = vac[0].reach_in(&enc);
+        assert_eq!(delta, delta_v);
+        emit(&mut cont, &enc, 1);
+        emit(&mut vac, &enc, 1);
+        assert_eq!(cont[0].agitation, crate::ring::grain(&(ratio(1, 2) * delta.clone())));
+        assert_eq!(
+            vac[0].agitation,
+            crate::ring::grain(&(ratio(1, 2) * (ratio(1, 1) - delta)))
+        );
     }
 }

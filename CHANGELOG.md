@@ -121,6 +121,15 @@ change is named here.
 
 ### Changed
 
+- Heat leaves by emission through the face (docs/122 law 3, step 2;
+  EQUATIONS E54): a body keeps its held face `g` of its heat a ring and
+  emits the rest as booked light, every kind by where it stands (hydrogen
+  emits). The torque only makes heat; galaxy and ocean motes, a system's
+  motes and its worlds emit, and the light is shone on the continuum face.
+  Retired: `keep = (1 − open)(1 − δ)` and `formation::radiates`; the gas
+  shell record moves from tag 6 (refused) to tag 31. Read (2^40, 580 bells,
+  same founding): light made 0.0037 → 0.110 unit masses; stars born 26 →
+  11, holding hydrogen 1 of 21 → 8 of 9; hydrogen burned 0 in both.
 - The read binaries' line tags are lowercase (`energy at bell …`,
   `light — …`, `identity torque — …`), never capitals: a tag names a
   reading, and capitals read as a constant. Every line of `breathe`,

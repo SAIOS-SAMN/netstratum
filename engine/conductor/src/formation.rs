@@ -16,12 +16,11 @@
 //!   Agitation spreads its spin `ℓ_z (1 ± a_z)`, so the shell stands over
 //!   `R_z (1 − a_z) … R_z (1 + a_z)` (a box: the first build; the sphere's
 //!   measure is the refinement).
-//! - **Cooling.** What a grain cannot hold it radiates: its open frames over
-//!   its held frames, `e_z = unpaired / hold` of its agitation a ring; and
-//!   the vacuum takes back the deficit's share `δ = H/(R + H)` a ring at its
-//!   reach (closed-shell gas cools this way alone; close-in gas fastest).
-//!   Both shares compound ring by ring (`crate::compound`): n rings keep
-//!   `((1 − e_z)(1 − δ))^n`.
+//! - **Cooling.** Heat leaves by emission through the face (docs/122 law
+//!   3): a shell keeps its held face's share of its heat a ring, `δ =
+//!   H/(R + H)` at its reach on the continuum, and emits the rest as light,
+//!   by where it stands, never by its frames. n rings keep `δ^n`
+//!   (`crate::compound`).
 //! - **Collapse.** Overlapping shells sum to a stretch of linear holding λ.
 //!   A binding of width w in it collapses where
 //!   `λ (K)(K + w) ≥ (1 + λ)[a (K)(K + w) + H w]`, `K = R + H` at its near
@@ -43,27 +42,12 @@ pub struct Shell {
     pub outer: Ratio,
     /// Its agitation at the cut.
     pub agitation: Ratio,
-    /// The share of its agitation its open frames radiate a ring, `e =
-    /// unpaired / hold` (0: it never cools by itself).
-    pub radiates: Ratio,
     /// The ring it was laid down (the cut: 0; a jet's landing: later); it
     /// cools from then.
     pub born: u64,
-    /// The share of its agitation the vacuum takes back a ring (operator
-    /// 2026-10-16, with Xylarium): the deficit `δ = H/(R + H)` at its reach.
-    /// Every mote cools this way, closed-shell ones included. 0: no vacuum.
+    /// Its deficit `δ = H/(R + H)` at its reach: the held face it keeps of
+    /// its heat a ring, the rest emitted (docs/122 law 3).
     pub vacuum: Ratio,
-}
-
-/// The share of a kind's agitation its open frames radiate a ring: its open
-/// frames over its held frames, `unpaired / hold` (at most ½, since a kind
-/// opens no more frames than its charge and holds at least twice it).
-pub fn radiates(k: &crate::chem::Kind) -> Ratio {
-    let held = crate::chem::hold(k);
-    if held == 0 {
-        return ratio(0, 1);
-    }
-    ratio(i64::from(crate::chem::unpaired(k)), i64::from(held))
 }
 
 /// The disc's cold bands and the gas's shells: the galaxy's grains `all`,
@@ -81,7 +65,6 @@ pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio
         let ell = push.clone() * mean.clone() / w.clone();
         let r = ell / h.clone();
         let delta = h.clone() / (r.clone() + h.clone());
-        let radiates = radiates(k);
         // The dispersal (`pulse::disperse`; operator: "disc and gas both
         // mixed"): the held part of the kind is the part of its spread
         // within the throat, a cold band `[R(1 − p), min(R(1 + p), H)]` (the
@@ -99,7 +82,6 @@ pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio
                 inner: lo,
                 outer: hi.clone(),
                 agitation: ratio(0, 1),
-                radiates: radiates.clone(),
                 born: 0,
                 vacuum: crate::ring::deficit(&hi, &h),
             });
@@ -119,7 +101,6 @@ pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio
                 inner,
                 outer: outer.clone(),
                 agitation,
-                radiates,
                 born: 0,
                 vacuum: crate::ring::deficit(&outer, &h),
             });
@@ -128,15 +109,13 @@ pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio
     (held_out, out, h)
 }
 
-/// A shell's agitation at ring `n`: both channels, its open frames' light
-/// (`e`) and the vacuum's pull back (`δ`), compounding over its age,
-/// `a₀·((1 − e)(1 − δ))^age`, read on the grain; nothing before it is laid
-/// down. None where a share lies outside the whole.
+/// A shell's agitation at ring `n`: it keeps its held face's share `δ` a
+/// ring (emission by the face, docs/122 law 3), compounding over its age,
+/// `a₀·δ^age`, read on the grain; nothing before it is laid down. None where
+/// a share lies outside the whole.
 fn cooled(s: &Shell, n: u64) -> Option<Ratio> {
     let age = n.saturating_sub(s.born);
-    let remaining = crate::compound::after(&s.radiates, age)?
-        .after(&s.vacuum, age)
-        .ok()?;
+    let remaining = crate::compound::after(&(ratio(1, 1) - s.vacuum.clone()), age)?;
     crate::compound::read(&s.agitation, &remaining, crate::ring::grain)
 }
 
@@ -2122,12 +2101,14 @@ pub fn settle_system(
             w.phase[kp] = crate::ring::grain(&frac(w.phase[kp].clone() + advance.clone() * share));
         }
         if rang {
-            w.heat = crate::ring::grain(
-                &(w.heat.clone()
-                    * (ratio(1, 1)
-                        - ratio(1, 2)
-                            * crate::polarity::faces_on(&delta, crate::polarity::Axis::Open).1)),
-            );
+            // Emission by the face (docs/122 law 3): on its star's bell a world
+            // keeps its held face's share of its heat, `δ` on the continuum,
+            // and emits the rest as light, booked (`Settled::emitted`).
+            let held = crate::polarity::faces_on(&delta, crate::polarity::Axis::Open).0;
+            let (kept, _) = crate::flows::emission(&w.heat, &held, 1);
+            let kept = crate::ring::grain(&kept);
+            read.emitted += (w.heat.clone() - kept.clone()) * mass(&w.kept);
+            w.heat = kept;
         }
         if w.born == 0 {
             layer_chemistry(&mut w.kept, &w.heat);
@@ -2181,6 +2162,9 @@ pub struct Settled {
     /// The holding of the medium no mote carried (zero where every spray
     /// and capture booked its motes).
     pub unmoted: Ratio,
+    /// The light its worlds emitted by their faces on its bell (docs/122
+    /// law 3), heat times holding.
+    pub emitted: Ratio,
 }
 
 #[cfg(test)]

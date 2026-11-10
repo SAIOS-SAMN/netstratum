@@ -1656,7 +1656,8 @@ stepped toward its rest and never past it (docs/104 §6, docs/112 F3).
 **E20 · The torque.** `flows::torque`, `flows::spin_torque`. Each mote's
 spin moves by the in-step response of the core's push over its passage
 (its tilt's share of `2δ` a plane) and the band (E19); what is not delivered
-in step is heat, `p·δ·(1 − |k|)`, kept by `(1 − e)(1 − δ)` a pass. The spin
+in step is heat, `p·δ·(1 − |k|)`; the torque only makes it, and it leaves by
+emission (E54). The spin
 given is the core's reservoir's to pay: `Σ m·ℓ + reservoir` is exact.
 
 **E21 · The luminal bound.** `flows::luminal`. A mote turns `2·share` a
@@ -1830,3 +1831,19 @@ shell, the round trip to the cell's outer held spread, `2·a(r_f)`,
 
 **E53 · The established period.** `T_u = 2·a(R_rim) = 4·R_rim`; a core ring
 in bells, `T_u/4`, is `R_rim` (`pulse::established_period`).
+
+**E54 · Emission by the face.** `flows::emission`, `flows::emit`,
+`flows::heat_after` (docs/122 law 3, docs/124 §2). A body keeps its held
+face `g` of its heat a ring and emits the rest as light, `u = 1 − g`, read
+on its own axis (`polarity::faces_on`: the continuum `g = δ`, the vacuum
+stream `g = 1 − δ`), by where it stands, never by its frames:
+
+    a ← a·g  a ring,    light = (a_before − a_after)·m
+
+on the grain, floored, so `Σ a·m` before is `Σ a·m` after plus the light
+exactly. With a source `q` a ring the heat stands at `a* = q/u`, reached in
+closed form, `a_n = a* + (a₀ − a*)·gⁿ` (law 5). Motes emit over the torque's
+two rings, a system's motes and worlds on its star's bell; the light is
+shone on the continuum face (law 4) and booked made, received and drained.
+Retired: `keep = (1 − open)(1 − δ)` and `formation::radiates`.
+
