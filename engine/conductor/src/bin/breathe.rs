@@ -991,6 +991,36 @@ fn main() {
         for line in &held_by {
             println!("fuel — a star holding hydrogen: {line}");
         }
+        // Each collapsing binding's heat by component (#143, read only): the
+        // members that fell, out of step on each plane's phase (in degrees,
+        // a turn 360), on each spatial plane's spin, between planes, and on
+        // the orthogonal orbit; never folded into one number.
+        {
+            let deg = |x: &cfe::ratio::Ratio| f(&(x.clone() * cfe::ratio::ratio(360, 1)));
+            let list = |v: &[cfe::ratio::Ratio], g: &dyn Fn(&cfe::ratio::Ratio) -> String| {
+                v.iter().map(g).collect::<Vec<_>>().join(" ")
+            };
+            let all: Vec<&conductor::dispersion::Dispersion> =
+                events.iter().flat_map(|e| e.collapses.iter()).collect();
+            println!("heat by component — {} bindings collapsed", all.len());
+            for (n, d) in all.iter().enumerate() {
+                let kinds: Vec<String> = d
+                    .phase_by_kind
+                    .iter()
+                    .take(4)
+                    .map(|(k, v)| format!("{k} {}", list(v, &deg)))
+                    .collect();
+                println!(
+                    "heat by component — collapse {n}: holding {}; phase off step by plane (degrees) {}; spin by plane {}; between planes (0,1) (1,2) (2,0) {}; orthogonal {}; by kind (degrees) {}",
+                    f(&d.holding),
+                    list(&d.phase, &deg),
+                    list(&d.spin, &|x| f(x)),
+                    list(&d.between, &|x| f(x)),
+                    f(&d.orth),
+                    kinds.join("; ")
+                );
+            }
+        }
         // Each birth's own record: hydrogen's share by mass of what fell, of
         // it after the fibres' transition, and of what the star keeps.
         let births: Vec<&(cfe::ratio::Ratio, cfe::ratio::Ratio, cfe::ratio::Ratio)> =

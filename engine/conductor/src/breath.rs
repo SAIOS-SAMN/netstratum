@@ -340,6 +340,10 @@ pub struct Event {
     /// what fell, of it after the fibres' transition at ignition, and of what
     /// the new star keeps.
     pub births_h: Vec<(Ratio, Ratio, Ratio)>,
+    /// Each collapsing binding's heat by component (issue #143, read only):
+    /// the dispersion of the members that fell about their own motion in
+    /// step, per plane and between planes (`crate::dispersion`).
+    pub collapses: Vec<crate::dispersion::Dispersion>,
     /// Jet batches that landed at the rim at this echo.
     pub jets: usize,
     /// The mass the galaxy's stars returned to its medium at this echo
@@ -802,6 +806,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut novae = 0usize;
         let mut lifted = (0usize, ratio(0, 1));
         let mut births_h: Vec<(Ratio, Ratio, Ratio)> = Vec::new();
+        let mut collapses: Vec<crate::dispersion::Dispersion> = Vec::new();
         let mut grown = (0usize, 0usize, 0usize, 0usize);
         let mut escaped_all = ratio(0, 1);
         let mut fates = (0usize, 0usize, 0usize, 0usize);
@@ -2774,6 +2779,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     core.flows.extend(members);
                     continue;
                 }
+                // Its heat by component, read as it collapses (#143).
+                collapses.push(crate::dispersion::read(
+                    &members
+                        .iter()
+                        .zip(&fallen)
+                        .filter(|(_, f)| **f)
+                        .map(|(x, _)| x.clone())
+                        .collect::<Vec<_>>(),
+                ));
                 let a = if amt.is_zero() {
                     ratio(0, 1)
                 } else {
@@ -3091,6 +3105,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             novae,
             lifted,
             births_h,
+            collapses,
             merged,
             encounters,
             grown,

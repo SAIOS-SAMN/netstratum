@@ -64,31 +64,41 @@ its own witness.
   that receives nothing back cools by its emission alone. In the model
   that is the sink, the vacuum's face (docs/122 §4).
 
-## 3. Heat is motion out of phase
+## 3. Heat is motion out of phase, kept by component
 
 Nature's thermal energy is the motion of a body's parts that does not move
-with the body: its velocities' spread about their mean. The mean is bulk
-motion and does work; the spread is heat. The record already reads heat
-this way (agitation: turning "absorbed and not re-locked"); this section
-states it as the law and so answers docs/120 §9 item 5: **heat is a reading
-of the coordinate, the spread of a body's turning about its own step,
-never a lane of its own.**
+with the body. Its usual measure, the mean square `⟨½mv²⟩`, folds each
+velocity into its norm and so loses direction, sign and plane: a collapse
+the record refuses (register C17; operator 2026-11-05: no squares; docs/120
+§8b: a lane is a vector at every tick). Heat here is a reading of the
+coordinate, kept on the axes it moves on (issue #143), never a lane of its
+own and never one number:
 
-- **In step:** a body's turning `ℓ̄`, the holding-weighted mean of its
-  parts' turnings on `H`, is its motion.
-- **Out of step:** its heat is the holding-weighted spread about that mean,
-  first degree, `a = Σ m_i·|ℓ_i − ℓ̄| / Σ m_i` (the record's rulings refuse
-  squares, so the spread is the mean absolute deviation, not nature's
-  second-degree variance; both vanish together and order bodies alike).
+- **In step:** a body's motion is the holding-weighted mean of its parts'
+  generators `B̄` on the poles basis (docs/117 §10.3): each plane's phase
+  and spin, the turnings between planes `τ`, the boosts, the volume part
+  `B₁∧B₂` (§11.3).
+- **Out of step:** its heat is each part's departure from `B̄`, component
+  by component, first degree and holding-weighted, `Σ w·|x − x̄| / Σ w` per
+  component (on the circle for a phase, in degrees per plane). Where a law
+  needs one reading of several components they compose by the flow law
+  (`⊕`, as `torsion` composes plane pressures), never summed, never squared.
+- **By kind:** each kind's departure is read against its own weight, the
+  record's first-degree `w̄/w` (the carried spin in `star_core_cut`), never
+  mass-blind.
 - **Friction is decoherence:** a share of motion that leaves step becomes
-  heat (docs/122 law 2). Motion in step is booked as `Σ m·ℓ`, which friction
-  never changes; what it spends is the relative motion, the spread about
-  the mean: two bodies meeting lose `γ·S` of `S = Σ m_k·|ℓ_k − ℓ̄|` to heat
-  (EQUATIONS E56), and a merged body's heat is its members' whole spread. The reverse, heat
-  ordered into step, is work done by a pressure contrast (docs/106 §3).
-- **Temperature** is heat per unit of holding, the share `a`. A body of one
-  part has no spread and so no heat of its own; it carries the heat it was
-  given until it emits it.
+  heat on the components it left (docs/122 law 2). Motion in step is booked
+  as `Σ m·ℓ`, which friction never changes; what it spends is the relative
+  motion, the dispersion about the mean (EQUATIONS E56).
+- **Temperature** is heat per unit of holding, per component.
+
+**Built:** the read-only reading, `conductor::dispersion` (each plane's
+phase, each spatial plane's spin, the spin differences between planes, the
+orthogonal orbit; by kind on the phases), printed for every collapsing
+binding by `breathe`. The motes do not carry the boosts or the volume part
+yet. **Not yet built:** heat carried by component on bodies and motes; the
+laws that make and spend it (E54, E55, E56, contraction) and ionization
+(`open_at`) still read one scalar, the collapse #143 removes.
 
 ## 4. States of matter: a reading across two levels
 
@@ -162,6 +172,10 @@ This retires `ionizing = 1` at ignition, the re-cut's heat 0, and the
 
 ## 8. Open
 
+0. **The scalar collapse (#143).** Heat, its laws and ionization still read
+   one number where the record holds a vector; #142's failure (no star
+   keeps hydrogen) is that collapse meeting a scalar tightness. The physics
+   issues it opens against nature's behaviour are #144–#152.
 1. **The scale on which heat meets a winding.** `open_at` compares heat
    with tightness (enclosed charge over its period, hydrogen's 1); the
    ruling of 2026-10-18 read heat as turns of the bell. §5's heat is a
