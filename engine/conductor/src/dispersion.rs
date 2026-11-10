@@ -105,7 +105,7 @@ pub fn read(parts: &[Mote]) -> Dispersion {
     let mut phase = Vec::with_capacity(PLANES);
     let mut means = Vec::with_capacity(PLANES);
     for k in 0..PLANES {
-        let ph = component(&|x| at(&x.phase, k));
+        let ph = component(&|x| x.phase_at(k));
         let mean = circle_mean(&ph);
         let d = ph
             .iter()
@@ -129,7 +129,7 @@ pub fn read(parts: &[Mote]) -> Dispersion {
             .or_insert_with(|| (ratio(0, 1), vec![ratio(0, 1); PLANES]));
         e.0 += w.clone();
         for (k, mean) in means.iter().enumerate() {
-            e.1[k] += w.clone() * on_circle(&at(&x.phase, k), mean);
+            e.1[k] += w.clone() * on_circle(&x.phase_at(k), mean);
         }
     }
     let phase_by_kind = sums
@@ -157,7 +157,7 @@ mod tests {
             amount: ratio(amount, 1),
             spins: Mote::spins_of(&ell, tilt),
             ell_orth: ell.clone() / ratio(3, 1),
-            phase: phase.to_vec(),
+            orientation: crate::orientation::Orientation::from_phases(phase.as_ref()),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,
@@ -218,8 +218,9 @@ mod tests {
         let before = read(&parts());
         let mut moved = parts();
         for x in &mut moved {
-            for p in &mut x.phase {
-                *p = frac(&(p.clone() + ratio(5, 11)));
+            for k in 0..PLANES {
+                let v = frac(&(x.phase_at(k) + ratio(5, 11)));
+                x.orientation.hold_phase(k, &v);
             }
             for s in &mut x.spins {
                 *s += ratio(7, 4);
@@ -240,7 +241,7 @@ mod tests {
         // phase changes that plane's dispersion alone.
         let before = read(&parts());
         let mut moved = parts();
-        moved[2].phase[3] = ratio(9, 10);
+        moved[2].orientation.hold_phase(3, &ratio(9, 10));
         let after = read(&moved);
         assert_ne!(after.phase[3], before.phase[3]);
         for k in 0..3 {

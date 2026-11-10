@@ -1694,9 +1694,9 @@ pub fn collide_stars(
                         }
                     }
                     for x in flows.iter_mut() {
-                        if let Some(ph) = x.phase.get_mut(k) {
-                            *ph = frac_of(ph.clone() + shift.clone());
-                        }
+                        x.orientation
+                            .shift(k, &shift)
+                            .expect("a turning is a motion");
                     }
                 }
             };
@@ -1905,8 +1905,7 @@ pub fn settle_system(
             continue;
         }
         let matter: Manifest = [(x.key.clone(), x.amount.clone())].into();
-        let mut phase = x.phase.clone();
-        crate::flows::full(&mut phase);
+        let phase = x.phase();
         bodies.push((
             r,
             mass(&matter) / total.clone(),
@@ -2160,7 +2159,7 @@ pub fn settle_system(
                         &tilt,
                     ),
                     ell_orth: ratio(0, 1),
-                    phase: phase.clone(),
+                    orientation: crate::orientation::Orientation::from_phases(&phase),
                     agitation: heat.clone(),
                     born: bell,
                     vacuum: false,

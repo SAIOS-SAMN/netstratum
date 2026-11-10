@@ -15,10 +15,14 @@
 //!   by plane; its parts on the planes between are made by the composition
 //!   (register K6 retired). Each component is held on the grain; any
 //!   bivector is a generator, so the grain never breaks the motion.
-//! - **The windings:** a plane's `K` rises by one each time its turning
-//!   passes a whole turn of the vector (its reading passes 0 forward) and
-//!   falls on a pass backward; where the composite is `R = −1` on a plane
-//!   the orientation is held as `−R`'s generator, the same sandwich.
+//! - **One cover, and the windings:** `R` and `−R` turn every vector alike,
+//!   so the motion is held as the one whose scalar part is not negative (a
+//!   plane alone then stands at `|g| ≤ 1`); a whole turn gives the
+//!   components back. A plane's `K` rises by one each time its reading
+//!   passes 0 under a forward drive and falls on a pass backward: exact for
+//!   a plane turned alone (`K = ⌊θ/360°⌋`, §11.1), a reading of the plane's
+//!   component where other planes turn with it (78.173 §8.3: windings stay
+//!   on the planes that wound them).
 //! - **The reading the laws act on** ([`reading`]): `ψ = g/(1 + |g|)` turns,
 //!   taken into `[0, 1)`, the L1 reading §8d names, rational, exact at the
 //!   hemisphere kinks (`g = 0` and `g = 1` are `0` and `½` a turn), and one
@@ -99,11 +103,16 @@ pub fn reading(g: &Ratio) -> Ratio {
     psi.clone() - psi.floor()
 }
 
-/// The component whose reading is `ψ ∈ [0, 1)`: `ψ/(1 − ψ)`, on its
-/// forward branch (the founding's, where a phase was given in turns).
+/// The component whose reading is `ψ ∈ [0, 1)`, on the one cover the
+/// orientation is held on (`|g| ≤ 1` on a plane alone): `ψ/(1 − ψ)` up to
+/// half a turn, `(ψ − 1)/ψ` past it.
 pub fn of_reading(psi: &Ratio) -> Ratio {
     let psi = psi.clone() - psi.floor();
-    psi.clone() / (ratio(1, 1) - psi)
+    if psi <= ratio(1, 2) {
+        psi.clone() / (ratio(1, 1) - psi)
+    } else {
+        (psi.clone() - ratio(1, 1)) / psi
+    }
 }
 
 /// A body's orientation: its generator's components on [`PLANES`], each on
@@ -116,10 +125,12 @@ pub struct Orientation {
 
 impl Orientation {
     /// At the readings `psi` (turns) on each plane, unwound: the founding's
-    /// form, each plane on its own (no part between planes yet).
+    /// form, each plane on its own (no part between planes yet), exact (a
+    /// reading `a/q` is the component `a/(q − a)`, its denominator bounded
+    /// by the reading's).
     pub fn at(psi: &[Ratio; 6]) -> Orientation {
         Orientation {
-            g: std::array::from_fn(|p| crate::ring::grain(&of_reading(&psi[p]))),
+            g: std::array::from_fn(|p| of_reading(&psi[p])),
             windings: [0; 6],
         }
     }
@@ -141,14 +152,25 @@ impl Orientation {
         let was = self.readings();
         let r = crate::turning::motion(&bivector(&self.g))?
             .product(&crate::turning::motion(&bivector(b))?)?;
+        // One cover: `R` and `−R` turn every vector alike, so the motion is
+        // held as the one whose scalar part is not negative; a whole turn of
+        // the vector (`R ↦ −R`) then gives the components back and is
+        // counted in `K`, never carried in `G`.
+        let minus = Clifford::blade(0, 0, ratio(-1, 1));
+        let scalar = r
+            .terms()
+            .find(|(m, _)| *m == 0)
+            .map(|(_, c)| c.clone())
+            .unwrap_or_else(|| ratio(0, 1));
+        let r = if scalar < ratio(0, 1) {
+            r.product(&minus)?
+        } else {
+            r
+        };
         let g = match crate::turning::generator(&r) {
             Ok(g) => g,
-            // A whole turn of the vector on a plane: `R = −1` there, held
-            // as `−R`, the same sandwich.
-            Err(TurningRefusal::NoGenerator) => {
-                let minus = Clifford::blade(0, 0, ratio(-1, 1));
-                crate::turning::generator(&r.product(&minus)?)?
-            }
+            // `R + 1` singular on one plane: held as `−R`, the same sandwich.
+            Err(TurningRefusal::NoGenerator) => crate::turning::generator(&r.product(&minus)?)?,
             Err(e) => return Err(e),
         };
         let g = components(&g)?;
@@ -170,6 +192,211 @@ impl Orientation {
         let mut b: [Ratio; 6] = std::array::from_fn(|_| ratio(0, 1));
         b[p] = of_reading(turns);
         self.advance(&b)
+    }
+}
+
+/// Turns split into whole turns (toward zero) and the signed rest, `|rest| < 1`.
+fn whole_and_rest(x: &Ratio) -> (i64, Ratio) {
+    let whole = x.trunc();
+    let n = i64::try_from(whole.to_integer()).unwrap_or(0);
+    (n, x.clone() - whole)
+}
+
+/// A signed turning of `|x| < 1` turns as its rate: `±rate(|x|)`.
+fn signed_rate(x: &Ratio) -> Ratio {
+    let r = rate(&x.abs()).unwrap_or_else(|| ratio(0, 1));
+    if *x < ratio(0, 1) {
+        -r
+    } else {
+        r
+    }
+}
+
+impl Orientation {
+    /// The readings in the phase layout of `flows` (`flows::SPACE`'s planes
+    /// and `flows::LOOP`): each spatial plane's own, and the circulation's,
+    /// the reading of its R-planes' mean, first degree (docs/117 §11.7.2;
+    /// the laws that still read one circulation, until each reads its pair).
+    pub fn phases(&self) -> Vec<Ratio> {
+        let mut v = vec![ratio(0, 1); crate::flows::PLANES];
+        for (j, &k) in crate::flows::SPACE.iter().enumerate() {
+            v[k] = reading(&self.g[SPATIAL[j]]);
+        }
+        v[crate::flows::LOOP] = reading(&self.loop_mean());
+        v
+    }
+
+    /// One reading in the phase layout.
+    pub fn phase(&self, k: usize) -> Ratio {
+        match crate::flows::SPACE.iter().position(|&s| s == k) {
+            Some(j) => reading(&self.g[SPATIAL[j]]),
+            None => reading(&self.loop_mean()),
+        }
+    }
+
+    fn loop_mean(&self) -> Ratio {
+        PARTNER
+            .iter()
+            .fold(ratio(0, 1), |s, &p| s + self.g[p].clone())
+            / ratio(3, 1)
+    }
+
+    /// The circulation's reading on spatial plane `j`'s pair: its R-plane
+    /// partner's own (docs/117 §11.6, the dual pair).
+    pub fn circulation(&self, j: usize) -> Ratio {
+        reading(&self.g[PARTNER[j]])
+    }
+
+    /// Hold reading `k` (phase layout) at `v`: a spatial plane's component
+    /// on its own branch; the circulation's R-planes scaled together to the
+    /// mean whose reading is `v` (each at it where none stands). Exact: a
+    /// reading held to a place has a bounded denominator, and every
+    /// composition floors onto the grain again.
+    pub fn hold_phase(&mut self, k: usize, v: &Ratio) {
+        match crate::flows::SPACE.iter().position(|&s| s == k) {
+            Some(j) => {
+                let p = SPATIAL[j];
+                if reading(&self.g[p]) != *v {
+                    self.g[p] = of_reading(v);
+                }
+            }
+            None => {
+                let mean = self.loop_mean();
+                let to = of_reading(v);
+                if to == mean {
+                    return;
+                }
+                for p in PARTNER {
+                    self.g[p] = if mean.is_zero() {
+                        to.clone()
+                    } else {
+                        self.g[p].clone() * to.clone() / mean.clone()
+                    };
+                }
+            }
+        }
+    }
+
+    /// One ring of a body's turning, in the phase layout's turns: each
+    /// spatial plane by its own `space[j]` turns, the circulation by `circ`
+    /// turns on each R-plane alike (one circulation seen in every pair, its
+    /// spin shared by the tilt where the swing reads it). Whole turns wind
+    /// the planes they turn on; the rest composes whole.
+    pub fn ring(&mut self, space: &[Ratio], circ: &Ratio) -> Result<(), TurningRefusal> {
+        let mut b: [Ratio; 6] = std::array::from_fn(|_| ratio(0, 1));
+        for j in 0..3 {
+            let (n, rest) = whole_and_rest(space.get(j).unwrap_or(&ratio(0, 1)));
+            self.windings[SPATIAL[j]] += n;
+            b[SPATIAL[j]] = signed_rate(&rest);
+        }
+        let (n, rest) = whole_and_rest(circ);
+        let c = signed_rate(&rest);
+        for p in PARTNER {
+            self.windings[p] += n;
+            b[p] = c.clone();
+        }
+        self.advance(&b)
+    }
+
+    /// Plane `k` (phase layout) through the centre on its own: half a turn
+    /// there, `b = 1`, composed whole (docs/120 §8b′).
+    pub fn half_turn(&mut self, k: usize) -> Result<(), TurningRefusal> {
+        match crate::flows::SPACE.iter().position(|&s| s == k) {
+            Some(j) => self.turn_plane(SPATIAL[j], &ratio(1, 2)),
+            None => {
+                let v = self.phase(k);
+                self.hold_phase(k, &crate::flows::frac(&(v + ratio(1, 2))));
+                Ok(())
+            }
+        }
+    }
+
+    /// The holding-weighted mean of orientations (a merger, first degree on
+    /// the generators); the windings of the heaviest stand.
+    pub fn mean(parts: &[(&Orientation, Ratio)]) -> Orientation {
+        let whole = parts.iter().fold(ratio(0, 1), |s, (_, w)| s + w.clone());
+        let mut out = Orientation::default();
+        if whole.is_zero() {
+            return out;
+        }
+        for p in 0..6 {
+            let sum = parts
+                .iter()
+                .fold(ratio(0, 1), |s, (o, w)| s + o.g[p].clone() * w.clone());
+            out.g[p] = crate::ring::grain(&(sum / whole.clone()));
+        }
+        if let Some((o, _)) = parts.iter().max_by(|a, b| a.1.cmp(&b.1)) {
+            out.windings = o.windings;
+        }
+        out
+    }
+
+    /// From readings in the phase layout (a founding, a spray, a body's
+    /// phases handed on): each spatial plane at its reading, the
+    /// circulation's at its own on every R-plane, unwound, no part between
+    /// planes yet.
+    pub fn from_phases(phase: &[Ratio]) -> Orientation {
+        let at = |k: usize| phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
+        let mut psi: [Ratio; 6] = std::array::from_fn(|_| ratio(0, 1));
+        for (j, &k) in crate::flows::SPACE.iter().enumerate() {
+            psi[SPATIAL[j]] = at(k);
+            psi[PARTNER[j]] = at(crate::flows::LOOP);
+        }
+        Orientation::at(&psi)
+    }
+
+    /// Reading `k` (phase layout) turned by `turns` (signed): a spatial
+    /// plane by that turning composed whole, the circulation's readings
+    /// moved together (a frame's residue handed down, a frame change).
+    pub fn shift(&mut self, k: usize, turns: &Ratio) -> Result<(), TurningRefusal> {
+        match crate::flows::SPACE.iter().position(|&s| s == k) {
+            Some(j) => {
+                let (_, rest) = whole_and_rest(turns);
+                let mut b: [Ratio; 6] = std::array::from_fn(|_| ratio(0, 1));
+                b[SPATIAL[j]] = signed_rate(&rest);
+                self.advance(&b)
+            }
+            None => {
+                let v = crate::flows::frac(&(self.phase(k) + turns.clone()));
+                self.hold_phase(k, &v);
+                Ok(())
+            }
+        }
+    }
+
+    /// The readings' antipode: every spatial reading half a turn on, held
+    /// on its own branch (the phase layout's through-the-centre of the
+    /// summed spin and the Möbius leg, until each reads its own plane).
+    pub fn antipode(&mut self) {
+        for &k in &crate::flows::SPACE {
+            let v = crate::flows::frac(&(self.phase(k) + ratio(1, 2)));
+            self.hold_phase(k, &v);
+        }
+    }
+
+    /// Encoded for the save record: the six components, then the six
+    /// windings, twelve exact values.
+    pub fn values(&self) -> Vec<Ratio> {
+        let mut v: Vec<Ratio> = self.g.to_vec();
+        v.extend(self.windings.iter().map(|&n| ratio(n, 1)));
+        v
+    }
+
+    /// Read back from [`Orientation::values`]; refused unless twelve
+    /// values with whole windings.
+    pub fn from_values(v: &[Ratio]) -> Option<Orientation> {
+        if v.len() != 12 {
+            return None;
+        }
+        let mut o = Orientation::default();
+        for p in 0..6 {
+            o.g[p] = v[p].clone();
+            if !v[6 + p].is_integer() {
+                return None;
+            }
+            o.windings[p] = i64::try_from(v[6 + p].to_integer()).ok()?;
+        }
+        Some(o)
     }
 }
 
@@ -264,10 +491,11 @@ mod tests {
     }
 
     #[test]
-    fn a_lean_separates_planes_turned_alike() {
-        // Founded isoclinic, equal rates keep the spatial planes equal; a
-        // one-grain lean between two planes (§11.5) makes the turning of
-        // equal rates part them, which per-plane sums never did.
+    fn a_lean_is_carried_by_planes_turned_alike() {
+        // Founded isoclinic, equal rates keep the spatial planes equal (one
+        // turning about the diagonal). A one-grain lean between two planes
+        // (§11.5) is carried by that turning, never erased by it: the
+        // planes stay apart by a part the composition turns with them.
         let b = {
             let mut b = zero();
             for p in SPATIAL {
@@ -284,14 +512,49 @@ mod tests {
         }
         assert_eq!(even.g[0], even.g[1]);
         assert_eq!(even.g[1], even.g[2]);
-        let spread = |o: &Orientation| (o.g[0].clone() - o.g[2].clone()).abs();
-        assert!(spread(&lean) > crate::ring::grain_step());
+        assert!(lean.g[0] != lean.g[1] || lean.g[1] != lean.g[2]);
+    }
+
+    #[test]
+    fn the_record_holds_the_orientation_and_refuses_a_flat_torus() {
+        let mut o = Orientation::default();
+        let mut b = zero();
+        b[2] = ratio(1, 2);
+        b[3] = ratio(1, 3);
+        o.advance(&b).expect("composed");
+        o.windings[4] = -2;
+        assert_eq!(Orientation::from_values(&o.values()), Some(o));
+        // Four per-plane phases, the record before §11.7, are refused.
+        assert_eq!(Orientation::from_values(&vec![ratio(1, 3); 4]), None);
+    }
+
+    #[test]
+    fn a_held_reading_is_exact_and_a_shift_composes() {
+        let mut o =
+            Orientation::from_phases(&[ratio(1, 60), ratio(1, 7), ratio(0, 1), ratio(3, 4)]);
+        assert_eq!(o.phase(0), ratio(1, 60));
+        assert_eq!(o.phase(crate::flows::LOOP), ratio(1, 7));
+        o.hold_phase(0, &ratio(59, 60));
+        assert_eq!(o.phase(0), ratio(59, 60));
+        // Half a turn on a plane alone, twice, is a whole turn wound, and
+        // the orientation is back where it stood (one cover).
+        let mut alone = Orientation::default();
+        alone.hold_phase(2, &ratio(1, 10));
+        let was = alone.g.clone();
+        alone.half_turn(2).expect("half");
+        // The round half turn of `g = 1/9`: `(1/9 + 1)/(1 − 1/9) = 5/4`, on
+        // the one cover `−4/5` (the L1 reading moves 5/9 − 1/10, not ½).
+        assert_eq!(alone.g[1], ratio(-4, 5));
+        alone.half_turn(2).expect("whole");
+        assert_eq!(alone.windings[1], 1);
+        assert_eq!(alone.g, was);
     }
 
     #[test]
     fn the_reading_inverts_on_the_forward_branch() {
         for psi in [ratio(0, 1), ratio(1, 3), ratio(1, 2), ratio(5, 6)] {
             assert_eq!(reading(&of_reading(&psi)), psi);
+            assert!(of_reading(&psi).abs() <= ratio(1, 1), "one cover");
         }
         assert_eq!(reading(&ratio(1, 1)), ratio(1, 2));
         assert_eq!(reading(&ratio(-1, 1)), ratio(1, 2));
