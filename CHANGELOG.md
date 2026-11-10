@@ -14,7 +14,7 @@ change is named here.
 
 - `conductor::energy`, the energy book read only (docs/122 step 1,
   docs/106 S1): heat (motes, stars, worlds), potential `m·(1 − δ)` and bond
-  (open frames) over every mote and body, and an `ENERGY` line per
+  (open frames) over every mote and body, and an `energy` line per
   universal echo and over the run in `breathe`, beside the light made,
   received and drained. Witnesses: reading leaves the universe as it was; a
   mote split in two leaves the book as it was; a fusion pair lowers the bond
@@ -32,7 +32,7 @@ change is named here.
   retires the constant heats at ignition and at the outburst re-cut.
   GLOSSARY: heat, temperature, state of matter, transition, emission,
   absorption and irradiance, sink, contraction heating.
-- `horizons::read` and a `HORIZON` line per echo in `breathe` (docs/117
+- `horizons::read` and a `horizon` line per echo in `breathe` (docs/117
   §8–§9, readings only): for each galaxy mote, which planes stand inside
   their horizons (`|R·t_k| < H`), against the whole enclosure's hold and each
   plane's own; where a turning plane is inside while the whole is outside
@@ -121,6 +121,13 @@ change is named here.
 
 ### Changed
 
+- The read binaries' line tags are lowercase (`energy at bell …`,
+  `light — …`, `identity torque — …`), never capitals: a tag names a
+  reading, and capitals read as a constant. Every line of `breathe`,
+  `observe`, `pulse`, `life`, `atoms`, `witness` and the conductor follows;
+  `observe`'s journal filter matches the conductor's tags after the beat
+  (`beat N: breath`). STAMP, an acronym, and environment variable names
+  keep their capitals.
 - Names follow nature's terminology (register H12): "heart" is now the
   **star core** (astronomy's stellar core) in code and docs:
   `formation::heart_cut` → `formation::star_core_cut`; the `observe`

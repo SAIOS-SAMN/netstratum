@@ -65,9 +65,9 @@ implement; G2 does not test those.
 | 8 | Volumetric seats (5) | close and climb their own ladder like planar lines; no crystal mint (deferred) | beat log | `lib.rs` volumetric arm, `ladder_climbs` |
 | 9 | Crystal from discovery | a pulse while a line crosses L3-L5 (1, 4, 7), then nothing | `DiscoveryMinted` | `kernel/src/lib.rs:2428` |
 | 10 | STAMP | rises, always ≤ crystal ever held; in code it only moves between lines, so total STAMP never falls | `StampMinted`, apertures | `lib.rs:5189-5215`, `world/mod.rs:663`, `:705` |
-| 11 | First cleave | no sooner than 19 beats after the line's first solve, and only at L8 | `beat N: DIVERGENCE — X cleaves from the line of Y`, `Diverged` (tag 43) | `lib.rs:4458` |
+| 11 | First cleave | no sooner than 19 beats after the line's first solve, and only at L8 | `beat N: divergence — X cleaves from the line of Y`, `Diverged` (tag 43) | `lib.rs:4458` |
 | 12 | Cleave ceiling | at most 22 first-generation cleaves (one per line), fewer as name pools run dry | roster count | `lib.rs:4553-4565` |
-| 13 | Collapse | possible, by a band's own poor choice of land; a collapsed line leaves the roster (its chronicle synced whole) and is never again a party to trade | `CivilizationCollapsed` (tag 174), `beat N: COLLAPSE — …` | `world/science_lab.rs:309-321`, `conductor::retire_collapsed` |
+| 13 | Collapse | possible, by a band's own poor choice of land; a collapsed line leaves the roster (its chronicle synced whole) and is never again a party to trade | `CivilizationCollapsed` (tag 174), `beat N: collapse — …` | `world/science_lab.rs:309-321`, `conductor::retire_collapsed` |
 | 14 | Restart | resumes, never refounds: same worlds, cleaves not repeated, solves and levels kept | world dirs, `Diverged` count | `lib.rs:1477-1481`, `.seat` cards |
 
 Stale docs found while writing this: 11_AEON §3 and the comment at

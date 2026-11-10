@@ -26,7 +26,7 @@ fn main() {
         .unwrap_or(0)
         .min(until);
     if start > 0 {
-        println!("RESUMED at bell {start} (the checkpoint)");
+        println!("resumed at bell {start} (the checkpoint)");
     }
     let spin_before = pulse::spin_total(&u, &breath::unit_mass(&u));
     let mut events = Vec::new();
@@ -145,7 +145,7 @@ fn main() {
             .collect::<Vec<_>>()
             .join(", ")
     };
-    eprintln!("FIELDS at bell {start}: {}", show(&fields(&u)));
+    eprintln!("fields at bell {start}: {}", show(&fields(&u)));
     let started = std::time::Instant::now();
     let mut grown_past: Option<u64> = None;
     let mut last_motes = carrier(&u).0;
@@ -209,7 +209,7 @@ fn main() {
             }
             if let Some((t_e, r_rim)) = pulse::established_period(&u) {
                 eprintln!(
-                    "RIM at bell {}: R_rim {}, established period T_u = 2·a(R_rim) = {} bells; stored T_u {}; whole holding {}, within the rim {}",
+                    "rim at bell {}: R_rim {}, established period T_u = 2·a(R_rim) = {} bells; stored T_u {}; whole holding {}, within the rim {}",
                     b + 1,
                     conductor::reading::sector(&r_rim),
                     conductor::reading::sector(&t_e),
@@ -224,7 +224,7 @@ fn main() {
                 let whole: f64 = spent.iter().map(|(_, d)| d.as_secs_f64()).sum();
                 for (name, d) in spent.iter().take(14) {
                     eprintln!(
-                        "PROFILE echo at bell {} {name}: {:.1} s ({:.0} %)",
+                        "profile echo at bell {} {name}: {:.1} s ({:.0} %)",
                         b + 1,
                         d.as_secs_f64(),
                         100.0 * d.as_secs_f64() / whole.max(1e-9)
@@ -242,7 +242,7 @@ fn main() {
                     continue;
                 };
                 eprintln!(
-                    "FRONT at bell {} plane {plane}: {} cells, round trips {}..{} bells; stored T_u {}",
+                    "front at bell {} plane {plane}: {} cells, round trips {}..{} bells; stored T_u {}",
                     b + 1,
                     cells.len(),
                     conductor::reading::sector(&lo),
@@ -288,7 +288,7 @@ fn main() {
                 }
                 let mean: Vec<f64> = sum.iter().map(|s| s / whole.max(1e-300)).collect();
                 eprintln!(
-                    "LEAN at bell {}: core {:+.3e} {:+.3e} {:+.3e}; motes {:+.3e} {:+.3e} {:+.3e}, widest {:.3e}; {apart} of {} motes apart in phase",
+                    "lean at bell {}: core {:+.3e} {:+.3e} {:+.3e}; motes {:+.3e} {:+.3e} {:+.3e}, widest {:.3e}; {apart} of {} motes apart in phase",
                     b + 1,
                     home.first().copied().unwrap_or(f64::NAN),
                     home.get(1).copied().unwrap_or(f64::NAN),
@@ -304,7 +304,7 @@ fn main() {
             {
                 let h = conductor::horizons::read(&u);
                 eprintln!(
-                    "HORIZON at bell {}: {} motes; whole inside {}; planes inside by the whole's hold {:?}, by their own {:?}; a turning plane inside with the whole outside {}, the reverse {}; tilt ties {}; the two holds disagree {}",
+                    "horizon at bell {}: {} motes; whole inside {}; planes inside by the whole's hold {:?}, by their own {:?}; a turning plane inside with the whole outside {}, the reverse {}; tilt ties {}; the two holds disagree {}",
                     b + 1,
                     h.motes,
                     h.whole_inside,
@@ -324,7 +324,7 @@ fn main() {
                 .iter()
                 .fold((0usize, 0usize), |a, e| (a.0 + e.rang.0, a.1 + e.rang.1));
             eprintln!("bell {}: {} echoes read; {motes} motes ({in_systems} in the systems), widest {widest} bits; star bells rang {rung} of {read} star-echoes", b + 1, events.len());
-            eprintln!("FIELDS at bell {}: {}", b + 1, show(&fields(&u)));
+            eprintln!("fields at bell {}: {}", b + 1, show(&fields(&u)));
             if last_motes > 0 && motes > 2 * last_motes {
                 grown_past = Some(b + 1);
                 break;
@@ -333,7 +333,7 @@ fn main() {
         }
     }
     if let Some(at) = grown_past {
-        println!("GROWTH — the motes more than doubled in the chunk ending at bell {at}: the run stopped there");
+        println!("growth — the motes more than doubled in the chunk ending at bell {at}: the run stopped there");
     }
     let until = grown_past.unwrap_or(until);
     let unit = breath::unit_mass(&u);
@@ -346,7 +346,7 @@ fn main() {
         .iter()
         .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
     println!(
-        "STARS MET — {} merged, {} bounced",
+        "stars met — {} merged, {} bounced",
         events.iter().map(|e| e.merged).sum::<usize>(),
         events.iter().map(|e| e.encounters).sum::<usize>()
     );
@@ -371,7 +371,7 @@ fn main() {
             |s, e| (s.0 + e.collapse.0.clone(), s.1 + e.collapse.1.clone()),
         );
         println!(
-            "INFALL — bindings {} (holding); fell into the star cores {}, the rest their discs",
+            "infall — bindings {} (holding); fell into the star cores {}, the rest their discs",
             conductor::reading::sector(&cl),
             conductor::reading::sector(&fell)
         );
@@ -385,7 +385,7 @@ fn main() {
                     s.3 + e.fates.3,
                 )
             });
-        println!("GROWN — bodies grown by meetings: {} worlds, {} ignited as stars, {} whose core held nothing, {} that left past the rim", f.0, f.1, f.2, f.3);
+        println!("grown — bodies grown by meetings: {} worlds, {} ignited as stars, {} whose core held nothing, {} that left past the rim", f.0, f.1, f.2, f.3);
         let w = events.iter().fold(
             [
                 cfe::ratio::ratio(0, 1),
@@ -407,11 +407,11 @@ fn main() {
                 conductor::reading::sector(&(m.clone() / n.clone())).to_string()
             }
         };
-        println!("WEIGHT — a nucleus's mean hold: grown groups that left past the rim {}, worlds grown {}", mean(&w[0], &w[1]), mean(&w[2], &w[3]));
+        println!("weight — a nucleus's mean hold: grown groups that left past the rim {}, worlds grown {}", mean(&w[0], &w[1]), mean(&w[2], &w[3]));
         let im = events.iter().fold((0usize, 0usize, 0usize), |s, e| {
             (s.0 + e.impacts.0, s.1 + e.impacts.1, s.2 + e.impacts.2)
         });
-        println!("IMPACTS — bounces that struck as matter {}, tugs between neighbouring worlds {}; grown groups carried past the rim by their orthogonal orbit's swing alone {}", im.0, im.1, im.2);
+        println!("impacts — bounces that struck as matter {}, tugs between neighbouring worlds {}; grown groups carried past the rim by their orthogonal orbit's swing alone {}", im.0, im.1, im.2);
         let ms = events.iter().fold([0usize; 6], |mut a, e| {
             for i in 0..5 {
                 a[i] += e.motes[i];
@@ -426,7 +426,7 @@ fn main() {
             }
             last.values().sum()
         };
-        println!("MOTES — entered the galaxies' flows: arrivals {}, shed and through the stars' throats {}, recycling {}, binding members returned {}; folded by the merge {}; held at the end {held}", ms[0], ms[1], ms[2], ms[3], ms[4]);
+        println!("motes — entered the galaxies' flows: arrivals {}, shed and through the stars' throats {}, recycling {}, binding members returned {}; folded by the merge {}; held at the end {held}", ms[0], ms[1], ms[2], ms[3], ms[4]);
         let rel = events
             .iter()
             .fold((0usize, cfe::ratio::ratio(0, 1)), |s, e| {
@@ -441,14 +441,14 @@ fn main() {
             last.values()
                 .fold(cfe::ratio::ratio(0, 1), |s, x| s + x.clone())
         };
-        println!("RELEASE — the bounces released {} motes from the throats, holding {}; the throats still hold {}", rel.0, conductor::reading::sector(&rel.1), conductor::reading::sector(&throat_left));
-        println!("DISCS — released at the stars' births {} (holding), at or past the rim when released {}", conductor::reading::sector(&born), conductor::reading::sector(&out));
-        println!("SYSTEMS MET — {sticks} stuck, {bounces} bounced; overstepped the rims {} (holding); after the last echo, motes and bodies by galaxy {last:?}", conductor::reading::sector(&escaped));
+        println!("release — the bounces released {} motes from the throats, holding {}; the throats still hold {}", rel.0, conductor::reading::sector(&rel.1), conductor::reading::sector(&throat_left));
+        println!("discs — released at the stars' births {} (holding), at or past the rim when released {}", conductor::reading::sector(&born), conductor::reading::sector(&out));
+        println!("systems met — {sticks} stuck, {bounces} bounced; overstepped the rims {} (holding); after the last echo, motes and bodies by galaxy {last:?}", conductor::reading::sector(&escaped));
     }
     for (name, spent) in conductor::profile::drain() {
-        eprintln!("PROFILE {name}: {:.1}s", spent.as_secs_f64());
+        eprintln!("profile {name}: {:.1}s", spent.as_secs_f64());
     }
-    println!("BREATH — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up); {novae} novae (a remnant's gathered fuel thrown off); the magnet on reach moved {lifted_n} lifts by {} in all", until, events.len(), returned.round(), conductor::reading::sector(&lifted_du));
+    println!("breath — {} bells, T_u {t_u}: {} echoes (perpendicular writes down); recohered {births} systems born, decohered {} returned and {dissolved} stars dissolved (writes up); {novae} novae (a remnant's gathered fuel thrown off); the magnet on reach moved {lifted_n} lifts by {} in all", until, events.len(), returned.round(), conductor::reading::sector(&lifted_du));
     for (i, c) in u.cores.iter().enumerate() {
         let echoes = events
             .iter()
@@ -513,7 +513,7 @@ fn main() {
                     ),
                     _ => "none".into(),
                 };
-                println!("  the HOME {:?} at the source: {echoes} echoes; no clock of its own, its {born} systems' clocks {span}; {orbs} orbs; medium left {}; {year}", c.path, medium.round());
+                println!("  the home {:?} at the source: {echoes} echoes; no clock of its own, its {born} systems' clocks {span}; {orbs} orbs; medium left {}; {year}", c.path, medium.round());
             }
         }
     }
@@ -534,13 +534,13 @@ fn main() {
     let journaled = worlds.iter().filter(|&&y| y > 0).count();
     let mut w = worlds.clone();
     w.sort();
-    println!("CLOCKS — over {until} bells: galaxy terms (echoes received) {terms:?}; galaxy epochs (half-mass rungs) {epochs:?}; worlds' journals: {} worlds, {journaled} with a completed local year (most years {:?}, median {:?}); universal echoes {}", worlds.len(), w.last(), w.get(w.len() / 2), until / t_u);
+    println!("clocks — over {until} bells: galaxy terms (echoes received) {terms:?}; galaxy epochs (half-mass rungs) {epochs:?}; worlds' journals: {} worlds, {journaled} with a completed local year (most years {:?}, median {:?}); universal echoes {}", worlds.len(), w.last(), w.get(w.len() / 2), until / t_u);
     // Fusion transmutes kinds (H + H → He), so the manifest itself changes;
     // what the breath conserves is each nucleus's 3Z, holding plus
     // magnetism (transduction via magnetism).
     // Mass is already the whole 3Z (holding and magnetism converged).
     let three_z = |m: &pulse::Manifest| pulse::mass(m);
-    println!("CONSERVATION — the breath created nothing (holding + magnetism, 3Z): {}; the manifest unchanged: {}", three_z(&u.total()) == three_z(&before), u.total() == before);
+    println!("conservation — the breath created nothing (holding + magnetism, 3Z): {}; the manifest unchanged: {}", three_z(&u.total()) == three_z(&before), u.total() == before);
     // The age (operator 2026-10-19: "universes age from their conception on
     // the TUniversal sexagesimal logged at their birth (distribution of
     // resources)"; hydrogen the commonest at the founding, a reading, then the
@@ -564,7 +564,7 @@ fn main() {
         .map(|(k, _)| k.to_string())
         .unwrap_or_else(|| "none".into());
     println!(
-        "AGE — by nuclei, H {} -> {}, He {} -> {} (founding -> now); commonest now {commonest}",
+        "age — by nuclei, H {} -> {}, He {} -> {} (founding -> now); commonest now {commonest}",
         share(&before, 1),
         share(&all, 1),
         share(&before, 2),
@@ -589,7 +589,7 @@ fn main() {
         conductor::reading::share(&o, &t)
     };
     println!(
-        "PARITY — odd share of Z >= 3 by nuclei: {} -> {} (founding -> now)",
+        "parity — odd share of Z >= 3 by nuclei: {} -> {} (founding -> now)",
         odd(&before),
         odd(&all)
     );
@@ -616,21 +616,21 @@ fn main() {
             })
             / pulse::mass(&all);
         println!(
-            "HEAVIEST — weight {top} (Q {}, Z {}); matter past weight 4 by mass {}",
+            "heaviest — weight {top} (Q {}, Z {}); matter past weight 4 by mass {}",
             conductor::nuclides::protons(top).unwrap_or(0),
             conductor::nuclides::neutrons(top).unwrap_or(0),
             f(&heavy)
         );
     }
-    println!("CIRCULATION — the shear moved {} outward, the pressure {} radially and {} around the shells' circles ({} shell planes parted into cells) (spin, ledger units); the luminal bound turned {} motes onto the Möbius leg; the stream read {} on the vacuum; the trapped carried {} spin to the reservoirs; {} jets left past the rims", f(&sum(&|e| e.circulation.0.clone())), f(&sum(&|e| e.circulation.1.clone())), f(&sum(&|e| e.circulation.4.clone())), events.iter().map(|e| e.circulation.5).sum::<usize>(), events.iter().map(|e| e.circulation.2).sum::<usize>(), events.iter().map(|e| e.circulation.3).sum::<usize>(), f(&sum(&|e| e.recycled.spun.clone())), events.iter().map(|e| e.jets).sum::<usize>());
+    println!("circulation — the shear moved {} outward, the pressure {} radially and {} around the shells' circles ({} shell planes parted into cells) (spin, ledger units); the luminal bound turned {} motes onto the Möbius leg; the stream read {} on the vacuum; the trapped carried {} spin to the reservoirs; {} jets left past the rims", f(&sum(&|e| e.circulation.0.clone())), f(&sum(&|e| e.circulation.1.clone())), f(&sum(&|e| e.circulation.4.clone())), events.iter().map(|e| e.circulation.5).sum::<usize>(), events.iter().map(|e| e.circulation.2).sum::<usize>(), events.iter().map(|e| e.circulation.3).sum::<usize>(), f(&sum(&|e| e.recycled.spun.clone())), events.iter().map(|e| e.jets).sum::<usize>());
     let closing: Vec<u32> = motion::years_closing(&u, until);
     let rungs: Vec<u64> = events.iter().map(|e| e.rung).collect();
     let parallel = events
         .iter()
         .filter(|e| matches!(e.write, breath::Write::Parallel))
         .count();
-    println!("ECHOES — rungs read {}..{}, {} written parallel and {} perpendicular; galactic years closing at bell {until}: {closing:?}", rungs.iter().min().copied().unwrap_or(0), rungs.iter().max().copied().unwrap_or(0), parallel, events.len() - parallel);
-    println!("RECYCLING — the throats pressed {} and peeled {} (grains of nuclei); light given {}, holding opened {}, trapped {} (units); {} echoes recycled", f(&sum(&|e| e.recycled.pressed.clone())), f(&sum(&|e| e.recycled.peeled.clone())), f(&sum(&|e| e.recycled.light.clone())), f(&sum(&|e| e.recycled.spent.clone())), f(&sum(&|e| e.recycled.trapped.clone())), events.iter().filter(|e| e.recycled != Default::default()).count());
+    println!("echoes — rungs read {}..{}, {} written parallel and {} perpendicular; galactic years closing at bell {until}: {closing:?}", rungs.iter().min().copied().unwrap_or(0), rungs.iter().max().copied().unwrap_or(0), parallel, events.len() - parallel);
+    println!("recycling — the throats pressed {} and peeled {} (grains of nuclei); light given {}, holding opened {}, trapped {} (units); {} echoes recycled", f(&sum(&|e| e.recycled.pressed.clone())), f(&sum(&|e| e.recycled.peeled.clone())), f(&sum(&|e| e.recycled.light.clone())), f(&sum(&|e| e.recycled.spent.clone())), f(&sum(&|e| e.recycled.trapped.clone())), events.iter().filter(|e| e.recycled != Default::default()).count());
     // The burn and the return as rates (TUniversal 11.0 (23)): hydrogen fused
     // by the stars and returned net by the throats, per universal echo, as
     // shares of the hydrogen standing now, over the run's windows (tenths).
@@ -676,7 +676,7 @@ fn main() {
             w += 1;
         }
         println!(
-            "RATES — hydrogen per universal echo, as a share of the hydrogen now: {}",
+            "rates — hydrogen per universal echo, as a share of the hydrogen now: {}",
             rows.join("; ")
         );
     }
@@ -715,7 +715,7 @@ fn main() {
                 phases = phases.max(bits(p));
             }
         }
-        println!("CARRIER — widest exact value held, in bits: amounts {amounts}, spins and reaches {spins}, phases {phases}, agitation {agitation}; {} motes", motes.len());
+        println!("carrier — widest exact value held, in bits: amounts {amounts}, spins and reaches {spins}, phases {phases}, agitation {agitation}; {} motes", motes.len());
     }
     // The cross (the eight pivots): every residue's fate over the run, by
     // fate, every plane together.
@@ -730,7 +730,7 @@ fn main() {
             .map(|(f, n)| format!("{f:?} {n}"))
             .collect();
         println!(
-            "CROSS — residues by fate over the run: {}",
+            "cross — residues by fate over the run: {}",
             if row.is_empty() {
                 "none".into()
             } else {
@@ -767,7 +767,7 @@ fn main() {
             sum(&|e| e.light.received.clone()),
             sum(&|e| e.light.drained.clone()),
         );
-        println!("LIGHT — made {}, received {} by the bodies on the continuum face, drained {} into the vacuum (units); balanced: {}", conductor::reading::sector(&made), conductor::reading::sector(&got), conductor::reading::sector(&gone), made == got.clone() + gone.clone());
+        println!("light — made {}, received {} by the bodies on the continuum face, drained {} into the vacuum (units); balanced: {}", conductor::reading::sector(&made), conductor::reading::sector(&got), conductor::reading::sector(&gone), made == got.clone() + gone.clone());
     }
     // The firmament's collective (docs/111 §4): its bonds read at each
     // universal bounce; the last bounce's reading and the greatest.
@@ -783,7 +783,7 @@ fn main() {
             } else {
                 last.in_collections.clone() / last.held.clone()
             };
-            println!("COLLECTIVE — {} bounces read; the last: {} motes, {} collections ({} motes bonded, the largest {}), {} of the holding bonded; at most {} collections; the transmission τ {}; weights held {}..={}, the collective's mean {}", read.len(), last.motes, last.collections, last.bonded, last.largest, conductor::reading::sector(&share), most, conductor::reading::sector(&last.tau), last.lightest, last.heaviest, conductor::reading::sector(&last.mean));
+            println!("collective — {} bounces read; the last: {} motes, {} collections ({} motes bonded, the largest {}), {} of the holding bonded; at most {} collections; the transmission τ {}; weights held {}..={}, the collective's mean {}", read.len(), last.motes, last.collections, last.bonded, last.largest, conductor::reading::sector(&share), most, conductor::reading::sector(&last.tau), last.lightest, last.heaviest, conductor::reading::sector(&last.mean));
         }
     }
     // The galaxies' formation (docs/111 §5.4), from each bounce's own record:
@@ -816,7 +816,7 @@ fn main() {
             .min_by(|a, b| a.0.cmp(&b.0));
         let held = f.groups.iter().filter(|g| g.self_held).count();
         println!(
-            "FORMATION — bounce {}: {} candidates, {} collections of two or more, {} self-held, {} formed; the nearest its pinch {}",
+            "formation — bounce {}: {} candidates, {} collections of two or more, {} self-held, {} formed; the nearest its pinch {}",
             n + 1,
             f.candidates,
             f.groups.len(),
@@ -831,7 +831,7 @@ fn main() {
     // The tolls: every star that passed, struck on its own bell.
     {
         let tolls: Vec<&breath::Toll> = events.iter().flat_map(|e| e.tolls.iter()).collect();
-        println!("TOLLS — {} stars passed", tolls.len());
+        println!("tolls — {} stars passed", tolls.len());
         for t in tolls {
             let heard: Vec<String> = (0..u.cores.len())
                 .filter_map(|g| {
@@ -869,12 +869,12 @@ fn main() {
         }
         for (kind, (n, exact, worst)) in &kinds {
             println!(
-                "IDENTITY {kind} — {exact} of {n} exact; greatest residual {}",
+                "identity {kind} — {exact} of {n} exact; greatest residual {}",
                 conductor::reading::sector(worst)
             );
         }
         let spin_after = pulse::spin_total(&u, &breath::unit_mass(&u));
-        println!("IDENTITY ledger — the bodies' spin (both orbits) and media, before {} after {}: moved {} (motes and reservoirs are outside it)", conductor::reading::sector(&spin_before), conductor::reading::sector(&spin_after), conductor::reading::sector(&(spin_after.clone() - spin_before.clone())));
+        println!("identity ledger — the bodies' spin (both orbits) and media, before {} after {}: moved {} (motes and reservoirs are outside it)", conductor::reading::sector(&spin_before), conductor::reading::sector(&spin_after), conductor::reading::sector(&(spin_after.clone() - spin_before.clone())));
     }
     use num_traits::Zero as _;
     // The swing (docs/90): each galaxy's stars' and worlds' elongations, their
@@ -935,14 +935,14 @@ fn main() {
                 orth_spin += pulse::mass(&b.total()) / unit.clone() * b.ell_orth.clone();
             }
             println!(
-                "SWING {:?} — stars: {}; worlds: {}",
+                "swing {:?} — stars: {}; worlds: {}",
                 core.path,
                 read(&stars),
                 read(&worlds)
             );
         }
         println!(
-            "SWING — the bodies' orthogonal spin on the ledger, Σ m·ℓ_⊥ = {}",
+            "swing — the bodies' orthogonal spin on the ledger, Σ m·ℓ_⊥ = {}",
             conductor::reading::sector(&orth_spin)
         );
     }
@@ -999,7 +999,7 @@ fn main() {
             .fold(cfe::ratio::ratio(0, 1), |a, x| a + x.amount.clone());
         let f = |x: &cfe::ratio::Ratio| conductor::reading::sector(x).to_string();
         println!(
-            "FUEL — weight 1, hydrogen (grains): the stars keep {} ({} of {} stars hold any; weight 2 kept {}), the galaxies' flows {}, their throats {}, the ocean {}; the stars' lightest kept kind, by weight: {:?}",
+            "fuel — weight 1, hydrogen (grains): the stars keep {} ({} of {} stars hold any; weight 2 kept {}), the galaxies' flows {}, their throats {}, the ocean {}; the stars' lightest kept kind, by weight: {:?}",
             f(&kept),
             holding_h,
             stars,
@@ -1010,7 +1010,7 @@ fn main() {
             lightest
         );
         for line in &held_by {
-            println!("FUEL — a star holding hydrogen: {line}");
+            println!("fuel — a star holding hydrogen: {line}");
         }
         // Each birth's own record: hydrogen's share by mass of what fell, of
         // it after the fibres' transition, and of what the star keeps.
@@ -1020,7 +1020,7 @@ fn main() {
         let none = |k: usize| births.iter().filter(|b| [&b.0, &b.1, &b.2][k] == &zero).count();
         let most = |k: usize| births.iter().map(|b| [&b.0, &b.1, &b.2][k].clone()).max().unwrap_or_else(|| zero.clone());
         println!(
-            "FUEL — births: {}; hydrogen absent from what fell in {}, after the fibres' transition in {}, from the star kept in {}; the greatest hydrogen share by mass, fell {}, after the transition {}, kept {}",
+            "fuel — births: {}; hydrogen absent from what fell in {}, after the fibres' transition in {}, from the star kept in {}; the greatest hydrogen share by mass, fell {}, after the transition {}, kept {}",
             births.len(),
             none(0),
             none(1),
@@ -1073,7 +1073,7 @@ fn main() {
             ));
         }
         let _ = std::fs::write(Path::new(era1).join("runs.txt"), text);
-        println!("JOINT READ — {} burning bodies (star, rung), {runs} runs on their own clocks, {refused} refused; written {era1}/runs.txt", bodies.len());
+        println!("joint read — {} burning bodies (star, rung), {runs} runs on their own clocks, {refused} refused; written {era1}/runs.txt", bodies.len());
     }
     if args.get(4).map(String::as_str) == Some("write") {
         let _ = pulse::write(Path::new(era1), &seed, &u);
@@ -1099,7 +1099,7 @@ fn energy_line(
     let s = conductor::reading::sector;
     let dh = b.heat() - a.heat();
     format!(
-        "ENERGY {when}: heat {} (motes {}, stars {}, worlds {}), change {}, less light received {}; potential {}, change {}; bond {}, closed {}; light made {}, received {}, drained {}",
+        "energy {when}: heat {} (motes {}, stars {}, worlds {}), change {}, less light received {}; potential {}, change {}; bond {}, closed {}; light made {}, received {}, drained {}",
         s(&b.heat()),
         s(&b.heat_motes),
         s(&b.heat_stars),

@@ -26,7 +26,7 @@ fn main() {
         match flag.as_str() {
             "--var" => var_root = value(),
             "--cycles" => cycles = value().parse().expect("--cycles N"),
-            "--cadence" => cadence_secs = value().parse().expect("--cadence SECONDS"),
+            "--cadence" => cadence_secs = value().parse().expect("--cadence seconds"),
             "--fold" => do_fold = true,
             other => {
                 eprintln!("conductor: unknown flag {other}");
@@ -42,7 +42,7 @@ fn main() {
         match conductor::fold(&var_root) {
             Ok((era, gauge)) => {
                 println!(
-                    "conductor: aeon FOLDED — era {era} sealed into {var_root}-era{era}; the new sheet seats at G = {gauge}"
+                    "conductor: aeon folded — era {era} sealed into {var_root}-era{era}; the new sheet seats at G = {gauge}"
                 );
                 return;
             }
@@ -140,7 +140,7 @@ fn main() {
     );
     for q in &converged.quarantined {
         println!(
-            "conductor: QUARANTINED {}/{} (break at {})",
+            "conductor: quarantined {}/{} (break at {})",
             q.era, q.world, q.at
         );
     }
@@ -161,7 +161,7 @@ fn main() {
         epoch_base,
     ) {
         Ok((seed, true)) => println!(
-            "conductor: THE BIG BANG — this universe is {} (recorded now)",
+            "conductor: the big bang — this universe is {} (recorded now)",
             seed.iter()
                 .take(8)
                 .map(|b| format!("{b:02x}"))
@@ -324,7 +324,7 @@ fn main() {
             Some(0) => {
                 write_control(true, None);
                 println!(
-                    "conductor: ADVANCE complete — the board pauses; `npcs resume` or `npcs advance N` to continue"
+                    "conductor: advance complete — the board pauses; `npcs resume` or `npcs advance N` to continue"
                 );
                 (true, cadence)
             }
@@ -337,7 +337,7 @@ fn main() {
         if paused {
             if !announced_pause {
                 println!(
-                    "conductor: PAUSED — npcs resume (or edit {}) to continue",
+                    "conductor: paused — npcs resume (or edit {}) to continue",
                     control_path.display()
                 );
                 announced_pause = true;
@@ -372,7 +372,7 @@ fn main() {
             // Transduction via magnetism: holding + magnetism (3Z a nucleus)
             // is what fusion conserves; light carries the transduction.
             let total_magnetism = conductor::pulse::magnetism(&universe.total()) / unit.clone();
-            println!("beat {beat}: LEDGER — mass {} spin {} magnetism {} mass+magnetism {} (units of the deepest hole)", total_mass, total_spin, total_magnetism, total_mass.clone() + total_magnetism.clone());
+            println!("beat {beat}: ledger — mass {} spin {} magnetism {} mass+magnetism {} (units of the deepest hole)", total_mass, total_spin, total_magnetism, total_mass.clone() + total_magnetism.clone());
             // The poles (docs/78 law 11): the universal core's strength, the
             // span between its ℤ pole (holding) and ℚ pole (magnetism), and
             // its balance, the share at the ℤ pole (1: hardened).
@@ -390,7 +390,7 @@ fn main() {
                 &conductor::pulse::magnetism(&held),
             );
             let f = conductor::reading::sector;
-            println!("beat {beat}: POLES — universal core strength H_u {}, balance {} (the share at the ℤ pole)", f(&conductor::ocean::universe_hold(&universe)), f(&balance));
+            println!("beat {beat}: poles — universal core strength H_u {}, balance {} (the share at the ℤ pole)", f(&conductor::ocean::universe_hold(&universe)), f(&balance));
             // The enclosures (docs/78): each galaxy its own S^360, each star
             // system its own S^60, joined at its core's throat; each counts
             // its turns on its own ring (the pulse's round trip to its rim).
@@ -460,7 +460,7 @@ fn main() {
                 (Some(a), Some(b)) => format!("{}..{}", f(a), f(b)),
                 _ => "none".to_string(),
             };
-            println!("beat {beat}: FORMATION — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {}, gas {} of the universe in {motes} motes; coupling κ {kappa}", universe.cores.len(), f(&discs), f(&gas_share));
+            println!("beat {beat}: formation — {stars} stars ({metal_stars} with metals) and {worlds} worlds in {lit} of {} galaxies; discs {}, gas {} of the universe in {motes} motes; coupling κ {kappa}", universe.cores.len(), f(&discs), f(&gas_share));
             // The burn observer (docs/83): each star's interface burn
             // on the rings it has received since its star core formed (its
             // nested clock: the galaxy's rate times its orbit's).
@@ -511,15 +511,15 @@ fn main() {
             }
             lives.sort();
             if let (Some(a), Some(b)) = (lives.first(), lives.last()) {
-                println!("beat {beat}: BURN — {burning} stars burning, {spent} spent; lifetimes {}..{} bells (median {})", f(a), f(b), f(&lives[lives.len() / 2]));
+                println!("beat {beat}: burn — {burning} stars burning, {spent} spent; lifetimes {}..{} bells (median {})", f(a), f(b), f(&lives[lives.len() / 2]));
             }
-            println!("beat {beat}: ENCLOSURES — {} galaxies on S^360 (own rings {gs}), {} systems on S^60 (own rings {ss}); {inversion}", gal.len(), sys.len());
+            println!("beat {beat}: enclosures — {} galaxies on S^360 (own rings {gs}), {} systems on S^60 (own rings {ss}); {inversion}", gal.len(), sys.len());
         }
         if !events.is_empty() {
             let _ =
                 conductor::pulse::write(std::path::Path::new(&var_root), &pulse_seed, &universe);
             println!(
-                "beat {beat}: BREATH — {} echoes, {} systems born, {} returned to the media (units of the deepest hole), {} stars dissolved",
+                "beat {beat}: breath — {} echoes, {} systems born, {} returned to the media (units of the deepest hole), {} stars dissolved",
                 breath_reading.echoes, breath_reading.births, conductor::reading::sector(&breath_reading.returned), breath_reading.dissolved
             );
         }
@@ -550,7 +550,7 @@ fn main() {
                 conductor::waking::found(&universe, &pulse_seed, &w, &registry, world)
             {
                 println!(
-                    "beat {beat}: A MIND WAKES — {} ({}, {} medium) on world {:?}",
+                    "beat {beat}: A mind wakes — {} ({}, {} medium) on world {:?}",
                     spec.civilization.name, spec.civilization.species, w.medium, w.path
                 );
                 breath_reading.wakings += 1;
@@ -573,21 +573,21 @@ fn main() {
                 )
             });
             for (mind, path) in &attached.coupled {
-                println!("beat {beat}: A MIND COUPLES — {mind} to the forming world {path:?}");
+                println!("beat {beat}: A mind couples — {mind} to the forming world {path:?}");
             }
             for (sigil, world) in &attached.admitted {
-                println!("beat {beat}: A MIND ATTACHES — its orbit solid, {sigil} founded on world {world}");
+                println!("beat {beat}: A mind attaches — its orbit solid, {sigil} founded on world {world}");
             }
             for sigil in &attached.released {
-                println!("beat {beat}: A MIND DETACHES — {sigil} goes on as the universe's own");
+                println!("beat {beat}: A mind detaches — {sigil} goes on as the universe's own");
             }
             for (mind, opened) in &attached.sandboxes {
                 println!(
-                    "beat {beat}: A SANDBOX {} — {mind}",
+                    "beat {beat}: A sandbox {} — {mind}",
                     if *opened {
-                        "OPENS"
+                        "opens"
                     } else {
-                        "IS REFUSED (its leisure does not cover it)"
+                        "is refused (its leisure does not cover it)"
                     }
                 );
             }
@@ -640,7 +640,7 @@ fn main() {
             while at < worlds.len() {
                 if !worlds[at].penned && !observed.contains(&worlds[at].spec.world_name) {
                     let spec = worlds.remove(at).compact(&book);
-                    println!("beat {beat}: COMPACT — {} has no observer; its state carried, its world unloaded", spec.world_name);
+                    println!("beat {beat}: compact — {} has no observer; its state carried, its world unloaded", spec.world_name);
                     dormant.push(spec);
                 } else {
                     at += 1;
@@ -652,7 +652,7 @@ fn main() {
             dormant = still;
             for spec in wake {
                 println!(
-                    "beat {beat}: UNROLLED — {} is observed; its world runs",
+                    "beat {beat}: unrolled — {} is observed; its world runs",
                     spec.world_name
                 );
                 worlds.push(Polity::genesis(spec, &registry, &book));
@@ -775,7 +775,7 @@ fn main() {
             let world_name = polity.spec.world_name.clone();
             for (sequence, unlawful) in polity.unreported_refusals() {
                 println!(
-                    "beat {beat}: THE JUDGE REFUSES — {world_name}: deed {sequence} is unlawful ({unlawful:?}); the deed stands, the verdict is on record"
+                    "beat {beat}: the judge refuses — {world_name}: deed {sequence} is unlawful ({unlawful:?}); the deed stands, the verdict is on record"
                 );
             }
         }
@@ -783,7 +783,7 @@ fn main() {
         // roster now, its chronicle synced whole, before any cross-world step
         // can name it as a party.
         for name in conductor::retire_collapsed(&mut worlds, &book, epoch_base + beat) {
-            println!("beat {beat}: COLLAPSE — {name} has no people left; it leaves the roster, its chronicle kept whole");
+            println!("beat {beat}: collapse — {name} has no people left; it leaves the roster, its chronicle kept whole");
         }
         // The largest living LINEAGE, read live and announced when it
         // changes: the progenitor candidate (an ancient arises only at a core).
@@ -802,7 +802,7 @@ fn main() {
         if now_ancient.as_ref().map(|(s, _)| s) != ancient.as_ref().map(|(s, _)| s) {
             match &now_ancient {
                 Some((sigil, tree)) => println!(
-                    "beat {beat}: THE PROGENITOR CANDIDATE — {sigil}'s line holds {tree} of {} living lines (an ancient arises only at a core)",
+                    "beat {beat}: the progenitor candidate — {sigil}'s line holds {tree} of {} living lines (an ancient arises only at a core)",
                     living.len()
                 ),
                 None => println!("beat {beat}: no progenitor candidate — no line's living tree is the strict largest"),
@@ -832,17 +832,17 @@ fn main() {
             }) {
                 Some((_, Some(site))) => conductor::seating::apply(&mut spec, &site),
                 Some((p, None)) => println!(
-                    "beat {beat}: UNSETTLED — {} finds no world near {p:?}: {}",
+                    "beat {beat}: unsettled — {} finds no world near {p:?}: {}",
                     spec.civilization.sigil,
                     conductor::places::unsettled(p)
                 ),
                 None => println!(
-                    "beat {beat}: UNSETTLED — {}: its parent {parent} stands on no era-1 world",
+                    "beat {beat}: unsettled — {}: its parent {parent} stands on no era-1 world",
                     spec.civilization.sigil
                 ),
             }
             println!(
-                "beat {beat}: DIVERGENCE — {} ({}) cleaves from the line of {}, settling {}/{}{}",
+                "beat {beat}: divergence — {} ({}) cleaves from the line of {}, settling {}/{}{}",
                 spec.civilization.name,
                 spec.civilization.species,
                 spec.civilization
@@ -865,7 +865,7 @@ fn main() {
             conductor::profile::timed("fleet_step", || conductor::fleet_step(&mut worlds));
         if released > 0 {
             println!(
-                "beat {beat}: FLEET — {released} hulls return to the idle pool from lapsed routes"
+                "beat {beat}: fleet — {released} hulls return to the idle pool from lapsed routes"
             );
         }
         // Cores slice 3: the core's bell delivers the dead's words that are due.
@@ -881,7 +881,7 @@ fn main() {
             conductor::market_step(&mut worlds, beat, &span)
         }) {
             contacts.add(&seller, &buyer);
-            println!("beat {beat}: THE CROSSING CLEARS — {seller} ⇌ {buyer}; the autarkies trade");
+            println!("beat {beat}: the crossing clears — {seller} ⇌ {buyer}; the autarkies trade");
         }
         // MERCHANT-1: the caravan bridges what the void walled.
         for (m, a, b) in conductor::profile::timed("merchant_step", || {
@@ -889,14 +889,14 @@ fn main() {
         }) {
             contacts.add(&m, &a);
             contacts.add(&m, &b);
-            println!("beat {beat}: THE CARAVAN — {m} bridges {a} ⇌ {b}; the walled trade flows");
+            println!("beat {beat}: the caravan — {m} bridges {a} ⇌ {b}; the walled trade flows");
         }
         // E3.3: pure NPC element aperture hauls (Wave-2).
         for (from, to) in conductor::profile::timed("element_trade_step", || {
             conductor::element_trade_step(&mut worlds, beat, &span)
         }) {
             contacts.add(&from, &to);
-            println!("beat {beat}: ELEMENT CROSSING — {from} → {to}; open matter rides the void");
+            println!("beat {beat}: element crossing — {from} → {to}; open matter rides the void");
         }
         // STAMP MM-1: mint + spot clear (Wave-4).
         // One line per beat, not one per clear (it was ~90 lines a second).
@@ -921,9 +921,9 @@ fn main() {
                         .iter()
                         .filter(|(_, r)| *r != cfe::ratio::ratio(0, 1))
                         .count();
-                    println!("beat {beat}: CHRONOMETRY — committed {} entries in all; {} rims, {out_of_phase} with a residual against their mantle; point {:?}", chain.entries, rims.len(), heard);
+                    println!("beat {beat}: chronometry — committed {} entries in all; {} rims, {out_of_phase} with a residual against their mantle; point {:?}", chain.entries, rims.len(), heard);
                 }
-                Err(e) => println!("beat {beat}: CHRONOMETRY — not committed: {e}"),
+                Err(e) => println!("beat {beat}: chronometry — not committed: {e}"),
             }
         }
         let h_now = point
@@ -991,7 +991,7 @@ fn main() {
             .map(|(why, n)| format!("{n} {why}"))
             .collect();
         println!(
-            "beat {beat}: HUB — {} galaxies cleared at their hubs (STAMP for cargo, one price each); road tolls {tolls} STAMP to the keepers, gate tolls {gated} STAMP to the builders; not cleared: {} alone, {} closed, {} unmet; buyers' STAMP legs: {} carried in part, refused [{}]",
+            "beat {beat}: hub — {} galaxies cleared at their hubs (STAMP for cargo, one price each); road tolls {tolls} STAMP to the keepers, gate tolls {gated} STAMP to the builders; not cleared: {} alone, {} closed, {} unmet; buyers' STAMP legs: {} carried in part, refused [{}]",
             spots.len(),
             hubs.alone,
             hubs.closed,
@@ -1002,7 +1002,7 @@ fn main() {
         // docs/73 decide step 1: the hull decisions captured this beat.
         let d = &hubs.decided;
         println!(
-            "beat {beat}: DECIDE hull — {} lines seen, {} lost for want of hull; persistence {} of {} rows this beat, {} of {} over the books' windows; {} books, {} triples",
+            "beat {beat}: decide hull — {} lines seen, {} lost for want of hull; persistence {} of {} rows this beat, {} of {} over the books' windows; {} books, {} triples",
             d.rows, d.lost, d.correct, d.scored, hubs.persistence.0, hubs.persistence.1, hubs.books.0, hubs.books.1
         );
         if let Err(e) = annal.beat(
@@ -1014,7 +1014,7 @@ fn main() {
             released,
             &breath_reading,
         ) {
-            println!("beat {beat}: THE UNIVERSE JOURNAL is not kept this beat: {e}");
+            println!("beat {beat}: the universe journal is not kept this beat: {e}");
         }
         // Concordance 3.9: the councils the house seats, published for it.
         if beat.is_multiple_of(10) {
@@ -1031,10 +1031,10 @@ fn main() {
                 )
             });
             if let Some((core, admitted)) = &commission.ambiguous {
-                println!("beat {beat}: COMMISSION OPEN — {core}: the pairs still admit {admitted} orders; no closure by a tie-break");
+                println!("beat {beat}: commission open — {core}: the pairs still admit {admitted} orders; no closure by a tie-break");
             }
             if let Some((core, world, arrived, by, admitted)) = &commission.closed {
-                println!("beat {beat}: COMMISSION CLOSED — {world} sites the hub of {core} by its own word ({by}; {admitted} orders admitted); bounty {arrived} STAMP arrived");
+                println!("beat {beat}: commission closed — {world} sites the hub of {core} by its own word ({by}; {admitted} orders admitted); bounty {arrived} STAMP arrived");
             }
         }
         // docs/69 — the spacing guild in the substrata: the ancients' tubes
@@ -1050,12 +1050,12 @@ fn main() {
         });
         for (sigil, origin, depth) in &below.opened {
             println!(
-                "beat {beat}: A TUBE OPENS — {sigil} opens a substratum {origin} at depth {depth}"
+                "beat {beat}: A tube opens — {sigil} opens a substratum {origin} at depth {depth}"
             );
         }
         if let Some((origin, depth, first)) = &below.closed {
             println!(
-                "beat {beat}: BELOW — substratum {origin} (depth {depth}) closed {}",
+                "beat {beat}: below — substratum {origin} (depth {depth}) closed {}",
                 if *first {
                     "a first action"
                 } else {
@@ -1069,7 +1069,7 @@ fn main() {
             conductor::consilience_step(&mut worlds, beat)
         }) {
             println!(
-                "beat {beat}: CONSILIENCE — {world} shares a truth {mass} lines reached (hardness {hardness})"
+                "beat {beat}: consilience — {world} shares a truth {mass} lines reached (hardness {hardness})"
             );
         }
         // The knowledge market (ARC C): a prosperous line licenses a word
@@ -1078,7 +1078,7 @@ fn main() {
             conductor::knowledge_market_step(&mut worlds, beat)
         }) {
             println!(
-                "beat {beat}: KNOWLEDGE MARKET — {world} licenses an idea (depth {price}); vocabulary spreads"
+                "beat {beat}: knowledge market — {world} licenses an idea (depth {price}); vocabulary spreads"
             );
         }
         // Speech between LINES (docs/60 D2): each line hears its nearest
@@ -1099,7 +1099,7 @@ fn main() {
             for polity in worlds.iter_mut().filter(|e| !e.penned) {
                 for deal in polity.world.maintain_routes(cfe::world::FIRST_ORB) {
                     year_lines.push(format!(
-                        "LANE {deal} LAPSES on {} — raw space takes the path back",
+                        "lane {deal} lapses on {} — raw space takes the path back",
                         polity.spec.world_name
                     ));
                 }
@@ -1159,7 +1159,7 @@ fn main() {
                     let g = conductor::gauges::read(p, &partners);
                     let pct = |x: &cfe::ratio::Ratio| (x * cfe::ratio::ratio(100, 1)).floor();
                     year_lines.push(format!(
-                        "GAUGES {} — instinct {}%, intelligence {}%, sentience {}%, consciousness {}%; Γ {}%",
+                        "gauges {} — instinct {}%, intelligence {}%, sentience {}%, consciousness {}%; Γ {}%",
                         p.spec.civilization.sigil,
                         pct(&g.instinct),
                         pct(&g.intelligence),
@@ -1191,7 +1191,7 @@ fn main() {
                 println!("beat {beat}: {line}");
             }
             if let Err(e) = annal.year(beat, &year_lines) {
-                println!("beat {beat}: THE UNIVERSE JOURNAL did not keep the year's close: {e}");
+                println!("beat {beat}: the universe journal did not keep the year's close: {e}");
             }
             // Memory (operator 2026-10-09): what the allocator holds freed but
             // unreturned is given back at the year's close, and the rss read
@@ -1214,7 +1214,7 @@ fn main() {
                     libc::malloc_trim(0);
                 }
                 println!(
-                    "beat {beat}: MEMORY — rss {} MB before the trim, {} MB after",
+                    "beat {beat}: memory — rss {} MB before the trim, {} MB after",
                     before / 1024,
                     rss() / 1024
                 );
@@ -1232,7 +1232,7 @@ fn main() {
             // GALAXY-1b: the observation sweep rides the year voice.
             for galaxy in observe_crossings(&worlds, &registry, &book, epoch_base + beat) {
                 println!(
-                    "beat {beat}: OBSERVATION — the galaxy {} enters the chart, reach {}",
+                    "beat {beat}: observation — the galaxy {} enters the chart, reach {}",
                     galaxy.name, galaxy.reach
                 );
             }
@@ -1281,7 +1281,7 @@ fn main() {
                 "census beat {beat}: memory entries={held} budget={} witness={hits}{}",
                 conductor::MIND_ENTRY_BUDGET,
                 if hits > 0 {
-                    " ALARM: a basin met the byte witness"
+                    " alarm: a basin met the byte witness"
                 } else {
                     ""
                 }
@@ -1320,10 +1320,10 @@ fn main() {
                 }
             }
             if !lane_tally.is_empty() {
-                println!("beat {beat}: LANE REFUSED — {lane_tally:?}");
+                println!("beat {beat}: lane refused — {lane_tally:?}");
             }
             if !judged_tally.is_empty() {
-                println!("beat {beat}: JUDGE REFUSED — {judged_tally:?}");
+                println!("beat {beat}: judge refused — {judged_tally:?}");
             }
         }
         // The shared-language census — prove on the wire that the civilizations
@@ -1379,7 +1379,7 @@ fn main() {
         }
         // Task #8: the opt-in phase profile (NETSTRATUM_PROFILE=1).
         for (name, spent) in conductor::profile::drain() {
-            println!("beat {beat}: PROFILE {name} {spent:?}");
+            println!("beat {beat}: profile {name} {spent:?}");
         }
         if cycles > 0 && beat >= cycles {
             break;

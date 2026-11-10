@@ -83,14 +83,14 @@ fn main() {
         .iter()
         .map(|w| w.gases.iter().filter(|(a, _)| *a <= 4).count())
         .collect();
-    println!("GRAVITY — least {}, median {}, most {} (hundredths); worlds holding a light gas (A ≤ 4): {}", grav.first().map(|g| (g.clone() * ratio(100, 1)).round()).unwrap_or_default(), grav.get(grav.len() / 2).map(|g| (g.clone() * ratio(100, 1)).round()).unwrap_or_default(), grav.last().map(|g| (g.clone() * ratio(100, 1)).round()).unwrap_or_default(), light.iter().filter(|&&n| n > 0).count());
+    println!("gravity — least {}, median {}, most {} (hundredths); worlds holding a light gas (A ≤ 4): {}", grav.first().map(|g| (g.clone() * ratio(100, 1)).round()).unwrap_or_default(), grav.get(grav.len() / 2).map(|g| (g.clone() * ratio(100, 1)).round()).unwrap_or_default(), grav.last().map(|g| (g.clone() * ratio(100, 1)).round()).unwrap_or_default(), light.iter().filter(|&&n| n > 0).count());
     let cores: Vec<Ratio> = {
         let mut c: Vec<Ratio> = worlds.iter().map(|w| w.core.clone()).collect();
         c.sort();
         c
     };
-    println!("WORLDS — {} read; {airless} airless (no gas kept); {any} carry a pattern in at least one medium", worlds.len());
-    println!("ATMOSPHERE — gas kept (share of what the world holds as gas): least {}%, median {}%, most {}%; core share median {}%", kept_share.first().map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), kept_share.get(kept_share.len() / 2).map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), kept_share.last().map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), cores.get(cores.len() / 2).map(|c| (c.clone() * ratio(100, 1)).round()).unwrap_or_default());
+    println!("worlds — {} read; {airless} airless (no gas kept); {any} carry a pattern in at least one medium", worlds.len());
+    println!("atmosphere — gas kept (share of what the world holds as gas): least {}%, median {}%, most {}%; core share median {}%", kept_share.first().map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), kept_share.get(kept_share.len() / 2).map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), kept_share.last().map(|k| (k.clone() * ratio(100, 1)).round()).unwrap_or_default(), cores.get(cores.len() / 2).map(|c| (c.clone() * ratio(100, 1)).round()).unwrap_or_default());
     for (b, row) in by_band.iter().enumerate() {
         println!(
             "  {:20} {:5} worlds: chemical {:5}, lithic {:5}, plasmic {:5}, informational {:5}",
@@ -151,7 +151,7 @@ fn main() {
                 )
             })
             .collect();
-        println!("MINDS ({name}) — ungated {} worlds; with impacts and the window {}: {}; first at bell {:?} on {:?}", free.len(), gated.len(), counts.join(", "), gated.first().map(|b| b.0), gated.first().map(|b| b.1.clone()));
+        println!("minds ({name}) — ungated {} worlds; with impacts and the window {}: {}; first at bell {:?} on {:?}", free.len(), gated.len(), counts.join(", "), gated.first().map(|b| b.0), gated.first().map(|b| b.1.clone()));
     }
     let windows: Vec<u64> = {
         let mut v: Vec<u64> = worlds.iter().map(|w| w.window).collect();
@@ -163,14 +163,14 @@ fn main() {
         v.sort();
         v
     };
-    println!("GATES — star windows (echoes): least {:?}, median {:?}, most {:?}; belt share median {}/10000", windows.first(), windows.get(windows.len() / 2), windows.last(), belts.get(belts.len() / 2).map(|b| (b.clone() * ratio(10000, 1)).round()).unwrap_or_default());
+    println!("gates — star windows (echoes): least {:?}, median {:?}, most {:?}; belt share median {}/10000", windows.first(), windows.get(windows.len() / 2), windows.last(), belts.get(belts.len() / 2).map(|b| (b.clone() * ratio(10000, 1)).round()).unwrap_or_default());
     let heats: Vec<Ratio> = {
         let mut h: Vec<Ratio> = worlds.iter().map(|w| w.heat.clone()).collect();
         h.sort();
         h
     };
     println!(
-        "HEAT — coldest {} K, median {} K, hottest {} K; pressure reference (the median world) {}",
+        "heat — coldest {} K, median {} K, hottest {} K; pressure reference (the median world) {}",
         heats.first().map(|h| h.round()).unwrap_or_default(),
         heats
             .get(heats.len() / 2)
