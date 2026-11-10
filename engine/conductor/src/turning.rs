@@ -152,7 +152,11 @@ impl Clifford {
                 }
                 swaps += (a & b & self.negatives).count_ones();
                 let c = ca.clone() * cb.clone();
-                Clifford::put(&mut terms, a ^ b, if swaps.is_multiple_of(2) { c } else { -c });
+                Clifford::put(
+                    &mut terms,
+                    a ^ b,
+                    if swaps.is_multiple_of(2) { c } else { -c },
+                );
             }
         }
         Ok(Clifford {

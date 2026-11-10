@@ -854,7 +854,10 @@ impl Enclosed {
     pub fn new(base: Ratio, bodies: Vec<(Ratio, Ratio)>) -> Enclosed {
         Enclosed::with_lifts(
             base,
-            bodies.into_iter().map(|(l, h)| (l, h, ratio(0, 1))).collect(),
+            bodies
+                .into_iter()
+                .map(|(l, h)| (l, h, ratio(0, 1)))
+                .collect(),
         )
     }
 
@@ -1234,8 +1237,7 @@ pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32) -> Ratio {
             continue;
         }
         let (_, delta) = x.reach_in(enc);
-        let held =
-            crate::polarity::faces_on(&delta, crate::polarity::Axis::of_stream(x.vacuum)).0;
+        let held = crate::polarity::faces_on(&delta, crate::polarity::Axis::of_stream(x.vacuum)).0;
         let (kept, _) = emission(&x.agitation, &held, rings);
         let kept = crate::ring::grain(&kept);
         light += (x.agitation.clone() - kept.clone()) * x.amount.clone() * weight(&x.key);
@@ -1348,9 +1350,8 @@ pub fn spin_torque(
     // step is heat, booked `m·heat` (`heated`) and taken from the bounce the
     // push carries on, `B = p − Σ m·|Δℓ| − Σ m·heat`, so motion and heat and
     // the bounce are the push, never more.
-    let heat = crate::ring::grain(
-        &(p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)))),
-    );
+    let heat =
+        crate::ring::grain(&(p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)))));
     let heated = m.clone() * heat.clone();
     x.agitation = crate::ring::grain(&(x.agitation.clone() + scar.clone())) + heat;
     // No radial law at the state level (operator 2026-11-06: the spin
@@ -2474,11 +2475,7 @@ pub fn band_pairs(
         // (`crest_count`); the exact sum only where they decide differently.
         crate::profile::mark("pairs:nu");
         let g_of = |i: usize| {
-            crate::polarity::faces(&stream_delta(
-                &motes[i].reach_in(&enc).1,
-                motes[i].vacuum,
-            ))
-            .0
+            crate::polarity::faces(&stream_delta(&motes[i].reach_in(&enc).1, motes[i].vacuum)).0
         };
         let nu_at = |g: &dyn Fn(usize) -> Ratio| {
             members.iter().fold(ratio(0, 1), |acc, (i, s)| {
@@ -2831,11 +2828,7 @@ pub fn luminal(motes: &mut [Mote], enc: &Enclosed) -> usize {
 /// ring moves alike. Returns (the pressure's spin moved, the spin moved
 /// around the shells' circles, and the number of shell planes that parted
 /// into cells), by holding.
-pub fn fluid(
-    motes: &mut [Mote],
-    enc: &Enclosed,
-    total: &Ratio,
-) -> (Ratio, Ratio, usize) {
+pub fn fluid(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio, usize) {
     if total.is_zero() || motes.len() < 2 {
         return (ratio(0, 1), ratio(0, 1), 0);
     }
@@ -2892,8 +2885,16 @@ pub fn fluid(
                     let e = own_enclosure(&motes[i], enc, total)[0].clone();
                     r.clone() * (ratio(1, 1) + ratio(sign, 1) * e)
                 };
-                let width = members.iter().map(|&i| edge(i, 1)).max().unwrap_or_else(|| ratio(0, 1))
-                    - members.iter().map(|&i| edge(i, -1)).min().unwrap_or_else(|| ratio(0, 1));
+                let width = members
+                    .iter()
+                    .map(|&i| edge(i, 1))
+                    .max()
+                    .unwrap_or_else(|| ratio(0, 1))
+                    - members
+                        .iter()
+                        .map(|&i| edge(i, -1))
+                        .min()
+                        .unwrap_or_else(|| ratio(0, 1));
                 let pressure = if width.is_zero() {
                     ratio(0, 1)
                 } else {
@@ -3838,8 +3839,16 @@ mod passage_tests {
         // heavy kind keeps its deep windings' open frames at that heat.
         let k = |w: u32| crate::chem::Kind::atom(w).expect("a kind");
         assert_eq!(super::open(&k(1)), ratio(1, 1), "cold hydrogen");
-        assert_eq!(super::open_hot(&k(1), &ratio(1, 1)), ratio(0, 1), "stripped");
-        assert_eq!(super::open_hot(&k(1), &ratio(0, 1)), super::open(&k(1)), "heat 0 is the atom");
+        assert_eq!(
+            super::open_hot(&k(1), &ratio(1, 1)),
+            ratio(0, 1),
+            "stripped"
+        );
+        assert_eq!(
+            super::open_hot(&k(1), &ratio(0, 1)),
+            super::open(&k(1)),
+            "heat 0 is the atom"
+        );
     }
 
     #[test]
@@ -3853,25 +3862,40 @@ mod passage_tests {
         // Aligned (s < 0): an outward share, the lift raised past the orbit.
         let push = magnet_share(&r, &d, &m, &ratio(-1, 3), &kappa).expect("defined");
         assert!(push < ratio(0, 1));
-        assert_eq!(boosted(&ratio(0, 1), &push), Some(-push.clone()), "lifted out by the push");
+        assert_eq!(
+            boosted(&ratio(0, 1), &push),
+            Some(-push.clone()),
+            "lifted out by the push"
+        );
         // From inside its rest (below −m) it is driven out; from outside drawn in.
         let rest = -push.clone();
         let inside = rest.clone() - ratio(1, 100);
         let outside = rest.clone() + ratio(1, 100);
         assert!(boosted(&inside, &push).expect("in") > inside, "driven out");
         assert!(boosted(&outside, &push).expect("in") < outside, "drawn in");
-        assert_eq!(boosted(&rest, &push), Some(rest.clone()), "at its rest it stays");
+        assert_eq!(
+            boosted(&rest, &push),
+            Some(rest.clone()),
+            "at its rest it stays"
+        );
         // Opposed (s > 0): inward, inside the orbit.
         let pull = magnet_share(&r, &d, &m, &ratio(1, 3), &kappa).expect("defined");
         assert!(pull > ratio(0, 1) && boosted(&ratio(0, 1), &pull).expect("in") < ratio(0, 1));
         // No open frames: back on its orbit.
         let none = magnet_share(&r, &d, &m, &ratio(1, 3), &ratio(0, 1)).expect("defined");
-        assert_eq!(boosted(&ratio(1, 5), &none), Some(ratio(0, 1)), "o = 0: on its orbit");
+        assert_eq!(
+            boosted(&ratio(1, 5), &none),
+            Some(ratio(0, 1)),
+            "o = 0: on its orbit"
+        );
         // The dipole falls faster than the monopole share it is measured against.
         let far = ratio(30, 1);
         let mono = |r: &Ratio| m.clone() / (r.clone() + m.clone());
         let dip = |r: &Ratio| magnet_share(r, &d, &m, &ratio(1, 1), &ratio(1, 1)).expect("defined");
-        assert!(dip(&far) / dip(&r) < mono(&far) / mono(&r), "the dipole falls faster");
+        assert!(
+            dip(&far) / dip(&r) < mono(&far) / mono(&r),
+            "the dipole falls faster"
+        );
         // The boost stays inside the horizon for the strongest share.
         for u in [ratio(-9, 10), ratio(0, 1), ratio(9, 10)] {
             for s in [ratio(-99, 100), ratio(99, 100)] {
@@ -3887,7 +3911,10 @@ mod passage_tests {
         // balance; lifted by u it stands at R_ℓ·D(u), its hold the hold within
         // that reach, its spin untouched.
         use super::{Enclosed, Mote};
-        let enc = Enclosed::new(ratio(1, 1), vec![(ratio(1, 2), ratio(1, 4)), (ratio(3, 1), ratio(1, 2))]);
+        let enc = Enclosed::new(
+            ratio(1, 1),
+            vec![(ratio(1, 2), ratio(1, 4)), (ratio(3, 1), ratio(1, 2))],
+        );
         let mut x = Mote {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
@@ -4053,12 +4080,7 @@ mod passage_tests {
             .collect();
         let enc = Enclosed::new(ratio(1, 1), vec![(ratio(3, 2), ratio(1, 1))]);
         let g = super::holding(&motes) * ratio(2, 1);
-        let bindings = band_pairs(
-            &motes,
-            &enc,
-            &[ratio(1, 1), ratio(0, 1), ratio(0, 1)],
-            &g,
-        );
+        let bindings = band_pairs(&motes, &enc, &[ratio(1, 1), ratio(0, 1), ratio(0, 1)], &g);
         assert!(!bindings.is_empty(), "the ring binds");
         for (_, members) in &bindings {
             for (i, _) in members {
@@ -4605,7 +4627,10 @@ mod emission_tests {
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let (_, delta) = motes[0].reach_in(&enc);
         let light = emit(&mut motes, &enc, 1);
-        assert_eq!(motes[0].agitation, crate::ring::grain(&(ratio(1, 2) * delta)));
+        assert_eq!(
+            motes[0].agitation,
+            crate::ring::grain(&(ratio(1, 2) * delta))
+        );
         assert!(light > ratio(0, 1) && motes[0].agitation > ratio(0, 1));
     }
 
@@ -4621,7 +4646,10 @@ mod emission_tests {
         assert_eq!(delta, delta_v);
         emit(&mut cont, &enc, 1);
         emit(&mut vac, &enc, 1);
-        assert_eq!(cont[0].agitation, crate::ring::grain(&(ratio(1, 2) * delta.clone())));
+        assert_eq!(
+            cont[0].agitation,
+            crate::ring::grain(&(ratio(1, 2) * delta.clone()))
+        );
         assert_eq!(
             vac[0].agitation,
             crate::ring::grain(&(ratio(1, 2) * (ratio(1, 1) - delta)))

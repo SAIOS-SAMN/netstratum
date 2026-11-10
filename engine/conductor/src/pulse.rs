@@ -1119,7 +1119,12 @@ pub fn ocean_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
 
 pub fn orbit_galaxies(
     u: &mut Universe,
-) -> (crate::enfold::Cross, Option<Ratio>, Collective, Vec<Vec<Ratio>>) {
+) -> (
+    crate::enfold::Cross,
+    Option<Ratio>,
+    Collective,
+    Vec<Vec<Ratio>>,
+) {
     let mut cross = crate::enfold::Cross::default();
     let mut collective = Collective::default();
     let whole = mass(&u.total());
@@ -1423,7 +1428,12 @@ pub struct Formation {
 /// the hold inside it, the collection's holding, and each member's (reach,
 /// own extent). The step and any reconstruction of it read the verdict by
 /// this one function.
-pub fn judge(reach: Ratio, inside: Ratio, holding: &Ratio, members: &[(Ratio, Ratio)]) -> PinchReading {
+pub fn judge(
+    reach: Ratio,
+    inside: Ratio,
+    holding: &Ratio,
+    members: &[(Ratio, Ratio)],
+) -> PinchReading {
     let pinch = crate::ring::pinch(&reach, holding, &inside);
     let widest = members.iter().fold(ratio(0, 1), |w, (ri, di)| {
         let out = ri.clone() + di.clone() - reach.clone();
@@ -1467,7 +1477,8 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
     if whole.is_zero() {
         return Formation::default();
     }
-    let share = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
+    let share =
+        |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
     let f_home = mass(&u.cores[h].total()) / whole.clone();
     // Every candidate, an ocean mote: (in the home, its index, its universal
     // orbit and circulation spins).
@@ -1500,12 +1511,12 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
                 )
             })
             .chain(u.ocean.iter().map(|x| (x.ell_o(), share(x))))
-            .chain(
-                u.cores
-                    .iter()
-                    .filter(|c| !is_home(c))
-                    .map(|c| (c.ell.clone(), ratio(2, 1) * mass(&c.total()) / whole.clone())),
-            )
+            .chain(u.cores.iter().filter(|c| !is_home(c)).map(|c| {
+                (
+                    c.ell.clone(),
+                    ratio(2, 1) * mass(&c.total()) / whole.clone(),
+                )
+            }))
             .collect(),
     );
     // Each candidate's reach and own extent on both orbit planes.
@@ -1540,12 +1551,20 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
     };
     let mut held: Vec<Vec<usize>> = Vec::new();
     for g in groups {
-        let hb = g.iter().fold(ratio(0, 1), |s, &i| s + share(mote(&cand[i])));
+        let hb = g
+            .iter()
+            .fold(ratio(0, 1), |s, &i| s + share(mote(&cand[i])));
         if hb.is_zero() {
             continue;
         }
         let plane = |k: usize| {
-            let spin = |i: usize| if k == 0 { cand[i].2.abs() } else { cand[i].3.abs() };
+            let spin = |i: usize| {
+                if k == 0 {
+                    cand[i].2.abs()
+                } else {
+                    cand[i].3.abs()
+                }
+            };
             let mean = g
                 .iter()
                 .fold(ratio(0, 1), |s, &i| s + share(mote(&cand[i])) * spin(i))
@@ -1575,7 +1594,13 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
     }
     // Each self-held collection becomes a core: its members leave the home
     // and the ocean, re-origined into it.
-    let mut next = u.cores.iter().filter_map(|c| c.path.first().copied()).max().unwrap_or(0) + 1;
+    let mut next = u
+        .cores
+        .iter()
+        .filter_map(|c| c.path.first().copied())
+        .max()
+        .unwrap_or(0)
+        + 1;
     let mut take_home: std::collections::BTreeSet<usize> = std::collections::BTreeSet::new();
     let mut take_ocean: std::collections::BTreeSet<usize> = std::collections::BTreeSet::new();
     let mut born: Vec<Body> = Vec::new();
@@ -1624,7 +1649,10 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
                         .iter()
                         .zip(&m)
                         .map(|((x, _, _), w)| {
-                            (w.clone(), x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))
+                            (
+                                w.clone(),
+                                x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)),
+                            )
                         })
                         .collect::<Vec<_>>(),
                 )
@@ -1680,10 +1708,7 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
     // The members' grains leave the home's books (its medium first, then
     // what it kept) and the ocean.
     let home = &mut u.cores[h];
-    let gone: Vec<crate::flows::Mote> = take_home
-        .iter()
-        .map(|&j| home.flows[j].clone())
-        .collect();
+    let gone: Vec<crate::flows::Mote> = take_home.iter().map(|&j| home.flows[j].clone()).collect();
     let mut j = 0;
     home.flows.retain(|_| {
         let go = take_home.contains(&j);
@@ -1983,13 +2008,7 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         let key = p.key.to_string();
         g.extend_from_slice(&(key.len() as u16).to_le_bytes());
         g.extend_from_slice(key.as_bytes());
-        for r in [
-            &p.held,
-            &p.inner,
-            &p.outer,
-            &p.agitation,
-            &p.vacuum,
-        ] {
+        for r in [&p.held, &p.inner, &p.outer, &p.agitation, &p.vacuum] {
             cfe::ratio::encode(r, &mut g);
         }
         g.extend_from_slice(&p.born.to_le_bytes());
@@ -2668,11 +2687,12 @@ mod tests {
         let whole = mass(&u.total());
         let books = |u: &Universe| {
             let w = mass(&u.total());
-            let m = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / w.clone();
-            let ocean = u
-                .ocean
-                .iter()
-                .fold(ratio(0, 1), |s, x| s + m(x) * (x.ell_o() + x.ell_orth.clone()));
+            let m = |x: &crate::flows::Mote| {
+                x.amount.clone() * crate::flows::weight(&x.key) / w.clone()
+            };
+            let ocean = u.ocean.iter().fold(ratio(0, 1), |s, x| {
+                s + m(x) * (x.ell_o() + x.ell_orth.clone())
+            });
             u.cores.iter().fold(ocean, |s, c| {
                 let f = mass(&c.total()) / w.clone();
                 let own = if is_home(c) {

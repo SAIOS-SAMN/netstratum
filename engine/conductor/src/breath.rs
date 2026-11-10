@@ -651,7 +651,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // The galaxies form where the escaped matter and the zero galaxy's
         // outer medium hold their own reach (docs/111 §5.4).
         crate::profile::mark("orbit:form");
-        pending_formation = Some(crate::pulse::form_galaxies(u, until / t_u * t_u, &ocean_moves));
+        pending_formation = Some(crate::pulse::form_galaxies(
+            u,
+            until / t_u * t_u,
+            &ocean_moves,
+        ));
         // The ocean's motes emit by their face over the universal torque's two
         // rings (docs/122 law 3); the light crosses the ocean on the
         // continuum face, what no mote takes drained. Booked with the echo's
@@ -2098,11 +2102,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                                 x.lift.clone(),
                             )
                         })
-                        .chain(
-                            core.satellites
-                                .iter()
-                                .map(|b| (b.ell.clone(), mass(&b.total()) / g_mass.clone(), ratio(0, 1))),
-                        )
+                        .chain(core.satellites.iter().map(|b| {
+                            (
+                                b.ell.clone(),
+                                mass(&b.total()) / g_mass.clone(),
+                                ratio(0, 1),
+                            )
+                        }))
                         .collect(),
                 )
             };
@@ -2407,10 +2413,16 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let base = enc_m.base();
                 // The base's frames: the core's state, in proportion to its
                 // throat's frames; a closed pole where its throat holds none.
-                let (a_t, q_t) = core.throat.iter().fold((ratio(0, 1), ratio(0, 1)), |(a, q), (k, n)| {
-                    let (fa, fq) = crate::chem::frames(k);
-                    (a + n.clone() * ratio(i64::from(fa), 1), q + n.clone() * ratio(i64::from(fq), 1))
-                });
+                let (a_t, q_t) =
+                    core.throat
+                        .iter()
+                        .fold((ratio(0, 1), ratio(0, 1)), |(a, q), (k, n)| {
+                            let (fa, fq) = crate::chem::frames(k);
+                            (
+                                a + n.clone() * ratio(i64::from(fa), 1),
+                                q + n.clone() * ratio(i64::from(fq), 1),
+                            )
+                        });
                 let whole_t = a_t.clone() + q_t.clone();
                 let base_frames = if whole_t.is_zero() {
                     (base.clone(), ratio(0, 1))
@@ -2418,7 +2430,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     (base.clone() * a_t / whole_t.clone(), base * q_t / whole_t)
                 };
                 let spin_was = ledger_sum(core);
-                let (n_m, du) = crate::flows::magnet(&mut core.flows, enc_m, &ledger_unit, &base_frames);
+                let (n_m, du) =
+                    crate::flows::magnet(&mut core.flows, enc_m, &ledger_unit, &base_frames);
                 lifted.0 += n_m;
                 lifted.1 += du;
                 identity.push(("magnet spin", ledger_sum(core) - spin_was));
@@ -3054,24 +3067,23 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         if !g_end.is_zero() && !unit.is_zero() {
             let scale_end = g_end.clone() / unit.clone();
 
-            let enc_end = crate::flows::Enclosed::with_lifts(
-                ratio(1, 1),
-                core.flows
-                    .iter()
-                    .map(|x| {
-                        (
-                            x.ell_o(),
-                            x.amount.clone() * crate::flows::weight(&x.key) / g_end.clone(),
-                            x.lift.clone(),
-                        )
-                    })
-                    .chain(
-                        core.satellites
-                            .iter()
-                            .map(|b| (b.ell.clone(), mass(&b.total()) / g_end.clone(), ratio(0, 1))),
-                    )
-                    .collect(),
-            );
+            let enc_end =
+                crate::flows::Enclosed::with_lifts(
+                    ratio(1, 1),
+                    core.flows
+                        .iter()
+                        .map(|x| {
+                            (
+                                x.ell_o(),
+                                x.amount.clone() * crate::flows::weight(&x.key) / g_end.clone(),
+                                x.lift.clone(),
+                            )
+                        })
+                        .chain(core.satellites.iter().map(|b| {
+                            (b.ell.clone(), mass(&b.total()) / g_end.clone(), ratio(0, 1))
+                        }))
+                        .collect(),
+                );
             for sys in core.satellites.iter_mut() {
                 if sys.ell > ratio(0, 1) {
                     let own = sys.ell.clone();
@@ -3184,9 +3196,17 @@ mod tests {
         assert!(burnable(&s, 3).is_empty());
         s.kept.insert(kind("W0001"), ratio(300, 1));
         let layer = burnable(&s, 3);
-        assert_eq!(layer, [(kind("W0001"), ratio(300, 1))].into(), "the layer is the hydrogen, whole");
+        assert_eq!(
+            layer,
+            [(kind("W0001"), ratio(300, 1))].into(),
+            "the layer is the hydrogen, whole"
+        );
         less(&mut s.kept, &layer);
-        assert_eq!(s.kept, [(kind("W0004"), ratio(500, 1))].into(), "the closed matter stays");
+        assert_eq!(
+            s.kept,
+            [(kind("W0004"), ratio(500, 1))].into(),
+            "the closed matter stays"
+        );
     }
 
     #[test]
