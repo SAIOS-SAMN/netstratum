@@ -1421,17 +1421,13 @@ fn torque_one(
     let place = crate::enfold::place(&r_o, &m, &h);
     let heat_was = x.agitation.clone();
     let tilt = x.tilt();
-    // The bell's turning composed whole on its orientation, ring by ring
-    // (docs/117 §11.7.4): each ring half the bell's turns, at the rate
+    // The bell's turning composed whole on its orientation (docs/117
+    // §11.7.4): its two rings, each half the bell's turns at the rate
     // `b = δ/(1 − δ)` a plane; then each reading held to its place.
     let step = turning_of(&marks, &tilt, &r_o, &h, p, tide, x.vacuum);
-    let half: Vec<Ratio> = step.space.iter().map(|v| v.clone() / ratio(2, 1)).collect();
-    let circ = step.circ.clone() / ratio(2, 1);
-    for _ in 0..2 {
-        x.orientation
-            .ring(&half, &circ)
-            .expect("a real generator always has a motion");
-    }
+    x.orientation
+        .bell(&step.space, &step.circ)
+        .expect("a real generator always has a motion");
     let mut held = x.phase();
     let (scar, levers) = hold_to_place(&mut held, place.as_ref(), &heat_was, cross);
     for (k, v) in held.iter().enumerate() {
