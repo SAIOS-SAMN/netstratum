@@ -749,7 +749,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let mut flowing: Vec<crate::flows::Mote> = Vec::new();
             for x in std::mem::take(&mut u.ocean) {
                 let r_m = match (&frame, x.vacuum) {
-                    (Some(f), true) => x.reach_in(&f).0,
+                    (Some(f), true) => x.reach_in(f).0,
                     _ => {
                         flowing.push(x);
                         continue;
@@ -1494,7 +1494,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         .iter()
                         .filter(|x| x.vacuum)
                         .fold(ratio(0, 1), |acc, x| {
-                            let rx = x.reach_in(&enc).0;
+                            let rx = x.reach_in(enc).0;
                             if rx < lo || rx > hi {
                                 return acc;
                             }
@@ -1911,7 +1911,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // never a second orbit). Remnants do not capture.
         if let (Some(_), Some(enc), false) = (&pre, &enc, scale_pre.is_zero() || g_before.is_zero())
         {
-            let reach_m = |x: &crate::flows::Mote| x.reach_in(&enc).0;
+            let reach_m = |x: &crate::flows::Mote| x.reach_in(enc).0;
             let mut claims: Vec<Vec<usize>> = vec![Vec::new(); core.flows.len()];
             let mut by_reach: Vec<(Ratio, usize)> = core
                 .flows

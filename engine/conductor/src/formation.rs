@@ -1844,7 +1844,7 @@ pub fn settle_system(
         // Its reach, read by the system's enclosure from its own spin.
         let r = frame
             .as_ref()
-            .map(|e| x.reach_in(&e).0)
+            .map(|e| x.reach_in(e).0)
             .unwrap_or_else(|| b0.clone());
         // No mirror (docs/117 §12): a mote's reach is read in this enclosure
         // and kept; one inside the star's ring belongs to the star.
