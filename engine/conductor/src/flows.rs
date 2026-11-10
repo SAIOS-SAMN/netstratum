@@ -1761,7 +1761,7 @@ pub fn exits(motes: &mut Vec<Mote>, enc: &Enclosed) -> Vec<Mote> {
     let rim = ratio(2, 1) * enc.base();
     let (gone, stay): (Vec<Mote>, Vec<Mote>) = std::mem::take(motes)
         .into_iter()
-        .partition(|x| x.reach_in(&enc).0 >= rim);
+        .partition(|x| x.reach_in(enc).0 >= rim);
     *motes = stay;
     gone
 }
@@ -2260,7 +2260,7 @@ pub fn settle_disc(motes: &mut [Mote], enc: &Enclosed) -> Vec<Ratio> {
         return plane;
     }
     for x in motes.iter_mut() {
-        let d = stream_delta(&x.reach_in(&enc).1, x.vacuum);
+        let d = stream_delta(&x.reach_in(enc).1, x.vacuum);
         let Some(keep) = attractor_keep(&d) else {
             continue;
         };
@@ -2336,7 +2336,7 @@ pub fn band_pairs(
     };
     // Each mote's own extent about its reach (docs/120 §8c), its pinch share.
     let band = |i: usize| {
-        let r = motes[i].reach_in(&enc).0;
+        let r = motes[i].reach_in(enc).0;
         let e = own_enclosure(&motes[i], enc, g_total)[0].clone();
         (r.clone() * (ratio(1, 1) - e.clone()), r * (ratio(1, 1) + e))
     };
@@ -2475,7 +2475,7 @@ pub fn band_pairs(
         // (`crest_count`); the exact sum only where they decide differently.
         crate::profile::mark("pairs:nu");
         let g_of = |i: usize| {
-            crate::polarity::faces(&stream_delta(&motes[i].reach_in(&enc).1, motes[i].vacuum)).0
+            crate::polarity::faces(&stream_delta(&motes[i].reach_in(enc).1, motes[i].vacuum)).0
         };
         let nu_at = |g: &dyn Fn(usize) -> Ratio| {
             members.iter().fold(ratio(0, 1), |acc, (i, s)| {
@@ -2799,7 +2799,7 @@ pub fn mobius(x: &mut Mote) {
 pub fn luminal(motes: &mut [Mote], enc: &Enclosed) -> usize {
     let mut n = 0;
     for x in motes.iter_mut() {
-        let d = x.reach_in(&enc).1;
+        let d = x.reach_in(enc).1;
         let share = if x.vacuum { ratio(1, 1) - d } else { d };
         if share > ratio(1, 2) {
             mobius(x);
@@ -2881,7 +2881,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio
                 // Its width, its members' own extents edge to edge (each
                 // `R(1 ± e)`, `e` its pinch share), never one band.
                 let edge = |i: usize, sign: i64| {
-                    let r = motes[i].reach_in(&enc).0;
+                    let r = motes[i].reach_in(enc).0;
                     let e = own_enclosure(&motes[i], enc, total)[0].clone();
                     r.clone() * (ratio(1, 1) + ratio(sign, 1) * e)
                 };
@@ -2980,7 +2980,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio
             .iter()
             .flat_map(|r| r.0.iter().copied())
             .map(|i| {
-                let (r, d) = motes[i].reach_in(&enc);
+                let (r, d) = motes[i].reach_in(enc);
                 (i, r, stream_delta(&d, motes[i].vacuum))
             })
             .collect();
