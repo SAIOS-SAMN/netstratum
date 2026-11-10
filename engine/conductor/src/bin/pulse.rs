@@ -34,11 +34,11 @@ fn main() {
     // as nuclei.
     let n = grains * pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024);
     let manifest = pulse::founding(&n);
-    println!("FOUNDING — {} nuclides as grains", manifest.len());
+    println!("founding — {} nuclides as grains", manifest.len());
     // The isomorphic reading: the founding beside nature's (never imposed).
     if let Some((np, he, h)) = conductor::nuclides::beside_nature(&manifest) {
         let f = |x: &cfe::ratio::Ratio| conductor::reading::sector(x).to_string();
-        println!("BESIDE NATURE — neutrons per proton {} (nature about 1/7), weight-4 mass share {} (about 1/4), hydrogen {} (about 3/4)", f(&np), f(&he), f(&h));
+        println!("beside nature — neutrons per proton {} (nature about 1/7), weight-4 mass share {} (about 1/4), hydrogen {} (about 3/4)", f(&np), f(&he), f(&h));
     }
     let phrase = args
         .get(4)
@@ -51,7 +51,7 @@ fn main() {
     pulse::orient(&mut u, &seed);
     let unit = conductor::breath::unit_mass(&u);
     println!(
-        "DEPLOYED — {} cores; conservation {}; spin {}; lean {:?}",
+        "deployed — {} cores; conservation {}; spin {}; lean {:?}",
         u.cores.len(),
         u.total() == manifest,
         pulse::spin_total(&u, &unit),

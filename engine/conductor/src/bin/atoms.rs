@@ -20,7 +20,7 @@ fn main() {
     }
     let atoms: Vec<_> = (1..=118).filter_map(atom).collect();
     let closed: Vec<u32> = atoms.iter().filter(|a| a.closed).map(|a| a.z).collect();
-    println!("CLOSED (inert) at Z = {closed:?}");
+    println!("closed (inert) at Z = {closed:?}");
     let mut by_depth: BTreeMap<u32, Vec<u32>> = BTreeMap::new();
     for a in &atoms {
         by_depth.entry(a.depth).or_default().push(a.unpaired);
@@ -74,7 +74,7 @@ fn main() {
         }
     }
     println!(
-        "COMPOUNDS among the {} open atoms of Z 1..30: {} pairs, {triples} triples",
+        "compounds among the {} open atoms of Z 1..30: {} pairs, {triples} triples",
         open.len(),
         pairs.len()
     );

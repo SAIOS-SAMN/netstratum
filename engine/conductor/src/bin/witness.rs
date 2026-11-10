@@ -56,7 +56,7 @@ fn main() {
         .and_then(|b| b.trim().parse().ok())
         .unwrap_or(0);
     let behind = lasts.iter().filter(|&&l| l + 2 < beat / 60).count();
-    println!("JOURNALS — last kept year: lowest {:?}, median {:?}, highest {:?}; universe year {} (beat {beat}); {behind} worlds more than a year behind", lasts.first(), lasts.get(lasts.len() / 2), lasts.last(), beat / 60);
+    println!("journals — last kept year: lowest {:?}, median {:?}, highest {:?}; universe year {} (beat {beat}); {behind} worlds more than a year behind", lasts.first(), lasts.get(lasts.len() / 2), lasts.last(), beat / 60);
     // The universe journal: beat frames continuous? year frames at each close?
     let (mut beats, mut years, mut gaps, mut prev): (
         Vec<u64>,
@@ -94,9 +94,9 @@ fn main() {
             }
         }
     }
-    println!("UNIVERSE JOURNAL — {} beat frames ({:?}..{:?}), {gaps} beats missing between; {} year closes {:?}", beats.len(), beats.first(), beats.last(), years.len(), years);
+    println!("universe journal — {} beat frames ({:?}..{:?}), {gaps} beats missing between; {} year closes {:?}", beats.len(), beats.first(), beats.last(), years.len(), years);
     println!(
-        "JOURNALS — {} worlds: {whole} whole, {gapped} with gaps ({missing_total} years missing)",
+        "journals — {} worlds: {whole} whole, {gapped} with gaps ({missing_total} years missing)",
         dirs.len()
     );
 }

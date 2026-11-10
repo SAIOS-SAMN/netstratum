@@ -155,7 +155,7 @@ the orientation:
 
 Each is unchanged while the planes are alike (the control read below).
 
-**Read** (2^40, 580 bells; `breathe` prints `LEAN` at each echo):
+**Read** (2^40, 580 bells; `breathe` prints `lean` at each echo):
 
 | echo at bell | the core's lean (lead, lag) | in grains | motes apart in phase |
 |---|---|---|---|
