@@ -87,6 +87,7 @@ pub mod commissions;
 pub mod compound;
 pub mod cores;
 pub mod decide;
+pub mod dispersion;
 pub mod enclosure;
 pub mod energy;
 pub mod enfold;

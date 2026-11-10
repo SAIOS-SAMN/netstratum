@@ -12,6 +12,12 @@ change is named here.
 
 ### Added
 
+- `conductor::dispersion` (#143, read only): heat by component, the
+  dispersion of a body's parts about its motion in step on each plane's
+  phase, each spatial plane's spin, between planes and on the orthogonal
+  orbit, by kind on the phases, never folded into one number; `breathe`
+  prints it for every collapsing binding (`heat by component`). docs/124 §3
+  restates heat by component.
 - `conductor::energy`, the energy book read only (docs/122 step 1,
   docs/106 S1): heat (motes, stars, worlds), potential `m·(1 − δ)` and bond
   (open frames) over every mote and body, and an `energy` line per
