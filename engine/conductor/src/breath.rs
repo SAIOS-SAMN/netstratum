@@ -422,6 +422,11 @@ pub struct Event {
     /// its reservoir across the torques; `ride`: each star's orthogonal spin and
     /// its galaxy's reservoir across its ride.
     pub identity: Vec<(&'static str, Ratio)>,
+    /// Heat made this echo by friction, by source, in unit masses (docs/122
+    /// law 2): `torque`, the push's undelivered share (paid from the
+    /// bounce); `encounters`, the stars' meetings. Read beside the energy
+    /// book so its heat change is accounted.
+    pub heat_made: Vec<(&'static str, Ratio)>,
     /// The firmament's collective at the universal bounce this event
     /// follows (docs/111 §4), carried into the first arrival's record.
     pub collective: Option<crate::pulse::Collective>,
@@ -833,6 +838,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut light = pending_ocean_light.take().unwrap_or_default();
         let mut tolls: Vec<Toll> = Vec::new();
         let mut identity: Vec<(&'static str, Ratio)> = Vec::new();
+        let mut heat_made: Vec<(&'static str, Ratio)> = Vec::new();
         if let Some(r) = pending_firm.take() {
             identity.push(("ocean", r));
         }
@@ -888,6 +894,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             })
             .collect();
         crate::profile::mark("breath:stars-collide");
+        let star_heat = |b: &Body| {
+            (crate::formation::agitation_of(&b.reservoir) + b.heat.clone()) * mass(&b.kept)
+        };
+        let heat_was = core
+            .satellites
+            .iter()
+            .fold(ratio(0, 1), |h, b| h + star_heat(b));
         let (met, star_sticks, star_bounces) = match &pre {
             Some(_) if enc.is_some() => crate::formation::collide_stars(
                 std::mem::take(&mut core.satellites),
@@ -906,6 +919,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 0,
             ),
         };
+        // The stars' meetings make heat (docs/122 law 2): read as the change
+        // in their heat across the collide law, booked by name.
+        {
+            let made = met
+                .iter()
+                .fold(ratio(0, 1), |h, (b, _)| h + star_heat(b))
+                - heat_was;
+            if !made.is_zero() && !unit.is_zero() {
+                heat_made.push(("encounters", made / unit.clone()));
+            }
+        }
         // Where leaving MATTER is set down (with Xylarium; the wind law: the
         // outflow ends at the star's rim): at the edge of the star's own
         // region, R_s(1 + e) with e = H_s/(H_s + H_g), never at its orbit,
@@ -1716,6 +1740,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // equal (docs/122 §4): it keeps ½ of its heat a ring over the
             // echo's rings and emits the rest, its starlight, on the grain
             // (the floor's remainder is light too). One starlight law (B9).
+            if !shone.is_zero() && !unit.is_zero() {
+                heat_made.push(("burn", shone.clone() / unit.clone()));
+            }
             let shone = crate::formation::star_glow(&mut sys, &shone, r_echo);
             // Its light crosses its own system on the continuum face.
             if !shone.is_zero() {
@@ -2320,7 +2347,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 })
             };
             let before = ledger_sum(core);
-            let (given, absorbed) = crate::flows::torque(
+            let (given, absorbed, heated) = crate::flows::torque(
                 &mut core.flows,
                 enc.as_ref().unwrap_or(&throat),
                 &p,
@@ -2427,7 +2454,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // at or above its cut, the heaviest that moved least; the bounce
             // it contains, B = p − Σ m·|Δℓ|.
             let container = ledger_unit.clone() + (h.clone() - ratio(1, 1)) * g_mass.clone();
-            let bounce = p.clone() - absorbed;
+            // The torque's heat is the push's too (docs/122 law 2): what it did
+            // not deliver in step warmed the motes and is not carried on.
+            let bounce = p.clone() - absorbed - heated.clone();
+            heat_made.push(("torque", heated.clone() * ledger_unit.clone() / unit.clone()));
             // What stood in the throat as it entered, to tell how each leaves.
             let entered: Vec<(usize, crate::chem::Kind, Ratio)> = in_throat
                 .iter()
@@ -2494,6 +2524,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // spin with them: the core banks it in its reservoir (the
             // antipole), so `Σ m·ℓ` and the reservoir stay one ledger.
             core.reservoir += r.spun.clone() / ledger_unit.clone();
+            if !r.heat.is_zero() {
+                heat_made.push(("throat", r.heat.clone() / unit.clone()));
+            }
             recycled = crate::recycle::Recycled {
                 pressed: r.pressed,
                 light: r.light / unit.clone(),
@@ -3078,6 +3111,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             light,
             tolls,
             identity,
+            heat_made,
             collective: pending_collective.take(),
             formation: pending_formation.take(),
         });

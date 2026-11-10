@@ -1257,6 +1257,7 @@ pub fn orbit_galaxies(
         // collections are written back.
         let w = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key);
         collective = Collective {
+            ocean_heat: ratio(0, 1),
             motes: firm.len(),
             collections: sets.len(),
             bonded: sets.iter().map(|c| c.len()).sum(),
@@ -1317,7 +1318,7 @@ pub fn orbit_galaxies(
             let before = ledger(&u.ocean);
             let phases_was: Vec<Vec<Ratio>> = u.ocean.iter().map(|x| x.phase.clone()).collect();
             crate::profile::mark("orbit:ocean");
-            let (given, _) = crate::flows::torque(
+            let (given, _, heated) = crate::flows::torque(
                 &mut u.ocean,
                 &enc_o,
                 &ratio(1, 2),
@@ -1325,6 +1326,9 @@ pub fn orbit_galaxies(
                 &ledger_u,
                 &mut cross,
             );
+            if !u.unit.is_zero() {
+                collective.ocean_heat = heated * ledger_u.clone() / u.unit.clone();
+            }
             if phases_was.len() == u.ocean.len() {
                 ocean_moves = u
                     .ocean
@@ -1730,6 +1734,10 @@ pub struct Collective {
     pub lightest: u32,
     pub heaviest: u32,
     pub mean: Ratio,
+    /// The heat the universal bounce's torque made in the ocean's motes,
+    /// in unit masses (docs/122 law 2): the push's undelivered share. Nothing
+    /// downstream carries the ocean's push on, so it is booked as a source.
+    pub ocean_heat: Ratio,
 }
 
 /// Magnetism (operator 2026-10-15, "transduction via magnetism"): an
