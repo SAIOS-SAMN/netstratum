@@ -69,8 +69,14 @@ pub fn rung_light(z: u32) -> Option<i64> {
 pub struct Recycled {
     /// Nuclei pressed into pairs (constructed).
     pub pressed: Ratio,
-    /// The light construction gave to the reverberation.
+    /// What the grain's floor left of the heat (docs/122 law 1): the
+    /// press's bond release and the bounce's work, less the peels' cost, go
+    /// into the heat of the throat's matter; the floored remainder leaves as
+    /// light.
     pub light: Ratio,
+    /// The heat the throat's matter took: the press's bond release and the
+    /// bounce's work less what the peels cost (docs/122 law 1).
+    pub heat: Ratio,
     /// Nuclei peeled (deconstructed), and the holding the peels opened.
     pub peeled: Ratio,
     pub spent: Ratio,
@@ -183,9 +189,9 @@ pub fn recycle(
         }
     }
     crate::profile::mark("rec:peel");
-    out.light = light.clone();
     // Deconstructed: the reverberation with construction's light, shared by
     // holding over the load, each kind peeled loosest first.
+    let input = e.clone() + light.clone();
     let pool = e + light;
     let whole = load.iter().fold(ratio(0, 1), |acc, (_, z, n)| {
         acc + n.clone() * ratio(i64::from(nuclide_hold(*z)), 1)
@@ -308,9 +314,12 @@ pub fn recycle(
         }
     }
     crate::profile::mark("rec:trap");
+    let mut trapped_at: Vec<usize> = Vec::new();
     for (k, mut t) in held {
         out.trapped += t.clone() * ratio(i64::from(crate::chem::weight(&k)), 1);
         let mut at_throat: Option<Mote> = None;
+        // The heat the trapped carry in goes with them (`Σ a·m` kept).
+        let mut carried = ratio(0, 1);
         for &i in &stack {
             if t <= ratio(0, 1) {
                 break;
@@ -319,6 +328,7 @@ pub fn recycle(
                 let x = motes[i].amount.clone().min(t.clone());
                 motes[i].amount -= x.clone();
                 t -= x.clone();
+                carried += motes[i].agitation.clone() * x.clone() * crate::flows::weight(&k);
                 // Its carried spin goes with it into the container.
                 out.spun += x.clone()
                     * crate::flows::weight(&k)
@@ -339,8 +349,43 @@ pub fn recycle(
         }
         if let Some(mut m) = at_throat {
             m.vacuum = false;
+            let held = m.amount.clone() * crate::flows::weight(&k);
+            if held > ratio(0, 1) {
+                m.agitation = crate::ring::grain(&(carried.clone() / held.clone()));
+                out.light += carried - m.agitation.clone() * held;
+            }
             motes.push(m);
+            trapped_at.push(motes.len() - 1);
         }
+    }
+    // Bonds release into heat (docs/122 law 1): the press's release and the
+    // bounce's work, less what the peels cost, warm every grain of the
+    // throat's matter alike, the rise on the grain (`Σ a·m` rises by it);
+    // what the floor leaves goes as light. `bond + heat + light` after is `bond + heat` before plus the
+    // bounce's work, exactly.
+    crate::profile::mark("rec:heat");
+    let released = input - out.spent.clone();
+    let mut warm: Vec<usize> = stack
+        .iter()
+        .copied()
+        .chain(trapped_at)
+        .filter(|&i| motes[i].amount > ratio(0, 1))
+        .collect();
+    warm.sort_unstable();
+    warm.dedup();
+    let holding = warm.iter().fold(ratio(0, 1), |acc, &i| {
+        acc + motes[i].amount.clone() * crate::flows::weight(&motes[i].key)
+    });
+    if released > ratio(0, 1) && holding > ratio(0, 1) {
+        let rise = crate::ring::grain(&(released.clone() / holding));
+        for &i in &warm {
+            motes[i].agitation += rise.clone();
+            out.heat +=
+                rise.clone() * motes[i].amount.clone() * crate::flows::weight(&motes[i].key);
+        }
+        out.light += released - out.heat.clone();
+    } else {
+        out.light += released;
     }
     out.hydrogen = stack
         .iter()
@@ -428,7 +473,7 @@ mod tests {
             1612,
         );
         assert_eq!(three_z(&ms), before);
-        assert!(r.pressed > ratio(0, 1) && r.light > ratio(0, 1));
+        assert!(r.pressed > ratio(0, 1) && r.heat > ratio(0, 1));
         assert!(r.peeled > ratio(0, 1));
         // No bounce, nothing recycled.
         let mut ms = vec![mote("W0010", ratio(1, 1))];
@@ -448,6 +493,70 @@ mod tests {
             ms[0].key,
             crate::chem::Kind::parse("W0010").expect("a kind")
         );
+    }
+
+    #[test]
+    fn the_throat_books_its_bonds_into_heat_and_the_bounce_pays_the_rest() {
+        // docs/122 law 1: the press's release and the bounce's work `e = b·s`
+        // pay the peels, and the rest warms the throat's matter; the grain's
+        // floor leaves as light. `bond + heat + light` after is `bond +
+        // heat + e` before, exactly, with some matter trapped (its heat
+        // carried with it) and some hot to begin with.
+        let bond = |ms: &[Mote]| {
+            ms.iter().fold(ratio(0, 1), |s, x| {
+                s + x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1)
+            })
+        };
+        let heat = |ms: &[Mote]| {
+            ms.iter().fold(ratio(0, 1), |s, x| {
+                s + x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key)
+            })
+        };
+        let mut ms = vec![
+            mote("W0001", ratio(40, 1)),
+            mote("W0016", ratio(9, 1)),
+            mote("W0056", ratio(3, 1)),
+        ];
+        ms[1].agitation = ratio(1, 7);
+        ms[2].agitation = ratio(2, 9);
+        let (b, s) = (ratio(1, 3), ratio(5, 1));
+        let before = bond(&ms) + heat(&ms) + b.clone() * s.clone();
+        let r = recycle(&mut ms, &[0, 1, 2], &b, &s, &ratio(200, 1), 1, 1612);
+        assert!(r.pressed > ratio(0, 1) && r.peeled > ratio(0, 1));
+        assert!(r.trapped > ratio(0, 1));
+        assert_eq!(bond(&ms) + heat(&ms) + r.light, before);
+        // With nothing to peel the press's release and the bounce's work all
+        // warm the throat's matter.
+        let mut hs = vec![mote("W0001", ratio(40, 1))];
+        let before = bond(&hs) + heat(&hs) + b.clone() * s.clone();
+        let r = recycle(&mut hs, &[0], &b, &s, &ratio(200, 1), 1, 1612);
+        assert!(r.pressed > ratio(0, 1) && r.heat > ratio(0, 1) && r.spent == ratio(0, 1));
+        assert_eq!(bond(&hs) + heat(&hs) + r.light, before);
+    }
+
+    #[test]
+    fn a_star_glows_by_half_a_ring_and_books_every_grain() {
+        // docs/122 laws 1 and 3: the burn's release warms the star; at its
+        // system's throat it keeps ½ a ring and emits the rest. `heat·m +
+        // released` before is `heat·m + light` after, exactly.
+        let mut sys = crate::pulse::deploy(
+            &[(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(900, 1))].into(),
+        )
+        .expect("a universe")
+        .cores
+        .remove(0);
+        sys.kept = [(crate::chem::Kind::parse("W0001").expect("a kind"), ratio(900, 1))].into();
+        sys.heat = ratio(1, 5);
+        let m = crate::pulse::mass(&sys.kept);
+        assert!(m > ratio(0, 1));
+        let released = ratio(37, 3);
+        let before = sys.heat.clone() * m.clone() + released.clone();
+        let light = crate::formation::star_glow(&mut sys, &released, 3);
+        assert_eq!(sys.heat.clone() * m.clone() + light.clone(), before);
+        // Three rings keep an eighth of the risen heat, floored.
+        let risen = ratio(1, 5) + released / m;
+        assert_eq!(sys.heat, crate::ring::grain(&(risen / ratio(8, 1))));
+        assert!(light > ratio(0, 1));
     }
 
     #[test]

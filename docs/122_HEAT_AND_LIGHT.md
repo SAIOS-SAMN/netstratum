@@ -6,7 +6,7 @@ body's unlocked face, and one ledger books it across bond, heat, motion,
 potential and light. It replaces the frame-count readings that set cooling
 and starlight today, and the two starlight laws.
 
-**Status:** derived (2026-11-05); steps 1 (the read-only ledger) and 2 (emission by the face) built (2026-11-10). It answers register docs/119
+**Status:** derived (2026-11-05); steps 1 (the read-only ledger), 2 (emission by the face) and 3 (bonds into heat, nuclear) built (2026-11-10). It answers register docs/119
 B8 and B9 and the open decision "hydrogen's hold" (docs/PLAN.md). The
 operator said on 2026-11-05: "why are we still stuck in frames :: where
 does irradiation as heat and light come from? bonds+friction - sounds like

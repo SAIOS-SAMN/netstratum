@@ -1679,8 +1679,11 @@ to its throat condition (width = holding, deficit ½); the star holds
 
 **E25 · The burn.** `formation::burn`, `crate::compound`. Each received
 ring fuses `feed = (|Δm|/3Z_p)·τ·s/Q̄·c` of the remaining fuel; `n` rings
-leave `(1 − feed)^n` (Mycelium's `forms::shares::share_compounds`). The
-light a ring is `feed × fuel share × |Δm|`.
+leave `(1 − feed)^n` (Mycelium's `forms::shares::share_compounds`). Each
+pair fused closes `|Δm| = 2u(z) − u(2z)` open frames, its bond's release,
+which warms the star (E55); its starlight is its emission (E54), one
+starlight law (B9; the second, `feed × fuel share × |Δm|`, retired
+2026-11-10).
 
 **E26 · Heat.** `nuclides::heat`. A body at deficit `δ` receiving `ν` rings
 a bell turns `ν·δ` a bell; the luminal excess is agitation, `max(0, ν·δ − 1)`.
@@ -1701,7 +1704,9 @@ standing as hydrogen. Nucleons conserved.
 **E30 · Recycling at the throat.** `recycle::recycle`. Matter standing in
 the throat is recycled under the bounce `b = p − Σ m·|Δℓ|`; the heaviest
 products join the container while it stays within the weight of the rest of
-its galaxy, the rest leave; carried spin passes to the core.
+its galaxy, carrying their heat, the rest leave; carried spin passes to the
+core. The press's release and the bounce's work `e = b·s` pay the peels; the
+rest warms the throat's matter (E55).
 
 ### §8.2 The tube
 
@@ -1846,4 +1851,21 @@ closed form, `a_n = a* + (a₀ − a*)·gⁿ` (law 5). Motes emit over the torqu
 two rings, a system's motes and worlds on its star's bell; the light is
 shone on the continuum face (law 4) and booked made, received and drained.
 Retired: `keep = (1 − open)(1 − δ)` and `formation::radiates`.
+
+**E55 · Bonds release into heat.** `recycle::recycle`,
+`formation::star_glow` (docs/122 law 1, docs/124 §2). A bond formed releases
+its open frames' closing into the heat of the body it formed in; a bond
+broken takes its cost from it. At the throat the press releases
+`pairs·(2u(z) − u(2z))`, the bounce brings its work `e = b·s`, and the peels
+cost `n·(u(z − k) + k·u(1) − u(z))`:
+
+    Δ(Σ a·m) = e + released − spent,    bond + heat + light after = bond + heat + e before
+
+the rise laid on every grain of the throat's matter alike, floored, the
+floor's remainder leaving as light. In a star the burn's release warms its
+kept matter, and the star, standing at its system's throat (`δ = ½`, docs/122
+§4), keeps ½ of its heat a ring and emits the rest, its starlight:
+`heat·m + released = heat′·m + light`. Chemistry's closings, dissociation and
+the captures change bonds without heat yet (the chemical grip's energy in
+ledger units is open, docs/122 §6).
 
