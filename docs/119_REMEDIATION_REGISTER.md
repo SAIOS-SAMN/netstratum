@@ -347,7 +347,7 @@ foundation (docs/118):**
 4. the bell and ring arithmetic ("two rings a bell", `ν = 2·r_echo/T_u`,
    "a core ring = `T_u/4` bells");
 5. the unit of mass and hold at each tier;
-6. the enclosure's order (inside out as built, outside in as decided);
+6. the enclosure's order: inside R, derived 2026-11-11 (docs/103 §5; "outside in" is the passage's exchange of reach and hold);
 7. what `T_u` is;
 8. whether the S^60 and S^360 tier spheres still stand beside the S⁷ tower;
 9. how the throat `R = H` relates to `A = Q`;

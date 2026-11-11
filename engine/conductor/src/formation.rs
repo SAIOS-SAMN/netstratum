@@ -1028,10 +1028,11 @@ pub fn system(
     // planets attached to each star, for diversity"; 2026-10-22: by physics,
     // never a draw).
     // The star core's released kinds leave as a spray over directions.
-    // The newborn star's push: ½ × its hot star core's open share.
-    // The spray leaves from the star's cool outer layers: their push (whole
-    // atoms), never the hot star core's stripped share.
-    let star_push = crate::pulse::push_of(&star);
+    // The newborn star's push (docs/125 §4.1): the protons' charge left open
+    // at its place in its galaxy, `tide` the galaxy's deficit there; the
+    // spray leaves from the star's cool outer layers (whole atoms, never the
+    // hot star core's stripped share), on the continuum.
+    let star_push = crate::pulse::push_of(&star, &crate::polarity::faces(tide).0, false);
     // The disc (read first: the wind's hold counts it): what never fell, where it stands, turning at the balance of
     // its place in each plane, `ℓ = r·H(<r)` (the ring law: reach × the hold
     // inside it), the hold the system's own enclosure: the star as it stands

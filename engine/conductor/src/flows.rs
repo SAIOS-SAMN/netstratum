@@ -1545,14 +1545,15 @@ fn shear_booked(
         .collect();
     // The dipole (docs/121 §10.1, restated in docs/95 §0): its pole the
     // nucleon dipole's span, `(Z − Q)/w`, its strength the electrons' open
-    // dimensions over the whole nucleon dimensions, `U/3w`.
+    // dimensions over the whole nucleon dimensions, `U/3w`; a vacuum mote's
+    // read on its inverted face, as the magnet reads it (docs/125 §3.2).
     let pole: Vec<Ratio> = motes
         .iter()
-        .map(|x| crate::chem::dimensions(&x.key).pole(false))
+        .map(|x| crate::chem::dimensions(&x.key).pole(x.vacuum))
         .collect();
     let o: Vec<Ratio> = motes
         .iter()
-        .map(|x| crate::chem::dimensions(&x.key).open_share(false))
+        .map(|x| crate::chem::dimensions(&x.key).open_share(x.vacuum))
         .collect();
     let mut reach = Vec::with_capacity(n);
     let mut extent = Vec::with_capacity(n);

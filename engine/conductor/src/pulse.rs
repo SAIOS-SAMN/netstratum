@@ -460,17 +460,29 @@ pub fn universal_ledger(u: &Universe) -> Ratio {
 /// 2026-10-16): each core re-pulses at full strength in its own units, so no
 /// share of the universe enters the push; a galaxy's gas comes from outside
 /// (the ocean), not from its own bounce.
-/// A body's push, Z and Q together (ruling of 2026-10-26: Q stands on the Z
-/// axis, and both must work together, otherwise R diverges): half its open frames' share of its whole weight, `½·Q/(A + Q)` (Q its
-/// magnetism, A its holding; their sum its 3Z mass). Never one pole over the
-/// other: `½·Q/A` passed ½ wherever the open outweighed the held, breaking
-/// the luminal bound; read on the whole it is at most ½, the bound itself.
-pub fn push_of(m: &Manifest) -> Ratio {
+/// A body's PUSH (docs/125 §4.1, operator 2026-11-11; docs/104 §1.2): its
+/// orientation the open pole, the protons' charge its bound electrons leave
+/// open at its place, `p = Q·(1 − g)/w = Q·u/w` (`g` its held share there,
+/// docs/105 §3, the electrons bound at `g`); its ANTIPOLE, by the same
+/// inversion, the held stratum, the neutrons with the charge the electrons
+/// carried there, `p̄ = (Z + Q·g)/w = 1 − p`. The face decides which a body
+/// reads: the continuum `p`, the vacuum leg (`inverted`) `p̄`. A pair share,
+/// no `½`; it replaces `½·U/w` (the electrons' unpaired over the whole), the
+/// electrons' `U` staying the coupling's strength.
+pub fn push_of(m: &Manifest, g: &Ratio, inverted: bool) -> Ratio {
     let whole = mass(m);
     if whole.is_zero() {
         return ratio(0, 1);
     }
-    ratio(1, 2) * magnetism(m) / whole
+    let charge = m.iter().fold(ratio(0, 1), |s, (k, a)| {
+        s + a.clone() * ratio(i64::from(crate::chem::charge(k)), 1)
+    });
+    let p = charge * (ratio(1, 1) - g.clone()) / whole;
+    if inverted {
+        ratio(1, 1) - p
+    } else {
+        p
+    }
 }
 
 pub fn galaxy_push(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
@@ -2885,5 +2897,53 @@ mod tests {
             "the file gives the universe back"
         );
         let _ = std::fs::remove_dir_all(dir);
+    }
+}
+
+#[cfg(test)]
+mod push_tests {
+    use super::{push_of, Manifest};
+    use cfe::ratio::ratio;
+
+    fn of(w: u32, amount: i64) -> Manifest {
+        [(
+            crate::chem::Kind::atom(w).expect("an atom"),
+            ratio(amount, 1),
+        )]
+        .into_iter()
+        .collect()
+    }
+
+    #[test]
+    fn the_push_and_its_antipole_are_a_pair_share() {
+        // docs/125 §4.1: p = Q(1 − g)/w, p̄ = 1 − p, no ½.
+        let h = of(1, 5);
+        assert_eq!(
+            push_of(&h, &ratio(0, 1), false),
+            ratio(1, 1),
+            "bare protons, nothing held"
+        );
+        assert_eq!(
+            push_of(&h, &ratio(1, 1), false),
+            ratio(0, 1),
+            "held whole: no push"
+        );
+        for g in [ratio(1, 3), ratio(1, 2), ratio(5, 7)] {
+            for w in [1u32, 2, 4, 16, 56] {
+                let m = of(w, 3);
+                assert_eq!(
+                    push_of(&m, &g, false) + push_of(&m, &g, true),
+                    ratio(1, 1),
+                    "w {w}: the push and its antipole make the whole"
+                );
+            }
+        }
+        // Deuterium carries one proton in two nucleons: half hydrogen's push
+        // at the same place.
+        let g = ratio(1, 4);
+        assert_eq!(
+            push_of(&of(2, 1), &g, false) * ratio(2, 1),
+            push_of(&of(1, 1), &g, false)
+        );
     }
 }

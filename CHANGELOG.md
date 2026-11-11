@@ -143,6 +143,11 @@ change is named here.
 
 ### Changed
 
+- A body's push oriented on the open pole, with its antipole (docs/125 §4.1,
+  EQUATIONS E16): `p = Q·(1 − g)/w`, the protons' charge left open at the
+  body's place, `p̄ = 1 − p` on the vacuum leg; no `½`, replacing `½·U/w`. The
+  shear reads a vacuum mote's dipole on its inverted face, as the magnet does
+  (E58).
 - The nucleons weighted as they are (#176, docs/95 §0, EQUATIONS E58,
   register K15): `chem::Dimensions` is the nucleon dipole, the protons'
   open dimensions `3Q` and the neutrons' held dimensions `3Z` over `3w`, with

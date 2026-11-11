@@ -1463,7 +1463,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 for (k, a) in &burst {
                     *sys.medium.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
                 }
-                let push = crate::pulse::push_of(&sys.kept);
+                // Its held share at its own reach in its galaxy (docs/105 §3),
+                // the ejecta leaving on the continuum (docs/125 §4.1).
+                let g_here = match &enc {
+                    Some(e) => crate::polarity::faces(&e.reach(&own_of(&sys)).1).0,
+                    None => crate::polarity::throat_held(),
+                };
+                let push = crate::pulse::push_of(&sys.kept, &g_here, false);
                 // The spray leaves from the star itself.
                 sys.flows.extend(crate::flows::spray(
                     &burst,

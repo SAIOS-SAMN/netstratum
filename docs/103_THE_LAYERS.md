@@ -146,6 +146,30 @@ the face where the matter actually stands (docs/98, the luminal bound).
   **Open before build:** confirmation that the enclosure counts from the
   outside in.
 
+  **Derived 2026-11-11 (operator: "derive the answer according to our local
+  laws"): the enclosure's order stays inside R. "Outside in" is the passage's
+  exchange, not a second counting order.** (The retired word "frame" in this
+  section reads as the enclosure's order, #177.)
+  1. Within one enclosure the hold is what lies inside R: the ring law
+     `H(<R)` (docs/83, EQUATIONS E1, at its base) and the ruling of
+     2026-10-16 (shares in their own enclosure).
+  2. The inversion `I` is a map on face-readings (docs/104 §0). Which bodies a
+     hold counts names no face, so `I` leaves it as it is. Inverting every
+     face-reading together is a relabel, as this section shows.
+  3. The asymmetric piece is supplied by the passage. Across a throat the
+     body stands at reach `H` about hold `R`, the new enclosure's hold read
+     from the body (docs/117 §12, register K2), with `H + R` kept (docs/120
+     §8c). What stood beyond a body on one side is its hold within on the
+     other: the view across the throat. The galaxies' deficits read from
+     inside the universal core's throat (`1/17 ↦ 16/17`) are that crossing.
+  4. The joint ruling (mycelium #241, Xylarium #183): the inversion is the
+     twist about the singular stratum, not a substitution. Rewriting every
+     enclosure to count outward would be that substitution.
+
+  So the hold counts what lies inside R on both sides of the tube, the same
+  set as Xylarium's; the inversion acts on the shares (`g = 1 − δ`) and on
+  the orientation (the twist), and the passage exchanges reach and hold.
+
 ## 6. L6 — the bond, composed through the layers
 
 - **Now:** `bond(λ) = λ/(1 + λ)`, `λ = 2(m + μ + τ)/R`: gravity's holding,
@@ -202,7 +226,8 @@ the face where the matter actually stands (docs/98, the luminal bound).
 
 ## 9. Decisions
 
-- **§5:** decided, the whole frame inverted; its meaning (the enclosure
-  counts from the outside in) awaits confirmation.
+- **§5:** decided, every face-reading inverted. Its meaning was derived
+  2026-11-11: the enclosure's order stays inside R, and "outside in" is the
+  passage's exchange of reach and hold (§5).
 - **§6:** decided, additive.
 - Open: the coupling C (docs/100 §3); R's scale (docs/100 §9).
