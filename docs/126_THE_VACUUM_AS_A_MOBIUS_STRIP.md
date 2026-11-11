@@ -96,6 +96,36 @@ plane (§0). The strip carries it on both faces:
   less. Where it winds with it, the reverse. "Equal or greater pressure to
   consume" is the vacuum face read where the twist's sense favours it.
 
+## 3a. Heat on the strip
+
+**The operator asked (2026-11-11):** "are you accounting for the inversion to
+cold via your heat derivation".
+
+- **Heat crosses the pass unchanged.** Heat is motion out of step, the spread
+  of a body's turning about its own mean (docs/124 §3). It names no face, and
+  `I` leaves every reading that names no face unchanged (docs/104 §0: turning
+  on its own leg, phases, in-step). The face enters only where heat is made
+  or lost: heating by the unlocked face, cooling by the held face, and the
+  counterweight's transfer between bodies (docs/104 §2, "cooling here is
+  heating there"). The inversion to cold is a transfer between bodies on the
+  two faces, never a relabelling of one body's heat.
+- **Heat travels with the matter that carries it, mixed by holding.** The
+  first read of §2 showed heat unaccounted at bell 558 growing from
+  −[2;08) to −[11;20)·60⁻². That was heat leaving with matter unbooked:
+  - a star's outburst, its shed layers, its dissolutions and its infall made
+    motes with heat 0;
+  - motes escaping a system lost their own heat;
+  - motes falling into a star dropped theirs.
+
+  Each now carries its source's heat per holding: the star's
+  `agitation_of(reservoir) + heat` (`formation::star_heat`), a system's
+  star-and-motes heat (`held_heat`), a world's with its moons'
+  (`world_heat`), the escaping motes' own. Infall mixes into the star by
+  holding, `(A + h′)·K′ = H + T` (`mixed_heat`).
+- **Still open:** the counterweight's pull channel (docs/104 §2) against
+  docs/122 law 3, which sends all cooling out as light (docs/125 §4.1 item
+  3), and E27 and E38 on the inverse face (docs/125 §3.2).
+
 ## 4. Witnesses
 
 - **Two passes return the strip.** The face, the sense and every share are

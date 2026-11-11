@@ -102,10 +102,7 @@ fn open_frames(x: &Mote, unit: &Ratio) -> Ratio {
 }
 
 fn world_heat(b: &Body, unit: &Ratio) -> Ratio {
-    let own = b.heat.clone() * mass(&b.kept) / unit.clone();
-    b.satellites
-        .iter()
-        .fold(own, |s, m| s + world_heat(m, unit))
+    crate::formation::world_heat(b) / unit.clone()
 }
 
 /// Read the universe's energy book.

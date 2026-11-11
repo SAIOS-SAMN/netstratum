@@ -143,6 +143,11 @@ change is named here.
 
 ### Changed
 
+- Heat travels with the matter that carries it (docs/126 §3a, docs/124 §3).
+  Matter leaving a star (outburst, shed layers, dissolutions, infall), motes
+  escaping a system and worlds crossing as motes carry their source's heat
+  per holding (`formation::star_heat`, `held_heat`, `world_heat`), never 0.
+  Infall mixes into the star by holding (`mixed_heat`).
 - The vacuum as a Möbius strip (docs/126, EQUATIONS E37, E37a; operator
   2026-11-11). The pass carries the strip's half twist, each plane `½·t_k`
   by the mote's lead, in place of a flat ½ on every plane. The core's twist

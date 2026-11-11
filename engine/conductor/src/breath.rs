@@ -836,10 +836,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut enclosed_in = mass(&core.kept) / unit.clone() + state.clone();
         let mut keep: Vec<Body> = Vec::new();
         // What the stars shed crosses whole into the galaxy's flows.
-        let mut shed: Vec<(crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
+        // Each with the heat per holding it carries (docs/124 §3).
+        let mut shed: Vec<(crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>, Ratio)> = Vec::new();
         // What a remnant passes through its other face, the galactic core's
         // throat (recycled there, then on with the shed).
-        let mut infall: Vec<(crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
+        let mut infall: Vec<(crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>, Ratio)> = Vec::new();
         let mut recycled = crate::recycle::Recycled::default();
         let mut burned = crate::pulse::Manifest::new();
         let mut burns: Vec<(Vec<u64>, u32, Ratio, u64)> = Vec::new();
@@ -1260,7 +1261,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let mut phase = orbit;
                     crate::flows::full(&mut phase);
                     phase[crate::flows::LOOP] = ratio(1, 2);
-                    infall.push((out, at, sys.ell_orth.clone(), phase));
+                    infall.push((
+                        out,
+                        at,
+                        sys.ell_orth.clone(),
+                        phase,
+                        crate::formation::star_heat(&sys),
+                    ));
                 }
                 if mass(&sys.kept).is_zero() {
                     // Emptied: its medium crosses whole; its worlds re-anchor.
@@ -1276,6 +1283,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     });
                     let spin_was = subtree_spin(&sys, &unit);
                     let all = sys.total();
+                    // The heat of its star and motes, carried by what is left.
+                    let left_heat = crate::formation::held_heat(&sys);
                     let worlds = std::mem::take(&mut sys.satellites);
                     let rest = all
                         .into_iter()
@@ -1298,7 +1307,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     core.medium_spin += spin_was - passed;
                     if !left.is_empty() {
                         // Dissolved whole: it leaves at its own orbit.
-                        shed.push((left, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                        let carried = crate::formation::per_holding(&left_heat, &mass(&left));
+                        shed.push((
+                            left,
+                            own_of(&sys),
+                            sys.ell_orth.clone(),
+                            sys.phase.clone(),
+                            carried,
+                        ));
                     }
                     orphans.extend(
                         worlds
@@ -1376,7 +1392,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         &mut core.medium_spin,
                         &mut identity,
                     );
-                    shed.push((escaped, at, sys.ell_orth.clone(), sys.phase.clone()));
+                    shed.push((
+                        escaped,
+                        at,
+                        sys.ell_orth.clone(),
+                        sys.phase.clone(),
+                        settled.escaped_heat.clone(),
+                    ));
                 }
                 // The flash (as nature: a nova; operator 2026-11-07, "align
                 // this with nature"): a remnant never burns again. What it
@@ -1398,7 +1420,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         &mut core.medium_spin,
                         &mut identity,
                     );
-                    shed.push((layer, at, sys.ell_orth.clone(), sys.phase.clone()));
+                    shed.push((
+                        layer,
+                        at,
+                        sys.ell_orth.clone(),
+                        sys.phase.clone(),
+                        crate::formation::star_heat(&sys),
+                    ));
                     novae += 1;
                 }
                 enclosed_in += mass(&sys.total()) / unit.clone();
@@ -1471,11 +1499,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 };
                 let push = crate::pulse::push_of(&sys.kept, &g_here, false);
                 // The spray leaves from the star itself.
+                // Thrown with the star's heat per holding (docs/124 §3, #142).
+                let star_heat = crate::formation::star_heat(&sys);
                 sys.flows.extend(crate::flows::spray(
                     &burst,
                     &thrown,
                     &vec![ratio(0, 1); planes],
-                    &ratio(0, 1),
+                    &star_heat,
                     bell,
                     &push,
                 ));
@@ -1601,7 +1631,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Dissolved whole: it leaves at its own orbit.
                 core.medium_spin +=
                     spin_was - carried_spin(&all, &own_of(&sys), &sys.ell_orth, &unit);
-                shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                // Dissolved whole: its star's, motes' and worlds' heat with it.
+                let whole_heat = sys
+                    .satellites
+                    .iter()
+                    .fold(crate::formation::held_heat(&sys), |h, w| {
+                        h + crate::formation::world_heat(w)
+                    });
+                let carried = crate::formation::per_holding(&whole_heat, &mass(&sys.total()));
+                shed.push((
+                    all,
+                    own_of(&sys),
+                    sys.ell_orth.clone(),
+                    sys.phase.clone(),
+                    carried,
+                ));
                 dissolved += 1;
                 continue;
             }
@@ -1631,7 +1675,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &mut core.medium_spin,
                 &mut identity,
             );
-            shed.push((back, at, sys.ell_orth.clone(), sys.phase.clone()));
+            shed.push((
+                back,
+                at,
+                sys.ell_orth.clone(),
+                sys.phase.clone(),
+                crate::formation::star_heat(&sys),
+            ));
             if mass(&sys.kept).is_zero() {
                 // Spent: all it held returns, with all its spin (its orbit's
                 // and everything turning inside it).
@@ -1665,7 +1715,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Dissolved whole: it leaves at its own orbit.
                 core.medium_spin +=
                     spin_was - carried_spin(&all, &own_of(&sys), &sys.ell_orth, &unit);
-                shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                // Dissolved whole: its star's, motes' and worlds' heat with it.
+                let whole_heat = sys
+                    .satellites
+                    .iter()
+                    .fold(crate::formation::held_heat(&sys), |h, w| {
+                        h + crate::formation::world_heat(w)
+                    });
+                let carried = crate::formation::per_holding(&whole_heat, &mass(&sys.total()));
+                shed.push((
+                    all,
+                    own_of(&sys),
+                    sys.ell_orth.clone(),
+                    sys.phase.clone(),
+                    carried,
+                ));
                 dissolved += 1;
                 continue;
             }
@@ -1844,7 +1908,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     &mut core.medium_spin,
                     &mut identity,
                 );
-                shed.push((escaped, at, sys.ell_orth.clone(), sys.phase.clone()));
+                shed.push((
+                    escaped,
+                    at,
+                    sys.ell_orth.clone(),
+                    sys.phase.clone(),
+                    settled.escaped_heat.clone(),
+                ));
             }
             enclosed_in += mass(&sys.total()) / unit.clone();
             keep.push(sys);
@@ -1890,7 +1960,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     // spin (its orbit about its star and what turns in it)
                     // is booked to the medium.
                     core.medium_spin += subtree_spin(&w, &unit);
-                    shed.push((w.total(), at, orth, place))
+                    let carried = crate::formation::per_holding(
+                        &crate::formation::world_heat(&w),
+                        &mass(&w.total()),
+                    );
+                    shed.push((w.total(), at, orth, place, carried))
                 }
             }
         }
@@ -2285,7 +2359,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // and its star's orthogonal orbit (carried spins add; never
             // dropped to zero, or `Σ m·ℓ_orth` would leak).
             let falling = infall.len();
-            for (n, (m, at, orth, star_phase)) in infall.into_iter().chain(shed).enumerate() {
+            for (n, (m, at, orth, star_phase, heat)) in infall.into_iter().chain(shed).enumerate() {
                 for (k, a) in m {
                     if n < falling {
                         in_throat.push(core.flows.len());
@@ -2304,7 +2378,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         spins: crate::flows::Mote::spins_of(&crate::ring::grain(&at), &[]),
                         ell_orth: orth.clone(),
                         phase,
-                        agitation: ratio(0, 1),
+                        agitation: crate::ring::grain(&heat),
                         born: bell,
                         vacuum: false,
                         lever: Vec::new(),
