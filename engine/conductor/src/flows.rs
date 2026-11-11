@@ -2783,16 +2783,25 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
     )
 }
 
-/// The MÖBIUS jetstream's map (docs/94 §2; operator 2026-10-25: "vacuum-
-/// continuum inversion needs to be a mobius inversion through the ocean as a
-/// jetstream current"), first degree in the deficit: `(δ, ψ, s) ↦ (1 − δ,
-/// ψ + ½, −s)`. On a mote it is its leg turned (continuum ↔ vacuum: the
-/// vacuum leg reads its pull at `1 − δ` and runs its circulation the other
-/// way, its sense flipped) and its orbit phase half a turn on. Twice is the
-/// identity.
+/// The MÖBIUS jetstream's map (docs/94 §2, docs/126 §2; operator
+/// 2026-10-25: "vacuum-continuum inversion needs to be a mobius inversion
+/// through the ocean as a jetstream current"; 2026-11-11: "the vacuum as
+/// mobius strip … on the twist of the quantum torsion"). The continuum and
+/// the vacuum are one strip's two faces; one pass turns the face over (the
+/// vacuum leg reads its pull at `1 − δ`), reverses the helix (the sense, the
+/// torsion's sign with it), and carries the strip's half twist, the core's
+/// twist locked into the mote's lead: each spatial plane `½·t_k`, half a turn
+/// in all, never a flat ½ on every plane. Twice returns the face, the sense
+/// and the shares, the phases a whole twist on (the winding kept, mycelium
+/// #241).
 pub fn mobius(x: &mut Mote) {
     x.vacuum = !x.vacuum;
-    antipode(&mut x.phase);
+    full(&mut x.phase);
+    let t = tilt_of(&x.tilt());
+    for (j, &k) in SPACE.iter().enumerate() {
+        let turned = x.phase[k].clone() + ratio(1, 2) * t[j].clone();
+        x.phase[k] = frac(&turned);
+    }
 }
 
 /// The luminal bound (docs/94 §2, docs/98 §4; the UMD kinematic law,
@@ -3813,14 +3822,18 @@ mod passage_tests {
     }
 
     #[test]
-    fn the_mobius_jetstream_twice_is_the_identity() {
-        use super::{mobius, Mote};
+    fn two_passes_of_the_strip_return_its_face_with_the_whole_twist_kept() {
+        // docs/126 §2: one pass turns the face over and each plane by its share
+        // of the half twist, `½·t_k`; two return the face and the sense, the
+        // phases one whole twist on, `t_k` a plane, one turn in all.
+        use super::{mobius, Mote, SPACE};
+        let tilt = vec![ratio(1, 2), ratio(1, 3), ratio(1, 6)];
         let mut x = Mote {
             key: crate::chem::Kind::parse("W0041").expect("a kind"),
             amount: ratio(1, 1),
-            spins: Mote::spins_of(&ratio(1, 3), &[]),
+            spins: Mote::spins_of(&ratio(1, 3), &tilt),
             ell_orth: ratio(0, 1),
-            phase: vec![ratio(3, 10), ratio(1, 7)],
+            phase: vec![ratio(3, 10), ratio(1, 7), ratio(0, 1), ratio(2, 5)],
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,
@@ -3830,12 +3843,23 @@ mod passage_tests {
         };
         let was = x.clone();
         mobius(&mut x);
-        assert!(
-            x.vacuum && x.phase[0] == ratio(4, 5),
-            "one pass: the other leg, half a turn on"
-        );
+        assert!(x.vacuum, "one pass: the other face");
+        let turned: Ratio = SPACE
+            .iter()
+            .map(|&k| super::frac(&(x.phase[k].clone() - was.phase[k].clone())))
+            .fold(ratio(0, 1), |a, d| a + d);
+        assert_eq!(turned, ratio(1, 2), "one pass: half a turn, shared by the lead");
         mobius(&mut x);
-        assert_eq!(x, was, "two passes close");
+        assert!(!x.vacuum, "two passes: the face returned");
+        assert_eq!(x.spins, was.spins, "the shares returned");
+        for (j, &k) in SPACE.iter().enumerate() {
+            assert_eq!(
+                x.phase[k],
+                super::frac(&(was.phase[k].clone() + tilt[j].clone())),
+                "plane {k}: the whole twist kept"
+            );
+        }
+        assert_eq!(x.phase[super::LOOP], was.phase[super::LOOP], "the loop untouched");
     }
 
     #[test]
