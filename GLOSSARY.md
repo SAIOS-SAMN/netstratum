@@ -29,6 +29,10 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 | **R** | The electron's phase state of a nuclide, `R = κ_e·(1 − 2·frac(p))`, where `p` is the pulse phase in turns and `κ_e = 2·Z(Q)/Q` its coherence. Bound electrons (`R > 0`) close its frames; free electrons open them. | `nuclides.rs` |
 | **place** (of a nuclide) | Where its nucleons stand on the 12-dimensional sphere S^11: its turning, its open degree, and how many directions are claimed and paired. | `nuclides::Place` |
 | **open frames** | The unpaired directions of a kind. They are its magnetism and decide how it bonds. | `flows::open` |
+| **deformation** | A body's departure from the manifold's conformed state at its place, per lane and component (docs/127 §2): its heat on H, its twist, its lift on S. A body's own state change is a deformation of the manifold. | docs/127 |
+| **conformation** | The manifold moving its bodies toward its conformed state at a place, the holding-weighted reading of the range, `Σ w·x` kept (docs/127 §3). | docs/127 |
+| **restoration** | A deformation relaxing by its lane's keep a ring (docs/127 §4). | docs/127 |
+| **dissipation** | What restoration removes, entering the manifold rather than a body: radiated at the place's unlocked share, recycled at its held share to the bodies conforming there (docs/127 §4, E62). | docs/127 |
 | **nucleon dipole** | A kind's dimensions (docs/95 §0, docs/97): each nucleon standing in three axes, `3Q` the protons' **open dimensions** and `3Z` the neutrons' **held dimensions**, `3w` in all ("frame" retired, mycelium #239). Its pole is `(Z − Q)/w`. The electrons' open dimensions `U` and their phase R stand beside it, never folded into it. | `chem::Dimensions` |
 | **grip** | How tightly a kind holds against heat, from its tightness `τ`; a kind parts where `a + τ > κ_w·h`. | `nuclides::grip` |
 | **densest element** | The heaviest nuclide the founding produced. Every later capture stops there. | `Universe::densest` |

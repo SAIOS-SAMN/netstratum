@@ -1873,7 +1873,10 @@ exactly. With a source `q` a ring the heat stands at `a* = q/u`, reached in
 closed form, `a_n = a* + (a₀ − a*)·gⁿ` (law 5). Motes emit over the torque's
 two rings, a system's motes and worlds on its star's bell; the light is
 shone on the continuum face (law 4) and booked made, received and drained.
-Retired: `keep = (1 − open)(1 − δ)` and `formation::radiates`.
+Retired: `keep = (1 − open)(1 − δ)` and `formation::radiates`. **Restated by
+E62 (docs/127 §4):** what the body gives up enters the manifold, which
+radiates `u_M` of it and recycles `g_M`; the light here becomes the radiated
+share once E62 is built.
 
 **E55 · Bonds release into heat.** `recycle::recycle`,
 `formation::star_glow` (docs/122 law 1, docs/124 §2). A bond formed releases
@@ -1924,6 +1927,31 @@ vacuum's inverted face, `σ ↦ −σ` and `o ↦ 1 − o`. The dipole coupling
 (`flows::shear`) and the magnet (`flows::magnet`, the enclosed magnetism `M`
 the electrons' open dimensions) read them. R, the electron's phase, stands
 beside the dipole, never folded into it. Replaces `(3·protons − U, U)`.
+
+**E59 · Deformation.** (docs/127 §2.) A body's departure from the manifold's
+conformed state at its place, per lane and component, first degree:
+`D^H_i = x_i − x̄` (heat, `Σ|·|`, weighted `w_i·a_i`), `d_i = t_i − t̄`
+(twist), the lift `u_i` (reach). A body's own state change is a deformation
+of the manifold, a star's `ΔD = (A′ − A)·K`, `A = agitation_of(reservoir)`.
+
+**E60 · Conformation.** (docs/127 §3.) `x̄ = Σ w_j·x_j / Σ w_j` over the
+range that meets the place. The coupling moves bodies toward it with `Σ w·x`
+kept; never a source.
+
+**E61 · Restoration.** (docs/127 §4.) A deformation relaxes by its lane's
+keep a ring (`k = g` heat, E54; `k = 2δ/(1 + δ)` twist, E38). What
+restoration removes is `Δ_i = (1 − k_i)·w_i·D_i`.
+
+**E62 · Dissipation: heat recycled across the manifold.** (docs/127 §4.) What
+restoration removes enters the manifold, `Δ_M = Σ Δ_i + Σ ΔD_state`, which
+returns it by its faces at the place:
+
+    radiated = u_M·Δ_M  (light: absorbed or drained)
+    recycled = g_M·Δ_M  to body j by w_j·g_j / Σ w·g
+
+`g_M = 1 − δ`, `u_M = δ` (docs/105 §3). The book closes: `Δ_M = radiated +
+recycled`, `radiated = absorbed + drained`, and only the drained light leaves
+the bodies. Not yet built (docs/127 §6; #182–#185).
 
 **E57 · The orientation is the generator.** `orientation::Orientation`,
 `orientation::rate`, `orientation::reading` (docs/117 §11.7, #117 step 2).

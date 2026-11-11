@@ -12,6 +12,13 @@ change is named here.
 
 ### Added
 
+- docs/127, the manifold deformed, conformed and restored (operator
+  2026-11-11; EQUATIONS E59–E62, register K16). Exuded properties are the
+  manifold's deformation, never a body's holding. What restoration removes is
+  dissipated into the manifold, radiated at the place's unlocked share and
+  recycled at its held share to the bodies conforming there, so the energy
+  book closes by construction. Its history: the half twist's read exposed
+  heat leaking at every body boundary.
 - docs/125, the equations at their base: every era-1 equation sorted by the
   side of matter it acts on (proton, neutron, electron, nucleons, none) and
   by whether it stands at its base under the nucleon inversion (docs/97,

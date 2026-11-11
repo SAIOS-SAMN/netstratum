@@ -122,6 +122,11 @@ cold via your heat derivation".
   star-and-motes heat (`held_heat`), a world's with its moons'
   (`world_heat`), the escaping motes' own. Infall mixes into the star by
   holding, `(A + h′)·K′ = H + T` (`mixed_heat`).
+- **Superseded as the method by docs/127** (operator 2026-11-11): moving heat
+  between body scalars at their boundaries is the missing connecting tissue
+  patched. The carriage stands as the rule that matter carries its own
+  deformation; the remaining unbooked changes (the reservoir, contraction)
+  enter the manifold's dissipation (docs/127 §2, §4).
 - **Still open:** the counterweight's pull channel (docs/104 §2) against
   docs/122 law 3, which sends all cooling out as light (docs/125 §4.1 item
   3), and E27 and E38 on the inverse face (docs/125 §3.2).

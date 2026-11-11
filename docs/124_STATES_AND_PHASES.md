@@ -91,6 +91,10 @@ own and never one number:
   as `Σ m·ℓ`, which friction never changes; what it spends is the relative
   motion, the dispersion about the mean (EQUATIONS E56).
 - **Temperature** is heat per unit of holding, per component.
+- **Heat is the manifold's deformation, not a body's holding** (docs/127,
+  operator 2026-11-11): a body's heat is its departure from the manifold's
+  conformed state at its place; what cooling removes is dissipated into the
+  manifold and recycled (EQUATIONS E59–E62).
 
 **Built:** the read-only reading, `conductor::dispersion` (each plane's
 phase, each spatial plane's spin, the spin differences between planes, the
