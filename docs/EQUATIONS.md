@@ -1955,6 +1955,20 @@ the bodies. **Built for heat (#182):** `flows::emit` dissipates each mote's
 restored heat into the manifold, recycling `g_M` of it to the motes whose own
 enclosures meet its own (by `w·g`) and radiating the rest. #183–#185 follow.
 
+**E63 · The pass per plane: velocity, pressure resistance, phase, the
+parcel's boundary.** `strip::plane_face`, `strip::face_share`,
+`strip::transit_share`, `strip::sense`, `strip::resisted` (docs/128). Each
+plane on its own circle and its own face:
+
+    R_k = ℓ_k/H(<ℓ_k)    δ_k = H/(R_k + H)    e_k = m/(m + H)
+    λ_k = clamp((H − R_k(1 − e_k)) / (2·R_k·e_k), 0, 1)        (the face)
+    s_k = δ_k + λ_k(1 − 2δ_k)    σ_k = 1 − 2λ_k               (the transit)
+    s_k′ = s_k ⊖ P_k  (λ_k < ½)    s_k ⊕ P_k  (λ_k > ½)          (resisted)
+
+The luminal bound `s_k ≤ ½` holds by construction; a whole crossing
+advances the phase `½·Δλ_k`. Replaces docs/126 §2's `½·t_k` and the face as
+one flag a mote. Readings built; the laws are rewired in docs/128 §6.
+
 **E57 · The orientation is the generator.** `orientation::Orientation`,
 `orientation::rate`, `orientation::reading` (docs/117 §11.7, #117 step 2).
 A body's orientation is one generator `G` over six elliptic planes (three

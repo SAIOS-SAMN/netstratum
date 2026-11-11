@@ -51,6 +51,14 @@ with the winding kept).
 
 ## 2. The pass is the strip's half twist
 
+**Superseded by docs/128 (operator 2026-11-11: "this is a flat plane").**
+`½·t_k` splits one half turn by the tilt's L1 shares of one summed spin, and
+carries the throat's `½` as a constant. docs/128 reads the pass per plane,
+from each plane's own velocity, the medium's pressure resisting it, its phase
+state and the share of its parcel across the ring, with the face per plane
+and continuous. What follows is kept as the record of the flat reading.
+
+
 A Möbius strip is one surface with a half twist. Going round it once turns
 the face over; going round twice returns it. The continuum and the vacuum are
 its two faces, and the ring (`δ = ½`) is its centre line. The half twist is

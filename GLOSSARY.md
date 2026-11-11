@@ -29,6 +29,7 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 | **R** | The electron's phase state of a nuclide, `R = κ_e·(1 − 2·frac(p))`, where `p` is the pulse phase in turns and `κ_e = 2·Z(Q)/Q` its coherence. Bound electrons (`R > 0`) close its frames; free electrons open them. | `nuclides.rs` |
 | **place** (of a nuclide) | Where its nucleons stand on the 12-dimensional sphere S^11: its turning, its open degree, and how many directions are claimed and paired. | `nuclides::Place` |
 | **open frames** | The unpaired directions of a kind. They are its magnetism and decide how it bonds. | `flows::open` |
+| **face (per plane)** | A plane's face is the share of the parcel's own extent standing inside the ring on that plane, `λ_k ∈ [0, 1]`: `0` the continuum, `1` the vacuum (docs/128 §2). Read through the transit, the plane's share is `δ_k + λ_k(1 − 2δ_k)` and its sense `1 − 2λ_k`. | `strip::plane_face` |
 | **deformation** | A body's departure from the manifold's conformed state at its place, per lane and component (docs/127 §2): its heat on H, its twist, its lift on S. A body's own state change is a deformation of the manifold. | docs/127 |
 | **conformation** | The manifold moving its bodies toward its conformed state at a place, the holding-weighted reading of the range, `Σ w·x` kept (docs/127 §3). | docs/127 |
 | **restoration** | A deformation relaxing by its lane's keep a ring (docs/127 §4). | docs/127 |

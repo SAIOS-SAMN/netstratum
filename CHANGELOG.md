@@ -12,6 +12,11 @@ change is named here.
 
 ### Added
 
+- `conductor::strip`, the pass per plane (docs/128, EQUATIONS E63; operator
+  2026-11-11). Each plane's own velocity on its own circle, its face as the
+  share of the parcel across the ring (continuous, one per plane), the
+  transit's share and sense, and the medium's pressure resisting before the
+  ring and aiding past it. Readings with their witnesses; the laws follow.
 - docs/127, the manifold deformed, conformed and restored (operator
   2026-11-11; EQUATIONS E59–E62, register K16). Exuded properties are the
   manifold's deformation, never a body's holding. What restoration removes is

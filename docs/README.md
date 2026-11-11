@@ -86,6 +86,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 125 | [The equations at their base: the nucleon inversion, row by row](125_THE_EQUATIONS_AT_THEIR_BASE.md) |
 | 126 | [The vacuum as a Möbius strip: the core's pressure on the twist](126_THE_VACUUM_AS_A_MOBIUS_STRIP.md) |
 | 127 | [The manifold deformed, conformed and restored: the connecting tissue](127_THE_MANIFOLD_DEFORMED_CONFORMED_RESTORED.md) |
+| 128 | [The pass per plane: velocity, pressure resistance, phase and the parcel's boundary](128_THE_PASS_PER_PLANE.md) |
 
 ## Era 0: the game, its civilizations and economy (01–77)
 
