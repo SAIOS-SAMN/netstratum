@@ -12,6 +12,12 @@ change is named here.
 
 ### Added
 
+- Drag, the jetstream's counterflow (docs/128 §4a, EQUATIONS E64; operator
+  2026-11-11). The forward traversal's rate read through the strip's pass is
+  `−1/b`, so drag is the same jetstream on the other face, share `1 − s`. It
+  takes from the parcel's departure from the medium's transit by the
+  medium's crowding and gives it to the medium, keeping `Σ w·σ·s`. Readings
+  in `conductor::strip` with their witnesses.
 - `conductor::strip`, the pass per plane (docs/128, EQUATIONS E63; operator
   2026-11-11). Each plane's own velocity on its own circle, its face as the
   share of the parcel across the ring (continuous, one per plane), the

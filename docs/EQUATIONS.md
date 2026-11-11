@@ -1972,6 +1972,22 @@ its pair in `G`, its axis's poles, its reach and face); the torque turns each
 plane's pair, the plane `2·s_k′` a bell and its R partner with it, retiring
 the tilt's `2δ·t_k` (`flows::torque` takes the core's twist pressure).
 
+**E64 · Drag: the jetstream's counterflow on the traversal.**
+`strip::counter_rate`, `strip::medium_transit`, `strip::drag`,
+`strip::exchange` (docs/128 §4a; operator 2026-11-11). The forward rate read
+through the strip's pass is its inverse reciprocal, the same traversal on
+the other face. The drag takes from the parcel's departure from the medium's
+transit, by the medium's crowding, and gives it to the medium:
+
+    M: b_k ↦ −1/b_k    d_k = 1 − s_k′    d_k/s_k′ = 1/b_k
+    s̄_k = Σ_j w_j·σ_j·s_j′ / Σ_j w_j    D_k = σ_i·s_i′ ⊖ s̄_k
+    g_k = W/(W + w_i)    T_k = d_k·g_k·w_i·D_k        (Σ w·σ·s kept)
+
+Distinct from E63's `P_k`: the planes' differences against the legs' motion.
+**Readings built and witnessed;** the exchange in the torque after `s_k′`
+follows. The friction's heat (the transit's restoration, docs/127 §4) is
+open, with #184.
+
 **E57 · The orientation is the generator.** `orientation::Orientation`,
 `orientation::rate`, `orientation::reading` (docs/117 §11.7, #117 step 2).
 A body's orientation is one generator `G` over six elliptic planes (three

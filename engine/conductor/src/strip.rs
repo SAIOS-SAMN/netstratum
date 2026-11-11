@@ -1,6 +1,7 @@
 //! The pass per plane (docs/128; operator 2026-11-11: "derive the physics as
 //! velocity / pressure resistance / phase state / parcel boundaries"; "add
-//! multi-dimensionality"). Readings only: no law reads this module yet
+//! multi-dimensionality"). The torque reads each plane's form and its
+//! resisted share (docs/128 §8); the faces' readers and the drag follow
 //! (docs/128 §6).
 //!
 //! - **Velocity:** each plane on its own circle, its spin read by the ring
@@ -16,6 +17,12 @@
 //! - **Pressure resistance:** the twist's pressure on the plane resists it on
 //!   the continuum side of its crossing and aids it past the ring (the helix
 //!   reversed): `s_k ⊖ P_k`, or `s_k ⊕ P_k`.
+//! - **Drag, the jetstream's counterflow** (docs/128 §4a): the forward rate
+//!   `b = s/(1 − s)` read through the pass is `−1/b`, so drag is the same
+//!   traversal on the strip's other face, share `d = 1 − s`. It takes from
+//!   the parcel's departure from the medium's transit, `D = σs′ ⊖ s̄`, at `d`
+//!   by the medium's crowding share `g = W/(W + w)`, and gives it to the
+//!   medium: `T = d·g·w·D`, `Σ w·σ·s` kept.
 use crate::flows::{Enclosed, Mote};
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
@@ -77,6 +84,68 @@ pub fn resisted(share: &Ratio, p: &Ratio, face: &Ratio) -> Option<Ratio> {
         std::cmp::Ordering::Greater => crate::ring::compose(share, p),
         std::cmp::Ordering::Equal => Some(share.clone()),
     }
+}
+
+/// The forward rate `b = s/(1 − s)` read through the strip's pass (face
+/// turned over, sense reversed): `−(1 − s)/s = −1/b`, the counterflow's
+/// rate. None at `s = 0` (no traversal to drag) or outside `[0, 1)`.
+pub fn counter_rate(share: &Ratio) -> Option<Ratio> {
+    if *share <= ratio(0, 1) || *share >= ratio(1, 1) {
+        return None;
+    }
+    Some(-(ratio(1, 1) - share.clone()) / share.clone())
+}
+
+/// The medium's transit on a plane: the holding-weighted signed share
+/// `Σ w_j·x_j / Σ w_j` over the range meeting the place (each `x_j = σ_j·s_j′`,
+/// the counterflow's inbound motes reading against the outbound). Zero over
+/// an empty range.
+pub fn medium_transit(range: &[(Ratio, Ratio)]) -> Ratio {
+    let held: Ratio = range.iter().map(|(w, _)| w.clone()).sum();
+    if held.is_zero() {
+        return ratio(0, 1);
+    }
+    range.iter().map(|(w, x)| w.clone() * x.clone()).sum::<Ratio>() / held
+}
+
+/// One plane's drag on a parcel (docs/128 §4a).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Drag {
+    /// The drag's share, the traversal's other face: `d = 1 − s′`.
+    pub share: Ratio,
+    /// The parcel's departure from the medium's transit, `σs′ ⊖ s̄`.
+    pub departure: Ratio,
+    /// The medium's crowding share of the holding at the place, `W/(W + w)`.
+    pub crowding: Ratio,
+    /// The transit the parcel gives the medium, `d·g·w·D`.
+    pub given: Ratio,
+}
+
+/// The drag on a parcel of holding `w` moving at share `s′` (magnitude) with
+/// signed share `x = σ·s′`, against the range `(w_j, x_j)` meeting its place
+/// (the parcel not in it). None outside the flow law's domain.
+pub fn drag(x: &Ratio, share: &Ratio, w: &Ratio, range: &[(Ratio, Ratio)]) -> Option<Drag> {
+    let d = ratio(1, 1) - share.clone();
+    let departure = crate::ring::compose(x, &-medium_transit(range))?;
+    let medium: Ratio = range.iter().map(|(wj, _)| wj.clone()).sum();
+    let whole = medium.clone() + w.clone();
+    let crowding = if whole.is_zero() { ratio(0, 1) } else { medium / whole };
+    let given = d.clone() * crowding.clone() * w.clone() * departure.clone();
+    Some(Drag { share: d, departure, crowding, given })
+}
+
+/// The exchange: the parcel's signed share after giving `T`, and each range
+/// member's after taking its holding's part, `x_j + T/W`. `Σ w·x` is kept.
+pub fn exchange(x: &Ratio, w: &Ratio, range: &[(Ratio, Ratio)], given: &Ratio) -> (Ratio, Vec<Ratio>) {
+    let medium: Ratio = range.iter().map(|(wj, _)| wj.clone()).sum();
+    if medium.is_zero() || w.is_zero() {
+        return (x.clone(), range.iter().map(|(_, xj)| xj.clone()).collect());
+    }
+    let each = given.clone() / medium;
+    (
+        x.clone() - given.clone() / w.clone(),
+        range.iter().map(|(_, xj)| xj.clone() + each.clone()).collect(),
+    )
 }
 
 /// One plane read at spin `ell` in `enc` for a parcel of holding share `m`.
@@ -334,5 +403,60 @@ mod tests {
         assert_eq!(crate::ring::compose(&before, &p), Some(s.clone()));
         assert_eq!(resisted(&s, &ratio(0, 1), &ratio(0, 1)), Some(s.clone()));
         assert_eq!(resisted(&s, &p, &ratio(1, 2)), Some(s));
+    }
+    #[test]
+    fn drag_is_the_forward_rate_read_through_the_pass() {
+        // M(b) = −1/b, M∘M returns b, b·(1/b) = 1 at every share.
+        for s in [ratio(1, 7), ratio(1, 3), ratio(1, 2), ratio(5, 11)] {
+            let b = crate::orientation::rate(&s).expect("below one");
+            let c = counter_rate(&s).expect("a traversal");
+            assert_eq!(c, -ratio(1, 1) / b.clone());
+            assert_eq!(b.clone() * -c.clone(), ratio(1, 1));
+            // The pass twice: the counterflow's face read back is the forward.
+            let back = -ratio(1, 1) / c;
+            assert_eq!(back, b);
+        }
+        assert_eq!(counter_rate(&ratio(0, 1)), None);
+    }
+
+    #[test]
+    fn drag_is_never_a_source() {
+        // An outbound parcel in a range with an inbound counterflow leg.
+        let (x, s, w) = (ratio(1, 3), ratio(1, 3), ratio(2, 1));
+        let range = vec![(ratio(3, 1), -ratio(1, 4)), (ratio(1, 1), ratio(1, 5))];
+        let dr = drag(&x, &s, &w, &range).expect("in domain");
+        assert_eq!(dr.share, ratio(2, 3));
+        assert_eq!(dr.crowding, ratio(4, 6));
+        assert!(dr.given > ratio(0, 1), "dragged against the counterflow");
+        let before: Ratio = w.clone() * x.clone()
+            + range.iter().map(|(a, b)| a.clone() * b.clone()).sum::<Ratio>();
+        let (x2, xs) = exchange(&x, &w, &range, &dr.given);
+        let after: Ratio = w.clone() * x2.clone()
+            + range.iter().zip(&xs).map(|((a, _), b)| a.clone() * b.clone()).sum::<Ratio>();
+        assert_eq!(before, after, "Σ w·σ·s kept");
+        assert!(x2 < x, "the parcel slows");
+    }
+
+    #[test]
+    fn no_departure_or_no_medium_means_no_drag() {
+        let (s, w) = (ratio(1, 4), ratio(1, 1));
+        // Moving with the medium.
+        let with = vec![(ratio(2, 1), ratio(1, 4)), (ratio(1, 1), ratio(1, 4))];
+        assert_eq!(drag(&s, &s, &w, &with).expect("in domain").given, ratio(0, 1));
+        // An empty medium.
+        assert_eq!(drag(&s, &s, &w, &[]).expect("in domain").given, ratio(0, 1));
+    }
+
+    #[test]
+    fn the_counterflow_drags_harder_than_a_still_medium() {
+        let (s, w) = (ratio(1, 4), ratio(1, 1));
+        let still = vec![(ratio(3, 1), ratio(0, 1))];
+        let counter = vec![(ratio(3, 1), -ratio(1, 4))];
+        let a = drag(&s, &s, &w, &still).expect("in domain").given;
+        let b = drag(&s, &s, &w, &counter).expect("in domain").given;
+        assert!(b > a && a > ratio(0, 1));
+        // A lighter medium drags less (crowding, docs/94 §5).
+        let light = vec![(ratio(1, 3), -ratio(1, 4))];
+        assert!(drag(&s, &s, &w, &light).expect("in domain").given < b);
     }
 }
