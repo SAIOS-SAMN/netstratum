@@ -192,6 +192,55 @@ fn streams(u: &pulse::Universe, i: usize, unit: &Ratio) {
     println!(
         "  vacuum motes with no partner spin (no route turning their R-side phase): {no_partner}"
     );
+    // The spin each mote carries against the spin it would need to stand in
+    // the disc: at the ring (`R = H(<R)`, rate 1) and at the rim, by weight.
+    if let Some(ring_at) = enc.reach_at_rate(&ratio(1, 1)) {
+        let (lo, hi) = (enc.spin_at(&ring_at), enc.spin_at(&enc.rim()));
+        let mut by: Vec<(Ratio, Ratio)> = Vec::new();
+        let (mut under, mut band, mut past, mut all) =
+            (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
+        for x in &core.flows {
+            let ell = x.ell_o().abs();
+            let wx = w(x);
+            all += wx.clone();
+            if ell < lo {
+                under += wx.clone();
+            } else if ell <= hi {
+                band += wx.clone();
+            } else {
+                past += wx.clone();
+            }
+            by.push((conductor::ring::grain(&(ell / lo.clone())), wx));
+        }
+        by.sort();
+        let q = |p: i64| {
+            let mut run = ratio(0, 1);
+            let at = all.clone() * ratio(p, 100);
+            by.iter()
+                .find(|(_, wx)| {
+                    run += wx.clone();
+                    run >= at
+                })
+                .map(|(v, _)| v.clone())
+                .unwrap_or_else(|| ratio(0, 1))
+        };
+        println!(
+            "  spin needed: ring reach {} needs ℓ {}, rim needs ℓ {}; carried/needed-at-ring by weight p10 {} p50 {} p90 {}",
+            f(&ring_at),
+            f(&lo),
+            f(&hi),
+            f(&q(10)),
+            f(&q(50)),
+            f(&q(90))
+        );
+        println!(
+            "  holding below the ring's spin {}, in the disc band {}, past the rim {} (of {})",
+            f(&under),
+            f(&band),
+            f(&past),
+            f(&all)
+        );
+    }
     // The route back: one bell's torque on a copy, and the vacuum motes it
     // carries into the throat (their R-side phase crossing ½ from above, as
     // the breath reads it), with how far their R-side phase moved.

@@ -974,6 +974,17 @@ base 1, which puts it at `R/H < 1`, and the home's rim is only `1.256` of
 its base. The spin the bounce distributes through the jetstream is what is
 read next (the probe first), before any exit law is adopted.
 
+**Read (g557, `observe streams 0`).** The ring (the least reach turning at
+rate 1, `R = H(<R)`) stands at `1.256`, the rim at `1.256`: with every
+body inside, the ring's hold is the whole hold, so the ring is the rim and
+the disc band between them has no width. To open it a body must carry
+more than `ℓ = 1.256·1.256 ≈ 1.578`; by weight the vacuum carries 0.10
+(p10), 0.27 (p50) and 0.37 (p90) of that, and the disc band holds nothing.
+The bounce's `ℓ = p·w̄/w` is read against the singularity's base 1, not
+against the home's whole hold (base plus the 0.256 its own matter adds),
+so even at `p = 1` a mean nucleus stands at `R ≤ 1` inside the ring. The
+shortfall is the bounce's ruler, not the passage.
+
 ### 14.2 The throat test reads the R side's passage, signed
 
 A vacuum mote reaches the throat when its R-side phase crosses ½ from
