@@ -204,10 +204,20 @@ pub fn wound(plane: &[Ratio], antipole: &[Ratio], disc_spin: &Ratio) -> Vec<Rati
     if disc_spin.is_zero() || antipole.len() != t.len() {
         return t;
     }
-    t.iter()
+    // The core's planes' spin with its antipole, normalized (docs/128
+    // §13.1): `t_k + A_k/ΣS` wherever the antipole sums to nothing; a
+    // rotation's antipole need not.
+    let held: Vec<Ratio> = t
+        .iter()
         .zip(antipole)
-        .map(|(tk, a)| tk.clone() + a.clone() / disc_spin.clone())
-        .collect()
+        .map(|(tk, a)| tk.clone() * disc_spin.clone() + a.clone())
+        .collect();
+    let w = crate::flows::tilt_from(&held);
+    if w.is_empty() {
+        t
+    } else {
+        w
+    }
 }
 
 /// The twist a released parcel carries off its plane (docs/100 §8.3): its

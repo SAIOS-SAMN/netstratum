@@ -245,6 +245,10 @@ pub struct Ring {
     pub shear: Ratio,
     /// Its axis in space, `h±·ℓ±·h̄±` (§11.1).
     pub axis: [Ratio; 3],
+    /// The chiral split between the mote's two rings (§13.4), the tilt of the
+    /// `+` half's axis against the `−` half's: the isoclinic torsion in
+    /// space. None where a half has no spin.
+    pub chiral: Option<crate::orientation::Tilt>,
 }
 
 /// A mote's two rings, `P+` then `P−` (docs/128 §11), its holding share in
@@ -258,6 +262,7 @@ pub fn half_rings(x: &Mote, enc: &Enclosed, whole: &Ratio) -> [Option<Ring>; 2] 
     };
     let (plus, minus) = spin_halves(&x.spins, &x.spins_orth);
     let (a_plus, a_minus) = x.orientation.half_axes(&plus, &minus);
+    let chiral = crate::orientation::tilt(&a_plus, &a_minus);
     let ring = |spin: &[Ratio; 3], axis: [Ratio; 3]| {
         let l = size(spin);
         if l.is_zero() {
@@ -272,6 +277,7 @@ pub fn half_rings(x: &Mote, enc: &Enclosed, whole: &Ratio) -> [Option<Ring>; 2] 
             volume,
             shear,
             axis,
+            chiral: chiral.clone(),
         })
     };
     [ring(&plus, a_plus), ring(&minus, a_minus)]

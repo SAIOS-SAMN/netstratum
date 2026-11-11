@@ -12,6 +12,14 @@ change is named here.
 
 ### Added
 
+- Tilt from quantum torsion (docs/128 §13, EQUATIONS E70; operator
+  2026-11-11, approved). Each bell a mote's spins precess about the core's
+  wound axis by the twist at its own place (`φ = δ·Σ t_c·t·ν`, falling with
+  reach) and tip about the twist's pressure on what its tube holds; the
+  spin moved between the planes is the core's antipole's (`S_k + A_k`
+  kept), restoring the wound plane's lead that §12 starved. The ring reads
+  the chiral split between its halves' axes. With §4b and §12.3 the disc
+  settles on a warp, not a flat plane.
 - The echo weighed (docs/130, EQUATIONS E69; operator 2026-11-11). At each
   echo's arrival every mote takes a beat: the universal bounce's push
   carried through the layers between (`p·ν`, its nested clock), its

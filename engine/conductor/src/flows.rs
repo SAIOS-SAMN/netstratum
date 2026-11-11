@@ -2249,6 +2249,101 @@ pub fn conform_axes(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio
     (moved, remainder)
 }
 
+/// Tilt from quantum torsion (docs/128 §13): each mote's spins turned by
+/// two axial rotations each bell, unitary on the group (`orientation::
+/// turned`). The precession about the core's lead `lead` (its wound plane)
+/// by the twist at its place, `φ = δ·Σ t_c·t·ν` (`quantum::twist_at`, `ν`
+/// the galaxy's clock `rate`), `m_c = Cayley(rate(φ)·Â_c)`; then the tipping
+/// by the twist's pressure on what its tube holds (itself and the range
+/// meeting it, each mote's `C` generator as a share, holding-weighted),
+/// the pair pressures `ρ·(x̄_j ⊖ x̄_k)` as the axial vector `p` (pair `(j,
+/// k)` about the third axis), `m_p = Cayley(p)`. Each on the grain. The spin
+/// they move between the planes is the core's antipole's to take (the
+/// caller books `S_k + A_k`).
+pub fn torsion_turns(
+    motes: &mut [Mote],
+    enc: &Enclosed,
+    total: &Ratio,
+    lead: &[Ratio],
+    rate: &Ratio,
+) {
+    use crate::orientation::{size, turned};
+    let n = motes.len();
+    if n == 0 {
+        return;
+    }
+    let zero3 = || -> [Ratio; 3] { std::array::from_fn(|_| ratio(0, 1)) };
+    let w: Vec<Ratio> = motes
+        .iter()
+        .map(|x| {
+            if total.is_zero() {
+                ratio(0, 1)
+            } else {
+                x.amount.clone() * weight(&x.key) / total.clone()
+            }
+        })
+        .collect();
+    let rho = if enc.whole().is_zero() {
+        ratio(0, 1)
+    } else {
+        enc.base() / enc.whole()
+    };
+    let lead3: [Ratio; 3] =
+        std::array::from_fn(|k| lead.get(k).cloned().unwrap_or_else(|| ratio(0, 1)));
+    let lead_size = size(&lead3);
+    let mut reach = Vec::with_capacity(n);
+    let mut extent = Vec::with_capacity(n);
+    let mut delta = Vec::with_capacity(n);
+    let mut f: Vec<Vec<Ratio>> = Vec::with_capacity(n);
+    for (i, x) in motes.iter().enumerate() {
+        let (r, _, d) = lifted(enc, &x.ell_o().abs(), &x.lift);
+        extent.push(r.clone() * own_enclosure(x, enc, total)[0].clone());
+        reach.push(r);
+        delta.push(d);
+        let v = x.orientation.twist_generator().unwrap_or_else(zero3);
+        let mut row = vec![w[i].clone()];
+        row.extend(
+            v.iter().map(|vk| {
+                crate::ring::grain(&(w[i].clone() * vk.clone() / (ratio(1, 1) + vk.abs())))
+            }),
+        );
+        f.push(row);
+    }
+    let sums = range_sums(&reach, &extent, &f);
+    for (i, x) in motes.iter_mut().enumerate() {
+        let spin: [Ratio; 3] =
+            std::array::from_fn(|k| x.spins.get(k).cloned().unwrap_or_else(|| ratio(0, 1)));
+        if size(&spin).is_zero() || x.spins.len() < 3 {
+            continue;
+        }
+        let mut now = spin;
+        // The precession about the core's lead.
+        if !lead_size.is_zero() {
+            let phi = crate::quantum::twist_at(&delta[i], rate, lead, &x.tilt());
+            if let Some(b) = crate::orientation::rate(&phi) {
+                let u: [Ratio; 3] =
+                    std::array::from_fn(|k| b.clone() * lead3[k].clone() / lead_size.clone());
+                now = turned(&u, &now);
+            }
+        }
+        // The tipping by the twist's pressure on what its tube holds.
+        let held = sums[i][0].clone() + f[i][0].clone();
+        if !held.is_zero() {
+            let rates: [Ratio; 3] = std::array::from_fn(|k| {
+                (sums[i][k + 1].clone() + f[i][k + 1].clone()) / held.clone()
+            });
+            if let Some(pairs) = crate::torsion::pair_pressures(&rates, &rho) {
+                // Pair (j, k) about the third axis: (0,1) → 2, (1,2) → 0, (2,0) → 1.
+                let p = [pairs[1].clone(), pairs[2].clone(), pairs[0].clone()];
+                now = turned(&p, &now);
+            }
+        }
+        for k in 0..3 {
+            x.spins[k] = crate::ring::grain(&now[k]);
+        }
+    }
+}
+
 /// The echo weighed (docs/130): each mote's beat at an echo's arrival. The
 /// bounce's `push` carried through the layers between, `a = p·ν` (`ν` the
 /// nested clock, `breath::nested`: the galaxy's `galaxy` rate, then the
@@ -6365,5 +6460,117 @@ mod range_sum_tests {
                 assert_eq!(sums[i][k], walked, "span {i}, value {k}");
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod torsion_turn_tests {
+    use super::{torsion_turns, Enclosed, Mote};
+    use crate::orientation::turned;
+    use cfe::ratio::{ratio, Ratio};
+
+    fn v3(a: i64, b: i64, c: i64, d: i64) -> [Ratio; 3] {
+        [ratio(a, d), ratio(b, d), ratio(c, d)]
+    }
+
+    fn dot(a: &[Ratio; 3], b: &[Ratio; 3]) -> Ratio {
+        a.iter()
+            .zip(b)
+            .fold(ratio(0, 1), |s, (x, y)| s + x.clone() * y.clone())
+    }
+
+    #[test]
+    fn a_rotation_about_an_axis_keeps_the_part_along_it_and_fixes_the_axis() {
+        // docs/128 §13.1-§13.2: precession about Â keeps `Â·a` exactly while the
+        // axis turns; a pressure along the ring's axis does not move it.
+        let axis = v3(1, 2, 2, 5);
+        let u: [Ratio; 3] = std::array::from_fn(|k| axis[k].clone() * ratio(1, 3));
+        let a = v3(3, -1, 4, 1);
+        let b = turned(&u, &a);
+        assert_eq!(dot(&axis, &b), dot(&axis, &a));
+        assert_ne!(b, a, "the axis turns");
+        assert_eq!(turned(&u, &axis), axis, "along the axis, fixed");
+    }
+
+    #[test]
+    fn deeper_precesses_faster() {
+        let (core, body) = (v3(1, 0, 0, 1), v3(2, 1, 0, 3));
+        let near = crate::quantum::twist_at(&ratio(1, 2), &ratio(1, 1), &core, &body);
+        let far = crate::quantum::twist_at(&ratio(1, 5), &ratio(1, 1), &core, &body);
+        assert!(near > far);
+        assert_eq!(near, crate::quantum::twist(&ratio(1, 1), &core, &body));
+    }
+
+    #[test]
+    fn the_torsions_rotations_move_spin_between_the_planes_and_tip_by_a_local_twist() {
+        // A mote twisted unevenly among untwisted ones: the precession and the
+        // tipping move its spin between the planes; the antipole's book is
+        // the caller's (`S_k + A_k`), read here as the planes' change.
+        let mote = |spins: [i64; 3], phases: [i64; 4]| Mote {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            amount: ratio(1, 1),
+            spins: spins.iter().map(|&l| ratio(l, 1)).collect(),
+            spins_orth: vec![ratio(0, 1); 3],
+            orientation: crate::orientation::Orientation::from_phases(
+                &phases.map(|p| ratio(p, 16)),
+            ),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        };
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let mut motes = vec![mote([4, 1, 1], [1, 3, 0, 5]), mote([4, 1, 1], [0, 0, 0, 0])];
+        let was = motes[0].spins.clone();
+        let lead = vec![ratio(1, 1), ratio(0, 1), ratio(0, 1)];
+        torsion_turns(&mut motes, &enc, &ratio(10, 1), &lead, &ratio(1, 1));
+        assert_ne!(motes[0].spins, was, "the spin turned between the planes");
+        let before = crate::torsion::plane_spin(&[
+            mote([4, 1, 1], [1, 3, 0, 5]),
+            mote([4, 1, 1], [0, 0, 0, 0]),
+        ]);
+        let after = crate::torsion::plane_spin(&motes);
+        let a = crate::torsion::antipole_take(&[], &before, &after);
+        for k in 0..3 {
+            assert_eq!(
+                after[k].clone() + a[k].clone(),
+                before[k],
+                "plane {k}: S + A kept"
+            );
+        }
+    }
+
+    #[test]
+    fn the_chiral_split_vanishes_without_twist_and_stands_with_it() {
+        // docs/128 §13.4.
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let mut x = Mote {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            amount: ratio(1, 2),
+            spins: vec![ratio(3, 4), ratio(1, 2), ratio(1, 4)],
+            spins_orth: vec![ratio(0, 1); 3],
+            orientation: crate::orientation::Orientation::default(),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        };
+        let [p, _] = crate::strip::half_rings(&x, &enc, &ratio(1, 1));
+        let c = p.expect("a ring").chiral.expect("a split");
+        assert_eq!(c.share, ratio(0, 1));
+        x.spins_orth = vec![ratio(1, 4), ratio(-1, 8), ratio(0, 1)];
+        x.orientation = crate::orientation::Orientation::from_phases(&[
+            ratio(1, 16),
+            ratio(3, 16),
+            ratio(0, 1),
+            ratio(5, 16),
+        ]);
+        let [p, _] = crate::strip::half_rings(&x, &enc, &ratio(1, 1));
+        let c = p.expect("a ring").chiral.expect("a split");
+        assert!(c.share > ratio(0, 1));
     }
 }

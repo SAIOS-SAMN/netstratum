@@ -839,6 +839,92 @@ attractor.
   move, equal rings at a right angle meet between, and a retrograde ring
   keeps its sense.
 
+## 13. Tilt from quantum torsion: the axial rotations
+
+**Operator 2026-11-11** (the derivation approved, with its four rulings):
+the ring had two tilt dampers (§4b, §12.3) and no tilt generator. Its tilt
+from quantum torsion (docs/100 §8, Einstein–Cartan: torsion couples to spin)
+enters as rotations of its axis, automorphisms on the group, unitary and
+first degree.
+
+**The basis.** The plane laws read a mote's spins as its components on the
+planes (`torsion::plane_spin`, the antipole, the disc's plane). The two
+rotations below turn the spins by the group's action, `ℓ ↦ m·ℓ·m̄`
+(`orientation::turned`). This keeps the spin's size on the group and moves
+spin between the planes.
+
+### 13.1 Precession about the core's axis
+
+- **The twist at a body's place.** "Twist per turn is the deficit" (docs/100
+  §2): the core winds each plane, each ring, by the deficit at the ring, ½
+  at its own, shared by its tilt. A body takes it at its own place by its
+  own deficit and its share of the core's planes, on its galaxy's clock:
+
+      φ_i = δ_i·Σ_k t_c,k·t_i,k·ν_g        (`quantum::twist_at`; `quantum::twist` is δ = ½)
+
+  So precession falls with reach as the deficit falls, as frame-dragging
+  does.
+- **The rotor.** `Â_c` is the core's lead (its wound plane, `torsion::wound`)
+  as an L1 direction, and `m_c = Cayley(rate(φ_i)·Â_c)`. Each bell, `ℓ_i ↦
+  m_c·ℓ_i·m̄_c`. A rotation about `Â_c` keeps the ring's part along it,
+  `Â_c·ℓ`, exactly, so the inclination to the core's axis is not inflated,
+  and the line of nodes advances: Lense–Thirring precession. (The tilt's L1
+  share `τ` reads the nodes on the L1 measure and so moves as they turn;
+  the part along the axis is the invariant.)
+- **The book.** The spin moved between the planes, `ΔS_k`, is taken by the
+  core's antipole with the opposite sign, `A_k′ = A_k − ΔS_k`, so `S_k + A_k`
+  is constant on every plane (docs/100 §8.2, E39). This restores the wound
+  plane's lead that §12 starved. `Σ_k A_k` need not vanish under a rotation,
+  so the wound plane is the core's planes' spin with its antipole,
+  normalized, `tilt_from(S + A)`. That is `t_k + A_k/ΣS` wherever `ΣA = 0`,
+  and the torque's ledger identity counts the antipole.
+
+### 13.2 Tipping by the twist's pressure
+
+- **The axial vector.** The pair pressures `P_jk = ρ·(x̄_j ⊖ x̄_k)` (§10.4)
+  are a bivector. Pair `(j, k)` turns plane `j` toward plane `k`, which is a
+  rotation about the third axis, so the axial vector is `p_l = P_jk` with
+  `l` the third. Read on the twist of what the ring's tube holds (the ring
+  and the range it meets, each mote's `C` generator as a share
+  `v/(1 + |v|)`, holding-weighted), `ρ` the enclosure's base over its
+  whole.
+- **The rotor.** `m_p = Cayley(p)`, and `ℓ_i ↦ m_p·ℓ_i·m̄_p` each bell. Where
+  `p` is transverse to the ring's axis, it tips the ring out of its plane:
+  torsion generates inclination. Since `p` is local, rings at different
+  places tip differently. A disc-wide `p` would only rotate the disc whole.
+- **The book.** As §13.1: the core's antipole takes `ΔS_k`.
+
+### 13.3 The warp's balance
+
+With §13.1–§13.2 beside §4b and §12.3, a disc no longer flattens to `τ = 0`.
+Near the core (deep deficit, strong twist), precession and tipping hold the
+rings to the core's wound axis. Far out, the out-of-plane shear and the
+repulsion settle them toward the invariable plane. Between, tipping and
+damping balance on a stationary warp, the analogue of a Bardeen–Petterson
+disc, read where the motions balance, never solved for.
+
+### 13.4 The chiral split between the halves
+
+`a+ = C·(F·ℓ+·F̄)·C̄` and `a− = F·ℓ−·F̄` (§11.1): the twist turns the `+`
+half's axis away from the `−` half's. The ring reads the split as the tilt
+between them from their product, `Q = a−·ā+` (§11.3): its share, sense and
+line of nodes `a−×a+`, the isoclinic torsion the parcel carries, in space
+(`strip::Ring::chiral`). With `C = 1` and no partner spin the halves are one
+axis, and the split is none.
+
+### 13.5 Witnesses
+
+- **The antipole's book:** `S_k + A_k` is unchanged on every plane by the
+  precession and the tipping.
+- **Precession keeps the inclination to the core's axis:** `Â_c·ℓ` is
+  unchanged exactly, while the axis turns; an axis along `Â_c` is fixed.
+- **Transverse pressure tips:** a ring whose `p` is transverse to its axis
+  ends the bell tilted against its former axis; `p` along the axis does not
+  move it.
+- **Deeper precesses faster:** `φ` rises with the deficit.
+- **The chiral split vanishes** with `C = 1` and no partner spin, and
+  stands with them.
+
 ## 7. Witnesses
 
 - **Wholly outside or inside**, a plane reads `λ = 0` or `1`, `s = δ` or `1 −

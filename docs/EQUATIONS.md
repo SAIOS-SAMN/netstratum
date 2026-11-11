@@ -2080,6 +2080,18 @@ about the body's own spin:
     a = p·ν    ν = Π(1 − δ)    A = a/(1 − ρ), ρ = ½·½    D = A ⊖ Ā    T = (1 − A)·g·w·D
     F ↦ F·m(rate(A′)·t)    C, ℓ unchanged    Σ w·A′ = Σ w·A (within the grain)
 
+**E70 · Tilt from quantum torsion.** `flows::torsion_turns`,
+`quantum::twist_at`, `orientation::turned`, `torsion::wound`,
+`strip::Ring::chiral` (docs/128 §13; operator 2026-11-11, approved). Two
+axial rotations of each mote's spins each bell, unitary on the group:
+
+    φ_i = δ_i·Σ_k t_c,k·t_i,k·ν_g    m_c = Cayley(rate(φ_i)·Â_c)    (precession; Â_c·ℓ kept)
+    p_l = P_jk on what the tube holds, (j, k, l) cyclic    m_p = Cayley(p)    (tipping)
+    ℓ ↦ m_p·(m_c·ℓ·m̄_c)·m̄_p    A_k′ = A_k − ΔS_k    wound = tilt_from(S + A)
+
+and the chiral split between the halves, `tilt(a+, a−)`, none with `C = 1`
+and no partner spin. The torque's ledger identity counts the antipole.
+
 **E65 · The bell on the group: six spins, one motion a half.**
 `orientation::spin_halves`, `orientation::size`, `orientation::half_motion`,
 `Orientation::bell_halves`, `flows::Mote::spins_orth` (docs/128 §9; operator

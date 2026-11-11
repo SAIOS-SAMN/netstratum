@@ -18,6 +18,7 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 | **pole plane** | The plane a dipole stands on (Mycelium #239, adopted 2026-11-11, docs/129 §4); a refusal names it (`UnbodiedDipole { pole_plane }`). | `flows::CouplingRefusal` |
 | **pole unit** | A pole plane's unit (Mycelium #239, docs/129 §4). | — |
 | **PassageState** `{ hold, reach }` | The passage's state carried across a tube (LAW-PASSAGE, Mycelium 78.172; docs/129 §4–§5). | — |
+| **chiral split** | The tilt between a ring's two halves' axes, `tilt(a+, a−)`: the isoclinic torsion a parcel carries in space, none with `C = 1` and no partner spin (docs/128 §13.4). | `strip::Ring::chiral` |
 | **push** `π` | LAW-COUPLING v2's open charge at a body's place: `π = p·δ/w` (protons `p`, nucleons `w`, `δ` the passage face's share there), its antipole `π̄ = 1 − π`; pole `1 − 2π`; inverted on the vacuum face (docs/129 §1). | `flows::dipole` |
 | **strength (of a dipole)** | The bond ends `U/3w`, the coupling's grip, never a pole (LAW-COUPLING v2, docs/129 §1). | `flows::Dipole` |
 | **invariable axis** `A±` | The manifold's reference for tilt on each half: the holding-weighted sum of its rings' axes, `Σ w·a±`, the normal of the invariable plane. | `strip::invariable_axes` |

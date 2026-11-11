@@ -2415,11 +2415,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 .collect();
             // The galaxy's band (push and return, `flows::torque`) stands held
             // back (operator 2026-10-21: "pull it back and make it static").
+            // The core's antipole holds what the torsion's rotations move
+            // between the planes (docs/128 §13.1), so the ledger counts it.
             let ledger_sum = |core: &Body| {
-                core.flows.iter().fold(core.reservoir.clone(), |s, x| {
-                    s + x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()
-                        * (x.ell_o() + x.ell_orth())
-                })
+                let held = core.antipole.iter().fold(ratio(0, 1), |s, a| s + a.clone())
+                    / ledger_unit.clone();
+                core.flows
+                    .iter()
+                    .fold(core.reservoir.clone() + held, |s, x| {
+                        s + x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()
+                            * (x.ell_o() + x.ell_orth())
+                    })
             };
             // The echo's beat (docs/130): each mote's form turned about its
             // own spin by the bounce's push carried to it, its reverberation
@@ -2456,6 +2462,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // orient`), never reset to none.
             // What the attractor moves off each plane the core takes as its
             // antipole (docs/100 §8.2): `S_k + A_k` constant on every plane.
+            let (lead, _) = crate::torsion::core_twist(core);
             let spin_before = crate::torsion::plane_spin(&core.flows);
             // The shear out of the plane (docs/128 §12.3): each ring
             // conformed toward the rings its tube meets, the range paying,
@@ -2465,6 +2472,16 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &mut core.flows,
                 enc.as_ref().unwrap_or(&throat),
                 &ledger_unit,
+            );
+            // Tilt from quantum torsion (docs/128 §13): the precession about
+            // the core's lead and the tipping by the twist's pressure, the
+            // spin they move between the planes the antipole's.
+            crate::flows::torsion_turns(
+                &mut core.flows,
+                enc.as_ref().unwrap_or(&throat),
+                &ledger_unit,
+                &lead,
+                &g_rate.clone().unwrap_or_else(|| ratio(1, 1)),
             );
             let plane = crate::flows::disc_plane(&core.flows);
             let spin_after = crate::torsion::plane_spin(&core.flows);

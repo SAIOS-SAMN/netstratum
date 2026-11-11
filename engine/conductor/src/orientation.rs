@@ -321,6 +321,13 @@ pub fn tilt(axis: &[Ratio; 3], reference: &[Ratio; 3]) -> Option<Tilt> {
     })
 }
 
+/// A pure `v` turned by the Cayley motion of `u`, `m·v·m̄` with `m = (1 +
+/// u)(1 − u)⁻¹` (docs/128 §13): exact, a conjugation by a unit, no norm read.
+/// A `v` along `u` is fixed.
+pub fn turned(u: &[Ratio; 3], v: &[Ratio; 3]) -> [Ratio; 3] {
+    Half::motion(u).carry(v)
+}
+
 /// A motion on the two halves.
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct Motion(Half, Half);
