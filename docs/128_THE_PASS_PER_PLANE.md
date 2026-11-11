@@ -406,7 +406,12 @@ that point as a unitary morphodynamic state".
 **Status:** derived. Steps 1–2 built: the form and twist as readings
 (`Orientation::form_twist`), and the partner orbits conformed to the
 manifold's shear with the driven loop retired (`flows::conform_partners`).
-Steps 3–4 follow in the order of §10.7.
+Step 3 built: a core's twist pressure is read from the manifold's twist
+over its disc's motes (`torsion::manifold_twist`, each mote's `C` generator
+as a share on the units, holding-weighted); the wound plane stays the
+release's lead. Bodies carry no `G` yet (#159), so a body's own twist and the
+fibre's tension (`torsion::tension`, a system's tilt against its core's)
+follow with it. Step 4 follows.
 
 ### 10.0 The factorization
 

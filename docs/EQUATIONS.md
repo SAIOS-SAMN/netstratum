@@ -1994,7 +1994,13 @@ exchange of halves conjugates it. **The twist sourced by the shear
     ℓ_kR′ = ℓ* + k·(ℓ_kR − ℓ*)    (k = E38's keep; the range pays by holding)
 
 The push on the partner orbits (`orth_push`'s `κ_⊥` in `spin_torque`, the
-tide in the mote torque) is retired. The torsion read from `C` follows.
+tide in the mote torque) is retired. **The torsion from the twist (built):**
+`Orientation::twist_generator`, `torsion::manifold_twist`, `torsion::core_twist`:
+
+    v = C_vec/(1 + C₀)    x̄_k = Σ w·(v_k/(1 + |v_k|)) / Σ w    P_jk = ρ·(x̄_j ⊖ x̄_k)
+
+A core's twist pressure is the manifold's twist over its disc's motes; its
+wound plane stays the release's lead (its tilt), never its torsion.
 
 **E65 · The bell on the group: six spins, one motion a half.**
 `orientation::spin_halves`, `orientation::size`, `orientation::half_motion`,

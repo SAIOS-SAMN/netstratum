@@ -568,6 +568,21 @@ impl Orientation {
         (q.ratios(), p.product(&q.conjugate()).ratios())
     }
 
+    /// Its twist's generator on the three units (docs/128 §10.4): the Cayley
+    /// generator of `C`, `v = C_vec/(1 + C₀)`, isoclinic (one value per dual
+    /// pair). None where `C = −1` (the halves opposed, a half turn of R).
+    pub fn twist_generator(&self) -> Option<[Ratio; 3]> {
+        let Motion(p, q) = Motion::of(&self.g);
+        let c = p.product(&q.conjugate());
+        let den = &c.d + &c.n[0];
+        if den.is_zero() {
+            return None;
+        }
+        Some(std::array::from_fn(|k| {
+            Ratio::new(c.n[k + 1].clone(), den.clone())
+        }))
+    }
+
     /// The orientation whose state is `(F, C)`: `q = F`, `p = C·F`, its
     /// generator held on the grain, unwound.
     pub fn of_form_twist(
