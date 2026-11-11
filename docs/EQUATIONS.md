@@ -1890,7 +1890,7 @@ stays the stick test). The bounce's parting (the exchange of the unkept share)
 then widens their spins; what pays it is the state level's (potential),
 not derived yet.
 
-**E58 · The nucleon dipole.** `chem::Dimensions`, `chem::frames` (docs/95 §0,
+**E58 · The nucleon dipole.** `chem::Dimensions`, `chem::dimensions` (docs/95 §0,
 docs/97; register K15). A kind's dimensions are its nucleons', each standing in
 three axes: `3Q` the protons' open dimensions and `3Z` the neutrons' held
 dimensions, `3w` in all ("frame" retired, mycelium #239). The electrons' open dimensions `U` stand beside them:

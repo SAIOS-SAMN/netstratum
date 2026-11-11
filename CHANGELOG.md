@@ -12,6 +12,11 @@ change is named here.
 
 ### Added
 
+- docs/125, the equations at their base: every era-1 equation sorted by the
+  side of matter it acts on (proton, neutron, electron, nucleons, none) and
+  by whether it stands at its base under the nucleon inversion (docs/97,
+  docs/104 `I`, docs/95 §0): 17 at base, 34 not, by cause, three points the
+  record disagrees with itself on, and the order of derivation.
 - `conductor::orientation` (#117 step 2a, docs/117 §11.7, EQUATIONS E57):
   the orientation held as the generator `G` over six elliptic planes with
   windings `K` per plane; the rate a ring `b = δ/(1 − δ)`; the whole
