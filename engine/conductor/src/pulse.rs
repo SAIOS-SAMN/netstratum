@@ -2026,41 +2026,7 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         cfe::tlv::put(9, &w, out);
     }
     for x in &b.flows {
-        let mut w = Vec::new();
-        let key = x.key.to_string();
-        w.extend_from_slice(&(key.len() as u16).to_le_bytes());
-        w.extend_from_slice(key.as_bytes());
-        for r in [&x.amount, &x.ell_o(), &x.ell_orth(), &x.agitation] {
-            cfe::ratio::encode(r, &mut w);
-        }
-        // Its orientation (docs/117 §11.7): the six components, then the
-        // six windings.
-        let o = x.orientation.values();
-        w.push(o.len() as u8);
-        for r in &o {
-            cfe::ratio::encode(r, &mut w);
-        }
-        w.extend_from_slice(&x.born.to_le_bytes());
-        w.push(u8::from(x.vacuum));
-        cfe::ratio::encode(&x.lever_place, &mut w);
-        w.push(x.lever.len() as u8);
-        for l in &x.lever {
-            cfe::ratio::encode(l, &mut w);
-        }
-        let tilt = x.tilt();
-        w.push(tilt.len() as u8);
-        for t in &tilt {
-            cfe::ratio::encode(t, &mut w);
-        }
-        // Its lift on the S lane (docs/121 §14.6).
-        cfe::ratio::encode(&x.lift, &mut w);
-        // Its partners' shares of its loop spin (docs/128 §9.1).
-        let orth = x.orth_tilt();
-        w.push(orth.len() as u8);
-        for t in &orth {
-            cfe::ratio::encode(t, &mut w);
-        }
-        cfe::tlv::put(10, &w, out);
+        cfe::tlv::put(10, &put_flow(x), out);
     }
     if !b.reservoir.is_zero() {
         let mut w = Vec::new();
@@ -2164,49 +2130,53 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
         }
         cfe::tlv::put(29, &w, &mut out);
     }
-    for (tag, x) in u.ocean.iter().map(|x| (24u8, x)) {
-        let mut w = Vec::new();
-        let key = x.key.to_string();
-        w.extend_from_slice(&(key.len() as u16).to_le_bytes());
-        w.extend_from_slice(key.as_bytes());
-        for r in [&x.amount, &x.ell_o(), &x.ell_orth(), &x.agitation] {
-            cfe::ratio::encode(r, &mut w);
-        }
-        // Its orientation (docs/117 §11.7): the six components, then the
-        // six windings.
-        let o = x.orientation.values();
-        w.push(o.len() as u8);
-        for r in &o {
-            cfe::ratio::encode(r, &mut w);
-        }
-        w.extend_from_slice(&x.born.to_le_bytes());
-        w.push(u8::from(x.vacuum));
-        cfe::ratio::encode(&x.lever_place, &mut w);
-        w.push(x.lever.len() as u8);
-        for l in &x.lever {
-            cfe::ratio::encode(l, &mut w);
-        }
-        // Its lead (docs/100 §4), as a flow mote's (tag 10).
-        let tilt = x.tilt();
-        w.push(tilt.len() as u8);
-        for t in &tilt {
-            cfe::ratio::encode(t, &mut w);
-        }
-        // Its lift on the S lane (docs/121 §14.6).
-        cfe::ratio::encode(&x.lift, &mut w);
-        // Its partners' shares of its loop spin (docs/128 §9.1).
-        let orth = x.orth_tilt();
-        w.push(orth.len() as u8);
-        for t in &orth {
-            cfe::ratio::encode(t, &mut w);
-        }
-        cfe::tlv::put(tag, &w, &mut out);
+    for x in &u.ocean {
+        cfe::tlv::put(24, &put_flow(x), &mut out);
     }
     std::fs::create_dir_all(var_root)?;
     let path = var_root.join("pulse.bin");
     let staged = path.with_extension("staged");
     std::fs::write(&staged, out)?;
     std::fs::rename(staged, path)
+}
+
+/// A mote's record (a flow mote, tag 10, and an ocean mote, tag 24, alike).
+fn put_flow(x: &crate::flows::Mote) -> Vec<u8> {
+    let mut w = Vec::new();
+    let key = x.key.to_string();
+    w.extend_from_slice(&(key.len() as u16).to_le_bytes());
+    w.extend_from_slice(key.as_bytes());
+    for r in [&x.amount, &x.ell_o(), &x.ell_orth(), &x.agitation] {
+        cfe::ratio::encode(r, &mut w);
+    }
+    // Its orientation (docs/117 §11.7): the six components, then the
+    // six windings.
+    let o = x.orientation.values();
+    w.push(o.len() as u8);
+    for r in &o {
+        cfe::ratio::encode(r, &mut w);
+    }
+    w.extend_from_slice(&x.born.to_le_bytes());
+    w.push(u8::from(x.vacuum));
+    cfe::ratio::encode(&x.lever_place, &mut w);
+    w.push(x.lever.len() as u8);
+    for l in &x.lever {
+        cfe::ratio::encode(l, &mut w);
+    }
+    let tilt = x.tilt();
+    w.push(tilt.len() as u8);
+    for t in &tilt {
+        cfe::ratio::encode(t, &mut w);
+    }
+    // Its lift on the S lane (docs/121 §14.6).
+    cfe::ratio::encode(&x.lift, &mut w);
+    // Its partners' shares of its loop spin (docs/128 §9.1).
+    let orth = x.orth_tilt();
+    w.push(orth.len() as u8);
+    for t in &orth {
+        cfe::ratio::encode(t, &mut w);
+    }
+    w
 }
 
 fn get_manifest(v: &[u8], at: &mut usize) -> Option<Manifest> {
@@ -2941,6 +2911,44 @@ mod tests {
             "the file gives the universe back"
         );
         let _ = std::fs::remove_dir_all(dir);
+    }
+}
+
+#[cfg(test)]
+mod record_tests {
+    use cfe::ratio::{ratio, Ratio};
+
+    #[test]
+    fn an_older_record_carries_its_loop_spin_by_the_tilt() {
+        // docs/128 §9.2: a record holding the loop spin alone (before the
+        // partners were carried) gives it to the partners by the tilt.
+        let tilt = [ratio(1, 2), ratio(1, 3), ratio(1, 6)];
+        let x = crate::flows::Mote {
+            key: crate::chem::Kind::parse("W0003").expect("a kind"),
+            amount: ratio(1, 1024),
+            spins: crate::flows::Mote::spins_of(&ratio(1, 3), &tilt),
+            spins_orth: vec![ratio(1, 5), ratio(-1, 10), ratio(1, 20)],
+            orientation: crate::orientation::Orientation::default(),
+            agitation: ratio(0, 1),
+            born: 3,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        };
+        let now = super::put_flow(&x);
+        assert_eq!(super::get_flow(&now), Some(x.clone()), "read back exactly");
+        // The same record without its partners' shares.
+        let mut shares = vec![x.orth_tilt().len() as u8];
+        for t in &x.orth_tilt() {
+            cfe::ratio::encode(t, &mut shares);
+        }
+        let older = &now[..now.len() - shares.len()];
+        let read = super::get_flow(older).expect("an older record loads");
+        assert_eq!(read.ell_orth(), x.ell_orth(), "the loop spin is kept");
+        let by_tilt: Vec<Ratio> = tilt.iter().map(|t| x.ell_orth() * t.clone()).collect();
+        assert_eq!(read.spins_orth, by_tilt, "carried by the tilt");
+        assert_eq!(read.spins, x.spins);
     }
 }
 
