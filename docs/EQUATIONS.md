@@ -1634,9 +1634,15 @@ at the share `α/(α + β)` (docs/105).
 **E15 · The faces.** `flows::face`, `polarity::faces`. `(held, unlocked) =
 (1 − δ, δ)` under the inversion (docs/104 §0).
 
-**E16 · A body's push.** `pulse::push_of`. Half its open frames' share of
-its whole weight, `½·Q/(A + Q)`, `Q` its magnetism, `A` its holding, at most
-½.
+**E16 · A body's push and its antipole.** `pulse::push_of` (docs/125 §4.1,
+operator 2026-11-11). Its orientation is the open pole: the protons' charge
+its bound electrons leave open at its place, `g` its held share there
+(docs/105 §3). Its antipole, by the same inversion, is the held stratum:
+
+    p = Q·(1 − g)/w = Q·u/w        p̄ = (Z + Q·g)/w = 1 − p
+
+The continuum reads `p` and the vacuum leg `p̄`. A pair share with no `½`;
+it replaces `½·U/w`.
 
 **E17 · The universe's hold.** `ocean::universe_hold`. `H_u = 1 +
 Σ_g (state_g + holding_g + magnetism_g)`, in the founding's unit.
