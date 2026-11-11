@@ -12,6 +12,12 @@ change is named here.
 
 ### Added
 
+- docs/108 §1a, gaps against what is measured, with G1 Kepler's third law:
+  `ring::period` reads `P ∝ R` far out, where the solar system measures
+  `P ∝ R^{3/2}`. It is open physics, tied to the per-plane reach and the
+  manifold's deformation. docs/78's design law 2 now carries the rationale
+  for Netstratum's own first-degree rulers, with no claim that
+  inverse-square physics is wrong.
 - docs/125, the equations at their base: every era-1 equation sorted by the
   side of matter it acts on (proton, neutron, electron, nucleons, none) and
   by whether it stands at its base under the nucleon inversion (docs/97,

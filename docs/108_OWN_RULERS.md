@@ -43,6 +43,16 @@ Three kinds of ruler are distinguished:
 | O6 | The placeholders of docs/82: the reference pressure (Earth's surface, 1 bar), `K = 60,000 K·bells` (an innermost world at 1,000 K), a mind's blueprint of order a genome (~6·10⁹ bits), a viable people of order 500, the orbs' spacing of ~10 reaches (Gyr-stable systems) | placeholder | a pressure unit, a radiation law, what a mind must hold, a population's floor, orbital stability | docs/82 §"Anchors" |
 | O7 | The kelvin bands of era 0 read by era 1 (cryo, mesic, foundry) | calibration | the regimes of a world's heat | `cfe::anchor`, through `site_of` |
 
+## 1a. Gaps against what is measured
+
+What Netstratum's own laws read differs from what nature measures. Each gap
+is missing physics on Netstratum's rulers, to be derived where its law is
+built, never patched with an exponent or a factor.
+
+| # | Gap | Netstratum reads | Nature measures | Where it is derived |
+|---|---|---|---|---|
+| G1 | **Kepler's third law** (recorded 2026-11-11) | `ring::period`, `P = 1 + R/H`: far out `P ∝ R` (a body's speed flat with reach) | the solar system `T² ∝ r³` (`P ∝ R^{3/2}`, inner, the central hold dominant); flat rotation (`P ∝ R`) in the outer galactic disks | per-plane reach on each plane's own circle (docs/128 §1, §8) with the manifold's deformation (docs/127). The candidate is two first-degree factors composing through the chain of ring steps (the circle's growth and each step's advance on the deformed plane), and the inner regime coupling the central hold across planes the outer has released. Read once built, never fitted. |
+
 ## 2. The derivation paths
 
 Each is stated as the path to derive, not as derived; each derivation is
