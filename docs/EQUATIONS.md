@@ -1974,6 +1974,20 @@ the tilt's `2δ·t_k`. **Superseded by E65** (docs/128 §9): the bell moves each
 half of the spin on the group; the per-plane reach and `2·s_k′` retire, and the
 twist pressure leaves the torque until it is read per half.
 
+**E66 · The unitary morphodynamic state: form and twist.**
+`Orientation::form_twist`, `Orientation::of_form_twist` (docs/128 §10;
+operator 2026-11-11). Every motion of S³ factors into an automorphism and
+an isoclinic motion; a body's state is its form and its twist, both unit
+quaternions:
+
+    p·x·q̄ = C·(F·x·F̄)    F = q    C = p·q̄    (p, q) = (C·F, F)
+    F ↦ F·m−    C ↦ C·F·(m+·m̄−)·F̄    (p, q) ↦ (q, p): C ↦ C̄
+
+**Built as readings,** with witnesses: the factorization exact, both factors
+unitary with no norm read (`q·q̄` integer), equal halves keep the twist, the
+exchange of halves conjugates it. The twist sourced by the manifold's shear
+(retiring `orth_push`, `κ_⊥`) and the torsion read from `C` follow (§10.7).
+
 **E65 · The bell on the group: six spins, one motion a half.**
 `orientation::spin_halves`, `orientation::size`, `orientation::half_motion`,
 `Orientation::bell_halves`, `flows::Mote::spins_orth` (docs/128 §9; operator

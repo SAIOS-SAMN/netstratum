@@ -189,6 +189,36 @@ impl Half {
             d: self.d.clone(),
         }
     }
+
+    /// Its conjugate, `q̄`: the vector part reversed. For a unit, its
+    /// inverse, read with no norm.
+    fn conjugate(&self) -> Half {
+        Half {
+            n: [
+                self.n[0].clone(),
+                -self.n[1].clone(),
+                -self.n[2].clone(),
+                -self.n[3].clone(),
+            ],
+            d: self.d.clone(),
+        }
+    }
+
+    /// Its four components, exact: `(scalar, i, j, k)`.
+    fn ratios(&self) -> [Ratio; 4] {
+        std::array::from_fn(|k| Ratio::new(self.n[k].clone(), self.d.clone()))
+    }
+
+    /// From four exact components, over their common denominator.
+    fn of_ratios(c: &[Ratio; 4]) -> Half {
+        let d = c.iter().fold(BigInt::one(), |l, x| l.lcm(x.denom()));
+        Half {
+            n: std::array::from_fn(|k| {
+                (c[k].clone() * Ratio::from_integer(d.clone())).to_integer()
+            }),
+            d,
+        }
+    }
 }
 
 /// A generator on [`PLANES`] split into its halves: on `P±` the components
@@ -527,6 +557,37 @@ impl Orientation {
             b[PARTNER[j]] = ring_rate(&rest);
         }
         self.advance_by(&b, 2)
+    }
+
+    /// Its unitary morphodynamic state (docs/128 §10.1), exact: the form
+    /// `F = q`, the automorphism (its orientation in space, R held), and the
+    /// twist `C = p·q̄`, the isoclinic turning against R, each `(scalar, i,
+    /// j, k)`. `p` is the `P+` half of its motion and `q` the `P−` half.
+    pub fn form_twist(&self) -> ([Ratio; 4], [Ratio; 4]) {
+        let Motion(p, q) = Motion::of(&self.g);
+        (q.ratios(), p.product(&q.conjugate()).ratios())
+    }
+
+    /// The orientation whose state is `(F, C)`: `q = F`, `p = C·F`, its
+    /// generator held on the grain, unwound.
+    pub fn of_form_twist(
+        form: &[Ratio; 4],
+        twist: &[Ratio; 4],
+    ) -> Result<Orientation, TurningRefusal> {
+        let q = Half::of_ratios(form);
+        let p = Half::of_ratios(twist).product(&q);
+        let m = Motion(p, q);
+        let m = if m.scalar() < ratio(0, 1) {
+            m.negated()
+        } else {
+            m
+        };
+        let g = match m.generator_on_grain() {
+            Ok(g) => g,
+            Err(TurningRefusal::NoGenerator) => m.negated().generator_on_grain()?,
+            Err(e) => return Err(e),
+        };
+        Ok(Orientation::of_generator(g, [0; 6]))
     }
 
     /// One bell on the group (docs/128 §9.4): each half moved by its own
@@ -901,5 +962,96 @@ mod tests {
     fn a_half_with_no_spin_does_not_move() {
         let none = std::array::from_fn(|_| ratio(0, 1));
         assert_eq!(half_motion(&none, &ratio(3, 1)), none);
+    }
+
+    fn unit_from(u: &[Ratio; 3]) -> Half {
+        Half::motion(u)
+    }
+
+    fn is_one(h: &Half) -> bool {
+        h.n[0] == h.d && h.n[1..].iter().all(Zero::is_zero)
+    }
+
+    #[test]
+    fn the_state_factors_exactly_into_form_and_twist() {
+        // docs/128 §10.0: p·x·q̄ = C·(q·x·q̄); (p, q) → (F, C) → (p, q).
+        let p = unit_from(&[ratio(1, 3), ratio(-1, 5), ratio(2, 7)]);
+        let q = unit_from(&[ratio(1, 4), ratio(1, 6), ratio(0, 1)]);
+        let (f, c) = (q.clone(), p.product(&q.conjugate()));
+        let back = c.product(&f);
+        assert_eq!(back.ratios(), p.ratios(), "p = C·F");
+        // The sandwich on a vector, exact.
+        let x = Half::of_ratios(&[ratio(2, 3), ratio(1, 2), ratio(-1, 9), ratio(1, 1)]);
+        let lhs = p.product(&x).product(&q.conjugate()).ratios();
+        let rhs = c.product(&f.product(&x).product(&f.conjugate())).ratios();
+        assert_eq!(lhs, rhs);
+        // The form fixes R (the real unit) and the twist of equal halves is one.
+        let one = Half::of_ratios(&[ratio(1, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1)]);
+        assert_eq!(
+            f.product(&one).product(&f.conjugate()).ratios(),
+            one.ratios()
+        );
+        assert!(is_one(&q.product(&q.conjugate())));
+    }
+
+    #[test]
+    fn form_and_twist_are_unitary_with_no_norm_read() {
+        let p = unit_from(&[ratio(3, 4), ratio(0, 1), ratio(-5, 2)]);
+        let q = unit_from(&[ratio(1, 9), ratio(2, 3), ratio(1, 1)]);
+        let c = p.product(&q.conjugate());
+        assert!(is_one(&q.product(&q.conjugate())), "F·F̄ = 1");
+        assert!(is_one(&c.product(&c.conjugate())), "C·C̄ = 1");
+    }
+
+    #[test]
+    fn a_bell_moves_the_form_by_its_orbit_and_the_twist_by_the_halves_difference() {
+        // docs/128 §10.2: F ↦ F·m−, C ↦ C·F·(m+·m̄−)·F̄; equal halves keep C.
+        let p = unit_from(&[ratio(1, 3), ratio(1, 5), ratio(0, 1)]);
+        let q = unit_from(&[ratio(-1, 4), ratio(0, 1), ratio(1, 6)]);
+        let (mp, mm) = (
+            unit_from(&[ratio(1, 11), ratio(0, 1), ratio(1, 13)]),
+            unit_from(&[ratio(0, 1), ratio(1, 17), ratio(0, 1)]),
+        );
+        let (f, c) = (q.clone(), p.product(&q.conjugate()));
+        let (p2, q2) = (p.product(&mp), q.product(&mm));
+        let c2 = p2.product(&q2.conjugate());
+        let rel = mp.product(&mm.conjugate());
+        let carried = c.product(&f.product(&rel).product(&f.conjugate()));
+        assert_eq!(c2.ratios(), carried.ratios(), "the twist's motion");
+        assert_eq!(q2.ratios(), f.product(&mm).ratios(), "the form's orbit");
+        // Equal halves: the twist is kept.
+        let (p3, q3) = (p.product(&mm), q.product(&mm));
+        assert_eq!(p3.product(&q3.conjugate()).ratios(), c.ratios());
+    }
+
+    #[test]
+    fn exchanging_the_halves_conjugates_the_twist() {
+        // The inversion (#241, docs/104 §0): (p, q) ↦ (q, p) takes C ↦ C̄.
+        let p = unit_from(&[ratio(2, 5), ratio(-1, 3), ratio(1, 8)]);
+        let q = unit_from(&[ratio(1, 7), ratio(1, 2), ratio(0, 1)]);
+        let c = p.product(&q.conjugate());
+        assert_eq!(q.product(&p.conjugate()).ratios(), c.conjugate().ratios());
+    }
+
+    #[test]
+    fn an_orientation_reads_its_state_and_is_read_back_from_it() {
+        let o = Orientation::of_generator(
+            [
+                ratio(1, 3),
+                ratio(-1, 5),
+                ratio(1, 7),
+                ratio(1, 9),
+                ratio(0, 1),
+                ratio(-1, 4),
+            ],
+            [0; 6],
+        );
+        let (f, c) = o.form_twist();
+        let back = Orientation::of_form_twist(&f, &c).expect("a generator");
+        // Exact up to the grain the generator is held on.
+        for k in 0..6 {
+            let d = (back.g()[k].clone() - o.g()[k].clone()).abs();
+            assert!(d <= crate::ring::grain_step(), "plane {k} within a grain");
+        }
     }
 }

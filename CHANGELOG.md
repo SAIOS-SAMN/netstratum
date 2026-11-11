@@ -12,6 +12,11 @@ change is named here.
 
 ### Added
 
+- The unitary morphodynamic state (docs/128 §10, EQUATIONS E66; operator
+  2026-11-11). A body's turning state factors exactly into its form, an
+  automorphism holding R (its orbits), and its twist, one isoclinic turning
+  against R, both unit quaternions (`Orientation::form_twist`). The R side
+  is orbits sheared by the manifold, never a driven loop.
 - The bell on the group (docs/128 §9, EQUATIONS E65; operator 2026-11-11,
   "rewrite entirely in non-euclidean space"). A mote carries its spin on all
   six planes of its orientation (`Mote::spins_orth`, three partner spins in

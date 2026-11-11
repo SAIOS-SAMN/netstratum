@@ -403,7 +403,8 @@ the same bell under step 2 (`.testtmp/wt2`), with these counters:
 **Operator 2026-11-11:** "add automorphism to isoclinic — and derive from
 that point as a unitary morphodynamic state".
 
-**Status:** derived. Built after §9.7 step 3's read, in the order of §10.7.
+**Status:** derived. Step 1 built (the form and twist as readings,
+`Orientation::form_twist`); steps 2–4 follow in the order of §10.7.
 
 ### 10.0 The factorization
 
