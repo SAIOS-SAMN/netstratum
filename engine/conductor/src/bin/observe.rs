@@ -22,6 +22,7 @@
 //! - `events [N]`             the last N creation/collapse events (journal)
 use cfe::ratio::{ratio, Ratio};
 use conductor::{breath, chronometry, enclosure, formation, life, pulse};
+use num_traits::Signed as _;
 use std::path::Path;
 use std::process::Command;
 
@@ -127,6 +128,113 @@ fn mean_tilt(motes: &[conductor::flows::Mote], total: &Ratio) -> Ratio {
     } else {
         sum / held
     }
+}
+
+/// The jetstream's distribution in galaxy `i`: `observe streams G`.
+fn streams(u: &pulse::Universe, i: usize, unit: &Ratio) {
+    use conductor::flows;
+    let core = &u.cores[i];
+    let Some(enc) = breath::galaxy_frame(u, i, unit) else {
+        return println!("streams: galaxy {:?} has no enclosure", core.path);
+    };
+    let total = if pulse::is_home(core) {
+        pulse::universal_ledger(u)
+    } else {
+        pulse::core_state(core)
+    };
+    let w = |x: &flows::Mote| {
+        conductor::ring::grain(&(x.amount.clone() * flows::weight(&x.key) / total.clone()))
+    };
+    // (stream, inside its ring): count, holding, the reaches over the hold.
+    let mut rows: std::collections::BTreeMap<(bool, bool), (usize, Ratio, Vec<Ratio>)> =
+        Default::default();
+    let mut no_partner = 0usize;
+    for x in &core.flows {
+        let (r, h, _) = flows::lifted(&enc, &x.ell_o().abs(), &x.lift);
+        let inside = r < h;
+        let e = rows
+            .entry((x.vacuum, inside))
+            .or_insert((0, ratio(0, 1), Vec::new()));
+        e.0 += 1;
+        e.1 += w(x);
+        if h > ratio(0, 1) {
+            e.2.push(r / h);
+        }
+        if x.vacuum && x.ell_orth() == ratio(0, 1) {
+            no_partner += 1;
+        }
+    }
+    println!(
+        "streams in galaxy {:?}: {} motes, base {}, whole {}, rim {}",
+        core.path,
+        core.flows.len(),
+        f(&enc.base()),
+        f(&enc.whole()),
+        f(&enc.rim())
+    );
+    for ((vacuum, inside), (n, held, mut at)) in rows {
+        at.sort();
+        let q = |p: usize| {
+            at.get(at.len() * p / 100)
+                .cloned()
+                .unwrap_or_else(|| ratio(0, 1))
+        };
+        println!(
+            "  {} {} its ring: {n} motes, holding {}, R/H p10 {} p50 {} p90 {}",
+            if vacuum { "vacuum   " } else { "continuum" },
+            if inside { "inside " } else { "outside" },
+            f(&held),
+            f(&q(10)),
+            f(&q(50)),
+            f(&q(90))
+        );
+    }
+    println!(
+        "  vacuum motes with no partner spin (no route turning their R-side phase): {no_partner}"
+    );
+    // The route back: one bell's torque on a copy, and the vacuum motes it
+    // carries into the throat (their R-side phase crossing ½ from above, as
+    // the breath reads it), with how far their R-side phase moved.
+    let push = if pulse::is_home(core) {
+        pulse::home_push(u, &core.total())
+    } else {
+        pulse::galaxy_push(&core.total())
+    };
+    if let Some((p, _, _)) = push {
+        let mut copy = core.flows.clone();
+        let was: Vec<(usize, Ratio)> = copy
+            .iter()
+            .enumerate()
+            .filter(|(_, x)| x.vacuum)
+            .map(|(j, x)| (j, flows::r_side(x)))
+            .collect();
+        let mut cross = conductor::enfold::Cross::default();
+        let _ = flows::torque(&mut copy, &enc, &p, &total, &mut cross);
+        let (mut back, mut fore) = (0usize, 0usize);
+        let mut entered = Vec::new();
+        for (j, v) in &was {
+            let now = flows::r_side(&copy[*j]);
+            if now < *v {
+                back += 1;
+            } else if now > *v {
+                fore += 1;
+            }
+            if flows::enters_throat(v, &now) {
+                entered.push(*j);
+            }
+        }
+        println!(
+            "  one bell's torque: {} of {} vacuum motes cross into the throat (signed); their R side moved backward on {back}, forward on {fore}",
+            entered.len(),
+            was.len()
+        );
+    }
+    let bands = flows::band_pairs(&core.flows, &enc, &core.tilt, &pulse::mass(&core.total()));
+    let members: usize = bands.iter().map(|(_, m)| m.len()).sum();
+    println!(
+        "  bands the galaxy would bind now: {} ({members} members)",
+        bands.len()
+    );
 }
 
 /// Each law alone on galaxy `i`'s disc: `observe ablate G [N]`, N its first
@@ -411,6 +519,15 @@ fn main() {
     let universe_hold = pulse::mass(&u.total());
     let galaxy = |g: u64| u.cores.iter().position(|c| c.path[0] == g);
     match view.as_str() {
+        "streams" => {
+            // The jetstream's distribution (docs/94 §2): each stream by side
+            // of its ring, by count and holding, where it stands, its route
+            // back through the throat, and the bands the galaxy would bind.
+            let Some(i) = num(1).and_then(galaxy) else {
+                return println!("streams G: no such galaxy");
+            };
+            streams(&u, i, &unit);
+        }
         "ablate" => {
             // Each law alone on a galaxy's real disc (docs/128, docs/130): a
             // copy of its motes, the enclosure and unit the breath reads,

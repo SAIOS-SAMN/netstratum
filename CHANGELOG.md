@@ -12,6 +12,16 @@ change is named here.
 
 ### Added
 
+- The jetstream's distribution measured (docs/128 §14; operator 2026-11-11,
+  zero stars in the home): `observe streams G` reads each stream by side of
+  its ring, the throat crossings of one bell's torque and the bands the
+  galaxy would bind. On g557 the home's disc stands on the vacuum stream
+  inside the core's ring (3,773 of 3,827 motes, median `R/H` 0.06) and binds
+  no band. The throat test now reads the R side's passage signed, with its
+  windings (`flows::r_side`, `flows::enters_throat`): since the R side is
+  turned by the shear either way, the wrapped reading counted forward moves
+  as crossings (2,139 against 215 in one bell). The exit across the passage
+  was measured and not adopted: every exit landed beyond the galaxy's rim.
 - The ablation probe, `observe ablate G [N]` (operator 2026-11-11: "why are
   we not doing localized formula ablations"): each law alone on a galaxy's
   real disc from a checkpoint (its first N motes, N against 4N), with its

@@ -2472,6 +2472,30 @@ pub fn echo_beats(
     (after, remainder)
 }
 
+/// A mote's R side unwound (docs/128 §14.2): its partner planes' mean of
+/// their readings with their windings, in turns, so a passage over a bell is
+/// its change, signed.
+pub fn r_side(x: &Mote) -> Ratio {
+    use crate::orientation::PARTNER;
+    let r = x.orientation.readings();
+    PARTNER.iter().fold(ratio(0, 1), |s, &p| {
+        s + r[p].clone() + ratio(x.orientation.windings[p], 1)
+    }) / ratio(PARTNER.len() as i64, 1)
+}
+
+/// Whether a vacuum mote reaches the throat over a passage of its R side
+/// from `was` to `now` (unwound, `r_side`): it crosses ½ from above
+/// (docs/128 §14.2), `Δψ_R < 0` and `frac(ψ_R − ½) ∈ (0, −Δψ_R]`. A forward
+/// passage never enters.
+pub fn enters_throat(was: &Ratio, now: &Ratio) -> bool {
+    let d = now.clone() - was.clone();
+    if d >= ratio(0, 1) {
+        return false;
+    }
+    let f = frac(&(was.clone() - ratio(1, 2)));
+    f > ratio(0, 1) && f <= -d
+}
+
 /// The partner orbits conformed to the manifold's shear (docs/128 §10.3,
 /// docs/127 §3): each mote's partner spins relax toward their target by the
 /// attractor's keep at its deficit (E38), `ℓ_kR′ = ℓ* + k·(ℓ_kR − ℓ*)`, and
@@ -6687,5 +6711,29 @@ mod reach_at_rate_tests {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod throat_entry_tests {
+    use super::enters_throat;
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn a_forward_passage_never_enters_the_throat() {
+        // docs/128 §14.2: crossing ½ from above enters; forward never does.
+        assert!(enters_throat(&ratio(3, 5), &ratio(2, 5)));
+        assert!(enters_throat(&ratio(13, 5), &ratio(12, 5)), "with windings");
+        assert!(!enters_throat(&ratio(3, 5), &ratio(11, 20)), "short of ½");
+        assert!(!enters_throat(&ratio(3, 5), &ratio(4, 5)), "forward");
+        assert!(!enters_throat(&ratio(3, 5), &ratio(23, 10)), "far forward");
+        assert!(
+            enters_throat(&ratio(1, 5), &ratio(-7, 10)),
+            "back through the ½ below"
+        );
+        assert!(
+            !enters_throat(&ratio(1, 5), &ratio(-2, 5)),
+            "short of the ½ below"
+        );
     }
 }

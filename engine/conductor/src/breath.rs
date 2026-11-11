@@ -2442,7 +2442,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 .iter()
                 .enumerate()
                 .filter(|(_, x)| x.vacuum)
-                .map(|(j, x)| (j, x.phase_at(crate::flows::LOOP)))
+                .map(|(j, x)| (j, crate::flows::r_side(x)))
                 .collect();
             // The galaxy's band (push and return, `flows::torque`) stands held
             // back (operator 2026-10-21: "pull it back and make it static").
@@ -2576,14 +2576,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // Recycling (`crate::recycle`; Xylarium 11.0 (18)): after the
             // torques (torques are motion, recycling the residue), the bounce the
             // container holds presses and peels the matter in the throat.
-            let frac = |x: Ratio| x.clone() - x.floor();
-            // Its route runs the loop backward (drawn in along the axis, out
-            // through the disc): it reaches the throat crossing ½ from above.
+            // Its route runs its R side backward (drawn in along the axis, out
+            // through the disc): it reaches the throat crossing ½ from above,
+            // read on its R side's passage, signed (docs/128 §14.2).
             for (j, was) in orth_was {
-                let to_half = frac(was.clone() - ratio(1, 2));
-                if to_half > ratio(0, 1)
-                    && to_half <= frac(was - core.flows[j].phase_at(crate::flows::LOOP))
-                {
+                if crate::flows::enters_throat(&was, &crate::flows::r_side(&core.flows[j])) {
                     in_throat.push(j);
                 }
             }

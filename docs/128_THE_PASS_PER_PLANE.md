@@ -934,6 +934,68 @@ axis, and the split is none.
 - **The chiral split vanishes** with `C = 1` and no partner spin, and
   stands with them.
 
+## 14. The jetstream's return: the exit across the passage
+
+**Operator 2026-11-11:** zero stars in the home galaxy is "an error or
+miscalculation of distribution properties through the jetstream of the
+vacuum and continuum"; the fix below approved.
+
+**What the probe measured** (`observe streams`, the g557 checkpoint, laid
+before §9): 3,773 of 3,827 motes on the vacuum stream, holding 0.256 of the
+galaxy, all inside the core's ring at median `R/H = 0.06`. The continuum
+was a shell of 54 motes just outside it (`R/H ≈ 1.04`, holding 0.002). The
+galaxy bound no band (`band_pairs`), so no star formed.
+
+**Why.** Inside the ring a continuum share passes ½, so the luminal bound
+sends the mote through the Möbius pass onto the vacuum leg
+(`flows::luminal`). The vacuum leg returns only through the throat, and
+what passes it leaves on the continuum (operator 2026-10-19). It left with
+its spin, so it stood inside the ring again, and the next bell sent it back
+to the vacuum. The matter cycled between the legs inside the ring, and the
+outbound leg never carried it into the disc.
+
+### 14.1 The exit across the passage: measured, not adopted
+
+Across the passage a body stands at reach `H` about hold `R` (docs/103 §5;
+Mycelium 78.181, settled). Read in the galaxy's own enclosure, the exit
+stands where the ring law turns at `R/H` (`Enclosed::reach_at_rate`), its
+spin `ℓ′ = R′·H(<R′)`. On g557 (`observe streams`) that carried the
+continuum outside the ring from 54 motes (holding 0.002) to 259 (0.059)
+in one bell. But every one of the 215 exits landed beyond the galaxy's rim
+(reaches about 9 to 356 against a rim of 1.256): the reading throws the
+matter out of the home, never into the disc between its ring and its rim.
+Read literally, `(R, H) ↦ (H, R)` keeps `ℓ = R·H`, so the body returns to
+its spin balance inside the ring at the next bell.
+
+**So the passage is not the missing piece alone.** The home's matter
+carries too little spin to stand outside the core's ring at all: the
+bounce gives a nucleus `ℓ = p·w̄/w` with `p = ½` against the singularity's
+base 1, which puts it at `R/H < 1`, and the home's rim is only `1.256` of
+its base. The spin the bounce distributes through the jetstream is what is
+read next (the probe first), before any exit law is adopted.
+
+### 14.2 The throat test reads the R side's passage, signed
+
+A vacuum mote reaches the throat when its R-side phase crosses ½ from
+above. The test read `frac(was − now)` as the distance travelled backward,
+which holds only while the R side is driven backward (the retired loop).
+With the R side turned by the shear either way (§10.3), a forward move `f`
+read as `1 − f` backward, so one bell sent 2,139 of 3,773 vacuum motes
+"into the throat". The test now reads the R side's passage with its
+windings, the partner planes' mean of their readings' change and their
+windings' change (as the spatial passage, §10.7 step 4), signed:
+
+    Δψ_R = mean_j (ψ′_jR − ψ_jR + K′_jR − K_jR)
+    enters  where  Δψ_R < 0  and  frac(ψ_R − ½) ∈ (0, −Δψ_R]
+
+A forward passage never enters.
+
+### 14.3 Witnesses
+
+- **Forward never enters:** a vacuum mote whose R side moves forward is not
+  taken into the throat, however far it moves; a backward passage through ½
+  is.
+
 ## 7. Witnesses
 
 - **Wholly outside or inside**, a plane reads `λ = 0` or `1`, `s = δ` or `1 −
