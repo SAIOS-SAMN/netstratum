@@ -687,8 +687,10 @@ pub fn boosted(u: &Ratio, m: &Ratio) -> Option<Ratio> {
 /// The magnet on reach for every mote of an enclosure (docs/121 §14), read
 /// at once from where they stand, then moved. Each mote at reach `R` (its
 /// spin balance lifted, `reach_in`), its own extent `d = R·e`, its pole and
-/// fluidity on its frames `(3Z − U, U)` (on the vacuum leg exchanged, the
-/// passage's pole swap: `σ ↦ −σ`, `o ↦ 1 − o`); what stands within `R`:
+/// fluidity on its dimensions (`chem::Dimensions`, docs/95 §0: the nucleon
+/// dipole `(3Z, 3Q)` over `3w` and the electrons' open `U` beside it; on the vacuum
+/// leg exchanged, the passage's pole swap: `σ ↦ −σ`, `o ↦ 1 − o`); what
+/// stands within `R`:
 /// the base (the core's state, its frames the throat's composition, a
 /// closed pole where its throat holds nothing) and every mote whose reach is
 /// below `R`, each by its holding share, its frames in proportion. Each lift
@@ -698,71 +700,84 @@ pub fn magnet(
     motes: &mut [Mote],
     enc: &Enclosed,
     total: &Ratio,
-    base_frames: &(Ratio, Ratio),
+    base_frames: &(Ratio, Ratio, Ratio),
 ) -> (usize, Ratio) {
     let n = motes.len();
     if n == 0 || total.is_zero() {
         return (0, ratio(0, 1));
     }
+    // A mote's dimensions as (held, open, electrons' open), on the
+    // vacuum's inverted face its poles exchanged and its electrons' open the
+    // complement of its whole.
     let frames_of = |x: &Mote| {
-        let (a, q) = crate::chem::frames(&x.key);
-        let (a, q) = (ratio(i64::from(a), 1), ratio(i64::from(q), 1));
+        let f = crate::chem::dimensions(&x.key);
+        let r = |v: u32| ratio(i64::from(v), 1);
+        let (a, q, e) = (r(f.held), r(f.open), r(f.electrons_open.min(f.whole())));
         if x.vacuum {
-            (q, a)
+            let whole = a.clone() + q.clone();
+            (q, a, whole - e)
         } else {
-            (a, q)
+            (a, q, e)
         }
     };
     // Each mote's reach, extent, holding and frames, at the bell's start.
     let reach: Vec<Ratio> = motes.iter().map(|x| x.reach_in(enc).0).collect();
     let mut by: Vec<usize> = (0..n).collect();
     by.sort_by(|&a, &b| reach[a].cmp(&reach[b]).then(a.cmp(&b)));
-    let held: Vec<(Ratio, Ratio)> = motes
+    let held: Vec<(Ratio, Ratio, Ratio)> = motes
         .iter()
         .map(|x| {
             let h = x.amount.clone() * weight(&x.key) / total.clone();
-            let (a, q) = frames_of(x);
+            let (a, q, e) = frames_of(x);
             let whole = a.clone() + q.clone();
             if whole.is_zero() {
-                (h, ratio(0, 1))
+                (h, ratio(0, 1), ratio(0, 1))
             } else {
-                (h.clone() * a / whole.clone(), h * q / whole)
+                (
+                    h.clone() * a / whole.clone(),
+                    h.clone() * q / whole.clone(),
+                    h * e / whole,
+                )
             }
         })
         .collect();
     // Prefix sums by reach: the frames standing below each mote.
-    let mut inside: Vec<(Ratio, Ratio)> = vec![(ratio(0, 1), ratio(0, 1)); n];
-    let (mut a_run, mut q_run) = base_frames.clone();
+    let zero = || (ratio(0, 1), ratio(0, 1), ratio(0, 1));
+    let mut inside: Vec<(Ratio, Ratio, Ratio)> = vec![zero(); n];
+    let (mut a_run, mut q_run, mut e_run) = base_frames.clone();
     let mut j = 0;
     while j < n {
         // Motes at one reach stand beside each other, not inside.
         let mut k = j;
         while k < n && reach[by[k]] == reach[by[j]] {
-            inside[by[k]] = (a_run.clone(), q_run.clone());
+            inside[by[k]] = (a_run.clone(), q_run.clone(), e_run.clone());
             k += 1;
         }
         for &i in &by[j..k] {
             a_run += held[i].0.clone();
             q_run += held[i].1.clone();
+            e_run += held[i].2.clone();
         }
         j = k;
     }
     let mut lifts = Vec::with_capacity(n);
     for (i, x) in motes.iter().enumerate() {
-        let (a, q) = frames_of(x);
+        let (a, q, e) = frames_of(x);
         let whole = a.clone() + q.clone();
-        let (ac, qc) = &inside[i];
+        let (ac, qc, ec) = &inside[i];
         let enclosed = ac.clone() + qc.clone();
         let next = if whole.is_zero() || enclosed.is_zero() {
             None
         } else {
-            let (s_i, o_i) = ((a.clone() - q.clone()) / whole.clone(), q.clone() / whole);
+            // The pole from the nucleon dipole, the open share and the
+            // enclosed magnetism `M` from the electrons' open dimensions.
+            let (s_i, o_i) = ((a.clone() - q.clone()) / whole.clone(), e.clone() / whole);
             let (s_c, o_c) = (
                 (ac.clone() - qc.clone()) / enclosed.clone(),
-                qc.clone() / enclosed,
+                ec.clone() / enclosed,
             );
             let d = reach[i].clone() * own_enclosure(x, enc, total)[0].clone();
-            magnet_share(&reach[i], &d, qc, &-(s_i * s_c), &(o_i * o_c))
+            magnet_share(&reach[i], &d, ec, &-(s_i * s_c), &(o_i * o_c))
                 .and_then(|m| boosted(&x.lift, &m))
         };
         lifts.push(next.map(|u| crate::ring::grain(&u)));
@@ -1448,7 +1463,7 @@ pub fn contact(psi0: &Ratio, d: &Ratio) -> Ratio {
 /// The shear (docs/121 §10–§11; operator 2026-11-05: "shear needs to be the
 /// degree of modulation at any dimensional level"), at the phase level: each
 /// mote is a dipole on each spatial plane, its pole the sign of its span
-/// (closed frames against open, `coupling::pole`), its strength its open
+/// (the nucleon dipole, `chem::Dimensions::pole`), its strength its open
 /// share, its orientation its phase there. It answers its range's field as
 /// one (docs/121 §9.2): the motes whose own enclosures meet its own on reach
 /// (`|R_i − R_j| ≤ R_i·e_i + R_j·e_j`, `own_enclosure`), each by the ring
@@ -1528,26 +1543,16 @@ fn shear_booked(
             x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1) / total.clone()
         })
         .collect();
-    // The dipole on its 3Z frames (docs/121 §10.1; Mycelium F1 with
-    // Xylarium): its pole the sign of held against open, its strength the
-    // open share of its frames, `U/3Z`.
+    // The dipole (docs/121 §10.1, restated in docs/95 §0): its pole the
+    // nucleon dipole's span, `(Z − Q)/w`, its strength the electrons' open
+    // dimensions over the whole nucleon dimensions, `U/3w`.
     let pole: Vec<Ratio> = motes
         .iter()
-        .map(|x| {
-            let (a, q) = crate::chem::frames(&x.key);
-            crate::coupling::pole(&ratio(i64::from(a), 1), &ratio(i64::from(q), 1))
-        })
+        .map(|x| crate::chem::dimensions(&x.key).pole(false))
         .collect();
     let o: Vec<Ratio> = motes
         .iter()
-        .map(|x| {
-            let (a, q) = crate::chem::frames(&x.key);
-            if a + q == 0 {
-                ratio(0, 1)
-            } else {
-                ratio(i64::from(q), i64::from(a + q))
-            }
-        })
+        .map(|x| crate::chem::dimensions(&x.key).open_share(false))
         .collect();
     let mut reach = Vec::with_capacity(n);
     let mut extent = Vec::with_capacity(n);

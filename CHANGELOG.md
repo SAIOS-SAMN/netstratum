@@ -138,6 +138,14 @@ change is named here.
 
 ### Changed
 
+- The nucleons weighted as they are (#176, docs/95 §0, EQUATIONS E58,
+  register K15): `chem::Dimensions` is the nucleon dipole, the protons'
+  open dimensions `3Q` and the neutrons' held dimensions `3Z` over `3w`, with
+  the electrons' open dimensions `U` beside it ("frame" retired, mycelium
+  #239). It replaces `(3·protons − U, U)`, which counted the
+  protons as "3Z", put the electrons on the Q pole and dropped the neutrons.
+  The dipole coupling's pole is `(Z − Q)/w` and its open share `U/3w`; the
+  magnet and the throat's base frames read the same.
 - Mycelium pinned at v0.4.0-rc.1 (#163; wire 0x0200, law version 5), a
   contract change. The uplink speaks the v0.4.0 SDK:
   - samples on the alphabet's section (`rule::SectionSample`, `TaskSection`)

@@ -171,14 +171,79 @@ pub fn hold(kind: &Kind) -> u32 {
     weight(kind).saturating_sub(unpaired(kind))
 }
 
-/// Its frames (docs/95 §8; register B8): one frame of each proton on each
-/// of three axes, `3Z`, of which its unpaired electrons are open: `(held,
-/// open) = (3Z − U, U)`, the frame state's two poles. Frames are never its
-/// mass: `weight` is its nucleons.
-pub fn frames(kind: &Kind) -> (u32, u32) {
-    let z: u32 = kind.parts().iter().map(|(n, w)| n * protons(*w)).sum();
-    let open = unpaired(kind);
-    ((3 * z).saturating_sub(open), open)
+/// A kind's DIMENSIONS (docs/95 §0, docs/97; register K15; "frame" retired,
+/// mycelium #239, operator 2026-11-11): the nucleon dipole, each nucleon
+/// standing in each of three axes, the protons' `3Q` the open dimensions and
+/// the neutrons' `3Z` the held dimensions, `3w` in all (a cluster sums its
+/// parts); and beside it, never folded in, the electrons' open dimensions `U`
+/// (`atom(Q)`, unpaired), the domain of R, the electron's phase.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Dimensions {
+    /// The neutrons' held dimensions, `3Z`.
+    pub held: u32,
+    /// The protons' open dimensions, `3Q`.
+    pub open: u32,
+    /// The electrons' open dimensions, `U`: R's domain, beside the dipole.
+    pub electrons_open: u32,
+}
+
+impl Dimensions {
+    /// The whole: every nucleon's dimensions, `3w`.
+    pub fn whole(&self) -> u32 {
+        self.held + self.open
+    }
+
+    /// The dipole's pole, its span over its whole, `(3Z − 3Q)/3w = (Z −
+    /// Q)/w`, in `[−1, 1]`: `−1` all proton, `0` balanced, positive
+    /// neutron-rich. Read on the vacuum's inverted face it negates.
+    pub fn pole(&self, inverted: bool) -> Ratio {
+        if self.whole() == 0 {
+            return ratio(0, 1);
+        }
+        // The pole opened by degrees (`coupling::pole`, operator 2026-11-06):
+        // the L1 cosine of the angle between the held and open poles.
+        let p = crate::coupling::pole(
+            &ratio(i64::from(self.held), 1),
+            &ratio(i64::from(self.open), 1),
+        );
+        if inverted {
+            -p
+        } else {
+            p
+        }
+    }
+
+    /// Its open share: the electrons' open dimensions over the whole nucleon
+    /// dimensions, `U/3w`, in `[0, 1]`. Read on the vacuum's inverted face it is
+    /// the complement.
+    pub fn open_share(&self, inverted: bool) -> Ratio {
+        if self.whole() == 0 {
+            return ratio(0, 1);
+        }
+        let o = ratio(
+            i64::from(self.electrons_open.min(self.whole())),
+            i64::from(self.whole()),
+        );
+        if inverted {
+            ratio(1, 1) - o
+        } else {
+            o
+        }
+    }
+}
+
+/// A kind's dimensions: its nucleons' dipole and its electrons' open
+/// dimensions.
+pub fn dimensions(kind: &Kind) -> Dimensions {
+    let (q, z) = kind.parts().iter().fold((0u32, 0u32), |(q, z), (n, w)| {
+        let protons = protons(*w);
+        (q + n * protons, z + n * w.saturating_sub(protons))
+    });
+    Dimensions {
+        held: 3 * z,
+        open: 3 * q,
+        electrons_open: unpaired(kind),
+    }
 }
 
 /// Its weight as mass (docs/97): its nucleons, `Σ n·w`, the one weight that
@@ -317,12 +382,39 @@ mod tests {
 }
 
 #[cfg(test)]
-mod frames_tests {
-    use super::{frames, hydrogen};
+mod dimensions_tests {
+    use super::{dimensions, hydrogen, Kind};
+    use cfe::ratio::ratio;
 
     #[test]
-    fn hydrogen_holds_two_frames_and_opens_one() {
-        // docs/95 §8, agreed with Xylarium: 3Z frames, U open.
-        assert_eq!(frames(&hydrogen()), (2, 1));
+    fn hydrogens_dimensions_are_its_protons_with_its_electron_beside() {
+        // docs/95 §0, docs/97: one proton, no neutron, its electron open.
+        let h = dimensions(&hydrogen());
+        assert_eq!((h.held, h.open, h.electrons_open), (0, 3, 1));
+        assert_eq!(h.pole(false), ratio(-1, 1), "all proton: the open pole");
+        assert_eq!(h.open_share(false), ratio(1, 3));
+        assert_eq!(h.pole(true), ratio(1, 1), "the vacuum reads it inverted");
+        assert_eq!(h.open_share(true), ratio(2, 3));
+    }
+
+    #[test]
+    fn every_nucleon_stands_in_three_dimensions_and_a_cluster_sums_its_parts() {
+        for w in 1..=60u32 {
+            let k = Kind::atom(w).expect("an atom");
+            let f = dimensions(&k);
+            assert_eq!(
+                f.whole(),
+                3 * w,
+                "w {w}: the nucleons, weighted as they are"
+            );
+            assert_eq!(f.open, 3 * super::protons(w));
+        }
+        // A hydride (docs/97 §4): its centre and its two hydrogens summed.
+        let water = Kind::parse("W0016·2W0001").expect("a cluster");
+        let centre = dimensions(&Kind::atom(16).expect("its centre"));
+        let h = dimensions(&hydrogen());
+        assert_eq!(dimensions(&water).held, centre.held + 2 * h.held);
+        assert_eq!(dimensions(&water).open, centre.open + 2 * h.open);
+        assert_eq!(dimensions(&water).whole(), 3 * 18);
     }
 }
