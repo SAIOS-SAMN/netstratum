@@ -121,7 +121,7 @@ pub fn read(parts: &[Mote]) -> Dispersion {
         .iter()
         .map(|&(j, k)| line(&component(&|x| at(&x.spins, j) - at(&x.spins, k))))
         .collect();
-    let orth = line(&component(&|x| x.ell_orth.clone()));
+    let orth = line(&component(&|x| x.ell_orth()));
     let mut sums: BTreeMap<crate::chem::Kind, (Ratio, Vec<Ratio>)> = BTreeMap::new();
     for (x, w) in parts.iter().zip(&held) {
         let e = sums
@@ -156,7 +156,7 @@ mod tests {
             key: crate::chem::Kind::parse(key).expect("a kind"),
             amount: ratio(amount, 1),
             spins: Mote::spins_of(&ell, tilt),
-            ell_orth: ell.clone() / ratio(3, 1),
+            spins_orth: Mote::orth_of(&(ell.clone() / ratio(3, 1)), tilt),
             orientation: crate::orientation::Orientation::from_phases(phase.as_ref()),
             agitation: ratio(0, 1),
             born: 0,
@@ -225,7 +225,10 @@ mod tests {
             for s in &mut x.spins {
                 *s += ratio(7, 4);
             }
-            x.ell_orth += ratio(-2, 9);
+            {
+                let v = x.ell_orth() + ratio(-2, 9);
+                x.set_ell_orth(v);
+            }
         }
         let after = read(&moved);
         assert_eq!(after.phase, before.phase);

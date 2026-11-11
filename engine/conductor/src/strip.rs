@@ -105,7 +105,11 @@ pub fn medium_transit(range: &[(Ratio, Ratio)]) -> Ratio {
     if held.is_zero() {
         return ratio(0, 1);
     }
-    range.iter().map(|(w, x)| w.clone() * x.clone()).sum::<Ratio>() / held
+    range
+        .iter()
+        .map(|(w, x)| w.clone() * x.clone())
+        .sum::<Ratio>()
+        / held
 }
 
 /// One plane's drag on a parcel (docs/128 §4a).
@@ -129,14 +133,28 @@ pub fn drag(x: &Ratio, share: &Ratio, w: &Ratio, range: &[(Ratio, Ratio)]) -> Op
     let departure = crate::ring::compose(x, &-medium_transit(range))?;
     let medium: Ratio = range.iter().map(|(wj, _)| wj.clone()).sum();
     let whole = medium.clone() + w.clone();
-    let crowding = if whole.is_zero() { ratio(0, 1) } else { medium / whole };
+    let crowding = if whole.is_zero() {
+        ratio(0, 1)
+    } else {
+        medium / whole
+    };
     let given = d.clone() * crowding.clone() * w.clone() * departure.clone();
-    Some(Drag { share: d, departure, crowding, given })
+    Some(Drag {
+        share: d,
+        departure,
+        crowding,
+        given,
+    })
 }
 
 /// The exchange: the parcel's signed share after giving `T`, and each range
 /// member's after taking its holding's part, `x_j + T/W`. `Σ w·x` is kept.
-pub fn exchange(x: &Ratio, w: &Ratio, range: &[(Ratio, Ratio)], given: &Ratio) -> (Ratio, Vec<Ratio>) {
+pub fn exchange(
+    x: &Ratio,
+    w: &Ratio,
+    range: &[(Ratio, Ratio)],
+    given: &Ratio,
+) -> (Ratio, Vec<Ratio>) {
     let medium: Ratio = range.iter().map(|(wj, _)| wj.clone()).sum();
     if medium.is_zero() || w.is_zero() {
         return (x.clone(), range.iter().map(|(_, xj)| xj.clone()).collect());
@@ -144,7 +162,10 @@ pub fn exchange(x: &Ratio, w: &Ratio, range: &[(Ratio, Ratio)], given: &Ratio) -
     let each = given.clone() / medium;
     (
         x.clone() - given.clone() / w.clone(),
-        range.iter().map(|(_, xj)| xj.clone() + each.clone()).collect(),
+        range
+            .iter()
+            .map(|(_, xj)| xj.clone() + each.clone())
+            .collect(),
     )
 }
 
@@ -429,10 +450,17 @@ mod tests {
         assert_eq!(dr.crowding, ratio(4, 6));
         assert!(dr.given > ratio(0, 1), "dragged against the counterflow");
         let before: Ratio = w.clone() * x.clone()
-            + range.iter().map(|(a, b)| a.clone() * b.clone()).sum::<Ratio>();
+            + range
+                .iter()
+                .map(|(a, b)| a.clone() * b.clone())
+                .sum::<Ratio>();
         let (x2, xs) = exchange(&x, &w, &range, &dr.given);
         let after: Ratio = w.clone() * x2.clone()
-            + range.iter().zip(&xs).map(|((a, _), b)| a.clone() * b.clone()).sum::<Ratio>();
+            + range
+                .iter()
+                .zip(&xs)
+                .map(|((a, _), b)| a.clone() * b.clone())
+                .sum::<Ratio>();
         assert_eq!(before, after, "Σ w·σ·s kept");
         assert!(x2 < x, "the parcel slows");
     }
@@ -442,7 +470,10 @@ mod tests {
         let (s, w) = (ratio(1, 4), ratio(1, 1));
         // Moving with the medium.
         let with = vec![(ratio(2, 1), ratio(1, 4)), (ratio(1, 1), ratio(1, 4))];
-        assert_eq!(drag(&s, &s, &w, &with).expect("in domain").given, ratio(0, 1));
+        assert_eq!(
+            drag(&s, &s, &w, &with).expect("in domain").given,
+            ratio(0, 1)
+        );
         // An empty medium.
         assert_eq!(drag(&s, &s, &w, &[]).expect("in domain").given, ratio(0, 1));
     }

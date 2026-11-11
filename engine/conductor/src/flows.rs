@@ -234,7 +234,9 @@ impl Mote {
 
     /// Its loop spin: the sum of its partner spins (docs/128 §9.1).
     pub fn ell_orth(&self) -> Ratio {
-        self.spins_orth.iter().fold(ratio(0, 1), |s, l| s + l.clone())
+        self.spins_orth
+            .iter()
+            .fold(ratio(0, 1), |s, l| s + l.clone())
     }
 
     /// Its partners' shares of its loop spin, summing to one; empty where
@@ -244,17 +246,25 @@ impl Mote {
         if ell.is_zero() {
             return Vec::new();
         }
-        self.spins_orth.iter().map(|l| l.clone() / ell.clone()).collect()
+        self.spins_orth
+            .iter()
+            .map(|l| l.clone() / ell.clone())
+            .collect()
     }
 
     /// Sets its loop spin, kept on the partners by their own shares
     /// (docs/128 §9.4); where they hold none, by its tilt (§9.1).
     pub fn set_ell_orth(&mut self, v: Ratio) {
-        let shares = match self.orth_tilt() {
+        self.spins_orth = Mote::spins_of(&v, &self.orth_shares());
+    }
+
+    /// The shares a loop spin is kept on its partners by (docs/128 §9.2):
+    /// the partners' own, or its tilt where they sum to nothing.
+    pub fn orth_shares(&self) -> Vec<Ratio> {
+        match self.orth_tilt() {
             t if t.is_empty() => self.tilt(),
             t => t,
-        };
-        self.spins_orth = Mote::spins_of(&v, &shares);
+        }
     }
 
     /// The partner spins carried from a loop spin by a tilt (docs/128 §9.1).
@@ -556,8 +566,10 @@ pub fn bonded(a: &Mote, b: &Mote, da: &[Ratio], db: &[Ratio]) -> bool {
 /// The bond test's work counter: pairs decided on whole numbers, and pairs
 /// read by the rational test (within the grid's resolution of a threshold,
 /// or a value beyond i128), summed over every `collections` call.
-pub static BOND_PAIRS: (std::sync::atomic::AtomicU64, std::sync::atomic::AtomicU64) =
-    (std::sync::atomic::AtomicU64::new(0), std::sync::atomic::AtomicU64::new(0));
+pub static BOND_PAIRS: (std::sync::atomic::AtomicU64, std::sync::atomic::AtomicU64) = (
+    std::sync::atomic::AtomicU64::new(0),
+    std::sync::atomic::AtomicU64::new(0),
+);
 
 /// A collective's COLLECTIONS (docs/111 §4.2): the connected sets of its
 /// bonds, read from one bounce's perturbations (each mote's displacement), never
@@ -709,8 +721,12 @@ pub fn collections(motes: &[Mote], moves: &[Vec<Ratio>]) -> Vec<Vec<usize>> {
             }
         }
     }
-    BOND_PAIRS.0.fetch_add(whole_pairs, std::sync::atomic::Ordering::Relaxed);
-    BOND_PAIRS.1.fetch_add(rational_pairs, std::sync::atomic::Ordering::Relaxed);
+    BOND_PAIRS
+        .0
+        .fetch_add(whole_pairs, std::sync::atomic::Ordering::Relaxed);
+    BOND_PAIRS
+        .1
+        .fetch_add(rational_pairs, std::sync::atomic::Ordering::Relaxed);
     let mut sets: std::collections::BTreeMap<usize, Vec<usize>> = std::collections::BTreeMap::new();
     for i in 0..n {
         if any[i] {
@@ -911,7 +927,7 @@ pub fn own_enclosure(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
     };
     [
         crate::ring::pinch_share(&m, &mote.hold_in(enc)),
-        crate::ring::pinch_share(&m, &enc.hold(&mote.ell_orth.abs())),
+        crate::ring::pinch_share(&m, &enc.hold(&mote.ell_orth().abs())),
     ]
 }
 
@@ -943,7 +959,7 @@ pub fn enclosures_meet(separation: &Ratio, a: &Ratio, b: &Ratio) -> bool {
 pub fn held(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> Ratio {
     let own = own_enclosure(mote, enc, whole);
     let (r_o, h_o, _) = lifted(enc, &mote.ell_o().abs(), &mote.lift);
-    let l = mote.ell_orth.abs();
+    let l = mote.ell_orth().abs();
     held_share(&r_o, &h_o, &own[0]) * held_share(&enc.reach(&l).0, &enc.hold(&l), &own[1])
 }
 
@@ -1490,7 +1506,7 @@ fn torque_one(
     let swing: Vec<Ratio> = (0..SPACE.len())
         .map(|j| {
             x.spins.get(j).cloned().unwrap_or_else(|| ratio(0, 1))
-                + t[j].clone() * x.ell_orth.clone() * response(&x.orientation.circulation(j))
+                + t[j].clone() * x.ell_orth() * response(&x.orientation.circulation(j))
         })
         .collect();
     let now = swing.iter().fold(ratio(0, 1), |a, s| a + s.abs());
@@ -1655,10 +1671,9 @@ pub fn spin_torque(
     // to the same reservoir as the orbit plane's (Σ m·(ℓ_o + ℓ_⊥) and the
     // reservoir exact).
     let new_c = crate::ring::grain(
-        &(x.ell_orth.clone() + torque_orth.clone()
-            - ratio(1, 2) * d_o.clone() * x.ell_orth.clone()),
+        &(x.ell_orth() + torque_orth.clone() - ratio(1, 2) * d_o.clone() * x.ell_orth()),
     );
-    let dl_c = new_c.clone() - x.ell_orth.clone();
+    let dl_c = new_c.clone() - x.ell_orth();
     absorbed += m.clone()
         * if dl_c < ratio(0, 1) {
             -dl_c.clone()
@@ -1666,7 +1681,7 @@ pub fn spin_torque(
             dl_c.clone()
         };
     given += m.clone() * dl_c;
-    x.ell_orth = new_c;
+    x.set_ell_orth(new_c);
     (given, absorbed, heated)
 }
 
@@ -2881,8 +2896,7 @@ pub fn merge(
                 continue;
             }
             let exact_o = (my.clone() * y.ell_o() + mx.clone() * x.ell_o()) / both.clone();
-            let exact_c =
-                (my.clone() * y.ell_orth.clone() + mx.clone() * x.ell_orth.clone()) / both.clone();
+            let exact_c = (my.clone() * y.ell_orth() + mx.clone() * x.ell_orth()) / both.clone();
             let (go, gc) = (g(&exact_o), g(&exact_c));
             if !total.is_zero() {
                 remainder += both.clone() * weight(&x.key) / total.clone()
@@ -2898,7 +2912,7 @@ pub fn merge(
                 (mx.clone(), x.ell_o(), x.tilt()),
             ]);
             y.spins = Mote::spins_of(&go, &joined);
-            y.ell_orth = gc;
+            y.set_ell_orth(gc);
             let place = place_of(y);
             // Both true phases (ascent), before the amounts join; the joined
             // orientation is the holding-weighted mean of their generators,
@@ -3854,6 +3868,39 @@ mod passage_tests {
     }
 
     #[test]
+    fn a_motes_loop_spin_is_its_partners_kept_by_their_own_shares() {
+        // docs/128 §9.2: six spins, the loop spin their sum; a law that sets
+        // it whole keeps it on the partners by their own shares, or by the
+        // tilt where they hold none.
+        let tilt = tilt_from(&[ratio(1, 1), ratio(2, 1), ratio(3, 1)]);
+        let mut x = Mote {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            amount: ratio(1, 1),
+            spins: Mote::spins_of(&ratio(1, 2), &tilt),
+            spins_orth: vec![ratio(1, 4), ratio(-1, 8), ratio(1, 8)],
+            orientation: crate::orientation::Orientation::default(),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        };
+        assert_eq!(x.ell_orth(), ratio(1, 4));
+        let shares = x.orth_tilt();
+        x.set_ell_orth(ratio(3, 4));
+        assert_eq!(x.ell_orth(), ratio(3, 4));
+        assert_eq!(x.orth_tilt(), shares, "the partners keep their shares");
+        assert_eq!(x.spins_orth, vec![ratio(3, 4), ratio(-3, 8), ratio(3, 8)]);
+        // Partners holding nothing take a loop spin by the tilt (§9.2).
+        x.spins_orth = vec![ratio(0, 1); 3];
+        x.set_ell_orth(ratio(1, 3));
+        assert_eq!(x.ell_orth(), ratio(1, 3));
+        let by_tilt: Vec<Ratio> = tilt.iter().map(|t| ratio(1, 3) * t.clone()).collect();
+        assert_eq!(x.spins_orth, by_tilt);
+    }
+
+    #[test]
     fn the_screened_collections_are_the_exact_ones() {
         // Phases on a fine grid near and far from every threshold, tilts
         // uneven, moves of both senses: the screened pass reads the same
@@ -3887,7 +3934,10 @@ mod passage_tests {
                 // the grain, phases read `n/(60⁶ + |n|)`, off the grid.
                 let grain: i64 = 60i64.pow(6);
                 let g = std::array::from_fn(|p| {
-                    ratio((i * 7919 * (p as i64 + 3) * 104_729) % grain - grain / 2, grain)
+                    ratio(
+                        (i * 7919 * (p as i64 + 3) * 104_729) % grain - grain / 2,
+                        grain,
+                    )
                 });
                 x.orientation = crate::orientation::Orientation::of_generator(g, [0; 6]);
             }
@@ -4592,7 +4642,7 @@ mod extent_degree_tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(1, 1), &[]),
-            ell_orth: ratio(1, 2),
+            spins_orth: Mote::orth_of(&ratio(1, 2), &[]),
             orientation: crate::orientation::Orientation::from_phases(&super::rest(ratio(1, 2))),
             agitation: ratio(0, 1),
             born: 0,

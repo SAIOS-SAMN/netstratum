@@ -346,14 +346,13 @@ pub fn recycle(
                 t -= x.clone();
                 carried += motes[i].agitation.clone() * x.clone() * crate::flows::weight(&k);
                 // Its carried spin goes with it into the container.
-                out.spun += x.clone()
-                    * crate::flows::weight(&k)
-                    * (motes[i].ell_o() + motes[i].ell_orth.clone());
+                out.spun +=
+                    x.clone() * crate::flows::weight(&k) * (motes[i].ell_o() + motes[i].ell_orth());
                 if at_throat.is_none() {
                     let mut m = motes[i].clone();
                     m.amount = ratio(0, 1);
                     m.set_ell_o(ratio(0, 1));
-                    m.ell_orth = ratio(0, 1);
+                    m.set_ell_orth(ratio(0, 1));
                     m.agitation = ratio(0, 1);
                     m.born = bell;
                     at_throat = Some(m);

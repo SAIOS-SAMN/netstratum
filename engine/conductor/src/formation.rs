@@ -1098,7 +1098,10 @@ pub fn system(
             // of its orbit spin (never its offset read as a second orbit).
             let ell_o = crate::ring::grain(&(r.clone() * at.clone()));
             motes.push(crate::flows::Mote {
-                ell_orth: crate::ring::grain(&(c.clone() * ell_o.clone())),
+                spins_orth: crate::flows::Mote::orth_of(
+                    &crate::ring::grain(&(c.clone() * ell_o.clone())),
+                    &x.orth_shares(),
+                ),
                 spins: crate::flows::Mote::spins_of(&ell_o, &x.tilt()),
                 agitation: crate::ring::grain(&x.agitation.clone().max(disc_agitation.clone())),
                 ..x.clone()
@@ -1147,7 +1150,7 @@ pub fn system(
     // its spins.
     let medium_spin = motes.iter().fold(ratio(0, 1), |s, x| {
         s + x.amount.clone() * crate::flows::weight(&x.key) / total.clone()
-            * (x.ell_o() + x.ell_orth.clone())
+            * (x.ell_o() + x.ell_orth())
     });
     Some((star, medium, medium_spin, motes))
 }
@@ -2191,7 +2194,7 @@ pub fn settle_system(
         let mut w = crate::pulse::Body {
             solid: false,
             coupled: None,
-            spins_orth: vec![ratio(0, 1); 3],
+            ell_orth: ratio(0, 1),
             path,
             radius: crate::ring::grain(&(r.clone() * total.clone() / unit.clone())),
             period: crate::ring::period(&r, &inner),

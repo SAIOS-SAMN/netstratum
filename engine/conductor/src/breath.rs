@@ -247,9 +247,7 @@ fn dilate_system(s: &mut Body, w: &Ratio, m: &Ratio, g: &Ratio) -> Ratio {
     let read = |s: &Body, lam: &Ratio| -> Ratio {
         lam.clone()
             * (s.flows.iter().fold(ratio(0, 1), |a, y| {
-                a + y.amount.clone()
-                    * crate::flows::weight(&y.key)
-                    * (y.ell_o() + y.ell_orth.clone())
+                a + y.amount.clone() * crate::flows::weight(&y.key) * (y.ell_o() + y.ell_orth())
             }) + s.satellites.iter().fold(ratio(0, 1), |a, x| {
                 a + mass(&x.total()) * (x.ell.clone() + x.ell_orth.clone())
             }))
@@ -262,7 +260,7 @@ fn dilate_system(s: &mut Body, w: &Ratio, m: &Ratio, g: &Ratio) -> Ratio {
             .iter()
             .map(|c| crate::ring::grain(&(c.clone() * factor.clone())))
             .collect();
-        y.ell_orth = crate::ring::grain(&(y.ell_orth.clone() * factor.clone()));
+        y.set_ell_orth(crate::ring::grain(&(y.ell_orth() * factor.clone())));
     }
     for x in s.satellites.iter_mut() {
         x.ell = crate::ring::grain(&(x.ell.clone() * factor.clone()));
@@ -773,7 +771,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     .map(|g| g.0);
                 if best == Some(i) && !f_g.is_zero() {
                     let ell = from_universe(&x.ell_o(), &ell_g, &f_g);
-                    let orth = from_universe(&x.ell_orth, &orth_g, &f_g);
+                    let orth = from_universe(&x.ell_orth(), &orth_g, &f_g);
                     if let (Some(ell), Some(orth)) = (ell, orth) {
                         landed.push((x, ell, orth));
                     }
@@ -2105,9 +2103,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         }
                     };
                     let ell_o = crate::ring::grain(&rel(&x.ell_o(), &s.ell));
-                    let ell_orth = crate::ring::grain(&rel(&x.ell_orth, &s.ell_orth));
+                    let ell_orth = crate::ring::grain(&rel(&x.ell_orth(), &s.ell_orth));
                     let before = w_sys.clone() * (s.ell.clone() + s.ell_orth.clone())
-                        + m.clone() * (x.ell_o() + x.ell_orth.clone());
+                        + m.clone() * (x.ell_o() + x.ell_orth());
                     let after = (w_sys.clone() + m.clone()) * (s.ell.clone() + s.ell_orth.clone())
                         + m.clone() * lam.clone() * (ell_o.clone() + ell_orth.clone());
                     let rest = before.clone() - after.clone();
@@ -2126,7 +2124,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let mote = crate::flows::Mote {
                         key: key.clone(),
                         amount: take.clone(),
-                        ell_orth,
+                        spins_orth: crate::flows::Mote::orth_of(&ell_orth, &x.orth_shares()),
                         spins: crate::flows::Mote::spins_of(&ell_o, &x.tilt()),
                         orientation,
                         agitation: x.agitation.clone(),
@@ -2345,7 +2343,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     key: k,
                     amount: a,
                     spins: crate::flows::Mote::spins_of(&crate::ring::grain(&ell_o), &[]),
-                    ell_orth: crate::ring::grain(&ell_orth),
+                    spins_orth: crate::flows::Mote::orth_of(&crate::ring::grain(&ell_orth), &[]),
                     orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(
                         ratio(1, 2),
                     )),
@@ -2379,7 +2377,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         key: k,
                         amount: a,
                         spins: crate::flows::Mote::spins_of(&crate::ring::grain(&at), &[]),
-                        ell_orth: orth.clone(),
+                        spins_orth: crate::flows::Mote::orth_of(&orth, &[]),
                         orientation: crate::orientation::Orientation::from_phases(&phase),
                         agitation: crate::ring::grain(&heat),
                         born: bell,
@@ -2417,7 +2415,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let ledger_sum = |core: &Body| {
                 core.flows.iter().fold(core.reservoir.clone(), |s, x| {
                     s + x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()
-                        * (x.ell_o() + x.ell_orth.clone())
+                        * (x.ell_o() + x.ell_orth())
                 })
             };
             let before = ledger_sum(core);
@@ -2686,11 +2684,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 };
                 let (ell_u, orth_u) = (
                     crate::ring::grain(&to_universe(&x.ell_o(), &core.ell, &f_g)),
-                    crate::ring::grain(&to_universe(&x.ell_orth, &core.ell_orth, &f_g)),
+                    crate::ring::grain(&to_universe(&x.ell_orth(), &core.ell_orth, &f_g)),
                 );
                 to_ocean.push(crate::flows::Mote {
                     spins: crate::flows::Mote::spins_of(&ell_u, &x.tilt()),
-                    ell_orth: orth_u,
+                    spins_orth: crate::flows::Mote::orth_of(&orth_u, &x.orth_shares()),
                     orientation,
                     vacuum: true,
                     born: bell,
@@ -2807,7 +2805,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // against).
                 let orth_binding = members
                     .iter()
-                    .fold(ratio(0, 1), |s, x| s + held_of(x) * x.ell_orth.clone())
+                    .fold(ratio(0, 1), |s, x| s + held_of(x) * x.ell_orth())
                     / m.clone();
                 let mut ph: Vec<Vec<(Ratio, Ratio)>> = vec![Vec::new(); crate::flows::PLANES];
                 // The star's own spin (with Xylarium 2026-10-23): the spin its
@@ -2837,7 +2835,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         heat += x.amount.clone() * x.agitation.clone();
                         amt += x.amount.clone();
                         fell_spins.push((w.clone(), place.clone(), hold_c(&place)));
-                        orth_held += w.clone() * x.ell_orth.clone();
+                        orth_held += w.clone() * x.ell_orth();
                         for k in 0..crate::flows::PLANES {
                             ph[k].push((w.clone(), x.phase_at(k)));
                         }
@@ -2850,7 +2848,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         let carried_c = if x.ell_o().is_zero() {
                             ratio(0, 1)
                         } else {
-                            (x.ell_orth.clone() - orth_binding.clone()) / x.ell_o()
+                            (x.ell_orth() - orth_binding.clone()) / x.ell_o()
                         };
                         outside.push((
                             crate::flows::Mote {
@@ -3024,7 +3022,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let mut sys = Body {
                     solid: false,
                     coupled: None,
-                    spins_orth: vec![ratio(0, 1); 3],
+                    ell_orth: ratio(0, 1),
                     path,
                     radius: r_guess,
                     period: ratio(0, 1),
@@ -3246,7 +3244,7 @@ mod tests {
         let mut s = Body {
             solid: false,
             coupled: None,
-            spins_orth: vec![ratio(0, 1); 3],
+            ell_orth: ratio(0, 1),
             path: vec![1, 1],
             radius: ratio(0, 1),
             period: ratio(0, 1),
@@ -3295,7 +3293,7 @@ mod tests {
         let mut s = Body {
             solid: false,
             coupled: None,
-            spins_orth: vec![ratio(0, 1); 3],
+            ell_orth: ratio(0, 1),
             path: vec![1, 1],
             radius: ratio(0, 1),
             period: ratio(0, 1),
@@ -3323,7 +3321,7 @@ mod tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(3, 1),
             spins: crate::flows::Mote::spins_of(&ratio(7, 11), &[]),
-            ell_orth: ratio(2, 13),
+            spins_orth: crate::flows::Mote::orth_of(&ratio(2, 13), &[]),
             orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
                 1, 2,
             ))),
@@ -3351,7 +3349,7 @@ mod tests {
         let mut t = Body {
             solid: false,
             coupled: None,
-            spins_orth: vec![ratio(0, 1); 3],
+            ell_orth: ratio(0, 1),
             path: vec![1, 1],
             radius: ratio(0, 1),
             period: ratio(0, 1),
@@ -3377,7 +3375,7 @@ mod tests {
         };
         let mut z = s.flows[0].clone();
         z.spins = vec![ratio(7, 1), ratio(0, 1), ratio(0, 1)];
-        z.ell_orth = ratio(0, 1);
+        z.set_ell_orth(ratio(0, 1));
         t.flows.push(z);
         assert_eq!(
             dilate_system(&mut t, &ratio(5, 1), &ratio(2, 1), &g),
@@ -3405,7 +3403,7 @@ mod tests {
         let body = |path: Vec<u64>, radius: Ratio, kept: Manifest, satellites: Vec<Body>| Body {
             solid: false,
             coupled: None,
-            spins_orth: vec![ratio(0, 1); 3],
+            ell_orth: ratio(0, 1),
             path,
             radius,
             period: ratio(0, 1),
@@ -3502,7 +3500,7 @@ mod tests {
         let body = |radius: Ratio, kept: Manifest, satellites: Vec<Body>| Body {
             solid: false,
             coupled: None,
-            spins_orth: vec![ratio(0, 1); 3],
+            ell_orth: ratio(0, 1),
             path: vec![1, 1],
             radius,
             period: ratio(0, 1),
@@ -3559,7 +3557,7 @@ mod tests {
         let core = |path: Vec<u64>, radius: Ratio| Body {
             solid: false,
             coupled: None,
-            spins_orth: vec![ratio(0, 1); 3],
+            ell_orth: ratio(0, 1),
             path,
             radius,
             period: ratio(0, 1),

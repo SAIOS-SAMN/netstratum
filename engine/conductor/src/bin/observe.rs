@@ -342,12 +342,7 @@ fn main() {
             let phases: Vec<String> = (0..conductor::flows::PLANES)
                 .map(|k| span(&c.flows.iter().map(|x| x.phase_at(k)).collect::<Vec<_>>()))
                 .collect();
-            let circ = span(
-                &c.flows
-                    .iter()
-                    .map(|x| x.ell_orth.clone())
-                    .collect::<Vec<_>>(),
-            );
+            let circ = span(&c.flows.iter().map(|x| x.ell_orth()).collect::<Vec<_>>());
             println!("flows {:?} at beat {now}: H {}, {} motes ({held} wholly held, {gas} wholly gas), reach {}, phases {phases:?}, ℓ_⊥ {circ}, reservoir {}", c.path, f(&h), c.flows.len(), span(&reaches), f(&c.reservoir));
             // The chains (docs/83): each read whole; the best margin shown.
             let Some(enc) =

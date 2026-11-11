@@ -991,7 +991,7 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     let home = Body {
         solid: false,
         coupled: None,
-        spins_orth: vec![ratio(0, 1); 3],
+        ell_orth: ratio(0, 1),
         path: vec![0],
         radius: ratio(0, 1),
         period: ratio(0, 1),
@@ -1225,7 +1225,7 @@ pub fn orbit_galaxies(
         };
         let spin_of = |ms: &[crate::flows::Mote]| {
             ms.iter().fold(ratio(0, 1), |s, x| {
-                s + booked(x) * (x.ell_o() + x.ell_orth.clone())
+                s + booked(x) * (x.ell_o() + x.ell_orth())
             })
         };
         let before = spin_of(&firm);
@@ -1240,7 +1240,7 @@ pub fn orbit_galaxies(
                     / total.clone()
             };
             let ell_o = crate::ring::grain(&mean(&|x| x.ell_o()));
-            let ell_orth = crate::ring::grain(&mean(&|x| x.ell_orth.clone()));
+            let ell_orth = crate::ring::grain(&mean(&|x| x.ell_orth()));
             let planes = set.iter().map(|&j| moves[j].len()).min().unwrap_or(0);
             let shift: Vec<Ratio> = (0..planes)
                 .map(|k| {
@@ -1252,7 +1252,7 @@ pub fn orbit_galaxies(
             for &j in set {
                 let x = &mut firm[j];
                 x.set_ell_o(ell_o.clone());
-                x.ell_orth = ell_orth.clone();
+                x.set_ell_orth(ell_orth.clone());
                 // Its own move replaced by the set's, turned on its
                 // orientation plane by plane.
                 for (k, d) in shift.iter().enumerate() {
@@ -1329,7 +1329,7 @@ pub fn orbit_galaxies(
             };
             let ledger = |sea: &[crate::flows::Mote]| {
                 sea.iter().fold(ratio(0, 1), |s, x| {
-                    s + booked(x) * (x.ell_o() + x.ell_orth.clone())
+                    s + booked(x) * (x.ell_o() + x.ell_orth())
                 })
             };
             let before = ledger(&u.ocean);
@@ -1499,7 +1499,7 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
         .ocean
         .iter()
         .enumerate()
-        .map(|(j, x)| (false, j, x.ell_o(), x.ell_orth.clone()))
+        .map(|(j, x)| (false, j, x.ell_o(), x.ell_orth()))
         .collect();
     if cand.len() < 2 {
         return Formation::default();
@@ -1647,7 +1647,7 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
             *grains.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
             flows.push(crate::flows::Mote {
                 spins: crate::flows::Mote::spins_of(&ell, &x.tilt()),
-                ell_orth: orth,
+                spins_orth: crate::flows::Mote::orth_of(&orth, &x.orth_shares()),
                 ..x.clone()
             });
         }
@@ -1883,7 +1883,7 @@ pub fn contained_front(u: &Universe) -> Vec<FrontCell> {
         .collect();
     let outer = |x: &crate::flows::Mote| {
         let psi = x.phase_at(crate::flows::LOOP);
-        let (ell, _) = crate::flows::swung(&x.ell_o(), &x.ell_orth, &psi);
+        let (ell, _) = crate::flows::swung(&x.ell_o(), &x.ell_orth(), &psi);
         enc.reach(&ell).0 * (ratio(1, 1) + push.clone())
     };
     let mut out = Vec::new();
@@ -2031,7 +2031,7 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         let key = x.key.to_string();
         w.extend_from_slice(&(key.len() as u16).to_le_bytes());
         w.extend_from_slice(key.as_bytes());
-        for r in [&x.amount, &x.ell_o(), &x.ell_orth, &x.agitation] {
+        for r in [&x.amount, &x.ell_o(), &x.ell_orth(), &x.agitation] {
             cfe::ratio::encode(r, &mut w);
         }
         // Its orientation (docs/117 §11.7): the six components, then the
@@ -2170,7 +2170,7 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
         let key = x.key.to_string();
         w.extend_from_slice(&(key.len() as u16).to_le_bytes());
         w.extend_from_slice(key.as_bytes());
-        for r in [&x.amount, &x.ell_o(), &x.ell_orth, &x.agitation] {
+        for r in [&x.amount, &x.ell_o(), &x.ell_orth(), &x.agitation] {
             cfe::ratio::encode(r, &mut w);
         }
         // Its orientation (docs/117 §11.7): the six components, then the
@@ -2248,7 +2248,7 @@ fn get_body(v: &[u8]) -> Option<Body> {
     Some(Body {
         solid: false,
         coupled: None,
-        spins_orth: vec![ratio(0, 1); 3],
+        ell_orth: ratio(0, 1),
         path,
         radius,
         period,
@@ -2719,7 +2719,7 @@ mod tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(amount, 1),
             spins: crate::flows::Mote::spins_of(&ell, &[]),
-            ell_orth: ratio(1, 7),
+            spins_orth: crate::flows::Mote::orth_of(&ratio(1, 7), &[]),
             orientation: crate::orientation::Orientation::from_phases(&vec![
                 ratio(0, 1);
                 crate::flows::PLANES
@@ -2743,9 +2743,10 @@ mod tests {
             let m = |x: &crate::flows::Mote| {
                 x.amount.clone() * crate::flows::weight(&x.key) / w.clone()
             };
-            let ocean = u.ocean.iter().fold(ratio(0, 1), |s, x| {
-                s + m(x) * (x.ell_o() + x.ell_orth.clone())
-            });
+            let ocean = u
+                .ocean
+                .iter()
+                .fold(ratio(0, 1), |s, x| s + m(x) * (x.ell_o() + x.ell_orth()));
             u.cores.iter().fold(ocean, |s, c| {
                 let f = mass(&c.total()) / w.clone();
                 let own = if is_home(c) {
@@ -2755,7 +2756,7 @@ mod tests {
                 };
                 c.flows.iter().fold(s + own, |s, x| {
                     let lift = if is_home(c) { ratio(1, 1) } else { f.clone() };
-                    s + m(x) * lift * (x.ell_o() + x.ell_orth.clone())
+                    s + m(x) * lift * (x.ell_o() + x.ell_orth())
                 })
             })
         };
@@ -2812,7 +2813,7 @@ mod tests {
         let orb = Body {
             solid: true,
             coupled: Some([9; 32]),
-            spins_orth: vec![ratio(0, 1); 3],
+            ell_orth: ratio(0, 1),
             path: vec![1, 1, 1],
             radius: ratio(3, 2),
             period: ratio(5, 2),
@@ -2843,7 +2844,7 @@ mod tests {
         let sys = Body {
             solid: false,
             coupled: None,
-            spins_orth: vec![ratio(0, 1); 3],
+            ell_orth: ratio(0, 1),
             path: vec![1, 1],
             radius: ratio(9, 2),
             period: ratio(11, 2),
@@ -2874,7 +2875,7 @@ mod tests {
         let core = Body {
             solid: false,
             coupled: None,
-            spins_orth: vec![ratio(0, 1); 3],
+            ell_orth: ratio(0, 1),
             path: vec![1],
             radius: ratio(60, 1),
             period: ratio(0, 1),
@@ -2915,7 +2916,8 @@ mod tests {
                     &ratio(1, 3),
                     &[ratio(1, 2), ratio(1, 3), ratio(1, 6)],
                 ),
-                spins_orth: vec![ratio(0, 1); 3],
+                // Its partners apart (docs/128 §9.2), each read back.
+                spins_orth: vec![ratio(1, 5), ratio(-1, 10), ratio(1, 20)],
                 orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(
                     ratio(1, 2),
                 )),
