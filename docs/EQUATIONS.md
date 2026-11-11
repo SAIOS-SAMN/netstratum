@@ -1951,7 +1951,9 @@ returns it by its faces at the place:
 
 `g_M = 1 − δ`, `u_M = δ` (docs/105 §3). The book closes: `Δ_M = radiated +
 recycled`, `radiated = absorbed + drained`, and only the drained light leaves
-the bodies. Not yet built (docs/127 §6; #182–#185).
+the bodies. **Built for heat (#182):** `flows::emit` dissipates each mote's
+restored heat into the manifold, recycling `g_M` of it to the motes whose own
+enclosures meet its own (by `w·g`) and radiating the rest. #183–#185 follow.
 
 **E57 · The orientation is the generator.** `orientation::Orientation`,
 `orientation::rate`, `orientation::reading` (docs/117 §11.7, #117 step 2).

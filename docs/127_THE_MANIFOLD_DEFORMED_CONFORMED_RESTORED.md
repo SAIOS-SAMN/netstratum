@@ -18,7 +18,8 @@ formulas and update equations to complete accuracy — then begin development
 on heat transfers as recycling energy across manifold dissipation".
 
 **Status:** derived (2026-11-11). Built in steps (§6), each with its witness
-and a founding read.
+and a founding read. Step 1 built: heat dissipated through the manifold
+(`flows::emit`, #182).
 
 **Prerequisites:**
 - docs/120: the coordinate as the state, its lanes S, G, T, H. The manifold

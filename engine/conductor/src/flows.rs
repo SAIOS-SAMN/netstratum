@@ -1240,23 +1240,74 @@ pub fn heat_after(a0: &Ratio, q: &Ratio, u: &Ratio, n: u32) -> Option<Ratio> {
     Some(star.clone() + (a0.clone() - star) * gn)
 }
 
-/// Every mote's emission over `rings` rings in `enc` (docs/122 law 3): each
-/// mote keeps its held face's share of its heat a ring, on the grain
-/// (floored, so what the grain leaves is light too), and the light it
-/// emits, its heat's fall times its holding, is returned to be shone and
-/// booked (law 4). `Σ a·m` before is `Σ a·m` after plus the light, exactly.
-pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32) -> Ratio {
+/// Every mote's restoration over `rings` rings in `enc`, its heat DISSIPATED
+/// INTO THE MANIFOLD (docs/127 §4, EQUATIONS E54, E61, E62; operator
+/// 2026-11-11). Each ring a mote keeps its held face's share of its heat
+/// (`g_i`, on its own axis), on the grain; what it gives up, `Δ_i`, enters
+/// the manifold at its place, which returns it by its own faces there (`g_M
+/// = 1 − δ`, `u_M = δ`, docs/105 §3):
+/// - recycled, `g_M·Δ_i`, to the motes whose own enclosures meet its own
+///   (the range that conforms at that place), each by `w_j·g_j / Σ w·g`;
+/// - radiated, the rest, as light to be shone and booked (law 4).
+///
+/// Where no mote meets it, what would be recycled radiates too. `total` is
+/// the enclosure's holding unit, as the torque and the shear read it. `Σ a·m`
+/// before is `Σ a·m` after plus the light radiated, exactly: what is recycled
+/// stays in the manifold's bodies, and each grain's floor radiates.
+pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32, total: &Ratio) -> Ratio {
+    let n = motes.len();
+    if n == 0 || motes.iter().all(|x| x.agitation.is_zero()) {
+        return ratio(0, 1);
+    }
+    let w: Vec<Ratio> = motes
+        .iter()
+        .map(|x| x.amount.clone() * weight(&x.key))
+        .collect();
+    let mut reach = Vec::with_capacity(n);
+    let mut delta = Vec::with_capacity(n);
+    let mut extent = Vec::with_capacity(n);
+    let mut keep = Vec::with_capacity(n);
+    for x in motes.iter() {
+        let (r, d) = x.reach_in(enc);
+        extent.push(r.clone() * own_enclosure(x, enc, total)[0].clone());
+        keep.push(crate::polarity::faces_on(&d, crate::polarity::Axis::of_stream(x.vacuum)).0);
+        reach.push(r);
+        delta.push(d);
+    }
+    let range = meeting(&reach, &extent);
     let mut light = ratio(0, 1);
-    for x in motes.iter_mut() {
-        if x.agitation.is_zero() {
-            continue;
+    for _ in 0..rings {
+        let mut gain = vec![ratio(0, 1); n];
+        for i in 0..n {
+            if motes[i].agitation.is_zero() {
+                continue;
+            }
+            let kept = crate::ring::grain(&(motes[i].agitation.clone() * keep[i].clone()));
+            let given = (motes[i].agitation.clone() - kept.clone()) * w[i].clone();
+            motes[i].agitation = kept;
+            let (g_m, _) = crate::polarity::faces(&delta[i]);
+            let recycled = g_m * given.clone();
+            let whole = range[i]
+                .iter()
+                .fold(ratio(0, 1), |s, &j| s + w[j].clone() * keep[j].clone());
+            if whole.is_zero() {
+                light += given;
+                continue;
+            }
+            light += given - recycled.clone();
+            for &j in &range[i] {
+                gain[j] += recycled.clone() * w[j].clone() * keep[j].clone() / whole.clone();
+            }
         }
-        let (_, delta) = x.reach_in(enc);
-        let held = crate::polarity::faces_on(&delta, crate::polarity::Axis::of_stream(x.vacuum)).0;
-        let (kept, _) = emission(&x.agitation, &held, rings);
-        let kept = crate::ring::grain(&kept);
-        light += (x.agitation.clone() - kept.clone()) * x.amount.clone() * weight(&x.key);
-        x.agitation = kept;
+        for (j, g) in gain.into_iter().enumerate() {
+            if g.is_zero() || w[j].is_zero() {
+                light += g;
+                continue;
+            }
+            let rise = crate::ring::grain(&(g.clone() / w[j].clone()));
+            light += g - rise.clone() * w[j].clone();
+            motes[j].agitation += rise;
+        }
     }
     light
 }
@@ -4652,9 +4703,46 @@ mod emission_tests {
             })
         };
         let before = held(&motes);
-        let light = emit(&mut motes, &enc, 2);
+        let light = emit(&mut motes, &enc, 2, &ratio(1, 1));
         assert!(light > ratio(0, 1));
         assert_eq!(before, held(&motes) + light);
+    }
+
+    #[test]
+    fn what_one_mote_restores_its_neighbour_takes_up_by_the_manifold() {
+        // docs/127 §4: two motes whose enclosures meet. The hot one's
+        // restoration enters the manifold; the held share g_M = 1 − δ is
+        // recycled to the cold one, the rest radiates; Σ a·m before is Σ a·m
+        // after plus the light, exactly.
+        let mut motes = vec![
+            hot("W0001", ratio(4, 1), ratio(1, 2), false),
+            hot("W0001", ratio(4, 1), ratio(0, 1), false),
+        ];
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let held = |m: &[Mote]| {
+            m.iter().fold(ratio(0, 1), |s, x| {
+                s + x.agitation.clone() * x.amount.clone() * weight(&x.key)
+            })
+        };
+        let before = held(&motes);
+        let light = emit(&mut motes, &enc, 1, &ratio(1, 1));
+        assert!(
+            motes[1].agitation > ratio(0, 1),
+            "the cold mote warmed: cooling there is heating here"
+        );
+        assert_eq!(
+            before,
+            held(&motes) + light.clone(),
+            "the book closes through the manifold"
+        );
+        let alone = {
+            let mut m = vec![hot("W0001", ratio(4, 1), ratio(1, 2), false)];
+            emit(&mut m, &enc, 1, &ratio(1, 1))
+        };
+        assert!(
+            light < alone,
+            "less radiates where a neighbour takes up the held share"
+        );
     }
 
     #[test]
@@ -4664,7 +4752,7 @@ mod emission_tests {
         let mut motes = vec![hot("W0001", ratio(1, 1), ratio(1, 2), false)];
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let (_, delta) = motes[0].reach_in(&enc);
-        let light = emit(&mut motes, &enc, 1);
+        let light = emit(&mut motes, &enc, 1, &ratio(1, 1));
         assert_eq!(
             motes[0].agitation,
             crate::ring::grain(&(ratio(1, 2) * delta))
@@ -4682,8 +4770,8 @@ mod emission_tests {
         let (_, delta) = cont[0].reach_in(&enc);
         let (_, delta_v) = vac[0].reach_in(&enc);
         assert_eq!(delta, delta_v);
-        emit(&mut cont, &enc, 1);
-        emit(&mut vac, &enc, 1);
+        emit(&mut cont, &enc, 1, &ratio(1, 1));
+        emit(&mut vac, &enc, 1, &ratio(1, 1));
         assert_eq!(
             cont[0].agitation,
             crate::ring::grain(&(ratio(1, 2) * delta.clone()))

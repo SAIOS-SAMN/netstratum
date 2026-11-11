@@ -505,7 +505,7 @@ fn system_glow(sys: &mut Body, emitted: &Ratio, rang: bool, unit: &Ratio) -> Lig
         };
     };
     let glow = if rang {
-        crate::flows::emit(&mut sys.flows, &enc_s, 1)
+        crate::flows::emit(&mut sys.flows, &enc_s, 1, unit)
     } else {
         ratio(0, 1)
     } + emitted.clone();
@@ -662,7 +662,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // first arrival.
         crate::profile::mark("orbit:emit");
         if let Some(enc_o) = crate::pulse::ocean_frame(u) {
-            let glow = crate::flows::emit(&mut u.ocean, &enc_o, 2);
+            let ocean_unit = unit_mass(u);
+            let glow = crate::flows::emit(&mut u.ocean, &enc_o, 2, &ocean_unit);
             let unit = unit_mass(u);
             if !glow.is_zero() && !unit.is_zero() {
                 let whole = mass(&u.medium());
@@ -2457,7 +2458,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // takes drained.
             crate::profile::mark("breath:emit");
             {
-                let glow = crate::flows::emit(&mut core.flows, enc.as_ref().unwrap_or(&throat), 2);
+                let glow = crate::flows::emit(
+                    &mut core.flows,
+                    enc.as_ref().unwrap_or(&throat),
+                    2,
+                    &ledger_unit,
+                );
                 if !glow.is_zero() {
                     let enc_l = galaxy_enc(core);
                     let (got, _) = shine(&mut core.flows, &mut [], &enc_l, &glow, &g_mass);
