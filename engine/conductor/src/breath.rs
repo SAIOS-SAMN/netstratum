@@ -2412,22 +2412,30 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let enc_m = enc.as_ref().unwrap_or(&throat);
                 let base = enc_m.base();
                 // The base's frames: the core's state, in proportion to its
-                // throat's frames; a closed pole where its throat holds none.
-                let (a_t, q_t) =
-                    core.throat
-                        .iter()
-                        .fold((ratio(0, 1), ratio(0, 1)), |(a, q), (k, n)| {
-                            let (fa, fq) = crate::chem::frames(k);
-                            (
-                                a + n.clone() * ratio(i64::from(fa), 1),
-                                q + n.clone() * ratio(i64::from(fq), 1),
-                            )
-                        });
+                // throat's dimensions (docs/95 §0: the nucleon dipole's poles
+                // and the electrons' open dimensions); a closed pole where its throat
+                // holds none.
+                let (a_t, q_t, e_t) = core.throat.iter().fold(
+                    (ratio(0, 1), ratio(0, 1), ratio(0, 1)),
+                    |(a, q, e), (k, n)| {
+                        let f = crate::chem::dimensions(k);
+                        let r = |v: u32| ratio(i64::from(v), 1);
+                        (
+                            a + n.clone() * r(f.held),
+                            q + n.clone() * r(f.open),
+                            e + n.clone() * r(f.electrons_open.min(f.whole())),
+                        )
+                    },
+                );
                 let whole_t = a_t.clone() + q_t.clone();
                 let base_frames = if whole_t.is_zero() {
-                    (base.clone(), ratio(0, 1))
+                    (base.clone(), ratio(0, 1), ratio(0, 1))
                 } else {
-                    (base.clone() * a_t / whole_t.clone(), base * q_t / whole_t)
+                    (
+                        base.clone() * a_t / whole_t.clone(),
+                        base.clone() * q_t / whole_t.clone(),
+                        base * e_t / whole_t,
+                    )
                 };
                 let spin_was = ledger_sum(core);
                 let (n_m, du) =

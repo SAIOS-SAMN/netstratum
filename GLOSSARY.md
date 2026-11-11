@@ -29,6 +29,7 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 | **R** | The electron's phase state of a nuclide, `R = κ_e·(1 − 2·frac(p))`, where `p` is the pulse phase in turns and `κ_e = 2·Z(Q)/Q` its coherence. Bound electrons (`R > 0`) close its frames; free electrons open them. | `nuclides.rs` |
 | **place** (of a nuclide) | Where its nucleons stand on the 12-dimensional sphere S^11: its turning, its open degree, and how many directions are claimed and paired. | `nuclides::Place` |
 | **open frames** | The unpaired directions of a kind. They are its magnetism and decide how it bonds. | `flows::open` |
+| **nucleon dipole** | A kind's dimensions (docs/95 §0, docs/97): each nucleon standing in three axes, `3Q` the protons' **open dimensions** and `3Z` the neutrons' **held dimensions**, `3w` in all ("frame" retired, mycelium #239). Its pole is `(Z − Q)/w`. The electrons' open dimensions `U` and their phase R stand beside it, never folded into it. | `chem::Dimensions` |
 | **grip** | How tightly a kind holds against heat, from its tightness `τ`; a kind parts where `a + τ > κ_w·h`. | `nuclides::grip` |
 | **densest element** | The heaviest nuclide the founding produced. Every later capture stops there. | `Universe::densest` |
 | **manifest** | An exact amount of each kind, in grains. | `pulse::Manifest` |

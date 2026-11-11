@@ -100,7 +100,12 @@ clause of LAW-PASSAGE.
    kernel's own enclosure is proposed (re-origin), its hold read from the
    body (`H′ = R`).
 3. **Xylarium's mathematics confirmed (2026-11-06).** Its frames are `W =
-   3Z − U` held and `U` open, so the swap is `U ↔ W`, with `3Z` kept. Its
+   3Z − U` held and `U` open (Xylarium's letters: its Z is the proton), so
+   the swap is `U ↔ W`, with `3Z` kept. **Netstratum's side restated
+   (2026-11-11, docs/95 §0, register K15):** netstratum's dimensions are the
+   nucleon dipole `(3Z neutrons, 3Q protons)` over `3w` with the electrons'
+   `U` and R beside it, translated Z ↔ Q at the seam; the exchange across
+   the tube is re-derived on that (#176). Its
    pole `t = U/W ↦ 1/t` is its axis inversion (`circuit::axis_antipole`),
    fixing only the throat. `σ ↦ −σ`, `o ↦ 1 − o` (its viscosity reversion),
    and fusion and fission exchange. **The architecture is open:** whether

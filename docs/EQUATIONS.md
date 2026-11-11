@@ -1890,6 +1890,19 @@ stays the stick test). The bounce's parting (the exchange of the unkept share)
 then widens their spins; what pays it is the state level's (potential),
 not derived yet.
 
+**E58 · The nucleon dipole.** `chem::Dimensions`, `chem::frames` (docs/95 §0,
+docs/97; register K15). A kind's dimensions are its nucleons', each standing in
+three axes: `3Q` the protons' open dimensions and `3Z` the neutrons' held
+dimensions, `3w` in all ("frame" retired, mycelium #239). The electrons' open dimensions `U` stand beside them:
+
+    pole σ = (3Z − 3Q)/3w = (Z − Q)/w        open share o = U/3w
+
+`σ` is read through `coupling::pole`, the pole opened by degrees. On the
+vacuum's inverted face, `σ ↦ −σ` and `o ↦ 1 − o`. The dipole coupling
+(`flows::shear`) and the magnet (`flows::magnet`, the enclosed magnetism `M`
+the electrons' open dimensions) read them. R, the electron's phase, stands
+beside the dipole, never folded into it. Replaces `(3·protons − U, U)`.
+
 **E57 · The orientation is the generator.** `orientation::Orientation`,
 `orientation::rate`, `orientation::reading` (docs/117 §11.7, #117 step 2).
 A body's orientation is one generator `G` over six elliptic planes (three
