@@ -521,6 +521,12 @@ pub fn bonded(a: &Mote, b: &Mote, da: &[Ratio], db: &[Ratio]) -> bool {
     moved(a) >= half && moved(b) >= half
 }
 
+/// The bond test's work counter: pairs decided on whole numbers, and pairs
+/// read by the rational test (within the grid's resolution of a threshold,
+/// or a value beyond i128), summed over every `collections` call.
+pub static BOND_PAIRS: (std::sync::atomic::AtomicU64, std::sync::atomic::AtomicU64) =
+    (std::sync::atomic::AtomicU64::new(0), std::sync::atomic::AtomicU64::new(0));
+
 /// A collective's COLLECTIONS (docs/111 §4.2): the connected sets of its
 /// bonds, read from one bounce's perturbations (each mote's displacement), never
 /// assigned. Each collection is its members' indices, ascending; a mote
@@ -537,65 +543,108 @@ pub fn collections(motes: &[Mote], moves: &[Vec<Ratio>]) -> Vec<Vec<usize>> {
         i
     }
     let mut any = vec![false; n];
-    // The bond test, exact, on whole numbers where it can be (the pairs are
-    // many): every phase, move and tilt share of a firmament mote stands on
-    // the spin grain, tilt shares split at most three ways, so each is a
-    // whole count of `1/D`, `D = 6·60⁶`. On that grid `in_step` is
-    // `D − 2·off` and each condition of `bonded` (a tilt-weighted sum of
-    // in-step shares at least ½) is `2·Σ t_k·i_k ≥ D²`, exact in i128
-    // (`D² < 2⁷⁷`). A mote with any value off the grid is read by the
-    // rational test instead. Either way the bonds are exactly `bonded`'s.
-    let grid = {
-        let d = num_bigint::BigInt::from(6) * num_bigint::BigInt::from(60).pow(6);
-        Ratio::from_integer(d)
-    };
+    // The bond test, exact, on whole numbers (the pairs are many). Every
+    // phase, move and tilt share is bounded on the grid `1/D`, `D = 6·60⁶`:
+    // its floor and ceiling there, equal where the value stands on the grid
+    // (a phase read from the orientation, `n/(60⁶ + |n|)`, mostly does not).
+    // `in_step` on the grid is the tent `D − 2·off`, so its bounds over an
+    // interval are read at the interval's ends and at the tent's breakpoints
+    // inside it. Each condition of `bonded` (a tilt-weighted sum of in-step
+    // shares at least ½) is `2·Σ t_k·i_k ≥ D²`; both factors are not negative,
+    // so the bounds' products bound the sum, exact in i128 (`D² < 2⁷⁷`). A pair
+    // the bounds decide is decided; only one standing within the grid's
+    // resolution of a threshold is read by the rational test (counted).
     let d_whole: i128 = 6 * 60i128.pow(6);
-    let whole = |x: &Ratio| -> Option<i128> {
+    let bound = |x: &Ratio| -> Option<(i128, i128)> {
+        use num_integer::Integer;
         use num_traits::ToPrimitive;
-        let c = x.clone() * grid.clone();
-        c.is_integer().then(|| c.to_integer().to_i128()).flatten()
+        let c = x.numer() * num_bigint::BigInt::from(d_whole);
+        let (lo, r) = c.div_mod_floor(x.denom());
+        let lo = lo.to_i128()?;
+        Some((lo, if r.is_zero() { lo } else { lo + 1 }))
     };
-    struct Whole {
+    struct Bounds {
         open: bool,
-        phase: [i128; 3],
-        tilt: [i128; 3],
-        moved: [i128; 3],
+        phase: [(i128, i128); 3],
+        tilt: [(i128, i128); 3],
+        moved: [(i128, i128); 3],
     }
-    let wholes: Vec<Option<Whole>> = (0..n)
+    let bounded: Vec<Option<Bounds>> = (0..n)
         .map(|i| {
             let x = &motes[i];
             let zero = ratio(0, 1);
-            let at = |v: &[Ratio], k: usize| whole(v.get(k).unwrap_or(&zero));
+            let at = |v: &[Ratio], k: usize| bound(v.get(k).unwrap_or(&zero));
             let t = tilt_of(&x.tilt());
-            let mut w = Whole {
+            let phase = x.phase();
+            let mut w = Bounds {
                 open: crate::chem::unpaired(&x.key) != 0,
-                phase: [0; 3],
-                tilt: [0; 3],
-                moved: [0; 3],
+                phase: [(0, 0); 3],
+                tilt: [(0, 0); 3],
+                moved: [(0, 0); 3],
             };
             for (j, &k) in SPACE.iter().enumerate() {
-                w.phase[j] = at(&x.phase(), k)?;
-                w.tilt[j] = whole(&t[j])?;
+                w.phase[j] = at(&phase, k)?;
+                w.tilt[j] = bound(&t[j])?;
                 w.moved[j] = at(&moves[i], k)?;
             }
             Some(w)
         })
         .collect();
-    let in_step_w = |a: i128, b: i128| {
-        let d = (a - b).rem_euclid(d_whole);
-        d_whole - 2 * d.min(d_whole - d)
+    let tent = |d: i128| {
+        let r = d.rem_euclid(d_whole);
+        d_whole - 2 * r.min(d_whole - r)
     };
-    let holds = |t: &[i128; 3], a: &[i128; 3], b: &[i128; 3]| {
-        2 * (0..3).map(|k| t[k] * in_step_w(a[k], b[k])).sum::<i128>() >= d_whole * d_whole
+    // The tent's least and greatest over the differences `[lo, hi]`.
+    let in_step_b = |a: (i128, i128), b: (i128, i128)| -> (i128, i128) {
+        let (lo, hi) = (a.0 - b.1, a.1 - b.0);
+        let (mut least, mut most) = (tent(lo).min(tent(hi)), tent(lo).max(tent(hi)));
+        // A peak (a whole turn) or a trough (half a turn) inside.
+        if (hi - lo) >= d_whole || hi.div_euclid(d_whole) * d_whole >= lo {
+            most = d_whole;
+        }
+        let half = d_whole / 2;
+        if (hi - lo) >= d_whole || (hi - half).div_euclid(d_whole) * d_whole + half >= lo {
+            least = 0;
+        }
+        (least, most)
     };
-    let bonded_whole = |a: &Whole, b: &Whole| {
-        a.open
-            && b.open
-            && holds(&a.tilt, &a.phase, &b.phase)
-            && holds(&b.tilt, &b.phase, &a.phase)
-            && holds(&a.tilt, &a.moved, &b.moved)
-            && holds(&b.tilt, &a.moved, &b.moved)
+    // Some(true) or Some(false) where the bounds decide, None where not.
+    let holds = |t: &[(i128, i128); 3], a: &[(i128, i128); 3], b: &[(i128, i128); 3]| {
+        let (mut lo, mut hi) = (0i128, 0i128);
+        for k in 0..3 {
+            let (il, ih) = in_step_b(a[k], b[k]);
+            lo += t[k].0.max(0) * il;
+            hi += t[k].1 * ih;
+        }
+        let need = d_whole * d_whole;
+        if 2 * lo >= need {
+            Some(true)
+        } else if 2 * hi < need {
+            Some(false)
+        } else {
+            None
+        }
     };
+    let bonded_b = |a: &Bounds, b: &Bounds| -> Option<bool> {
+        if !(a.open && b.open) {
+            return Some(false);
+        }
+        let mut sure = true;
+        for (t, x, y) in [
+            (&a.tilt, &a.phase, &b.phase),
+            (&b.tilt, &b.phase, &a.phase),
+            (&a.tilt, &a.moved, &b.moved),
+            (&b.tilt, &a.moved, &b.moved),
+        ] {
+            match holds(t, x, y) {
+                Some(false) => return Some(false),
+                Some(true) => {}
+                None => sure = false,
+            }
+        }
+        sure.then_some(true)
+    };
+    let (mut whole_pairs, mut rational_pairs) = (0u64, 0u64);
     for i in 0..n {
         if moves[i].is_empty() {
             continue;
@@ -604,9 +653,19 @@ pub fn collections(motes: &[Mote], moves: &[Vec<Ratio>]) -> Vec<Vec<usize>> {
             if moves[j].is_empty() {
                 continue;
             }
-            let bond = match (&wholes[i], &wholes[j]) {
-                (Some(a), Some(b)) => bonded_whole(a, b),
-                _ => bonded(&motes[i], &motes[j], &moves[i], &moves[j]),
+            let decided = match (&bounded[i], &bounded[j]) {
+                (Some(a), Some(b)) => bonded_b(a, b),
+                _ => None,
+            };
+            let bond = match decided {
+                Some(v) => {
+                    whole_pairs += 1;
+                    v
+                }
+                None => {
+                    rational_pairs += 1;
+                    bonded(&motes[i], &motes[j], &moves[i], &moves[j])
+                }
             };
             if bond {
                 let (a, b) = (find(&mut root, i), find(&mut root, j));
@@ -618,6 +677,8 @@ pub fn collections(motes: &[Mote], moves: &[Vec<Ratio>]) -> Vec<Vec<usize>> {
             }
         }
     }
+    BOND_PAIRS.0.fetch_add(whole_pairs, std::sync::atomic::Ordering::Relaxed);
+    BOND_PAIRS.1.fetch_add(rational_pairs, std::sync::atomic::Ordering::Relaxed);
     let mut sets: std::collections::BTreeMap<usize, Vec<usize>> = std::collections::BTreeMap::new();
     for i in 0..n {
         if any[i] {
@@ -3788,6 +3849,15 @@ mod passage_tests {
             for (j, &k) in super::SPACE.iter().enumerate() {
                 x.orientation
                     .hold_phase(k, &ratio((i * (7 + j as i64)) % 24, 24));
+            }
+            if i % 3 == 0 {
+                // An orientation as motes carry it (#167): components on
+                // the grain, phases read `n/(60⁶ + |n|)`, off the grid.
+                let grain: i64 = 60i64.pow(6);
+                let g = std::array::from_fn(|p| {
+                    ratio((i * 7919 * (p as i64 + 3) * 104_729) % grain - grain / 2, grain)
+                });
+                x.orientation = crate::orientation::Orientation::of_generator(g, [0; 6]);
             }
             let mut m = vec![ratio(0, 1); super::PLANES];
             for (j, &k) in super::SPACE.iter().enumerate() {

@@ -209,6 +209,13 @@ fn main() {
             }
             if std::env::var_os("NETSTRATUM_PROFILE").is_some() {
                 conductor::profile::mark("breathe:echo");
+                let ord = std::sync::atomic::Ordering::Relaxed;
+                eprintln!(
+                    "bond pairs at bell {}: {} on whole numbers, {} by the rational test",
+                    b + 1,
+                    conductor::flows::BOND_PAIRS.0.swap(0, ord),
+                    conductor::flows::BOND_PAIRS.1.swap(0, ord)
+                );
                 let spent = conductor::profile::drain();
                 let whole: f64 = spent.iter().map(|(_, d)| d.as_secs_f64()).sum();
                 for (name, d) in spent.iter().take(14) {
