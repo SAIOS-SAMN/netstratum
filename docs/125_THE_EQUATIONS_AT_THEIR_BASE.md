@@ -142,6 +142,52 @@ with its two sides.
    - docs/104 keeps `(1 − e)` and a counterweight (§2).
    - docs/122 law 3, which E54 follows, drops `e`.
 
+### 4.1 Decided (operator 2026-11-11)
+
+The operator on item 2: "regardless of the orientation, this is your
+orientation which needs to be defined and needs the antipole/inversion
+applied as well". On item 1: "your call".
+
+**Item 1, the electrons' held share:** docs/104 §1.1's count, the phase
+kept. A share read as `g` drops R, the offset the nucleon dipole stands on.
+
+    h(w, p) = (F_e + L_e·in_step(p, φ_held)) / Q      φ_held = ½ (inverse)
+
+**Item 2, the push: its orientation, its antipole, and the inversion.**
+- **The orientation is Netstratum's own, the open pole.** The protons' open
+  dimensions over the whole, `3Q/3w = Q/w`, the open stratum's share `d₀` of
+  the join `S¹¹ = S¹_axis * S⁹_iso` (Xylarium #183). This is docs/104 §1.2's
+  "open in both frames: the inverse nucleus already makes the protons the
+  open ends".
+- **R offsets it.** Charge moves between the poles only with R (docs/97 §1).
+  The electrons standing on the held hemisphere, `h·Q` of them, carry their
+  protons' charge onto the held side. So the push is the protons' charge
+  left open:
+
+      p = Q·(1 − h) / w
+
+  A bare proton (hydrogen, `h = 0`) pushes fully. A neutral atom, every
+  electron bound (`h = 1`), pushes not at all.
+- **The antipole is derived by the same inversion, never left out.** It is
+  the held stratum: the neutrons, with the charge the electrons carried
+  there:
+
+      p̄ = (Z + Q·h) / w = 1 − p
+
+  `p` and `p̄` are a pair share (docs/104 §1.2), with no `½`.
+- **The inversion `I` exchanges them across the faces.** The continuum leg
+  reads `p` and the vacuum leg reads `p̄` (pole ↦ the other pole), which is
+  the join's `t₀ ↦ 1/t₀`, `c₀ ↔ d₀`.
+- **What stays the electrons'.** Their open dimensions `U` (unpaired) remain
+  the coupling's strength and the bonds' ends (E58, E40–E44). They no longer
+  set the push.
+- **Replaces** E16's `½·U/w`. A body's push now depends on its phase, so
+  `pulse::push_of` takes the body's pulse phase.
+
+**Item 3, emission's open share:** docs/122 law 3 governs (operator
+2026-11-05: heat and light from bonds and friction). docs/104's `(1 − e)`
+row and its "in code now" column are corrected with it.
+
 ## 5. The order of derivation
 
 Each step is one change: its formula here or in its own document first, its
