@@ -1509,36 +1509,30 @@ fn torque_one(
     total: &Ratio,
     cross: &mut crate::enfold::Cross,
 ) -> (Ratio, Ratio, Ratio) {
-    // Each turns by what is enclosed inside it (the core and all inside),
-    // at the reach its orthogonal orbit swings it to this bell (docs/90 D2): the
-    // motion law at its present reach, so it turns faster inward and
-    // slower outward; through the centre where the swing passes zero.
-    // The swing read pair by pair (docs/117 §11.6, §11.7; docs/120 §8b′): each
-    // spatial plane's spin with its R partner's share of the orthogonal spin,
-    // `ℓ_k + t_k·ℓ_⊥·response(ψ_kR)`; a plane whose swing passes zero passes
-    // through the centre on that plane alone, its magnitude kept (L1, the
-    // reach `Σ|·|/H`).
-    let t = tilt_of(&x.tilt());
-    let swing: Vec<Ratio> = (0..SPACE.len())
-        .map(|j| {
-            x.spins.get(j).cloned().unwrap_or_else(|| ratio(0, 1))
-                + t[j].clone() * x.ell_orth() * response(&x.orientation.circulation(j))
-        })
-        .collect();
-    let now = swing.iter().fold(ratio(0, 1), |a, s| a + s.abs());
-    let (r_o, h, d_o) = lifted(enc, &now, &x.lift);
+    // Each turns by what is enclosed inside it (the core and all inside):
+    // its reach is its form's orbit, the spatial spin read by the ring law
+    // (docs/128 §10.4); the partner orbits enter through the halves of its
+    // motion, never as a swing of the reach (the swing's response retires,
+    // docs/128 §9.4).
+    let (r_o, h, _) = lifted(enc, &x.ell_o().abs(), &x.lift);
     // Ascent: the bell turns the mote from where it truly stands, its
     // lever read back onto its marks.
     let marks: Vec<Ratio> = (0..PLANES).map(|k| true_phase(x, k)).collect();
     for (k, v) in marks.iter().enumerate() {
         x.orientation.hold_phase(k, v);
     }
-    let mut from = space_of(&marks);
-    for (j, s) in swing.iter().enumerate() {
-        if *s < ratio(0, 1) {
-            from[j] = frac(&(from[j].clone() + ratio(1, 2)));
-        }
-    }
+    let from = space_of(&marks);
+    let read = |x: &Mote| -> Vec<(Ratio, i64)> {
+        (0..SPACE.len())
+            .map(|j| {
+                (
+                    x.phase_at(SPACE[j]),
+                    x.orientation.windings[crate::orientation::SPATIAL[j]],
+                )
+            })
+            .collect()
+    };
+    let was = read(x);
     // A mote's place: the cap its own gravity holds (`enfold::place`).
     let m = if total.is_zero() {
         ratio(0, 1)
@@ -1569,15 +1563,33 @@ fn torque_one(
             &crate::orientation::half_motion(&minus, &b_minus),
         )
         .expect("a real generator always has a motion");
+    // Each spatial plane's passage this bell, as the group moved it: its
+    // reading's change with its windings' (docs/128 §9.6, one law for the
+    // motion and the book).
+    let passage: Vec<Ratio> = was
+        .iter()
+        .zip(read(x))
+        .map(|((psi, k), (psi2, k2))| psi2 - psi.clone() + ratio(k2 - k, 1))
+        .collect();
     let mut held = x.phase();
     let (scar, levers) = hold_to_place(&mut held, place.as_ref(), &heat_was, cross);
     for (k, v) in held.iter().enumerate() {
         x.orientation.hold_phase(k, v);
     }
-    let (g, ab, ht) = spin_torque(x, &from, &d_o, p, &m, &scar);
+    let (g, ab, ht) = spin_torque(x, &from, &passage, p, &m, &scar);
     // Descent: its weight past its round stands one place past its mark.
     settle(x, &levers, place.as_ref(), cross);
     (g, ab, ht)
+}
+
+/// A spatial passage as the tilt's turning would have given it, `2δ·t_k`
+/// (the witnesses' fixture for a deficit `δ`).
+#[cfg(test)]
+fn passage_of(delta: &Ratio, tilt: &[Ratio]) -> Vec<Ratio> {
+    tilt_of(tilt)
+        .into_iter()
+        .map(|t| ratio(2, 1) * delta.clone() * t)
+        .collect()
 }
 
 /// The torque on one mote's SPINS over one bell's passage, the one law at
@@ -1592,47 +1604,51 @@ fn torque_one(
 pub fn spin_torque(
     x: &mut Mote,
     from: &[Ratio],
-    d_o: &Ratio,
+    passage: &[Ratio],
     p: &Ratio,
     m: &Ratio,
     scar: &Ratio,
 ) -> (Ratio, Ratio, Ratio) {
     let mut given = ratio(0, 1);
     let mut absorbed = ratio(0, 1);
-    // Over its whole passage this bell, never at one instant; a vacuum
-    // mote at its inverted reach (`1 − δ`), forward.
-    let d_o = if x.vacuum {
-        ratio(1, 1) - d_o.clone()
-    } else {
-        d_o.clone()
-    };
-    // Its response in each SPATIAL plane over that plane's passage (its
-    // tilt's share of `2δ`; docs/96 step 1): the push acts in every plane at
-    // once (isoclinic), each plane's spin `ℓ·t_k` torqued by its own
-    // response, weighted by its share.
-    let t = tilt_of(&x.tilt());
-    let resp: Vec<Ratio> = from
-        .iter()
-        .zip(&t)
-        .map(|(f, tk)| mean_response(f, &(ratio(2, 1) * d_o.clone() * tk.clone())))
+    // Over its whole passage this bell, never at one instant: each spatial
+    // plane's response over the arc it actually turned (docs/128 §9.6), the
+    // vacuum's face already in its motion (`b ↦ 1/b`). The push acts in every
+    // plane at once, each plane's spin torqued by its own response over its
+    // own passage.
+    let zero = ratio(0, 1);
+    let len = |j: usize| passage.get(j).cloned().unwrap_or_else(|| zero.clone());
+    let resp: Vec<Ratio> = (0..SPACE.len())
+        .map(|j| {
+            let f = from.get(j).cloned().unwrap_or_else(|| zero.clone());
+            let l = len(j);
+            if l < zero {
+                mean_response(&(f + l.clone()), &-l)
+            } else {
+                mean_response(&f, &l)
+            }
+        })
         .collect();
-    let k = resp
-        .iter()
-        .zip(&t)
-        .fold(ratio(0, 1), |s, (r, tk)| s + r.clone() * tk.clone());
+    let swept = (0..SPACE.len()).fold(ratio(0, 1), |s, j| s + len(j).abs());
+    let k = if swept.is_zero() {
+        ratio(0, 1)
+    } else {
+        (0..SPACE.len()).fold(ratio(0, 1), |s, j| s + resp[j].clone() * len(j).abs())
+            / swept.clone()
+    };
     // Dissipation (ruling of 2026-10-19: heat dissipation to the void is read
     // from the current physics, mimicking nature; with Xylarium): what the
-    // torque does not deliver in step becomes heat, `p·δ·(1 − |k|)` (k its
-    // signed mean over the passage, the coherent share): motion leaving
-    // step (docs/124 §3). The heat leaves by emission through the face
-    // (`emit`, docs/122 law 3), never here: the torque only makes it.
+    // torque does not deliver in step becomes heat, `p·(Σ|Δψ_k|/2)·(1 − |k|)`
+    // (k the passage-weighted response, the coherent share): motion leaving
+    // step (docs/124 §3). The heat leaves through the manifold (`emit`).
     let coherent = if k < ratio(0, 1) { -k } else { k };
     // The push pays it (docs/122 law 2): what the torque does not deliver in
     // step is heat, booked `m·heat` (`heated`) and taken from the bounce the
-    // push carries on, `B = p − Σ m·|Δℓ| − Σ m·heat`, so motion and heat and
-    // the bounce are the push, never more.
-    let heat =
-        crate::ring::grain(&(p.clone() * d_o.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)))));
+    // push carries on, so motion and heat and the bounce are the push.
+    let half = ratio(1, 2);
+    let heat = crate::ring::grain(
+        &(p.clone() * swept * half.clone() * (ratio(1, 1) - coherent.min(ratio(1, 1)))),
+    );
     let heated = m.clone() * heat.clone();
     x.agitation = crate::ring::grain(&(x.agitation.clone() + scar.clone())) + heat;
     // No radial law at the state level (operator 2026-11-06: the spin
@@ -1645,10 +1661,11 @@ pub fn spin_torque(
     // its share of the band (radial). A plane torqued past zero carries the
     // mote through the centre in that plane (its phase there on half a
     // turn), never piled at zero.
+    let t = tilt_of(&x.tilt());
     let mut planes_l: Vec<Ratio> = Vec::with_capacity(t.len());
     for (j, tk) in t.iter().enumerate() {
         let lk = x.ell_o() * tk.clone()
-            + p.clone() * d_o.clone() * resp[j].clone() * tk.clone()
+            + p.clone() * len(j) * half.clone() * resp[j].clone()
             + band.clone() * tk.clone();
         if lk < ratio(0, 1) {
             x.orientation
@@ -3755,8 +3772,8 @@ mod reading_tests {
 #[cfg(test)]
 mod passage_tests {
     use super::{
-        around, blend, conform_partners, mean_response, partner_target, phase_beads, rest,
-        restoring, shear_rate, space_of, spin_torque, tilt_from, tilt_of, weight, CellRead,
+        around, blend, conform_partners, mean_response, partner_target, passage_of, phase_beads,
+        rest, restoring, shear_rate, space_of, spin_torque, tilt_from, tilt_of, weight, CellRead,
         Enclosed, Mote,
     };
     use cfe::ratio::{ratio, Ratio};
@@ -4090,10 +4107,11 @@ mod passage_tests {
         );
         let was = x.spins_orth.clone();
         let from = space_of(&x.phase());
+        let passage = passage_of(&ratio(1, 3), &x.tilt());
         let _ = spin_torque(
             &mut x,
             &from,
-            &ratio(1, 3),
+            &passage,
             &ratio(1, 4),
             &ratio(1, 1),
             &ratio(0, 1),
@@ -4331,10 +4349,11 @@ mod passage_tests {
         x.orientation.hold_phase(0, &ratio(1, 10));
         x.orientation.hold_phase(2, &ratio(7, 10));
         let from = space_of(&x.phase());
+        let passage = super::passage_of(&ratio(2, 3), &x.tilt());
         let _ = spin_torque(
             &mut x,
             &from,
-            &ratio(2, 3),
+            &passage,
             &ratio(1, 4),
             &ratio(1, 1),
             &ratio(0, 1),
@@ -5295,7 +5314,8 @@ mod friction_tests {
             let from = space_of(&x.phase());
             let (d_o, p) = (ratio(2, 3), ratio(1, 4));
             let was = x.agitation.clone();
-            let (_, _, heated) = spin_torque(&mut x, &from, &d_o, &p, &m, &ratio(0, 1));
+            let passage = super::passage_of(&d_o, &x.tilt());
+            let (_, _, heated) = spin_torque(&mut x, &from, &passage, &p, &m, &ratio(0, 1));
             assert_eq!(m.clone() * (x.agitation.clone() - was), heated);
             assert!(heated >= ratio(0, 1) && heated <= m * p * d_o);
         }

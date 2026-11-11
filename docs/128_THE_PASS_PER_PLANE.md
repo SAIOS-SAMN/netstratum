@@ -411,7 +411,13 @@ over its disc's motes (`torsion::manifold_twist`, each mote's `C` generator
 as a share on the units, holding-weighted); the wound plane stays the
 release's lead. Bodies carry no `G` yet (#159), so a body's own twist and the
 fibre's tension (`torsion::tension`, a system's tilt against its core's)
-follow with it. Step 4 follows.
+follow with it. Step 4's law built: the book reads the passage each
+spatial plane took on the group this bell (its reading's change with its
+windings'), so `spin_torque`'s torque `p·(Δψ_k/2)·resp_k` and its heat
+`p·(Σ|Δψ_k|/2)·(1 − |k|)` read the motion itself; the old `2δ·t_k` was that
+passage under the tilt's turning, so the law's form is kept. The reach
+reads the form's orbit (the spatial spin), and the swing's response
+retires. The face, transit, pressure and drag per half follow (§9.6).
 
 ### 10.0 The factorization
 

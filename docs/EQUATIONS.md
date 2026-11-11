@@ -2000,7 +2000,14 @@ tide in the mote torque) is retired. **The torsion from the twist (built):**
     v = C_vec/(1 + C₀)    x̄_k = Σ w·(v_k/(1 + |v_k|)) / Σ w    P_jk = ρ·(x̄_j ⊖ x̄_k)
 
 A core's twist pressure is the manifold's twist over its disc's motes; its
-wound plane stays the release's lead (its tilt), never its torsion.
+wound plane stays the release's lead (its tilt), never its torsion. **One
+law for the motion and the book (built):** `flows::spin_torque` reads each
+spatial plane's passage on the group, `Δψ_k = ψ_k′ − ψ_k + (K_k′ − K_k)`:
+
+    Δℓ_k = p·(Δψ_k/2)·resp_k        heat = p·(Σ|Δψ_k|/2)·(1 − |k|),  k = Σ resp_k·|Δψ_k| / Σ|Δψ_k|
+
+(the tilt's `2δ·t_k` was this passage under the flat turning). The reach
+reads the spatial spin; the swing's `response(ψ_kR)` retires.
 
 **E65 · The bell on the group: six spins, one motion a half.**
 `orientation::spin_halves`, `orientation::size`, `orientation::half_motion`,
