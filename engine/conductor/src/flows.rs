@@ -1368,9 +1368,13 @@ pub fn torque(
     } else {
         lo.clone() + crate::ring::grain_step()
     };
-    for x in motes.iter_mut() {
+    // The rings' motions, read once at the bell's start for every mote: the
+    // drag and the repulsion exchange with the range meeting each, so they
+    // are read before any mote turns (docs/128 §9.6).
+    let (motions, _) = ring_motions(motes, enc, total);
+    for (x, motion) in motes.iter_mut().zip(&motions) {
         if lo == hi {
-            let (g, ab, ht) = torque_one(x, enc, &lo, total, cross);
+            let (g, ab, ht) = torque_one(x, motion, enc, &lo, total, cross);
             given += g;
             absorbed += ab;
             heated += ht;
@@ -1381,8 +1385,8 @@ pub fn torque(
             crate::enfold::Cross::default(),
             crate::enfold::Cross::default(),
         );
-        let (ga, aa, ha) = torque_one(&mut xa, enc, &lo, total, &mut ca);
-        let (gb, ab, hb) = torque_one(&mut xb, enc, &hi, total, &mut cb);
+        let (ga, aa, ha) = torque_one(&mut xa, motion, enc, &lo, total, &mut ca);
+        let (gb, ab, hb) = torque_one(&mut xb, motion, enc, &hi, total, &mut cb);
         if xa == xb && ca == cb && ga == gb && aa == ab && ha == hb {
             *x = xa;
             cross.join(&ca);
@@ -1390,7 +1394,7 @@ pub fn torque(
             absorbed += aa;
             heated += ha;
         } else {
-            let (g, ab, ht) = torque_one(x, enc, p, total, cross);
+            let (g, ab, ht) = torque_one(x, motion, enc, p, total, cross);
             given += g;
             absorbed += ab;
             heated += ht;
@@ -1504,6 +1508,7 @@ pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32, total: &Ratio) -> Ra
 #[allow(clippy::too_many_arguments)]
 fn torque_one(
     x: &mut Mote,
+    motion: &[[Ratio; 3]; 2],
     enc: &Enclosed,
     p: &Ratio,
     total: &Ratio,
@@ -1546,22 +1551,11 @@ fn torque_one(
     // its own spin, composed twice; the vacuum's face reads the reciprocal
     // rate (`δ ↦ 1 − δ`). Retires the tilt's `2δ·t_k`, the loop laid on every
     // partner alike, and the rate taken plane by plane.
-    let (plus, minus) = crate::orientation::spin_halves(&x.spins, &x.spins_orth);
-    let rate_of = |half: &[Ratio; 3]| {
-        let l = crate::orientation::size(half);
-        if l.is_zero() {
-            return ratio(0, 1);
-        }
-        let (_, _, d) = lifted(enc, &l, &x.lift);
-        let d = if x.vacuum { ratio(1, 1) - d } else { d };
-        crate::orientation::rate(&d).unwrap_or_else(|| ratio(0, 1))
-    };
-    let (b_plus, b_minus) = (rate_of(&plus), rate_of(&minus));
+    // Each half's motion is its ring's, read for the whole manifold at the
+    // bell's start (`ring_motions`: the face, transit, pressure and drag on
+    // both axes, docs/128 §9.6).
     x.orientation
-        .bell_halves(
-            &crate::orientation::half_motion(&plus, &b_plus),
-            &crate::orientation::half_motion(&minus, &b_minus),
-        )
+        .bell_halves(&motion[0], &motion[1])
         .expect("a real generator always has a motion");
     // Each spatial plane's passage this bell, as the group moved it: its
     // reading's change with its windings' (docs/128 §9.6, one law for the
@@ -1580,6 +1574,232 @@ fn torque_one(
     // Descent: its weight past its round stands one place past its mark.
     settle(x, &levers, place.as_ref(), cross);
     (g, ab, ht)
+}
+
+/// One half's ring as the bell reads it (docs/128 §9.6, §4–§4b, §11).
+struct HalfRing {
+    /// Its transit's speed after the pressure, `|s′|`.
+    speed: Ratio,
+    /// The pressure's speed on it, `|P|`.
+    pressure: Ratio,
+    /// Its transit along the invariable plane, `ς(1 − τ)·σs′`, on the grain.
+    along: Ratio,
+    /// Its crossing, `τ·σs′`, on the grain.
+    crossing: Ratio,
+    /// Its direction in space split: along the invariable axis, `ς(1 − τ)·Â`,
+    /// and the crossing's rest, `â − ς(1 − τ)·Â`.
+    va: [Ratio; 3],
+    vc: [Ratio; 3],
+}
+
+/// Every mote's two half motions for one bell (docs/128 §9.6, §4, §4a, §4b,
+/// §11), read at the bell's start, `P+` then `P−` per mote:
+///
+/// 1. each half's ring at its lifted reach: its face `λ` from its tube (the
+///    vacuum stream's face inverted, `1 − λ`: the inversion exchanges the
+///    two solid tori), its transit `s = δ + λ(1 − 2δ)` and sense `σ = 1 − 2λ`;
+/// 2. its pressure, the manifold's own twist over these motes on its planes
+///    along its direction (`strip::ring_pressure`), resisting or aiding by
+///    its face, `s′`;
+/// 3. its transit `x = σs′` split by its tilt against the invariable axis,
+///    along `ς(1 − τ)x` and crossing `τx`;
+/// 4. the counterflow on the along part at `1 − |s′|`, the repulsion on the
+///    crossing at `1 − |P|` (`strip::drag`), each against the range meeting
+///    the mote and exchanged with it on the grain, `Σ w·x` kept but for the
+///    grain's remainder (returned);
+/// 5. its rate `b = s″/(1 − s″)` at the speed left, `s″ = |s′|·(|x_a′| +
+///    |x_c′|)/(|x_a| + |x_c|)`, along its direction with each part scaled by
+///    what it kept, carried back into the body's axes: the crossing's loss
+///    turns the ring toward the invariable plane. Outside the flow law's
+///    domain the drag is not taken.
+///
+/// With no pressure, no tilt and no medium, a half moves at its transit's
+/// rate along its own spin; a ring wholly outside its ring reads `δ`, the
+/// vacuum stream's `1 − δ`.
+pub fn ring_motions(
+    motes: &[Mote],
+    enc: &Enclosed,
+    total: &Ratio,
+) -> (Vec<[[Ratio; 3]; 2]>, Ratio) {
+    use crate::orientation::{size, spin_halves};
+    let n = motes.len();
+    let zero3 = || -> [Ratio; 3] { std::array::from_fn(|_| ratio(0, 1)) };
+    let one = ratio(1, 1);
+    let w: Vec<Ratio> = motes
+        .iter()
+        .map(|x| {
+            if total.is_zero() {
+                ratio(0, 1)
+            } else {
+                x.amount.clone() * weight(&x.key) / total.clone()
+            }
+        })
+        .collect();
+    let rho = if enc.whole().is_zero() {
+        ratio(0, 1)
+    } else {
+        enc.base() / enc.whole()
+    };
+    let planes: [Ratio; 3] = crate::torsion::manifold_twist(motes)
+        .and_then(|r| crate::torsion::pair_pressures(&r, &rho))
+        .and_then(|p| crate::torsion::plane_pressures(&p))
+        .unwrap_or_else(zero3);
+    let axes = crate::strip::invariable_axes(motes, total);
+    let unit = |v: &[Ratio; 3]| -> [Ratio; 3] {
+        let l = size(v);
+        if l.is_zero() {
+            zero3()
+        } else {
+            std::array::from_fn(|k| v[k].clone() / l.clone())
+        }
+    };
+    let reference = [unit(&axes[0]), unit(&axes[1])];
+    let mut reach = Vec::with_capacity(n);
+    let mut extent = Vec::with_capacity(n);
+    let mut reads: Vec<[Option<HalfRing>; 2]> = Vec::with_capacity(n);
+    for (i, x) in motes.iter().enumerate() {
+        let (r, _, _) = lifted(enc, &x.ell_o().abs(), &x.lift);
+        extent.push(r.clone() * own_enclosure(x, enc, total)[0].clone());
+        reach.push(r);
+        let (plus, minus) = spin_halves(&x.spins, &x.spins_orth);
+        let (ap, am) = x.orientation.half_axes(&plus, &minus);
+        let read = |spin: [Ratio; 3], axis: &[Ratio; 3], at: &[Ratio; 3]| -> Option<HalfRing> {
+            let l = size(&spin);
+            if l.is_zero() {
+                return None;
+            }
+            let (rr, hh, d) = lifted(enc, &l, &x.lift);
+            let e = crate::ring::pinch_share(&w[i], &hh);
+            let face = crate::strip::face_share(&rr, &hh, &e);
+            let face = if x.vacuum { one.clone() - face } else { face };
+            let s = crate::strip::transit_share(&d, &face);
+            let sigma = crate::strip::sense(&face);
+            let pressure = crate::strip::ring_pressure(&spin, &planes);
+            let s1 = crate::strip::resisted(&s, &pressure, &face).unwrap_or(s);
+            let xt = sigma * s1.clone();
+            let (tau, sg) = crate::orientation::tilt(axis, at)
+                .map(|t| (t.share, t.sense))
+                .unwrap_or_else(|| (ratio(0, 1), ratio(1, 1)));
+            let hat = unit(axis);
+            let va: [Ratio; 3] = if size(at).is_zero() {
+                hat.clone()
+            } else {
+                std::array::from_fn(|k| sg.clone() * (one.clone() - tau.clone()) * at[k].clone())
+            };
+            let vc: [Ratio; 3] = std::array::from_fn(|k| hat[k].clone() - va[k].clone());
+            Some(HalfRing {
+                speed: s1.abs(),
+                pressure: pressure.abs(),
+                along: crate::ring::grain(&(sg * (one.clone() - tau.clone()) * xt.clone())),
+                crossing: crate::ring::grain(&(tau * xt)),
+                va,
+                vc,
+            })
+        };
+        reads.push([
+            read(plus, &ap, &reference[0]),
+            read(minus, &am, &reference[1]),
+        ]);
+    }
+    let range = meeting(&reach, &extent);
+    // The exchange, read from the bell's start: each drag's transit leaves its
+    // parcel and is shared by holding over the range meeting it.
+    let mut change: Vec<[[Ratio; 2]; 2]> = (0..n)
+        .map(|_| std::array::from_fn(|_| std::array::from_fn(|_| ratio(0, 1))))
+        .collect();
+    let mut remainder = ratio(0, 1);
+    for i in 0..n {
+        if w[i].is_zero() {
+            continue;
+        }
+        for h in 0..2 {
+            let Some(me) = reads[i][h].as_ref() else {
+                continue;
+            };
+            let met: Vec<usize> = range[i]
+                .iter()
+                .copied()
+                .filter(|&j| j != i && reads[j][h].is_some())
+                .collect();
+            let held: Ratio = met.iter().fold(ratio(0, 1), |a, &j| a + w[j].clone());
+            if held.is_zero() {
+                continue;
+            }
+            for axis in 0..2 {
+                let of = |r: &HalfRing| {
+                    if axis == 0 {
+                        r.along.clone()
+                    } else {
+                        r.crossing.clone()
+                    }
+                };
+                let medium: Vec<(Ratio, Ratio)> = met
+                    .iter()
+                    .map(|&j| (w[j].clone(), of(reads[j][h].as_ref().expect("met"))))
+                    .collect();
+                let share = if axis == 0 { &me.speed } else { &me.pressure };
+                let Some(d) = crate::strip::drag(&of(me), share, &w[i], &medium) else {
+                    continue;
+                };
+                if d.given.is_zero() {
+                    continue;
+                }
+                let lost = crate::ring::grain(&(d.given.clone() / w[i].clone()));
+                change[i][h][axis] -= lost.clone();
+                remainder -= w[i].clone() * lost;
+                let each = crate::ring::grain(&(d.given / held.clone()));
+                for &j in &met {
+                    change[j][h][axis] += each.clone();
+                    remainder += w[j].clone() * each.clone();
+                }
+            }
+        }
+    }
+    let motions = motes
+        .iter()
+        .enumerate()
+        .map(|(i, x)| {
+            let mut out: [[Ratio; 3]; 2] = [zero3(), zero3()];
+            let mut space: [[Ratio; 3]; 2] = [zero3(), zero3()];
+            let mut rates = [ratio(0, 1), ratio(0, 1)];
+            for h in 0..2 {
+                let Some(r) = reads[i][h].as_ref() else {
+                    continue;
+                };
+                let a2 = r.along.clone() + change[i][h][0].clone();
+                let c2 = r.crossing.clone() + change[i][h][1].clone();
+                let before = r.along.abs() + r.crossing.abs();
+                let kept = |was: &Ratio, now: &Ratio| {
+                    if was.is_zero() {
+                        ratio(1, 1)
+                    } else {
+                        now.abs() / was.abs()
+                    }
+                };
+                let speed = if before.is_zero() {
+                    r.speed.clone()
+                } else {
+                    r.speed.clone() * (a2.abs() + c2.abs()) / before
+                };
+                let (ka, kc) = (kept(&r.along, &a2), kept(&r.crossing, &c2));
+                rates[h] = crate::orientation::rate(&speed)
+                    .or_else(|| crate::orientation::rate(&r.speed))
+                    .unwrap_or_else(|| ratio(0, 1));
+                space[h] = std::array::from_fn(|k| {
+                    r.va[k].clone() * ka.clone() + r.vc[k].clone() * kc.clone()
+                });
+            }
+            let (bp, bm) = x.orientation.body_axes(&space[0], &space[1]);
+            for (h, t) in [bp, bm].into_iter().enumerate() {
+                if reads[i][h].is_none() {
+                    continue;
+                }
+                out[h] = crate::orientation::half_motion(&t, &rates[h]);
+            }
+            out
+        })
+        .collect();
+    (motions, remainder)
 }
 
 /// A spatial passage as the tilt's turning would have given it, `2δ·t_k`
@@ -5326,5 +5546,69 @@ mod friction_tests {
             assert_eq!(m.clone() * (x.agitation.clone() - was), heated);
             assert!(heated >= ratio(0, 1) && heated <= m * p * d_o);
         }
+    }
+}
+
+#[cfg(test)]
+mod ring_motion_tests {
+    use super::{ring_motions, Enclosed, Mote};
+    use cfe::ratio::{ratio, Ratio};
+
+    fn mote(spins: [i64; 3], amount: i64, vacuum: bool) -> Mote {
+        Mote {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            amount: ratio(amount, 1),
+            spins: spins.iter().map(|&l| ratio(l, 1)).collect(),
+            spins_orth: vec![ratio(0, 1); 3],
+            orientation: crate::orientation::Orientation::default(),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        }
+    }
+
+    fn arr(v: &[Ratio]) -> [Ratio; 3] {
+        [v[0].clone(), v[1].clone(), v[2].clone()]
+    }
+
+    #[test]
+    fn a_lone_ring_outside_moves_at_its_transit_and_the_vacuum_at_its_inverse() {
+        // docs/128 §9.6: no pressure, no tilt, no medium; wholly outside its
+        // ring (`R = 6`, `H = 1`) the continuum reads `δ = 1/7`, rate `1/6`,
+        // and the vacuum stream its face inverted, `1 − δ`, rate `6`.
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        for (vacuum, b) in [(false, ratio(1, 6)), (true, ratio(6, 1))] {
+            let x = mote([3, 2, 1], 1, vacuum);
+            let (motions, rem) = ring_motions(std::slice::from_ref(&x), &enc, &ratio(1000, 1));
+            let want = crate::orientation::half_motion(&arr(&x.spins), &b);
+            assert_eq!(motions[0], [want.clone(), want]);
+            assert_eq!(rem, ratio(0, 1));
+        }
+    }
+
+    #[test]
+    fn the_repulsion_turns_a_tilted_ring_toward_the_invariable_plane() {
+        // docs/128 §4b: a ring crossing a medium that turns in its own plane
+        // gives its crossing to the medium, so its motion's tilt falls; the
+        // exchange keeps `Σ w·x` but for the grain.
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let mut motes: Vec<Mote> = (0..4).map(|_| mote([6, 0, 0], 10, false)).collect();
+        motes.push(mote([4, 2, 0], 1, false));
+        let total = ratio(100, 1);
+        let axes = crate::strip::invariable_axes(&motes, &total);
+        let (motions, rem) = ring_motions(&motes, &enc, &total);
+        let tilted = motes.len() - 1;
+        let before = crate::orientation::tilt(&arr(&motes[tilted].spins), &axes[0])
+            .expect("a tilt")
+            .share;
+        let after = crate::orientation::tilt(&motions[tilted][0], &axes[0])
+            .expect("a tilt")
+            .share;
+        assert!(after < before, "tilt {after} from {before}");
+        let grains = crate::ring::grain_step() * ratio(4 * 5 * 5, 1);
+        assert!(rem.clone() <= grains.clone() && -rem <= grains);
     }
 }

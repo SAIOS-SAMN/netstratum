@@ -411,6 +411,17 @@ state, sourced by the manifold's shear (§10).
 
 ### 9.6 One law for the motion and the book
 
+**Built (`flows::ring_motions`, read by `flows::torque` at each bell's
+start):** each half moves at its ring's transit after the pressure and the
+drag on both axes (§4, §4a, §4b, §11), read for the whole manifold before
+any mote turns, the exchange with the range on the grain. The vacuum stream
+reads its face inverted, `λ ↦ 1 − λ`: the inversion exchanges the two solid
+tori (§11), so `Mote::vacuum` names the stream and no longer sets its
+deficit whole; a vacuum mote wholly outside its ring reads `1 − δ` as
+before, and one straddling it crosses continuously. The ring's pressure is
+the manifold's own twist over the motes it moves, `ρ` the enclosure's base
+over its whole.
+
 The book takes each half's torque at that half's `δ±`, the same deficit its
 motion reads. The face (§2), the transit (§3), the pressure (§4) and the
 drag (§4a) are read per half, at `R±` and the parcel's extent there, in place
@@ -469,7 +480,9 @@ windings'), so `spin_torque`'s torque `p·(Δψ_k/2)·resp_k` and its heat
 `p·(Σ|Δψ_k|/2)·(1 − |k|)` read the motion itself; the old `2δ·t_k` was that
 passage under the tilt's turning, so the law's form is kept. The reach
 reads the form's orbit (the spatial spin), and the swing's response
-retires. The face, transit, pressure and drag per half follow (§9.6).
+retires. The face, transit, pressure and drag per half are built (§9.6,
+`flows::ring_motions`), with the ring's tilt (§11) and drag's orthogonal axis
+(§4b).
 
 ### 10.0 The factorization
 
@@ -728,7 +741,8 @@ part is `A×a`, the line of nodes. First degree, as every share in the model
 - **Tilt limits:** an aligned ring reads `τ = 0, ς = +1`, a reversed ring
   `τ = 0, ς = −1`, and a perpendicular ring `τ = 1`. Scaling either axis
   leaves the tilt unchanged.
-- **A lone ring** is untilted against its own invariable axis.
+- **A lone ring** is untilted against its own invariable axis, within the
+  grain its terms stand on.
 
 ## 7. Witnesses
 

@@ -25,6 +25,12 @@ change is named here.
   `1 − P`), by the same drag law that acts along the traversal; the crossing
   is kept by the exchange. Readings (`strip::ring_pressure`,
   `strip::along_and_crossing`).
+- Each half moves at its ring's own transit (docs/128 §9.6,
+  `flows::ring_motions`): the face from its tube, the twist's pressure, and
+  drag on both axes (the counterflow along, the repulsion across), read for
+  the manifold at the bell's start. The crossing's loss turns a ring toward
+  the invariable plane. The vacuum stream reads its face inverted, so the
+  stream flag no longer sets the deficit whole.
 - The unitary morphodynamic state (docs/128 §10, EQUATIONS E66; operator
   2026-11-11). A body's turning state factors exactly into its form, an
   automorphism holding R (its orbits), and its twist, one isoclinic turning

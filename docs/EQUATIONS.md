@@ -2032,6 +2032,17 @@ velocity of pressure"):
     P± = Σ_k |t±_k|·P_k    b_P = P/(1 − P)    M(b_P) = −1/b_P: share 1 − P
     x = ς(1 − τ)·x + τ·x    D⊥ = τx ⊖ x̄⊥    T⊥ = (1 − P)·g·w·D⊥    Σ w·x⊥ kept
 
+**The rings' motions (built):** `flows::ring_motions`, read by `flows::torque`
+at the bell's start (docs/128 §9.6). Per half: `λ` from the tube (vacuum
+`1 − λ`), `s = δ + λ(1 − 2δ)`, `s′ = s ⊖ P` (or `⊕` past the ring),
+`x = σs′` split by the tilt, the counterflow at `1 − |s′|` and the repulsion
+at `1 − |P|` exchanged with the range on the grain, then
+
+    s″ = |s′|·(|x_a′| + |x_c′|)/(|x_a| + |x_c|)    b = s″/(1 − s″)    u = b·t′
+
+with `t′` the direction in space, each part scaled by what it kept, carried
+back into the body's axes.
+
 **E65 · The bell on the group: six spins, one motion a half.**
 `orientation::spin_halves`, `orientation::size`, `orientation::half_motion`,
 `Orientation::bell_halves`, `flows::Mote::spins_orth` (docs/128 §9; operator

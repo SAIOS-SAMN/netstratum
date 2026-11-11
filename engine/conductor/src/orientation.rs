@@ -637,6 +637,13 @@ impl Orientation {
         (p.carry(plus), q.carry(minus))
     }
 
+    /// A direction in space carried back into the body's own axes by each
+    /// half (the inverse of [`Orientation::half_axes`]): `p̄·a+·p`, `q̄·a−·q`.
+    pub fn body_axes(&self, plus: &[Ratio; 3], minus: &[Ratio; 3]) -> ([Ratio; 3], [Ratio; 3]) {
+        let Motion(p, q) = Motion::of(&self.g);
+        (p.conjugate().carry(plus), q.conjugate().carry(minus))
+    }
+
     /// The orientation whose state is `(F, C)`: `q = F`, `p = C·F`, its
     /// generator held on the grain, unwound.
     pub fn of_form_twist(

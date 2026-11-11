@@ -290,7 +290,8 @@ pub fn along_and_crossing(x: &Ratio, tilt: &crate::orientation::Tilt) -> (Ratio,
 
 /// The invariable axes of a manifold (docs/128 §11.3): on each half the
 /// holding-weighted sum of its rings' axes in space, `A± = Σ w·a±`, the
-/// normal of the plane inclinations are read from.
+/// normal of the plane inclinations are read from; each term on the grain
+/// (only its direction is read).
 pub fn invariable_axes(motes: &[Mote], whole: &Ratio) -> [[Ratio; 3]; 2] {
     use crate::orientation::spin_halves;
     let zero = || std::array::from_fn(|_| ratio(0, 1));
@@ -303,8 +304,8 @@ pub fn invariable_axes(motes: &[Mote], whole: &Ratio) -> [[Ratio; 3]; 2] {
         let (plus, minus) = spin_halves(&x.spins, &x.spins_orth);
         let (ap, am) = x.orientation.half_axes(&plus, &minus);
         for k in 0..3 {
-            a[0][k] += w.clone() * ap[k].clone();
-            a[1][k] += w.clone() * am[k].clone();
+            a[0][k] += crate::ring::grain(&(w.clone() * ap[k].clone()));
+            a[1][k] += crate::ring::grain(&(w.clone() * am[k].clone()));
         }
     }
     a
@@ -454,8 +455,10 @@ mod tests {
         let a = invariable_axes(std::slice::from_ref(&y), &ratio(1, 1));
         let rings = half_rings(&y, &enc, &ratio(1, 1));
         for (h, r) in rings.into_iter().enumerate() {
+            // Untilted within the grain: the invariable axis's terms stand on it.
             let t = crate::orientation::tilt(&r.expect("a ring").axis, &a[h]).expect("a tilt");
-            assert_eq!((t.share, t.sense), (ratio(0, 1), ratio(1, 1)));
+            assert_eq!(t.sense, ratio(1, 1));
+            assert!(t.share < crate::ring::grain_step(), "tilt {}", t.share);
         }
     }
 
