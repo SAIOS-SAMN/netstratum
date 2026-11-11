@@ -83,6 +83,7 @@ The universe beneath the game, derived from one grammar of shares and phases
 | 122 | [Heat and light: from bonds and friction, out by the face](122_HEAT_AND_LIGHT.md) |
 | 123 | [The universal core tube: a wormhole between antipolar kernels](123_THE_UNIVERSAL_CORE_TUBE.md) |
 | 124 | [States and phases: where each form of energy lives](124_STATES_AND_PHASES.md) |
+| 125 | [The equations at their base: the nucleon inversion, row by row](125_THE_EQUATIONS_AT_THEIR_BASE.md) |
 
 ## Era 0: the game, its civilizations and economy (01–77)
 
