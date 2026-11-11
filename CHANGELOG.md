@@ -12,6 +12,16 @@ change is named here.
 
 ### Added
 
+- The rulings of 2026-11-11 adopted (docs/129; Mycelium 78.182, operator:
+  "if mycelium sends you rulings its because i ruled for mycelium - adopt").
+  LAW-COUPLING v2 built: a body's dipole is the push `π = p·δ/w` at its place
+  and the bond ends' strength `U/3w` (`flows::dipole`), each isoclinic plane
+  coupling at its own reach weighted by `α_p = W_p/3W` (`flows::magnet`), a
+  dipole of no nucleons refused `UnbodiedDipole { pole_plane }`; the shear
+  reads the same dipole. v1's pole `(Z − Q)/w` (`coupling::pole`,
+  `Dimensions::pole`) and fluidity (`Dimensions::open_share`) retire. The
+  basket entry, the reserve's faces, the pole-plane names and the traversal
+  envelope are stated for netstratum (docs/129 §2–§5).
 - The ring with volume, axis and tilt (docs/128 §11, EQUATIONS E67;
   operator 2026-11-11). A half's motion sweeps a solid torus on S³: its
   tube's width (the face) and content (the holding it encloses, which the

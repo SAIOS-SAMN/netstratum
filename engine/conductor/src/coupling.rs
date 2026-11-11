@@ -1,9 +1,9 @@
 // AI-GENERATED CONTENT — see DISCLAIMER.md.
 //
 //! The dipole coupling (docs/121 §9–§10): every body is a dipole on each
-//! plane. Its pole is the sign of its span, closed against open frames. Its
-//! orientation is its turning on that plane. Its strength is its open
-//! frames. A body answers the field of its range as one: its neighbours'
+//! plane. Its pole and strength are LAW-COUPLING v2's (`flows::dipole`,
+//! docs/129 §1: the push `1 − 2π` and the bond ends `U/3w`). Its
+//! orientation is its turning on that plane. A body answers the field of its range as one: its neighbours'
 //! dipoles, each by the ring law's nearness and the hemisphere law's sign.
 //! The field moves its rate by the flow law, bounded by the luminal rate.
 //! Attraction and repulsion are one law and its sign; nothing is halved,
@@ -21,24 +21,6 @@ use num_traits::{Signed, Zero};
 /// axis projects onto it by `1 − θ/90°`, first degree and exact.
 pub fn cosine(theta: &Ratio) -> Ratio {
     ratio(1, 1) - theta.clone() / ratio(90, 1)
-}
-
-/// A frame state's angle between its Z pole (0°) and its Q pole (180°),
-/// the throat at 90° (docs/117 §10.1): `θ = 180°·Q/(A + Q)`.
-pub fn pole_angle(closed: &Ratio, open: &Ratio) -> Ratio {
-    let whole = closed.clone() + open.clone();
-    if whole.is_zero() {
-        ratio(90, 1)
-    } else {
-        ratio(180, 1) * open.clone() / whole
-    }
-}
-
-/// A dipole's pole, opened by degrees (operator 2026-11-06): the L1 cosine of
-/// its frame angle, `1 − θ/90° = (A − Q)/(A + Q)`, its span over its whole,
-/// in `[−1, 1]`; never a bare sign.
-pub fn pole(closed: &Ratio, open: &Ratio) -> Ratio {
-    cosine(&pole_angle(closed, open))
 }
 
 /// Two orientations' alignment on one plane, opened by degrees (operator
@@ -118,17 +100,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn the_pole_and_the_alignment_open_by_degrees() {
+    fn the_alignment_opens_by_degrees() {
         // The L1 circle's cosine, 1 - theta/90 degrees, exact.
-        assert_eq!(pole_angle(&ratio(2, 1), &ratio(1, 1)), ratio(60, 1));
-        assert_eq!(pole(&ratio(2, 1), &ratio(1, 1)), ratio(1, 3), "hydrogen");
-        assert_eq!(pole(&ratio(3, 1), &ratio(1, 1)), ratio(1, 2));
-        assert_eq!(pole(&ratio(2, 1), &ratio(2, 1)), ratio(0, 1), "the throat");
-        assert_eq!(
-            pole(&ratio(0, 1), &ratio(1, 1)),
-            ratio(-1, 1),
-            "a pure Q pole"
-        );
         assert_eq!(hemisphere(&ratio(0, 1), &ratio(0, 1)), ratio(1, 1));
         assert_eq!(
             hemisphere(&ratio(0, 1), &ratio(1, 8)),

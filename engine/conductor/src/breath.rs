@@ -2486,35 +2486,41 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             {
                 let enc_m = enc.as_ref().unwrap_or(&throat);
                 let base = enc_m.base();
-                // The base's frames: the core's state, in proportion to its
-                // throat's dimensions (docs/95 §0: the nucleon dipole's poles
-                // and the electrons' open dimensions); a closed pole where its throat
-                // holds none.
-                let (a_t, q_t, e_t) = core.throat.iter().fold(
+                // The base's dipole (LAW-COUPLING v2, docs/129 §1): the core's
+                // state, its push and strength the throat's composition, read
+                // at the throat's own place, its rim (`δ = ½`); a closed pole
+                // (no push, no strength) where its throat holds none.
+                let (p_t, n_t, u_t) = core.throat.iter().fold(
                     (ratio(0, 1), ratio(0, 1), ratio(0, 1)),
-                    |(a, q, e), (k, n)| {
+                    |(p, nn, u), (k, amount)| {
                         let f = crate::chem::dimensions(k);
                         let r = |v: u32| ratio(i64::from(v), 1);
                         (
-                            a + n.clone() * r(f.held),
-                            q + n.clone() * r(f.open),
-                            e + n.clone() * r(f.electrons_open.min(f.whole())),
+                            p + amount.clone() * r(f.open / 3),
+                            nn + amount.clone() * r(f.held / 3),
+                            u + amount.clone() * r(f.electrons_open.min(f.whole())),
                         )
                     },
                 );
-                let whole_t = a_t.clone() + q_t.clone();
-                let base_frames = if whole_t.is_zero() {
-                    (base.clone(), ratio(0, 1), ratio(0, 1))
+                let w_t = p_t.clone() + n_t;
+                let base_dipole = if w_t.is_zero() {
+                    crate::flows::Dipole {
+                        push: ratio(0, 1),
+                        strength: ratio(0, 1),
+                    }
                 } else {
-                    (
-                        base.clone() * a_t / whole_t.clone(),
-                        base.clone() * q_t / whole_t.clone(),
-                        base * e_t / whole_t,
-                    )
+                    crate::flows::Dipole {
+                        push: p_t * ratio(1, 2) / w_t.clone(),
+                        strength: u_t / (ratio(3, 1) * w_t),
+                    }
                 };
                 let spin_was = ledger_sum(core);
-                let (n_m, du) =
-                    crate::flows::magnet(&mut core.flows, enc_m, &ledger_unit, &base_frames);
+                let (n_m, du) = crate::flows::magnet(
+                    &mut core.flows,
+                    enc_m,
+                    &ledger_unit,
+                    &(base, base_dipole),
+                );
                 lifted.0 += n_m;
                 lifted.1 += du;
                 identity.push(("magnet spin", ledger_sum(core) - spin_was));

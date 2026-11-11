@@ -777,8 +777,9 @@ pub fn lifted(enc: &Enclosed, ell: &Ratio, lift: &Ratio) -> (Ratio, Ratio, Ratio
 
 /// The magnet's share on a body at reach `R` (docs/121 §14.3): the dipole
 /// contrast of the ring law across its own extent `d`, `n_d = M/(R − d + M) −
-/// M/(R + d + M)` (`M` the open frames enclosed), signed by the poles `s =
-/// −σ_i·σ_c` and gripped by the fluidities `κ = o_i·o_c`: `m = s·κ·n_d`,
+/// M/(R + d + M)` (`M` the bond ends enclosed), signed by the poles `s =
+/// −σ_i·σ_c` and gripped by the strengths `κ = κ_i·κ_c` (LAW-COUPLING v2,
+/// docs/129 §1): `m = s·κ·n_d`,
 /// inward positive, in `(−1, 1)`. None where the contrast is undefined.
 pub fn magnet_share(r: &Ratio, d: &Ratio, m: &Ratio, s: &Ratio, kappa: &Ratio) -> Option<Ratio> {
     let near = r.clone() - d.clone() + m.clone();
@@ -802,104 +803,190 @@ pub fn boosted(u: &Ratio, m: &Ratio) -> Option<Ratio> {
     crate::ring::compose(u, &-y)
 }
 
-/// The magnet on reach for every mote of an enclosure (docs/121 §14), read
-/// at once from where they stand, then moved. Each mote at reach `R` (its
-/// spin balance lifted, `reach_in`), its own extent `d = R·e`, its pole and
-/// fluidity on its dimensions (`chem::Dimensions`, docs/95 §0: the nucleon
-/// dipole `(3Z, 3Q)` over `3w` and the electrons' open `U` beside it; on the vacuum
-/// leg exchanged, the passage's pole swap: `σ ↦ −σ`, `o ↦ 1 − o`); what
-/// stands within `R`:
-/// the base (the core's state, its frames the throat's composition, a
-/// closed pole where its throat holds nothing) and every mote whose reach is
-/// below `R`, each by its holding share, its frames in proportion. Each lift
-/// moves by `boosted`, held on the grain. Returns the motes moved and the sum
-/// of their lifts' change.
+/// A dipole that couples on no plane (docs/129 §1.3, LAW-COUPLING v2,
+/// Mycelium 78.182 item 9): refused by name, replacing v1's `NotFrames`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum CouplingRefusal {
+    /// No nucleons on the pole plane named: no body to hold a dipole.
+    UnbodiedDipole { pole_plane: usize },
+}
+
+/// A body's dipole at its place (docs/129 §1.1, LAW-COUPLING v2): the push
+/// and the strength, in netstratum's orientation (the protons open, the
+/// neutrons held).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Dipole {
+    /// The push, the protons' charge left open by their bound electrons,
+    /// `π = p·u/w` with `u = δ` at the place (`g = 1 − δ` bound); on the
+    /// vacuum face `1 − π`.
+    pub push: Ratio,
+    /// The strength, the bond ends `U/3w`, never a pole; it names no face.
+    pub strength: Ratio,
+}
+
+impl Dipole {
+    /// Its pole in the push coordinate, held minus open: `π̄ − π = 1 − 2π`.
+    pub fn pole(&self) -> Ratio {
+        ratio(1, 1) - ratio(2, 1) * self.push.clone()
+    }
+}
+
+/// The dipole of `protons` and `neutrons` with `unpaired` electron ends, at
+/// the passage face's share `delta` (`δ = H/(H + R)`) on `pole_plane`, the
+/// face map applied on the vacuum. Refused where no nucleon stands.
+pub fn dipole(
+    protons: u32,
+    neutrons: u32,
+    unpaired: u32,
+    delta: &Ratio,
+    vacuum: bool,
+    pole_plane: usize,
+) -> Result<Dipole, CouplingRefusal> {
+    let w = protons + neutrons;
+    if w == 0 {
+        return Err(CouplingRefusal::UnbodiedDipole { pole_plane });
+    }
+    let w = ratio(i64::from(w), 1);
+    let push = ratio(i64::from(protons), 1) * delta.clone() / w.clone();
+    let push = if vacuum { ratio(1, 1) - push } else { push };
+    Ok(Dipole {
+        push,
+        strength: ratio(i64::from(unpaired), 1) / (ratio(3, 1) * w),
+    })
+}
+
+/// A body's isoclinic planes' shares (docs/129 §1.2): each dual pair's part
+/// of its spin, `α_p = (|ℓ_k| + |ℓ_kR|)/Σ_j(|ℓ_j| + |ℓ_jR|)`, first degree
+/// (`W_p = 3W·α_p`, `Σ W_p = 3W`); a third each where it does not turn.
+pub fn plane_shares(x: &Mote) -> [Ratio; 3] {
+    let at = |v: &[Ratio], k: usize| v.get(k).map(|l| l.abs()).unwrap_or_else(|| ratio(0, 1));
+    let part: [Ratio; 3] = std::array::from_fn(|k| at(&x.spins, k) + at(&x.spins_orth, k));
+    let all = part.iter().fold(ratio(0, 1), |a, v| a + v.clone());
+    if all.is_zero() {
+        return std::array::from_fn(|_| ratio(1, 3));
+    }
+    std::array::from_fn(|k| part[k].clone() / all.clone())
+}
+
+/// The magnet on reach for every mote of an enclosure (docs/121 §14,
+/// LAW-COUPLING v2, docs/129 §1), read at once from where they stand, then
+/// moved. On each isoclinic plane `p` of a mote, at the plane's own reach
+/// `r_p` (its pair's spin read by the ring law, lifted) with its own extent
+/// `d_p = r_p·e`, its dipole there (`dipole`: the push `π = p·δ_p/w` at the
+/// plane's place, the face map on the vacuum leg, the strength `U/3w`); what
+/// stands within `r_p` on that plane: the base (the core's state, its push
+/// and strength the throat's, `base_dipole`) and every mote whose own reach
+/// on that plane is below `r_p`, each by its holding share. The plane's
+/// share is `magnet_share(r_p, d_p, M_p, −σ_i·σ_c, κ_i·κ_c)`, with `M_p` the
+/// enclosed bond ends, `σ` the poles and `κ` the strengths; the mote's share
+/// is `Σ_p α_p·m_p` (`plane_shares`), never an L2 norm across planes. Each
+/// lift moves by `boosted`, held on the grain. A dipole refused on a plane
+/// (`UnbodiedDipole`) couples on none there. Returns the motes moved and the
+/// sum of their lifts' change.
 pub fn magnet(
     motes: &mut [Mote],
     enc: &Enclosed,
     total: &Ratio,
-    base_frames: &(Ratio, Ratio, Ratio),
+    base_dipole: &(Ratio, Dipole),
 ) -> (usize, Ratio) {
     let n = motes.len();
     if n == 0 || total.is_zero() {
         return (0, ratio(0, 1));
     }
-    // A mote's dimensions as (held, open, electrons' open), on the
-    // vacuum's inverted face its poles exchanged and its electrons' open the
-    // complement of its whole.
-    let frames_of = |x: &Mote| {
-        let f = crate::chem::dimensions(&x.key);
-        let r = |v: u32| ratio(i64::from(v), 1);
-        let (a, q, e) = (r(f.held), r(f.open), r(f.electrons_open.min(f.whole())));
-        if x.vacuum {
-            let whole = a.clone() + q.clone();
-            (q, a, whole - e)
-        } else {
-            (a, q, e)
-        }
-    };
-    // Each mote's reach, extent, holding and frames, at the bell's start.
-    let reach: Vec<Ratio> = motes.iter().map(|x| x.reach_in(enc).0).collect();
-    let mut by: Vec<usize> = (0..n).collect();
-    by.sort_by(|&a, &b| reach[a].cmp(&reach[b]).then(a.cmp(&b)));
-    let held: Vec<(Ratio, Ratio, Ratio)> = motes
+    let hold: Vec<Ratio> = motes
         .iter()
-        .map(|x| {
-            let h = x.amount.clone() * weight(&x.key) / total.clone();
-            let (a, q, e) = frames_of(x);
-            let whole = a.clone() + q.clone();
-            if whole.is_zero() {
-                (h, ratio(0, 1), ratio(0, 1))
-            } else {
-                (
-                    h.clone() * a / whole.clone(),
-                    h.clone() * q / whole.clone(),
-                    h * e / whole,
+        .map(|x| x.amount.clone() * weight(&x.key) / total.clone())
+        .collect();
+    let alpha: Vec<[Ratio; 3]> = motes.iter().map(plane_shares).collect();
+    let mut share: Vec<Option<Ratio>> = vec![None; n];
+    let (base, base_d) = base_dipole;
+    for plane in 0..SPACE.len() {
+        // Each mote on this plane: its reach, its place's deficit, its
+        // dipole there.
+        let at: Vec<(Ratio, Ratio, Option<Dipole>)> = motes
+            .iter()
+            .map(|x| {
+                let ell = x
+                    .spins
+                    .get(plane)
+                    .map(|l| l.abs())
+                    .unwrap_or_else(|| ratio(0, 1));
+                let (r, _, d) = lifted(enc, &ell, &x.lift);
+                let f = crate::chem::dimensions(&x.key);
+                let dip = dipole(
+                    f.open / 3,
+                    f.held / 3,
+                    f.electrons_open.min(f.whole()),
+                    &d,
+                    x.vacuum,
+                    plane,
                 )
+                .ok();
+                (r, d, dip)
+            })
+            .collect();
+        let mut by: Vec<usize> = (0..n).collect();
+        by.sort_by(|&a, &b| at[a].0.cmp(&at[b].0).then(a.cmp(&b)));
+        // Prefix sums by reach on this plane: the holding, push and bond
+        // ends standing below each mote.
+        let zero = || (ratio(0, 1), ratio(0, 1), ratio(0, 1));
+        let mut inside: Vec<(Ratio, Ratio, Ratio)> = vec![zero(); n];
+        let (mut h_run, mut p_run, mut u_run) = (
+            base.clone(),
+            base.clone() * base_d.push.clone(),
+            base.clone() * base_d.strength.clone(),
+        );
+        let mut j = 0;
+        while j < n {
+            // Motes at one reach stand beside each other, not inside.
+            let mut k = j;
+            while k < n && at[by[k]].0 == at[by[j]].0 {
+                inside[by[k]] = (h_run.clone(), p_run.clone(), u_run.clone());
+                k += 1;
             }
+            for &i in &by[j..k] {
+                if let Some(dip) = &at[i].2 {
+                    h_run += hold[i].clone();
+                    p_run += hold[i].clone() * dip.push.clone();
+                    u_run += hold[i].clone() * dip.strength.clone();
+                }
+            }
+            j = k;
+        }
+        for (i, x) in motes.iter().enumerate() {
+            let (r, _, dip) = &at[i];
+            let Some(dip) = dip else { continue };
+            let (hc, pc, uc) = &inside[i];
+            if hc.is_zero() {
+                continue;
+            }
+            let enclosed = Dipole {
+                push: pc.clone() / hc.clone(),
+                strength: uc.clone() / hc.clone(),
+            };
+            let d = r.clone() * own_enclosure(x, enc, total)[0].clone();
+            let Some(m) = magnet_share(
+                r,
+                &d,
+                uc,
+                &-(dip.pole() * enclosed.pole()),
+                &(dip.strength.clone() * enclosed.strength),
+            ) else {
+                continue;
+            };
+            let part = alpha[i][plane].clone() * m;
+            share[i] = Some(share[i].take().unwrap_or_else(|| ratio(0, 1)) + part);
+        }
+    }
+    let lifts: Vec<Option<Ratio>> = motes
+        .iter()
+        .zip(&share)
+        .map(|(x, m)| {
+            m.as_ref()
+                .and_then(|m| boosted(&x.lift, m))
+                .map(|u| crate::ring::grain(&u))
         })
         .collect();
-    // Prefix sums by reach: the frames standing below each mote.
-    let zero = || (ratio(0, 1), ratio(0, 1), ratio(0, 1));
-    let mut inside: Vec<(Ratio, Ratio, Ratio)> = vec![zero(); n];
-    let (mut a_run, mut q_run, mut e_run) = base_frames.clone();
-    let mut j = 0;
-    while j < n {
-        // Motes at one reach stand beside each other, not inside.
-        let mut k = j;
-        while k < n && reach[by[k]] == reach[by[j]] {
-            inside[by[k]] = (a_run.clone(), q_run.clone(), e_run.clone());
-            k += 1;
-        }
-        for &i in &by[j..k] {
-            a_run += held[i].0.clone();
-            q_run += held[i].1.clone();
-            e_run += held[i].2.clone();
-        }
-        j = k;
-    }
-    let mut lifts = Vec::with_capacity(n);
-    for (i, x) in motes.iter().enumerate() {
-        let (a, q, e) = frames_of(x);
-        let whole = a.clone() + q.clone();
-        let (ac, qc, ec) = &inside[i];
-        let enclosed = ac.clone() + qc.clone();
-        let next = if whole.is_zero() || enclosed.is_zero() {
-            None
-        } else {
-            // The pole from the nucleon dipole, the open share and the
-            // enclosed magnetism `M` from the electrons' open dimensions.
-            let (s_i, o_i) = ((a.clone() - q.clone()) / whole.clone(), e.clone() / whole);
-            let (s_c, o_c) = (
-                (ac.clone() - qc.clone()) / enclosed.clone(),
-                ec.clone() / enclosed,
-            );
-            let d = reach[i].clone() * own_enclosure(x, enc, total)[0].clone();
-            magnet_share(&reach[i], &d, ec, &-(s_i * s_c), &(o_i * o_c))
-                .and_then(|m| boosted(&x.lift, &m))
-        };
-        lifts.push(next.map(|u| crate::ring::grain(&u)));
-    }
     let (mut moved, mut change) = (0usize, ratio(0, 1));
     for (x, u) in motes.iter_mut().zip(lifts) {
         let Some(u) = u else { continue };
@@ -2170,17 +2257,37 @@ fn shear_booked(
             x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1) / total.clone()
         })
         .collect();
-    // The dipole (docs/121 §10.1, restated in docs/95 §0): its pole the
-    // nucleon dipole's span, `(Z − Q)/w`, its strength the electrons' open
-    // dimensions over the whole nucleon dimensions, `U/3w`; a vacuum mote's
-    // read on its inverted face, as the magnet reads it (docs/125 §3.2).
-    let pole: Vec<Ratio> = motes
+    // The dipole at each mote's place (LAW-COUPLING v2, docs/129 §1): its
+    // pole the push's, `1 − 2π` with `π = p·δ/w`, inverted on the vacuum
+    // face, its strength the bond ends `U/3w`; a dipole of no body couples
+    // with neither.
+    let dips: Vec<Option<Dipole>> = motes
         .iter()
-        .map(|x| crate::chem::dimensions(&x.key).pole(x.vacuum))
+        .map(|x| {
+            let f = crate::chem::dimensions(&x.key);
+            let (_, d) = x.reach_in(enc);
+            dipole(
+                f.open / 3,
+                f.held / 3,
+                f.electrons_open.min(f.whole()),
+                &d,
+                x.vacuum,
+                0,
+            )
+            .ok()
+        })
         .collect();
-    let o: Vec<Ratio> = motes
+    let pole: Vec<Ratio> = dips
         .iter()
-        .map(|x| crate::chem::dimensions(&x.key).open_share(x.vacuum))
+        .map(|d| d.as_ref().map(Dipole::pole).unwrap_or_else(|| ratio(0, 1)))
+        .collect();
+    let o: Vec<Ratio> = dips
+        .iter()
+        .map(|d| {
+            d.as_ref()
+                .map(|d| d.strength.clone())
+                .unwrap_or_else(|| ratio(0, 1))
+        })
         .collect();
     let mut reach = Vec::with_capacity(n);
     let mut extent = Vec::with_capacity(n);
@@ -5610,5 +5717,70 @@ mod ring_motion_tests {
         assert!(after < before, "tilt {after} from {before}");
         let grains = crate::ring::grain_step() * ratio(4 * 5 * 5, 1);
         assert!(rem.clone() <= grains.clone() && -rem <= grains);
+    }
+}
+
+#[cfg(test)]
+mod coupling_v2_tests {
+    use super::{dipole, plane_shares, CouplingRefusal, Mote};
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn the_push_reads_mycelium_78_181_fixtures_in_netstratums_letters() {
+        // (protons 3, neutrons 4), netstratum's (Q 3, Z 4), at δ = 1/4: the
+        // held share g = 3/4, π = 3/28, π̄ = 25/28.
+        let d = dipole(3, 4, 0, &ratio(1, 4), false, 0).expect("a body");
+        assert_eq!(d.push, ratio(3, 28));
+        assert_eq!(ratio(1, 1) - d.push.clone(), ratio(25, 28));
+        assert_eq!(d.pole(), ratio(25, 28) - ratio(3, 28));
+        // The bound share's table: bare 3/7, g = 1/3 gives 2/7, neutral 0.
+        for (u, pi) in [
+            (ratio(1, 1), ratio(3, 7)),
+            (ratio(2, 3), ratio(2, 7)),
+            (ratio(0, 1), ratio(0, 1)),
+        ] {
+            assert_eq!(dipole(3, 4, 0, &u, false, 0).expect("a body").push, pi);
+        }
+    }
+
+    #[test]
+    fn the_vacuum_inverts_the_push_and_keeps_the_strength() {
+        let c = dipole(3, 4, 2, &ratio(1, 4), false, 1).expect("a body");
+        let v = dipole(3, 4, 2, &ratio(1, 4), true, 1).expect("a body");
+        assert_eq!(v.push, ratio(1, 1) - c.push.clone());
+        assert_eq!(v.pole(), -c.pole());
+        assert_eq!(
+            (c.strength.clone(), v.strength),
+            (ratio(2, 21), ratio(2, 21))
+        );
+    }
+
+    #[test]
+    fn a_dipole_with_no_nucleons_is_refused_by_name() {
+        assert_eq!(
+            dipole(0, 0, 1, &ratio(1, 2), false, 2),
+            Err(CouplingRefusal::UnbodiedDipole { pole_plane: 2 })
+        );
+    }
+
+    #[test]
+    fn the_plane_shares_are_first_degree_and_whole() {
+        let mut x = Mote {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            amount: ratio(1, 1),
+            spins: vec![ratio(3, 1), ratio(-1, 1), ratio(0, 1)],
+            spins_orth: vec![ratio(0, 1), ratio(1, 1), ratio(1, 1)],
+            orientation: crate::orientation::Orientation::default(),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        };
+        assert_eq!(plane_shares(&x), [ratio(1, 2), ratio(1, 3), ratio(1, 6)]);
+        x.spins = vec![ratio(0, 1); 3];
+        x.spins_orth = vec![ratio(0, 1); 3];
+        assert_eq!(plane_shares(&x), [ratio(1, 3), ratio(1, 3), ratio(1, 3)]);
     }
 }

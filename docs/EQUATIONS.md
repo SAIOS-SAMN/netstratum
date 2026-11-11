@@ -1920,13 +1920,21 @@ docs/97; register K15). A kind's dimensions are its nucleons', each standing in
 three axes: `3Q` the protons' open dimensions and `3Z` the neutrons' held
 dimensions, `3w` in all ("frame" retired, mycelium #239). The electrons' open dimensions `U` stand beside them:
 
-    pole σ = (3Z − 3Q)/3w = (Z − Q)/w        open share o = U/3w
+**Read by LAW-COUPLING v2** (`flows::dipole`, `flows::plane_shares`,
+`flows::magnet`; docs/129 §1; Mycelium 78.181, 78.182 item 9), in
+netstratum's orientation (protons open, neutrons held), `p` protons, `n`
+neutrons, `w = p + n`, at the passage face's share at the place `δ = H/(H + R)`:
 
-`σ` is read through `coupling::pole`, the pole opened by degrees. On the
-vacuum's inverted face, `σ ↦ −σ` and `o ↦ 1 − o`. The dipole coupling
-(`flows::shear`) and the magnet (`flows::magnet`, the enclosed magnetism `M`
-the electrons' open dimensions) read them. R, the electron's phase, stands
-beside the dipole, never folded into it. Replaces `(3·protons − U, U)`.
+    π = p·δ/w    π̄ = (n + p·g)/w = 1 − π    (g = 1 − δ)    pole σ = 1 − 2π    strength U/3w
+
+On the vacuum face `π ↦ 1 − π`; the strength names no face. Each isoclinic
+plane couples at its own reach with weight `α_p = (|ℓ_k| + |ℓ_kR|)/Σ_j(|ℓ_j| +
+|ℓ_jR|)` (`W_p = 3W·α_p`), the mote's share `Σ_p α_p·m_p`; the enclosed
+magnetism `M` is the enclosed bond ends. A dipole of no nucleons is refused,
+`UnbodiedDipole { pole_plane }`. The dipole coupling (`flows::shear`) and the
+magnet read it. R, the electron's phase, stands beside the dipole, never
+folded into it. Retires v1's `σ = (Z − Q)/w` (`coupling::pole`) and fluidity
+`o = U/3w ↦ 1 − o` on the vacuum.
 
 **E59 · Deformation.** (docs/127 §2.) A body's departure from the manifold's
 conformed state at its place, per lane and component, first degree:
