@@ -116,9 +116,123 @@ pub fn plane_faces(x: &Mote, enc: &Enclosed, whole: &Ratio) -> Vec<PlaneFace> {
     x.spins.iter().map(|l| plane_face(enc, l, &m)).collect()
 }
 
+/// A plane's FORM (docs/128 §8): the dimension attached, without collapse.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PlaneForm {
+    /// Its turning pair in the generator: the plane's component and its R
+    /// partner's (the dual pair of S³), exact.
+    pub pair: (Ratio, Ratio),
+    /// The pair as isoclinic degrees on its readings, in turns: `α = (ψ_k +
+    /// ψ_kR)/2`, `β = (ψ_k − ψ_kR)/2`.
+    pub isoclinic: (Ratio, Ratio),
+    /// Its poles on its own axis: the neutrons' held dimensions and the
+    /// protons' open dimensions, a third of the nuclide's each (an atom names
+    /// no axis).
+    pub poles: (Ratio, Ratio),
+    /// Its radial dimension: its own reach, extent and face (§1–§2).
+    pub reach: PlaneFace,
+}
+
+/// A mote's three plane forms, each read from its orientation, its kind and
+/// its plane's own circle in `enc` (`whole` the enclosure's holding unit).
+pub fn plane_forms(x: &Mote, enc: &Enclosed, whole: &Ratio) -> Vec<PlaneForm> {
+    use crate::orientation::{reading, PARTNER, SPATIAL};
+    let dims = crate::chem::dimensions(&x.key);
+    let third = |v: u32| ratio(i64::from(v), 3);
+    let faces = plane_faces(x, enc, whole);
+    let g = x.orientation.g();
+    (0..SPATIAL.len())
+        .map(|j| {
+            let (a, b) = (g[SPATIAL[j]].clone(), g[PARTNER[j]].clone());
+            let (ra, rb) = (reading(&a), reading(&b));
+            PlaneForm {
+                isoclinic: (
+                    (ra.clone() + rb.clone()) / ratio(2, 1),
+                    (ra - rb) / ratio(2, 1),
+                ),
+                pair: (a, b),
+                poles: (third(dims.held), third(dims.open)),
+                reach: faces
+                    .get(j)
+                    .cloned()
+                    .unwrap_or_else(|| plane_face(enc, &ratio(0, 1), &ratio(0, 1))),
+            }
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_planes_form_is_its_pair_its_poles_and_its_reach() {
+        // docs/128 §8: the pair from G, the isoclinic degrees from its
+        // readings, a third of the nuclide's dimensions on each axis, the
+        // reach from its own circle; the three axes' poles make the whole.
+        let mut x = crate::flows::Mote {
+            key: crate::chem::Kind::atom(4).expect("a kind"),
+            amount: ratio(2, 1),
+            spins: crate::flows::Mote::spins_of(
+                &ratio(3, 2),
+                &[ratio(1, 2), ratio(1, 3), ratio(1, 6)],
+            ),
+            ell_orth: ratio(0, 1),
+            orientation: crate::orientation::Orientation::from_phases(&[
+                ratio(1, 4),
+                ratio(1, 8),
+                ratio(1, 2),
+                ratio(3, 4),
+            ]),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        };
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let forms = plane_forms(&x, &enc, &ratio(1, 1));
+        assert_eq!(forms.len(), 3);
+        let dims = crate::chem::dimensions(&x.key);
+        let held = forms.iter().fold(ratio(0, 1), |s, f| s + f.poles.0.clone());
+        let open = forms.iter().fold(ratio(0, 1), |s, f| s + f.poles.1.clone());
+        assert_eq!(
+            held + open,
+            ratio(i64::from(dims.whole()), 1),
+            "the axes' poles make 3w"
+        );
+        for (j, f) in forms.iter().enumerate() {
+            let (a, b) = (
+                crate::orientation::reading(&f.pair.0),
+                crate::orientation::reading(&f.pair.1),
+            );
+            assert_eq!(
+                f.isoclinic.0.clone() + f.isoclinic.1.clone(),
+                a,
+                "α + β is the plane"
+            );
+            assert_eq!(
+                f.isoclinic.0.clone() - f.isoclinic.1.clone(),
+                b,
+                "α − β its partner"
+            );
+            assert_eq!(
+                f.reach,
+                plane_face(
+                    &enc,
+                    &x.spins[j],
+                    &(x.amount.clone() * crate::flows::weight(&x.key))
+                )
+            );
+        }
+        x.orientation.hold_phase(0, &ratio(1, 3));
+        assert_ne!(
+            plane_forms(&x, &enc, &ratio(1, 1))[0].pair,
+            forms[0].pair,
+            "the pair is the state"
+        );
+    }
 
     #[test]
     fn wholly_outside_or_inside_reads_the_two_faces() {

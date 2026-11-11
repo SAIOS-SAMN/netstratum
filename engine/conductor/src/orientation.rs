@@ -793,4 +793,3 @@ mod tests {
         assert_eq!(reading(&ratio(-1, 1)), ratio(1, 2));
     }
 }
-
