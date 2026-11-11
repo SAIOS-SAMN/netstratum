@@ -195,8 +195,10 @@ pub struct Mote {
     /// `ℓ_k = ℓ_o·t_k`. The orbit spin `ℓ_o` is their sum (reach `ℓ_o/H`),
     /// its tilt their shares of it (`ell_o`, `tilt`).
     pub spins: Vec<Ratio>,
-    /// Spin in the circulation's plane (radial–axial, the torsion axis).
-    pub ell_orth: Ratio,
+    /// Its spin on each R partner (`e₁R, e₂R, e₃R`, in `SPACE` order, docs/128
+    /// §9.1): the circulation's plane per pair, one slot a plane. The loop
+    /// spin `ℓ_⊥` is their sum ([`Mote::ell_orth`]).
+    pub spins_orth: Vec<Ratio>,
     /// Its orientation (docs/117 §11.7): the generator `G` over the six
     /// elliptic planes with its windings `K` per plane. Each plane's phase
     /// against the bell, in turns `[0, 1)`, is a reading of it
@@ -228,6 +230,36 @@ impl Mote {
     /// empty tilt isotropic (a third in each plane).
     pub fn spins_of(ell: &Ratio, tilt: &[Ratio]) -> Vec<Ratio> {
         tilt_of(tilt).into_iter().map(|t| ell.clone() * t).collect()
+    }
+
+    /// Its loop spin: the sum of its partner spins (docs/128 §9.1).
+    pub fn ell_orth(&self) -> Ratio {
+        self.spins_orth.iter().fold(ratio(0, 1), |s, l| s + l.clone())
+    }
+
+    /// Its partners' shares of its loop spin, summing to one; empty where
+    /// the partners sum to nothing.
+    pub fn orth_tilt(&self) -> Vec<Ratio> {
+        let ell = self.ell_orth();
+        if ell.is_zero() {
+            return Vec::new();
+        }
+        self.spins_orth.iter().map(|l| l.clone() / ell.clone()).collect()
+    }
+
+    /// Sets its loop spin, kept on the partners by their own shares
+    /// (docs/128 §9.4); where they hold none, by its tilt (§9.1).
+    pub fn set_ell_orth(&mut self, v: Ratio) {
+        let shares = match self.orth_tilt() {
+            t if t.is_empty() => self.tilt(),
+            t => t,
+        };
+        self.spins_orth = Mote::spins_of(&v, &shares);
+    }
+
+    /// The partner spins carried from a loop spin by a tilt (docs/128 §9.1).
+    pub fn orth_of(ell_orth: &Ratio, tilt: &[Ratio]) -> Vec<Ratio> {
+        Mote::spins_of(ell_orth, tilt)
     }
 
     /// Its orbit spin: the sum of its plane spins (L1, so its reach is
@@ -1935,7 +1967,7 @@ pub fn spray(
                 key: k.clone(),
                 amount: a.clone(),
                 spins: Mote::spins_of(&ell_o, &[]),
-                ell_orth: ratio(0, 1),
+                spins_orth: vec![ratio(0, 1); 3],
                 orientation: crate::orientation::Orientation::from_phases(&phase),
                 agitation: crate::ring::grain(agitation),
                 born,
@@ -2985,7 +3017,7 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
                     key: (*k).clone(),
                     amount: (*a).clone(),
                     spins: Mote::spins_of(&crate::ring::grain(&ell), &[]),
-                    ell_orth: ratio(0, 1),
+                    spins_orth: vec![ratio(0, 1); 3],
                     orientation: crate::orientation::Orientation::from_phases(&phase),
                     agitation: ratio(0, 1),
                     born: 0,
@@ -3644,7 +3676,7 @@ mod passage_tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(1, 1), &[]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[ratio(1, 60), ratio(0, 1)]),
             agitation: ratio(0, 1),
             born: 0,
@@ -3686,7 +3718,7 @@ mod passage_tests {
             key: crate::chem::Kind::parse(key).expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(1, 1), &[]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[
                 ratio(ph.0, ph.1),
                 ratio(0, 1),
@@ -3837,7 +3869,7 @@ mod passage_tests {
                     &ratio(1, 2),
                     &tilt_from(&[ratio(1 + i % 3, 1), ratio(2, 1), ratio(1 + i % 5, 1)]),
                 ),
-                ell_orth: ratio(0, 1),
+                spins_orth: vec![ratio(0, 1); 3],
                 orientation: crate::orientation::Orientation::from_phases(&rest(ratio(1, 2))),
                 agitation: ratio(0, 1),
                 born: 0,
@@ -4003,7 +4035,7 @@ mod passage_tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(1, 2), &[ratio(1, 2), ratio(1, 3), ratio(1, 6)]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&rest(ratio(1, 2))),
             agitation: ratio(0, 1),
             born: 0,
@@ -4045,7 +4077,7 @@ mod passage_tests {
             key: crate::chem::Kind::parse("W0041").expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(1, 3), &tilt),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[
                 ratio(3, 10),
                 ratio(1, 7),
@@ -4175,7 +4207,7 @@ mod passage_tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(2, 1), &[]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&super::rest(ratio(0, 1))),
             agitation: ratio(0, 1),
             born: 0,
@@ -4218,7 +4250,7 @@ mod passage_tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(3, 1), &[ratio(1, 2), ratio(1, 2), ratio(0, 1)]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&super::rest(ratio(1, 10))),
             agitation: ratio(0, 1),
             born: 0,
@@ -4255,7 +4287,7 @@ mod passage_tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(1, 1), &tilt),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&phase),
             agitation: ratio(0, 1),
             born: 0,
@@ -4290,7 +4322,7 @@ mod passage_tests {
             key: crate::chem::Kind::parse(key).expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(1, 1), &[]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&super::rest(ratio(
                 loop_at.0, loop_at.1,
             ))),
@@ -4323,7 +4355,7 @@ mod passage_tests {
                 key: crate::chem::Kind::parse("W0016").expect("a kind"),
                 amount: ratio(1, 1),
                 spins: Mote::spins_of(&ratio(3, 2), &[ratio(1, 1), ratio(0, 1), ratio(0, 1)]),
-                ell_orth: ratio(0, 1),
+                spins_orth: vec![ratio(0, 1); 3],
                 orientation: crate::orientation::Orientation::from_phases(&phase),
                 agitation: ratio(0, 1),
                 born: 0,
@@ -4359,7 +4391,7 @@ mod passage_tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(ell.0, ell.1), &[]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[ratio(1, 10), ratio(1, 7)]),
             agitation: ratio(0, 1),
             born: 0,
@@ -4394,7 +4426,7 @@ mod passage_tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ratio(ell.0, ell.1), &[]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[ratio(1, 10), ratio(1, 7)]),
             agitation: ratio(0, 1),
             born: 0,
@@ -4591,7 +4623,7 @@ mod coupling_tests {
             key: crate::chem::Kind::parse(kind).expect("a kind"),
             amount,
             spins: Mote::spins_of(&ell, tilt),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&phase),
             agitation: ratio(0, 1),
             born: 0,
@@ -4829,7 +4861,7 @@ mod emission_tests {
             key: crate::chem::Kind::parse(kind).expect("a kind"),
             amount: ratio(3, 1),
             spins: Mote::spins_of(&ell, &[]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&rest(ratio(1, 2))),
             agitation: heat,
             born: 0,
@@ -4967,7 +4999,7 @@ mod friction_tests {
                 key: crate::chem::Kind::parse("W0001").expect("a kind"),
                 amount: ratio(1, 1),
                 spins: Mote::spins_of(&ratio(1, 2), &[ratio(1, 2), ratio(1, 3), ratio(1, 6)]),
-                ell_orth: ratio(0, 1),
+                spins_orth: vec![ratio(0, 1); 3],
                 orientation: crate::orientation::Orientation::from_phases(&rest(ratio(1, 2))),
                 agitation: crate::ring::grain(&ratio(1, 9)),
                 born: 0,

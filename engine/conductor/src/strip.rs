@@ -246,7 +246,7 @@ mod tests {
                 &ratio(3, 2),
                 &[ratio(1, 2), ratio(1, 3), ratio(1, 6)],
             ),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[
                 ratio(1, 4),
                 ratio(1, 8),

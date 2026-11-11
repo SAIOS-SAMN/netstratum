@@ -240,7 +240,7 @@ mod tests {
             key: crate::chem::Kind::parse("W0004").expect("a kind"),
             amount: ratio(3, 1),
             spins: crate::flows::Mote::spins_of(&ratio(ell, 1), &tilt.map(|t| ratio(t, 6))),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&vec![
                 ratio(0, 1);
                 crate::flows::PLANES

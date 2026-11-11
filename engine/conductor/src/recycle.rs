@@ -429,7 +429,7 @@ mod tests {
             key: crate::chem::Kind::parse(key).expect("a kind"),
             amount,
             spins: Mote::spins_of(&ratio(1, 2), &[]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
                 1, 2,
             ))),
@@ -600,7 +600,7 @@ mod tests {
             key: crate::chem::Kind::parse(key).expect("a kind"),
             amount: ratio(1000, 1),
             spins: Mote::spins_of(&ratio(1, 2), &[]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
                 1, 2,
             ))),

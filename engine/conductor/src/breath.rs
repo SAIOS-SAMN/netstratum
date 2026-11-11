@@ -2315,7 +2315,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         key: k,
                         amount: take,
                         spins: spins.clone(),
-                        ell_orth: ratio(0, 1),
+                        spins_orth: vec![ratio(0, 1); 3],
                         orientation: crate::orientation::Orientation::from_phases(&phase),
                         agitation: ratio(0, 1),
                         born: bell,
@@ -3024,7 +3024,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let mut sys = Body {
                     solid: false,
                     coupled: None,
-                    ell_orth: ratio(0, 1),
+                    spins_orth: vec![ratio(0, 1); 3],
                     path,
                     radius: r_guess,
                     period: ratio(0, 1),
@@ -3246,7 +3246,7 @@ mod tests {
         let mut s = Body {
             solid: false,
             coupled: None,
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             path: vec![1, 1],
             radius: ratio(0, 1),
             period: ratio(0, 1),
@@ -3295,7 +3295,7 @@ mod tests {
         let mut s = Body {
             solid: false,
             coupled: None,
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             path: vec![1, 1],
             radius: ratio(0, 1),
             period: ratio(0, 1),
@@ -3351,7 +3351,7 @@ mod tests {
         let mut t = Body {
             solid: false,
             coupled: None,
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             path: vec![1, 1],
             radius: ratio(0, 1),
             period: ratio(0, 1),
@@ -3405,7 +3405,7 @@ mod tests {
         let body = |path: Vec<u64>, radius: Ratio, kept: Manifest, satellites: Vec<Body>| Body {
             solid: false,
             coupled: None,
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             path,
             radius,
             period: ratio(0, 1),
@@ -3474,7 +3474,7 @@ mod tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(amount.0, amount.1),
             spins: crate::flows::Mote::spins_of(&ratio(ell.0, ell.1), &[]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[ratio(0, 1), ratio(0, 1)]),
             agitation: ratio(0, 1),
             born: 0,
@@ -3502,7 +3502,7 @@ mod tests {
         let body = |radius: Ratio, kept: Manifest, satellites: Vec<Body>| Body {
             solid: false,
             coupled: None,
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             path: vec![1, 1],
             radius,
             period: ratio(0, 1),
@@ -3559,7 +3559,7 @@ mod tests {
         let core = |path: Vec<u64>, radius: Ratio| Body {
             solid: false,
             coupled: None,
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             path,
             radius,
             period: ratio(0, 1),

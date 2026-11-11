@@ -2158,7 +2158,7 @@ pub fn settle_system(
                         &crate::ring::grain(&(r.clone() * inner.clone())),
                         &tilt,
                     ),
-                    ell_orth: ratio(0, 1),
+                    spins_orth: vec![ratio(0, 1); 3],
                     orientation: crate::orientation::Orientation::from_phases(&phase),
                     agitation: heat.clone(),
                     born: bell,
@@ -2191,7 +2191,7 @@ pub fn settle_system(
         let mut w = crate::pulse::Body {
             solid: false,
             coupled: None,
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             path,
             radius: crate::ring::grain(&(r.clone() * total.clone() / unit.clone())),
             period: crate::ring::period(&r, &inner),

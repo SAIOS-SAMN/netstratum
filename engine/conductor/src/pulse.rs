@@ -991,7 +991,7 @@ pub fn deploy(manifest: &Manifest) -> Option<Universe> {
     let home = Body {
         solid: false,
         coupled: None,
-        ell_orth: ratio(0, 1),
+        spins_orth: vec![ratio(0, 1); 3],
         path: vec![0],
         radius: ratio(0, 1),
         period: ratio(0, 1),
@@ -2055,6 +2055,12 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         }
         // Its lift on the S lane (docs/121 §14.6).
         cfe::ratio::encode(&x.lift, &mut w);
+        // Its partners' shares of its loop spin (docs/128 §9.1).
+        let orth = x.orth_tilt();
+        w.push(orth.len() as u8);
+        for t in &orth {
+            cfe::ratio::encode(t, &mut w);
+        }
         cfe::tlv::put(10, &w, out);
     }
     if !b.reservoir.is_zero() {
@@ -2189,6 +2195,12 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
         }
         // Its lift on the S lane (docs/121 §14.6).
         cfe::ratio::encode(&x.lift, &mut w);
+        // Its partners' shares of its loop spin (docs/128 §9.1).
+        let orth = x.orth_tilt();
+        w.push(orth.len() as u8);
+        for t in &orth {
+            cfe::ratio::encode(t, &mut w);
+        }
         cfe::tlv::put(tag, &w, &mut out);
     }
     std::fs::create_dir_all(var_root)?;
@@ -2236,7 +2248,7 @@ fn get_body(v: &[u8]) -> Option<Body> {
     Some(Body {
         solid: false,
         coupled: None,
-        ell_orth: ratio(0, 1),
+        spins_orth: vec![ratio(0, 1); 3],
         path,
         radius,
         period,
@@ -2311,15 +2323,37 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
     // Its lift, where the pulse file carries one (docs/121 §14.6); 0 on its
     // orbit otherwise.
     let lift = match v.get(at..).filter(|rest| !rest.is_empty()) {
-        Some(rest) => cfe::ratio::decode(rest)?.0,
+        Some(rest) => {
+            let (x, used) = cfe::ratio::decode(rest)?;
+            at += used;
+            x
+        }
         None => ratio(0, 1),
     };
+    // Its partners' shares of its loop spin (docs/128 §9.1); a record
+    // without them carries the loop spin by its tilt.
+    let mut orth = Vec::new();
+    if let Some(&t) = v.get(at) {
+        at += 1;
+        for _ in 0..usize::from(t).min(16) {
+            let (x, used) = cfe::ratio::decode(v.get(at..)?)?;
+            at += used;
+            orth.push(x);
+        }
+    }
     let mut r = r.into_iter();
+    let (amount, ell_o, ell_orth) = (r.next()?, r.next()?, r.next()?);
+    let spins = crate::flows::Mote::spins_of(&ell_o, &tilt);
+    let carried = if orth.is_empty() {
+        crate::flows::tilt_of(&tilt)
+    } else {
+        orth
+    };
     Some(crate::flows::Mote {
         key,
-        amount: r.next()?,
-        spins: crate::flows::Mote::spins_of(&r.next()?, &tilt),
-        ell_orth: r.next()?,
+        amount,
+        spins,
+        spins_orth: crate::flows::Mote::orth_of(&ell_orth, &carried),
         agitation: r.next()?,
         orientation,
         born,
@@ -2500,7 +2534,7 @@ mod tests {
                 key: crate::chem::Kind::parse("W0001").expect("a kind"),
                 amount: ratio(1, 1),
                 spins: crate::flows::Mote::spins_of(&ratio(1, 3), &[]),
-                ell_orth: ratio(0, 1),
+                spins_orth: vec![ratio(0, 1); 3],
                 orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(
                     ratio(1, 2),
                 )),
@@ -2778,7 +2812,7 @@ mod tests {
         let orb = Body {
             solid: true,
             coupled: Some([9; 32]),
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             path: vec![1, 1, 1],
             radius: ratio(3, 2),
             period: ratio(5, 2),
@@ -2809,7 +2843,7 @@ mod tests {
         let sys = Body {
             solid: false,
             coupled: None,
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             path: vec![1, 1],
             radius: ratio(9, 2),
             period: ratio(11, 2),
@@ -2840,7 +2874,7 @@ mod tests {
         let core = Body {
             solid: false,
             coupled: None,
-            ell_orth: ratio(0, 1),
+            spins_orth: vec![ratio(0, 1); 3],
             path: vec![1],
             radius: ratio(60, 1),
             period: ratio(0, 1),
@@ -2881,7 +2915,7 @@ mod tests {
                     &ratio(1, 3),
                     &[ratio(1, 2), ratio(1, 3), ratio(1, 6)],
                 ),
-                ell_orth: ratio(0, 1),
+                spins_orth: vec![ratio(0, 1); 3],
                 orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(
                     ratio(1, 2),
                 )),

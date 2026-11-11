@@ -15,10 +15,10 @@ multi-dimensionality".
 
 **Status:** derived. Readings built and witnessed (`conductor::strip`). §8's
 order built: motes carry `G`; `strip::PlaneForm`; the torque turning each
-plane's pair at its own resisted share. §9 (the two halves) supersedes §1's
-per-plane reach and step 3's rates: six spins, two rates, one law for the
-motion and the book. It is built next (§9.6), then the faces' readers and
-the pass (§6, #188).
+plane's pair at its own resisted share. §9 (the two halves on the group)
+supersedes §1's per-plane reach and step 3's rates: six spins, one motion a
+half composed on S³ × S³, one law for the motion and the book. It is built
+next (§9.7), then the faces' readers and the pass (§6, #188).
 
 **Prerequisites:** docs/94 §2 (the transit), docs/120 §8b′ (a plane closes
 on itself) and §8c (a mote's own enclosure), docs/126 (the strip), the twist's
@@ -235,123 +235,166 @@ law's own carrier) and never stored back.
    `chem::dimensions`, its reach and face from `strip::plane_face`.
 3. The torque composing on each plane's pair at `s_k′`, retiring `2δ·t_k`.
 
-## 9. The two halves: six spins, two rates, one law
+## 9. The two halves on the group: six spins, two motions, one law
 
 **Operator 2026-11-11:** "is step 2 condensing what should be uncompacted
 space into two planes which is just two dimensions in costume, or is there a
-deeper issue that needs to be unfolded"; the halves below then ruled ("write
-docs/128 §9 on the two chiral quaternion halves before writing code").
+deeper issue that needs to be unfolded"; then "are you writing this in
+non-euclidean geometric space"; then "rewrite entirely in non-euclidean
+space — then build".
 
 **Status:** derived; supersedes §1's per-plane reach and §8 step 3's rates.
-Build follows (§9.6).
+Built in the order of §9.7.
 
-### 9.0 What was collapsed
+### 9.0 The space
+
+A body's turning state is a point of the group, not of a flat chart. The
+orientation `G` is a rotor of `Cl(4,0)`'s even algebra, the direct sum of
+two quaternion algebras (`P± = (1 ± I)/2`, docs/117 §11.6), so a state is a
+pair of unit quaternions `(q+, q−)` on S³ × S³, one cover (`R ~ −R`). It is
+curved and does not commute: two motions composed in the other order give
+another state.
+
+What stands on the group:
+- **Composition is the algebra's product.** A motion is applied as `q± ↦
+  q±·m±` on each half (`orientation::Motion::then`), never by adding angles.
+- **The chart is Cayley's.** A motion is written as a pure quaternion `u`
+  per half and lifted as `m = (1 + u)(1 − u)⁻¹` (`Half::motion`). Its
+  components are the Cayley rates on the half's three units.
+- **Magnitudes read first degree (design law 2).** A pure quaternion's size
+  is read in the L1 metric, `|u|₁ = Σ_k |u_k|` (docs/120 §8d). Its square,
+  the round norm, never states a law. The algebra's own product uses it
+  only inside composition, which is the group itself.
+
+### 9.1 What was collapsed, and what was flat
 
 - **The state.** A mote holds `spins`, three spatial spins, and `ell_orth`,
   one number for the whole R side: four spin numbers for the six planes of
-  its orientation `G`.
-- **The bell.** `Orientation::bell` turns the circulation "on each R-plane
-  alike", so `e₁R`, `e₂R` and `e₃R` never part. The R partner, the plane's
-  attached dimension (§8 item 1), has no direction of its own.
-- **The rate.** The tilt's turning (`turning_of`) reads one `δ` from the
-  summed reach. The spatial planes take `2δ·t_k`, and the loop takes `2δ` plus
-  the push, the same `δ` again. A rotation of S³ has two rates (Spin(4) =
-  H⊕H, rank 2), and they were tied to one number. This is why #157's planes
-  stayed identical.
-- **§1's unfolding was the wrong one.** It read the three spatial planes as
-  three orbits, each at its own reach `R_k = ℓ_k/H(<ℓ_k) < R`, so `δ_k > δ`.
-  It copied those rates onto the still-collapsed partners. The phases
-  advanced near `6δ` a bell while `spin_torque` booked at `δ`: two laws for
-  one motion. One founding showed it: at the echo of bell 558, one system
-  of 1,535 bodies where step 2 forms three of 63, from the same
-  checkpoint.
+  `G`.
+- **The bell.** `Orientation::bell` turned the circulation "on each R-plane
+  alike", so `e₁R`, `e₂R` and `e₃R` never parted. The halves had nothing to
+  part them, which is #157.
+- **The rate.** `turning_of` read one `δ` from the summed reach: the spatial
+  planes `2δ·t_k` and the loop `2δ` plus the push. A motion of S³ × S³ has
+  two (one per half), and they were tied to one number.
+- **The chart, flat.** The bell took each plane's share of a turn through
+  `rate()` on its own (`signed_rate(Δθ_k/2)`), a rate per component. On the
+  group the rate belongs to the half's motion as one vector. A component's
+  rate of a share is the flat chart applied plane by plane.
+- **§1's unfolding.** It read the three spatial planes as three orbits, each
+  at its own reach `R_k < R`, so `δ_k > δ`. It copied those rates onto the
+  still-collapsed partners. The phases advanced near `6δ` a bell while
+  `spin_torque` booked at `δ`. One read: at the echo of bell 558 from one
+  checkpoint, one system of 1,535 bodies where step 2 forms three of 63.
 
-### 9.1 Six spins
+### 9.2 Six spins
 
-A mote's spin is a bivector with one component on each plane of `G`:
-`ℓ_k` on the spatial plane k and `ℓ_kR` on its partner `e_kR` (k = 1, 2,
-3). No two planes share a slot. `ell_orth` becomes the three partner spins;
-the swing's split `t_k·ℓ_⊥` (docs/120 §8b′) is their reading today, and it
-is how a mote's existing loop spin is first carried onto them.
+A mote's spin is a bivector, an element of the algebra the group turns by,
+with one component on each plane of `G`: `ℓ_k` on spatial plane k and
+`ℓ_kR` on its partner `e_kR`. No two planes share a slot. `ell_orth`
+becomes the three partner spins, its sum the loop spin. A loop spin carried
+alone (a record before the partners) goes onto them by the tilt, `ℓ_kR =
+t_k·ℓ_⊥`, the swing's split (docs/120 §8b′). A law that changes the loop
+spin as a whole keeps it on the partners by their own shares `ℓ_kR/Σ_j ℓ_jR`,
+or by the tilt where they sum to nothing.
 
-### 9.2 The two halves
+### 9.3 Each half's spin, reach and rate
 
-The self-dual and anti-self-dual halves (docs/117 §11.7, `P± = (1 ± I)/2`),
-first degree:
+The halves of the spin, as the orientation splits a generator
+(`orientation::halves`; `e₁R = −e₂₃I`, `e₂R = −e₃₁I`, `e₃R = −e₁₂I`, so on
+`P+` a partner enters with its sign reversed):
 
-    ℓ±_k = ℓ_k ± ℓ_kR        ℓ± = Σ_k |ℓ±_k|        t±_k = ℓ±_k / ℓ±
+    ℓ+_k = ℓ_k − ℓ_kR        ℓ−_k = ℓ_k + ℓ_kR        (pure quaternions)
 
-Each half stands at its own reach by the ring law and turns at its own
-deficit:
+Each half is one spin with its own size, reach, deficit and rate, the ring
+law read first degree:
 
-    R± = ℓ± / H(<ℓ±)        δ± = H(<ℓ±) / (R± + H(<ℓ±))
+    ℓ± = |ℓ±|₁ = Σ_k |ℓ±_k|        R± = ℓ± / H(<ℓ±)
+    δ± = H(<ℓ±) / (R± + H(<ℓ±))     b± = δ±/(1 − δ±) = H(<ℓ±)/R±
 
-A half with no spin (`ℓ± = 0`) does not turn: its steps are zero, never `δ
-= 1` with no direction.
+and its direction is the spin's own, on the L1 sphere:
 
-### 9.3 The planes' steps, from the halves
+    t±_k = ℓ±_k / ℓ±        Σ_k |t±_k| = 1
 
-A bell is two rings (E57), each half turning `δ±` a ring along its own
+A half with no spin does not move.
+
+### 9.4 The motion: one vector a half, composed on the group
+
+The ring's motion on each half is the Cayley vector of its rate along its
 direction:
 
-    Δθ_k  = δ+·t+_k + δ−·t−_k        (spatial plane k, turns a bell)
-    Δθ_kR = δ+·t+_k − δ−·t−_k        (its partner)
+    u±_k = b±·t±_k        m± = (1 + u±)(1 − u±)⁻¹
 
-- **The identity.** With no partner spin, `t+ = t− = t` and `δ+ = δ− = δ`,
-  so `Δθ_k = 2δ·t_k`, the tilt's sum, and `Δθ_kR = 0`. The planes cannot
-  over-turn, since `Σ_k |Δθ_k| ≤ δ+ + δ− ≤ 2·max δ±`.
-- **The halves part** once the partners differ from their planes. With
-  `ℓ_kR = c·ℓ_k` the halves stand at `ℓ(1 ± c)` and turn at two rates: the
-  double rotation.
-- **Step 2's loop is not recovered,** and should not be. Step 2 turned every
-  partner at `2δ` plus the push, along the diagonal, whatever spin the
-  partners held. Here a partner turns by its own spin.
+The bell is two rings, composed on each half:
 
-### 9.4 The push along the loop
+    q± ↦ q±·m±·m±
 
-The parent's push advancing matter along the orthogonal orbit (`orth_push`,
-`κ_⊥`) is a torque on the partner spins, booked by `spin_torque` as now. It
-is shared onto the three partners by their own spins' shares,
-`ℓ_kR / Σ_j |ℓ_jR|`; with no partner spin, by the tilt. It is never laid on
-every partner alike.
+so `G` takes the pair `(m+², m−²)`. Fed to the orientation as a generator on
+the six planes, by the halves' inverse (`joined`): `b_k = (u+_k + u−_k)/2`,
+`b_kR = (u−_k − u+_k)/2`, then `advance_by(b, 2)`. The windings count the
+planes' passes as now.
 
-### 9.5 One law for the motion and the book
+- **No partner spin.** `ℓ+ = ℓ− = ℓ`, so the halves move alike, `b_kR = 0`
+  and `b_k = b·t_k`. Equal halves are a rotation of the three spatial
+  axes alone (the diagonal SO(3)), with R held: the tilt's motion at the
+  body's rate, as one vector rather than a rate per plane.
+- **The halves part** once the partners hold spin: `ℓ+ ≠ ℓ−`, two reaches,
+  two rates and two directions, the double rotation.
+- **Nothing over-turns.** Each half moves by one rate `b±` a ring, never by
+  one rate a plane.
+- **The swing's response retires.** `ℓ_k + t_k·ℓ_⊥·response(ψ_kR)` put the
+  partner's phase into the reach. The halves carry the partner spin into
+  the reach directly (`ℓ±`), and R stays the axis plane's phase in the
+  turning, never a factor in a share (Xylarium #183).
 
-`spin_torque`, the face (§2), the transit (§3), the pressure (§4) and the
-drag (§4a) read the same halves. A plane's deficit a ring is half its bell
-step, `d_k = Δθ_k/2` and `d_kR = Δθ_kR/2`, and the book takes that plane's
-torque at that `d`. No law reads a third `δ`. §1–§3 are then read per half,
-at `R±` and the parcel's extent there, in place of `R_k`.
+### 9.5 The push along the loop
 
-### 9.6 Build order
+The parent's push along the orthogonal orbit (`orth_push`, `κ_⊥`) is a
+torque on the partner spins, booked by `spin_torque`. It is shared by the
+partners' own shares (§9.2), never laid on every partner alike. It moves the
+state only through the spin it changes, read by §9.4 at the next ring:
+there is no second phase step for the push.
 
-1. The mote carries its six spins (`ell_orth` → three partner spins). This
-   is a save-format change, so one new genesis checkpoint is laid once.
-2. The halves (`ℓ±`, `t±`, `R±`, `δ±`) and the steps of §9.3 as readings,
-   with their witnesses.
-3. The bell turning each plane and partner by `Δθ`, retiring §8 step 3's
-   `2·s_k′` and `turning_of`'s `2δ·t_k` together.
-4. `spin_torque` at each plane's `d`, then the face, transit and drag per
-   half.
+### 9.6 One law for the motion and the book
 
-Each step from 3 on is read as bell 558 from the new checkpoint against the
-same bell under step 2 (`.testtmp/wt2`), with these counters:
+The book takes each half's torque at that half's `δ±`, the same deficit its
+motion reads. The face (§2), the transit (§3), the pressure (§4) and the
+drag (§4a) are read per half, at `R±` and the parcel's extent there, in place
+of `R_k`. A plane's own reading is the orientation's reading of `G`, never a
+rate of its own. No law reads a third `δ`.
+
+### 9.7 Build order
+
+1. **The mote carries its six spins** (§9.2). The save keeps the partners'
+   shares; an older record loads by the tilt.
+2. **The halves as readings** (`orientation`): `ℓ±`, `R±`, `δ±`, `b±`, `t±`,
+   `u±`, with their witnesses.
+3. **The bell on the halves** (§9.4): `G ← G·(m+², m−²)`. This retires §8 step
+   3's `2·s_k′`, `turning_of`'s `2δ·t_k` and circulation, and the bell's
+   rate per component.
+4. **`spin_torque` at each half's `δ±`,** then the face, transit and drag
+   per half.
+
+From step 3 on, each change is read as bell 558 from the checkpoint against
+the same bell under step 2 (`.testtmp/wt2`), with these counters:
 - `Σ m·ℓ` given against the push;
-- the phases' advance against `Σ d`;
+- each half's motion against its `δ±`;
 - the systems and their bodies.
 
-### 9.7 Witnesses
+### 9.8 Witnesses
 
-- **No partner spin** recovers the tilt's sum, `Δθ_k = 2δ·t_k`, `Δθ_kR = 0`.
-- **The halves part:** `ℓ_kR ≠ 0` gives `δ+ ≠ δ−` and partners turning
-  apart.
-- **Bounded:** `Σ|Δθ_k| ≤ δ+ + δ−`, so a bell never turns more than the two
-  halves carry.
-- **One law:** the deficit the book reads for every plane is half its phase
-  step.
-- **Exchange of halves:** reversing every partner (`ℓ_kR ↦ −ℓ_kR`) exchanges
-  `+` and `−` and leaves `Δθ_k` unchanged and `Δθ_kR` reversed: the
-  inversion between the two halves.
+- **The group, not the chart.** Two rings composed give `m·m`, which is not
+  the motion of the doubled rate (`(1 + 2u)(1 − 2u)⁻¹`); the bell is the
+  product.
+- **No partner spin** moves both halves alike, and the partners not at all.
+- **The halves part:** partner spin gives `b+ ≠ b−` and partners turning.
+- **The ring is the fixed point:** `R± = H` gives `b± = 1`.
+- **The inversion:** `δ ↦ 1 − δ` gives `b ↦ 1/b` on each half (E57).
+- **Exchange of halves:** reversing every partner spin exchanges `+` and
+  `−`. The six-plane generator keeps its spatial components and reverses
+  its partners.
+- **One law:** the deficit the book reads for each half is the one its
+  motion reads.
 
 ## 7. Witnesses
 
