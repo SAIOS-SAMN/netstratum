@@ -1335,14 +1335,9 @@ pub fn orbit_galaxies(
             let before = ledger(&u.ocean);
             let phases_was: Vec<Vec<Ratio>> = u.ocean.iter().map(|x| x.phase()).collect();
             crate::profile::mark("orbit:ocean");
-            let (given, _, heated) = crate::flows::torque(
-                &mut u.ocean,
-                &enc_o,
-                &ratio(1, 2),
-                None,
-                &ledger_u,
-                &mut cross,
-            );
+            let (given, _, heated) =
+                crate::flows::torque(&mut u.ocean, &enc_o, &ratio(1, 2), &ledger_u, &mut cross);
+            let _ = crate::flows::conform_partners(&mut u.ocean, &enc_o, &ledger_u);
             if !u.unit.is_zero() {
                 collective.ocean_heat = heated * ledger_u.clone() / u.unit.clone();
             }

@@ -403,8 +403,10 @@ the same bell under step 2 (`.testtmp/wt2`), with these counters:
 **Operator 2026-11-11:** "add automorphism to isoclinic — and derive from
 that point as a unitary morphodynamic state".
 
-**Status:** derived. Step 1 built (the form and twist as readings,
-`Orientation::form_twist`); steps 2–4 follow in the order of §10.7.
+**Status:** derived. Steps 1–2 built: the form and twist as readings
+(`Orientation::form_twist`), and the partner orbits conformed to the
+manifold's shear with the driven loop retired (`flows::conform_partners`).
+Steps 3–4 follow in the order of §10.7.
 
 ### 10.0 The factorization
 
@@ -488,13 +490,35 @@ manifold's shear, never a push:
   motion on plane k across the reach turns the plane k with its R partner,
   the dual pair: an isoclinic increment, the twist. The shear's share on
   plane k is the half's own direction there, `t±_k` (§9.3).
-- **Conformation.** The parcel's twist moves toward the manifold's at its
-  place, the holding-weighted twist of the range meeting it (docs/127 §1,
-  §3), with `Σ w·ℓ_kR` kept across the range. The shear is never a source.
-- **Restoration and dissipation.** A twist's departure from the conformed
-  twist relaxes by the attractor's keep (E38, docs/127 §4). What
-  restoration removes enters the manifold's dissipation and is recycled as
-  heat (E62).
+- **The shear's rate (built, `flows::shear_rate`).** A rigidly turning
+  chord's edges part by `2e·H` (it turns at `b = H/R`); the shear is the
+  departure from it:
+
+      σ = (2e·H − ΔH) / (2e·R)
+
+  `b` where nothing stands across the parcel, zero where the hold grows in
+  step with the reach (rigid), zero with no extent. `σ` is itself the
+  departure from rigid, so `σ`, not `σ − b`, sources the partners (the
+  coordinator's ruling 2 read `σ − b`, which would give a rigid parcel
+  partner spin `−b`; its intent, rigid gives none, is `σ`).
+- **The target (built, `flows::partner_target`).** The halves' rates split
+  about the orbit's own, `b± = b ± σ/2`, so their mean is the spatial orbit
+  and their difference the shear (the vacuum's halves exchanged, `σ ↦ −σ`).
+  Each half's spin is the one standing at its rate's reach,
+  `ℓ±* = R±*·H(<R±*)` with `b±·R±* = H(<R±*)` (`Enclosed::reach_at_rate`,
+  the inverse through the hold's steps). The partners take half the
+  difference along the tilt: `ℓ_kR* = t_k·(ℓ−* − ℓ+*)/2`.
+- **Conformation (built, `flows::conform_partners`).** Each mote's partner
+  spins relax toward the target by the attractor's keep at its deficit
+  (E38), `ℓ_kR′ = ℓ* + k·(ℓ_kR − ℓ*)`; the range meeting it on reach pays
+  the change by holding, so `Σ w·ℓ_kR` stands on every partner plane but
+  for the grain's remainder (returned, as the shear's). The shear is never
+  a source. The twist `C` then moves by the halves those spins give
+  (§10.2).
+- **Restoration and dissipation.** The friction's heat from the
+  conformation is open with §4a's (#184): spin is kept, and what of the
+  relaxation becomes heat must be read first degree before it enters the
+  manifold's dissipation (E62).
 
 ### 10.4 What the laws read
 

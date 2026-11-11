@@ -1098,6 +1098,26 @@ impl Enclosed {
         r.clone() * self.whole()
     }
 
+    /// The reach at which the ring law turns at rate `b` (docs/128 §10.3):
+    /// the least `R` with `b·R = H(<R)` by place, the hold being constant
+    /// between neighbouring places, each step read once in order (as
+    /// [`Enclosed::spin_at`]). None where `b` is not positive or no step
+    /// holds it.
+    pub fn reach_at_rate(&self, b: &Ratio) -> Option<Ratio> {
+        if *b <= ratio(0, 1) {
+            return None;
+        }
+        for (k, h) in self.within.iter().enumerate() {
+            let r = h.clone() / b.clone();
+            let above = k == 0 || r > self.places[k - 1];
+            let below = self.places.get(k).is_none_or(|top| r <= *top);
+            if above && below && !r.is_zero() {
+                return Some(r);
+            }
+        }
+        None
+    }
+
     /// A body's reach and deficit at spin ℓ: `R = ℓ/H(<ℓ)`, `δ = H/(R + H)`,
     /// exact (operator 2026-10-23: "this is approximations leaking into an
     /// exact system"): readings, never stored, so never floored. ℓ and H
@@ -1328,7 +1348,6 @@ pub fn torque(
     motes: &mut [Mote],
     enc: &Enclosed,
     p: &Ratio,
-    tide: Option<(&Ratio, &Ratio)>,
     total: &Ratio,
     cross: &mut crate::enfold::Cross,
 ) -> (Ratio, Ratio, Ratio) {
@@ -1351,7 +1370,7 @@ pub fn torque(
     };
     for x in motes.iter_mut() {
         if lo == hi {
-            let (g, ab, ht) = torque_one(x, enc, &lo, tide, total, cross);
+            let (g, ab, ht) = torque_one(x, enc, &lo, total, cross);
             given += g;
             absorbed += ab;
             heated += ht;
@@ -1362,8 +1381,8 @@ pub fn torque(
             crate::enfold::Cross::default(),
             crate::enfold::Cross::default(),
         );
-        let (ga, aa, ha) = torque_one(&mut xa, enc, &lo, tide, total, &mut ca);
-        let (gb, ab, hb) = torque_one(&mut xb, enc, &hi, tide, total, &mut cb);
+        let (ga, aa, ha) = torque_one(&mut xa, enc, &lo, total, &mut ca);
+        let (gb, ab, hb) = torque_one(&mut xb, enc, &hi, total, &mut cb);
         if xa == xb && ca == cb && ga == gb && aa == ab && ha == hb {
             *x = xa;
             cross.join(&ca);
@@ -1371,7 +1390,7 @@ pub fn torque(
             absorbed += aa;
             heated += ha;
         } else {
-            let (g, ab, ht) = torque_one(x, enc, p, tide, total, cross);
+            let (g, ab, ht) = torque_one(x, enc, p, total, cross);
             given += g;
             absorbed += ab;
             heated += ht;
@@ -1487,7 +1506,6 @@ fn torque_one(
     x: &mut Mote,
     enc: &Enclosed,
     p: &Ratio,
-    tide: Option<(&Ratio, &Ratio)>,
     total: &Ratio,
     cross: &mut crate::enfold::Cross,
 ) -> (Ratio, Ratio, Ratio) {
@@ -1529,11 +1547,6 @@ fn torque_one(
     };
     let place = crate::enfold::place(&r_o, &m, &h);
     let heat_was = x.agitation.clone();
-    let tilt = x.tilt();
-    // The bell's turning composed whole on its orientation (docs/117
-    // §11.7.4): its two rings, each half the bell's turns at the rate
-    // `b = δ/(1 − δ)` a plane; then each reading held to its place.
-    let step = turning_of(&marks, &tilt, &r_o, &h, p, tide, x.vacuum);
     // The bell on the group (docs/128 §9.4): each half of the spin moves by
     // one Cayley vector a ring, its rate `b± = H/R±` at its own reach along
     // its own spin, composed twice; the vacuum's face reads the reciprocal
@@ -1561,8 +1574,7 @@ fn torque_one(
     for (k, v) in held.iter().enumerate() {
         x.orientation.hold_phase(k, v);
     }
-    let torque_orth = step.torque_orth;
-    let (g, ab, ht) = spin_torque(x, &from, &d_o, p, &torque_orth, &m, &scar);
+    let (g, ab, ht) = spin_torque(x, &from, &d_o, p, &m, &scar);
     // Descent: its weight past its round stands one place past its mark.
     settle(x, &levers, place.as_ref(), cross);
     (g, ab, ht)
@@ -1582,7 +1594,6 @@ pub fn spin_torque(
     from: &[Ratio],
     d_o: &Ratio,
     p: &Ratio,
-    torque_orth: &Ratio,
     m: &Ratio,
     scar: &Ratio,
 ) -> (Ratio, Ratio, Ratio) {
@@ -1662,23 +1673,141 @@ pub fn spin_torque(
         };
     given += m.clone() * dl;
     x.spins = planes_l;
-    // The orthogonal spin (docs/90 D1): the release's torque in the orthogonal orbit's plane,
-    // less the hold's return of the held half, `½·δ(R)·ℓ_⊥`, both from and
-    // to the same reservoir as the orbit plane's (Σ m·(ℓ_o + ℓ_⊥) and the
-    // reservoir exact).
-    let new_c = crate::ring::grain(
-        &(x.ell_orth() + torque_orth.clone() - ratio(1, 2) * d_o.clone() * x.ell_orth()),
-    );
-    let dl_c = new_c.clone() - x.ell_orth();
-    absorbed += m.clone()
-        * if dl_c < ratio(0, 1) {
-            -dl_c.clone()
-        } else {
-            dl_c.clone()
-        };
-    given += m.clone() * dl_c;
-    x.set_ell_orth(new_c);
+    // The partner orbits are not torqued by the push (operator 2026-11-11:
+    // "there should be no loop"): their spin is the manifold's shear,
+    // conformed by `conform_partners` (docs/128 §10.3).
     (given, absorbed, heated)
+}
+
+/// The manifold's shear across a parcel (docs/128 §10.3): at reach `r` with
+/// extent share `e`, the ring law's speed is the hold (`b·r = H(<r)`), so
+/// the parcel's edges at `r(1 ± e)` part by the hold enclosed across it,
+/// `ΔH`, against the rigid `2e·H`:
+///
+///     σ = (2e·H − ΔH) / (2e·r)
+///
+/// First degree, exact: `b` where nothing stands across the parcel, zero
+/// where the hold grows in step with the reach, zero with no extent.
+pub fn shear_rate(enc: &Enclosed, r: &Ratio, e: &Ratio) -> Ratio {
+    if e.is_zero() || r.is_zero() {
+        return ratio(0, 1);
+    }
+    let one = ratio(1, 1);
+    let h = enc.hold_within(r);
+    let dh = enc.hold_within(&(r.clone() * (one.clone() + e.clone())))
+        - enc.hold_within(&(r.clone() * (one - e.clone())));
+    let two_e = ratio(2, 1) * e.clone();
+    (two_e.clone() * h - dh) / (two_e * r.clone())
+}
+
+/// A mote's partner spins as the manifold's shear sets them (docs/128
+/// §10.3): the halves' rates split about the orbit's own, `b± = b ± σ/2`
+/// (the vacuum's halves exchanged), each half's spin the one standing at
+/// that rate's reach, `ℓ±* = R±*·H(<R±*)`, and the partners half their
+/// difference along the tilt, `ℓ_kR* = t_k·(ℓ−* − ℓ+*)/2`. None where a
+/// half's rate has no reach.
+pub fn partner_target(x: &Mote, enc: &Enclosed, total: &Ratio) -> Option<Vec<Ratio>> {
+    let (r, h, _) = lifted(enc, &x.ell_o().abs(), &x.lift);
+    if r.is_zero() {
+        return None;
+    }
+    let e = own_enclosure(x, enc, total)[0].clone();
+    let b = h / r.clone();
+    let sigma = shear_rate(enc, &r, &e);
+    let sigma = if x.vacuum { -sigma } else { sigma };
+    let half = sigma / ratio(2, 1);
+    let spin_at_rate = |rate: &Ratio| -> Option<Ratio> {
+        let at = enc.reach_at_rate(rate)?;
+        Some(at.clone() * enc.hold_within(&at))
+    };
+    let plus = spin_at_rate(&(b.clone() + half.clone()))?;
+    let minus = spin_at_rate(&(b - half))?;
+    let l_r = (minus - plus) / ratio(2, 1);
+    Some(
+        tilt_of(&x.tilt())
+            .into_iter()
+            .map(|t| t * l_r.clone())
+            .collect(),
+    )
+}
+
+/// The partner orbits conformed to the manifold's shear (docs/128 §10.3,
+/// docs/127 §3): each mote's partner spins relax toward their target by the
+/// attractor's keep at its deficit (E38), `ℓ_kR′ = ℓ* + k·(ℓ_kR − ℓ*)`, and
+/// the range meeting it on reach pays the change by holding, so `Σ w·ℓ_kR`
+/// stands on every partner plane. Read from the bell's start, then applied;
+/// each step on the grain. Returns the spin moved, `Σ w·|Δℓ_kR|`, and the
+/// grain's remainder, `Σ w·Δℓ_kR` over every mote and its range.
+pub fn conform_partners(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio) {
+    let n = motes.len();
+    let w: Vec<Ratio> = motes
+        .iter()
+        .map(|x| {
+            if total.is_zero() {
+                ratio(0, 1)
+            } else {
+                x.amount.clone() * weight(&x.key) / total.clone()
+            }
+        })
+        .collect();
+    let mut reach = Vec::with_capacity(n);
+    let mut extent = Vec::with_capacity(n);
+    let mut delta = Vec::with_capacity(n);
+    for x in motes.iter() {
+        let (r, _, d) = lifted(enc, &x.ell_o().abs(), &x.lift);
+        extent.push(r.clone() * own_enclosure(x, enc, total)[0].clone());
+        reach.push(r);
+        delta.push(d);
+    }
+    let range = meeting(&reach, &extent);
+    let mut change: Vec<[Ratio; 3]> = vec![std::array::from_fn(|_| ratio(0, 1)); n];
+    for i in 0..n {
+        let Some(target) = partner_target(&motes[i], enc, total) else {
+            continue;
+        };
+        let Some(keep) = attractor_keep(&delta[i]) else {
+            continue;
+        };
+        let held: Ratio = range[i].iter().fold(ratio(0, 1), |s, &j| s + w[j].clone());
+        if held.is_zero() || w[i].is_zero() {
+            continue;
+        }
+        for k in 0..3 {
+            let now = motes[i]
+                .spins_orth
+                .get(k)
+                .cloned()
+                .unwrap_or_else(|| ratio(0, 1));
+            let to = target[k].clone() + keep.clone() * (now.clone() - target[k].clone());
+            let step = crate::ring::grain(&(to - now));
+            if step.is_zero() {
+                continue;
+            }
+            change[i][k] += step.clone();
+            // The range pays it by holding: each member `−w_i·Δ/W`.
+            let paid = -(w[i].clone() * step) / held.clone();
+            for &j in &range[i] {
+                change[j][k] += paid.clone();
+            }
+        }
+    }
+    let (mut moved, mut remainder) = (ratio(0, 1), ratio(0, 1));
+    for (i, x) in motes.iter_mut().enumerate() {
+        if x.spins_orth.len() < 3 {
+            x.spins_orth.resize(3, ratio(0, 1));
+        }
+        for k in 0..3 {
+            if change[i][k].is_zero() {
+                continue;
+            }
+            let stored = crate::ring::grain(&(x.spins_orth[k].clone() + change[i][k].clone()));
+            let step = stored.clone() - x.spins_orth[k].clone();
+            moved += w[i].clone() * step.clone().abs();
+            remainder += w[i].clone() * step;
+            x.spins_orth[k] = stored;
+        }
+    }
+    (moved, remainder)
 }
 
 /// The contact of A pair over one echo (operators 2026-10-18, with
@@ -3626,8 +3755,9 @@ mod reading_tests {
 #[cfg(test)]
 mod passage_tests {
     use super::{
-        around, blend, mean_response, phase_beads, rest, restoring, space_of, spin_torque,
-        tilt_from, tilt_of, CellRead, Mote,
+        around, blend, conform_partners, mean_response, partner_target, phase_beads, rest,
+        restoring, shear_rate, space_of, spin_torque, tilt_from, tilt_of, weight, CellRead,
+        Enclosed, Mote,
     };
     use cfe::ratio::{ratio, Ratio};
     use num_traits::Zero;
@@ -3861,6 +3991,114 @@ mod passage_tests {
         assert_eq!(mean_response(&ratio(1, 2), &ratio(1, 2)), ratio(-1, 2));
         // Across the bell: from ¾ to 1¼, the loss then the gain cancel.
         assert_eq!(mean_response(&ratio(3, 4), &ratio(1, 2)), ratio(0, 1));
+    }
+
+    fn sheared(key: &str, ell: Ratio, partners: Vec<Ratio>, vacuum: bool) -> Mote {
+        Mote {
+            key: crate::chem::Kind::parse(key).expect("a kind"),
+            amount: ratio(1, 1),
+            spins: Mote::spins_of(&ell, &tilt_from(&[ratio(1, 1), ratio(2, 1), ratio(1, 1)])),
+            spins_orth: partners,
+            orientation: crate::orientation::Orientation::default(),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        }
+    }
+
+    #[test]
+    fn the_shear_is_the_hold_across_the_parcel_against_the_rigid() {
+        // docs/128 §10.3: σ = (2eH − ΔH)/(2eR).
+        let point = Enclosed::new(ratio(1, 1), Vec::new());
+        // Nothing across the parcel: the full shear, the orbit's own rate.
+        assert_eq!(shear_rate(&point, &ratio(2, 1), &ratio(1, 4)), ratio(1, 2));
+        assert_eq!(shear_rate(&point, &ratio(2, 1), &ratio(0, 1)), ratio(0, 1));
+        // A hold that grows in step with the reach across it: rigid, no shear.
+        let rigid = Enclosed::new(ratio(1, 1), vec![(ratio(1, 1), ratio(1, 1))]);
+        assert_eq!(rigid.hold_within(&ratio(1, 1)), ratio(1, 1));
+        assert_eq!(shear_rate(&rigid, &ratio(1, 1), &ratio(1, 2)), ratio(0, 1));
+    }
+
+    #[test]
+    fn the_reach_at_a_rate_is_where_the_ring_law_turns_at_it() {
+        let enc = Enclosed::new(ratio(1, 1), vec![(ratio(2, 1), ratio(1, 1))]);
+        for b in [ratio(1, 3), ratio(1, 1), ratio(5, 2)] {
+            let r = enc.reach_at_rate(&b).expect("a reach");
+            assert_eq!(b.clone() * r.clone(), enc.hold_within(&r), "b·R = H(<R)");
+        }
+        assert_eq!(enc.reach_at_rate(&ratio(0, 1)), None);
+    }
+
+    #[test]
+    fn the_partner_orbits_conform_to_the_shear_and_the_range_pays() {
+        // docs/128 §10.3, docs/127 §3: Σ w·ℓ_kR stands but for the grain.
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let mut motes = vec![
+            sheared("W0001", ratio(3, 2), vec![ratio(0, 1); 3], false),
+            sheared(
+                "W0001",
+                ratio(8, 5),
+                vec![ratio(1, 10), ratio(0, 1), ratio(-1, 20)],
+                false,
+            ),
+            sheared("W0004", ratio(7, 4), vec![ratio(0, 1); 3], false),
+        ];
+        let total = ratio(1, 1);
+        let w: Vec<Ratio> = motes
+            .iter()
+            .map(|x| x.amount.clone() * weight(&x.key))
+            .collect();
+        let book = |ms: &[Mote], k: usize| {
+            ms.iter().zip(&w).fold(ratio(0, 1), |s, (x, wi)| {
+                s + wi.clone() * x.spins_orth[k].clone()
+            })
+        };
+        let before: Vec<Ratio> = (0..3).map(|k| book(&motes, k)).collect();
+        let target = partner_target(&motes[0], &enc, &total).expect("a target");
+        assert!(
+            target.iter().any(|t| !t.is_zero()),
+            "the shear sets a target"
+        );
+        let (moved, remainder) = conform_partners(&mut motes, &enc, &total);
+        assert!(moved > ratio(0, 1), "the partners moved");
+        let after: Ratio = (0..3).map(|k| book(&motes, k)).sum();
+        let was: Ratio = before.iter().cloned().sum();
+        assert_eq!(after - was, remainder, "only the grain's remainder");
+        // The vacuum's halves exchanged: the target reversed.
+        let v = sheared("W0001", ratio(3, 2), vec![ratio(0, 1); 3], true);
+        let tv = partner_target(&v, &enc, &total).expect("a target");
+        let tc = partner_target(
+            &sheared("W0001", ratio(3, 2), vec![ratio(0, 1); 3], false),
+            &enc,
+            &total,
+        )
+        .expect("a target");
+        assert_eq!(tv, tc.iter().map(|t| -t.clone()).collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn the_push_no_longer_drives_the_partner_orbits() {
+        // Operator 2026-11-11: no loop. The torque leaves the partners alone.
+        let mut x = sheared(
+            "W0001",
+            ratio(1, 2),
+            vec![ratio(1, 8), ratio(0, 1), ratio(1, 16)],
+            false,
+        );
+        let was = x.spins_orth.clone();
+        let from = space_of(&x.phase());
+        let _ = spin_torque(
+            &mut x,
+            &from,
+            &ratio(1, 3),
+            &ratio(1, 4),
+            &ratio(1, 1),
+            &ratio(0, 1),
+        );
+        assert_eq!(x.spins_orth, was);
     }
 
     #[test]
@@ -4098,7 +4336,6 @@ mod passage_tests {
             &from,
             &ratio(2, 3),
             &ratio(1, 4),
-            &ratio(0, 1),
             &ratio(1, 1),
             &ratio(0, 1),
         );
@@ -5058,8 +5295,7 @@ mod friction_tests {
             let from = space_of(&x.phase());
             let (d_o, p) = (ratio(2, 3), ratio(1, 4));
             let was = x.agitation.clone();
-            let (_, _, heated) =
-                spin_torque(&mut x, &from, &d_o, &p, &ratio(0, 1), &m, &ratio(0, 1));
+            let (_, _, heated) = spin_torque(&mut x, &from, &d_o, &p, &m, &ratio(0, 1));
             assert_eq!(m.clone() * (x.agitation.clone() - was), heated);
             assert!(heated >= ratio(0, 1) && heated <= m * p * d_o);
         }

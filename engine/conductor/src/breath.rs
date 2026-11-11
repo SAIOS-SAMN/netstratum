@@ -2423,9 +2423,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &mut core.flows,
                 enc.as_ref().unwrap_or(&throat),
                 &p,
-                tide,
                 &ledger_unit,
                 &mut cross,
+            );
+            // The partner orbits conformed to the manifold's shear (docs/128
+            // §10.3), the range paying by holding.
+            let _ = crate::flows::conform_partners(
+                &mut core.flows,
+                enc.as_ref().unwrap_or(&throat),
+                &ledger_unit,
             );
             // The disc forms: each mote's tilt returns toward its galaxy's spin
             // plane (`flows::settle_disc`). A core whose disc holds nothing
