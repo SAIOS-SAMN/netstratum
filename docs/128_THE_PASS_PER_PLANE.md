@@ -347,13 +347,15 @@ planes' passes as now.
   the reach directly (`ℓ±`), and R stays the axis plane's phase in the
   turning, never a factor in a share (Xylarium #183).
 
-### 9.5 The push along the loop
+### 9.5 The R side: orbits, never a loop
 
-The parent's push along the orthogonal orbit (`orth_push`, `κ_⊥`) is a
-torque on the partner spins, booked by `spin_torque`. It is shared by the
-partners' own shares (§9.2), never laid on every partner alike. It moves the
-state only through the spin it changes, read by §9.4 at the next ring:
-there is no second phase step for the push.
+**Operator 2026-11-11:** "there should be no loop — there should be orbits
+with shear from the manifold produced by gravity and physics".
+
+The partner planes hold orbits like every plane. The parent's push laid
+"along the orthogonal orbit" (`orth_push`, `κ_⊥`) is a driven loop and
+retires. What turns the R side is the twist of the unitary morphodynamic
+state, sourced by the manifold's shear (§10).
 
 ### 9.6 One law for the motion and the book
 
@@ -395,6 +397,145 @@ the same bell under step 2 (`.testtmp/wt2`), with these counters:
   its partners.
 - **One law:** the deficit the book reads for each half is the one its
   motion reads.
+
+## 10. The unitary morphodynamic state: automorphism and isoclinic
+
+**Operator 2026-11-11:** "add automorphism to isoclinic — and derive from
+that point as a unitary morphodynamic state".
+
+**Status:** derived. Built after §9.7 step 3's read, in the order of §10.7.
+
+### 10.0 The factorization
+
+A rotation of S³, the continuum's four axes `e₊₁, e₊₂, e₊₃, e₊R` held as the
+quaternions with `e₊R` the real unit, is `x ↦ p·x·q̄`, with `p, q` unit
+quaternions, the two halves (`P±`). Two kinds of motion stand inside it:
+
+- **The automorphisms** of the quaternions are the conjugations `x ↦ a·x·ā`.
+  They fix the real unit, R, and rotate the three spatial units. They are
+  the equal halves, `p = q`: §9.4's "no partner spin", the three spatial
+  axes turned with R held.
+- **The isoclinic motions** multiply on one side, `x ↦ c·x`. They turn both
+  planes of every dual pair (`e₂₃, e₁R`), (`e₃₁, e₂R`), (`e₁₂, e₃R`) by one
+  angle (docs/117 §11.6; Xylarium T18). They are the turnings that involve
+  R.
+
+Every motion factors uniquely into the two, exactly:
+
+    p·x·q̄ = c·(q·x·q̄),    c = p·q̄
+
+### 10.1 The state
+
+A body's turning state is the pair of unit quaternions:
+
+    F = q        its **form**: the automorphism, its orientation in space, R held
+    C = p·q̄      its **twist**: the isoclinic turning against R
+
+It is the same point as `G`'s halves, `(p, q) = (C·F, F)`, one cover, with
+`p` the `P+` half and `q` the `P−` half of `orientation::Motion`. The
+factorization is algebraic in the pair, so it holds for either labelling; the
+labelling is fixed by the face (below). Both
+factors are unitary (unit quaternions, `F·F̄ = C·C̄ = 1`), so the state keeps
+its measure under every motion, and an inverse is a conjugate: no norm is
+read, and no root is taken.
+
+- **Morphodynamic.** `F` is the form a body holds, the orientation of its
+  axes and its orbits in space. `C` is how that form stands deformed against
+  R. `C = 1` is a body in pure orbit, undeformed. `C ≠ 1` is the manifold's
+  twist at the body, the deformation docs/127 §2 names on the H lane
+  ("twist", the quantum torsion), now one unitary factor, not a scalar per
+  pair.
+- **The face chooses the chirality.** The continuum carries its form on one
+  half and its twist as the other's motion relative to it. The vacuum, the
+  continuum inverted (docs/104 §0), exchanges the halves: form on the other
+  half, twist `C̄`. Reversing every partner spin exchanges the halves
+  (§9.8), so the inversion is the exchange of chirality, and #241's "the
+  inversion is the twist" is this exchange read on `C`.
+
+### 10.2 One bell from that point
+
+Each half moves by its own motion (§9.4), `p ↦ p·m+`, `q ↦ q·m−`, with
+`m± = (1 + u±)(1 − u±)⁻¹` twice a bell. On the state:
+
+    F ↦ F·m−
+    C ↦ p·m+·m̄−·q̄ = C·F·(m+·m̄−)·F̄
+
+- **The form moves by the automorphism part of the motion,** `m−`, its
+  orbit.
+- **The twist moves by the halves' relative motion,** `m+·m̄−`, carried into
+  the body's own axes by its form (conjugation by `F`). It is measured
+  against the body, not against a fixed axis. Equal halves (`m+ = m−`) leave
+  `C` unchanged: a body in pure orbit keeps its twist.
+- **Exact:** products of the integer halves (`orientation::Half`) and their
+  conjugates.
+
+### 10.3 What sources the twist: the manifold's shear
+
+The halves differ by the partner spins (`ℓ+ − ℓ− = −2·ℓ_R`, §9.3). So the
+twist's motion is sourced by what gives the partners spin. That is the
+manifold's shear, never a push:
+
+- **Gravity's differential motion across a parcel.** The ring law's speed at
+  reach `r` is the hold there, `b·r = H(<r)`. A parcel spanning `R(1 ± e)`
+  (docs/120 §8c) has edges moving by different amounts. The difference is
+  the hold enclosed across its own extent:
+
+      ΔH = H(<R(1 + e)) − H(<R(1 − e))
+
+  It is first degree and exact, with no rate taken and no square.
+- **The shear deforms the parcel's form against R.** A difference of the
+  motion on plane k across the reach turns the plane k with its R partner,
+  the dual pair: an isoclinic increment, the twist. The shear's share on
+  plane k is the half's own direction there, `t±_k` (§9.3).
+- **Conformation.** The parcel's twist moves toward the manifold's at its
+  place, the holding-weighted twist of the range meeting it (docs/127 §1,
+  §3), with `Σ w·ℓ_kR` kept across the range. The shear is never a source.
+- **Restoration and dissipation.** A twist's departure from the conformed
+  twist relaxes by the attractor's keep (E38, docs/127 §4). What
+  restoration removes enters the manifold's dissipation and is recycled as
+  heat (E62).
+
+### 10.4 What the laws read
+
+- **Orbits and the reach** read the form `F`: the spatial orientation, the
+  tilt, the orbit planes.
+- **The torsion, the face's twist and the pressure** read the twist `C`. Its
+  generator is equal on each dual pair (isoclinic), so the pressure between
+  planes is read from `C`'s components on the three units. This is §4's
+  `P_k`, now from the unitary twist.
+- **Heat** names no face and is unchanged (docs/104 §0).
+
+### 10.5 What retires
+
+- the driven loop on the R side (`orth_push`, `κ_⊥`, §9.5);
+- the twist as a scalar per pair of planes (`torsion` pressures `ρ·(x_j ⊖
+  x_k)` on phase readings), replaced by the unitary twist `C`;
+- "loop" and "circulation" as names for the turning that involves R: it is
+  the isoclinic twist, carried on the partner orbits.
+
+### 10.6 Witnesses
+
+- **The factorization is exact:** `(C·F)·x·F̄ = p·x·q̄` for every `x`, and `(p,
+  q) ↦ (F, C) ↦ (p, q)` is the identity.
+- **Unitary:** `F·F̄ = C·C̄ = 1` after any bell, exact before the grain.
+- **Pure orbit:** equal halves leave `C` unchanged and move `F`.
+- **The inversion is the exchange:** exchanging the halves takes `C ↦ C̄`.
+- **Shear is never a source:** `Σ w·ℓ_kR` kept by conformation; a parcel with
+  no extent (`e = 0`) has no shear.
+- **Restoration closes the book:** what the twist's restoration removes
+  appears as the manifold's dissipation (E62).
+
+### 10.7 Build order
+
+1. **The state's two factors as readings** (`orientation`): `F`, `C` from
+   `G`'s halves, and back, with the factorization and unitary witnesses.
+2. **The twist sourced by the shear** (§10.3), retiring `orth_push` and `κ_⊥`.
+   The partner spins are conformed to the manifold's shear and restored
+   into the dissipation.
+3. **`torsion` from `C`** (§10.4), retiring the per-pair pressures on phase
+   readings.
+4. **§9.7 step 4 on the factors:** `spin_torque` at `δ±`, the face, transit
+   and drag per half.
 
 ## 7. Witnesses
 
