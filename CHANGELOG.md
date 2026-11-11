@@ -150,6 +150,11 @@ change is named here.
 
 ### Changed
 
+- Heat recycled across the manifold's dissipation (#182, docs/127 §4,
+  EQUATIONS E62). A mote's restored heat enters its enclosure's manifold,
+  which recycles the held share `1 − δ` at its place to the motes whose own
+  enclosures meet its own, by holding times held share, and radiates the
+  rest as light. `flows::emit` takes the enclosure's holding unit.
 - Heat travels with the matter that carries it (docs/126 §3a, docs/124 §3).
   Matter leaving a star (outburst, shed layers, dissolutions, infall), motes
   escaping a system and worlds crossing as motes carry their source's heat
