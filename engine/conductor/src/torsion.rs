@@ -82,6 +82,45 @@ pub fn released_share(s: &Ratio, planes: &[Ratio; 3]) -> Option<Ratio> {
     Some(v.max(ratio(0, 1)))
 }
 
+/// A CORE'S TWIST and its PRESSURE on each plane (docs/100 §8.3, docs/126 §3;
+/// operator 2026-11-06): the twist its wound plane (its disc's plane with the
+/// antipole the settle gave it), its plane rates the twist per ring, each
+/// pair's pressure the throat's share of the core's holding times the pair's
+/// twist rate, each plane's the composition of its two pairs'. One reading,
+/// felt on both faces of the strip: the release on the continuum, the
+/// consumption on the vacuum.
+pub fn core_twist(core: &crate::pulse::Body) -> (Vec<Ratio>, Option<[Ratio; 3]>) {
+    let disc_spin = plane_spin(&core.flows)
+        .iter()
+        .fold(ratio(0, 1), |a, l| a + l.clone());
+    let twist = wound(&core.tilt, &core.antipole, &disc_spin);
+    let whole = crate::pulse::mass(&core.total());
+    let rho = if whole.is_zero() {
+        ratio(0, 1)
+    } else {
+        crate::pulse::mass(&core.throat) / whole
+    };
+    let rates = [
+        twist.first().cloned().unwrap_or_else(|| ratio(0, 1)),
+        twist.get(1).cloned().unwrap_or_else(|| ratio(0, 1)),
+        twist.get(2).cloned().unwrap_or_else(|| ratio(0, 1)),
+    ];
+    let pressure = pair_pressures(&rates, &rho).and_then(|pairs| plane_pressures(&pairs));
+    (twist, pressure)
+}
+
+/// The share the VACUUM face consumes under the same twist (docs/126 §3): the
+/// strip past its half twist reads the helix reversed, so the plane pressures
+/// stand with their sense flipped, `e ⊕ (−P₁) ⊕ (−P₂) ⊕ (−P₃)`, held in
+/// `[0, 1)`. The continuum releases on the twist's pressure; the vacuum
+/// consumes on its inverse; with no twist both shares stand bare.
+pub fn consumed_share(e: &Ratio, planes: &[Ratio; 3]) -> Option<Ratio> {
+    released_share(
+        e,
+        &[-planes[0].clone(), -planes[1].clone(), -planes[2].clone()],
+    )
+}
+
 /// The tension a fibre carries (docs/100 §9.2, read per pair): its leads
 /// over its enclosure's plane on each plane, `d_k = t_k − t̄_k`, their twist
 /// on each pair `d_j ⊖ d_k`, and the tightest-wound pair's: a fibre parts
@@ -160,6 +199,37 @@ pub fn carried_twist(spins: &[Ratio], plane: &[Ratio]) -> Vec<Ratio> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_strips_two_faces_cancel_and_no_twist_leaves_them_bare() {
+        // docs/126 §3: the continuum releases on the twist's pressure, the
+        // vacuum consumes on its inverse; composed through both, a share
+        // returns exactly (the flow law a group); with no twist both stand
+        // bare.
+        let planes = [ratio(1, 7), ratio(-1, 5), ratio(1, 11)];
+        let whole = planes
+            .iter()
+            .try_fold(ratio(0, 1), |a, p| compose(&a, p))
+            .expect("in the flow law's domain");
+        for x in [ratio(1, 3), ratio(1, 2), ratio(2, 9)] {
+            let there = compose(&x, &whole).expect("released");
+            assert_eq!(
+                compose(&there, &-whole.clone()),
+                Some(x.clone()),
+                "the faces cancel"
+            );
+            let bare = [ratio(0, 1), ratio(0, 1), ratio(0, 1)];
+            assert_eq!(released_share(&x, &bare), Some(x.clone()));
+            assert_eq!(consumed_share(&x, &bare), Some(x.clone()));
+        }
+        // The vacuum reads the pressures' sense flipped: consumed under P is
+        // released under −P.
+        let neg = [-planes[0].clone(), -planes[1].clone(), -planes[2].clone()];
+        assert_eq!(
+            consumed_share(&ratio(1, 3), &planes),
+            released_share(&ratio(1, 3), &neg)
+        );
+    }
 
     #[test]
     fn the_antipole_balances_what_the_attractor_moves_on_every_plane() {

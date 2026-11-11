@@ -2146,28 +2146,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 };
                 let rings_now =
                     g_rate.clone().unwrap_or_else(|| ratio(1, 1)) * ratio(bell as i64, 1);
-                // The core's twist is its wound plane: its disc's plane with
-                // the antipole the settle gave it (docs/100 §8.3).
-                let disc_spin = crate::torsion::plane_spin(&core.flows)
-                    .iter()
-                    .fold(ratio(0, 1), |a, l| a + l.clone());
-                let twist_t = crate::torsion::wound(&core.tilt, &core.antipole, &disc_spin);
+                // The core's twist and its pressure (`torsion::core_twist`,
+                // docs/100 §8.3, docs/126 §3): it sets how much leaves (the
+                // share) and how it leaves (each plane's rate).
+                let (twist_t, planes_p) = crate::torsion::core_twist(core);
                 let lead = core.tilt.clone();
-                // The twist's pressure on the expungement (crate::torsion;
-                // operator 2026-11-06): the core's plane rates are its twist
-                // per ring, `2δ·t_k` with `δ = ½` (docs/100 §2), each pair's
-                // pressure the throat's share of the core's holding times the
-                // pair's twist rate, each plane's the composition of its two
-                // pairs'. It sets how much leaves (the share) and how it
-                // leaves (each plane's rate).
-                let rho = if mass(&core.total()).is_zero() {
-                    ratio(0, 1)
-                } else {
-                    mass(&core.throat) / mass(&core.total())
-                };
-                let twist_rates = [twist_t[0].clone(), twist_t[1].clone(), twist_t[2].clone()];
-                let planes_p = crate::torsion::pair_pressures(&twist_rates, &rho)
-                    .and_then(|pairs| crate::torsion::plane_pressures(&pairs));
                 let ledger_r = if home {
                     ledger_u.clone()
                 } else {
@@ -2498,6 +2481,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 .collect();
             crate::profile::mark("rec:recycle");
             let before = core.flows.len();
+            // The vacuum face of the strip consumes under the core's twist
+            // reversed (docs/126 §3).
+            let (_, twist_p) = crate::torsion::core_twist(core);
             let r = crate::recycle::recycle(
                 &mut core.flows,
                 &in_throat,
@@ -2506,6 +2492,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &(g_mass.clone() - (h.clone() - ratio(1, 1)) * g_mass.clone()),
                 bell,
                 densest,
+                twist_p.as_ref(),
             );
             motes_in[2] += core.flows.len().saturating_sub(before);
             // Whatever passed the throat, split or not, leaves on the

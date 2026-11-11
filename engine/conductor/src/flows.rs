@@ -3848,7 +3848,11 @@ mod passage_tests {
             .iter()
             .map(|&k| super::frac(&(x.phase[k].clone() - was.phase[k].clone())))
             .fold(ratio(0, 1), |a, d| a + d);
-        assert_eq!(turned, ratio(1, 2), "one pass: half a turn, shared by the lead");
+        assert_eq!(
+            turned,
+            ratio(1, 2),
+            "one pass: half a turn, shared by the lead"
+        );
         mobius(&mut x);
         assert!(!x.vacuum, "two passes: the face returned");
         assert_eq!(x.spins, was.spins, "the shares returned");
@@ -3859,7 +3863,11 @@ mod passage_tests {
                 "plane {k}: the whole twist kept"
             );
         }
-        assert_eq!(x.phase[super::LOOP], was.phase[super::LOOP], "the loop untouched");
+        assert_eq!(
+            x.phase[super::LOOP],
+            was.phase[super::LOOP],
+            "the loop untouched"
+        );
     }
 
     #[test]

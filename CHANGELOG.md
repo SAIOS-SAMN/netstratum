@@ -143,6 +143,12 @@ change is named here.
 
 ### Changed
 
+- The vacuum as a Möbius strip (docs/126, EQUATIONS E37, E37a; operator
+  2026-11-11). The pass carries the strip's half twist, each plane `½·t_k`
+  by the mote's lead, in place of a flat ½ on every plane. The core's twist
+  pressure (`torsion::core_twist`, one reading) releases on the continuum
+  and consumes, reversed, on the vacuum face at the throat, where recycling
+  deconstructs `E/(S + E) ⊕ (−P₁) ⊕ (−P₂) ⊕ (−P₃)`.
 - A body's push oriented on the open pole, with its antipole (docs/125 §4.1,
   EQUATIONS E16): `p = Q·(1 − g)/w`, the protons' charge left open at the
   body's place, `p̄ = 1 − p` on the vacuum leg; no `½`, replacing `½·U/w`. The

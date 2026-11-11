@@ -131,7 +131,9 @@ pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
 }
 
 /// Recycle the (parted) motes at `at`, the matter standing in the throat,
-/// under the bounce `b = p − Σ m·|Δℓ|` contained in `s` (holding units).
+/// under the bounce `b = p − Σ m·|Δℓ|` contained in `s` (holding units), its
+/// deconstruction on the strip's vacuum face under the core's `twist`
+/// pressure reversed (docs/126 §3; none: the bare share).
 /// Products keep their mote's state; the heaviest join the container as of
 /// `bell` while it stays within `g`, the weight of the rest of its galaxy
 /// (holding units): they stand at the throat (reach 0), and the spin they
@@ -145,6 +147,7 @@ pub fn recycle(
     g: &Ratio,
     bell: u64,
     densest: u32,
+    twist: Option<&[Ratio; 3]>,
 ) -> Recycled {
     let mut out = Recycled::default();
     if *b <= ratio(0, 1) || *s <= ratio(0, 1) {
@@ -155,7 +158,15 @@ pub fn recycle(
         .filter(|&&i| i < motes.len() && motes[i].key == crate::chem::hydrogen())
         .fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone());
     let e = b.clone() * s.clone();
-    let built = s.clone() / (s.clone() + e.clone());
+    // The vacuum face of the strip (docs/126 §3): what the throat
+    // deconstructs, `E/(S + E)`, composed with the core's twist pressure
+    // reversed, the helix past the half twist; pressed is the rest.
+    let bare = e.clone() / (s.clone() + e.clone());
+    let deconstructed = twist
+        .and_then(|p| crate::torsion::consumed_share(&bare, p))
+        .map(|d| d.min(ratio(1, 1)))
+        .unwrap_or(bare);
+    let built = ratio(1, 1) - deconstructed;
     let mut stack: Vec<usize> = at.iter().copied().filter(|&i| i < motes.len()).collect();
     crate::profile::mark("rec:press");
     // Constructed: each kind's share pressed like with like on the rung.
@@ -479,6 +490,7 @@ mod tests {
             &ratio(4, 1),
             1,
             1612,
+            None,
         );
         assert_eq!(three_z(&ms), before);
         assert!(r.pressed > ratio(0, 1) && r.heat > ratio(0, 1));
@@ -493,7 +505,8 @@ mod tests {
                 &ratio(4, 1),
                 &ratio(4, 1),
                 1,
-                1612
+                1612,
+                None
             ),
             Recycled::default()
         );
@@ -530,7 +543,7 @@ mod tests {
         ms[2].agitation = ratio(2, 9);
         let (b, s) = (ratio(1, 3), ratio(5, 1));
         let before = bond(&ms) + heat(&ms);
-        let r = recycle(&mut ms, &[0, 1, 2], &b, &s, &ratio(200, 1), 1, 1612);
+        let r = recycle(&mut ms, &[0, 1, 2], &b, &s, &ratio(200, 1), 1, 1612, None);
         assert!(r.pressed > ratio(0, 1) && r.peeled > ratio(0, 1));
         assert!(r.trapped > ratio(0, 1));
         assert!(r.worked <= b.clone() * s.clone());
@@ -539,7 +552,7 @@ mod tests {
         // matter, and the bounce does no work.
         let mut hs = vec![mote("W0001", ratio(40, 1))];
         let before = bond(&hs) + heat(&hs);
-        let r = recycle(&mut hs, &[0], &b, &s, &ratio(200, 1), 1, 1612);
+        let r = recycle(&mut hs, &[0], &b, &s, &ratio(200, 1), 1, 1612, None);
         assert!(r.pressed > ratio(0, 1) && r.heat > ratio(0, 1) && r.spent == ratio(0, 1));
         assert_eq!(r.worked, ratio(0, 1));
         assert_eq!(bond(&hs) + heat(&hs) + r.light, before);
@@ -610,6 +623,7 @@ mod tests {
             &ratio(4, 1),
             1,
             1612,
+            None,
         );
         assert_eq!(nucleons(&ms), before);
         assert!(ms.iter().all(|x| crate::chem::weight(&x.key) <= 1612));
@@ -625,6 +639,7 @@ mod tests {
             &ratio(4, 1),
             1,
             1612,
+            None,
         );
         assert_eq!(nucleons(&ms), before);
     }

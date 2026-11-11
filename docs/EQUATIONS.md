@@ -1761,9 +1761,25 @@ its lead over its enclosure's plane. The scalar `Σ_k |t_k − t̄_k|/2` is
 retired: `flows::torsion_signed` and the band pairs' torsion read the
 tightest pair.
 
-**E37 · The Möbius pass.** Built. `flows::mobius`, `flows::torsion_signed`.
+**E37 · The Möbius pass, the strip's half twist.** Built. `flows::mobius`,
+`flows::torsion_signed` (docs/126 §2). The continuum and the vacuum are one
+strip's two faces. One pass turns the face over and reverses the helix, and
+each spatial plane takes its share of the half twist, the core's twist locked
+into the mote's lead:
 
-    (δ, ψ, s) ↦ (1 − δ, ψ + ½, −s)
+    (δ, ψ_k, s) ↦ (1 − δ, ψ_k + ½·t_k, −s)        Σ_k ½·t_k = ½
+
+Two passes return the face, the sense and the shares, the phases a whole twist
+on, with the winding kept.
+
+**E37a · One pressure on the strip's two faces.** `torsion::core_twist`,
+`torsion::released_share`, `torsion::consumed_share`, `recycle::recycle`
+(docs/126 §3). The core's twist pressure `P_k` releases on the continuum face
+and consumes, reversed, on the vacuum face at the throat:
+
+    s′ = s ⊕ P₁ ⊕ P₂ ⊕ P₃        e′ = E/(S + E) ⊕ (−P₁) ⊕ (−P₂) ⊕ (−P₃)
+
+The two faces cancel, `(x ⊕ ΣP) ⊕ (−ΣP) = x`; no twist leaves both bare.
 
 **E38 · The attractor's keep.** Built. `flows::attractor_keep`,
 `flows::settle_disc`.
