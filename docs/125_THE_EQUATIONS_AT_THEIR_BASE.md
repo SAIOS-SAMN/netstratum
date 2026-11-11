@@ -148,10 +148,27 @@ The operator on item 2: "regardless of the orientation, this is your
 orientation which needs to be defined and needs the antipole/inversion
 applied as well". On item 1: "your call".
 
-**Item 1, the electrons' held share:** docs/104 §1.1's count, the phase
-kept. A share read as `g` drops R, the offset the nucleon dipole stands on.
+**Item 1, the electrons' held share: docs/105 §3 governs** (revised the
+same day, before any build). docs/105 is the later derivation from the
+polarity master equation, built and read with Xylarium. It removed the
+halving docs/104 §1.1 objected to: electrons bind at the held face `g` and
+free at the unlocked face `u`, so they stand bound at `g/(g + u) = g`, with
+no phase and no halving.
 
-    h(w, p) = (F_e + L_e·in_step(p, φ_held)) / Q      φ_held = ½ (inverse)
+The count with the phase was first chosen here, and is refused for two
+reasons:
+- At the founding's phase (`frac(p) = ½`, docs/97 §13) it reads
+  `in_step(½, ½) = 1` on the inverted face. Deuterium's held share becomes 1,
+  the seal window moves from `¾` to `1` at `ν = 2`, and the neutron share
+  goes to 0.
+- It puts R in a share, which Xylarium #183 rules out: "the Z–Q stretch is
+  the axis plane's **share**, not its phase. The phase φ₀ joins the common
+  turn."
+
+So **R is the axis plane's phase in the turning** (the orientation, docs/117
+§11.7), never a factor in a share.
+
+    h = g        (the held share at the body's own place)
 
 **Item 2, the push: its orientation, its antipole, and the inversion.**
 - **The orientation is Netstratum's own, the open pole.** The protons' open
@@ -159,20 +176,19 @@ kept. A share read as `g` drops R, the offset the nucleon dipole stands on.
   the join `S¹¹ = S¹_axis * S⁹_iso` (Xylarium #183). This is docs/104 §1.2's
   "open in both frames: the inverse nucleus already makes the protons the
   open ends".
-- **R offsets it.** Charge moves between the poles only with R (docs/97 §1).
-  The electrons standing on the held hemisphere, `h·Q` of them, carry their
-  protons' charge onto the held side. So the push is the protons' charge
-  left open:
+- **The bound electrons close it.** The electrons bound at their place,
+  `h·Q = g·Q` of them, carry their protons' charge onto the held side. So the
+  push is the protons' charge left open, at the unlocked face:
 
-      p = Q·(1 − h) / w
+      p = Q·(1 − g) / w = Q·u / w
 
-  A bare proton (hydrogen, `h = 0`) pushes fully. A neutral atom, every
-  electron bound (`h = 1`), pushes not at all.
+  A body where nothing holds (`g = 0`) pushes by all its protons; one held
+  whole (`g = 1`) pushes not at all.
 - **The antipole is derived by the same inversion, never left out.** It is
   the held stratum: the neutrons, with the charge the electrons carried
   there:
 
-      p̄ = (Z + Q·h) / w = 1 − p
+      p̄ = (Z + Q·g) / w = 1 − p
 
   `p` and `p̄` are a pair share (docs/104 §1.2), with no `½`.
 - **The inversion `I` exchanges them across the faces.** The continuum leg
