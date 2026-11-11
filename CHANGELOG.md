@@ -12,6 +12,14 @@ change is named here.
 
 ### Added
 
+- The bell on the group (docs/128 §9, EQUATIONS E65; operator 2026-11-11,
+  "rewrite entirely in non-euclidean space"). A mote carries its spin on all
+  six planes of its orientation (`Mote::spins_orth`, three partner spins in
+  place of one loop spin). Each half of the spin moves by one Cayley vector
+  a ring at its own reach and rate, composed on S³ × S³; the tilt's
+  per-plane turning, the loop laid on every partner alike and §8 step 3's
+  per-plane reach retire. The bond test (`flows::collections`) decides
+  pairs on certified whole-number bounds, with a work counter.
 - Drag, the jetstream's counterflow (docs/128 §4a, EQUATIONS E64; operator
   2026-11-11). The forward traversal's rate read through the strip's pass is
   `−1/b`, so drag is the same jetstream on the other face, share `1 − s`. It

@@ -1970,7 +1970,25 @@ advances the phase `½·Δλ_k`. Replaces docs/126 §2's `½·t_k` and the face 
 one flag a mote. **Built (docs/128 §8):** the plane's form (`strip::PlaneForm`:
 its pair in `G`, its axis's poles, its reach and face); the torque turns each
 plane's pair, the plane `2·s_k′` a bell and its R partner with it, retiring
-the tilt's `2δ·t_k` (`flows::torque` takes the core's twist pressure).
+the tilt's `2δ·t_k`. **Superseded by E65** (docs/128 §9): the bell moves each
+half of the spin on the group; the per-plane reach and `2·s_k′` retire, and the
+twist pressure leaves the torque until it is read per half.
+
+**E65 · The bell on the group: six spins, one motion a half.**
+`orientation::spin_halves`, `orientation::size`, `orientation::half_motion`,
+`Orientation::bell_halves`, `flows::Mote::spins_orth` (docs/128 §9; operator
+2026-11-11). The spin on all six planes of `G`; its halves each at their own
+reach and rate, moving by one Cayley vector a ring, composed on S³ × S³:
+
+    ℓ+_k = ℓ_k − ℓ_kR    ℓ−_k = ℓ_k + ℓ_kR    ℓ± = Σ_k |ℓ±_k|
+    R± = ℓ±/H(<ℓ±)    δ± = H/(R± + H)    b± = δ±/(1 − δ±)
+    u±_k = b±·ℓ±_k/ℓ±    q± ↦ q±·m±·m±,  m± = (1 + u±)(1 − u±)⁻¹
+
+The vacuum reads `1 − δ±` (`b ↦ 1/b`). **Built:** the six spins (the save
+keeps the partners' shares), the halves and the bell; it retires E63's
+per-plane `2·s_k′`, the tilt's `2δ·t_k` and the loop on every partner alike.
+`spin_torque`, the face, transit, pressure and drag move onto `δ±` next
+(§9.7 step 4).
 
 **E64 · Drag: the jetstream's counterflow on the traversal.**
 `strip::counter_rate`, `strip::medium_transit`, `strip::drag`,

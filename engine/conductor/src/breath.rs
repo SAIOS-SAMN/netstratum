@@ -2419,15 +2419,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 })
             };
             let before = ledger_sum(core);
-            // The core's twist pressure on each plane (docs/126 §3, docs/128 §4).
-            let (_, core_p) = crate::torsion::core_twist(core);
             let (given, absorbed, heated) = crate::flows::torque(
                 &mut core.flows,
                 enc.as_ref().unwrap_or(&throat),
                 &p,
                 tide,
                 &ledger_unit,
-                core_p.as_ref(),
                 &mut cross,
             );
             // The disc forms: each mote's tilt returns toward its galaxy's spin

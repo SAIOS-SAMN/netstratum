@@ -200,8 +200,7 @@ fn halves(g: &[Ratio; 6]) -> ([Ratio; 3], [Ratio; 3]) {
     (plus, minus)
 }
 
-#[cfg(test)]
-/// The generator on [`PLANES`] from its halves.
+/// The generator on [`PLANES`] from its halves (the inverse of [`halves`]).
 fn joined(plus: &[Ratio; 3], minus: &[Ratio; 3]) -> [Ratio; 6] {
     let two = ratio(2, 1);
     std::array::from_fn(|p| {
@@ -211,6 +210,38 @@ fn joined(plus: &[Ratio; 3], minus: &[Ratio; 3]) -> [Ratio; 6] {
             (minus[p - 3].clone() - plus[p - 3].clone()) / two.clone()
         }
     })
+}
+
+/// A body's spin split onto the halves (docs/128 §9.3), as [`halves`]
+/// splits a generator: `ℓ+_k = ℓ_k − ℓ_kR`, `ℓ−_k = ℓ_k + ℓ_kR`, the spatial
+/// spins on `flows::SPACE`'s order and their partners'. A missing component
+/// is none.
+pub fn spin_halves(spatial: &[Ratio], partner: &[Ratio]) -> ([Ratio; 3], [Ratio; 3]) {
+    let at = |v: &[Ratio], k: usize| v.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
+    let g: [Ratio; 6] = std::array::from_fn(|p| {
+        if p < 3 {
+            at(spatial, p)
+        } else {
+            at(partner, p - 3)
+        }
+    });
+    halves(&g)
+}
+
+/// A half's size, first degree (design law 2): `Σ_k |u_k|`.
+pub fn size(u: &[Ratio; 3]) -> Ratio {
+    u.iter().fold(ratio(0, 1), |s, x| s + x.abs())
+}
+
+/// One half's motion a ring (docs/128 §9.4): the Cayley vector of the rate
+/// `b` along the half's own spin, `u_k = b·ℓ_k/ℓ` (`ℓ` its size). A half
+/// with no spin does not move.
+pub fn half_motion(spin: &[Ratio; 3], b: &Ratio) -> [Ratio; 3] {
+    let l = size(spin);
+    if l.is_zero() {
+        return std::array::from_fn(|_| ratio(0, 1));
+    }
+    std::array::from_fn(|k| b.clone() * spin[k].clone() / l.clone())
 }
 
 /// A motion on the two halves.
@@ -495,6 +526,21 @@ impl Orientation {
             self.windings[PARTNER[j]] += n;
             b[PARTNER[j]] = ring_rate(&rest);
         }
+        self.advance_by(&b, 2)
+    }
+
+    /// One bell on the group (docs/128 §9.4): each half moved by its own
+    /// Cayley vector a ring, `q± ↦ q±·m±·m±`, `m± = (1 + u±)(1 − u±)⁻¹`. The
+    /// pair is handed to the composition as the generator joined from the
+    /// halves, each component held on the grain (the carrier, as every
+    /// rate).
+    pub fn bell_halves(
+        &mut self,
+        plus: &[Ratio; 3],
+        minus: &[Ratio; 3],
+    ) -> Result<(), TurningRefusal> {
+        let b = joined(plus, minus);
+        let b: [Ratio; 6] = std::array::from_fn(|p| crate::ring::grain(&b[p]));
         self.advance_by(&b, 2)
     }
 
@@ -792,5 +838,68 @@ mod tests {
         }
         assert_eq!(reading(&ratio(1, 1)), ratio(1, 2));
         assert_eq!(reading(&ratio(-1, 1)), ratio(1, 2));
+    }
+
+    #[test]
+    fn with_no_partner_spin_the_halves_move_alike_and_r_is_held() {
+        // docs/128 §9.4: equal halves rotate the three spatial axes alone.
+        let spins = [ratio(1, 4), ratio(1, 2), ratio(1, 4)];
+        let (p, m) = spin_halves(&spins, &[]);
+        assert_eq!(p, m);
+        let b = ratio(1, 5);
+        let (up, um) = (half_motion(&p, &b), half_motion(&m, &b));
+        assert_eq!(size(&up), b, "a half moves by its one rate");
+        let mut o = Orientation::default();
+        o.bell_halves(&up, &um).expect("a motion");
+        for &q in &PARTNER {
+            assert!(o.g()[q].is_zero(), "the partners are held");
+        }
+        assert!(SPATIAL.iter().all(|&q| !o.g()[q].is_zero()));
+    }
+
+    #[test]
+    fn partner_spin_parts_the_halves_and_exchanging_them_reverses_r() {
+        let spins = [ratio(1, 4), ratio(1, 2), ratio(1, 4)];
+        let partner = [ratio(1, 8), ratio(0, 1), ratio(-1, 16)];
+        let (p, m) = spin_halves(&spins, &partner);
+        assert_ne!(p, m, "the halves part");
+        // Reversing every partner exchanges the halves.
+        let back: Vec<Ratio> = partner.iter().map(|x| -x.clone()).collect();
+        let (p2, m2) = spin_halves(&spins, &back);
+        assert_eq!((p2.clone(), m2.clone()), (m.clone(), p.clone()));
+        // The law, exact (the grain floors toward −∞, so a mirrored state
+        // stands within a grain of the mirror once floored).
+        let b = |h: &[Ratio; 3]| half_motion(h, &ratio(1, 6));
+        let bell = |p: &[Ratio; 3], m: &[Ratio; 3]| {
+            let step = Motion::of(&joined(p, m));
+            step.then(&step).generator().expect("a generator")
+        };
+        let (o, r) = (bell(&b(&p), &b(&m)), bell(&b(&p2), &b(&m2)));
+        for k in 0..3 {
+            assert_eq!(o[SPATIAL[k]], r[SPATIAL[k]], "spatial kept");
+            assert_eq!(o[PARTNER[k]], -r[PARTNER[k]].clone(), "partners reversed");
+        }
+        assert!(PARTNER.iter().any(|&q| !o[q].is_zero()), "R turns");
+    }
+
+    #[test]
+    fn the_bell_is_the_groups_product_not_the_charts_sum() {
+        // Two rings composed, m·m, against one ring at the doubled rate.
+        let u = [ratio(1, 3), ratio(1, 5), ratio(0, 1)];
+        let w = [ratio(1, 7), ratio(0, 1), ratio(1, 4)];
+        let mut o = Orientation::default();
+        o.bell_halves(&u, &w).expect("a motion");
+        let joined_b = joined(&u, &w);
+        let doubled: [Ratio; 6] =
+            std::array::from_fn(|p| crate::ring::grain(&(ratio(2, 1) * joined_b[p].clone())));
+        let mut flat = Orientation::default();
+        flat.advance_by(&doubled, 1).expect("a motion");
+        assert_ne!(o.g(), flat.g(), "composition is not the doubled rate");
+    }
+
+    #[test]
+    fn a_half_with_no_spin_does_not_move() {
+        let none = std::array::from_fn(|_| ratio(0, 1));
+        assert_eq!(half_motion(&none, &ratio(3, 1)), none);
     }
 }

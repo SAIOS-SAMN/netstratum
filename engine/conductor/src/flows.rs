@@ -1330,7 +1330,6 @@ pub fn torque(
     p: &Ratio,
     tide: Option<(&Ratio, &Ratio)>,
     total: &Ratio,
-    twist: Option<&[Ratio; 3]>,
     cross: &mut crate::enfold::Cross,
 ) -> (Ratio, Ratio, Ratio) {
     let mut given = ratio(0, 1);
@@ -1352,7 +1351,7 @@ pub fn torque(
     };
     for x in motes.iter_mut() {
         if lo == hi {
-            let (g, ab, ht) = torque_one(x, enc, &lo, tide, total, twist, cross);
+            let (g, ab, ht) = torque_one(x, enc, &lo, tide, total, cross);
             given += g;
             absorbed += ab;
             heated += ht;
@@ -1363,8 +1362,8 @@ pub fn torque(
             crate::enfold::Cross::default(),
             crate::enfold::Cross::default(),
         );
-        let (ga, aa, ha) = torque_one(&mut xa, enc, &lo, tide, total, twist, &mut ca);
-        let (gb, ab, hb) = torque_one(&mut xb, enc, &hi, tide, total, twist, &mut cb);
+        let (ga, aa, ha) = torque_one(&mut xa, enc, &lo, tide, total, &mut ca);
+        let (gb, ab, hb) = torque_one(&mut xb, enc, &hi, tide, total, &mut cb);
         if xa == xb && ca == cb && ga == gb && aa == ab && ha == hb {
             *x = xa;
             cross.join(&ca);
@@ -1372,7 +1371,7 @@ pub fn torque(
             absorbed += aa;
             heated += ha;
         } else {
-            let (g, ab, ht) = torque_one(x, enc, p, tide, total, twist, cross);
+            let (g, ab, ht) = torque_one(x, enc, p, tide, total, cross);
             given += g;
             absorbed += ab;
             heated += ht;
@@ -1490,7 +1489,6 @@ fn torque_one(
     p: &Ratio,
     tide: Option<(&Ratio, &Ratio)>,
     total: &Ratio,
-    twist: Option<&[Ratio; 3]>,
     cross: &mut crate::enfold::Cross,
 ) -> (Ratio, Ratio, Ratio) {
     // Each turns by what is enclosed inside it (the core and all inside),
@@ -1536,29 +1534,27 @@ fn torque_one(
     // §11.7.4): its two rings, each half the bell's turns at the rate
     // `b = δ/(1 − δ)` a plane; then each reading held to its place.
     let step = turning_of(&marks, &tilt, &r_o, &h, p, tide, x.vacuum);
-    // Each plane turns its pair at its own velocity on its own face, resisted
-    // by the medium's twist pressure on it (docs/128 §1–§4, §8): the plane's
-    // component `2·s_k′` a bell, its R partner with it at the same plane
-    // rate plus the parent's push along the circulation. Retires the tilt's
-    // `2δ·t_k`.
-    let route = if x.vacuum { ratio(-1, 1) } else { ratio(1, 1) };
-    let forms = crate::strip::plane_forms(x, enc, total);
-    let rates: Vec<Ratio> = forms
-        .iter()
-        .enumerate()
-        .map(|(j, f)| {
-            let p_k = twist.map(|t| t[j].clone()).unwrap_or_else(|| ratio(0, 1));
-            crate::strip::resisted(&f.reach.share, &p_k, &f.reach.face)
-                .unwrap_or_else(|| f.reach.share.clone())
-        })
-        .collect();
-    let space: Vec<Ratio> = rates.iter().map(|s| ratio(2, 1) * s.clone()).collect();
-    let circ: Vec<Ratio> = rates
-        .iter()
-        .map(|s| route.clone() * ratio(2, 1) * s.clone() + step.torque_orth.clone())
-        .collect();
+    // The bell on the group (docs/128 §9.4): each half of the spin moves by
+    // one Cayley vector a ring, its rate `b± = H/R±` at its own reach along
+    // its own spin, composed twice; the vacuum's face reads the reciprocal
+    // rate (`δ ↦ 1 − δ`). Retires the tilt's `2δ·t_k`, the loop laid on every
+    // partner alike, and the rate taken plane by plane.
+    let (plus, minus) = crate::orientation::spin_halves(&x.spins, &x.spins_orth);
+    let rate_of = |half: &[Ratio; 3]| {
+        let l = crate::orientation::size(half);
+        if l.is_zero() {
+            return ratio(0, 1);
+        }
+        let (_, _, d) = lifted(enc, &l, &x.lift);
+        let d = if x.vacuum { ratio(1, 1) - d } else { d };
+        crate::orientation::rate(&d).unwrap_or_else(|| ratio(0, 1))
+    };
+    let (b_plus, b_minus) = (rate_of(&plus), rate_of(&minus));
     x.orientation
-        .bell(&space, &circ)
+        .bell_halves(
+            &crate::orientation::half_motion(&plus, &b_plus),
+            &crate::orientation::half_motion(&minus, &b_minus),
+        )
         .expect("a real generator always has a motion");
     let mut held = x.phase();
     let (scar, levers) = hold_to_place(&mut held, place.as_ref(), &heat_was, cross);
