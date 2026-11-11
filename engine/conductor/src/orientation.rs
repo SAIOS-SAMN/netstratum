@@ -204,6 +204,14 @@ impl Half {
         }
     }
 
+    /// A pure `v` carried by this unit, `h·v·h̄` (docs/128 §11.1): exact, a
+    /// conjugation, no norm read.
+    fn carry(&self, v: &[Ratio; 3]) -> [Ratio; 3] {
+        let x = Half::of_ratios(&[ratio(0, 1), v[0].clone(), v[1].clone(), v[2].clone()]);
+        let r = self.product(&x).product(&self.conjugate()).ratios();
+        [r[1].clone(), r[2].clone(), r[3].clone()]
+    }
+
     /// Its four components, exact: `(scalar, i, j, k)`.
     fn ratios(&self) -> [Ratio; 4] {
         std::array::from_fn(|k| Ratio::new(self.n[k].clone(), self.d.clone()))
@@ -272,6 +280,45 @@ pub fn half_motion(spin: &[Ratio; 3], b: &Ratio) -> [Ratio; 3] {
         return std::array::from_fn(|_| ratio(0, 1));
     }
     std::array::from_fn(|k| b.clone() * spin[k].clone() / l.clone())
+}
+
+/// A ring's tilt against a reference axis (docs/128 §11.3), read from the
+/// product of the axes on the half, `Q = A·ā`: its scalar part `A·a` the axis
+/// along the reference, its vector part `A×a` the line of nodes.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Tilt {
+    /// The inclination share, `|A×a|₁/(|A·a| + |A×a|₁)`: `0` in the
+    /// reference's plane, `1` polar.
+    pub share: Ratio,
+    /// The sense, `sign(A·a)`: `1` prograde, `−1` retrograde, `0` polar.
+    pub sense: Ratio,
+    /// The line of nodes, `A×a`.
+    pub nodes: [Ratio; 3],
+}
+
+/// The tilt of an axis `a` against a reference `A` (docs/128 §11.3). None
+/// where either has no size.
+pub fn tilt(axis: &[Ratio; 3], reference: &[Ratio; 3]) -> Option<Tilt> {
+    if size(axis).is_zero() || size(reference).is_zero() {
+        return None;
+    }
+    let pure =
+        |v: &[Ratio; 3]| Half::of_ratios(&[ratio(0, 1), v[0].clone(), v[1].clone(), v[2].clone()]);
+    let q = pure(reference).product(&pure(axis).conjugate()).ratios();
+    let along = q[0].clone();
+    let nodes = [q[1].clone(), q[2].clone(), q[3].clone()];
+    let across = size(&nodes);
+    let share = across.clone() / (along.abs() + across);
+    let sense = match along.cmp(&ratio(0, 1)) {
+        std::cmp::Ordering::Greater => ratio(1, 1),
+        std::cmp::Ordering::Less => ratio(-1, 1),
+        std::cmp::Ordering::Equal => ratio(0, 1),
+    };
+    Some(Tilt {
+        share,
+        sense,
+        nodes,
+    })
 }
 
 /// A motion on the two halves.
@@ -583,6 +630,13 @@ impl Orientation {
         }))
     }
 
+    /// Each half's axis in space (docs/128 §11.1): its spin in the body's
+    /// own axes carried by its half, `a+ = p·ℓ+·p̄`, `a− = q·ℓ−·q̄`, exact.
+    pub fn half_axes(&self, plus: &[Ratio; 3], minus: &[Ratio; 3]) -> ([Ratio; 3], [Ratio; 3]) {
+        let Motion(p, q) = Motion::of(&self.g);
+        (p.carry(plus), q.carry(minus))
+    }
+
     /// The orientation whose state is `(F, C)`: `q = F`, `p = C·F`, its
     /// generator held on the grain, unwound.
     pub fn of_form_twist(
@@ -727,6 +781,55 @@ impl Orientation {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn v3(a: i64, b: i64, c: i64, d: i64) -> [Ratio; 3] {
+        [ratio(a, d), ratio(b, d), ratio(c, d)]
+    }
+
+    #[test]
+    fn a_ring_keeps_its_axis_under_its_own_motion() {
+        // docs/128 §11.1: m± commutes with ℓ±, so the axis in space stands.
+        let g: [Ratio; 6] = std::array::from_fn(|p| ratio(p as i64 + 1, 11));
+        let Motion(p, q) = Motion::of(&g);
+        let (plus, minus) = (v3(3, -1, 2, 5), v3(1, 4, -2, 7));
+        for (h, spin) in [(p, plus), (q, minus)] {
+            let b = ratio(3, 8);
+            let m = Half::motion(&half_motion(&spin, &b));
+            assert_eq!(h.product(&m).carry(&spin), h.carry(&spin));
+        }
+    }
+
+    #[test]
+    fn equal_halves_give_one_axis() {
+        // No partner component: p = q, so equal spins carry to one axis.
+        let mut g: [Ratio; 6] = std::array::from_fn(|_| ratio(0, 1));
+        g[0] = ratio(1, 3);
+        g[1] = ratio(-2, 7);
+        g[2] = ratio(1, 5);
+        let o = Orientation::of_generator(g, [0; 6]);
+        let spin = v3(2, 1, -3, 4);
+        let (a, b) = o.half_axes(&spin, &spin);
+        assert_eq!(a, b);
+        assert_ne!(a, spin, "the orientation carries the axis");
+    }
+
+    #[test]
+    fn tilt_reads_its_limits_and_is_scale_free() {
+        let up = v3(0, 0, 1, 1);
+        let t = tilt(&v3(0, 0, 5, 2), &up).expect("aligned");
+        assert_eq!((t.share, t.sense), (ratio(0, 1), ratio(1, 1)));
+        let t = tilt(&v3(0, 0, -3, 1), &up).expect("reversed");
+        assert_eq!((t.share, t.sense), (ratio(0, 1), ratio(-1, 1)));
+        let t = tilt(&v3(1, -2, 0, 1), &up).expect("polar");
+        assert_eq!((t.share, t.sense), (ratio(1, 1), ratio(0, 1)));
+        let (a, r) = (v3(1, 2, 3, 1), v3(-1, 1, 4, 3));
+        let s = tilt(&a, &r).expect("tilted");
+        let scaled: [Ratio; 3] = std::array::from_fn(|k| a[k].clone() * ratio(7, 2));
+        let r2: [Ratio; 3] = std::array::from_fn(|k| r[k].clone() * ratio(5, 1));
+        assert_eq!(tilt(&scaled, &r2).expect("scaled").share, s.share);
+        assert!(s.share > ratio(0, 1) && s.share < ratio(1, 1));
+        assert!(tilt(&v3(0, 0, 0, 1), &up).is_none());
+    }
 
     fn zero() -> [Ratio; 6] {
         std::array::from_fn(|_| ratio(0, 1))

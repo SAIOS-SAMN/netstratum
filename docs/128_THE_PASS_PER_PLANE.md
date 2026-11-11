@@ -157,6 +157,58 @@ heat is the transit lane's restoration in docs/127 §4. Its keep must be
 read first degree: kinetic energy as a square of the share is refused
 (docs/78). It is derived with #184.
 
+## 4b. Drag's orthogonal axis: repulsion, the inverse velocity of pressure
+
+**Operator 2026-11-11:** "drag needs an orthogonal axis on repulsion as
+inverse velocity of pressure".
+
+§4a reads drag on one axis, the traversal, so it is flat. A jetstream has two
+legs on two axes. The continuum flows out in the ring's plane, and the
+vacuum is drawn in along the ring's axis (docs/94 §2). The counterflow
+therefore also stands orthogonal to the traversal, on the ring's axis `a±`
+(§11.1). There the medium does not carry the parcel along: its pressure
+pushes back against the parcel's crossing. That push is repulsion, the
+restoring force toward the hydrostatic balance (docs/106 S3, docs/110).
+
+**The repulsion's measure: the pass of pressure's velocity.** A pressure
+share `P` on the ring moves at the flow law's rate, `b_P = P/(1 − P)` (E57).
+Read through the strip's pass, as §4a reads the forward rate:
+
+    M: b_P ↦ −1/b_P        share r = 1 − P, sense reversed
+
+So the repulsion is the inverse velocity of pressure. Its share is `1 − P`
+on the closed face, and its sense opposes the crossing. `b_P·(1/b_P) = 1` at
+every pressure, and no constant enters. The ring's pressure is the twist's
+pressure on its planes, read along its own direction (§9.3), first degree:
+
+    P± = Σ_k |t±_k|·P_k
+
+**What it acts on: the crossing.** The ring's motion on its transit `x =
+σ·s′` splits by its tilt (§11.3). It moves along the invariable plane on
+`ς(1 − τ)·x`, and it crosses the plane on `τ·x`. The along-part takes
+§4a's counterflow. The crossing takes the repulsion, by §4a's law on the
+orthogonal axis, with the medium's crossing over the range meeting it:
+
+    x⊥ = τ·x        x̄⊥ = Σ_j w_j·x⊥_j / Σ_j w_j        D⊥ = x⊥ ⊖ x̄⊥
+    T⊥ = (1 − P)·g·w·D⊥
+
+- **One law on two axes.** The drag's share is the axis's own velocity
+  turned over: `1 − s′` along the traversal, `1 − P` across it
+  (`strip::drag` with that axis's share).
+- **Never a source:** the exchange keeps `Σ w·x⊥` (§4a's exchange on the
+  crossing), so repulsion moves crossing between the parcel and the medium,
+  and none is made.
+- **What it does:** a ring crossing faster than the medium loses its
+  crossing to it, so the medium's rings settle toward the invariable plane.
+  That is the disc's flattening, read from pressure, not imposed.
+- **Its limits:** an untilted ring (`τ = 0`) has no crossing and feels no
+  repulsion. Pressure at the luminal bound (`P → 1`) turns at full velocity,
+  and its inverse falls to nothing. At `P = ½` the pressure's rate is `1`
+  and is its own inverse, the fixed point. With no pressure the repulsion
+  takes the whole departure, as §4a's drag does on a parcel at rest.
+- **Order:** the twist's pressure resists the traversal first (§4, `s′`),
+  then the along-drag (§4a) and the repulsion (here) read `s′`.
+
 ## 5. Every face-reading reads its plane's face
 
 Each law that names a face reads it per plane, at `λ_k`, through the transit:
@@ -572,6 +624,111 @@ manifold's shear, never a push:
    readings.
 4. **§9.7 step 4 on the factors:** `spin_torque` at `δ±`, the face, transit
    and drag per half.
+
+## 11. The ring: volume, axis and tilt
+
+**Operator 2026-11-11:** "your reference to a 'ring' needs volume, axis, and
+tilt".
+
+**Status:** derived; the readings are built (`strip::Ring`,
+`strip::half_rings`, `strip::invariable_axes`, `flows::ring_volume`,
+`orientation::tilt`, `Orientation::half_axes`) with §11.5's witnesses. The
+motion already turns about the axis by the rate; the face, transit,
+pressure and drag per half read the rest with §9.6.
+
+§9.4 moved each half "a ring" by a rate along a direction. That treats the
+ring as a circle with a speed, which is flat. A ring is the solid a half's
+motion sweeps on S³. An isoclinic motion's orbits are great circles that
+fibre S³ (the Hopf fibration). The fibres through a parcel's extent fill a
+solid torus. At `δ = ½` (`R = H`), the Clifford torus splits S³ into two
+solid tori, and the inversion `I` exchanges them (docs/104 §0, §10.1). So a
+ring has three readings, each on its half and each exact.
+
+### 11.1 Axis
+
+The half's spin in the body's own axes is `ℓ±` (§9.3). Its motion `m±`
+composes on the right (`h± ↦ h±·m±`, §9.4), so in space it turns about the
+spin carried by its half:
+
+    a+ = p·ℓ+·p̄        a− = q·ℓ−·q̄
+
+Each is a conjugation by a unit, so it is exact and takes no norm. The axis is
+fixed by its own motion: `m±` commutes with `ℓ±`, so `h±·m±·ℓ±·m̄±·h̄± =
+h±·ℓ±·h̄±`. Equal halves (`C = 1`, no partner spin) give one axis on both,
+which is the spatial orbit's.
+
+### 11.2 Volume
+
+The ring's tube is the parcel's extent about its reach, `R±(1 ± e±)`, with
+`e± = m/(m + H(<ℓ±))` the pinch share at the half's hold (§2,
+`ring::pinch_share`). Design law 2 refuses a volume taken as a squared or
+cubed length. A tube is therefore read by two first-degree measures:
+
+- **Its width,** `2·R±·e±`. The face `λ±` is the share of the width standing
+  inside the ring `R = H` (§2's law on the half), and the transit and sense
+  follow from it (§3).
+- **Its content,** the holding inside the tube, the manifold's own measure of
+  the volume it encloses:
+
+      V± = H(<R±(1 + e±)) − H(<R±(1 − e±))
+
+  This is §10.3's `ΔH`. The shear reads the ring's content against the
+  holding a rigid tube of that width would enclose, so it is this ring's
+  reading (`σ± = (2e±·H − V±)/(2e±·R±)`), not a law of its own.
+
+With no extent, the ring is a circle: no width, no content, no shear, and the
+face is `0`, `½` or `1` by place.
+
+### 11.3 Tilt
+
+A ring tilts against the plane of the manifold's own turning. In nature this
+is the invariable plane: the plane normal to the total angular momentum of
+everything enclosed, the plane inclinations are measured from. On each half
+it is the holding-weighted sum of the rings' axes in space:
+
+    A± = Σ_i w_i·a±_i
+
+It is conserved wherever the spins are kept (`Σ w·ℓ` stands under
+conformation and the torque's exchange), so it is the manifold's reference,
+not a fixed axis. The tilt of a ring is read from the product of its axis
+with that reference on the half, `Q = A±·ā±`. For pure quaternions, the
+scalar part of `Q` is `A·a`, the axis along the reference, and its vector
+part is `A×a`, the line of nodes. First degree, as every share in the model
+(`v/(1 + |v|₁)`):
+
+    τ± = |A×a|₁ / (|A·a| + |A×a|₁)     its inclination share, in [0, 1]
+    ς± = sign(A·a)                     its sense: +1 prograde, −1 retrograde
+    n± = A×a                           its line of nodes
+
+- `τ = 0` is a ring in the invariable plane, prograde (`ς = +1`) or
+  retrograde (`ς = −1`). `τ = 1` is a polar ring (`A·a = 0`).
+- It is scale-free: a ring's tilt does not change with its spin's size or
+  the manifold's.
+- A lone ring is its own reference: `τ = 0`, `ς = +1`.
+
+### 11.4 What reads the ring
+
+- **The motion** reads its axis and rate (§9.4): it turns the tube about
+  `a±` by `b±`, one ring.
+- **The face and transit** read its width (§2–§3, per half: §9.6).
+- **The shear** reads its content (§10.3).
+- **The pressure and the drag** read its tilt. The medium's transit lies in
+  the invariable plane. A ring meets the medium along that plane on the share
+  `1 − τ` of its motion, with its sense `ς`, and crosses it on the share `τ`.
+  The along-part takes the counterflow (§4a). The crossing, on the ring's
+  axis, takes the repulsion at the inverse velocity of the ring's pressure
+  (§4b). These enter with §9.6's pipeline.
+
+### 11.5 Witnesses
+
+- **The axis is fixed by its own motion:** a half moved about its own spin
+  keeps `a±`. Equal halves give one axis.
+- **Content and shear are one reading:** `V = 0` gives `σ = b`, and no extent
+  gives no width, no content and no shear.
+- **Tilt limits:** an aligned ring reads `τ = 0, ς = +1`, a reversed ring
+  `τ = 0, ς = −1`, and a perpendicular ring `τ = 1`. Scaling either axis
+  leaves the tilt unchanged.
+- **A lone ring** is untilted against its own invariable axis.
 
 ## 7. Witnesses
 

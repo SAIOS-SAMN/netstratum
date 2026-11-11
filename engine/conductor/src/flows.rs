@@ -1709,12 +1709,19 @@ pub fn shear_rate(enc: &Enclosed, r: &Ratio, e: &Ratio) -> Ratio {
     if e.is_zero() || r.is_zero() {
         return ratio(0, 1);
     }
-    let one = ratio(1, 1);
     let h = enc.hold_within(r);
-    let dh = enc.hold_within(&(r.clone() * (one.clone() + e.clone())))
-        - enc.hold_within(&(r.clone() * (one - e.clone())));
+    let dh = ring_volume(enc, r, e);
     let two_e = ratio(2, 1) * e.clone();
     (two_e.clone() * h - dh) / (two_e * r.clone())
+}
+
+/// A ring's content (docs/128 §11.2): the holding inside its tube `r(1 ± e)`,
+/// `V = H(<r(1 + e)) − H(<r(1 − e))`, the manifold's own measure of the
+/// volume it encloses (never a squared or cubed length, design law 2).
+pub fn ring_volume(enc: &Enclosed, r: &Ratio, e: &Ratio) -> Ratio {
+    let one = ratio(1, 1);
+    enc.hold_within(&(r.clone() * (one.clone() + e.clone())))
+        - enc.hold_within(&(r.clone() * (one - e.clone())))
 }
 
 /// A mote's partner spins as the manifold's shear sets them (docs/128

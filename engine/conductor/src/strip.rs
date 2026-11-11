@@ -23,9 +23,13 @@
 //!   the parcel's departure from the medium's transit, `D = σs′ ⊖ s̄`, at `d`
 //!   by the medium's crowding share `g = W/(W + w)`, and gives it to the
 //!   medium: `T = d·g·w·D`, `Σ w·σ·s` kept.
+//! - **The ring** (docs/128 §11): each half's motion sweeps a solid on S³,
+//!   read by its tube's width (its face) and content (`V = H(<R(1+e)) −
+//!   H(<R(1−e))`, the shear's reading), its axis in space (`h·ℓ·h̄`) and its
+//!   tilt against the manifold's invariable axis (`orientation::tilt`).
 use crate::flows::{Enclosed, Mote};
 use cfe::ratio::{ratio, Ratio};
-use num_traits::Zero;
+use num_traits::{Signed as _, Zero};
 
 /// One plane's reading of a parcel: its own reach and deficit, its extent's
 /// share, its face, its share on that face and its sense.
@@ -128,6 +132,11 @@ pub struct Drag {
 /// The drag on a parcel of holding `w` moving at share `s′` (magnitude) with
 /// signed share `x = σ·s′`, against the range `(w_j, x_j)` meeting its place
 /// (the parcel not in it). None outside the flow law's domain.
+///
+/// One law on both of a ring's axes (docs/128 §4b): along the traversal the
+/// share is the traversal's `s′` (the counterflow, `1 − s′`); across it, on
+/// the ring's axis, the share is the ring's pressure `P` and `x` its
+/// crossing (the repulsion, `1 − P`, the inverse velocity of pressure).
 pub fn drag(x: &Ratio, share: &Ratio, w: &Ratio, range: &[(Ratio, Ratio)]) -> Option<Drag> {
     let d = ratio(1, 1) - share.clone();
     let departure = crate::ring::compose(x, &-medium_transit(range))?;
@@ -206,6 +215,101 @@ pub fn plane_faces(x: &Mote, enc: &Enclosed, whole: &Ratio) -> Vec<PlaneFace> {
     x.spins.iter().map(|l| plane_face(enc, l, &m)).collect()
 }
 
+/// A half's ring (docs/128 §11): the solid its motion sweeps on S³, read
+/// exact. Its tube's width and face are its radial reading at the half's
+/// spin; its content is the holding inside the tube; its axis is its spin
+/// carried into space by its half.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Ring {
+    /// The half's spin size, `ℓ± = |ℓ±|₁`.
+    pub spin: Ratio,
+    /// Its reach, hold, deficit, tube width share, face, transit and sense
+    /// (§2–§3 on the half).
+    pub tube: PlaneFace,
+    /// Its content, `V± = H(<R(1 + e)) − H(<R(1 − e))` (§11.2).
+    pub volume: Ratio,
+    /// Its shear, `(2e·H − V)/(2e·R)` (§10.3), the content against a rigid
+    /// tube's.
+    pub shear: Ratio,
+    /// Its axis in space, `h±·ℓ±·h̄±` (§11.1).
+    pub axis: [Ratio; 3],
+}
+
+/// A mote's two rings, `P+` then `P−` (docs/128 §11), its holding share in
+/// the enclosure's unit `whole`. None for a half with no spin.
+pub fn half_rings(x: &Mote, enc: &Enclosed, whole: &Ratio) -> [Option<Ring>; 2] {
+    use crate::orientation::{size, spin_halves};
+    let m = if whole.is_zero() {
+        ratio(0, 1)
+    } else {
+        x.amount.clone() * crate::flows::weight(&x.key) / whole.clone()
+    };
+    let (plus, minus) = spin_halves(&x.spins, &x.spins_orth);
+    let (a_plus, a_minus) = x.orientation.half_axes(&plus, &minus);
+    let ring = |spin: &[Ratio; 3], axis: [Ratio; 3]| {
+        let l = size(spin);
+        if l.is_zero() {
+            return None;
+        }
+        let tube = plane_face(enc, &l, &m);
+        let volume = crate::flows::ring_volume(enc, &tube.reach, &tube.extent);
+        let shear = crate::flows::shear_rate(enc, &tube.reach, &tube.extent);
+        Some(Ring {
+            spin: l,
+            tube,
+            volume,
+            shear,
+            axis,
+        })
+    };
+    [ring(&plus, a_plus), ring(&minus, a_minus)]
+}
+
+/// A ring's pressure (docs/128 §4b): the twist's pressure on its planes read
+/// along its own direction, `P = Σ_k |t_k|·P_k`, `t` its spin's L1 shares.
+/// Zero for a ring with no spin.
+pub fn ring_pressure(spin: &[Ratio; 3], planes: &[Ratio]) -> Ratio {
+    let l = crate::orientation::size(spin);
+    if l.is_zero() {
+        return ratio(0, 1);
+    }
+    spin.iter()
+        .zip(planes)
+        .fold(ratio(0, 1), |s, (t, p)| s + t.abs() * p.clone())
+        / l
+}
+
+/// A ring's transit `x` split by its tilt (docs/128 §4b, §11.3): along the
+/// invariable plane `ς(1 − τ)·x`, crossing it `τ·x`.
+pub fn along_and_crossing(x: &Ratio, tilt: &crate::orientation::Tilt) -> (Ratio, Ratio) {
+    (
+        tilt.sense.clone() * (ratio(1, 1) - tilt.share.clone()) * x.clone(),
+        tilt.share.clone() * x.clone(),
+    )
+}
+
+/// The invariable axes of a manifold (docs/128 §11.3): on each half the
+/// holding-weighted sum of its rings' axes in space, `A± = Σ w·a±`, the
+/// normal of the plane inclinations are read from.
+pub fn invariable_axes(motes: &[Mote], whole: &Ratio) -> [[Ratio; 3]; 2] {
+    use crate::orientation::spin_halves;
+    let zero = || std::array::from_fn(|_| ratio(0, 1));
+    let mut a: [[Ratio; 3]; 2] = [zero(), zero()];
+    if whole.is_zero() {
+        return a;
+    }
+    for x in motes {
+        let w = x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
+        let (plus, minus) = spin_halves(&x.spins, &x.spins_orth);
+        let (ap, am) = x.orientation.half_axes(&plus, &minus);
+        for k in 0..3 {
+            a[0][k] += w.clone() * ap[k].clone();
+            a[1][k] += w.clone() * am[k].clone();
+        }
+    }
+    a
+}
+
 /// A plane's FORM (docs/128 §8): the dimension attached, without collapse.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PlaneForm {
@@ -254,6 +358,106 @@ pub fn plane_forms(x: &Mote, enc: &Enclosed, whole: &Ratio) -> Vec<PlaneForm> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn turning_mote(amount: Ratio, orth: Vec<Ratio>) -> Mote {
+        crate::flows::Mote {
+            key: crate::chem::Kind::atom(4).expect("a kind"),
+            amount,
+            spins: vec![ratio(3, 4), ratio(1, 2), ratio(1, 4)],
+            spins_orth: orth,
+            orientation: crate::orientation::Orientation::from_phases(&[
+                ratio(1, 4),
+                ratio(1, 8),
+                ratio(1, 2),
+                ratio(3, 4),
+            ]),
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        }
+    }
+
+    #[test]
+    fn repulsion_is_the_inverse_velocity_of_pressure_on_the_crossing() {
+        // docs/128 §4b: across the traversal the drag's share is `1 − P`, the
+        // pass of pressure's rate; the crossing is kept by the exchange; an
+        // untilted ring has no crossing and feels none.
+        let p = ratio(2, 7);
+        let rate = p.clone() / (ratio(1, 1) - p.clone());
+        assert_eq!(
+            counter_rate(&p).expect("a counter rate") * rate,
+            ratio(-1, 1)
+        );
+        let polar = crate::orientation::tilt(
+            &[ratio(1, 1), ratio(0, 1), ratio(0, 1)],
+            &[ratio(0, 1), ratio(0, 1), ratio(1, 1)],
+        )
+        .expect("a tilt");
+        let flat = crate::orientation::tilt(
+            &[ratio(0, 1), ratio(0, 1), ratio(2, 1)],
+            &[ratio(0, 1), ratio(0, 1), ratio(1, 1)],
+        )
+        .expect("a tilt");
+        let x = ratio(3, 10);
+        let (along, cross) = along_and_crossing(&x, &flat);
+        assert_eq!((along, cross.clone()), (x.clone(), ratio(0, 1)));
+        let range = vec![(ratio(1, 2), ratio(0, 1))];
+        let none = drag(&cross, &p, &ratio(1, 4), &range).expect("a drag");
+        assert_eq!(none.given, ratio(0, 1));
+        let (_, cross) = along_and_crossing(&x, &polar);
+        assert_eq!(cross, x);
+        let d = drag(&cross, &p, &ratio(1, 4), &range).expect("a drag");
+        assert_eq!(d.share, ratio(1, 1) - p);
+        assert!(d.given > ratio(0, 1));
+        let (after, others) = exchange(&cross, &ratio(1, 4), &range, &d.given);
+        let before = ratio(1, 4) * cross.clone();
+        let kept = ratio(1, 4) * after + ratio(1, 2) * others[0].clone();
+        assert_eq!(kept, before);
+        let spin = [ratio(1, 2), ratio(-1, 4), ratio(1, 4)];
+        let planes = [ratio(1, 3), ratio(1, 5), ratio(0, 1)];
+        assert_eq!(ring_pressure(&spin, &planes), ratio(1, 6) + ratio(1, 20));
+    }
+
+    #[test]
+    fn a_rings_content_and_shear_are_one_reading() {
+        // docs/128 §11.2: an empty tube holds nothing, so its shear is the
+        // orbit's own rate by place; no extent, no width, content or shear.
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let x = turning_mote(ratio(1, 2), vec![ratio(1, 8), ratio(0, 1), ratio(-1, 16)]);
+        for r in half_rings(&x, &enc, &ratio(1, 1)).into_iter().flatten() {
+            assert!(r.tube.extent > ratio(0, 1));
+            assert_eq!(r.volume, ratio(0, 1));
+            assert_eq!(
+                r.shear,
+                enc.hold_within(&r.tube.reach) / r.tube.reach.clone()
+            );
+        }
+        let x = turning_mote(ratio(0, 1), vec![ratio(1, 8), ratio(0, 1), ratio(0, 1)]);
+        for r in half_rings(&x, &enc, &ratio(1, 1)).into_iter().flatten() {
+            assert_eq!(r.tube.extent, ratio(0, 1));
+            assert_eq!((r.volume, r.shear), (ratio(0, 1), ratio(0, 1)));
+        }
+    }
+
+    #[test]
+    fn a_ring_with_no_partner_spin_has_one_axis_and_a_lone_ring_no_tilt() {
+        // docs/128 §11.1, §11.3.
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let x = turning_mote(ratio(1, 2), vec![ratio(0, 1); 3]);
+        let [p, m] = half_rings(&x, &enc, &ratio(1, 1));
+        let (p, m) = (p.expect("a ring"), m.expect("a ring"));
+        assert_eq!(p.spin, m.spin);
+        let y = turning_mote(ratio(1, 2), vec![ratio(1, 4), ratio(-1, 8), ratio(0, 1)]);
+        let a = invariable_axes(std::slice::from_ref(&y), &ratio(1, 1));
+        let rings = half_rings(&y, &enc, &ratio(1, 1));
+        for (h, r) in rings.into_iter().enumerate() {
+            let t = crate::orientation::tilt(&r.expect("a ring").axis, &a[h]).expect("a tilt");
+            assert_eq!((t.share, t.sense), (ratio(0, 1), ratio(1, 1)));
+        }
+    }
 
     #[test]
     fn a_planes_form_is_its_pair_its_poles_and_its_reach() {

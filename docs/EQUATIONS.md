@@ -2009,6 +2009,29 @@ spatial plane's passage on the group, `Δψ_k = ψ_k′ − ψ_k + (K_k′ − K
 (the tilt's `2δ·t_k` was this passage under the flat turning). The reach
 reads the spatial spin; the swing's `response(ψ_kR)` retires.
 
+**E67 · The ring: volume, axis and tilt.** `strip::Ring`,
+`strip::half_rings`, `strip::invariable_axes`, `flows::ring_volume`,
+`Orientation::half_axes`, `orientation::tilt` (docs/128 §11; operator
+2026-11-11). A half's motion sweeps a solid torus of Hopf fibres on S³, read
+first degree and exact:
+
+    width 2R±e±    V± = H(<R±(1+e±)) − H(<R±(1−e±))    σ± = (2e±·H − V±)/(2e±·R±)
+    a+ = p·ℓ+·p̄    a− = q·ℓ−·q̄    A± = Σ w·a±
+    Q = A·ā:  τ = |A×a|₁/(|A·a| + |A×a|₁)    ς = sign(A·a)    n = A×a
+
+**Built as readings,** with witnesses: the axis stands under its own motion,
+equal halves give one axis, the tilt reads its limits and is scale-free,
+an empty tube's shear is its orbit's rate and no extent gives none, a lone
+ring is untilted. The face, transit, pressure and drag per half read them
+with §9.6.
+**Drag's orthogonal axis, repulsion (readings built):** `strip::ring_pressure`,
+`strip::along_and_crossing`, `strip::drag` on the crossing (docs/128 §4b;
+operator 2026-11-11, "drag needs an orthogonal axis on repulsion as inverse
+velocity of pressure"):
+
+    P± = Σ_k |t±_k|·P_k    b_P = P/(1 − P)    M(b_P) = −1/b_P: share 1 − P
+    x = ς(1 − τ)·x + τ·x    D⊥ = τx ⊖ x̄⊥    T⊥ = (1 − P)·g·w·D⊥    Σ w·x⊥ kept
+
 **E65 · The bell on the group: six spins, one motion a half.**
 `orientation::spin_halves`, `orientation::size`, `orientation::half_motion`,
 `Orientation::bell_halves`, `flows::Mote::spins_orth` (docs/128 §9; operator

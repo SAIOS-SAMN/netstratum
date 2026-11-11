@@ -12,6 +12,19 @@ change is named here.
 
 ### Added
 
+- The ring with volume, axis and tilt (docs/128 §11, EQUATIONS E67;
+  operator 2026-11-11). A half's motion sweeps a solid torus on S³: its
+  tube's width (the face) and content (the holding it encloses, which the
+  shear reads), its axis in space (its spin carried by its half) and its
+  tilt against the manifold's invariable axis, read from the product of the
+  axes (inclination share, sense, line of nodes). Readings, exact
+  (`strip::half_rings`, `strip::invariable_axes`, `orientation::tilt`).
+- Drag's orthogonal axis (docs/128 §4b; operator 2026-11-11). Across the
+  traversal, on the ring's axis, the medium's pressure repels the ring's
+  crossing at the inverse velocity of pressure, `M(b_P) = −1/b_P` (share
+  `1 − P`), by the same drag law that acts along the traversal; the crossing
+  is kept by the exchange. Readings (`strip::ring_pressure`,
+  `strip::along_and_crossing`).
 - The unitary morphodynamic state (docs/128 §10, EQUATIONS E66; operator
   2026-11-11). A body's turning state factors exactly into its form, an
   automorphism holding R (its orbits), and its twist, one isoclinic turning
