@@ -138,14 +138,26 @@ pub struct Drag {
 /// the ring's axis, the share is the ring's pressure `P` and `x` its
 /// crossing (the repulsion, `1 − P`, the inverse velocity of pressure).
 pub fn drag(x: &Ratio, share: &Ratio, w: &Ratio, range: &[(Ratio, Ratio)]) -> Option<Drag> {
-    let d = ratio(1, 1) - share.clone();
-    let departure = crate::ring::compose(x, &-medium_transit(range))?;
     let medium: Ratio = range.iter().map(|(wj, _)| wj.clone()).sum();
+    drag_against(x, share, w, &medium, &medium_transit(range))
+}
+
+/// The same drag read from the range's sums: its holding `W` and its
+/// transit `s̄` (`medium_transit`), as a range read without a walk gives them.
+pub fn drag_against(
+    x: &Ratio,
+    share: &Ratio,
+    w: &Ratio,
+    medium: &Ratio,
+    transit: &Ratio,
+) -> Option<Drag> {
+    let d = ratio(1, 1) - share.clone();
+    let departure = crate::ring::compose(x, &-transit.clone())?;
     let whole = medium.clone() + w.clone();
     let crowding = if whole.is_zero() {
         ratio(0, 1)
     } else {
-        medium / whole
+        medium.clone() / whole
     };
     let given = d.clone() * crowding.clone() * w.clone() * departure.clone();
     Some(Drag {

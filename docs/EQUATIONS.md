@@ -2051,6 +2051,35 @@ at `1 − |P|` exchanged with the range on the grain, then
 with `t′` the direction in space, each part scaled by what it kept, carried
 back into the body's axes.
 
+**E68 · The ring in every dimension; shear out of the plane.**
+`flows::plane_rings`, `flows::partner_target`, `flows::conform_axes`,
+`flows::disc_plane` (docs/128 §12; operator 2026-11-11, "open the vents on
+rings in multi-dimensional capacity with volume and derive shear for orbital
+pathways outside of planar view"). Each isoclinic plane its own ring, read per
+face, never summed:
+
+    W_k = 3W·α_k    r_k(1 ± e_k), e_k = m/(m + H_k)    V_k = H(<r_k(1+e_k)) − H(<r_k(1−e_k))
+    σ_k = (2e_k·H_k − V_k)/(2e_k·r_k)    b±_k = H_k/r_k ± σ_k/2    ℓ_kR* = sign(ℓ_k)·(ℓ−*_k − ℓ+*_k)/2
+
+The shear out of the plane, each ring against the rings its tube meets:
+
+    Ā_i = Σ_j w_j·ℓ_j    Q = Ā·ℓ̄: τ, ς    σ⊥ = τ·b    ℓ* = ς·|ℓ|₁·Ā/|Ā|₁    ℓ′ = ℓ* + k·(ℓ − ℓ*)
+
+the range paying by holding, `Σ w·ℓ_k` kept per plane within the grain.
+Retires the partner target laid by the tilt (`t_k·(ℓ−* − ℓ+*)/2`) and
+`settle_disc`'s pull of every tilt toward the blended plane; the plane stays
+a reading (`disc_plane`).
+
+**E69 · The echo weighed: the beat.** `Orientation::beat`, `flows::echo_beats`,
+wired at each echo's arrival (`breath::breathe`) and at the universal echo for
+the ocean (`pulse::orbit_galaxies`) (docs/130; operator 2026-11-11). The
+bounce's push carried through the layers, its reverberation between the two
+rims summed, the fluid answering its departure, applied as an automorphism
+about the body's own spin:
+
+    a = p·ν    ν = Π(1 − δ)    A = a/(1 − ρ), ρ = ½·½    D = A ⊖ Ā    T = (1 − A)·g·w·D
+    F ↦ F·m(rate(A′)·t)    C, ℓ unchanged    Σ w·A′ = Σ w·A (within the grain)
+
 **E65 · The bell on the group: six spins, one motion a half.**
 `orientation::spin_halves`, `orientation::size`, `orientation::half_motion`,
 `Orientation::bell_halves`, `flows::Mote::spins_orth` (docs/128 §9; operator

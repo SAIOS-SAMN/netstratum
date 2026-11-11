@@ -12,6 +12,22 @@ change is named here.
 
 ### Added
 
+- The echo weighed (docs/130, EQUATIONS E69; operator 2026-11-11). At each
+  echo's arrival every mote takes a beat: the universal bounce's push
+  carried through the layers between (`p·ν`, its nested clock), its
+  reverberation between the two rims summed in closed form (`a/(1 − ρ)`,
+  `ρ = ¼`), the fluid's drag answering its departure from the medium's beat
+  (`Σ w·A` kept), applied to its form as an automorphism about its own spin:
+  unitary, its twist and spin unchanged (`flows::echo_beats`,
+  `Orientation::beat`).
+- The ring in every dimension, and the shear out of the plane (docs/128
+  §12, EQUATIONS E68; operator 2026-11-11). Each isoclinic plane is its own
+  ring with its capacity `W_k = 3W·α_k`, tube, volume and shear
+  (`flows::plane_rings`), and the partner orbits' target is read on each
+  plane's own ring. A ring tilted against the rings its tube meets is
+  conformed toward their axis, keeping its sense and size, the range paying
+  (`flows::conform_axes`): the disc forms by contact, the warp's shear.
+  `settle_disc`'s global pull and the target laid by the tilt retire.
 - The rulings of 2026-11-11 adopted (docs/129; Mycelium 78.182, operator:
   "if mycelium sends you rulings its because i ruled for mycelium - adopt").
   LAW-COUPLING v2 built: a body's dipole is the push `π = p·δ/w` at its place

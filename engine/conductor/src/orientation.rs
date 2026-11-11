@@ -681,6 +681,23 @@ impl Orientation {
         self.advance_by(&b, 2)
     }
 
+    /// The echo's beat (docs/130 §1): an automorphism, both halves turned
+    /// alike about the spin `spin` (body axes) by `a` turns, the Cayley motion
+    /// of the rate `a/(1 − a)` along its direction, composed once and held on
+    /// the grain. The twist `C` is kept (equal halves) and the spin is not
+    /// touched. None where `a` is outside the motion law's domain or there is
+    /// no spin.
+    pub fn beat(&mut self, spin: &[Ratio; 3], a: &Ratio) -> Option<Result<(), TurningRefusal>> {
+        if size(spin).is_zero() {
+            return None;
+        }
+        let b = rate(a)?;
+        let u = half_motion(spin, &b);
+        let g = joined(&u, &u);
+        let g: [Ratio; 6] = std::array::from_fn(|p| crate::ring::grain(&g[p]));
+        Some(self.advance_by(&g, 1))
+    }
+
     /// Plane `k` (phase layout) through the centre on its own: half a turn
     /// there, `b = 1`, composed whole (docs/120 §8b′).
     pub fn half_turn(&mut self, k: usize) -> Result<(), TurningRefusal> {

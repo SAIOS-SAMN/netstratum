@@ -802,6 +802,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         } else {
             None
         };
+        // The universal bounce's push (`pulse::home_push`), carried by the
+        // echo to every body it reaches (docs/130).
+        let echo_push = crate::pulse::home_push(u, &u.cores[i].total()).map(|(p, _, _)| p);
         let centre = centre_state(u, i);
         let core = &mut u.cores[i];
         let mut returned = ratio(0, 1);
@@ -2209,7 +2212,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // core has received; derived, never drawn). It leaves with the
             // core's twist as its locked lead between its planes (its tilt,
             // docs/100 §4: the jet a helix), loosened later by its own
-            // turning (`flows::settle_disc`). The core's reservoir pays the
+            // turning (`flows::conform_axes`). The core's reservoir pays the
             // spin it leaves with (the ledger exact).
             {
                 let span_r = if home && !whole_u.is_zero() {
@@ -2418,6 +2421,20 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         * (x.ell_o() + x.ell_orth())
                 })
             };
+            // The echo's beat (docs/130): each mote's form turned about its
+            // own spin by the bounce's push carried to it, its reverberation
+            // summed, the fluid answering its departure from the medium's
+            // beat; unitary, the spins and the ledger untouched.
+            crate::profile::mark("breath:beat");
+            if let Some(push) = echo_push.as_ref() {
+                let _ = crate::flows::echo_beats(
+                    &mut core.flows,
+                    enc.as_ref().unwrap_or(&throat),
+                    &ledger_unit,
+                    push,
+                    g_rate.as_ref(),
+                );
+            }
             let before = ledger_sum(core);
             let (given, absorbed, heated) = crate::flows::torque(
                 &mut core.flows,
@@ -2433,14 +2450,23 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 enc.as_ref().unwrap_or(&throat),
                 &ledger_unit,
             );
-            // The disc forms: each mote's tilt returns toward its galaxy's spin
-            // plane (`flows::settle_disc`). A core whose disc holds nothing
+            // The disc forms by the shear out of the plane (`flows::
+            // conform_axes`). A core whose disc holds nothing
             // turning keeps its own lean (its founding orientation, `pulse::
             // orient`), never reset to none.
             // What the attractor moves off each plane the core takes as its
             // antipole (docs/100 §8.2): `S_k + A_k` constant on every plane.
             let spin_before = crate::torsion::plane_spin(&core.flows);
-            let plane = crate::flows::settle_disc(&mut core.flows, enc.as_ref().unwrap_or(&throat));
+            // The shear out of the plane (docs/128 §12.3): each ring
+            // conformed toward the rings its tube meets, the range paying,
+            // so the planes' spin stands but for the grain, which the
+            // antipole takes. The galaxy's plane is the reading after it.
+            let _ = crate::flows::conform_axes(
+                &mut core.flows,
+                enc.as_ref().unwrap_or(&throat),
+                &ledger_unit,
+            );
+            let plane = crate::flows::disc_plane(&core.flows);
             let spin_after = crate::torsion::plane_spin(&core.flows);
             let taken = crate::torsion::antipole_take(&core.antipole, &spin_before, &spin_after);
             let was_a = core.antipole.clone();

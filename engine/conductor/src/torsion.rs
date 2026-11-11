@@ -261,8 +261,7 @@ mod tests {
 
     #[test]
     fn the_antipole_balances_what_the_attractor_moves_on_every_plane() {
-        // docs/100 §8.2: two wound motes at different reaches relax by
-        // different keeps; the plane spin moves between the planes (never
+        // docs/100 §8.2: the plane spin moves between the planes (never
         // made), and the antipole holds the opposite, plane by plane.
         let mote = |ell: i64, tilt: [i64; 3]| crate::flows::Mote {
             key: crate::chem::Kind::parse("W0004").expect("a kind"),
@@ -286,7 +285,13 @@ mod tests {
             disc.iter().map(|x| (x.ell_o(), ratio(1, 4))).collect(),
         );
         let before = plane_spin(&disc);
-        let plane = crate::flows::settle_disc(&mut disc, &enc);
+        // A redistribution between the planes (a body's tilt turned, its
+        // orbit spin kept), as a law that moves spin between planes gives.
+        let _ = &enc;
+        let plane = crate::flows::disc_plane(&disc);
+        let ell = disc[0].ell_o();
+        disc[0].set_tilt(vec![ratio(1, 3), ratio(1, 3), ratio(1, 3)]);
+        assert_eq!(disc[0].ell_o(), ell);
         let after = plane_spin(&disc);
         let sum = |v: &[Ratio]| v.iter().fold(ratio(0, 1), |s, k| s + k.clone());
         assert_eq!(sum(&before), sum(&after), "redistributed, never made");

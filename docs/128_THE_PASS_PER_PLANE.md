@@ -744,6 +744,101 @@ part is `A×a`, the line of nodes. First degree, as every share in the model
 - **A lone ring** is untilted against its own invariable axis, within the
   grain its terms stand on.
 
+## 12. The ring in every dimension: capacity, volume, and shear out of the plane
+
+**Operator 2026-11-11:** "open the vents on rings in multi-dimensional
+capacity with volume and derive shear for orbital pathways outside of
+planar view".
+
+§11 read a ring at one reach with one tube. Two planar collapses remain.
+The shear and the partner target were read once, at the orbit's summed
+reach, and laid onto the planes by the tilt's shares. The disc formed by
+pulling every tilt toward one global plane (`settle_disc`), a share vector
+relaxed toward a blend, with no shear in it. This section opens both.
+
+### 12.1 Capacity: each plane its own ring
+
+Each isoclinic plane `p`, the dual pair `(e_k, e_kR)`, stands on its own
+circle (§1). Its spin `ℓ_k` is read by the ring law, lifted, at its own
+reach `r_k`, with hold `H_k = H(<r_k)`. Its ring has:
+
+- **its capacity** `W_k = 3W·α_k`, the plane's first-degree hold share
+  (LAW-COUPLING v2, docs/129 §1.2, `α_k` its spin's part on the pair);
+- **its tube** `r_k(1 ± e_k)`, with `e_k = m/(m + H_k)` its pinch share at
+  that plane's hold;
+- **its volume,** the holding inside the tube, `V_k = H(<r_k(1 + e_k)) −
+  H(<r_k(1 − e_k))` (§11.2 per plane);
+- **its shear across its own reach,** `σ_k = (2e_k·H_k − V_k)/(2e_k·r_k)`.
+
+The capacity is read per face and never summed (Mycelium 78.181 §7,
+Xylarium #197): a body's three rings are three readings, not one.
+
+### 12.2 In-plane shear per plane: the partner orbits
+
+The partner target (§10.3) is read on each plane at its own rate,
+`b_k = H_k/r_k`, split about it by its own shear, `b±_k = b_k ± σ_k/2` (the
+vacuum's halves exchanged). Each half's spin stands at its rate's reach,
+`ℓ±*_k = R±*_k·H(<R±*_k)` with `b±_k·R±*_k = H(<R±*_k)`, and the partner
+takes half the difference with the plane's own sense:
+
+    ℓ_kR* = sign(ℓ_k)·(ℓ−*_k − ℓ+*_k)/2
+
+This retires `t_k·(ℓ−* − ℓ+*)/2`, the orbit's one shear laid onto the planes
+by the tilt. A plane with no spin has no ring and no partner target. The
+conformation is §10.3's unchanged.
+
+### 12.3 Shear out of the plane: rings against the rings their tubes meet
+
+A ring's tube meets the rings of the range around it (the motes whose
+extents meet its own, `meeting`). Where their axes differ, the manifold
+turns about different axes across the tube's volume. That is a shear out
+of the ring's plane: the warp of a disc, which in nature damps inclination
+and carries the disc to one plane by contact, never by a global
+attractor.
+
+- **The volume's axis.** The holding-weighted spin of what the ring's tube
+  holds: the ring itself and the range meeting it, `Ā_i = w_i·ℓ_i + Σ_j
+  w_j·ℓ_j`, the spins read on the planes they are booked on. A heavy ring
+  among light ones is its volume's axis, and barely moves.
+- **The shear's reading.** The product of the ring's axis with its volume's,
+  `Q = Ā·ℓ̄`, as §11.3: its inclination share against what it meets,
+  `τ_i = |Ā×ℓ|₁/(|Ā·ℓ| + |Ā×ℓ|₁)`, its sense `ς_i = sign(Ā·ℓ)`, its line of
+  nodes `Ā×ℓ`. The out-of-plane shear rate is the ring's rate on that
+  share, `σ⊥_i = τ_i·b_i`, zero for a ring coaxial with its volume.
+- **What it does.** The shear conforms the ring's axis toward its volume's,
+  keeping its sense and its size: the target `ℓ*_i = ς_i·|ℓ_i|₁·Ā_i/|Ā_i|₁`,
+  relaxed by the attractor's keep at its deficit (E38), `ℓ_k′ = ℓ*_k +
+  k·(ℓ_k − ℓ*_k)`. The range pays the change by holding on every plane, so
+  `Σ w·ℓ_k` stands per plane but for the grain's remainder. The shear is
+  never a source.
+- **Its limits.** A lone ring is its own volume's axis and is not moved, nor
+  is a coaxial one. A ring at right angles to its volume's axis (`ς = 0`,
+  `Ā·ℓ = 0`, possible only where the range cancels the ring's own part)
+  stands at the unstable fixed point and is not moved. Two equal rings at a
+  right angle each hold both in their tubes and turn toward their diagonal.
+  A retrograde ring aligns antiparallel and stays retrograde: shear does not
+  flip a sense.
+- **What it replaces.** `settle_disc`'s pull of every tilt toward the
+  galaxy's blended plane. The galaxy's plane stays a reading (`blend`), the
+  core's lean. Since the range pays, `Σ w·ℓ_k` per plane is kept inside the
+  disc, so the core's antipole takes nothing from it. The disc's angular
+  momentum is held by the disc itself.
+- **The heat** of the out-of-plane shear is open with §4a's and §10.3's
+  (#184).
+
+### 12.4 Witnesses
+
+- **Per-plane capacities sum to the whole:** `Σ W_k = 3W`. A plane with no
+  spin has no ring.
+- **Per-plane partners:** a body whose planes stand at different reaches
+  takes a different partner target on each, never one laid by its tilt.
+- **Shear out of the plane is never a source:** `Σ w·ℓ_k` is kept per plane
+  within the grain.
+- **It damps inclination:** a ring tilted against the rings it meets ends
+  the bell less tilted against them. A coaxial ring and a lone ring do not
+  move, equal rings at a right angle meet between, and a retrograde ring
+  keeps its sense.
+
 ## 7. Witnesses
 
 - **Wholly outside or inside**, a plane reads `λ = 0` or `1`, `s = δ` or `1 −
