@@ -479,7 +479,7 @@ impl Orientation {
     /// the planes they turn on; the rest, under a turn, is the bell's two
     /// rings, each at the rate of half of it held on the grain (the carrier,
     /// as every rate), composed whole: `cayley(G)·cayley(B)²`.
-    pub fn bell(&mut self, space: &[Ratio], circ: &Ratio) -> Result<(), TurningRefusal> {
+    pub fn bell(&mut self, space: &[Ratio], circ: &[Ratio]) -> Result<(), TurningRefusal> {
         let ring_rate =
             |rest: &Ratio| crate::ring::grain(&signed_rate(&(rest.clone() / ratio(2, 1))));
         let mut b: [Ratio; 6] = std::array::from_fn(|_| ratio(0, 1));
@@ -488,11 +488,12 @@ impl Orientation {
             self.windings[SPATIAL[j]] += n;
             b[SPATIAL[j]] = ring_rate(&rest);
         }
-        let (n, rest) = whole_and_rest(circ);
-        let c = ring_rate(&rest);
-        for p in PARTNER {
-            self.windings[p] += n;
-            b[p] = c.clone();
+        // Each R partner turns with its own plane (docs/128 §8): the pair
+        // composed together, never one circulation for all three.
+        for j in 0..3 {
+            let (n, rest) = whole_and_rest(circ.get(j).unwrap_or(&ratio(0, 1)));
+            self.windings[PARTNER[j]] += n;
+            b[PARTNER[j]] = ring_rate(&rest);
         }
         self.advance_by(&b, 2)
     }

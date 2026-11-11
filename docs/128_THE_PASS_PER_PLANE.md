@@ -13,8 +13,10 @@ the physics as velocity / pressure resistance / phase state / parcel
 boundaries: ½·t_k"; then "derive the correction and add
 multi-dimensionality".
 
-**Status:** derived. Readings built and witnessed (`conductor::strip`); the
-laws are rewired onto them one at a time (§6), each with a founding read.
+**Status:** derived. Readings built and witnessed (`conductor::strip`). §8's
+order built: motes carry `G`; `strip::PlaneForm`; the torque turning each
+plane's pair at its own resisted share. The faces' readers and the pass
+follow (§6, #188).
 
 **Prerequisites:** docs/94 §2 (the transit), docs/120 §8b′ (a plane closes
 on itself) and §8c (a mote's own enclosure), docs/126 (the strip), the twist's

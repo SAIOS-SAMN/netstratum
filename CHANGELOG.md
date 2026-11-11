@@ -155,6 +155,12 @@ change is named here.
 
 ### Changed
 
+- The torque turns each plane's pair on its own circle (docs/128 §8,
+  EQUATIONS E63). Motes carry the orientation `G`; each plane's form
+  (`strip::PlaneForm`) is its turning pair, its axis's poles and its reach
+  and face. The plane turns `2·s_k′` a bell at its own share on its own face,
+  resisted by the core's twist pressure, and its R partner turns with it.
+  This retires the tilt's `2δ·t_k`. `flows::torque` takes the twist pressure.
 - Heat recycled across the manifold's dissipation (#182, docs/127 §4,
   EQUATIONS E62). A mote's restored heat enters its enclosure's manifold,
   which recycles the held share `1 − δ` at its place to the motes whose own

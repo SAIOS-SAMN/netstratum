@@ -235,6 +235,32 @@ mod tests {
     }
 
     #[test]
+    fn planes_with_their_own_spins_turn_at_their_own_rates() {
+        // docs/128 §1: each plane on its own circle. Unequal spins read
+        // unequal shares, where the tilt's `2δ·t_k` read one deficit for all.
+        let enc = Enclosed::new(ratio(1, 1), vec![(ratio(1, 2), ratio(1, 4))]);
+        let m = ratio(1, 100);
+        let (a, b) = (
+            plane_face(&enc, &ratio(1, 3), &m),
+            plane_face(&enc, &ratio(3, 1), &m),
+        );
+        assert_ne!(a.share, b.share, "the planes part by their own velocities");
+        // And their R partners, turned with their own planes, part too.
+        let mut o = crate::orientation::Orientation::default();
+        let (sa, sb) = (ratio(2, 1) * a.share.clone(), ratio(2, 1) * b.share.clone());
+        o.bell(
+            &[sa.clone(), sb.clone(), ratio(0, 1)],
+            &[sa, sb, ratio(0, 1)],
+        )
+        .expect("a bell");
+        let g = o.g();
+        assert_ne!(
+            g[crate::orientation::PARTNER[0]],
+            g[crate::orientation::PARTNER[1]]
+        );
+    }
+
+    #[test]
     fn wholly_outside_or_inside_reads_the_two_faces() {
         // docs/128 §7: outside the ring, the continuum, λ 0, s = δ, σ 1;
         // inside, the vacuum, λ 1, s = 1 − δ, σ −1.

@@ -1967,7 +1967,10 @@ plane on its own circle and its own face:
 
 The luminal bound `s_k ≤ ½` holds by construction; a whole crossing
 advances the phase `½·Δλ_k`. Replaces docs/126 §2's `½·t_k` and the face as
-one flag a mote. Readings built; the laws are rewired in docs/128 §6.
+one flag a mote. **Built (docs/128 §8):** the plane's form (`strip::PlaneForm`:
+its pair in `G`, its axis's poles, its reach and face); the torque turns each
+plane's pair, the plane `2·s_k′` a bell and its R partner with it, retiring
+the tilt's `2δ·t_k` (`flows::torque` takes the core's twist pressure).
 
 **E57 · The orientation is the generator.** `orientation::Orientation`,
 `orientation::rate`, `orientation::reading` (docs/117 §11.7, #117 step 2).
