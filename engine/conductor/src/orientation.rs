@@ -557,15 +557,21 @@ impl Orientation {
 
     /// Hold reading `k` (phase layout) at `v`: a spatial plane's component
     /// on its own branch; the circulation's R-planes scaled together to the
-    /// mean whose reading is `v` (each at it where none stands). Exact: a
-    /// reading held to a place has a bounded denominator, and every
-    /// composition floors onto the grain again.
+    /// mean whose reading is `v` (each at it where none stands). A spatial
+    /// reading is held on the grain, so it reads back exactly and its
+    /// generator's denominator stays bounded; the R-planes' scaling is held
+    /// on the grain. Exact readings held as they came, and the scaling
+    /// chained bell on bell, compounded the denominators (generators of 75
+    /// digits at bell 557, found by the ablation probe): the scalar collapse.
     pub fn hold_phase(&mut self, k: usize, v: &Ratio) {
         match crate::flows::SPACE.iter().position(|&s| s == k) {
             Some(j) => {
+                // The reading on the grain: it reads back exactly, and its
+                // generator's denominator is bounded by the grain's.
                 let p = SPATIAL[j];
-                if self.phase(k) != *v {
-                    self.g[p] = of_reading(v);
+                let to = of_reading(&crate::ring::grain(v));
+                if self.g[p] != to {
+                    self.g[p] = to;
                     self.refresh();
                 }
             }
@@ -576,11 +582,11 @@ impl Orientation {
                     return;
                 }
                 for p in PARTNER {
-                    self.g[p] = if mean.is_zero() {
+                    self.g[p] = crate::ring::grain(&if mean.is_zero() {
                         to.clone()
                     } else {
                         self.g[p].clone() * to.clone() / mean.clone()
-                    };
+                    });
                 }
                 self.refresh();
             }
@@ -791,14 +797,16 @@ impl Orientation {
     }
 
     /// Read back from [`Orientation::values`]; refused unless twelve
-    /// values with whole windings.
+    /// values with whole windings. Each component is held on the grain, as
+    /// `G` is: a record written while `hold_phase` held exact readings
+    /// carries them wide.
     pub fn from_values(v: &[Ratio]) -> Option<Orientation> {
         if v.len() != 12 {
             return None;
         }
         let mut o = Orientation::default();
         for p in 0..6 {
-            o.g[p] = v[p].clone();
+            o.g[p] = crate::ring::grain(&v[p]);
             if !v[6 + p].is_integer() {
                 return None;
             }
@@ -1201,6 +1209,38 @@ mod tests {
         for k in 0..6 {
             let d = (back.g()[k].clone() - o.g()[k].clone()).abs();
             assert!(d <= crate::ring::grain_step(), "plane {k} within a grain");
+        }
+    }
+}
+
+#[cfg(test)]
+mod grain_tests {
+    use super::*;
+
+    #[test]
+    fn a_held_reading_stays_on_the_grain_bell_on_bell() {
+        // The scalar collapse the ablation probe found: held readings on the
+        // grain and the R-planes' scaling on it keep G's denominators bounded.
+        let mut o =
+            Orientation::from_phases(&[ratio(1, 7), ratio(2, 11), ratio(3, 13), ratio(5, 17)]);
+        for b in 1..40i64 {
+            for k in 0..crate::flows::PLANES {
+                o.hold_phase(k, &ratio(b * (k as i64 + 3), 101 + b));
+            }
+        }
+        // A spatial generator `a/(N − a)` of a reading on the grain `a/N`, and
+        // an R-plane on the grain: every denominator stays within `N = 60⁶`.
+        let n = num_bigint::BigInt::from(60).pow(6);
+        for g in o.g() {
+            assert!(*g.denom() <= n, "bounded: {g}");
+        }
+        let read = Orientation::from_values(&o.values()).expect("a record");
+        for (a, b) in read.g().iter().zip(o.g()) {
+            let d = a.clone() - b.clone();
+            assert!(
+                d.abs() <= crate::ring::grain_step(),
+                "read back within a grain"
+            );
         }
     }
 }

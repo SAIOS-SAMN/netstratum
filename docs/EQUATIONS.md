@@ -2041,8 +2041,9 @@ velocity of pressure"):
     x = ς(1 − τ)·x + τ·x    D⊥ = τx ⊖ x̄⊥    T⊥ = (1 − P)·g·w·D⊥    Σ w·x⊥ kept
 
 **The rings' motions (built):** `flows::ring_motions`, read by `flows::torque`
-at the bell's start (docs/128 §9.6). Per half: `λ` from the tube (vacuum
-`1 − λ`), `s = δ + λ(1 − 2δ)`, `s′ = s ⊖ P` (or `⊕` past the ring),
+at the bell's start (docs/128 §9.6). Per half: `λ` from the tube, read on
+the face it stands on (never inverted by the stream: `s(δ, 1 − λ) = 1 −
+s(δ, λ)`), `s = δ + λ(1 − 2δ) ≤ ½`, `s′ = s ⊖ P` (or `⊕` past the ring),
 `x = σs′` split by the tilt, the counterflow at `1 − |s′|` and the repulsion
 at `1 − |P|` exchanged with the range on the grain, then
 

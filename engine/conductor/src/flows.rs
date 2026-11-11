@@ -893,9 +893,12 @@ pub fn magnet(
     if n == 0 || total.is_zero() {
         return (0, ratio(0, 1));
     }
+    // Each holding on the grain, and each term summed below on it: a
+    // holding's exact share carries its amount's denominator, and a sum over
+    // a disc compounds them (the scalar collapse).
     let hold: Vec<Ratio> = motes
         .iter()
-        .map(|x| x.amount.clone() * weight(&x.key) / total.clone())
+        .map(|x| crate::ring::grain(&(x.amount.clone() * weight(&x.key) / total.clone())))
         .collect();
     let alpha: Vec<[Ratio; 3]> = motes.iter().map(plane_shares).collect();
     let mut share: Vec<Option<Ratio>> = vec![None; n];
@@ -947,8 +950,8 @@ pub fn magnet(
             for &i in &by[j..k] {
                 if let Some(dip) = &at[i].2 {
                     h_run += hold[i].clone();
-                    p_run += hold[i].clone() * dip.push.clone();
-                    u_run += hold[i].clone() * dip.strength.clone();
+                    p_run += crate::ring::grain(&(hold[i].clone() * dip.push.clone()));
+                    u_run += crate::ring::grain(&(hold[i].clone() * dip.strength.clone()));
                 }
             }
             j = k;
@@ -1067,6 +1070,9 @@ pub struct Enclosed {
     /// at or within it summed from the base: `hold_within` by bisection.
     places: Vec<Ratio>,
     within: Vec<Ratio>,
+    /// The running least of `within[k]/places[k]` over the places (none where
+    /// a place stands at nothing): `reach_at_rate` by bisection.
+    least: Vec<Option<Ratio>>,
 }
 
 impl Enclosed {
@@ -1122,11 +1128,25 @@ impl Enclosed {
             run += h.clone();
             within.push(run.clone());
         }
+        let places: Vec<Ratio> = by_place.into_iter().map(|(r, _)| r).collect();
+        let mut least: Vec<Option<Ratio>> = Vec::with_capacity(places.len());
+        let mut low: Option<Ratio> = None;
+        for (k, at) in places.iter().enumerate() {
+            if *at > ratio(0, 1) {
+                let q = within[k].clone() / at.clone();
+                low = Some(match low {
+                    Some(l) if l <= q => l,
+                    _ => q,
+                });
+            }
+            least.push(low.clone());
+        }
         Enclosed {
             spins: bodies.into_iter().map(|(l, _, _)| l).collect(),
             held,
-            places: by_place.into_iter().map(|(r, _)| r).collect(),
+            places,
             within,
+            least,
         }
     }
 
@@ -1187,12 +1207,23 @@ impl Enclosed {
 
     /// The reach at which the ring law turns at rate `b` (docs/128 §10.3):
     /// the least `R` with `b·R = H(<R)` by place, the hold being constant
-    /// between neighbouring places, each step read once in order (as
-    /// [`Enclosed::spin_at`]). None where `b` is not positive or no step
+    /// between neighbouring places, found by bisection on the running least
+    /// of `H_k/place_k`; a hold of nothing at the base is read in order. None where `b` is not positive or no step
     /// holds it.
     pub fn reach_at_rate(&self, b: &Ratio) -> Option<Ratio> {
         if *b <= ratio(0, 1) {
             return None;
+        }
+        // The least step whose reach `H_k/b` stands within its place is the
+        // least `k` with `H_k/place_k ≤ b`: the step before it stands past its
+        // place, and `H` only grows, so its reach clears the place below. The
+        // running least of `H_k/place_k` never rises, so it is bisected.
+        let k = self
+            .least
+            .partition_point(|m| m.as_ref().is_none_or(|m| m > b));
+        let r = self.within[k].clone() / b.clone();
+        if !r.is_zero() {
+            return Some(r);
         }
         for (k, h) in self.within.iter().enumerate() {
             let r = h.clone() / b.clone();
@@ -1682,9 +1713,9 @@ struct HalfRing {
 /// Every mote's two half motions for one bell (docs/128 §9.6, §4, §4a, §4b,
 /// §11), read at the bell's start, `P+` then `P−` per mote:
 ///
-/// 1. each half's ring at its lifted reach: its face `λ` from its tube (the
-///    vacuum stream's face inverted, `1 − λ`: the inversion exchanges the
-///    two solid tori), its transit `s = δ + λ(1 − 2δ)` and sense `σ = 1 − 2λ`;
+/// 1. each half's ring at its lifted reach: its face `λ` from its tube, its
+///    transit `s = δ + λ(1 − 2δ)` and sense `σ = 1 − 2λ`, read on the face it
+///    stands on (the face carries the inversion, so no transit passes ½);
 /// 2. its pressure, the manifold's own twist over these motes on its planes
 ///    along its direction (`strip::ring_pressure`), resisting or aiding by
 ///    its face, `s′`;
@@ -1701,13 +1732,14 @@ struct HalfRing {
 ///    domain the drag is not taken.
 ///
 /// With no pressure, no tilt and no medium, a half moves at its transit's
-/// rate along its own spin; a ring wholly outside its ring reads `δ`, the
-/// vacuum stream's `1 − δ`.
+/// rate along its own spin: wholly outside its ring `δ`, wholly inside
+/// `1 − δ`, whichever stream it rides.
 pub fn ring_motions(
     motes: &[Mote],
     enc: &Enclosed,
     total: &Ratio,
 ) -> (Vec<[[Ratio; 3]; 2]>, Ratio) {
+    crate::profile::mark("ring:read");
     use crate::orientation::{size, spin_halves};
     let n = motes.len();
     let zero3 = || -> [Ratio; 3] { std::array::from_fn(|_| ratio(0, 1)) };
@@ -1758,7 +1790,6 @@ pub fn ring_motions(
             let (rr, hh, d) = lifted(enc, &l, &x.lift);
             let e = crate::ring::pinch_share(&w[i], &hh);
             let face = crate::strip::face_share(&rr, &hh, &e);
-            let face = if x.vacuum { one.clone() - face } else { face };
             let s = crate::strip::transit_share(&d, &face);
             let sigma = crate::strip::sense(&face);
             let pressure = crate::strip::ring_pressure(&spin, &planes);
@@ -1796,9 +1827,11 @@ pub fn ring_motions(
             for h in 0..2 {
                 match reads[j][h].as_ref() {
                     Some(r) => {
-                        v.push(w[j].clone());
-                        v.push(w[j].clone() * r.along.clone());
-                        v.push(w[j].clone() * r.crossing.clone());
+                        // The holding on the grain, the transits already on it.
+                        let wg = crate::ring::grain(&w[j]);
+                        v.push(wg.clone());
+                        v.push(wg.clone() * r.along.clone());
+                        v.push(wg * r.crossing.clone());
                     }
                     None => v.extend([ratio(0, 1), ratio(0, 1), ratio(0, 1)]),
                 }
@@ -1806,7 +1839,9 @@ pub fn ring_motions(
             v
         })
         .collect();
+    crate::profile::mark("ring:sums");
     let sums = range_sums(&reach, &extent, &f);
+    crate::profile::mark("ring:exchange");
     // The exchange, read from the bell's start: each drag's transit leaves its
     // parcel and is shared by holding over the range meeting it, each
     // receiver taking `Σ T/W` over the givers meeting it.
@@ -1840,10 +1875,11 @@ pub fn ring_motions(
                 let lost = crate::ring::grain(&(d.given.clone() / w[i].clone()));
                 change[i][h][axis] -= lost.clone();
                 remainder -= w[i].clone() * lost;
-                shares[i][2 * h + axis] = d.given / held.clone();
+                shares[i][2 * h + axis] = crate::ring::grain(&(d.given / held.clone()));
             }
         }
     }
+    crate::profile::mark("ring:gained");
     let gained = range_sums(&reach, &extent, &shares);
     for j in 0..n {
         for h in 0..2 {
@@ -1860,6 +1896,7 @@ pub fn ring_motions(
             }
         }
     }
+    crate::profile::mark("ring:motions");
     let motions = motes
         .iter()
         .enumerate()
@@ -1904,6 +1941,7 @@ pub fn ring_motions(
             out
         })
         .collect();
+    crate::profile::mark("ring:done");
     (motions, remainder)
 }
 
@@ -2184,7 +2222,7 @@ pub fn conform_axes(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio
         .zip(&w)
         .map(|(x, wj)| {
             let l = spin3(x);
-            let mut v = vec![wj.clone()];
+            let mut v = vec![crate::ring::grain(wj)];
             v.extend(
                 l.iter()
                     .map(|lk| crate::ring::grain(&(wj.clone() * lk.clone()))),
@@ -2224,7 +2262,7 @@ pub fn conform_axes(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio
             }
             change[i][k] += step.clone();
             // The range pays it by holding: each member `−w_i·Δ/W`.
-            paid[i][k] = -(w[i].clone() * step) / held.clone();
+            paid[i][k] = crate::ring::grain(&(-(w[i].clone() * step) / held.clone()));
         }
     }
     let owed = range_sums(&reach, &extent, &paid);
@@ -2301,7 +2339,7 @@ pub fn torsion_turns(
         reach.push(r);
         delta.push(d);
         let v = x.orientation.twist_generator().unwrap_or_else(zero3);
-        let mut row = vec![w[i].clone()];
+        let mut row = vec![crate::ring::grain(&w[i])];
         row.extend(
             v.iter().map(|vk| {
                 crate::ring::grain(&(w[i].clone() * vk.clone() / (ratio(1, 1) + vk.abs())))
@@ -2388,7 +2426,10 @@ pub fn echo_beats(
     }
     // The range meeting each mote, read by its sums: its holding and beat.
     let f: Vec<Vec<Ratio>> = (0..n)
-        .map(|j| vec![w[j].clone(), w[j].clone() * beat[j].clone()])
+        .map(|j| {
+            let wg = crate::ring::grain(&w[j]);
+            vec![wg.clone(), wg * beat[j].clone()]
+        })
         .collect();
     let sums = range_sums(&reach, &extent, &f);
     let mut change = vec![ratio(0, 1); n];
@@ -2409,7 +2450,7 @@ pub fn echo_beats(
         let lost = crate::ring::grain(&(d.given.clone() / w[i].clone()));
         change[i] -= lost.clone();
         remainder -= w[i].clone() * lost;
-        shares[i][0] = d.given / held;
+        shares[i][0] = crate::ring::grain(&(d.given / held));
     }
     let gained = range_sums(&reach, &extent, &shares);
     for j in 0..n {
@@ -2565,12 +2606,33 @@ pub fn shear(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
     shear_booked(motes, enc, total, false).0
 }
 
+/// The meeting count of an enclosure's motes (each mote's span its reach and
+/// own extent, as the laws read their ranges): `Σ_i |range(i)|`, twice the
+/// pairs, read by the range sums, never by the pairs. A work counter.
+pub fn meeting_count(motes: &[Mote], enc: &Enclosed, total: &Ratio) -> Ratio {
+    let mut reach = Vec::with_capacity(motes.len());
+    let mut extent = Vec::with_capacity(motes.len());
+    for x in motes {
+        let (r, _, _) = lifted(enc, &x.ell_o().abs(), &x.lift);
+        extent.push(r.clone() * own_enclosure(x, enc, total)[0].clone());
+        reach.push(r);
+    }
+    let ones: Vec<Vec<Ratio>> = motes.iter().map(|_| vec![ratio(1, 1)]).collect();
+    range_sums(&reach, &extent, &ones)
+        .iter()
+        .fold(ratio(0, 1), |s, v| s + v[0].clone())
+}
+
 /// Sums over the range meeting each span, read without a walk (register
 /// A28; the peel, never the pairs): span `i`, `[r_i − d_i, r_i + d_i]`, meets
 /// every span whose lower end stands within its upper end, less those whose
 /// upper end stands below its lower end (each of which is among the former),
 /// so a sum over its range is two prefix sums, `n log n` in all. `f` gives
-/// each span's values; the span itself is left out, as `meeting` leaves it.
+/// each span's values, exact; the callers hold them on the grain (a holding
+/// on the grain times a carrier on the grain), since a holding's exact share
+/// carries its amount's denominator and a sum over thousands compounds them
+/// (the scalar collapse). The span itself is left out, as `meeting` leaves
+/// it.
 fn range_sums(reach: &[Ratio], extent: &[Ratio], f: &[Vec<Ratio>]) -> Vec<Vec<Ratio>> {
     let n = reach.len();
     let width = f.first().map_or(0, Vec::len);
@@ -6071,17 +6133,21 @@ mod ring_motion_tests {
     }
 
     #[test]
-    fn a_lone_ring_outside_moves_at_its_transit_and_the_vacuum_at_its_inverse() {
-        // docs/128 §9.6: no pressure, no tilt, no medium; wholly outside its
-        // ring (`R = 6`, `H = 1`) the continuum reads `δ = 1/7`, rate `1/6`,
-        // and the vacuum stream its face inverted, `1 − δ`, rate `6`.
-        let enc = Enclosed::new(ratio(1, 1), Vec::new());
-        for (vacuum, b) in [(false, ratio(1, 6)), (true, ratio(6, 1))] {
-            let x = mote([3, 2, 1], 1, vacuum);
-            let (motions, rem) = ring_motions(std::slice::from_ref(&x), &enc, &ratio(1000, 1));
-            let want = crate::orientation::half_motion(&arr(&x.spins), &b);
-            assert_eq!(motions[0], [want.clone(), want]);
-            assert_eq!(rem, ratio(0, 1));
+    fn a_lone_ring_moves_at_its_transit_on_its_own_face_within_the_luminal_bound() {
+        // docs/128 §9.6: no pressure, no tilt, no medium. Wholly outside its
+        // ring (`R = 6`, `H = 1`) a ring reads `δ = 1/7`, rate `1/6`; wholly
+        // inside (`R = ½`, `H = 12`) it reads `1 − δ = 1/25`, rate `1/24`. The
+        // face carries the inversion, so the stream's flag changes neither,
+        // and no transit passes ½.
+        for (base, b) in [(ratio(1, 1), ratio(1, 6)), (ratio(12, 1), ratio(1, 24))] {
+            let enc = Enclosed::new(base, Vec::new());
+            for vacuum in [false, true] {
+                let x = mote([3, 2, 1], 1, vacuum);
+                let (motions, rem) = ring_motions(std::slice::from_ref(&x), &enc, &ratio(1000, 1));
+                let want = crate::orientation::half_motion(&arr(&x.spins), &b);
+                assert_eq!(motions[0], [want.clone(), want], "vacuum {vacuum}");
+                assert_eq!(rem, ratio(0, 1));
+            }
         }
     }
 
@@ -6572,5 +6638,54 @@ mod torsion_turn_tests {
         let [p, _] = crate::strip::half_rings(&x, &enc, &ratio(1, 1));
         let c = p.expect("a ring").chiral.expect("a split");
         assert!(c.share > ratio(0, 1));
+    }
+}
+
+#[cfg(test)]
+mod reach_at_rate_tests {
+    use super::Enclosed;
+    use cfe::ratio::{ratio, Ratio};
+    use num_traits::Zero as _;
+
+    /// The ordered scan, each step read once: the reference.
+    fn scanned(enc: &Enclosed, b: &Ratio) -> Option<Ratio> {
+        for (k, h) in enc.within.iter().enumerate() {
+            let r = h.clone() / b.clone();
+            let above = k == 0 || r > enc.places[k - 1];
+            let below = enc.places.get(k).is_none_or(|top| r <= *top);
+            if above && below && !r.is_zero() {
+                return Some(r);
+            }
+        }
+        None
+    }
+
+    #[test]
+    fn the_reach_at_a_rate_by_bisection_is_the_scans() {
+        let encs = [
+            Enclosed::new(ratio(1, 1), Vec::new()),
+            Enclosed::new(
+                ratio(1, 1),
+                vec![
+                    (ratio(2, 1), ratio(1, 2)),
+                    (ratio(3, 1), ratio(1, 2)),
+                    (ratio(6, 1), ratio(1, 1)),
+                ],
+            ),
+            Enclosed::new(
+                ratio(1, 3),
+                (1..40)
+                    .map(|i| (ratio(i * i % 17 + 1, 3), ratio(i % 5 + 1, 11)))
+                    .collect(),
+            ),
+        ];
+        for enc in &encs {
+            for num in 1..60 {
+                for den in [1, 3, 7, 20] {
+                    let b = ratio(num, den);
+                    assert_eq!(enc.reach_at_rate(&b), scanned(enc, &b), "rate {b}");
+                }
+            }
+        }
     }
 }

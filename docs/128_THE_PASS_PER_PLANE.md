@@ -414,13 +414,22 @@ state, sourced by the manifold's shear (§10).
 **Built (`flows::ring_motions`, read by `flows::torque` at each bell's
 start):** each half moves at its ring's transit after the pressure and the
 drag on both axes (§4, §4a, §4b, §11), read for the whole manifold before
-any mote turns, the exchange with the range on the grain. The vacuum stream
-reads its face inverted, `λ ↦ 1 − λ`: the inversion exchanges the two solid
-tori (§11), so `Mote::vacuum` names the stream and no longer sets its
-deficit whole; a vacuum mote wholly outside its ring reads `1 − δ` as
-before, and one straddling it crosses continuously. The ring's pressure is
-the manifold's own twist over the motes it moves, `ρ` the enclosure's base
-over its whole.
+any mote turns, the exchange with the range on the grain. Each half reads
+its transit on the face it stands on: the face carries the inversion (§3,
+`I` is the face-reading at `λ = 1`), so `Mote::vacuum` names the stream and
+no longer sets its deficit, and no transit passes ½. A ring wholly inside
+its ring reads `1 − δ` and one wholly outside `δ`, whichever stream it
+rides; one straddling it crosses continuously. The ring's pressure is the
+manifold's own twist over the motes it moves, `ρ` the enclosure's base over
+its whole.
+
+**Corrected (the ablation probe, `observe ablate`, 2026-11-11).** The first
+build inverted the vacuum stream's face, `λ ↦ 1 − λ`. By the transit's
+identity `s(δ, 1 − λ) = 1 − s(δ, λ)` that turns each share to its
+complement: the disc's vacuum motes, which stand inside their rings, read
+`δ > ½`, past the luminal bound, with rates up to ~900 against the old
+motion's ~1. The face alone gives the old motion on every half standing on
+its own side.
 
 The book takes each half's torque at that half's `δ±`, the same deficit its
 motion reads. The face (§2), the transit (§3), the pressure (§4) and the

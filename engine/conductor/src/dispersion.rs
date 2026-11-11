@@ -231,11 +231,24 @@ mod tests {
             }
         }
         let after = read(&moved);
-        assert_eq!(after.phase, before.phase);
+        // Held phases stand on the grain (`Orientation::hold_phase`), so the
+        // common turn leaves each dispersion within it.
+        for (a, b) in after.phase.iter().zip(&before.phase) {
+            let d = a.clone() - b.clone();
+            let g = crate::ring::grain_step() * ratio(4, 1);
+            assert!(d.clone() <= g && -d <= g, "{a} against {b}");
+        }
         assert_eq!(after.spin, before.spin);
         assert_eq!(after.between, before.between);
         assert_eq!(after.orth, before.orth);
-        assert_eq!(after.phase_by_kind, before.phase_by_kind);
+        for (kind, a) in &after.phase_by_kind {
+            let b = &before.phase_by_kind[kind];
+            for (x, y) in a.iter().zip(b) {
+                let d = x.clone() - y.clone();
+                let g = crate::ring::grain_step() * ratio(4, 1);
+                assert!(d.clone() <= g && -d <= g, "{kind:?}: {x} against {y}");
+            }
+        }
     }
 
     #[test]

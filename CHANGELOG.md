@@ -12,6 +12,17 @@ change is named here.
 
 ### Added
 
+- The ablation probe, `observe ablate G [N]` (operator 2026-11-11: "why are
+  we not doing localized formula ablations"): each law alone on a galaxy's
+  real disc from a checkpoint (its first N motes, N against 4N), with its
+  work counters, its invariant's remainder and its effect. Its first runs
+  found and fixed: the vacuum stream's face inverted past the luminal bound
+  (rates ~900 against ~1); `hold_phase` holding exact readings, so `G`
+  carried 75-digit denominators by bell 557 (the scalar collapse; readings
+  now on the grain, records read onto it); exact holding sums in the
+  magnet, the manifold's twist and the range sums (terms on the grain); and
+  `Enclosed::reach_at_rate`'s scan of every step, now a bisection on the
+  running least of `H_k/place_k`, the same reach.
 - Tilt from quantum torsion (docs/128 §13, EQUATIONS E70; operator
   2026-11-11, approved). Each bell a mote's spins precess about the core's
   wound axis by the twist at its own place (`φ = δ·Σ t_c·t·ν`, falling with
@@ -63,8 +74,10 @@ change is named here.
   `flows::ring_motions`): the face from its tube, the twist's pressure, and
   drag on both axes (the counterflow along, the repulsion across), read for
   the manifold at the bell's start. The crossing's loss turns a ring toward
-  the invariable plane. The vacuum stream reads its face inverted, so the
-  stream flag no longer sets the deficit whole.
+  the invariable plane. Each half reads its transit on the face it stands
+  on, so the stream flag no longer sets the deficit and no transit passes ½
+  (the first build inverted the vacuum's face and broke the luminal bound;
+  found by the ablation probe).
 - The unitary morphodynamic state (docs/128 §10, EQUATIONS E66; operator
   2026-11-11). A body's turning state factors exactly into its form, an
   automorphism holding R (its orbits), and its twist, one isoclinic turning

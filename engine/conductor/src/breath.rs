@@ -121,6 +121,37 @@ pub fn galaxy_frame(u: &Universe, i: usize, unit: &Ratio) -> Option<crate::flows
     ))
 }
 
+/// A core's base dipole for the magnet (LAW-COUPLING v2, docs/129 §1): its
+/// push and strength the throat's composition, read at the throat's own
+/// place, its rim (`δ = ½`); a closed pole (no push, no strength) where its
+/// throat holds none.
+pub fn throat_dipole(core: &Body) -> crate::flows::Dipole {
+    use num_traits::Zero as _;
+    let (p_t, n_t, u_t) = core.throat.iter().fold(
+        (ratio(0, 1), ratio(0, 1), ratio(0, 1)),
+        |(p, nn, u), (k, amount)| {
+            let f = crate::chem::dimensions(k);
+            let r = |v: u32| ratio(i64::from(v), 1);
+            (
+                p + amount.clone() * r(f.open / 3),
+                nn + amount.clone() * r(f.held / 3),
+                u + amount.clone() * r(f.electrons_open.min(f.whole())),
+            )
+        },
+    );
+    let w_t = p_t.clone() + n_t;
+    if w_t.is_zero() {
+        return crate::flows::Dipole {
+            push: ratio(0, 1),
+            strength: ratio(0, 1),
+        };
+    }
+    crate::flows::Dipole {
+        push: p_t * ratio(1, 2) / w_t.clone(),
+        strength: u_t / (ratio(3, 1) * w_t),
+    }
+}
+
 /// The outflow's BOOK (with Xylarium 2026-10-24; the settling book's
 /// inverse): matter leaving a system at spin `ℓ_at` (its region's edge,
 /// `beyond`) takes `m·ℓ_at` with it, and the system's orbit pays it, `W·ℓ =
@@ -2529,34 +2560,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             {
                 let enc_m = enc.as_ref().unwrap_or(&throat);
                 let base = enc_m.base();
-                // The base's dipole (LAW-COUPLING v2, docs/129 §1): the core's
-                // state, its push and strength the throat's composition, read
-                // at the throat's own place, its rim (`δ = ½`); a closed pole
-                // (no push, no strength) where its throat holds none.
-                let (p_t, n_t, u_t) = core.throat.iter().fold(
-                    (ratio(0, 1), ratio(0, 1), ratio(0, 1)),
-                    |(p, nn, u), (k, amount)| {
-                        let f = crate::chem::dimensions(k);
-                        let r = |v: u32| ratio(i64::from(v), 1);
-                        (
-                            p + amount.clone() * r(f.open / 3),
-                            nn + amount.clone() * r(f.held / 3),
-                            u + amount.clone() * r(f.electrons_open.min(f.whole())),
-                        )
-                    },
-                );
-                let w_t = p_t.clone() + n_t;
-                let base_dipole = if w_t.is_zero() {
-                    crate::flows::Dipole {
-                        push: ratio(0, 1),
-                        strength: ratio(0, 1),
-                    }
-                } else {
-                    crate::flows::Dipole {
-                        push: p_t * ratio(1, 2) / w_t.clone(),
-                        strength: u_t / (ratio(3, 1) * w_t),
-                    }
-                };
+                let base_dipole = throat_dipole(core);
                 let spin_was = ledger_sum(core);
                 let (n_m, du) = crate::flows::magnet(
                     &mut core.flows,

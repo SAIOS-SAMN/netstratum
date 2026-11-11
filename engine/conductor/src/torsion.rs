@@ -98,10 +98,12 @@ pub fn manifold_twist(motes: &[crate::flows::Mote]) -> Option<[Ratio; 3]> {
         let Some(v) = x.orientation.twist_generator() else {
             continue;
         };
-        let w = x.amount.clone() * crate::flows::weight(&x.key);
+        // Each term on the grain: an amount's exact denominator, summed over
+        // a disc's motes, compounds (the scalar collapse).
+        let w = crate::ring::grain(&(x.amount.clone() * crate::flows::weight(&x.key)));
         for k in 0..3 {
             let share = v[k].clone() / (ratio(1, 1) + v[k].abs());
-            sum[k] += w.clone() * share;
+            sum[k] += crate::ring::grain(&(w.clone() * share));
         }
         held += w;
     }
