@@ -113,6 +113,57 @@ heat (docs/104 §0).
    as the stream's kind (where it entered), never the face.
 5. **docs/126 §2's `½·t_k` reverted** in the same change as step 4.
 
+## 8. The plane's form: the dimension attached, without collapse
+
+**Operator 2026-11-11:** "plane needs a dimension attached to it with form:
+how do we represent that without collapse"; then "derive it and build in
+that order".
+
+A plane's share `s_k` is a number standing in for a two-dimensional form:
+the same collapse one level down. The record already gives each plane its
+attached dimension in three places, and together they are its form.
+
+1. **Its turning pair** (docs/117 §11.6, §11.7). Every spatial plane has its
+   R partner, its circulation: `e₂₃ ↔ e₁R`, `e₃₁ ↔ e₂R`, `e₁₂ ↔ e₃R`, the dual
+   pairs of S³. Spin(4) is left × right isoclinic, so a pair is held exactly
+   as two degrees, with no square and no cosine:
+   `α_k = (θ_k + θ_kR)/2`, `β_k = (θ_k − θ_kR)/2`. In the orientation's
+   generator `G` (docs/117 §11.7, `conductor::orientation`) the pair is its
+   two components `(g_k, g_kR)`, each with its winding `K`. On Xylarium's join
+   (#183) it is the axis share against the isoclinic share.
+2. **Its poles on its own axis** (docs/95 §0): the neutrons' held dimensions
+   `3Z_k` and the protons' open dimensions `3Q_k` on axis k, the plane's
+   nucleon dipole. An atom names no axis, so a nuclide's dimensions part
+   evenly over the three axes; each plane carries `3Z/3` and `3Q/3`.
+3. **Its radial dimension on S** (§1–§2): its own reach `R_k`, its parcel's
+   extent `e_k`, and its face `λ_k`.
+
+So a plane's form is one record per plane:
+
+    PlaneForm_k = { turning: (g_k, g_kR),  poles: (3Z_k, 3Q_k),  reach: (R_k, e_k, λ_k) }
+
+Nothing in it is a share. `s_k`, `σ_k` and `P_k` are readings of it, taken
+where a law needs a velocity share for the flow law (a share is the flow
+law's own carrier) and never stored back.
+
+**The laws on the form:**
+- **The torque turns the pair.** Its push composes `(g_k, g_kR)` together
+  through the generator, so the circulation moves with its plane, never
+  beside it. `s_k′` sets only the rate of that composition.
+- **The pressure is read from the forms' differences.** Each pair's twist is
+  the plane forms' `(α_j, β_j)` against `(α_k, β_k)`, so the twist presses
+  once the planes' pairs differ. This is the asymmetry #157 lacked.
+- **The face is the plane's,** from its reach and extent (§2); the pass is
+  the transit on each plane (§3).
+
+**Build order:**
+1. Motes carry the orientation `G`, the six components with their windings,
+   in place of per-plane phases (the #167 work, here on the per-plane
+   velocity and face, never on the tilt).
+2. `strip::PlaneForm`, read from a mote: its pair from `G`, its poles from
+   `chem::dimensions`, its reach and face from `strip::plane_face`.
+3. The torque composing on each plane's pair at `s_k′`, retiring `2δ·t_k`.
+
 ## 7. Witnesses
 
 - **Wholly outside or inside**, a plane reads `λ = 0` or `1`, `s = δ` or `1 −
