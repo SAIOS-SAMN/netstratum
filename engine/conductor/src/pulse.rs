@@ -2906,17 +2906,28 @@ mod push_tests {
     use cfe::ratio::ratio;
 
     fn of(w: u32, amount: i64) -> Manifest {
-        [(crate::chem::Kind::atom(w).expect("an atom"), ratio(amount, 1))]
-            .into_iter()
-            .collect()
+        [(
+            crate::chem::Kind::atom(w).expect("an atom"),
+            ratio(amount, 1),
+        )]
+        .into_iter()
+        .collect()
     }
 
     #[test]
     fn the_push_and_its_antipole_are_a_pair_share() {
         // docs/125 §4.1: p = Q(1 − g)/w, p̄ = 1 − p, no ½.
         let h = of(1, 5);
-        assert_eq!(push_of(&h, &ratio(0, 1), false), ratio(1, 1), "bare protons, nothing held");
-        assert_eq!(push_of(&h, &ratio(1, 1), false), ratio(0, 1), "held whole: no push");
+        assert_eq!(
+            push_of(&h, &ratio(0, 1), false),
+            ratio(1, 1),
+            "bare protons, nothing held"
+        );
+        assert_eq!(
+            push_of(&h, &ratio(1, 1), false),
+            ratio(0, 1),
+            "held whole: no push"
+        );
         for g in [ratio(1, 3), ratio(1, 2), ratio(5, 7)] {
             for w in [1u32, 2, 4, 16, 56] {
                 let m = of(w, 3);
