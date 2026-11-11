@@ -1985,8 +1985,16 @@ quaternions:
 
 **Built as readings,** with witnesses: the factorization exact, both factors
 unitary with no norm read (`q·q̄` integer), equal halves keep the twist, the
-exchange of halves conjugates it. The twist sourced by the manifold's shear
-(retiring `orth_push`, `κ_⊥`) and the torsion read from `C` follow (§10.7).
+exchange of halves conjugates it. **The twist sourced by the shear
+(built):** `flows::shear_rate`, `flows::partner_target`,
+`flows::conform_partners`, `Enclosed::reach_at_rate`:
+
+    σ = (2e·H − ΔH)/(2e·R)    ΔH = H(<R(1+e)) − H(<R(1−e))
+    b± = b ± σ/2    b±·R±* = H(<R±*)    ℓ_kR* = t_k·(ℓ−* − ℓ+*)/2
+    ℓ_kR′ = ℓ* + k·(ℓ_kR − ℓ*)    (k = E38's keep; the range pays by holding)
+
+The push on the partner orbits (`orth_push`'s `κ_⊥` in `spin_torque`, the
+tide in the mote torque) is retired. The torsion read from `C` follows.
 
 **E65 · The bell on the group: six spins, one motion a half.**
 `orientation::spin_halves`, `orientation::size`, `orientation::half_motion`,
