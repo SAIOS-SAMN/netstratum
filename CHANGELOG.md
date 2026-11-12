@@ -12,6 +12,22 @@ change is named here.
 
 ### Added
 
+- The state on Cl(5,4) over ℚ (docs/131; operator 2026-11-12, "uniform
+  phase states as defined by fluid hydromagnetics"): the nine axes, each
+  pair's character read from its squares (16 turnings, 20 boosts), the pole
+  swap and the carry `M·x·M̃`. A body's orientation holds its motion as the
+  product of three commuting factors, the continuum's (the six built
+  planes), the vacuum's (the spans' turnings, opposite hand) and the
+  scale's (the conformal dilator, flow law), each in closed form; the save
+  record carries the vacuum and the scale where they move. The general
+  Cayley form on Cl(5,4) measured 43 ms an advance against 0.19 ms, and did
+  not finish with boosts in it, so the other boosts act by carry (docs/131
+  §9 step 2). Nothing moves the new factors yet: no change to how the
+  universe moves.
+- The spin the disc needs, read against the spin the bounce gives
+  (`observe streams`, docs/128 §14.1): on g557 the ring and the rim
+  coincide at 1.256, and the vacuum carries 0.10–0.37 of the spin needed.
+
 - The jetstream's distribution measured (docs/128 §14; operator 2026-11-11,
   zero stars in the home): `observe streams G` reads each stream by side of
   its ring, the throat crossings of one bell's torque and the bands the

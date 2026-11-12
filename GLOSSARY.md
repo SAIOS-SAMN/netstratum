@@ -13,6 +13,7 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 |---|---|---|
 | **grain** | The unit of amount: one nucleon's worth of matter. A universe is founded with an exact number of grains (e.g. `2^55`). | `pulse.rs` (`Manifest`) |
 | **bell** | One tick of the simulation. Every law advances by whole bells; nothing is integrated continuously. | `breath.rs` |
+| **Cl(5,4)** | The state's algebra over ℚ (docs/131): each frame plane's whole `e₊ₖ` and span `e₋ₖ`, R's pole axis `e_R`, the universe's pair `e₊, e₋`; 16 turnings, 20 boosts. A body's motion is the product of its continuum, vacuum and scale factors. | `orientation.rs` |
 | **ring** | The pulse a body emits each bell, travelling outward. A ring crosses distance `r` in `r` bells. | `ring.rs` |
 | **ring (of a half)** | The solid a half's motion sweeps on S³ in one ring: a tube of Hopf fibres about the half's reach, with a **width** `2R±e±` (its face reads the share inside `R = H`), a **content** `V± = H(<R±(1+e±)) − H(<R±(1−e±))` (the holding it encloses, which the shear reads), an **axis** `a± = h±·ℓ±·h̄±` (its spin carried into space) and a **tilt** against the invariable axis (docs/128 §11). | `strip::Ring`, `strip::half_rings` |
 | **pole plane** | The plane a dipole stands on (Mycelium #239, adopted 2026-11-11, docs/129 §4); a refusal names it (`UnbodiedDipole { pole_plane }`). | `flows::CouplingRefusal` |

@@ -2081,6 +2081,20 @@ about the body's own spin:
     a = p·ν    ν = Π(1 − δ)    A = a/(1 − ρ), ρ = ½·½    D = A ⊖ Ā    T = (1 − A)·g·w·D
     F ↦ F·m(rate(A′)·t)    C, ℓ unchanged    Σ w·A′ = Σ w·A (within the grain)
 
+**E71 · The state on Cl(5,4): nine axes, three commuting factors.**
+`orientation::{AXES, NEGATIVES, pairs, is_turning, pole_swap, carried}`,
+`Orientation::{factors, advance_vacuum, advance_scale}` (docs/131;
+operator 2026-11-12). Nine axes over ℚ, the spans and `e₋` negative; a pair
+is a turning or a boost by its squares (16 and 20). The motion is the product
+of three factors on disjoint axes:
+
+    continuum on e₊₁e₊₂e₊₃e_R (six planes, isoclinic halves)
+    vacuum on e₋₂e₋₃, e₋₃e₋₁, e₋₁e₋₂ (one half, opposite hand)
+    scale on e₊e₋: s ⊕ u = (s + u)/(1 + s·u)
+
+The pole swap of plane k negates every blade holding `e₋ₖ` (an involution);
+a value is carried by `M·x·M̃`.
+
 **E70 · Tilt from quantum torsion.** `flows::torsion_turns`,
 `quantum::twist_at`, `orientation::turned`, `torsion::wound`,
 `strip::Ring::chiral` (docs/128 §13; operator 2026-11-11, approved). Two

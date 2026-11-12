@@ -2147,10 +2147,17 @@ fn put_flow(x: &crate::flows::Mote) -> Vec<u8> {
     for r in [&x.amount, &x.ell_o(), &x.ell_orth(), &x.agitation] {
         cfe::ratio::encode(r, &mut w);
     }
-    // Its orientation (docs/117 §11.7): the six components, then the
-    // six windings.
+    // Its orientation (docs/117 §11.7, docs/131): the six components, the
+    // six windings, then its wide parts where it has any. A count past 254
+    // is written as 255 and the count on two bytes.
     let o = x.orientation.values();
-    w.push(o.len() as u8);
+    match u8::try_from(o.len()) {
+        Ok(n) if n < 255 => w.push(n),
+        _ => {
+            w.push(255);
+            w.extend_from_slice(&(o.len() as u16).to_le_bytes());
+        }
+    }
     for r in &o {
         cfe::ratio::encode(r, &mut w);
     }
@@ -2252,16 +2259,20 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
         at += used;
         r.push(x);
     }
-    let n = *v.get(at)? as usize;
+    let mut n = *v.get(at)? as usize;
     at += 1;
+    if n == 255 {
+        n = u16::from_le_bytes(v.get(at..at + 2)?.try_into().ok()?) as usize;
+        at += 2;
+    }
     let mut values = Vec::with_capacity(n.min(16));
     for _ in 0..n {
         let (x, used) = cfe::ratio::decode(v.get(at..)?)?;
         at += used;
         values.push(x);
     }
-    // Its orientation: twelve values (docs/117 §11.7); a record of per-plane
-    // phases (the flat torus) is refused.
+    // Its orientation: twelve values (docs/117 §11.7) and its wide parts
+    // (docs/131); a record of per-plane phases (the flat torus) is refused.
     let orientation = crate::orientation::Orientation::from_values(&values)?;
     let born = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
     let vacuum = *v.get(at + 8)? == 1;
