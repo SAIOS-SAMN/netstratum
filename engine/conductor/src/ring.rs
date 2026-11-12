@@ -130,6 +130,22 @@ pub fn compose(x: &Ratio, y: &Ratio) -> Option<Ratio> {
     Some((x.clone() + y.clone()) / den)
 }
 
+/// The flow law over a stride (docs/132 §1): `x` composed with itself `n`
+/// times, the rate whose dilation is `D(x)ⁿ`,
+/// `((1 + x)ⁿ − (1 − x)ⁿ)/((1 + x)ⁿ + (1 − x)ⁿ)`, exact: the law composed,
+/// never a rate times n. `n = 1` is `x`; `n = 0` is rest. None where the
+/// composition has no value (a pole, `x = −1` at even n).
+pub fn compose_n(x: &Ratio, n: u32) -> Option<Ratio> {
+    use num_traits::Pow;
+    let (up, down) = (ratio(1, 1) + x.clone(), ratio(1, 1) - x.clone());
+    let (a, b) = (Pow::pow(&up, n), Pow::pow(&down, n));
+    let den = a.clone() + b.clone();
+    if den.is_zero() {
+        return None;
+    }
+    Some((a - b) / den)
+}
+
 /// The specific spin of a body at reach r about the holding H inside it:
 /// `ℓ = R · H`.
 pub fn spin(r: &Ratio, held: &Ratio) -> Ratio {
@@ -213,6 +229,57 @@ pub fn birth_key(born: u64, reach: &Ratio, held: &Ratio, siblings: &[u64]) -> u6
         key += 1;
     }
     key
+}
+
+#[cfg(test)]
+mod stride_tests {
+    //! docs/132 §1 and §5: the stride's closed forms.
+    use super::*;
+    use num_traits::Signed as _;
+
+    /// Witness 1 (the flow law): n bells in closed form are n compositions,
+    /// at N and 4N.
+    #[test]
+    fn the_flow_law_over_n_bells_is_its_n_fold_composition() {
+        for x in [ratio(1, 3), ratio(-2, 7), ratio(5, 9), ratio(0, 1)] {
+            for n in [3u32, 12] {
+                let mut step = ratio(0, 1);
+                for _ in 0..n {
+                    step = compose(&step, &x).expect("in the domain");
+                }
+                assert_eq!(compose_n(&x, n), Some(step), "{x} over {n}");
+            }
+            assert_eq!(compose_n(&x, 1), Some(x.clone()));
+            assert_eq!(compose_n(&x, 0), Some(ratio(0, 1)));
+        }
+    }
+
+    /// Witnesses 5 and 6 (§5): met at q landing phases a turn's q-th apart
+    /// (a mote turning `a/q` between echoes), the push's mean response is
+    /// the response's own over q times the arc from q times the phase,
+    /// `mean_response(q·ψ₀, q·len)/q`, so it is bounded by `1/q`: a
+    /// resonance with small q has a mean, a draw filling the circle tends to
+    /// none. Read at q = N and 4N.
+    #[test]
+    fn the_echo_draw_at_a_resonance_has_the_mean_one_qth_of_the_folded_response() {
+        for q in [7i64, 28] {
+            for (psi, len) in [
+                (ratio(1, 11), ratio(1, 5)),
+                (ratio(2, 3), ratio(3, 2)),
+                (ratio(1, 20), ratio(1, 4)),
+            ] {
+                let mean = (0..q).fold(ratio(0, 1), |s, j| {
+                    s + crate::flows::mean_response(&(psi.clone() + ratio(j, q)), &len)
+                }) / ratio(q, 1);
+                let folded = crate::flows::mean_response(
+                    &(psi.clone() * ratio(q, 1)),
+                    &(len.clone() * ratio(q, 1)),
+                ) / ratio(q, 1);
+                assert_eq!(mean, folded, "q {q}");
+                assert!(mean.abs() <= ratio(1, q), "bounded by 1/q");
+            }
+        }
+    }
 }
 
 #[cfg(test)]

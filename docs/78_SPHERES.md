@@ -29,6 +29,14 @@ law that breaks one of them is rejected before it is built.
    `^2` norm (docs/79), no `P²` or `r^k` (Kepler, caught 2026-10-14), no
    `2n²` shell capacities. The dimensions are fluid; an effective dimension
    is read from how matter gathers, never set.
+   **Rationale (2026-11-11), Netstratum's own rulers, not a claim about
+   nature's laws:** the hold and the reach stand in one first-degree
+   denominator, `δ = H/(R + H)` and `1 − δ = R/(R + H)`, two pair shares
+   with no calibre (docs/104 §1.2), bounded at both ends: no singularity at
+   `R → 0` (`δ → 1`, the throat) and no coupling constant to carry units.
+   Inverse-square physics is not claimed wrong. Where these rulers disagree
+   with what is measured, the disagreement is missing physics on them,
+   recorded in docs/108 §1a, never a victory over Newton.
 3. **No slots, no fill orders.** Nothing is a cell in a fixed grid filled in
    order, or an index running one way (caught 2026-10-14: "Z fills the table
    line by line"; earlier, the box of squares). A thing is a system that

@@ -17,9 +17,14 @@
 //! - **The expungement takes both** (operator 2026-11-06): the release share
 //!   composes with the three planes' pressures, `s′ = s ⊕ P₁ ⊕ P₂ ⊕ P₃`, and a
 //!   released parcel's rate on each plane with its plane's, `x_k′ = x_k ⊕ P_k`.
+//! - **The rates are the manifold's twist** (docs/128 §10.4): each mote's
+//!   twist `C = p·q̄`, its generator read as a share on each unit (`v/(1 +
+//!   |v|)`, the L1 reading), the holding-weighted mean over what the core
+//!   holds (docs/127 §1). The wound plane's shares are its tilt, the
+//!   release's lead, never its torsion.
 
 use cfe::ratio::{ratio, Ratio};
-use num_traits::Zero as _;
+use num_traits::{Signed as _, Zero as _};
 
 /// The flow law, `(x + y)/(1 + x·y)`; None outside its domain.
 fn compose(x: &Ratio, y: &Ratio) -> Option<Ratio> {
@@ -82,6 +87,70 @@ pub fn released_share(s: &Ratio, planes: &[Ratio; 3]) -> Option<Ratio> {
     Some(v.max(ratio(0, 1)))
 }
 
+/// The manifold's twist over motes (docs/128 §10.4, docs/127 §1): each
+/// mote's twist generator on the three units read as a share, `v/(1 + |v|)`,
+/// holding-weighted, on the grain. None where nothing holds; a mote whose
+/// halves stand opposed (no generator) reads none.
+pub fn manifold_twist(motes: &[crate::flows::Mote]) -> Option<[Ratio; 3]> {
+    let mut sum: [Ratio; 3] = Default::default();
+    let mut held = ratio(0, 1);
+    for x in motes {
+        let Some(v) = x.orientation.twist_generator() else {
+            continue;
+        };
+        // Each term on the grain: an amount's exact denominator, summed over
+        // a disc's motes, compounds (the scalar collapse).
+        let w = crate::ring::grain(&(x.amount.clone() * crate::flows::weight(&x.key)));
+        for k in 0..3 {
+            let share = v[k].clone() / (ratio(1, 1) + v[k].abs());
+            sum[k] += crate::ring::grain(&(w.clone() * share));
+        }
+        held += w;
+    }
+    if held.is_zero() {
+        return None;
+    }
+    Some(std::array::from_fn(|k| {
+        crate::ring::grain(&(sum[k].clone() / held.clone()))
+    }))
+}
+
+/// A CORE'S LEAD and its TWIST PRESSURE on each plane (docs/100 §8.3,
+/// docs/126 §3, docs/128 §10.4): the lead its wound plane (its disc's plane
+/// with the antipole the settle gave it), the release's tilt; the pressure
+/// from the manifold's twist over its disc's motes, each pair's the throat's
+/// share of the core's holding times the pair's twist rate, each plane's the
+/// composition of its two pairs'. One reading, felt on both faces of the
+/// strip: the release on the continuum, the consumption on the vacuum.
+pub fn core_twist(core: &crate::pulse::Body) -> (Vec<Ratio>, Option<[Ratio; 3]>) {
+    let disc_spin = plane_spin(&core.flows)
+        .iter()
+        .fold(ratio(0, 1), |a, l| a + l.clone());
+    let lead = wound(&core.tilt, &core.antipole, &disc_spin);
+    let whole = crate::pulse::mass(&core.total());
+    let rho = if whole.is_zero() {
+        ratio(0, 1)
+    } else {
+        crate::pulse::mass(&core.throat) / whole
+    };
+    let pressure = manifold_twist(&core.flows)
+        .and_then(|rates| pair_pressures(&rates, &rho))
+        .and_then(|pairs| plane_pressures(&pairs));
+    (lead, pressure)
+}
+
+/// The share the VACUUM face consumes under the same twist (docs/126 §3): the
+/// strip past its half twist reads the helix reversed, so the plane pressures
+/// stand with their sense flipped, `e ⊕ (−P₁) ⊕ (−P₂) ⊕ (−P₃)`, held in
+/// `[0, 1)`. The continuum releases on the twist's pressure; the vacuum
+/// consumes on its inverse; with no twist both shares stand bare.
+pub fn consumed_share(e: &Ratio, planes: &[Ratio; 3]) -> Option<Ratio> {
+    released_share(
+        e,
+        &[-planes[0].clone(), -planes[1].clone(), -planes[2].clone()],
+    )
+}
+
 /// The tension a fibre carries (docs/100 §9.2, read per pair): its leads
 /// over its enclosure's plane on each plane, `d_k = t_k − t̄_k`, their twist
 /// on each pair `d_j ⊖ d_k`, and the tightest-wound pair's: a fibre parts
@@ -137,10 +206,20 @@ pub fn wound(plane: &[Ratio], antipole: &[Ratio], disc_spin: &Ratio) -> Vec<Rati
     if disc_spin.is_zero() || antipole.len() != t.len() {
         return t;
     }
-    t.iter()
+    // The core's planes' spin with its antipole, normalized (docs/128
+    // §13.1): `t_k + A_k/ΣS` wherever the antipole sums to nothing; a
+    // rotation's antipole need not.
+    let held: Vec<Ratio> = t
+        .iter()
         .zip(antipole)
-        .map(|(tk, a)| tk.clone() + a.clone() / disc_spin.clone())
-        .collect()
+        .map(|(tk, a)| tk.clone() * disc_spin.clone() + a.clone())
+        .collect();
+    let w = crate::flows::tilt_from(&held);
+    if w.is_empty() {
+        t
+    } else {
+        w
+    }
 }
 
 /// The twist a released parcel carries off its plane (docs/100 §8.3): its
@@ -162,19 +241,49 @@ mod tests {
     use super::*;
 
     #[test]
+    fn the_strips_two_faces_cancel_and_no_twist_leaves_them_bare() {
+        // docs/126 §3: the continuum releases on the twist's pressure, the
+        // vacuum consumes on its inverse; composed through both, a share
+        // returns exactly (the flow law a group); with no twist both stand
+        // bare.
+        let planes = [ratio(1, 7), ratio(-1, 5), ratio(1, 11)];
+        let whole = planes
+            .iter()
+            .try_fold(ratio(0, 1), |a, p| compose(&a, p))
+            .expect("in the flow law's domain");
+        for x in [ratio(1, 3), ratio(1, 2), ratio(2, 9)] {
+            let there = compose(&x, &whole).expect("released");
+            assert_eq!(
+                compose(&there, &-whole.clone()),
+                Some(x.clone()),
+                "the faces cancel"
+            );
+            let bare = [ratio(0, 1), ratio(0, 1), ratio(0, 1)];
+            assert_eq!(released_share(&x, &bare), Some(x.clone()));
+            assert_eq!(consumed_share(&x, &bare), Some(x.clone()));
+        }
+        // The vacuum reads the pressures' sense flipped: consumed under P is
+        // released under −P.
+        let neg = [-planes[0].clone(), -planes[1].clone(), -planes[2].clone()];
+        assert_eq!(
+            consumed_share(&ratio(1, 3), &planes),
+            released_share(&ratio(1, 3), &neg)
+        );
+    }
+
+    #[test]
     fn the_antipole_balances_what_the_attractor_moves_on_every_plane() {
-        // docs/100 §8.2: two wound motes at different reaches relax by
-        // different keeps; the plane spin moves between the planes (never
+        // docs/100 §8.2: the plane spin moves between the planes (never
         // made), and the antipole holds the opposite, plane by plane.
         let mote = |ell: i64, tilt: [i64; 3]| crate::flows::Mote {
             key: crate::chem::Kind::parse("W0004").expect("a kind"),
             amount: ratio(3, 1),
-            spins: crate::flows::Mote::spins_of(
-                &ratio(ell, 1),
-                &tilt.map(|t| ratio(t, 6)),
-            ),
-            ell_orth: ratio(0, 1),
-            phase: vec![ratio(0, 1); crate::flows::PLANES],
+            spins: crate::flows::Mote::spins_of(&ratio(ell, 1), &tilt.map(|t| ratio(t, 6))),
+            spins_orth: vec![ratio(0, 1); 3],
+            orientation: crate::orientation::Orientation::from_phases(&vec![
+                ratio(0, 1);
+                crate::flows::PLANES
+            ]),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,
@@ -188,7 +297,13 @@ mod tests {
             disc.iter().map(|x| (x.ell_o(), ratio(1, 4))).collect(),
         );
         let before = plane_spin(&disc);
-        let plane = crate::flows::settle_disc(&mut disc, &enc);
+        // A redistribution between the planes (a body's tilt turned, its
+        // orbit spin kept), as a law that moves spin between planes gives.
+        let _ = &enc;
+        let plane = crate::flows::disc_plane(&disc);
+        let ell = disc[0].ell_o();
+        disc[0].set_tilt(vec![ratio(1, 3), ratio(1, 3), ratio(1, 3)]);
+        assert_eq!(disc[0].ell_o(), ell);
         let after = plane_spin(&disc);
         let sum = |v: &[Ratio]| v.iter().fold(ratio(0, 1), |s, k| s + k.clone());
         assert_eq!(sum(&before), sum(&after), "redistributed, never made");
@@ -206,7 +321,11 @@ mod tests {
         let d = carried_twist(&spins, &plane);
         assert_eq!(sum(&d), ratio(0, 1));
         for k in 0..3 {
-            assert_eq!(d[k].clone() > ratio(0, 1), a[k].clone() > ratio(0, 1), "plane {k}");
+            assert_eq!(
+                d[k].clone() > ratio(0, 1),
+                a[k].clone() > ratio(0, 1),
+                "plane {k}"
+            );
         }
     }
 
@@ -248,6 +367,88 @@ mod tests {
         assert_eq!(
             tension(&wound, &plane),
             pair_rate(&a, &b).expect("in the bound")
+        );
+    }
+
+    fn mote(orientation: crate::orientation::Orientation) -> crate::flows::Mote {
+        crate::flows::Mote {
+            key: crate::chem::Kind::parse("W0001").expect("a kind"),
+            amount: ratio(1, 1),
+            spins: vec![ratio(1, 3); 3],
+            spins_orth: vec![ratio(0, 1); 3],
+            orientation,
+            agitation: ratio(0, 1),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        }
+    }
+
+    #[test]
+    fn motes_in_pure_orbit_twist_nothing_and_press_nothing() {
+        // docs/128 §10.4: equal halves (R held) give C = 1, no pressure.
+        let spatial = crate::orientation::Orientation::of_generator(
+            [
+                ratio(1, 3),
+                ratio(-1, 5),
+                ratio(1, 7),
+                ratio(0, 1),
+                ratio(0, 1),
+                ratio(0, 1),
+            ],
+            [0; 6],
+        );
+        let motes = vec![mote(spatial.clone()), mote(spatial)];
+        let v = manifold_twist(&motes).expect("held");
+        assert!(v.iter().all(|x| *x == ratio(0, 1)), "no twist");
+        let planes = pair_pressures(&v, &ratio(1, 2)).and_then(|p| plane_pressures(&p));
+        assert!(planes
+            .expect("in the bound")
+            .iter()
+            .all(|p| *p == ratio(0, 1)));
+    }
+
+    #[test]
+    fn a_twisted_manifold_presses_its_planes_apart() {
+        // A twist against R uneven on the units presses the planes; one
+        // even on the three units (isoclinic about the diagonal) presses none.
+        let twisted = crate::orientation::Orientation::of_generator(
+            [
+                ratio(0, 1),
+                ratio(0, 1),
+                ratio(0, 1),
+                ratio(1, 4),
+                ratio(0, 1),
+                ratio(-1, 9),
+            ],
+            [0; 6],
+        );
+        let v = manifold_twist(&[mote(twisted)]).expect("held");
+        assert!(v.iter().any(|x| !x.is_zero()), "a twist against R");
+        let planes = pair_pressures(&v, &ratio(1, 2))
+            .and_then(|p| plane_pressures(&p))
+            .expect("in the bound");
+        assert!(planes.iter().any(|p| !p.is_zero()));
+        let even = crate::orientation::Orientation::of_generator(
+            [
+                ratio(0, 1),
+                ratio(0, 1),
+                ratio(0, 1),
+                ratio(1, 6),
+                ratio(1, 6),
+                ratio(1, 6),
+            ],
+            [0; 6],
+        );
+        let v = manifold_twist(&[mote(even)]).expect("held");
+        let planes = pair_pressures(&v, &ratio(1, 2))
+            .and_then(|p| plane_pressures(&p))
+            .expect("in the bound");
+        assert!(
+            planes.iter().all(|p| p.is_zero()),
+            "isoclinic about the diagonal"
         );
     }
 }

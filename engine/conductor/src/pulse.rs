@@ -460,17 +460,29 @@ pub fn universal_ledger(u: &Universe) -> Ratio {
 /// 2026-10-16): each core re-pulses at full strength in its own units, so no
 /// share of the universe enters the push; a galaxy's gas comes from outside
 /// (the ocean), not from its own bounce.
-/// A body's push, Z and Q together (ruling of 2026-10-26: Q stands on the Z
-/// axis, and both must work together, otherwise R diverges): half its open frames' share of its whole weight, `½·Q/(A + Q)` (Q its
-/// magnetism, A its holding; their sum its 3Z mass). Never one pole over the
-/// other: `½·Q/A` passed ½ wherever the open outweighed the held, breaking
-/// the luminal bound; read on the whole it is at most ½, the bound itself.
-pub fn push_of(m: &Manifest) -> Ratio {
+/// A body's PUSH (docs/125 §4.1, operator 2026-11-11; docs/104 §1.2): its
+/// orientation the open pole, the protons' charge its bound electrons leave
+/// open at its place, `p = Q·(1 − g)/w = Q·u/w` (`g` its held share there,
+/// docs/105 §3, the electrons bound at `g`); its ANTIPOLE, by the same
+/// inversion, the held stratum, the neutrons with the charge the electrons
+/// carried there, `p̄ = (Z + Q·g)/w = 1 − p`. The face decides which a body
+/// reads: the continuum `p`, the vacuum leg (`inverted`) `p̄`. A pair share,
+/// no `½`; it replaces `½·U/w` (the electrons' unpaired over the whole), the
+/// electrons' `U` staying the coupling's strength.
+pub fn push_of(m: &Manifest, g: &Ratio, inverted: bool) -> Ratio {
     let whole = mass(m);
     if whole.is_zero() {
         return ratio(0, 1);
     }
-    ratio(1, 2) * magnetism(m) / whole
+    let charge = m.iter().fold(ratio(0, 1), |s, (k, a)| {
+        s + a.clone() * ratio(i64::from(crate::chem::charge(k)), 1)
+    });
+    let p = charge * (ratio(1, 1) - g.clone()) / whole;
+    if inverted {
+        ratio(1, 1) - p
+    } else {
+        p
+    }
 }
 
 pub fn galaxy_push(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio)> {
@@ -1119,7 +1131,12 @@ pub fn ocean_frame(u: &Universe) -> Option<crate::flows::Enclosed> {
 
 pub fn orbit_galaxies(
     u: &mut Universe,
-) -> (crate::enfold::Cross, Option<Ratio>, Collective, Vec<Vec<Ratio>>) {
+) -> (
+    crate::enfold::Cross,
+    Option<Ratio>,
+    Collective,
+    Vec<Vec<Ratio>>,
+) {
     let mut cross = crate::enfold::Cross::default();
     let mut collective = Collective::default();
     let whole = mass(&u.total());
@@ -1187,8 +1204,8 @@ pub fn orbit_galaxies(
             .iter()
             .zip(&keys)
             .map(|(x, k)| match prev.get(k) {
-                Some(p) if p.len() == x.phase.len() => x
-                    .phase
+                Some(p) if p.len() == crate::flows::PLANES => x
+                    .phase()
                     .iter()
                     .zip(p)
                     .map(|(a, b)| crate::flows::signed(&(a.clone() - b.clone())))
@@ -1196,10 +1213,7 @@ pub fn orbit_galaxies(
                 _ => Vec::new(),
             })
             .collect();
-        u.firm_prev = firm
-            .iter()
-            .map(|x| (x.key.clone(), x.phase.clone()))
-            .collect();
+        u.firm_prev = firm.iter().map(|x| (x.key.clone(), x.phase())).collect();
         // Its collections (docs/111 §4.2) move as one (§4.3): one specific
         // spin in each orbit, the holding-weighted mean, held on the grain
         // with what flooring leaves to the singularity's reservoir (Σ m·ℓ +
@@ -1211,7 +1225,7 @@ pub fn orbit_galaxies(
         };
         let spin_of = |ms: &[crate::flows::Mote]| {
             ms.iter().fold(ratio(0, 1), |s, x| {
-                s + booked(x) * (x.ell_o() + x.ell_orth.clone())
+                s + booked(x) * (x.ell_o() + x.ell_orth())
             })
         };
         let before = spin_of(&firm);
@@ -1226,7 +1240,7 @@ pub fn orbit_galaxies(
                     / total.clone()
             };
             let ell_o = crate::ring::grain(&mean(&|x| x.ell_o()));
-            let ell_orth = crate::ring::grain(&mean(&|x| x.ell_orth.clone()));
+            let ell_orth = crate::ring::grain(&mean(&|x| x.ell_orth()));
             let planes = set.iter().map(|&j| moves[j].len()).min().unwrap_or(0);
             let shift: Vec<Ratio> = (0..planes)
                 .map(|k| {
@@ -1238,10 +1252,13 @@ pub fn orbit_galaxies(
             for &j in set {
                 let x = &mut firm[j];
                 x.set_ell_o(ell_o.clone());
-                x.ell_orth = ell_orth.clone();
+                x.set_ell_orth(ell_orth.clone());
+                // Its own move replaced by the set's, turned on its
+                // orientation plane by plane.
                 for (k, d) in shift.iter().enumerate() {
-                    let from = x.phase[k].clone() - moves[j][k].clone();
-                    x.phase[k] = crate::ring::grain(&crate::flows::wrap(&(from + d.clone())));
+                    x.orientation
+                        .shift(k, &crate::flows::wrap(&(d.clone() - moves[j][k].clone())))
+                        .expect("a turning is a motion");
                 }
             }
         }
@@ -1312,20 +1329,18 @@ pub fn orbit_galaxies(
             };
             let ledger = |sea: &[crate::flows::Mote]| {
                 sea.iter().fold(ratio(0, 1), |s, x| {
-                    s + booked(x) * (x.ell_o() + x.ell_orth.clone())
+                    s + booked(x) * (x.ell_o() + x.ell_orth())
                 })
             };
             let before = ledger(&u.ocean);
-            let phases_was: Vec<Vec<Ratio>> = u.ocean.iter().map(|x| x.phase.clone()).collect();
+            let phases_was: Vec<Vec<Ratio>> = u.ocean.iter().map(|x| x.phase()).collect();
             crate::profile::mark("orbit:ocean");
-            let (given, _, heated) = crate::flows::torque(
-                &mut u.ocean,
-                &enc_o,
-                &ratio(1, 2),
-                None,
-                &ledger_u,
-                &mut cross,
-            );
+            // The universal echo's beat on the ocean (docs/130): the bounce's
+            // push ½ (`home_push`) at each mote's own clock.
+            let _ = crate::flows::echo_beats(&mut u.ocean, &enc_o, &ledger_u, &ratio(1, 2), None);
+            let (given, _, heated) =
+                crate::flows::torque(&mut u.ocean, &enc_o, &ratio(1, 2), &ledger_u, &mut cross);
+            let _ = crate::flows::conform_partners(&mut u.ocean, &enc_o, &ledger_u);
             if !u.unit.is_zero() {
                 collective.ocean_heat = heated * ledger_u.clone() / u.unit.clone();
             }
@@ -1335,7 +1350,7 @@ pub fn orbit_galaxies(
                     .iter()
                     .zip(&phases_was)
                     .map(|(x, was)| {
-                        x.phase
+                        x.phase()
                             .iter()
                             .zip(was)
                             .map(|(a, b)| crate::flows::signed(&(a.clone() - b.clone())))
@@ -1423,7 +1438,12 @@ pub struct Formation {
 /// the hold inside it, the collection's holding, and each member's (reach,
 /// own extent). The step and any reconstruction of it read the verdict by
 /// this one function.
-pub fn judge(reach: Ratio, inside: Ratio, holding: &Ratio, members: &[(Ratio, Ratio)]) -> PinchReading {
+pub fn judge(
+    reach: Ratio,
+    inside: Ratio,
+    holding: &Ratio,
+    members: &[(Ratio, Ratio)],
+) -> PinchReading {
     let pinch = crate::ring::pinch(&reach, holding, &inside);
     let widest = members.iter().fold(ratio(0, 1), |w, (ri, di)| {
         let out = ri.clone() + di.clone() - reach.clone();
@@ -1467,7 +1487,8 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
     if whole.is_zero() {
         return Formation::default();
     }
-    let share = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
+    let share =
+        |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
     let f_home = mass(&u.cores[h].total()) / whole.clone();
     // Every candidate, an ocean mote: (in the home, its index, its universal
     // orbit and circulation spins).
@@ -1475,7 +1496,7 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
         .ocean
         .iter()
         .enumerate()
-        .map(|(j, x)| (false, j, x.ell_o(), x.ell_orth.clone()))
+        .map(|(j, x)| (false, j, x.ell_o(), x.ell_orth()))
         .collect();
     if cand.len() < 2 {
         return Formation::default();
@@ -1500,12 +1521,12 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
                 )
             })
             .chain(u.ocean.iter().map(|x| (x.ell_o(), share(x))))
-            .chain(
-                u.cores
-                    .iter()
-                    .filter(|c| !is_home(c))
-                    .map(|c| (c.ell.clone(), ratio(2, 1) * mass(&c.total()) / whole.clone())),
-            )
+            .chain(u.cores.iter().filter(|c| !is_home(c)).map(|c| {
+                (
+                    c.ell.clone(),
+                    ratio(2, 1) * mass(&c.total()) / whole.clone(),
+                )
+            }))
             .collect(),
     );
     // Each candidate's reach and own extent on both orbit planes.
@@ -1540,12 +1561,20 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
     };
     let mut held: Vec<Vec<usize>> = Vec::new();
     for g in groups {
-        let hb = g.iter().fold(ratio(0, 1), |s, &i| s + share(mote(&cand[i])));
+        let hb = g
+            .iter()
+            .fold(ratio(0, 1), |s, &i| s + share(mote(&cand[i])));
         if hb.is_zero() {
             continue;
         }
         let plane = |k: usize| {
-            let spin = |i: usize| if k == 0 { cand[i].2.abs() } else { cand[i].3.abs() };
+            let spin = |i: usize| {
+                if k == 0 {
+                    cand[i].2.abs()
+                } else {
+                    cand[i].3.abs()
+                }
+            };
             let mean = g
                 .iter()
                 .fold(ratio(0, 1), |s, &i| s + share(mote(&cand[i])) * spin(i))
@@ -1575,7 +1604,13 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
     }
     // Each self-held collection becomes a core: its members leave the home
     // and the ocean, re-origined into it.
-    let mut next = u.cores.iter().filter_map(|c| c.path.first().copied()).max().unwrap_or(0) + 1;
+    let mut next = u
+        .cores
+        .iter()
+        .filter_map(|c| c.path.first().copied())
+        .max()
+        .unwrap_or(0)
+        + 1;
     let mut take_home: std::collections::BTreeSet<usize> = std::collections::BTreeSet::new();
     let mut take_ocean: std::collections::BTreeSet<usize> = std::collections::BTreeSet::new();
     let mut born: Vec<Body> = Vec::new();
@@ -1609,7 +1644,7 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
             *grains.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
             flows.push(crate::flows::Mote {
                 spins: crate::flows::Mote::spins_of(&ell, &x.tilt()),
-                ell_orth: orth,
+                spins_orth: crate::flows::Mote::orth_of(&orth, &x.orth_shares()),
                 ..x.clone()
             });
         }
@@ -1623,9 +1658,7 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
                     &members
                         .iter()
                         .zip(&m)
-                        .map(|((x, _, _), w)| {
-                            (w.clone(), x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))
-                        })
+                        .map(|((x, _, _), w)| (w.clone(), x.phase_at(k)))
                         .collect::<Vec<_>>(),
                 )
             })
@@ -1680,10 +1713,7 @@ pub fn form_galaxies(u: &mut Universe, bell: u64, moves: &[Vec<Ratio>]) -> Forma
     // The members' grains leave the home's books (its medium first, then
     // what it kept) and the ocean.
     let home = &mut u.cores[h];
-    let gone: Vec<crate::flows::Mote> = take_home
-        .iter()
-        .map(|&j| home.flows[j].clone())
-        .collect();
+    let gone: Vec<crate::flows::Mote> = take_home.iter().map(|&j| home.flows[j].clone()).collect();
     let mut j = 0;
     home.flows.retain(|_| {
         let go = take_home.contains(&j);
@@ -1849,12 +1879,8 @@ pub fn contained_front(u: &Universe) -> Vec<FrontCell> {
         .map(|(c, j)| &u.cores[c].flows[j])
         .collect();
     let outer = |x: &crate::flows::Mote| {
-        let psi = x
-            .phase
-            .get(crate::flows::LOOP)
-            .cloned()
-            .unwrap_or_else(|| ratio(0, 1));
-        let (ell, _) = crate::flows::swung(&x.ell_o(), &x.ell_orth, &psi);
+        let psi = x.phase_at(crate::flows::LOOP);
+        let (ell, _) = crate::flows::swung(&x.ell_o(), &x.ell_orth(), &psi);
         enc.reach(&ell).0 * (ratio(1, 1) + push.clone())
     };
     let mut out = Vec::new();
@@ -1983,13 +2009,7 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         let key = p.key.to_string();
         g.extend_from_slice(&(key.len() as u16).to_le_bytes());
         g.extend_from_slice(key.as_bytes());
-        for r in [
-            &p.held,
-            &p.inner,
-            &p.outer,
-            &p.agitation,
-            &p.vacuum,
-        ] {
+        for r in [&p.held, &p.inner, &p.outer, &p.agitation, &p.vacuum] {
             cfe::ratio::encode(r, &mut g);
         }
         g.extend_from_slice(&p.born.to_le_bytes());
@@ -2004,32 +2024,7 @@ fn put_body(b: &Body, out: &mut Vec<u8>) {
         cfe::tlv::put(9, &w, out);
     }
     for x in &b.flows {
-        let mut w = Vec::new();
-        let key = x.key.to_string();
-        w.extend_from_slice(&(key.len() as u16).to_le_bytes());
-        w.extend_from_slice(key.as_bytes());
-        for r in [&x.amount, &x.ell_o(), &x.ell_orth, &x.agitation] {
-            cfe::ratio::encode(r, &mut w);
-        }
-        w.push(x.phase.len() as u8);
-        for r in &x.phase {
-            cfe::ratio::encode(r, &mut w);
-        }
-        w.extend_from_slice(&x.born.to_le_bytes());
-        w.push(u8::from(x.vacuum));
-        cfe::ratio::encode(&x.lever_place, &mut w);
-        w.push(x.lever.len() as u8);
-        for l in &x.lever {
-            cfe::ratio::encode(l, &mut w);
-        }
-        let tilt = x.tilt();
-        w.push(tilt.len() as u8);
-        for t in &tilt {
-            cfe::ratio::encode(t, &mut w);
-        }
-        // Its lift on the S lane (docs/121 §14.6).
-        cfe::ratio::encode(&x.lift, &mut w);
-        cfe::tlv::put(10, &w, out);
+        cfe::tlv::put(10, &put_flow(x), out);
     }
     if !b.reservoir.is_zero() {
         let mut w = Vec::new();
@@ -2133,40 +2128,60 @@ pub fn write(var_root: &Path, seed: &[u8; 32], u: &Universe) -> std::io::Result<
         }
         cfe::tlv::put(29, &w, &mut out);
     }
-    for (tag, x) in u.ocean.iter().map(|x| (24u8, x)) {
-        let mut w = Vec::new();
-        let key = x.key.to_string();
-        w.extend_from_slice(&(key.len() as u16).to_le_bytes());
-        w.extend_from_slice(key.as_bytes());
-        for r in [&x.amount, &x.ell_o(), &x.ell_orth, &x.agitation] {
-            cfe::ratio::encode(r, &mut w);
-        }
-        w.push(x.phase.len() as u8);
-        for r in &x.phase {
-            cfe::ratio::encode(r, &mut w);
-        }
-        w.extend_from_slice(&x.born.to_le_bytes());
-        w.push(u8::from(x.vacuum));
-        cfe::ratio::encode(&x.lever_place, &mut w);
-        w.push(x.lever.len() as u8);
-        for l in &x.lever {
-            cfe::ratio::encode(l, &mut w);
-        }
-        // Its lead (docs/100 §4), as a flow mote's (tag 10).
-        let tilt = x.tilt();
-        w.push(tilt.len() as u8);
-        for t in &tilt {
-            cfe::ratio::encode(t, &mut w);
-        }
-        // Its lift on the S lane (docs/121 §14.6).
-        cfe::ratio::encode(&x.lift, &mut w);
-        cfe::tlv::put(tag, &w, &mut out);
+    for x in &u.ocean {
+        cfe::tlv::put(24, &put_flow(x), &mut out);
     }
     std::fs::create_dir_all(var_root)?;
     let path = var_root.join("pulse.bin");
     let staged = path.with_extension("staged");
     std::fs::write(&staged, out)?;
     std::fs::rename(staged, path)
+}
+
+/// A mote's record (a flow mote, tag 10, and an ocean mote, tag 24, alike).
+fn put_flow(x: &crate::flows::Mote) -> Vec<u8> {
+    let mut w = Vec::new();
+    let key = x.key.to_string();
+    w.extend_from_slice(&(key.len() as u16).to_le_bytes());
+    w.extend_from_slice(key.as_bytes());
+    for r in [&x.amount, &x.ell_o(), &x.ell_orth(), &x.agitation] {
+        cfe::ratio::encode(r, &mut w);
+    }
+    // Its orientation (docs/117 §11.7, docs/131): the six components, the
+    // six windings, then its wide parts where it has any. A count past 254
+    // is written as 255 and the count on two bytes.
+    let o = x.orientation.values();
+    match u8::try_from(o.len()) {
+        Ok(n) if n < 255 => w.push(n),
+        _ => {
+            w.push(255);
+            w.extend_from_slice(&(o.len() as u16).to_le_bytes());
+        }
+    }
+    for r in &o {
+        cfe::ratio::encode(r, &mut w);
+    }
+    w.extend_from_slice(&x.born.to_le_bytes());
+    w.push(u8::from(x.vacuum));
+    cfe::ratio::encode(&x.lever_place, &mut w);
+    w.push(x.lever.len() as u8);
+    for l in &x.lever {
+        cfe::ratio::encode(l, &mut w);
+    }
+    let tilt = x.tilt();
+    w.push(tilt.len() as u8);
+    for t in &tilt {
+        cfe::ratio::encode(t, &mut w);
+    }
+    // Its lift on the S lane (docs/121 §14.6).
+    cfe::ratio::encode(&x.lift, &mut w);
+    // Its partners' shares of its loop spin (docs/128 §9.1).
+    let orth = x.orth_tilt();
+    w.push(orth.len() as u8);
+    for t in &orth {
+        cfe::ratio::encode(t, &mut w);
+    }
+    w
 }
 
 fn get_manifest(v: &[u8], at: &mut usize) -> Option<Manifest> {
@@ -2244,14 +2259,21 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
         at += used;
         r.push(x);
     }
-    let n = *v.get(at)? as usize;
+    let mut n = *v.get(at)? as usize;
     at += 1;
-    let mut phase = Vec::with_capacity(n.min(16));
+    if n == 255 {
+        n = u16::from_le_bytes(v.get(at..at + 2)?.try_into().ok()?) as usize;
+        at += 2;
+    }
+    let mut values = Vec::with_capacity(n.min(16));
     for _ in 0..n {
         let (x, used) = cfe::ratio::decode(v.get(at..)?)?;
         at += used;
-        phase.push(x);
+        values.push(x);
     }
+    // Its orientation: twelve values (docs/117 §11.7) and its wide parts
+    // (docs/131); a record of per-plane phases (the flat torus) is refused.
+    let orientation = crate::orientation::Orientation::from_values(&values)?;
     let born = u64::from_le_bytes(v.get(at..at + 8)?.try_into().ok()?);
     let vacuum = *v.get(at + 8)? == 1;
     at += 9;
@@ -2279,17 +2301,39 @@ fn get_flow(v: &[u8]) -> Option<crate::flows::Mote> {
     // Its lift, where the pulse file carries one (docs/121 §14.6); 0 on its
     // orbit otherwise.
     let lift = match v.get(at..).filter(|rest| !rest.is_empty()) {
-        Some(rest) => cfe::ratio::decode(rest)?.0,
+        Some(rest) => {
+            let (x, used) = cfe::ratio::decode(rest)?;
+            at += used;
+            x
+        }
         None => ratio(0, 1),
     };
+    // Its partners' shares of its loop spin (docs/128 §9.1); a record
+    // without them carries the loop spin by its tilt.
+    let mut orth = Vec::new();
+    if let Some(&t) = v.get(at) {
+        at += 1;
+        for _ in 0..usize::from(t).min(16) {
+            let (x, used) = cfe::ratio::decode(v.get(at..)?)?;
+            at += used;
+            orth.push(x);
+        }
+    }
     let mut r = r.into_iter();
+    let (amount, ell_o, ell_orth) = (r.next()?, r.next()?, r.next()?);
+    let spins = crate::flows::Mote::spins_of(&ell_o, &tilt);
+    let carried = if orth.is_empty() {
+        crate::flows::tilt_of(&tilt)
+    } else {
+        orth
+    };
     Some(crate::flows::Mote {
         key,
-        amount: r.next()?,
-        spins: crate::flows::Mote::spins_of(&r.next()?, &tilt),
-        ell_orth: r.next()?,
+        amount,
+        spins,
+        spins_orth: crate::flows::Mote::orth_of(&ell_orth, &carried),
         agitation: r.next()?,
-        phase,
+        orientation,
         born,
         vacuum,
         lever,
@@ -2468,8 +2512,10 @@ mod tests {
                 key: crate::chem::Kind::parse("W0001").expect("a kind"),
                 amount: ratio(1, 1),
                 spins: crate::flows::Mote::spins_of(&ratio(1, 3), &[]),
-                ell_orth: ratio(0, 1),
-                phase: crate::flows::rest(ratio(1, 2)),
+                spins_orth: vec![ratio(0, 1); 3],
+                orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(
+                    ratio(1, 2),
+                )),
                 agitation: ratio(0, 1),
                 born: 0,
                 vacuum: true,
@@ -2651,8 +2697,11 @@ mod tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(amount, 1),
             spins: crate::flows::Mote::spins_of(&ell, &[]),
-            ell_orth: ratio(1, 7),
-            phase: vec![ratio(0, 1); crate::flows::PLANES],
+            spins_orth: crate::flows::Mote::orth_of(&ratio(1, 7), &[]),
+            orientation: crate::orientation::Orientation::from_phases(&vec![
+                ratio(0, 1);
+                crate::flows::PLANES
+            ]),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: true,
@@ -2662,17 +2711,20 @@ mod tests {
         };
         // The pair in step, moved together; the lone mote half a turn off.
         let mut lone = at(ratio(50, 1), 30);
-        lone.phase = vec![ratio(1, 2); crate::flows::PLANES];
+        lone.orientation =
+            crate::orientation::Orientation::from_phases(&vec![ratio(1, 2); crate::flows::PLANES]);
         u.ocean = vec![at(ratio(5, 1), 60), at(ratio(5, 1), 40), lone];
         let moves = vec![vec![ratio(1, 60); crate::flows::PLANES]; 3];
         let whole = mass(&u.total());
         let books = |u: &Universe| {
             let w = mass(&u.total());
-            let m = |x: &crate::flows::Mote| x.amount.clone() * crate::flows::weight(&x.key) / w.clone();
+            let m = |x: &crate::flows::Mote| {
+                x.amount.clone() * crate::flows::weight(&x.key) / w.clone()
+            };
             let ocean = u
                 .ocean
                 .iter()
-                .fold(ratio(0, 1), |s, x| s + m(x) * (x.ell_o() + x.ell_orth.clone()));
+                .fold(ratio(0, 1), |s, x| s + m(x) * (x.ell_o() + x.ell_orth()));
             u.cores.iter().fold(ocean, |s, c| {
                 let f = mass(&c.total()) / w.clone();
                 let own = if is_home(c) {
@@ -2682,7 +2734,7 @@ mod tests {
                 };
                 c.flows.iter().fold(s + own, |s, x| {
                     let lift = if is_home(c) { ratio(1, 1) } else { f.clone() };
-                    s + m(x) * lift * (x.ell_o() + x.ell_orth.clone())
+                    s + m(x) * lift * (x.ell_o() + x.ell_orth())
                 })
             })
         };
@@ -2842,8 +2894,11 @@ mod tests {
                     &ratio(1, 3),
                     &[ratio(1, 2), ratio(1, 3), ratio(1, 6)],
                 ),
-                ell_orth: ratio(0, 1),
-                phase: crate::flows::rest(ratio(1, 2)),
+                // Its partners apart (docs/128 §9.2), each read back.
+                spins_orth: vec![ratio(1, 5), ratio(-1, 10), ratio(1, 20)],
+                orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(
+                    ratio(1, 2),
+                )),
                 agitation: ratio(0, 1),
                 born: 0,
                 vacuum: true,
@@ -2865,5 +2920,91 @@ mod tests {
             "the file gives the universe back"
         );
         let _ = std::fs::remove_dir_all(dir);
+    }
+}
+
+#[cfg(test)]
+mod record_tests {
+    use cfe::ratio::{ratio, Ratio};
+
+    #[test]
+    fn an_older_record_carries_its_loop_spin_by_the_tilt() {
+        // docs/128 §9.2: a record holding the loop spin alone (before the
+        // partners were carried) gives it to the partners by the tilt.
+        let tilt = [ratio(1, 2), ratio(1, 3), ratio(1, 6)];
+        let x = crate::flows::Mote {
+            key: crate::chem::Kind::parse("W0003").expect("a kind"),
+            amount: ratio(1, 1024),
+            spins: crate::flows::Mote::spins_of(&ratio(1, 3), &tilt),
+            spins_orth: vec![ratio(1, 5), ratio(-1, 10), ratio(1, 20)],
+            orientation: crate::orientation::Orientation::default(),
+            agitation: ratio(0, 1),
+            born: 3,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        };
+        let now = super::put_flow(&x);
+        assert_eq!(super::get_flow(&now), Some(x.clone()), "read back exactly");
+        // The same record without its partners' shares.
+        let mut shares = vec![x.orth_tilt().len() as u8];
+        for t in &x.orth_tilt() {
+            cfe::ratio::encode(t, &mut shares);
+        }
+        let older = &now[..now.len() - shares.len()];
+        let read = super::get_flow(older).expect("an older record loads");
+        assert_eq!(read.ell_orth(), x.ell_orth(), "the loop spin is kept");
+        let by_tilt: Vec<Ratio> = tilt.iter().map(|t| x.ell_orth() * t.clone()).collect();
+        assert_eq!(read.spins_orth, by_tilt, "carried by the tilt");
+        assert_eq!(read.spins, x.spins);
+    }
+}
+
+#[cfg(test)]
+mod push_tests {
+    use super::{push_of, Manifest};
+    use cfe::ratio::ratio;
+
+    fn of(w: u32, amount: i64) -> Manifest {
+        [(
+            crate::chem::Kind::atom(w).expect("an atom"),
+            ratio(amount, 1),
+        )]
+        .into_iter()
+        .collect()
+    }
+
+    #[test]
+    fn the_push_and_its_antipole_are_a_pair_share() {
+        // docs/125 §4.1: p = Q(1 − g)/w, p̄ = 1 − p, no ½.
+        let h = of(1, 5);
+        assert_eq!(
+            push_of(&h, &ratio(0, 1), false),
+            ratio(1, 1),
+            "bare protons, nothing held"
+        );
+        assert_eq!(
+            push_of(&h, &ratio(1, 1), false),
+            ratio(0, 1),
+            "held whole: no push"
+        );
+        for g in [ratio(1, 3), ratio(1, 2), ratio(5, 7)] {
+            for w in [1u32, 2, 4, 16, 56] {
+                let m = of(w, 3);
+                assert_eq!(
+                    push_of(&m, &g, false) + push_of(&m, &g, true),
+                    ratio(1, 1),
+                    "w {w}: the push and its antipole make the whole"
+                );
+            }
+        }
+        // Deuterium carries one proton in two nucleons: half hydrogen's push
+        // at the same place.
+        let g = ratio(1, 4);
+        assert_eq!(
+            push_of(&of(2, 1), &g, false) * ratio(2, 1),
+            push_of(&of(1, 1), &g, false)
+        );
     }
 }

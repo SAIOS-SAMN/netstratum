@@ -132,8 +132,10 @@ ledger closing; the identities; the carrier's widths.
 
    **Derived 2026-11-07 from docs/97 §3–§4 and docs/104 §1.1.** The two
    counts carry two roles the docs already assign:
-   - **The open frames** (magnetism, the push, the dipole's frames `(3Z − U,
-     U)`, and the ends a bond pairs) are `chem::unpaired`, read from
+   - **The open frames** (magnetism, the push, the dipole's open share, and
+     the ends a bond pairs; restated 2026-11-11 in docs/95 §0: the dipole's
+     poles are the nucleons' held and open dimensions `(3Z, 3Q)`, and these
+     open dimensions stand beside it over `3w`) are `chem::unpaired`, read from
      `atom(Q)`. docs/97 §4: "the atom, unpaired frames, hold and tightness:
      read from `atom(Q)` as now". `atom(Q)` is the electrons' own harmonic
      atom on S¹¹ (operators 2026-10-18, `cfe::almanac::atom`), so this is

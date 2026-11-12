@@ -473,6 +473,48 @@ pub fn dissociate(m: &Manifest) -> Manifest {
     out
 }
 
+/// A star's HEAT PER HOLDING of what it keeps (docs/124 §3, the energy
+/// book's reading): its ignition share's agitation and its carried heat.
+pub fn star_heat(sys: &crate::pulse::Body) -> Ratio {
+    agitation_of(&sys.reservoir) + sys.heat.clone()
+}
+
+/// The heat a system's star and motes hold, in holding units: the star's on
+/// what it keeps, each mote's own `a·m` (docs/124 §3; heat travels with the
+/// matter that carries it).
+pub fn held_heat(sys: &crate::pulse::Body) -> Ratio {
+    sys.flows
+        .iter()
+        .fold(star_heat(sys) * mass(&sys.kept), |h, x| {
+            h + x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key)
+        })
+}
+
+/// A world's heat with its moons', in holding units.
+pub fn world_heat(w: &crate::pulse::Body) -> Ratio {
+    w.satellites
+        .iter()
+        .fold(w.heat.clone() * mass(&w.kept), |h, m| h + world_heat(m))
+}
+
+/// The carried heat `h′` a star stands at after infall mixes in by holding
+/// (docs/124 §3): `(A + h′)·K′ = H + T`, `H` its heat on what it kept before,
+/// `T` the infall's heat, `K′` what it keeps after, `A` its ignition share's
+/// agitation.
+pub fn mixed_heat(before: &Ratio, infall: &Ratio, kept_after: &Ratio, a: &Ratio) -> Ratio {
+    (before.clone() + infall.clone()) / kept_after.clone() - a.clone()
+}
+
+/// Heat per holding: a holding's heat over its holding (0 where it holds
+/// nothing).
+pub fn per_holding(heat: &Ratio, holding: &Ratio) -> Ratio {
+    if holding.is_zero() {
+        ratio(0, 1)
+    } else {
+        heat.clone() / holding.clone()
+    }
+}
+
 /// A star's glow (docs/122 laws 1 and 3): the bond its burn released
 /// (`released`, holding units) warms its kept matter, and the star, standing
 /// at its system's throat where the faces are equal (`δ = ½`, docs/122 §4),
@@ -1037,10 +1079,11 @@ pub fn system(
     // planets attached to each star, for diversity"; 2026-10-22: by physics,
     // never a draw).
     // The star core's released kinds leave as a spray over directions.
-    // The newborn star's push: ½ × its hot star core's open share.
-    // The spray leaves from the star's cool outer layers: their push (whole
-    // atoms), never the hot star core's stripped share.
-    let star_push = crate::pulse::push_of(&star);
+    // The newborn star's push (docs/125 §4.1): the protons' charge left open
+    // at its place in its galaxy, `tide` the galaxy's deficit there; the
+    // spray leaves from the star's cool outer layers (whole atoms, never the
+    // hot star core's stripped share), on the continuum.
+    let star_push = crate::pulse::push_of(&star, &crate::polarity::faces(tide).0, false);
     // The disc (read first: the wind's hold counts it): what never fell, where it stands, turning at the balance of
     // its place in each plane, `ℓ = r·H(<r)` (the ring law: reach × the hold
     // inside it), the hold the system's own enclosure: the star as it stands
@@ -1064,7 +1107,10 @@ pub fn system(
             // of its orbit spin (never its offset read as a second orbit).
             let ell_o = crate::ring::grain(&(r.clone() * at.clone()));
             motes.push(crate::flows::Mote {
-                ell_orth: crate::ring::grain(&(c.clone() * ell_o.clone())),
+                spins_orth: crate::flows::Mote::orth_of(
+                    &crate::ring::grain(&(c.clone() * ell_o.clone())),
+                    &x.orth_shares(),
+                ),
                 spins: crate::flows::Mote::spins_of(&ell_o, &x.tilt()),
                 agitation: crate::ring::grain(&x.agitation.clone().max(disc_agitation.clone())),
                 ..x.clone()
@@ -1113,7 +1159,7 @@ pub fn system(
     // its spins.
     let medium_spin = motes.iter().fold(ratio(0, 1), |s, x| {
         s + x.amount.clone() * crate::flows::weight(&x.key) / total.clone()
-            * (x.ell_o() + x.ell_orth.clone())
+            * (x.ell_o() + x.ell_orth())
     });
     Some((star, medium, medium_spin, motes))
 }
@@ -1678,9 +1724,9 @@ pub fn collide_stars(
                         }
                     }
                     for x in flows.iter_mut() {
-                        if let Some(ph) = x.phase.get_mut(k) {
-                            *ph = frac_of(ph.clone() + shift.clone());
-                        }
+                        x.orientation
+                            .shift(k, &shift)
+                            .expect("a turning is a motion");
                     }
                 }
             };
@@ -1859,6 +1905,9 @@ pub fn settle_system(
     );
     let mut bodies: Vec<Small> = Vec::new();
     let mut to_star = Manifest::new();
+    // The heat the escaping and infalling motes carry, in holding units
+    // (docs/124 §3: heat travels with the matter that carries it).
+    let (mut escaped_heat, mut to_star_heat) = (ratio(0, 1), ratio(0, 1));
     // The partition of what entered (register B15): every mote and world is
     // read once, as escaping, falling to the star or entering convergence,
     // each with its spin; their sum is checked against the spin read before.
@@ -1871,21 +1920,22 @@ pub fn settle_system(
         // Its reach, read by the system's enclosure from its own spin.
         let r = frame
             .as_ref()
-            .map(|e| x.reach_in(&e).0)
+            .map(|e| x.reach_in(e).0)
             .unwrap_or_else(|| b0.clone());
         // No mirror (docs/117 §12): a mote's reach is read in this enclosure
         // and kept; one inside the star's ring belongs to the star.
         if r > rim {
+            escaped_heat += x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key);
             *escaped.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
             continue;
         }
         if r < b0 {
+            to_star_heat += x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key);
             *to_star.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
             continue;
         }
         let matter: Manifest = [(x.key.clone(), x.amount.clone())].into();
-        let mut phase = x.phase.clone();
-        crate::flows::full(&mut phase);
+        let phase = x.phase();
         bodies.push((
             r,
             mass(&matter) / total.clone(),
@@ -1900,9 +1950,23 @@ pub fn settle_system(
             vec![x],
         ));
     }
+    // What falls into the star mixes its heat into the star's by holding:
+    // `(A + h′)·K′ = (A + h)·K + T`, `A` the ignition share's agitation (its
+    // reservoir unchanged here), `h` the carried heat, `T` the infall's heat.
+    let star_before = star_heat(sys) * mass(&sys.kept);
     for (kind, a) in to_star {
         *sys.kept.entry(kind).or_insert_with(|| ratio(0, 1)) += a;
     }
+    let kept_after = mass(&sys.kept);
+    if !kept_after.is_zero() && !to_star_heat.is_zero() {
+        sys.heat = mixed_heat(
+            &star_before,
+            &to_star_heat,
+            &kept_after,
+            &agitation_of(&sys.reservoir),
+        );
+    }
+    read.escaped_heat = per_holding(&escaped_heat, &mass(&escaped));
     for w in std::mem::take(&mut sys.satellites) {
         parted += mass(&w.total()) / unit.clone() * w.ell.clone();
         let r = if total.is_zero() {
@@ -2124,8 +2188,8 @@ pub fn settle_system(
                         &crate::ring::grain(&(r.clone() * inner.clone())),
                         &tilt,
                     ),
-                    ell_orth: ratio(0, 1),
-                    phase: phase.clone(),
+                    spins_orth: vec![ratio(0, 1); 3],
+                    orientation: crate::orientation::Orientation::from_phases(&phase),
                     agitation: heat.clone(),
                     born: bell,
                     vacuum: false,
@@ -2274,6 +2338,40 @@ pub struct Settled {
     /// The light its worlds emitted by their faces on its bell (docs/122
     /// law 3), heat times holding.
     pub emitted: Ratio,
+    /// The heat per holding of what escaped past the rim: its motes' own,
+    /// holding-weighted (docs/124 §3).
+    pub escaped_heat: Ratio,
+}
+
+#[cfg(test)]
+mod heat_carriage_tests {
+    use super::{mixed_heat, per_holding};
+    use cfe::ratio::ratio;
+
+    #[test]
+    fn infall_mixes_its_heat_into_the_star_by_holding_exactly() {
+        // A star keeping 6 at A = 1/5, h = 1/10 holds (3/10)·6 = 9/5; motes
+        // of holding 2 at heat 1/2 fall in, 1. After: (A + h′)·8 = 14/5.
+        let (a, h, k) = (ratio(1, 5), ratio(1, 10), ratio(6, 1));
+        let before = (a.clone() + h) * k.clone();
+        let infall = ratio(1, 2) * ratio(2, 1);
+        let after = k + ratio(2, 1);
+        let h2 = mixed_heat(&before, &infall, &after, &a);
+        assert_eq!(
+            (a + h2) * after,
+            before + infall,
+            "heat conserved by the mixing"
+        );
+    }
+
+    #[test]
+    fn heat_per_holding_carried_out_is_the_heat_that_left() {
+        // What leaves at the source's heat per holding takes exactly its share.
+        let (heat, holding) = (ratio(7, 3), ratio(5, 1));
+        let per = per_holding(&heat, &holding);
+        assert_eq!(per.clone() * ratio(2, 1) + per * ratio(3, 1), heat);
+        assert_eq!(per_holding(&ratio(1, 1), &ratio(0, 1)), ratio(0, 1));
+    }
 }
 
 #[cfg(test)]

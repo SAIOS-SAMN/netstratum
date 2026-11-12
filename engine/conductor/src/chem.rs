@@ -171,14 +171,79 @@ pub fn hold(kind: &Kind) -> u32 {
     weight(kind).saturating_sub(unpaired(kind))
 }
 
-/// Its frames (docs/95 §8; register B8): one frame of each proton on each
-/// of three axes, `3Z`, of which its unpaired electrons are open: `(held,
-/// open) = (3Z − U, U)`, the frame state's two poles. Frames are never its
-/// mass: `weight` is its nucleons.
-pub fn frames(kind: &Kind) -> (u32, u32) {
-    let z: u32 = kind.parts().iter().map(|(n, w)| n * protons(*w)).sum();
-    let open = unpaired(kind);
-    ((3 * z).saturating_sub(open), open)
+/// A kind's DIMENSIONS (docs/95 §0, docs/97; register K15; "frame" retired,
+/// mycelium #239, operator 2026-11-11): the nucleon dipole, each nucleon
+/// standing in each of three axes, the protons' `3Q` the open dimensions and
+/// the neutrons' `3Z` the held dimensions, `3w` in all (a cluster sums its
+/// parts); and beside it, never folded in, the electrons' open dimensions `U`
+/// (`atom(Q)`, unpaired), the domain of R, the electron's phase.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Dimensions {
+    /// The neutrons' held dimensions, `3Z`.
+    pub held: u32,
+    /// The protons' open dimensions, `3Q`.
+    pub open: u32,
+    /// The electrons' open dimensions, `U`: R's domain, beside the dipole.
+    pub electrons_open: u32,
+}
+
+impl Dimensions {
+    /// The whole: every nucleon's dimensions, `3w`.
+    pub fn whole(&self) -> u32 {
+        self.held + self.open
+    }
+}
+
+/// A kind's dimensions: its nucleons' dipole and its electrons' open
+/// dimensions.
+pub fn dimensions(kind: &Kind) -> Dimensions {
+    let (q, z) = kind.parts().iter().fold((0u32, 0u32), |(q, z), (n, w)| {
+        let protons = protons(*w);
+        (q + n * protons, z + n * w.saturating_sub(protons))
+    });
+    Dimensions {
+        held: 3 * z,
+        open: 3 * q,
+        electrons_open: unpaired(kind),
+    }
+}
+
+/// A holding's survival basket entry (Mycelium #238, 78.182 item 10; docs/129
+/// §2), stated by physical meaning in Mycelium's letters: its protons `Z`
+/// (netstratum's `Q`), its neutrons `Q` (netstratum's `Z`), its bound
+/// electrons `E_bound = 3Z − U` (the protons' dimensions less the electrons'
+/// unpaired ends, `U` read as the electrons' state, never a pole) and its
+/// mass `M = 3(Z + Q)`, each summed over the holding's kinds by amount.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BasketEntry {
+    /// Its protons, Mycelium's `Z`.
+    pub protons: cfe::ratio::Ratio,
+    /// Its neutrons, Mycelium's `Q`.
+    pub neutrons: cfe::ratio::Ratio,
+    /// Its bound electrons, `3Z − U`.
+    pub bound_electrons: cfe::ratio::Ratio,
+    /// Its mass, `3(Z + Q)`.
+    pub mass: cfe::ratio::Ratio,
+}
+
+/// The basket entry of a holding (kind, amount).
+pub fn basket_entry<'a>(
+    holding: impl IntoIterator<Item = (&'a Kind, &'a cfe::ratio::Ratio)>,
+) -> BasketEntry {
+    use cfe::ratio::ratio;
+    let (mut p, mut n, mut u) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
+    for (k, a) in holding {
+        let f = dimensions(k);
+        p += a.clone() * ratio(i64::from(f.open / 3), 1);
+        n += a.clone() * ratio(i64::from(f.held / 3), 1);
+        u += a.clone() * ratio(i64::from(f.electrons_open.min(f.whole())), 1);
+    }
+    BasketEntry {
+        bound_electrons: ratio(3, 1) * p.clone() - u,
+        mass: ratio(3, 1) * (p.clone() + n.clone()),
+        protons: p,
+        neutrons: n,
+    }
 }
 
 /// Its weight as mass (docs/97): its nucleons, `Σ n·w`, the one weight that
@@ -317,12 +382,52 @@ mod tests {
 }
 
 #[cfg(test)]
-mod frames_tests {
-    use super::{frames, hydrogen};
+mod dimensions_tests {
+    use super::{basket_entry, dimensions, hydrogen, Kind};
+    use cfe::ratio::ratio;
 
     #[test]
-    fn hydrogen_holds_two_frames_and_opens_one() {
-        // docs/95 §8, agreed with Xylarium: 3Z frames, U open.
-        assert_eq!(frames(&hydrogen()), (2, 1));
+    fn the_basket_entry_states_a_holding_by_physical_meaning() {
+        // docs/129 §2: hydrogen, one proton and its electron unpaired:
+        // Mycelium's (Z 1, Q 0, E_bound 3·1 − 1, M 3), by amount.
+        let h = hydrogen();
+        let two = ratio(2, 1);
+        let e = basket_entry([(&h, &two)]);
+        assert_eq!(
+            (e.protons.clone(), e.neutrons.clone()),
+            (ratio(2, 1), ratio(0, 1))
+        );
+        assert_eq!(e.bound_electrons, ratio(4, 1));
+        assert_eq!(e.mass, ratio(6, 1));
+        // The mass counts every nucleon's three dimensions, both counts kept.
+        assert_eq!(e.mass, ratio(3, 1) * (e.protons + e.neutrons));
+    }
+
+    #[test]
+    fn hydrogens_dimensions_are_its_protons_with_its_electron_beside() {
+        // docs/95 §0, docs/97: one proton, no neutron, its electron open.
+        let h = dimensions(&hydrogen());
+        assert_eq!((h.held, h.open, h.electrons_open), (0, 3, 1));
+    }
+
+    #[test]
+    fn every_nucleon_stands_in_three_dimensions_and_a_cluster_sums_its_parts() {
+        for w in 1..=60u32 {
+            let k = Kind::atom(w).expect("an atom");
+            let f = dimensions(&k);
+            assert_eq!(
+                f.whole(),
+                3 * w,
+                "w {w}: the nucleons, weighted as they are"
+            );
+            assert_eq!(f.open, 3 * super::protons(w));
+        }
+        // A hydride (docs/97 §4): its centre and its two hydrogens summed.
+        let water = Kind::parse("W0016·2W0001").expect("a cluster");
+        let centre = dimensions(&Kind::atom(16).expect("its centre"));
+        let h = dimensions(&hydrogen());
+        assert_eq!(dimensions(&water).held, centre.held + 2 * h.held);
+        assert_eq!(dimensions(&water).open, centre.open + 2 * h.open);
+        assert_eq!(dimensions(&water).whole(), 3 * 18);
     }
 }

@@ -426,6 +426,8 @@ pub fn entry_bytes(mut rows: Vec<Net>, mut declared: Vec<Net>) -> Vec<u8> {
         declared,
         children: Vec::new(),
         handoffs: Vec::new(),
+        // No crossing of the universal core tube is stated by a census.
+        transitions: Vec::new(),
     }
     .rows_bytes()
 }
@@ -734,6 +736,7 @@ mod tests {
             declared: vec![],
             children: vec![],
             handoffs: vec![],
+            transitions: vec![],
         };
         assert_eq!(entry_bytes(rows, vec![]), court.rows_bytes());
     }

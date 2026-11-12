@@ -161,8 +161,10 @@ mod tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(1, 1),
             spins: Mote::spins_of(&ell, &tilt),
-            ell_orth: ratio(0, 1),
-            phase: crate::flows::rest(ratio(1, 2)),
+            spins_orth: vec![ratio(0, 1); 3],
+            orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
+                1, 2,
+            ))),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,

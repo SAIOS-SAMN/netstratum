@@ -10,6 +10,56 @@ two planes sharing e₁).
 **Status:** step 1 built (three spatial planes and the R loop on every
 phase; the hand-built source retired).
 
+## 0. Restated in docs/97's nuclide (2026-11-11, #176)
+
+**Operator 2026-11-11:** "we had our documentation aligned on 3Z/3Q with R
+offset (electron phase) — we lost that somehow, and it was the nucleon
+inverse from xylarium to test inverted physics"; "this needs to get fixed so
+that our nucleons are weighted properly".
+
+§1 and §8 below were written before docs/97 (2026-10-28) swapped the letters
+to Xylarium's inverse. They read Z as the charge and Q as the unpaired
+electrons inside `3Z`. `chem::frames` was built on that reading on
+2026-11-06 (64254316), through Mycelium 78.175 F1 (Xylarium's convention, Z
+the proton) without the seam's Z ↔ Q translation. The result: the protons
+were counted as "3Z", the electrons' unpaired count stood as the Q pole, and
+the neutrons were nowhere. In docs/97's terms:
+
+- **The nucleon dipole.** Each nucleon stands in each of the three axes, so a
+  nuclide of weight `w = Q + Z` has `3w` dimensions:
+  - `3Q`, the protons' open dimensions, the **open pole** (the lone ends, docs/97 §2);
+  - `3Z`, the neutrons' held dimensions, the **held pole** (the fibred ends, the glue).
+
+  A cluster sums its parts. This is the whole every reading of the dimensions is a share
+  of: the nucleons, weighted as they are.
+- **R, the electron's phase: the offset between the poles.** The `Q`
+  electrons follow the protons. Their open dimensions `U` (`atom(Q)`, unpaired)
+  and their phase `R = κ_e·(1 − 2·frac(p))` (docs/97 §3,
+  `nuclides::electron_phase`) are the electrons' domain, "never the
+  nucleus's". Charge moves between the poles only with R carrying the change.
+  R is its own component beside the dipole, never folded into it.
+- **The planes** are `(Z_k, Q_k)`, each axis's neutron and proton dimensions.
+  R is the axis that pairs with none (§2).
+- **"Frame" is retired** (mycelium #239, adopted for netstratum by the
+  operator 2026-11-11): a collapse of volume and dimensions. The coupling's
+  two poles are the **held dimensions** (`3Z`) and the **open dimensions**
+  (`3Q`); §1 and §8's "frames" read as these.
+- **Readings** (`chem::Dimensions`):
+  - the dipole's pole is its span over its whole, `(3Z − 3Q)/3w = (Z − Q)/w`,
+    in `[−1, 1]`: hydrogen `−1` (all proton), deuterium `0`, a neutron-rich
+    kind positive;
+  - its open share is the electrons' open dimensions over the whole nucleon
+    frames, `U/3w`;
+  - read on the vacuum's inverted face, the pole negates and the open share
+    is its complement.
+- **At every seam** with Xylarium and Mycelium, Z ↔ Q is translated and
+  labelled ("Q(proton)", docs/97).
+
+Where §1 and §8 below say `3Z`, `hold`, `u` or `A + Q = 3Z`, read this
+section. The push and the open share already divide by the nucleons
+(`pulse::push_of`, `flows::open`); the dipole coupling, the magnet and the
+throat's base frames are rebuilt on `chem::Dimensions`.
+
 ## 1. The axes
 
 A nucleus of charge Z weighs `3Z` (`chem::weight`): its closed frames, the

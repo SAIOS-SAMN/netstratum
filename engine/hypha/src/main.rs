@@ -8,6 +8,8 @@
 //!   ns-hypha found                      found Netstratum's domain on the court (once)
 //!   ns-hypha reserve <tier>             designate one of the domain's tiers its reserve (in trust)
 //!   ns-hypha originate [<var-root>]     state the universe's origin once: its Big Bang, its torus
+//!   ns-hypha standing                   the domain's reserve as the court reads it: the
+//!                                       tier sitting, any pending, its μ per lane
 //!   ns-hypha refound [<var-root>]       after the fleet's recut: found, originate, reserve union,
 //!                                       the first ledger entry; then the house maps the gates
 //!   ns-hypha seat [--every S] [--key F] [--worlds D] Netstratum's client kernel on the fleet: pull, think, file (signed with the house key)
@@ -34,7 +36,6 @@
 use ns_hypha::census::{self, grains};
 use ns_hypha::fold::{fold, tier_key};
 use ns_hypha::line::{Cursors, FoldLog, FoldMark, TierLine};
-use ns_hypha::mycelium_sdk::house::uplink::Uplinked;
 use ns_hypha::{laws_of, probe, Uplink};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -230,6 +231,7 @@ fn main() -> ExitCode {
             }
         }
         Some("refound") => refound_cmd(&up, &args, &home),
+        Some("standing") => standing_cmd(&up, &home),
         Some("census") => census_cmd(&args, Some(&up), &home),
         Some("prune") => prune_cmd(&up, &home),
         Some("publish") => publish_cmd(&up, &home),
@@ -238,6 +240,53 @@ fn main() -> ExitCode {
         _ => {
             eprintln!("usage: ns-hypha laws|lexicon|probe|found|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
             ExitCode::from(2)
+        }
+    }
+}
+
+/// The domain's reserve as the court reads it (a reading; nothing written):
+/// which tier sits, any redesignation pending, and the μ it holds per lane,
+/// what a tier's bond is posted from (78.129).
+fn standing_cmd(up: &Uplink, home: &Path) -> ExitCode {
+    let hex = |k: &[u8; 32]| {
+        k.iter()
+            .take(4)
+            .map(|b| format!("{b:02x}"))
+            .collect::<String>()
+    };
+    let domain = match ns_hypha::fold::tier_key(home, "domain") {
+        Ok(k) => k.verifying_key().to_bytes(),
+        Err(e) => {
+            eprintln!("ns-hypha: the domain key: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    let named = |k: &[u8; 32]| {
+        ["union", "colonies"]
+            .iter()
+            .find(|t| {
+                ns_hypha::fold::tier_key(home, t)
+                    .is_ok_and(|key| key.verifying_key().to_bytes() == *k)
+            })
+            .map_or_else(|| hex(k), |t| format!("{t} ({})", hex(k)))
+    };
+    match up.session().reserve_reading(domain) {
+        Ok(r) => {
+            println!("domain {}", hex(&domain));
+            println!(
+                "  reserve sitting: {}",
+                r.current.as_ref().map_or("none".into(), named)
+            );
+            println!(
+                "  reserve pending: {}",
+                r.pending.as_ref().map_or("none".into(), named)
+            );
+            println!("  reserve holds μ: {:?}", r.balance);
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("ns-hypha: the reserve was not read: {e}");
+            ExitCode::from(1)
         }
     }
 }
@@ -260,7 +309,6 @@ fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
 /// streamed for replay, so it is upheld before anyone can demand it.
 fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
     use ns_hypha::mycelium_sdk::house::challenge::Finality;
-    use ns_hypha::mycelium_sdk::house::Stamp;
     let (line, log, key) = match TierLine::open(home, "colonies").and_then(|l| {
         Ok((
             l,
@@ -281,7 +329,7 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
         .filter(|f| f.first >= line.offset && f.first + f.count <= line.total())
     {
         let span = format!("[{}, {})", f.first, f.first + f.count);
-        match Stamp::from_key(&f.at).map(|at| up.finality(at)) {
+        match ns_hypha::fold::at_of(&f.at).map(|at| up.finality(at)) {
             Some(Ok((Finality::Provisional { .. }, _))) => {}
             Some(Ok((other, _))) => {
                 println!("  fold at entries {span}: {other:?}; nothing to publish");
@@ -578,10 +626,17 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
             println!("  nothing moved; cursor advanced to {}", chunk.to);
             continue;
         }
-        match up.uplink_fold(&signed) {
-            Ok(Uplinked::Admitted { at, .. }) => {
+        // Carried in the sitting reserve's fold (v0.4.0, 78.138).
+        let carried = ns_hypha::fold::tier_key(home, "union").and_then(|reserve| {
+            let domain = ns_hypha::fold::tier_key(home, "domain")?
+                .verifying_key()
+                .to_bytes();
+            up.carry_fold(domain, &reserve, &signed)
+        });
+        match carried {
+            Ok(Ok(at)) => {
                 let mark = FoldMark {
-                    at: at.key(),
+                    at: ns_hypha::fold::at_key(&at),
                     first: line.total(),
                     count: batch.len() as u64,
                 };
@@ -599,9 +654,13 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
                     .take(6)
                     .map(|b| format!("{b:02x}"))
                     .collect();
-                println!("  fold {n}: admitted at h {}; line {} entries, head {h}…; {people} folded through {}", at.h, line.entries.len(), chunk.to);
+                println!("  fold {n}: carried at h {} {:?}; line {} entries, head {h}…; {people} folded through {}", at.stamp.h, at.path, line.entries.len(), chunk.to);
             }
-            Ok(u) => {
+            Ok(Err(Ok(founded))) => {
+                println!("  fold {n}: the reserve did not bond the colonies line: {founded:?}");
+                return ExitCode::from(1);
+            }
+            Ok(Err(Err(u))) => {
                 println!("  fold {n}: court {u:?}");
                 return ExitCode::from(1);
             }

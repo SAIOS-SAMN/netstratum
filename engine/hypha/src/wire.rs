@@ -146,7 +146,11 @@ impl HouseActs for Session {
         rule: &[u8],
     ) -> io::Result<Option<(u8, mycelium_sdk::wallet::Mu)>> {
         // The outputs as samples, each at its place (`[test, i, output]`).
-        let spoken = mycelium_sdk::task::spoken_outputs(outputs).map_err(|_| unwritten())?;
+        let outputs = outputs
+            .iter()
+            .map(|g| mycelium_sdk::rule::SectionSample::of_lines(g).map_err(|_| unwritten()))
+            .collect::<io::Result<Vec<_>>>()?;
+        let spoken = mycelium_sdk::task::spoken_outputs(&outputs).map_err(|_| unwritten())?;
         let act = mycelium_sdk::task::encode_solve_with_rule(key, citation, &spoken, Some(rule))
             .ok_or_else(unwritten)?;
         Ok(mycelium_sdk::task::decode_solve_receipt(&self.speak(act)?))

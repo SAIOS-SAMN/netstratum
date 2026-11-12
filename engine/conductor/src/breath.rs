@@ -121,6 +121,37 @@ pub fn galaxy_frame(u: &Universe, i: usize, unit: &Ratio) -> Option<crate::flows
     ))
 }
 
+/// A core's base dipole for the magnet (LAW-COUPLING v2, docs/129 §1): its
+/// push and strength the throat's composition, read at the throat's own
+/// place, its rim (`δ = ½`); a closed pole (no push, no strength) where its
+/// throat holds none.
+pub fn throat_dipole(core: &Body) -> crate::flows::Dipole {
+    use num_traits::Zero as _;
+    let (p_t, n_t, u_t) = core.throat.iter().fold(
+        (ratio(0, 1), ratio(0, 1), ratio(0, 1)),
+        |(p, nn, u), (k, amount)| {
+            let f = crate::chem::dimensions(k);
+            let r = |v: u32| ratio(i64::from(v), 1);
+            (
+                p + amount.clone() * r(f.open / 3),
+                nn + amount.clone() * r(f.held / 3),
+                u + amount.clone() * r(f.electrons_open.min(f.whole())),
+            )
+        },
+    );
+    let w_t = p_t.clone() + n_t;
+    if w_t.is_zero() {
+        return crate::flows::Dipole {
+            push: ratio(0, 1),
+            strength: ratio(0, 1),
+        };
+    }
+    crate::flows::Dipole {
+        push: p_t * ratio(1, 2) / w_t.clone(),
+        strength: u_t / (ratio(3, 1) * w_t),
+    }
+}
+
 /// The outflow's BOOK (with Xylarium 2026-10-24; the settling book's
 /// inverse): matter leaving a system at spin `ℓ_at` (its region's edge,
 /// `beyond`) takes `m·ℓ_at` with it, and the system's orbit pays it, `W·ℓ =
@@ -247,9 +278,7 @@ fn dilate_system(s: &mut Body, w: &Ratio, m: &Ratio, g: &Ratio) -> Ratio {
     let read = |s: &Body, lam: &Ratio| -> Ratio {
         lam.clone()
             * (s.flows.iter().fold(ratio(0, 1), |a, y| {
-                a + y.amount.clone()
-                    * crate::flows::weight(&y.key)
-                    * (y.ell_o() + y.ell_orth.clone())
+                a + y.amount.clone() * crate::flows::weight(&y.key) * (y.ell_o() + y.ell_orth())
             }) + s.satellites.iter().fold(ratio(0, 1), |a, x| {
                 a + mass(&x.total()) * (x.ell.clone() + x.ell_orth.clone())
             }))
@@ -262,7 +291,7 @@ fn dilate_system(s: &mut Body, w: &Ratio, m: &Ratio, g: &Ratio) -> Ratio {
             .iter()
             .map(|c| crate::ring::grain(&(c.clone() * factor.clone())))
             .collect();
-        y.ell_orth = crate::ring::grain(&(y.ell_orth.clone() * factor.clone()));
+        y.set_ell_orth(crate::ring::grain(&(y.ell_orth() * factor.clone())));
     }
     for x in s.satellites.iter_mut() {
         x.ell = crate::ring::grain(&(x.ell.clone() * factor.clone()));
@@ -340,6 +369,10 @@ pub struct Event {
     /// what fell, of it after the fibres' transition at ignition, and of what
     /// the new star keeps.
     pub births_h: Vec<(Ratio, Ratio, Ratio)>,
+    /// Each collapsing binding's heat by component (issue #143, read only):
+    /// the dispersion of the members that fell about their own motion in
+    /// step, per plane and between planes (`crate::dispersion`).
+    pub collapses: Vec<crate::dispersion::Dispersion>,
     /// Jet batches that landed at the rim at this echo.
     pub jets: usize,
     /// The mass the galaxy's stars returned to its medium at this echo
@@ -501,7 +534,7 @@ fn system_glow(sys: &mut Body, emitted: &Ratio, rang: bool, unit: &Ratio) -> Lig
         };
     };
     let glow = if rang {
-        crate::flows::emit(&mut sys.flows, &enc_s, 1)
+        crate::flows::emit(&mut sys.flows, &enc_s, 1, unit)
     } else {
         ratio(0, 1)
     } + emitted.clone();
@@ -647,14 +680,19 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // The galaxies form where the escaped matter and the zero galaxy's
         // outer medium hold their own reach (docs/111 §5.4).
         crate::profile::mark("orbit:form");
-        pending_formation = Some(crate::pulse::form_galaxies(u, until / t_u * t_u, &ocean_moves));
+        pending_formation = Some(crate::pulse::form_galaxies(
+            u,
+            until / t_u * t_u,
+            &ocean_moves,
+        ));
         // The ocean's motes emit by their face over the universal torque's two
         // rings (docs/122 law 3); the light crosses the ocean on the
         // continuum face, what no mote takes drained. Booked with the echo's
         // first arrival.
         crate::profile::mark("orbit:emit");
         if let Some(enc_o) = crate::pulse::ocean_frame(u) {
-            let glow = crate::flows::emit(&mut u.ocean, &enc_o, 2);
+            let ocean_unit = unit_mass(u);
+            let glow = crate::flows::emit(&mut u.ocean, &enc_o, 2, &ocean_unit);
             let unit = unit_mass(u);
             if !glow.is_zero() && !unit.is_zero() {
                 let whole = mass(&u.medium());
@@ -741,7 +779,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             let mut flowing: Vec<crate::flows::Mote> = Vec::new();
             for x in std::mem::take(&mut u.ocean) {
                 let r_m = match (&frame, x.vacuum) {
-                    (Some(f), true) => x.reach_in(&f).0,
+                    (Some(f), true) => x.reach_in(f).0,
                     _ => {
                         flowing.push(x);
                         continue;
@@ -764,7 +802,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     .map(|g| g.0);
                 if best == Some(i) && !f_g.is_zero() {
                     let ell = from_universe(&x.ell_o(), &ell_g, &f_g);
-                    let orth = from_universe(&x.ell_orth, &orth_g, &f_g);
+                    let orth = from_universe(&x.ell_orth(), &orth_g, &f_g);
                     if let (Some(ell), Some(orth)) = (ell, orth) {
                         landed.push((x, ell, orth));
                     }
@@ -795,6 +833,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         } else {
             None
         };
+        // The universal bounce's push (`pulse::home_push`), carried by the
+        // echo to every body it reaches (docs/130).
+        let echo_push = crate::pulse::home_push(u, &u.cores[i].total()).map(|(p, _, _)| p);
         let centre = centre_state(u, i);
         let core = &mut u.cores[i];
         let mut returned = ratio(0, 1);
@@ -802,6 +843,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut novae = 0usize;
         let mut lifted = (0usize, ratio(0, 1));
         let mut births_h: Vec<(Ratio, Ratio, Ratio)> = Vec::new();
+        let mut collapses: Vec<crate::dispersion::Dispersion> = Vec::new();
         let mut grown = (0usize, 0usize, 0usize, 0usize);
         let mut escaped_all = ratio(0, 1);
         let mut fates = (0usize, 0usize, 0usize, 0usize);
@@ -827,10 +869,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         let mut enclosed_in = mass(&core.kept) / unit.clone() + state.clone();
         let mut keep: Vec<Body> = Vec::new();
         // What the stars shed crosses whole into the galaxy's flows.
-        let mut shed: Vec<(crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
+        // Each with the heat per holding it carries (docs/124 §3).
+        let mut shed: Vec<(crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>, Ratio)> = Vec::new();
         // What a remnant passes through its other face, the galactic core's
         // throat (recycled there, then on with the shed).
-        let mut infall: Vec<(crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>)> = Vec::new();
+        let mut infall: Vec<(crate::pulse::Manifest, Ratio, Ratio, Vec<Ratio>, Ratio)> = Vec::new();
         let mut recycled = crate::recycle::Recycled::default();
         let mut burned = crate::pulse::Manifest::new();
         let mut burns: Vec<(Vec<u64>, u32, Ratio, u64)> = Vec::new();
@@ -1142,9 +1185,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                                 *ph = x.clone() - x.floor();
                             };
                             for x in sys.flows.iter_mut() {
-                                if let Some(ph) = x.phase.get_mut(k) {
-                                    shift(ph);
-                                }
+                                x.orientation
+                                    .shift(k, &residue)
+                                    .expect("a turning is a motion");
                             }
                             for w in sys.satellites.iter_mut() {
                                 if let Some(ph) = w.phase.get_mut(k) {
@@ -1251,7 +1294,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     let mut phase = orbit;
                     crate::flows::full(&mut phase);
                     phase[crate::flows::LOOP] = ratio(1, 2);
-                    infall.push((out, at, sys.ell_orth.clone(), phase));
+                    infall.push((
+                        out,
+                        at,
+                        sys.ell_orth.clone(),
+                        phase,
+                        crate::formation::star_heat(&sys),
+                    ));
                 }
                 if mass(&sys.kept).is_zero() {
                     // Emptied: its medium crosses whole; its worlds re-anchor.
@@ -1267,6 +1316,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     });
                     let spin_was = subtree_spin(&sys, &unit);
                     let all = sys.total();
+                    // The heat of its star and motes, carried by what is left.
+                    let left_heat = crate::formation::held_heat(&sys);
                     let worlds = std::mem::take(&mut sys.satellites);
                     let rest = all
                         .into_iter()
@@ -1289,7 +1340,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     core.medium_spin += spin_was - passed;
                     if !left.is_empty() {
                         // Dissolved whole: it leaves at its own orbit.
-                        shed.push((left, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                        let carried = crate::formation::per_holding(&left_heat, &mass(&left));
+                        shed.push((
+                            left,
+                            own_of(&sys),
+                            sys.ell_orth.clone(),
+                            sys.phase.clone(),
+                            carried,
+                        ));
                     }
                     orphans.extend(
                         worlds
@@ -1367,7 +1425,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         &mut core.medium_spin,
                         &mut identity,
                     );
-                    shed.push((escaped, at, sys.ell_orth.clone(), sys.phase.clone()));
+                    shed.push((
+                        escaped,
+                        at,
+                        sys.ell_orth.clone(),
+                        sys.phase.clone(),
+                        settled.escaped_heat.clone(),
+                    ));
                 }
                 // The flash (as nature: a nova; operator 2026-11-07, "align
                 // this with nature"): a remnant never burns again. What it
@@ -1389,7 +1453,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         &mut core.medium_spin,
                         &mut identity,
                     );
-                    shed.push((layer, at, sys.ell_orth.clone(), sys.phase.clone()));
+                    shed.push((
+                        layer,
+                        at,
+                        sys.ell_orth.clone(),
+                        sys.phase.clone(),
+                        crate::formation::star_heat(&sys),
+                    ));
                     novae += 1;
                 }
                 enclosed_in += mass(&sys.total()) / unit.clone();
@@ -1456,13 +1526,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 for (k, a) in &burst {
                     *sys.medium.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
                 }
-                let push = crate::pulse::push_of(&sys.kept);
+                // Its held share at its own reach in its galaxy (docs/105 §3),
+                // the ejecta leaving on the continuum (docs/125 §4.1).
+                let g_here = match &enc {
+                    Some(e) => crate::polarity::faces(&e.reach(&own_of(&sys)).1).0,
+                    None => crate::polarity::throat_held(),
+                };
+                let push = crate::pulse::push_of(&sys.kept, &g_here, false);
                 // The spray leaves from the star itself.
+                // Thrown with the star's heat per holding (docs/124 §3, #142).
+                let star_heat = crate::formation::star_heat(&sys);
                 sys.flows.extend(crate::flows::spray(
                     &burst,
                     &thrown,
                     &vec![ratio(0, 1); planes],
-                    &ratio(0, 1),
+                    &star_heat,
                     bell,
                     &push,
                 ));
@@ -1487,12 +1565,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         .iter()
                         .filter(|x| x.vacuum)
                         .fold(ratio(0, 1), |acc, x| {
-                            let rx = x.reach_in(&enc).0;
+                            let rx = x.reach_in(enc).0;
                             if rx < lo || rx > hi {
                                 return acc;
                             }
                             let c = (0..planes).fold(ratio(1, 1), |c, k| {
-                                c * crate::flows::in_step(&x.phase[k], &sys.phase[k])
+                                c * crate::flows::in_step(&x.phase_at(k), &sys.phase[k])
                             });
                             acc + x.amount.clone() * crate::flows::weight(&x.key) / g_before.clone()
                                 * c
@@ -1589,7 +1667,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Dissolved whole: it leaves at its own orbit.
                 core.medium_spin +=
                     spin_was - carried_spin(&all, &own_of(&sys), &sys.ell_orth, &unit);
-                shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                // Dissolved whole: its star's, motes' and worlds' heat with it.
+                let whole_heat = sys
+                    .satellites
+                    .iter()
+                    .fold(crate::formation::held_heat(&sys), |h, w| {
+                        h + crate::formation::world_heat(w)
+                    });
+                let carried = crate::formation::per_holding(&whole_heat, &mass(&sys.total()));
+                shed.push((
+                    all,
+                    own_of(&sys),
+                    sys.ell_orth.clone(),
+                    sys.phase.clone(),
+                    carried,
+                ));
                 dissolved += 1;
                 continue;
             }
@@ -1619,7 +1711,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &mut core.medium_spin,
                 &mut identity,
             );
-            shed.push((back, at, sys.ell_orth.clone(), sys.phase.clone()));
+            shed.push((
+                back,
+                at,
+                sys.ell_orth.clone(),
+                sys.phase.clone(),
+                crate::formation::star_heat(&sys),
+            ));
             if mass(&sys.kept).is_zero() {
                 // Spent: all it held returns, with all its spin (its orbit's
                 // and everything turning inside it).
@@ -1653,7 +1751,21 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // Dissolved whole: it leaves at its own orbit.
                 core.medium_spin +=
                     spin_was - carried_spin(&all, &own_of(&sys), &sys.ell_orth, &unit);
-                shed.push((all, own_of(&sys), sys.ell_orth.clone(), sys.phase.clone()));
+                // Dissolved whole: its star's, motes' and worlds' heat with it.
+                let whole_heat = sys
+                    .satellites
+                    .iter()
+                    .fold(crate::formation::held_heat(&sys), |h, w| {
+                        h + crate::formation::world_heat(w)
+                    });
+                let carried = crate::formation::per_holding(&whole_heat, &mass(&sys.total()));
+                shed.push((
+                    all,
+                    own_of(&sys),
+                    sys.ell_orth.clone(),
+                    sys.phase.clone(),
+                    carried,
+                ));
                 dissolved += 1;
                 continue;
             }
@@ -1832,7 +1944,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     &mut core.medium_spin,
                     &mut identity,
                 );
-                shed.push((escaped, at, sys.ell_orth.clone(), sys.phase.clone()));
+                shed.push((
+                    escaped,
+                    at,
+                    sys.ell_orth.clone(),
+                    sys.phase.clone(),
+                    settled.escaped_heat.clone(),
+                ));
             }
             enclosed_in += mass(&sys.total()) / unit.clone();
             keep.push(sys);
@@ -1878,7 +1996,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     // spin (its orbit about its star and what turns in it)
                     // is booked to the medium.
                     core.medium_spin += subtree_spin(&w, &unit);
-                    shed.push((w.total(), at, orth, place))
+                    let carried = crate::formation::per_holding(
+                        &crate::formation::world_heat(&w),
+                        &mass(&w.total()),
+                    );
+                    shed.push((w.total(), at, orth, place, carried))
                 }
             }
         }
@@ -1905,7 +2027,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         // never a second orbit). Remnants do not capture.
         if let (Some(_), Some(enc), false) = (&pre, &enc, scale_pre.is_zero() || g_before.is_zero())
         {
-            let reach_m = |x: &crate::flows::Mote| x.reach_in(&enc).0;
+            let reach_m = |x: &crate::flows::Mote| x.reach_in(enc).0;
             let mut claims: Vec<Vec<usize>> = vec![Vec::new(); core.flows.len()];
             let mut by_reach: Vec<(Ratio, usize)> = core
                 .flows
@@ -2018,30 +2140,30 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         }
                     };
                     let ell_o = crate::ring::grain(&rel(&x.ell_o(), &s.ell));
-                    let ell_orth = crate::ring::grain(&rel(&x.ell_orth, &s.ell_orth));
+                    let ell_orth = crate::ring::grain(&rel(&x.ell_orth(), &s.ell_orth));
                     let before = w_sys.clone() * (s.ell.clone() + s.ell_orth.clone())
-                        + m.clone() * (x.ell_o() + x.ell_orth.clone());
+                        + m.clone() * (x.ell_o() + x.ell_orth());
                     let after = (w_sys.clone() + m.clone()) * (s.ell.clone() + s.ell_orth.clone())
                         + m.clone() * lam.clone() * (ell_o.clone() + ell_orth.clone());
                     let rest = before.clone() - after.clone();
                     core.medium_spin += rest.clone() / unit.clone();
                     identity.push(("settle", after + rest - before));
                     crate::profile::mark("cap:mote");
-                    let phase: Vec<Ratio> = x
-                        .phase
-                        .iter()
-                        .zip(&s.phase)
-                        .map(|(a, b)| {
-                            let f = a.clone() - b.clone();
-                            crate::ring::grain(&(f.clone() - f.floor()))
-                        })
-                        .collect();
+                    // Its orientation in the star's frame: each plane turned
+                    // back by the star's own phase there (#159: the star's
+                    // phases until it holds an orientation).
+                    let mut orientation = x.orientation.clone();
+                    for (k, b) in s.phase.iter().enumerate() {
+                        orientation
+                            .shift(k, &-b.clone())
+                            .expect("a turning is a motion");
+                    }
                     let mote = crate::flows::Mote {
                         key: key.clone(),
                         amount: take.clone(),
-                        ell_orth,
+                        spins_orth: crate::flows::Mote::orth_of(&ell_orth, &x.orth_shares()),
                         spins: crate::flows::Mote::spins_of(&ell_o, &x.tilt()),
-                        phase,
+                        orientation,
                         agitation: x.agitation.clone(),
                         born: bell,
                         vacuum: false,
@@ -2096,11 +2218,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                                 x.lift.clone(),
                             )
                         })
-                        .chain(
-                            core.satellites
-                                .iter()
-                                .map(|b| (b.ell.clone(), mass(&b.total()) / g_mass.clone(), ratio(0, 1))),
-                        )
+                        .chain(core.satellites.iter().map(|b| {
+                            (
+                                b.ell.clone(),
+                                mass(&b.total()) / g_mass.clone(),
+                                ratio(0, 1),
+                            )
+                        }))
                         .collect(),
                 )
             };
@@ -2122,7 +2246,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // core has received; derived, never drawn). It leaves with the
             // core's twist as its locked lead between its planes (its tilt,
             // docs/100 §4: the jet a helix), loosened later by its own
-            // turning (`flows::settle_disc`). The core's reservoir pays the
+            // turning (`flows::conform_axes`). The core's reservoir pays the
             // spin it leaves with (the ledger exact).
             {
                 let span_r = if home && !whole_u.is_zero() {
@@ -2132,28 +2256,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 };
                 let rings_now =
                     g_rate.clone().unwrap_or_else(|| ratio(1, 1)) * ratio(bell as i64, 1);
-                // The core's twist is its wound plane: its disc's plane with
-                // the antipole the settle gave it (docs/100 §8.3).
-                let disc_spin = crate::torsion::plane_spin(&core.flows)
-                    .iter()
-                    .fold(ratio(0, 1), |a, l| a + l.clone());
-                let twist_t = crate::torsion::wound(&core.tilt, &core.antipole, &disc_spin);
+                // The core's twist and its pressure (`torsion::core_twist`,
+                // docs/100 §8.3, docs/126 §3): it sets how much leaves (the
+                // share) and how it leaves (each plane's rate).
+                let (twist_t, planes_p) = crate::torsion::core_twist(core);
                 let lead = core.tilt.clone();
-                // The twist's pressure on the expungement (crate::torsion;
-                // operator 2026-11-06): the core's plane rates are its twist
-                // per ring, `2δ·t_k` with `δ = ½` (docs/100 §2), each pair's
-                // pressure the throat's share of the core's holding times the
-                // pair's twist rate, each plane's the composition of its two
-                // pairs'. It sets how much leaves (the share) and how it
-                // leaves (each plane's rate).
-                let rho = if mass(&core.total()).is_zero() {
-                    ratio(0, 1)
-                } else {
-                    mass(&core.throat) / mass(&core.total())
-                };
-                let twist_rates = [twist_t[0].clone(), twist_t[1].clone(), twist_t[2].clone()];
-                let planes_p = crate::torsion::pair_pressures(&twist_rates, &rho)
-                    .and_then(|pairs| crate::torsion::plane_pressures(&pairs));
                 let ledger_r = if home {
                     ledger_u.clone()
                 } else {
@@ -2243,8 +2350,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         key: k,
                         amount: take,
                         spins: spins.clone(),
-                        ell_orth: ratio(0, 1),
-                        phase,
+                        spins_orth: vec![ratio(0, 1); 3],
+                        orientation: crate::orientation::Orientation::from_phases(&phase),
                         agitation: ratio(0, 1),
                         born: bell,
                         vacuum: false,
@@ -2273,8 +2380,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     key: k,
                     amount: a,
                     spins: crate::flows::Mote::spins_of(&crate::ring::grain(&ell_o), &[]),
-                    ell_orth: crate::ring::grain(&ell_orth),
-                    phase: crate::flows::rest(ratio(1, 2)),
+                    spins_orth: crate::flows::Mote::orth_of(&crate::ring::grain(&ell_orth), &[]),
+                    orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(
+                        ratio(1, 2),
+                    )),
                     agitation,
                     born: bell,
                     vacuum: true,
@@ -2288,7 +2397,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // and its star's orthogonal orbit (carried spins add; never
             // dropped to zero, or `Σ m·ℓ_orth` would leak).
             let falling = infall.len();
-            for (n, (m, at, orth, star_phase)) in infall.into_iter().chain(shed).enumerate() {
+            for (n, (m, at, orth, star_phase, heat)) in infall.into_iter().chain(shed).enumerate() {
                 for (k, a) in m {
                     if n < falling {
                         in_throat.push(core.flows.len());
@@ -2305,9 +2414,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         key: k,
                         amount: a,
                         spins: crate::flows::Mote::spins_of(&crate::ring::grain(&at), &[]),
-                        ell_orth: orth.clone(),
-                        phase,
-                        agitation: ratio(0, 1),
+                        spins_orth: crate::flows::Mote::orth_of(&orth, &[]),
+                        orientation: crate::orientation::Orientation::from_phases(&phase),
+                        agitation: crate::ring::grain(&heat),
                         born: bell,
                         vacuum: false,
                         lever: Vec::new(),
@@ -2335,34 +2444,80 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 .flows
                 .iter()
                 .enumerate()
-                .filter(|(_, x)| x.vacuum && x.phase.len() > crate::flows::LOOP)
-                .map(|(j, x)| (j, x.phase[crate::flows::LOOP].clone()))
+                .filter(|(_, x)| x.vacuum)
+                .map(|(j, x)| (j, crate::flows::r_side(x)))
                 .collect();
             // The galaxy's band (push and return, `flows::torque`) stands held
             // back (operator 2026-10-21: "pull it back and make it static").
+            // The core's antipole holds what the torsion's rotations move
+            // between the planes (docs/128 §13.1), so the ledger counts it.
             let ledger_sum = |core: &Body| {
-                core.flows.iter().fold(core.reservoir.clone(), |s, x| {
-                    s + x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()
-                        * (x.ell_o() + x.ell_orth.clone())
-                })
+                let held = core.antipole.iter().fold(ratio(0, 1), |s, a| s + a.clone())
+                    / ledger_unit.clone();
+                core.flows
+                    .iter()
+                    .fold(core.reservoir.clone() + held, |s, x| {
+                        s + x.amount.clone() * crate::flows::weight(&x.key) / ledger_unit.clone()
+                            * (x.ell_o() + x.ell_orth())
+                    })
             };
+            // The echo's beat (docs/130): each mote's form turned about its
+            // own spin by the bounce's push carried to it, its reverberation
+            // summed, the fluid answering its departure from the medium's
+            // beat; unitary, the spins and the ledger untouched.
+            crate::profile::mark("breath:beat");
+            if let Some(push) = echo_push.as_ref() {
+                let _ = crate::flows::echo_beats(
+                    &mut core.flows,
+                    enc.as_ref().unwrap_or(&throat),
+                    &ledger_unit,
+                    push,
+                    g_rate.as_ref(),
+                );
+            }
             let before = ledger_sum(core);
             let (given, absorbed, heated) = crate::flows::torque(
                 &mut core.flows,
                 enc.as_ref().unwrap_or(&throat),
                 &p,
-                tide,
                 &ledger_unit,
                 &mut cross,
             );
-            // The disc forms: each mote's tilt returns toward its galaxy's spin
-            // plane (`flows::settle_disc`). A core whose disc holds nothing
+            // The partner orbits conformed to the manifold's shear (docs/128
+            // §10.3), the range paying by holding.
+            let _ = crate::flows::conform_partners(
+                &mut core.flows,
+                enc.as_ref().unwrap_or(&throat),
+                &ledger_unit,
+            );
+            // The disc forms by the shear out of the plane (`flows::
+            // conform_axes`). A core whose disc holds nothing
             // turning keeps its own lean (its founding orientation, `pulse::
             // orient`), never reset to none.
             // What the attractor moves off each plane the core takes as its
             // antipole (docs/100 §8.2): `S_k + A_k` constant on every plane.
+            let (lead, _) = crate::torsion::core_twist(core);
             let spin_before = crate::torsion::plane_spin(&core.flows);
-            let plane = crate::flows::settle_disc(&mut core.flows, enc.as_ref().unwrap_or(&throat));
+            // The shear out of the plane (docs/128 §12.3): each ring
+            // conformed toward the rings its tube meets, the range paying,
+            // so the planes' spin stands but for the grain, which the
+            // antipole takes. The galaxy's plane is the reading after it.
+            let _ = crate::flows::conform_axes(
+                &mut core.flows,
+                enc.as_ref().unwrap_or(&throat),
+                &ledger_unit,
+            );
+            // Tilt from quantum torsion (docs/128 §13): the precession about
+            // the core's lead and the tipping by the twist's pressure, the
+            // spin they move between the planes the antipole's.
+            crate::flows::torsion_turns(
+                &mut core.flows,
+                enc.as_ref().unwrap_or(&throat),
+                &ledger_unit,
+                &lead,
+                &g_rate.clone().unwrap_or_else(|| ratio(1, 1)),
+            );
+            let plane = crate::flows::disc_plane(&core.flows);
             let spin_after = crate::torsion::plane_spin(&core.flows);
             let taken = crate::torsion::antipole_take(&core.antipole, &spin_before, &spin_after);
             let was_a = core.antipole.clone();
@@ -2386,7 +2541,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // takes drained.
             crate::profile::mark("breath:emit");
             {
-                let glow = crate::flows::emit(&mut core.flows, enc.as_ref().unwrap_or(&throat), 2);
+                let glow = crate::flows::emit(
+                    &mut core.flows,
+                    enc.as_ref().unwrap_or(&throat),
+                    2,
+                    &ledger_unit,
+                );
                 if !glow.is_zero() {
                     let enc_l = galaxy_enc(core);
                     let (got, _) = shine(&mut core.flows, &mut [], &enc_l, &glow, &g_mass);
@@ -2403,20 +2563,14 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             {
                 let enc_m = enc.as_ref().unwrap_or(&throat);
                 let base = enc_m.base();
-                // The base's frames: the core's state, in proportion to its
-                // throat's frames; a closed pole where its throat holds none.
-                let (a_t, q_t) = core.throat.iter().fold((ratio(0, 1), ratio(0, 1)), |(a, q), (k, n)| {
-                    let (fa, fq) = crate::chem::frames(k);
-                    (a + n.clone() * ratio(i64::from(fa), 1), q + n.clone() * ratio(i64::from(fq), 1))
-                });
-                let whole_t = a_t.clone() + q_t.clone();
-                let base_frames = if whole_t.is_zero() {
-                    (base.clone(), ratio(0, 1))
-                } else {
-                    (base.clone() * a_t / whole_t.clone(), base * q_t / whole_t)
-                };
+                let base_dipole = throat_dipole(core);
                 let spin_was = ledger_sum(core);
-                let (n_m, du) = crate::flows::magnet(&mut core.flows, enc_m, &ledger_unit, &base_frames);
+                let (n_m, du) = crate::flows::magnet(
+                    &mut core.flows,
+                    enc_m,
+                    &ledger_unit,
+                    &(base, base_dipole),
+                );
                 lifted.0 += n_m;
                 lifted.1 += du;
                 identity.push(("magnet spin", ledger_sum(core) - spin_was));
@@ -2425,14 +2579,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // Recycling (`crate::recycle`; Xylarium 11.0 (18)): after the
             // torques (torques are motion, recycling the residue), the bounce the
             // container holds presses and peels the matter in the throat.
-            let frac = |x: Ratio| x.clone() - x.floor();
-            // Its route runs the loop backward (drawn in along the axis, out
-            // through the disc): it reaches the throat crossing ½ from above.
+            // Its route runs its R side backward (drawn in along the axis, out
+            // through the disc): it reaches the throat crossing ½ from above,
+            // read on its R side's passage, signed (docs/128 §14.2).
             for (j, was) in orth_was {
-                let to_half = frac(was.clone() - ratio(1, 2));
-                if to_half > ratio(0, 1)
-                    && to_half <= frac(was - core.flows[j].phase[crate::flows::LOOP].clone())
-                {
+                if crate::flows::enters_throat(&was, &crate::flows::r_side(&core.flows[j])) {
                     in_throat.push(j);
                 }
             }
@@ -2469,6 +2620,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 .collect();
             crate::profile::mark("rec:recycle");
             let before = core.flows.len();
+            // The vacuum face of the strip consumes under the core's twist
+            // reversed (docs/126 §3).
+            let (_, twist_p) = crate::torsion::core_twist(core);
             let r = crate::recycle::recycle(
                 &mut core.flows,
                 &in_throat,
@@ -2477,6 +2631,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &(g_mass.clone() - (h.clone() - ratio(1, 1)) * g_mass.clone()),
                 bell,
                 densest,
+                twist_p.as_ref(),
             );
             motes_in[2] += core.flows.len().saturating_sub(before);
             // Whatever passed the throat, split or not, leaves on the
@@ -2571,10 +2726,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // It leaves whole, keeping its state, co-moving with its
                 // galaxy about the universal core (its galaxy's orbit spins
                 // and phases), on the vacuum leg home.
-                let phase = if core.phase.len() == crate::flows::PLANES {
-                    core.phase.clone()
+                let orientation = if core.phase.len() == crate::flows::PLANES {
+                    crate::orientation::Orientation::from_phases(&core.phase)
                 } else {
-                    x.phase.clone()
+                    x.orientation.clone()
                 };
                 // Its own spin carried across by its galaxy's share, once
                 // (with Xylarium): `ℓ_u = ℓ_g + ℓ_m·f` in each plane.
@@ -2585,12 +2740,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 };
                 let (ell_u, orth_u) = (
                     crate::ring::grain(&to_universe(&x.ell_o(), &core.ell, &f_g)),
-                    crate::ring::grain(&to_universe(&x.ell_orth, &core.ell_orth, &f_g)),
+                    crate::ring::grain(&to_universe(&x.ell_orth(), &core.ell_orth, &f_g)),
                 );
                 to_ocean.push(crate::flows::Mote {
                     spins: crate::flows::Mote::spins_of(&ell_u, &x.tilt()),
-                    ell_orth: orth_u,
-                    phase,
+                    spins_orth: crate::flows::Mote::orth_of(&orth_u, &x.orth_shares()),
+                    orientation,
                     vacuum: true,
                     born: bell,
                     lever: Vec::new(),
@@ -2684,12 +2839,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         crate::flows::circle_mean(
                             &members
                                 .iter()
-                                .map(|x| {
-                                    (
-                                        held_of(x),
-                                        x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)),
-                                    )
-                                })
+                                .map(|x| (held_of(x), x.phase_at(k)))
                                 .collect::<Vec<_>>(),
                         )
                     })
@@ -2711,7 +2861,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // against).
                 let orth_binding = members
                     .iter()
-                    .fold(ratio(0, 1), |s, x| s + held_of(x) * x.ell_orth.clone())
+                    .fold(ratio(0, 1), |s, x| s + held_of(x) * x.ell_orth())
                     / m.clone();
                 let mut ph: Vec<Vec<(Ratio, Ratio)>> = vec![Vec::new(); crate::flows::PLANES];
                 // The star's own spin (with Xylarium 2026-10-23): the spin its
@@ -2741,12 +2891,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         heat += x.amount.clone() * x.agitation.clone();
                         amt += x.amount.clone();
                         fell_spins.push((w.clone(), place.clone(), hold_c(&place)));
-                        orth_held += w.clone() * x.ell_orth.clone();
+                        orth_held += w.clone() * x.ell_orth();
                         for k in 0..crate::flows::PLANES {
-                            ph[k].push((
-                                w.clone(),
-                                x.phase.get(k).cloned().unwrap_or_else(|| ratio(0, 1)),
-                            ));
+                            ph[k].push((w.clone(), x.phase_at(k)));
                         }
                     } else {
                         // The disc: it stays at its phase place off step, its
@@ -2757,7 +2904,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         let carried_c = if x.ell_o().is_zero() {
                             ratio(0, 1)
                         } else {
-                            (x.ell_orth.clone() - orth_binding.clone()) / x.ell_o()
+                            (x.ell_orth() - orth_binding.clone()) / x.ell_o()
                         };
                         outside.push((
                             crate::flows::Mote {
@@ -2777,6 +2924,15 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     core.flows.extend(members);
                     continue;
                 }
+                // Its heat by component, read as it collapses (#143).
+                collapses.push(crate::dispersion::read(
+                    &members
+                        .iter()
+                        .zip(&fallen)
+                        .filter(|(_, f)| **f)
+                        .map(|(x, _)| x.clone())
+                        .collect::<Vec<_>>(),
+                ));
                 let a = if amt.is_zero() {
                     ratio(0, 1)
                 } else {
@@ -3068,24 +3224,23 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         if !g_end.is_zero() && !unit.is_zero() {
             let scale_end = g_end.clone() / unit.clone();
 
-            let enc_end = crate::flows::Enclosed::with_lifts(
-                ratio(1, 1),
-                core.flows
-                    .iter()
-                    .map(|x| {
-                        (
-                            x.ell_o(),
-                            x.amount.clone() * crate::flows::weight(&x.key) / g_end.clone(),
-                            x.lift.clone(),
-                        )
-                    })
-                    .chain(
-                        core.satellites
-                            .iter()
-                            .map(|b| (b.ell.clone(), mass(&b.total()) / g_end.clone(), ratio(0, 1))),
-                    )
-                    .collect(),
-            );
+            let enc_end =
+                crate::flows::Enclosed::with_lifts(
+                    ratio(1, 1),
+                    core.flows
+                        .iter()
+                        .map(|x| {
+                            (
+                                x.ell_o(),
+                                x.amount.clone() * crate::flows::weight(&x.key) / g_end.clone(),
+                                x.lift.clone(),
+                            )
+                        })
+                        .chain(core.satellites.iter().map(|b| {
+                            (b.ell.clone(), mass(&b.total()) / g_end.clone(), ratio(0, 1))
+                        }))
+                        .collect(),
+                );
             for sys in core.satellites.iter_mut() {
                 if sys.ell > ratio(0, 1) {
                     let own = sys.ell.clone();
@@ -3119,6 +3274,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             novae,
             lifted,
             births_h,
+            collapses,
             merged,
             encounters,
             grown,
@@ -3197,9 +3353,17 @@ mod tests {
         assert!(burnable(&s, 3).is_empty());
         s.kept.insert(kind("W0001"), ratio(300, 1));
         let layer = burnable(&s, 3);
-        assert_eq!(layer, [(kind("W0001"), ratio(300, 1))].into(), "the layer is the hydrogen, whole");
+        assert_eq!(
+            layer,
+            [(kind("W0001"), ratio(300, 1))].into(),
+            "the layer is the hydrogen, whole"
+        );
         less(&mut s.kept, &layer);
-        assert_eq!(s.kept, [(kind("W0004"), ratio(500, 1))].into(), "the closed matter stays");
+        assert_eq!(
+            s.kept,
+            [(kind("W0004"), ratio(500, 1))].into(),
+            "the closed matter stays"
+        );
     }
 
     #[test]
@@ -3238,8 +3402,10 @@ mod tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(3, 1),
             spins: crate::flows::Mote::spins_of(&ratio(7, 11), &[]),
-            ell_orth: ratio(2, 13),
-            phase: crate::flows::rest(ratio(1, 2)),
+            spins_orth: crate::flows::Mote::orth_of(&ratio(2, 13), &[]),
+            orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
+                1, 2,
+            ))),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,
@@ -3290,7 +3456,7 @@ mod tests {
         };
         let mut z = s.flows[0].clone();
         z.spins = vec![ratio(7, 1), ratio(0, 1), ratio(0, 1)];
-        z.ell_orth = ratio(0, 1);
+        z.set_ell_orth(ratio(0, 1));
         t.flows.push(z);
         assert_eq!(
             dilate_system(&mut t, &ratio(5, 1), &ratio(2, 1), &g),
@@ -3387,8 +3553,8 @@ mod tests {
             key: crate::chem::Kind::parse("W0001").expect("a kind"),
             amount: ratio(amount.0, amount.1),
             spins: crate::flows::Mote::spins_of(&ratio(ell.0, ell.1), &[]),
-            ell_orth: ratio(0, 1),
-            phase: vec![ratio(0, 1), ratio(0, 1)],
+            spins_orth: vec![ratio(0, 1); 3],
+            orientation: crate::orientation::Orientation::from_phases(&[ratio(0, 1), ratio(0, 1)]),
             agitation: ratio(0, 1),
             born: 0,
             vacuum: false,

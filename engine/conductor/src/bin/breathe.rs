@@ -43,8 +43,8 @@ fn main() {
         let mut in_systems = 0usize;
         let mut widest = 0u64;
         let mut see = |x: &conductor::flows::Mote| {
-            widest = widest.max(bits(&x.ell_o())).max(bits(&x.ell_orth));
-            for p in &x.phase {
+            widest = widest.max(bits(&x.ell_o())).max(bits(&x.ell_orth()));
+            for p in x.orientation.g() {
                 widest = widest.max(bits(p));
             }
         };
@@ -101,14 +101,17 @@ fn main() {
                 for (n, r) in [
                     ("amount", &x.amount),
                     ("ell_o", &x.ell_o()),
-                    ("ell_orth", &x.ell_orth),
+                    ("ell_orth", &x.ell_orth()),
                     ("agitation", &x.agitation),
                     ("lever_place", &x.lever_place),
                 ] {
                     put(format!("{tier}.mote.{n}"), r);
                 }
-                for p in x.phase.iter() {
-                    put(format!("{tier}.mote.phase"), p);
+                for l in x.spins_orth.iter() {
+                    put(format!("{tier}.mote.spins_orth"), l);
+                }
+                for p in x.orientation.g().iter() {
+                    put(format!("{tier}.mote.orientation"), p);
                 }
                 for l in x.lever.iter() {
                     put(format!("{tier}.mote.lever"), l);
@@ -119,13 +122,13 @@ fn main() {
             for (n, r) in [
                 ("amount", &x.amount),
                 ("ell_o", &x.ell_o()),
-                ("ell_orth", &x.ell_orth),
+                ("ell_orth", &x.ell_orth()),
                 ("agitation", &x.agitation),
             ] {
                 put(format!("ocean.{n}"), r);
             }
-            for p in x.phase.iter() {
-                put("ocean.phase".into(), p);
+            for p in x.orientation.g().iter() {
+                put("ocean.orientation".into(), p);
             }
         }
         for c in &u.cores {
@@ -209,6 +212,13 @@ fn main() {
             }
             if std::env::var_os("NETSTRATUM_PROFILE").is_some() {
                 conductor::profile::mark("breathe:echo");
+                let ord = std::sync::atomic::Ordering::Relaxed;
+                eprintln!(
+                    "bond pairs at bell {}: {} on whole numbers, {} by the rational test",
+                    b + 1,
+                    conductor::flows::BOND_PAIRS.0.swap(0, ord),
+                    conductor::flows::BOND_PAIRS.1.swap(0, ord)
+                );
                 let spent = conductor::profile::drain();
                 let whole: f64 = spent.iter().map(|(_, d)| d.as_secs_f64()).sum();
                 for (name, d) in spent.iter().take(14) {
@@ -270,7 +280,7 @@ fn main() {
                         widest = widest.max(o.abs());
                     }
                     whole += w;
-                    let ph = conductor::flows::space_of(&x.phase);
+                    let ph = conductor::flows::space_of(&x.phase());
                     if ph.iter().any(|p| *p != ph[0]) {
                         apart += 1;
                     }
@@ -330,7 +340,9 @@ fn main() {
     let dissolved: usize = events.iter().map(|e| e.dissolved).sum();
     let novae: usize = events.iter().map(|e| e.novae).sum();
     let lifted_n: usize = events.iter().map(|e| e.lifted.0).sum();
-    let lifted_du = events.iter().fold(cfe::ratio::ratio(0, 1), |s, e| s + e.lifted.1.clone());
+    let lifted_du = events
+        .iter()
+        .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.lifted.1.clone());
     let returned = events
         .iter()
         .fold(cfe::ratio::ratio(0, 1), |s, e| s + e.returned.clone());
@@ -698,9 +710,9 @@ fn main() {
         }
         for x in &motes {
             amounts = amounts.max(bits(&x.amount));
-            spins = spins.max(bits(&x.ell_o())).max(bits(&x.ell_orth));
+            spins = spins.max(bits(&x.ell_o())).max(bits(&x.ell_orth()));
             agitation = agitation.max(bits(&x.agitation));
-            for p in &x.phase {
+            for p in x.orientation.g() {
                 phases = phases.max(bits(p));
             }
         }
@@ -769,7 +781,11 @@ fn main() {
     // its candidates, its collections of two or more, the self-held and the
     // formed, and the collection nearest its pinch (its widest extent over its
     // pinch on its worse plane; at most 1 holds).
-    for (n, f) in events.iter().filter_map(|e| e.formation.as_ref()).enumerate() {
+    for (n, f) in events
+        .iter()
+        .filter_map(|e| e.formation.as_ref())
+        .enumerate()
+    {
         let worst = |g: &pulse::GroupReading| {
             g.planes
                 .iter()
@@ -941,7 +957,8 @@ fn main() {
             0usize,
             0usize,
         );
-        let mut lightest: std::collections::BTreeMap<u32, usize> = std::collections::BTreeMap::new();
+        let mut lightest: std::collections::BTreeMap<u32, usize> =
+            std::collections::BTreeMap::new();
         let mut kept_he = cfe::ratio::ratio(0, 1);
         let mut held_by: Vec<String> = Vec::new();
         for core in &u.cores {
@@ -991,13 +1008,54 @@ fn main() {
         for line in &held_by {
             println!("fuel — a star holding hydrogen: {line}");
         }
+        // Each collapsing binding's heat by component (#143, read only): the
+        // members that fell, out of step on each plane's phase (in degrees,
+        // a turn 360), on each spatial plane's spin, between planes, and on
+        // the orthogonal orbit; never folded into one number.
+        {
+            let deg = |x: &cfe::ratio::Ratio| f(&(x.clone() * cfe::ratio::ratio(360, 1)));
+            let list = |v: &[cfe::ratio::Ratio], g: &dyn Fn(&cfe::ratio::Ratio) -> String| {
+                v.iter().map(g).collect::<Vec<_>>().join(" ")
+            };
+            let all: Vec<&conductor::dispersion::Dispersion> =
+                events.iter().flat_map(|e| e.collapses.iter()).collect();
+            println!("heat by component — {} bindings collapsed", all.len());
+            for (n, d) in all.iter().enumerate() {
+                let kinds: Vec<String> = d
+                    .phase_by_kind
+                    .iter()
+                    .take(4)
+                    .map(|(k, v)| format!("{k} {}", list(v, &deg)))
+                    .collect();
+                println!(
+                    "heat by component — collapse {n}: holding {}; phase off step by plane (degrees) {}; spin by plane {}; between planes (0,1) (1,2) (2,0) {}; orthogonal {}; by kind (degrees) {}",
+                    f(&d.holding),
+                    list(&d.phase, &deg),
+                    list(&d.spin, &|x| f(x)),
+                    list(&d.between, &|x| f(x)),
+                    f(&d.orth),
+                    kinds.join("; ")
+                );
+            }
+        }
         // Each birth's own record: hydrogen's share by mass of what fell, of
         // it after the fibres' transition, and of what the star keeps.
         let births: Vec<&(cfe::ratio::Ratio, cfe::ratio::Ratio, cfe::ratio::Ratio)> =
             events.iter().flat_map(|e| e.births_h.iter()).collect();
         let zero = cfe::ratio::ratio(0, 1);
-        let none = |k: usize| births.iter().filter(|b| [&b.0, &b.1, &b.2][k] == &zero).count();
-        let most = |k: usize| births.iter().map(|b| [&b.0, &b.1, &b.2][k].clone()).max().unwrap_or_else(|| zero.clone());
+        let none = |k: usize| {
+            births
+                .iter()
+                .filter(|b| [&b.0, &b.1, &b.2][k] == &zero)
+                .count()
+        };
+        let most = |k: usize| {
+            births
+                .iter()
+                .map(|b| [&b.0, &b.1, &b.2][k].clone())
+                .max()
+                .unwrap_or_else(|| zero.clone())
+        };
         println!(
             "fuel — births: {}; hydrogen absent from what fell in {}, after the fibres' transition in {}, from the star kept in {}; the greatest hydrogen share by mass, fell {}, after the transition {}, kept {}",
             births.len(),

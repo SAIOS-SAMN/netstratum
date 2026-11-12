@@ -138,7 +138,10 @@ operators of the network.
   conservation is exact across every run. Its medium has a restoring force:
   pressure is state, and neighbouring rings are pushed back toward the
   hydrostatic balance of pressure against potential, radially and around
-  each shell's circles (docs/106 S3, docs/110). It can be founded, advanced and read;
+  each shell's circles (docs/106 S3, docs/110). Each mote's orientation is one
+  generator over six turning planes, composed whole each bell, so its planes
+  turn into one another instead of as a flat torus (docs/117 §11.7; stars
+  and worlds follow). It can be founded, advanced and read;
   it cannot yet be played directly, and civilizations are seated on its star
   systems by the conductor. Several values are still imported from Earth's
   physics and are scheduled to be derived (docs/108).

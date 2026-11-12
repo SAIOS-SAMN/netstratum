@@ -1634,9 +1634,15 @@ at the share `α/(α + β)` (docs/105).
 **E15 · The faces.** `flows::face`, `polarity::faces`. `(held, unlocked) =
 (1 − δ, δ)` under the inversion (docs/104 §0).
 
-**E16 · A body's push.** `pulse::push_of`. Half its open frames' share of
-its whole weight, `½·Q/(A + Q)`, `Q` its magnetism, `A` its holding, at most
-½.
+**E16 · A body's push and its antipole.** `pulse::push_of` (docs/125 §4.1,
+operator 2026-11-11). Its orientation is the open pole: the protons' charge
+its bound electrons leave open at its place, `g` its held share there
+(docs/105 §3). Its antipole, by the same inversion, is the held stratum:
+
+    p = Q·(1 − g)/w = Q·u/w        p̄ = (Z + Q·g)/w = 1 − p
+
+The continuum reads `p` and the vacuum leg `p̄`. A pair share with no `½`;
+it replaces `½·U/w`.
 
 **E17 · The universe's hold.** `ocean::universe_hold`. `H_u = 1 +
 Σ_g (state_g + holding_g + magnetism_g)`, in the founding's unit.
@@ -1755,9 +1761,25 @@ its lead over its enclosure's plane. The scalar `Σ_k |t_k − t̄_k|/2` is
 retired: `flows::torsion_signed` and the band pairs' torsion read the
 tightest pair.
 
-**E37 · The Möbius pass.** Built. `flows::mobius`, `flows::torsion_signed`.
+**E37 · The Möbius pass, the strip's half twist.** Built. `flows::mobius`,
+`flows::torsion_signed` (docs/126 §2). The continuum and the vacuum are one
+strip's two faces. One pass turns the face over and reverses the helix, and
+each spatial plane takes its share of the half twist, the core's twist locked
+into the mote's lead:
 
-    (δ, ψ, s) ↦ (1 − δ, ψ + ½, −s)
+    (δ, ψ_k, s) ↦ (1 − δ, ψ_k + ½·t_k, −s)        Σ_k ½·t_k = ½
+
+Two passes return the face, the sense and the shares, the phases a whole twist
+on, with the winding kept.
+
+**E37a · One pressure on the strip's two faces.** `torsion::core_twist`,
+`torsion::released_share`, `torsion::consumed_share`, `recycle::recycle`
+(docs/126 §3). The core's twist pressure `P_k` releases on the continuum face
+and consumes, reversed, on the vacuum face at the throat:
+
+    s′ = s ⊕ P₁ ⊕ P₂ ⊕ P₃        e′ = E/(S + E) ⊕ (−P₁) ⊕ (−P₂) ⊕ (−P₃)
+
+The two faces cancel, `(x ⊕ ΣP) ⊕ (−ΣP) = x`; no twist leaves both bare.
 
 **E38 · The attractor's keep.** Built. `flows::attractor_keep`,
 `flows::settle_disc`.
@@ -1851,7 +1873,10 @@ exactly. With a source `q` a ring the heat stands at `a* = q/u`, reached in
 closed form, `a_n = a* + (a₀ − a*)·gⁿ` (law 5). Motes emit over the torque's
 two rings, a system's motes and worlds on its star's bell; the light is
 shone on the continuum face (law 4) and booked made, received and drained.
-Retired: `keep = (1 − open)(1 − δ)` and `formation::radiates`.
+Retired: `keep = (1 − open)(1 − δ)` and `formation::radiates`. **Restated by
+E62 (docs/127 §4):** what the body gives up enters the manifold, which
+radiates `u_M` of it and recycles `g_M`; the light here becomes the radiated
+share once E62 is built.
 
 **E55 · Bonds release into heat.** `recycle::recycle`,
 `formation::star_glow` (docs/122 law 1, docs/124 §2). A bond formed releases
@@ -1889,3 +1914,254 @@ replacing the deficit contrast `|δ_i − δ_j|/(δ_i + δ_j)` as the heat (it
 stays the stick test). The bounce's parting (the exchange of the unkept share)
 then widens their spins; what pays it is the state level's (potential),
 not derived yet.
+
+**E58 · The nucleon dipole.** `chem::Dimensions`, `chem::dimensions` (docs/95 §0,
+docs/97; register K15). A kind's dimensions are its nucleons', each standing in
+three axes: `3Q` the protons' open dimensions and `3Z` the neutrons' held
+dimensions, `3w` in all ("frame" retired, mycelium #239). The electrons' open dimensions `U` stand beside them:
+
+**Read by LAW-COUPLING v2** (`flows::dipole`, `flows::plane_shares`,
+`flows::magnet`; docs/129 §1; Mycelium 78.181, 78.182 item 9), in
+netstratum's orientation (protons open, neutrons held), `p` protons, `n`
+neutrons, `w = p + n`, at the passage face's share at the place `δ = H/(H + R)`:
+
+    π = p·δ/w    π̄ = (n + p·g)/w = 1 − π    (g = 1 − δ)    pole σ = 1 − 2π    strength U/3w
+
+On the vacuum face `π ↦ 1 − π`; the strength names no face. Each isoclinic
+plane couples at its own reach with weight `α_p = (|ℓ_k| + |ℓ_kR|)/Σ_j(|ℓ_j| +
+|ℓ_jR|)` (`W_p = 3W·α_p`), the mote's share `Σ_p α_p·m_p`; the enclosed
+magnetism `M` is the enclosed bond ends. A dipole of no nucleons is refused,
+`UnbodiedDipole { pole_plane }`. The dipole coupling (`flows::shear`) and the
+magnet read it. R, the electron's phase, stands beside the dipole, never
+folded into it. Retires v1's `σ = (Z − Q)/w` (`coupling::pole`) and fluidity
+`o = U/3w ↦ 1 − o` on the vacuum.
+
+**E59 · Deformation.** (docs/127 §2.) A body's departure from the manifold's
+conformed state at its place, per lane and component, first degree:
+`D^H_i = x_i − x̄` (heat, `Σ|·|`, weighted `w_i·a_i`), `d_i = t_i − t̄`
+(twist), the lift `u_i` (reach). A body's own state change is a deformation
+of the manifold, a star's `ΔD = (A′ − A)·K`, `A = agitation_of(reservoir)`.
+
+**E60 · Conformation.** (docs/127 §3.) `x̄ = Σ w_j·x_j / Σ w_j` over the
+range that meets the place. The coupling moves bodies toward it with `Σ w·x`
+kept; never a source.
+
+**E61 · Restoration.** (docs/127 §4.) A deformation relaxes by its lane's
+keep a ring (`k = g` heat, E54; `k = 2δ/(1 + δ)` twist, E38). What
+restoration removes is `Δ_i = (1 − k_i)·w_i·D_i`.
+
+**E62 · Dissipation: heat recycled across the manifold.** (docs/127 §4.) What
+restoration removes enters the manifold, `Δ_M = Σ Δ_i + Σ ΔD_state`, which
+returns it by its faces at the place:
+
+    radiated = u_M·Δ_M  (light: absorbed or drained)
+    recycled = g_M·Δ_M  to body j by w_j·g_j / Σ w·g
+
+`g_M = 1 − δ`, `u_M = δ` (docs/105 §3). The book closes: `Δ_M = radiated +
+recycled`, `radiated = absorbed + drained`, and only the drained light leaves
+the bodies. **Built for heat (#182):** `flows::emit` dissipates each mote's
+restored heat into the manifold, recycling `g_M` of it to the motes whose own
+enclosures meet its own (by `w·g`) and radiating the rest. #183–#185 follow.
+
+**E63 · The pass per plane: velocity, pressure resistance, phase, the
+parcel's boundary.** `strip::plane_face`, `strip::face_share`,
+`strip::transit_share`, `strip::sense`, `strip::resisted` (docs/128). Each
+plane on its own circle and its own face:
+
+    R_k = ℓ_k/H(<ℓ_k)    δ_k = H/(R_k + H)    e_k = m/(m + H)
+    λ_k = clamp((H − R_k(1 − e_k)) / (2·R_k·e_k), 0, 1)        (the face)
+    s_k = δ_k + λ_k(1 − 2δ_k)    σ_k = 1 − 2λ_k               (the transit)
+    s_k′ = s_k ⊖ P_k  (λ_k < ½)    s_k ⊕ P_k  (λ_k > ½)          (resisted)
+
+The luminal bound `s_k ≤ ½` holds by construction; a whole crossing
+advances the phase `½·Δλ_k`. Replaces docs/126 §2's `½·t_k` and the face as
+one flag a mote. **Built (docs/128 §8):** the plane's form (`strip::PlaneForm`:
+its pair in `G`, its axis's poles, its reach and face); the torque turns each
+plane's pair, the plane `2·s_k′` a bell and its R partner with it, retiring
+the tilt's `2δ·t_k`. **Superseded by E65** (docs/128 §9): the bell moves each
+half of the spin on the group; the per-plane reach and `2·s_k′` retire, and the
+twist pressure leaves the torque until it is read per half.
+
+**E66 · The unitary morphodynamic state: form and twist.**
+`Orientation::form_twist`, `Orientation::of_form_twist` (docs/128 §10;
+operator 2026-11-11). Every motion of S³ factors into an automorphism and
+an isoclinic motion; a body's state is its form and its twist, both unit
+quaternions:
+
+    p·x·q̄ = C·(F·x·F̄)    F = q    C = p·q̄    (p, q) = (C·F, F)
+    F ↦ F·m−    C ↦ C·F·(m+·m̄−)·F̄    (p, q) ↦ (q, p): C ↦ C̄
+
+**Built as readings,** with witnesses: the factorization exact, both factors
+unitary with no norm read (`q·q̄` integer), equal halves keep the twist, the
+exchange of halves conjugates it. **The twist sourced by the shear
+(built):** `flows::shear_rate`, `flows::partner_target`,
+`flows::conform_partners`, `Enclosed::reach_at_rate`:
+
+    σ = (2e·H − ΔH)/(2e·R)    ΔH = H(<R(1+e)) − H(<R(1−e))
+    b± = b ± σ/2    b±·R±* = H(<R±*)    ℓ_kR* = t_k·(ℓ−* − ℓ+*)/2
+    ℓ_kR′ = ℓ* + k·(ℓ_kR − ℓ*)    (k = E38's keep; the range pays by holding)
+
+The push on the partner orbits (`orth_push`'s `κ_⊥` in `spin_torque`, the
+tide in the mote torque) is retired. **The torsion from the twist (built):**
+`Orientation::twist_generator`, `torsion::manifold_twist`, `torsion::core_twist`:
+
+    v = C_vec/(1 + C₀)    x̄_k = Σ w·(v_k/(1 + |v_k|)) / Σ w    P_jk = ρ·(x̄_j ⊖ x̄_k)
+
+A core's twist pressure is the manifold's twist over its disc's motes; its
+wound plane stays the release's lead (its tilt), never its torsion. **One
+law for the motion and the book (built):** `flows::spin_torque` reads each
+spatial plane's passage on the group, `Δψ_k = ψ_k′ − ψ_k + (K_k′ − K_k)`:
+
+    Δℓ_k = p·(Δψ_k/2)·resp_k        heat = p·(Σ|Δψ_k|/2)·(1 − |k|),  k = Σ resp_k·|Δψ_k| / Σ|Δψ_k|
+
+(the tilt's `2δ·t_k` was this passage under the flat turning). The reach
+reads the spatial spin; the swing's `response(ψ_kR)` retires.
+
+**E67 · The ring: volume, axis and tilt.** `strip::Ring`,
+`strip::half_rings`, `strip::invariable_axes`, `flows::ring_volume`,
+`Orientation::half_axes`, `orientation::tilt` (docs/128 §11; operator
+2026-11-11). A half's motion sweeps a solid torus of Hopf fibres on S³, read
+first degree and exact:
+
+    width 2R±e±    V± = H(<R±(1+e±)) − H(<R±(1−e±))    σ± = (2e±·H − V±)/(2e±·R±)
+    a+ = p·ℓ+·p̄    a− = q·ℓ−·q̄    A± = Σ w·a±
+    Q = A·ā:  τ = |A×a|₁/(|A·a| + |A×a|₁)    ς = sign(A·a)    n = A×a
+
+**Built as readings,** with witnesses: the axis stands under its own motion,
+equal halves give one axis, the tilt reads its limits and is scale-free,
+an empty tube's shear is its orbit's rate and no extent gives none, a lone
+ring is untilted. The face, transit, pressure and drag per half read them
+with §9.6.
+**Drag's orthogonal axis, repulsion (readings built):** `strip::ring_pressure`,
+`strip::along_and_crossing`, `strip::drag` on the crossing (docs/128 §4b;
+operator 2026-11-11, "drag needs an orthogonal axis on repulsion as inverse
+velocity of pressure"):
+
+    P± = Σ_k |t±_k|·P_k    b_P = P/(1 − P)    M(b_P) = −1/b_P: share 1 − P
+    x = ς(1 − τ)·x + τ·x    D⊥ = τx ⊖ x̄⊥    T⊥ = (1 − P)·g·w·D⊥    Σ w·x⊥ kept
+
+**The rings' motions (built):** `flows::ring_motions`, read by `flows::torque`
+at the bell's start (docs/128 §9.6). Per half: `λ` from the tube, read on
+the face it stands on (never inverted by the stream: `s(δ, 1 − λ) = 1 −
+s(δ, λ)`), `s = δ + λ(1 − 2δ) ≤ ½`, `s′ = s ⊖ P` (or `⊕` past the ring),
+`x = σs′` split by the tilt, the counterflow at `1 − |s′|` and the repulsion
+at `1 − |P|` exchanged with the range on the grain, then
+
+    s″ = |s′|·(|x_a′| + |x_c′|)/(|x_a| + |x_c|)    b = s″/(1 − s″)    u = b·t′
+
+with `t′` the direction in space, each part scaled by what it kept, carried
+back into the body's axes.
+
+**E68 · The ring in every dimension; shear out of the plane.**
+`flows::plane_rings`, `flows::partner_target`, `flows::conform_axes`,
+`flows::disc_plane` (docs/128 §12; operator 2026-11-11, "open the vents on
+rings in multi-dimensional capacity with volume and derive shear for orbital
+pathways outside of planar view"). Each isoclinic plane its own ring, read per
+face, never summed:
+
+    W_k = 3W·α_k    r_k(1 ± e_k), e_k = m/(m + H_k)    V_k = H(<r_k(1+e_k)) − H(<r_k(1−e_k))
+    σ_k = (2e_k·H_k − V_k)/(2e_k·r_k)    b±_k = H_k/r_k ± σ_k/2    ℓ_kR* = sign(ℓ_k)·(ℓ−*_k − ℓ+*_k)/2
+
+The shear out of the plane, each ring against the rings its tube meets:
+
+    Ā_i = Σ_j w_j·ℓ_j    Q = Ā·ℓ̄: τ, ς    σ⊥ = τ·b    ℓ* = ς·|ℓ|₁·Ā/|Ā|₁    ℓ′ = ℓ* + k·(ℓ − ℓ*)
+
+the range paying by holding, `Σ w·ℓ_k` kept per plane within the grain.
+Retires the partner target laid by the tilt (`t_k·(ℓ−* − ℓ+*)/2`) and
+`settle_disc`'s pull of every tilt toward the blended plane; the plane stays
+a reading (`disc_plane`).
+
+**E69 · The echo weighed: the beat.** `Orientation::beat`, `flows::echo_beats`,
+wired at each echo's arrival (`breath::breathe`) and at the universal echo for
+the ocean (`pulse::orbit_galaxies`) (docs/130; operator 2026-11-11). The
+bounce's push carried through the layers, its reverberation between the two
+rims summed, the fluid answering its departure, applied as an automorphism
+about the body's own spin:
+
+    a = p·ν    ν = Π(1 − δ)    A = a/(1 − ρ), ρ = ½·½    D = A ⊖ Ā    T = (1 − A)·g·w·D
+    F ↦ F·m(rate(A′)·t)    C, ℓ unchanged    Σ w·A′ = Σ w·A (within the grain)
+
+**E72 · The stride and the echo's draw.** `ring::compose_n`,
+`flows::mean_response` (docs/132 §1, §5; operator 2026-11-12). The flow law
+over n bells, composed, never scaled:
+
+    x ⊕ⁿ = ((1 + x)ⁿ − (1 − x)ⁿ)/((1 + x)ⁿ + (1 − x)ⁿ)
+
+and the echo's push met at a resonance `frac(T_u·ω) = a/q`, its mean
+response over the q landings `mean_response(q·ψ₀, q·len)/q`, bounded by
+`1/q`: no expected spin in the limit `q → ∞`.
+
+**E71 · The state on Cl(5,4): nine axes, three commuting factors.**
+`orientation::{AXES, NEGATIVES, pairs, is_turning, pole_swap, carried}`,
+`Orientation::{factors, advance_vacuum, advance_scale}` (docs/131;
+operator 2026-11-12). Nine axes over ℚ, the spans and `e₋` negative; a pair
+is a turning or a boost by its squares (16 and 20). The motion is the product
+of three factors on disjoint axes:
+
+    continuum on e₊₁e₊₂e₊₃e_R (six planes, isoclinic halves)
+    vacuum on e₋₂e₋₃, e₋₃e₋₁, e₋₁e₋₂ (one half, opposite hand)
+    scale on e₊e₋: s ⊕ u = (s + u)/(1 + s·u)
+
+The pole swap of plane k negates every blade holding `e₋ₖ` (an involution);
+a value is carried by `M·x·M̃`.
+
+**E70 · Tilt from quantum torsion.** `flows::torsion_turns`,
+`quantum::twist_at`, `orientation::turned`, `torsion::wound`,
+`strip::Ring::chiral` (docs/128 §13; operator 2026-11-11, approved). Two
+axial rotations of each mote's spins each bell, unitary on the group:
+
+    φ_i = δ_i·Σ_k t_c,k·t_i,k·ν_g    m_c = Cayley(rate(φ_i)·Â_c)    (precession; Â_c·ℓ kept)
+    p_l = P_jk on what the tube holds, (j, k, l) cyclic    m_p = Cayley(p)    (tipping)
+    ℓ ↦ m_p·(m_c·ℓ·m̄_c)·m̄_p    A_k′ = A_k − ΔS_k    wound = tilt_from(S + A)
+
+and the chiral split between the halves, `tilt(a+, a−)`, none with `C = 1`
+and no partner spin. The torque's ledger identity counts the antipole.
+
+**E65 · The bell on the group: six spins, one motion a half.**
+`orientation::spin_halves`, `orientation::size`, `orientation::half_motion`,
+`Orientation::bell_halves`, `flows::Mote::spins_orth` (docs/128 §9; operator
+2026-11-11). The spin on all six planes of `G`; its halves each at their own
+reach and rate, moving by one Cayley vector a ring, composed on S³ × S³:
+
+    ℓ+_k = ℓ_k − ℓ_kR    ℓ−_k = ℓ_k + ℓ_kR    ℓ± = Σ_k |ℓ±_k|
+    R± = ℓ±/H(<ℓ±)    δ± = H/(R± + H)    b± = δ±/(1 − δ±)
+    u±_k = b±·ℓ±_k/ℓ±    q± ↦ q±·m±·m±,  m± = (1 + u±)(1 − u±)⁻¹
+
+The vacuum reads `1 − δ±` (`b ↦ 1/b`). **Built:** the six spins (the save
+keeps the partners' shares), the halves and the bell; it retires E63's
+per-plane `2·s_k′`, the tilt's `2δ·t_k` and the loop on every partner alike.
+`spin_torque`, the face, transit, pressure and drag move onto `δ±` next
+(§9.7 step 4).
+
+**E64 · Drag: the jetstream's counterflow on the traversal.**
+`strip::counter_rate`, `strip::medium_transit`, `strip::drag`,
+`strip::exchange` (docs/128 §4a; operator 2026-11-11). The forward rate read
+through the strip's pass is its inverse reciprocal, the same traversal on
+the other face. The drag takes from the parcel's departure from the medium's
+transit, by the medium's crowding, and gives it to the medium:
+
+    M: b_k ↦ −1/b_k    d_k = 1 − s_k′    d_k/s_k′ = 1/b_k
+    s̄_k = Σ_j w_j·σ_j·s_j′ / Σ_j w_j    D_k = σ_i·s_i′ ⊖ s̄_k
+    g_k = W/(W + w_i)    T_k = d_k·g_k·w_i·D_k        (Σ w·σ·s kept)
+
+Distinct from E63's `P_k`: the planes' differences against the legs' motion.
+**Readings built and witnessed;** the exchange in the torque after `s_k′`
+follows. The friction's heat (the transit's restoration, docs/127 §4) is
+open, with #184.
+
+**E57 · The orientation is the generator.** `orientation::Orientation`,
+`orientation::rate`, `orientation::reading` (docs/117 §11.7, #117 step 2).
+A body's orientation is one generator `G` over six elliptic planes (three
+spatial, each with its R partner), with windings `K` per plane. A ring's
+rate is the hold over the reach, and the advance composes whole:
+
+    b = δ/(1 − δ) = H/R        G ← generator(cayley(G)·cayley(B))
+
+Each component of `G` is held on the grain. A plane's reading, the one the
+laws act on, is `ψ = g/(1 + |g|)` turns. One ring from rest gives back `δ`,
+and the vacuum's `1 − δ` is the reciprocal rate. Turnings on planes that
+share a unit gain the plane between them, its sign set by the order
+(register K6 retired). The motion is held on one cover (the rotor's scalar
+part not negative), and a held reading is exact. Motes carry it
+(`flows::torque_one`, `flows::turning_of`, `flows::hold_to_place`; #157),
+with the swing read pair by pair. Stars and worlds do not yet (#159).

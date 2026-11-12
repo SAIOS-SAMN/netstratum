@@ -55,6 +55,41 @@ impl Book {
     }
 }
 
+/// Exact sums of many terms whose denominators differ (amounts carry wide
+/// ones): added in a balanced tree, never one by one, so each addition
+/// meets a partner of its own size. The sum is the same exact value; a
+/// running sum's denominator grows with every term and makes each later
+/// addition dearer, quadratic over the universe's motes.
+#[derive(Default)]
+struct Terms(Vec<Ratio>);
+
+impl Terms {
+    fn push(&mut self, x: Ratio) {
+        if !x.is_zero() {
+            self.0.push(x);
+        }
+    }
+
+    fn sum(self) -> Ratio {
+        let mut level = self.0;
+        if level.is_empty() {
+            return ratio(0, 1);
+        }
+        while level.len() > 1 {
+            let mut next = Vec::with_capacity(level.len().div_ceil(2));
+            let mut it = level.into_iter();
+            while let Some(a) = it.next() {
+                next.push(match it.next() {
+                    Some(b) => a + b,
+                    None => a,
+                });
+            }
+            level = next;
+        }
+        level.pop().unwrap_or_else(|| ratio(0, 1))
+    }
+}
+
 fn mote_mass(x: &Mote, unit: &Ratio) -> Ratio {
     x.amount.clone() * weight(&x.key) / unit.clone()
 }
@@ -67,10 +102,7 @@ fn open_frames(x: &Mote, unit: &Ratio) -> Ratio {
 }
 
 fn world_heat(b: &Body, unit: &Ratio) -> Ratio {
-    let own = b.heat.clone() * mass(&b.kept) / unit.clone();
-    b.satellites
-        .iter()
-        .fold(own, |s, m| s + world_heat(m, unit))
+    crate::formation::world_heat(b) / unit.clone()
 }
 
 /// Read the universe's energy book.
@@ -84,50 +116,58 @@ pub fn read(u: &Universe) -> Book {
         return book;
     }
     book.bond /= unit.clone();
+    let (mut heat_motes, mut heat_stars, mut heat_worlds) =
+        (Terms::default(), Terms::default(), Terms::default());
+    let (mut potential, mut bond) = (Terms::default(), Terms::default());
     let phi = |delta: Ratio| ratio(1, 1) - delta;
     // The ocean's motes, in the ocean's frame.
     let ocean = crate::pulse::ocean_frame(u);
     for x in &u.ocean {
         let m = mote_mass(x, &unit);
-        book.heat_motes += x.agitation.clone() * m.clone();
+        heat_motes.push(x.agitation.clone() * m.clone());
         if let Some(enc) = &ocean {
-            book.potential += m * phi(x.reach_in(enc).1);
+            potential.push(m * phi(x.reach_in(enc).1));
         }
     }
     for (i, core) in u.cores.iter().enumerate() {
         let frame = crate::breath::galaxy_frame(u, i, &unit);
         for x in &core.flows {
             let m = mote_mass(x, &unit);
-            book.bond += open_frames(x, &unit);
-            book.heat_motes += x.agitation.clone() * m.clone();
+            bond.push(open_frames(x, &unit));
+            heat_motes.push(x.agitation.clone() * m.clone());
             if let Some(enc) = &frame {
-                book.potential += m * phi(x.reach_in(enc).1);
+                potential.push(m * phi(x.reach_in(enc).1));
             }
         }
         for sys in &core.satellites {
             let kept = mass(&sys.kept) / unit.clone();
-            book.heat_stars +=
-                (crate::formation::agitation_of(&sys.reservoir) + sys.heat.clone()) * kept;
+            heat_stars
+                .push((crate::formation::agitation_of(&sys.reservoir) + sys.heat.clone()) * kept);
             if let Some(enc) = &frame {
-                book.potential += mass(&sys.total()) / unit.clone() * phi(enc.reach(&sys.ell).1);
+                potential.push(mass(&sys.total()) / unit.clone() * phi(enc.reach(&sys.ell).1));
             }
             let inner = crate::formation::system_frame(sys, &unit);
             for x in &sys.flows {
                 let m = mote_mass(x, &unit);
-                book.bond += open_frames(x, &unit);
-                book.heat_motes += x.agitation.clone() * m.clone();
+                bond.push(open_frames(x, &unit));
+                heat_motes.push(x.agitation.clone() * m.clone());
                 if let Some(enc) = &inner {
-                    book.potential += m * phi(x.reach_in(enc).1);
+                    potential.push(m * phi(x.reach_in(enc).1));
                 }
             }
             for w in &sys.satellites {
-                book.heat_worlds += world_heat(w, &unit);
+                heat_worlds.push(world_heat(w, &unit));
                 if let Some(enc) = &inner {
-                    book.potential += mass(&w.total()) / unit.clone() * phi(enc.reach(&w.ell).1);
+                    potential.push(mass(&w.total()) / unit.clone() * phi(enc.reach(&w.ell).1));
                 }
             }
         }
     }
+    book.heat_motes = heat_motes.sum();
+    book.heat_stars = heat_stars.sum();
+    book.heat_worlds = heat_worlds.sum();
+    book.potential = potential.sum();
+    book.bond += bond.sum();
     book
 }
 
@@ -140,8 +180,10 @@ mod tests {
             key: crate::chem::Kind::parse(key).expect("a kind"),
             amount,
             spins: Mote::spins_of(&ell, &[]),
-            ell_orth: ratio(0, 1),
-            phase: crate::flows::rest(ratio(1, 2)),
+            spins_orth: vec![ratio(0, 1); 3],
+            orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
+                1, 2,
+            ))),
             agitation,
             born: 0,
             vacuum: false,

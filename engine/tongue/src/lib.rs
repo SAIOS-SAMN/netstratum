@@ -8,7 +8,7 @@
 pub use mycelium_sdk;
 
 use mycelium_sdk::rule::Element;
-use mycelium_sdk::rule::{sentence, Step, Symmetry};
+use mycelium_sdk::rule::{sentence, SectionSample, Step, Symmetry};
 use mycelium_sdk::rule::{Crystal, NoCrystal};
 use solver::Op;
 
@@ -29,7 +29,7 @@ fn rows(g: &solver::Grid) -> Vec<Vec<u8>> {
 
 /// The translator (Concordance 1.9/1.10; Mycelium 78.142 `sdk::rule`): a
 /// Netstratum program as the court's rule. Each of the six symmetries is the
-/// centred rigid motion `Step::grid_motion` builds for the shapes it acts
+/// centred rigid motion `Step::symmetry_motion` builds for the shapes it acts
 /// between (traced through the program on the family's first input);
 /// `Recolor` is a hue step naming every hue it moves. A program with an
 /// object op or a tile has no form yet: `Err(NotARule)`. The steps are minted
@@ -48,9 +48,9 @@ pub fn translate(
     for op in program {
         let next = solver::grid::run(&vec![op.clone()], &at);
         let kind = match op {
-            Op::Rotate90 => Some(Symmetry::Rotate90),
-            Op::Rotate180 => Some(Symmetry::Rotate180),
-            Op::Rotate270 => Some(Symmetry::Rotate270),
+            Op::Rotate90 => Some(Symmetry::RotateE2E1By90),
+            Op::Rotate180 => Some(Symmetry::RotateE2E1By180),
+            Op::Rotate270 => Some(Symmetry::RotateE2E1By270),
             Op::FlipH => Some(Symmetry::FlipH),
             Op::FlipV => Some(Symmetry::FlipV),
             Op::Transpose => Some(Symmetry::Transpose),
@@ -63,7 +63,7 @@ pub fn translate(
         };
         match (kind, op) {
             (Some(kind), _) => {
-                let step = Step::grid_motion(kind, (at.rows, at.cols), (next.rows, next.cols))
+                let step = Step::symmetry_motion(kind, (at.rows, at.cols), (next.rows, next.cols))
                     .ok_or(Untranslated::Shape)?;
                 steps.push(step);
             }
@@ -114,7 +114,19 @@ pub fn translate(
         }
         at = next;
     }
-    sentence(&steps, train, crystal).map_err(|why| Untranslated::Refused(format!("{why:?}")))
+    // The court's word machinery reads samples on the alphabet's section
+    // (Mycelium v0.4.0, `rule::SectionSample`): each raster pair admitted
+    // there, refused by name where it is no sample.
+    let family = train
+        .iter()
+        .map(|(a, b)| {
+            let on = |g: &Vec<Vec<u8>>| {
+                SectionSample::of_lines(g).map_err(|why| Untranslated::Refused(format!("{why:?}")))
+            };
+            Ok((on(a)?, on(b)?))
+        })
+        .collect::<Result<Vec<_>, Untranslated>>()?;
+    sentence(&steps, &family, crystal).map_err(|why| Untranslated::Refused(format!("{why:?}")))
 }
 
 /// A projector's predicate in the court's select language, where it has one:
@@ -125,9 +137,9 @@ fn court_pred(select: &solver::percept::Select) -> Option<mycelium_sdk::rule::Pr
     use solver::percept::Select;
     Some(match select {
         Select::Hue(h) => Pred::Hue(*h),
-        Select::Size(k) => Pred::count(Coord::Shell, i64::try_from(*k).ok()?),
-        Select::Largest => Pred::extremum(Coord::Shell, Order::Greatest, Tie::Hold),
-        Select::Smallest => Pred::extremum(Coord::Shell, Order::Least, Tie::Hold),
+        Select::Size(k) => Pred::count(Coord::Cells, i64::try_from(*k).ok()?),
+        Select::Largest => Pred::extremum(Coord::Cells, Order::Greatest, Tie::Hold),
+        Select::Smallest => Pred::extremum(Coord::Cells, Order::Least, Tie::Hold),
         Select::Not(inner) => Pred::Not(Box::new(court_pred(inner)?)),
         Select::And(a, b) => Pred::And(vec![court_pred(a)?, court_pred(b)?]),
         Select::Border(_)

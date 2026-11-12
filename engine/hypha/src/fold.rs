@@ -22,7 +22,7 @@
 use crate::wire::HouseActs;
 use crate::Uplink;
 use mycelium_sdk::house::domain::{DomainGenesis, Founded, Reservation};
-use mycelium_sdk::house::uplink::{FoldAt, Net, SignedFold, TierFold, Uplinked};
+use mycelium_sdk::house::uplink::{Child, ChildNet, FoldAt, Net, SignedFold, TierFold, Uplinked};
 use std::io::{self, Read};
 use std::path::Path;
 
@@ -120,21 +120,125 @@ pub fn fold(
         declared,
         children: Vec::new(),
         handoffs: Vec::new(),
+        // No crossing of the universal core tube is stated by a census.
+        transitions: Vec::new(),
     }
     .sign(key)
 }
 
+/// A fold's position as one key: its receipt's stamp, then its path inside
+/// that receipt (`u16` LE each; empty for a fold its own receipt sealed, so
+/// a sealed fold keys exactly as its stamp).
+pub fn at_key(at: &FoldAt) -> Vec<u8> {
+    let mut k = at.stamp.key();
+    for i in &at.path {
+        k.extend_from_slice(&i.to_le_bytes());
+    }
+    k
+}
+
+/// The position [`at_key`] wrote; `None` where it does not read.
+pub fn at_of(k: &[u8]) -> Option<FoldAt> {
+    let mut p = 0usize;
+    let stamp = mycelium_sdk::house::Stamp::take_canonical(k, &mut p)?;
+    let rest = k.get(p..)?;
+    if rest.len() % 2 != 0 {
+        return None;
+    }
+    Some(FoldAt {
+        stamp,
+        path: rest
+            .chunks(2)
+            .map(|c| u16::from_le_bytes([c[0], c[1]]))
+            .collect(),
+    })
+}
+
+/// A fold's EXPOSURE per lane: what its rows move, each lane's positive
+/// parts summed (a balanced fold moves as much out as in; mycelium #237's
+/// candidate `X_l`, against which a bond `B_l ≥ X_l` answers).
+pub fn exposure(rows: &[Net]) -> [u64; 4] {
+    let mut x = [0u64; 4];
+    for (_, lanes) in rows {
+        for (l, v) in lanes.iter().enumerate() {
+            if *v > 0 {
+                x[l] = x[l].saturating_add(u64::try_from(*v).unwrap_or(u64::MAX));
+            }
+        }
+    }
+    x
+}
+
 impl Uplink {
+    /// v0.4.0 (78.138; MU-HOSTING §5a.5) — A TIER'S FOLD CROSSES CARRIED:
+    /// a universe's events enter the court only as the act its domain's
+    /// sitting reserve signs, a line's own fold carried whole in it under
+    /// the line's own signature (never re-signed, never reduced to bare
+    /// nets). The reserve first bonds the line by the fold's exposure,
+    /// `B = X` per lane (78.129; mycelium #237's candidate), from μ it
+    /// holds; then its fresh fold carries the child, including all of it
+    /// (the union nets the colonies, 12_UNION) at rate 1 on every lane.
+    /// Returns where the carried fold stands (`[0]` inside the reserve's
+    /// receipt), or what the court answered instead (the bond's refusal as
+    /// `Err(Ok(founded))`, the crossing's as `Err(Err(uplinked))`).
+    pub fn carry_fold(
+        &self,
+        domain: [u8; 32],
+        reserve: &ed25519_dalek::SigningKey,
+        child: &SignedFold,
+    ) -> io::Result<Result<FoldAt, Result<Founded, Uplinked>>> {
+        use mycelium_sdk::house::domain::{decode_domain_reply, encode_bond, Bond};
+        let x = exposure(&child.fold.rows);
+        if x.iter().any(|v| *v > 0) {
+            let bond = Bond {
+                domain,
+                reserve: reserve.verifying_key().to_bytes(),
+                tier: child.fold.tier,
+                mu: Some(x.into()),
+                nonce: crate::refound::fresh()?,
+            }
+            .sign(reserve);
+            let answered = decode_domain_reply(&self.session.speak(encode_bond(&bond))?)
+                .ok_or_else(|| io::Error::other("the bond's reply did not decode"))?;
+            if !matches!(answered, Founded::Bonded { .. }) {
+                return Ok(Err(Ok(answered)));
+            }
+        }
+        let net = ChildNet {
+            rows: child.fold.rows.clone(),
+            declared: child.fold.declared.clone(),
+            child: Child::Carried(Box::new(child.clone())),
+            included_rows: child.fold.rows.clone(),
+            included_declared: child.fold.declared.clone(),
+            rate: [(1, 1); 4],
+        };
+        let carrier = TierFold {
+            tier: reserve.verifying_key().to_bytes(),
+            prefix: crate::refound::fresh()?,
+            rows: Vec::new(),
+            declared: Vec::new(),
+            children: vec![net],
+            handoffs: Vec::new(),
+            transitions: Vec::new(),
+        }
+        .sign(reserve);
+        Ok(match self.session.uplink_fold(&carrier)? {
+            Uplinked::Chained { at, .. } => Ok(FoldAt {
+                stamp: at,
+                path: vec![0],
+            }),
+            other => Err(Err(other)),
+        })
+    }
+
     /// 78.125 — a fold's finality at the court's head, by its receipt's
     /// stamp, and (78.129) whether its tier was bonded. A reading: nothing is
     /// sealed by it.
     pub fn finality(
         &self,
-        at: mycelium_sdk::house::Stamp,
+        at: FoldAt,
     ) -> io::Result<(mycelium_sdk::house::challenge::Finality, bool)> {
-        self.session
-            .finality(FoldAt::sealed(at))
-            .map(|r| (r.finality, r.bonded))
+        self.session.finality(at).map(|r| (r.finality, r.bonded))
     }
 
     /// 78.125 — the tier's LINE head on the court: where its next fold's span
@@ -176,14 +280,14 @@ impl Uplink {
     pub fn publish(
         &self,
         key: &ed25519_dalek::SigningKey,
-        at: mycelium_sdk::house::Stamp,
+        at: FoldAt,
         entries: Vec<mycelium_sdk::house::challenge::Entry>,
     ) -> io::Result<mycelium_sdk::house::challenge::Challenged> {
         use mycelium_sdk::house::challenge::{Challenge, Challenged};
         let (rows, declared) = crate::line::fold_of(&entries);
         let opened = self.session.challenge(
             &Challenge::Open {
-                fold: FoldAt::sealed(at),
+                fold: at.clone(),
                 rows,
                 declared,
                 children: Vec::new(),
@@ -212,7 +316,7 @@ impl Uplink {
         for entries in parts {
             last = self.session.challenge(
                 &Challenge::Part {
-                    fold: FoldAt::sealed(at),
+                    fold: at.clone(),
                     entries,
                 }
                 .sign(key),
@@ -303,5 +407,45 @@ impl Uplink {
         }
         .sign(&domain);
         self.session.reserve(&signed)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{at_key, at_of, exposure};
+    use mycelium_sdk::house::uplink::FoldAt;
+    use mycelium_sdk::house::Stamp;
+
+    fn stamp() -> Stamp {
+        Stamp {
+            h: 1376,
+            vk: [7; 32],
+            k: 48,
+            i: 2,
+        }
+    }
+
+    #[test]
+    fn a_folds_position_reads_back_and_a_sealed_one_keys_as_its_stamp() {
+        let sealed = FoldAt::sealed(stamp());
+        assert_eq!(at_key(&sealed), stamp().key());
+        assert_eq!(at_of(&at_key(&sealed)), Some(sealed));
+        let carried = FoldAt {
+            stamp: stamp(),
+            path: vec![0, 3],
+        };
+        assert_eq!(at_of(&at_key(&carried)), Some(carried));
+        let mut odd = stamp().key();
+        odd.push(1);
+        assert_eq!(at_of(&odd), None, "a path of half a step does not read");
+    }
+
+    #[test]
+    fn a_balanced_folds_exposure_is_what_it_moves_out() {
+        // 5 moved from one holder to another on S, 3 on G: the exposure is
+        // what moved, never the sum of both sides.
+        let rows = vec![([1; 32], [5, -3, 0, 0]), ([2; 32], [-5, 3, 0, 0])];
+        assert_eq!(exposure(&rows), [5, 3, 0, 0]);
+        assert_eq!(exposure(&[]), [0, 0, 0, 0]);
     }
 }

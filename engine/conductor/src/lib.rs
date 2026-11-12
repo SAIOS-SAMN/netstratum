@@ -65,7 +65,10 @@ use std::path::Path;
 pub mod civic;
 pub mod coordinate;
 pub mod coupling;
+pub mod orientation;
+pub mod strip;
 pub mod torsion;
+pub mod turning;
 // docs/61 G1 — a line's place about its core, in closed form.
 pub mod orbit;
 // docs/63 — a world is unrolled only while it is observed.
@@ -87,6 +90,7 @@ pub mod commissions;
 pub mod compound;
 pub mod cores;
 pub mod decide;
+pub mod dispersion;
 pub mod enclosure;
 pub mod energy;
 pub mod enfold;

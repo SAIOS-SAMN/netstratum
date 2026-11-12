@@ -10,8 +10,8 @@ on the inverse face.
 **Status:** building.
 
 **Prerequisites:** docs/97 (the inverse nucleus), docs/98 (the faces),
-docs/100 (twist, torsion), docs/103 (the layers; §5 the whole frame
-inverted, its enclosure read by share from the outside in).
+docs/100 (twist, torsion), docs/103 (the layers; §5 the face-readings
+inverted, the enclosure's order kept inside R).
 
 ## 0. A single map
 
@@ -19,8 +19,10 @@ Netstratum is Xylarium's universe inverted at both ends:
 
 - **Its nucleus (built, docs/97):** the open lone end is the proton (Q), the
   fibred end the neutron (Z); the electrons (R) follow the protons.
-- **Its gravity (decided, docs/103 §5):** the frame inverted whole; the hold at
-  a place counts what stands beyond it (by share, from the outside in).
+- **Its gravity (docs/103 §5, derived 2026-11-11):** every face-reading
+  inverted; the hold at a place counts what lies inside R, and what stood
+  beyond a body becomes its hold within across a throat, by the passage's
+  exchange of reach and hold (docs/117 §12).
 
 The inversion is one first-degree map on every face-reading:
 
@@ -43,7 +45,7 @@ inverse held share (inverse gravity); `u = δ` the inverse unlocked share;
 
 | pair | forward (Xylarium) | inverse (Netstratum) | in code now | change |
 |---|---|---|---|---|
-| **pull** (gravity's hold) | `δ` | `g = 1 − δ` | `Enclosed::reach`, star core cut `H/(R + H) ≥ p` | the enclosure by share from the outside in (docs/103 §5); the cut held where `g ≥ p` |
+| **pull** (gravity's hold) | `δ` | `g = 1 − δ` | `Enclosed::reach`, star core cut `H/(R + H) ≥ p` | the enclosure kept inside R (docs/103 §5, derived 2026-11-11); the cut held where `g ≥ p` |
 | **push** (the bounce's carriage) | on the unlocked face `1 − δ` | on the inverse unlocked face `u = δ` | release `s = ½·c/(c + base)` (`breath`) | `s = p·c/(c + base)`, `p = S/(S + T)` the core's pair share (§1.2) |
 | **heating** (the face not locked heats) | `½(1 − δ)` | `u·e` (§1.2) | the light warms bodies by `1 − δ` (`breath::shine`); torque heat `p·δ·(1 − |k|)` | warmth by `u·e`; torque heat by the face pushed, `p·u·(1 − |k|)` |
 | **cooling** (heat leaves) | light `e` and the vacuum's pull back `δ`, keep `(1 − e)(1 − δ)` a ring | light `e` and the inverse pull back `g`, keep `(1 − e)(1 − g) = (1 − e)·δ` | keep the held face `g` a ring, the rest emitted as light (`flows::emit`, docs/122 law 3, EQUATIONS E54; the frames `e` retired, 2026-11-10) | keep `(1 − e)·u`, and the counterweight (§2) |

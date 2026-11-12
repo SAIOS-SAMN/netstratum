@@ -64,7 +64,8 @@ pub fn load_key(home: &Path, file: &str) -> io::Result<ed25519_dalek::SigningKey
     Ok(ed25519_dalek::SigningKey::from_bytes(&seed))
 }
 
-fn nonce() -> io::Result<[u8; 32]> {
+/// Thirty-two fresh bytes: a nonce, or a carrier fold's fresh prefix.
+pub fn fresh() -> io::Result<[u8; 32]> {
     use std::io::Read;
     let mut n = [0u8; 32];
     std::fs::File::open("/dev/urandom")?.read_exact(&mut n)?;
@@ -136,7 +137,7 @@ pub fn ledger_frame(
         point,
         parent,
         applied: Default::default(),
-        nonce: nonce()?,
+        nonce: fresh()?,
     };
     Ok((encode_ledger(&entry.sign(reserve)), records.len()))
 }
@@ -165,6 +166,9 @@ pub fn post_ledger(session: &Session, home: &Path, var_root: &Path, u: u64) -> i
             ))
         }
         Some(Ledgered::Refused(why)) => Ok(format!("LEDGER refused: {why:?}")),
+        // Mycelium v0.4.0: refused at the court's boundary (the act not
+        // through its core, not its signatory), named.
+        Some(Ledgered::Boundary(why)) => Ok(format!("LEDGER refused at the boundary: {why:?}")),
         None => Err(io::Error::other("the ledger reply did not decode")),
     }
 }
@@ -200,7 +204,7 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     let colonies = load_key(home, "tier-colonies.key")?;
     let id = domain.verifying_key().to_bytes();
     // 0. The contract.
-    let (agreed, mut said) = concord(session, &domain)?;
+    let (agreed, mut said) = concord(session, &[&domain, &union, &colonies])?;
     if !agreed {
         return Ok((false, said));
     }
@@ -273,18 +277,26 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     if !stands {
         return Ok((false, said));
     }
-    // 3. The reserve: the union tier, held for stillcold (docs/68).
-    let reserved = session.reserve(
-        &Reservation {
-            domain: id,
-            tier: union.verifying_key().to_bytes(),
-            nonce: nonce()?,
+    // 3. The reserve: the union tier, held for stillcold (docs/68). A domain
+    // designates once (Mycelium v0.4.0): where the court already reads the
+    // union as the sitting reserve, it stands and is not asked again.
+    let tier = union.verifying_key().to_bytes();
+    let sitting = session.reserve_reading(id)?;
+    if sitting.current == Some(tier) {
+        said.push("3 reserve: the union sits already".into());
+    } else {
+        let reserved = session.reserve(
+            &Reservation {
+                domain: id,
+                tier,
+                nonce: fresh()?,
+            }
+            .sign(&domain),
+        )?;
+        said.push(format!("3 reserve: {reserved:?}"));
+        if !matches!(reserved, Founded::Reserved { .. }) {
+            return Ok((false, said));
         }
-        .sign(&domain),
-    )?;
-    said.push(format!("3 reserve: {reserved:?}"));
-    if !matches!(reserved, Founded::Reserved { .. }) {
-        return Ok((false, said));
     }
     // The manifest: the universe's nuclei per Z, signed by the sitting
     // reserve. Granted, or refused by the court's standing (short, granted
@@ -338,19 +350,26 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
 }
 
 /// THE CONTRACT, the re-founding's step 0 (Mycelium's KERNEL profile): the
-/// statement the hypha serves and its Concordance's hash, each against the
-/// pinned SDK's, then the domain's signature over the hash presented and
-/// judged. Agreed only where all three hold; what each read said.
+/// statement the hypha serves against the pinned SDK's, then the clause
+/// register it serves (ACT_LAWS mode 7) signed by reconstruction (mode 8) by
+/// every key the domain acts with (the court admits an act only from a
+/// signatory of the register, Mycelium v0.4.0 `Boundary::NotSignatory`):
+/// each clause enabled, carrying this kernel's reconstruction of each of its
+/// fixtures (`sign_concordance`), the verdict read back, and each key's
+/// alignment read (mode 9). Agreed only where the statement is the pinned
+/// one and every served clause is admitted for every key; what each read
+/// said.
 pub fn concord(
     session: &Session,
-    domain: &ed25519_dalek::SigningKey,
+    keys: &[&ed25519_dalek::SigningKey],
 ) -> io::Result<(bool, Vec<String>)> {
     use mycelium_sdk::conformance::{
         decode_statement_reply, encode_statement_request, StatementRead, STATEMENT,
     };
     use mycelium_sdk::house::{
-        decode_concordance_reply, decode_signature_reply, encode_concordance_request,
-        encode_signature_request, ConcordanceSignature, CONCORDANCE_HASH,
+        decode_alignment_reply, decode_concordance_reply, decode_signature_reply,
+        encode_alignment_request, encode_concordance_request, encode_signature_request,
+        sign_concordance, Assent,
     };
     let mut said = Vec::new();
     let stated = decode_statement_reply(&session.speak(encode_statement_request())?);
@@ -359,17 +378,51 @@ pub fn concord(
         return Ok((false, said));
     }
     said.push("0 statement: the pinned contract".into());
-    if decode_concordance_reply(&session.speak(encode_concordance_request())?)
-        != Some(CONCORDANCE_HASH)
-    {
-        said.push("0 concordance: another version".into());
-        return Ok((false, said));
+    let served = match decode_concordance_reply(&session.speak(encode_concordance_request())?) {
+        Some(Ok(served)) => served,
+        Some(Err(r)) => {
+            said.push(format!(
+                "0 concordance: the hypha cannot read clause {:?} of its register",
+                r.id
+            ));
+            return Ok((false, said));
+        }
+        None => {
+            said.push("0 concordance: no clause register".into());
+            return Ok((false, said));
+        }
+    };
+    said.push(format!("0 concordance: {} clauses served", served.len()));
+    let mut all = true;
+    for key in keys {
+        let kernel = key.verifying_key().to_bytes();
+        let named: String = kernel.iter().take(4).map(|b| format!("{b:02x}")).collect();
+        let Some(signed) = sign_concordance(key, &served, |_| Assent::Enabled) else {
+            said.push("0 signature: a served fixture does not reconstruct here".into());
+            return Ok((false, said));
+        };
+        let judged = decode_signature_reply(&session.speak(encode_signature_request(&signed))?);
+        all &= matches!(&judged, Some(Ok(a)) if a.len() == served.len());
+        said.push(format!("0 signature {named}: {judged:?}"));
+        // The key's alignment read back from the hypha's ledger (mode 9):
+        // each clause as this key's signing left it.
+        match decode_alignment_reply(&session.speak(encode_alignment_request(Some(&kernel)))?) {
+            Some(Ok(read)) => {
+                let ours = read.kernels.iter().find(|k| k.kernel == kernel);
+                said.push(format!(
+                    "0 alignment {named}: {}",
+                    ours.map_or("unread".to_string(), |k| format!(
+                        "{} clauses read, {:?}",
+                        k.clauses.len(),
+                        k.clauses
+                    ))
+                ));
+            }
+            Some(Err(why)) => said.push(format!("0 alignment {named}: refused {why:?}")),
+            None => said.push(format!("0 alignment {named}: no reading")),
+        }
     }
-    said.push("0 concordance: the pinned hash".into());
-    let signed = ConcordanceSignature::sign(domain, CONCORDANCE_HASH);
-    let judged = decode_signature_reply(&session.speak(encode_signature_request(&signed))?);
-    said.push(format!("0 signature: {judged:?}"));
-    Ok((matches!(judged, Some(Ok(()))), said))
+    Ok((all, said))
 }
 
 /// THE MANIFEST: the universe's nuclei per Z (`conductor::pulse::nuclei_by_z`
@@ -391,7 +444,7 @@ pub fn post_manifest(
     let signed = Manifest {
         domain,
         nuclei,
-        nonce: nonce()?,
+        nonce: fresh()?,
     }
     .sign(reserve)
     .ok_or_else(unwritten_manifest)?;
@@ -499,7 +552,7 @@ pub fn map_frame(
             domain,
             point,
             record,
-            nonce: nonce()?,
+            nonce: fresh()?,
         }
         .sign(reserve),
     ))
@@ -550,6 +603,9 @@ pub fn map_gates(
             Some(Mapped::Refused(why)) => {
                 unknown |= matches!(why, MapRefusal::UnknownDomain);
                 said.push(format!("GATE {} not mapped: {why:?}", end.id));
+            }
+            Some(Mapped::Boundary(why)) => {
+                said.push(format!("GATE {} refused at the boundary: {why:?}", end.id));
             }
             None => said.push(format!("GATE {}: the reply did not decode", end.id)),
         }
