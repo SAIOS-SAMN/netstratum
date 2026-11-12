@@ -22,6 +22,7 @@
 //! - `events [N]`             the last N creation/collapse events (journal)
 use cfe::ratio::{ratio, Ratio};
 use conductor::{breath, chronometry, enclosure, formation, life, pulse};
+use num_traits::Signed as _;
 use std::path::Path;
 use std::process::Command;
 
@@ -101,6 +102,446 @@ fn system_rate(u: &pulse::Universe, g: usize, s: usize, unit: &Ratio) -> Ratio {
     breath::system_clock(u, g, s, unit)
 }
 
+/// The disc's mean inclination share against its own axis `Σ w·ℓ`,
+/// holding-weighted (docs/128 §11.3).
+fn mean_tilt(motes: &[conductor::flows::Mote], total: &Ratio) -> Ratio {
+    let w = |x: &conductor::flows::Mote| {
+        x.amount.clone() * conductor::flows::weight(&x.key) / total.clone()
+    };
+    let l3 = |x: &conductor::flows::Mote| -> [Ratio; 3] {
+        std::array::from_fn(|k| x.spins.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))
+    };
+    let axis: [Ratio; 3] = std::array::from_fn(|k| {
+        motes.iter().fold(ratio(0, 1), |s, x| {
+            s + conductor::ring::grain(&(w(x) * l3(x)[k].clone()))
+        })
+    });
+    let (mut sum, mut held) = (ratio(0, 1), ratio(0, 1));
+    for x in motes {
+        if let Some(t) = conductor::orientation::tilt(&l3(x), &axis) {
+            sum += conductor::ring::grain(&(w(x) * t.share));
+            held += conductor::ring::grain(&w(x));
+        }
+    }
+    if held == ratio(0, 1) {
+        ratio(0, 1)
+    } else {
+        sum / held
+    }
+}
+
+/// The jetstream's distribution in galaxy `i`: `observe streams G`.
+fn streams(u: &pulse::Universe, i: usize, unit: &Ratio) {
+    use conductor::flows;
+    let core = &u.cores[i];
+    let Some(enc) = breath::galaxy_frame(u, i, unit) else {
+        return println!("streams: galaxy {:?} has no enclosure", core.path);
+    };
+    let total = if pulse::is_home(core) {
+        pulse::universal_ledger(u)
+    } else {
+        pulse::core_state(core)
+    };
+    let w = |x: &flows::Mote| {
+        conductor::ring::grain(&(x.amount.clone() * flows::weight(&x.key) / total.clone()))
+    };
+    // (stream, inside its ring): count, holding, the reaches over the hold.
+    let mut rows: std::collections::BTreeMap<(bool, bool), (usize, Ratio, Vec<Ratio>)> =
+        Default::default();
+    let mut no_partner = 0usize;
+    for x in &core.flows {
+        let (r, h, _) = flows::lifted(&enc, &x.ell_o().abs(), &x.lift);
+        let inside = r < h;
+        let e = rows
+            .entry((x.vacuum, inside))
+            .or_insert((0, ratio(0, 1), Vec::new()));
+        e.0 += 1;
+        e.1 += w(x);
+        if h > ratio(0, 1) {
+            e.2.push(r / h);
+        }
+        if x.vacuum && x.ell_orth() == ratio(0, 1) {
+            no_partner += 1;
+        }
+    }
+    println!(
+        "streams in galaxy {:?}: {} motes, base {}, whole {}, rim {}",
+        core.path,
+        core.flows.len(),
+        f(&enc.base()),
+        f(&enc.whole()),
+        f(&enc.rim())
+    );
+    for ((vacuum, inside), (n, held, mut at)) in rows {
+        at.sort();
+        let q = |p: usize| {
+            at.get(at.len() * p / 100)
+                .cloned()
+                .unwrap_or_else(|| ratio(0, 1))
+        };
+        println!(
+            "  {} {} its ring: {n} motes, holding {}, R/H p10 {} p50 {} p90 {}",
+            if vacuum { "vacuum   " } else { "continuum" },
+            if inside { "inside " } else { "outside" },
+            f(&held),
+            f(&q(10)),
+            f(&q(50)),
+            f(&q(90))
+        );
+    }
+    println!(
+        "  vacuum motes with no partner spin (no route turning their R-side phase): {no_partner}"
+    );
+    // The spin each mote carries against the spin it would need to stand in
+    // the disc: at the ring (`R = H(<R)`, rate 1) and at the rim, by weight.
+    if let Some(ring_at) = enc.reach_at_rate(&ratio(1, 1)) {
+        let (lo, hi) = (enc.spin_at(&ring_at), enc.spin_at(&enc.rim()));
+        let mut by: Vec<(Ratio, Ratio)> = Vec::new();
+        let (mut under, mut band, mut past, mut all) =
+            (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
+        for x in &core.flows {
+            let ell = x.ell_o().abs();
+            let wx = w(x);
+            all += wx.clone();
+            if ell < lo {
+                under += wx.clone();
+            } else if ell <= hi {
+                band += wx.clone();
+            } else {
+                past += wx.clone();
+            }
+            by.push((conductor::ring::grain(&(ell / lo.clone())), wx));
+        }
+        by.sort();
+        let q = |p: i64| {
+            let mut run = ratio(0, 1);
+            let at = all.clone() * ratio(p, 100);
+            by.iter()
+                .find(|(_, wx)| {
+                    run += wx.clone();
+                    run >= at
+                })
+                .map(|(v, _)| v.clone())
+                .unwrap_or_else(|| ratio(0, 1))
+        };
+        println!(
+            "  spin needed: ring reach {} needs ℓ {}, rim needs ℓ {}; carried/needed-at-ring by weight p10 {} p50 {} p90 {}",
+            f(&ring_at),
+            f(&lo),
+            f(&hi),
+            f(&q(10)),
+            f(&q(50)),
+            f(&q(90))
+        );
+        println!(
+            "  holding below the ring's spin {}, in the disc band {}, past the rim {} (of {})",
+            f(&under),
+            f(&band),
+            f(&past),
+            f(&all)
+        );
+    }
+    // The route back: one bell's torque on a copy, and the vacuum motes it
+    // carries into the throat (their R-side phase crossing ½ from above, as
+    // the breath reads it), with how far their R-side phase moved.
+    let push = if pulse::is_home(core) {
+        pulse::home_push(u, &core.total())
+    } else {
+        pulse::galaxy_push(&core.total())
+    };
+    if let Some((p, _, _)) = push {
+        let mut copy = core.flows.clone();
+        let was: Vec<(usize, Ratio)> = copy
+            .iter()
+            .enumerate()
+            .filter(|(_, x)| x.vacuum)
+            .map(|(j, x)| (j, flows::r_side(x)))
+            .collect();
+        let mut cross = conductor::enfold::Cross::default();
+        let _ = flows::torque(&mut copy, &enc, &p, &total, &mut cross);
+        let (mut back, mut fore) = (0usize, 0usize);
+        let mut entered = Vec::new();
+        for (j, v) in &was {
+            let now = flows::r_side(&copy[*j]);
+            if now < *v {
+                back += 1;
+            } else if now > *v {
+                fore += 1;
+            }
+            if flows::enters_throat(v, &now) {
+                entered.push(*j);
+            }
+        }
+        println!(
+            "  one bell's torque: {} of {} vacuum motes cross into the throat (signed); their R side moved backward on {back}, forward on {fore}",
+            entered.len(),
+            was.len()
+        );
+    }
+    let bands = flows::band_pairs(&core.flows, &enc, &core.tilt, &pulse::mass(&core.total()));
+    let members: usize = bands.iter().map(|(_, m)| m.len()).sum();
+    println!(
+        "  bands the galaxy would bind now: {} ({members} members)",
+        bands.len()
+    );
+}
+
+/// Each law alone on galaxy `i`'s disc: `observe ablate G [N]`, N its first
+/// motes.
+fn ablate(u: &pulse::Universe, i: usize, unit: &Ratio, limit: Option<usize>) {
+    use conductor::flows;
+    use std::time::Instant;
+    let core = &u.cores[i];
+    let Some(enc) = breath::galaxy_frame(u, i, unit) else {
+        return println!("ablate: galaxy {:?} has no enclosure", core.path);
+    };
+    let total = if pulse::is_home(core) {
+        pulse::universal_ledger(u)
+    } else {
+        pulse::core_state(core)
+    };
+    // The first `limit` motes (N against 4N), in the enclosure the whole disc gives.
+    let base: Vec<flows::Mote> = core
+        .flows
+        .iter()
+        .take(limit.unwrap_or(usize::MAX))
+        .cloned()
+        .collect();
+    let w = |x: &flows::Mote| x.amount.clone() * flows::weight(&x.key) / total.clone();
+    // The carriers' denominators: the widest of the holdings and the spins.
+    let digits = |r: &Ratio| r.denom().to_string().len();
+    let wide_w = base.iter().map(|x| digits(&w(x))).max().unwrap_or(0);
+    let wide_l = base
+        .iter()
+        .flat_map(|x| x.spins.iter().map(digits))
+        .max()
+        .unwrap_or(0);
+    println!("  carriers: widest holding share denominator {wide_w} digits, widest spin {wide_l} digits; total {} digits", digits(&total));
+    let t0 = Instant::now();
+    let met = flows::meeting_count(&base, &enc, &total);
+    println!(
+        "ablate galaxy {:?}: {} motes, meeting count {} (twice the pairs, read by range sums, {:.1?}); mean tilt against the disc's axis {}",
+        core.path,
+        base.len(),
+        met,
+        t0.elapsed(),
+        f(&mean_tilt(&base, &total))
+    );
+    let l1 = |v: &[Ratio]| {
+        v.iter().fold(ratio(0, 1), |s, x| {
+            s + if *x < ratio(0, 1) {
+                -x.clone()
+            } else {
+                x.clone()
+            }
+        })
+    };
+    // The parts of ring_motions, timed: the slowest motes' ring and tilt read.
+    if std::env::var("ABLATE_PARTS").is_ok() {
+        let t = Instant::now();
+        let axes = conductor::strip::invariable_axes(&base, &total);
+        println!("  parts: invariable axes {:.1?}", t.elapsed());
+        let t = Instant::now();
+        let _ = conductor::torsion::manifold_twist(&base);
+        println!("  parts: manifold twist {:.1?}", t.elapsed());
+        let mut slow: Vec<(std::time::Duration, usize, usize)> = Vec::new();
+        for (j, x) in base.iter().enumerate() {
+            let t = Instant::now();
+            let rings = conductor::strip::half_rings(x, &enc, &total);
+            for (h, r) in rings.iter().enumerate() {
+                if let Some(r) = r {
+                    let _ = conductor::orientation::tilt(&r.axis, &axes[h]);
+                }
+            }
+            let digits = x
+                .orientation
+                .g()
+                .iter()
+                .map(|g| g.denom().to_string().len())
+                .max()
+                .unwrap_or(0);
+            slow.push((t.elapsed(), j, digits));
+        }
+        slow.sort();
+        for (d, j, digits) in slow.iter().rev().take(5) {
+            println!("  parts: mote {j} read in {d:.1?}, its generator's widest denominator {digits} digits");
+        }
+        let all: std::time::Duration = slow.iter().map(|s| s.0).sum();
+        println!("  parts: every mote's read {all:.1?}");
+    }
+    // ring_motions: each half's motion against the plain rate along its spin.
+    {
+        let t = Instant::now();
+        let (motions, rem) = flows::ring_motions(&base, &enc, &total);
+        let el = t.elapsed();
+        for (stage, spent) in conductor::profile::drain() {
+            if stage.starts_with("ring:") {
+                println!("    {stage}: {spent:.1?}");
+            }
+        }
+        let (mut dev, mut size) = (ratio(0, 1), ratio(0, 1));
+        for (x, m) in base.iter().zip(&motions) {
+            let (plus, minus) = conductor::orientation::spin_halves(&x.spins, &x.spins_orth);
+            for (h, spin) in [plus, minus].iter().enumerate() {
+                let l = conductor::orientation::size(spin);
+                if l == ratio(0, 1) {
+                    continue;
+                }
+                let (_, _, d) = flows::lifted(&enc, &l, &x.lift);
+                let d = if x.vacuum { ratio(1, 1) - d } else { d };
+                let b = conductor::orientation::rate(&d).unwrap_or_else(|| ratio(0, 1));
+                let plain = conductor::orientation::half_motion(spin, &b);
+                let diff: Vec<Ratio> = (0..3).map(|k| m[h][k].clone() - plain[k].clone()).collect();
+                dev += conductor::ring::grain(&(w(x) * l1(&diff)));
+                size += conductor::ring::grain(&(w(x) * l1(&plain)));
+            }
+        }
+        let share = if size == ratio(0, 1) {
+            ratio(0, 1)
+        } else {
+            dev / size
+        };
+        println!("  ring_motions ({el:.1?}): motion off the plain rate {} of its size; Σ w·x remainder {}", f(&share), f(&rem));
+        // Its terms, half by half: the face and the transit read from it,
+        // against the plain rate; then the widest motion it gave.
+        let (mut outside, mut straddle, mut inside) = (0usize, 0usize, 0usize);
+        let (mut above_half, mut halves) = (0usize, 0usize);
+        let mut widest_rate = ratio(0, 1);
+        let mut widest_plain = ratio(0, 1);
+        for x in &base {
+            for r in conductor::strip::half_rings(x, &enc, &total)
+                .iter()
+                .flatten()
+            {
+                halves += 1;
+                let face = r.tube.face.clone();
+                if face == ratio(0, 1) {
+                    outside += 1;
+                } else if face == ratio(1, 1) {
+                    inside += 1;
+                } else {
+                    straddle += 1;
+                }
+                let s_t = conductor::strip::transit_share(&r.tube.delta, &face);
+                if s_t > ratio(1, 2) {
+                    above_half += 1;
+                }
+                widest_rate = widest_rate
+                    .max(conductor::orientation::rate(&s_t).unwrap_or_else(|| ratio(0, 1)));
+                // The flag's old reading: the vacuum stream at `1 − δ` whole.
+                let d = if x.vacuum {
+                    ratio(1, 1) - r.tube.delta.clone()
+                } else {
+                    r.tube.delta.clone()
+                };
+                widest_plain = widest_plain
+                    .max(conductor::orientation::rate(&d).unwrap_or_else(|| ratio(0, 1)));
+            }
+        }
+        let widest_motion = motions
+            .iter()
+            .flat_map(|m| m.iter().map(|h| l1(h)))
+            .max()
+            .unwrap_or_else(|| ratio(0, 1));
+        let vacuum = base.iter().filter(|x| x.vacuum).count();
+        println!(
+            "    {vacuum} vacuum motes; faces of {halves} halves: {outside} outside, {straddle} straddling, {inside} inside; transit above ½ on {above_half}; widest rate at the transit {}, plain {}; widest motion {}",
+            f(&widest_rate),
+            f(&widest_plain),
+            f(&widest_motion)
+        );
+    }
+    // conform_partners: the partner orbits to the shear.
+    {
+        let mut m = base.clone();
+        let t = Instant::now();
+        let (moved, rem) = flows::conform_partners(&mut m, &enc, &total);
+        println!(
+            "  conform_partners ({:.1?}): moved {}; Σ w·ℓ_R remainder {}",
+            t.elapsed(),
+            f(&moved),
+            f(&rem)
+        );
+    }
+    // conform_axes: the shear out of the plane.
+    {
+        let mut m = base.clone();
+        let t = Instant::now();
+        let (moved, rem) = flows::conform_axes(&mut m, &enc, &total);
+        println!(
+            "  conform_axes ({:.1?}): moved {}; Σ w·ℓ remainder {}; mean tilt {} -> {}",
+            t.elapsed(),
+            f(&moved),
+            f(&rem),
+            f(&mean_tilt(&base, &total)),
+            f(&mean_tilt(&m, &total))
+        );
+    }
+    // torsion_turns: precession and tipping, the antipole's take.
+    {
+        let mut m = base.clone();
+        let (lead, _) = conductor::torsion::core_twist(core);
+        let rate = breath::galaxy_rate(u, i, unit).unwrap_or_else(|| ratio(1, 1));
+        let before = conductor::torsion::plane_spin(&m);
+        let t = Instant::now();
+        flows::torsion_turns(&mut m, &enc, &total, &lead, &rate);
+        let el = t.elapsed();
+        let after = conductor::torsion::plane_spin(&m);
+        let moved = base.iter().zip(&m).fold(ratio(0, 1), |s, (a, b)| {
+            let d: Vec<Ratio> = (0..3)
+                .map(|k| b.spins[k].clone() - a.spins[k].clone())
+                .collect();
+            s + conductor::ring::grain(&(w(a) * l1(&d)))
+        });
+        let taken: Vec<Ratio> = (0..3)
+            .map(|k| before[k].clone() - after[k].clone())
+            .collect();
+        println!(
+            "  torsion_turns ({el:.1?}): spin turned {}; the antipole takes {} {} {} (Σ {}); mean tilt {} -> {}",
+            f(&moved),
+            f(&taken[0]),
+            f(&taken[1]),
+            f(&taken[2]),
+            f(&taken.iter().fold(ratio(0, 1), |s, x| s + x.clone())),
+            f(&mean_tilt(&base, &total)),
+            f(&mean_tilt(&m, &total))
+        );
+    }
+    // echo_beats: the echo's beat after the fluid.
+    if let Some((push, _, _)) = pulse::home_push(u, &core.total()) {
+        let mut m = base.clone();
+        let rate = breath::galaxy_rate(u, i, unit);
+        let t = Instant::now();
+        let (beats, rem) = flows::echo_beats(&mut m, &enc, &total, &push, rate.as_ref());
+        let el = t.elapsed();
+        let lo = beats.iter().min().cloned().unwrap_or_else(|| ratio(0, 1));
+        let hi = beats.iter().max().cloned().unwrap_or_else(|| ratio(0, 1));
+        println!(
+            "  echo_beats ({el:.1?}): beats {} .. {} turns; Σ w·A remainder {}",
+            f(&lo),
+            f(&hi),
+            f(&rem)
+        );
+    }
+    // magnet: LAW-COUPLING v2 on reach.
+    {
+        let mut m = base.clone();
+        let t = Instant::now();
+        let (moved, change) = flows::magnet(
+            &mut m,
+            &enc,
+            &total,
+            &(enc.base(), breath::throat_dipole(core)),
+        );
+        println!(
+            "  magnet ({:.1?}): {} lifts moved by {} in all",
+            t.elapsed(),
+            moved,
+            f(&change)
+        );
+    }
+}
+
 fn main() {
     let mut args: Vec<String> = std::env::args().skip(1).collect();
     let mut var = String::from("var-e1");
@@ -127,6 +568,25 @@ fn main() {
     let universe_hold = pulse::mass(&u.total());
     let galaxy = |g: u64| u.cores.iter().position(|c| c.path[0] == g);
     match view.as_str() {
+        "streams" => {
+            // The jetstream's distribution (docs/94 §2): each stream by side
+            // of its ring, by count and holding, where it stands, its route
+            // back through the throat, and the bands the galaxy would bind.
+            let Some(i) = num(1).and_then(galaxy) else {
+                return println!("streams G: no such galaxy");
+            };
+            streams(&u, i, &unit);
+        }
+        "ablate" => {
+            // Each law alone on a galaxy's real disc (docs/128, docs/130): a
+            // copy of its motes, the enclosure and unit the breath reads,
+            // one law applied; its work counters, its invariant's remainder
+            // and its effect. Wall time is a diagnostic, never evidence.
+            let Some(i) = num(1).and_then(galaxy) else {
+                return println!("ablate G: no such galaxy");
+            };
+            ablate(&u, i, &unit, num(2).map(|n| n as usize));
+        }
         "universe" => {
             let stars: usize = u.cores.iter().map(|c| c.satellites.len()).sum();
             let worlds: usize = u
@@ -340,21 +800,9 @@ fn main() {
                 .count();
             let reaches: Vec<Ratio> = c.flows.iter().map(|x| x.ell_o() / h.clone()).collect();
             let phases: Vec<String> = (0..conductor::flows::PLANES)
-                .map(|k| {
-                    span(
-                        &c.flows
-                            .iter()
-                            .map(|x| x.phase[k].clone())
-                            .collect::<Vec<_>>(),
-                    )
-                })
+                .map(|k| span(&c.flows.iter().map(|x| x.phase_at(k)).collect::<Vec<_>>()))
                 .collect();
-            let circ = span(
-                &c.flows
-                    .iter()
-                    .map(|x| x.ell_orth.clone())
-                    .collect::<Vec<_>>(),
-            );
+            let circ = span(&c.flows.iter().map(|x| x.ell_orth()).collect::<Vec<_>>());
             println!("flows {:?} at beat {now}: H {}, {} motes ({held} wholly held, {gas} wholly gas), reach {}, phases {phases:?}, ℓ_⊥ {circ}, reservoir {}", c.path, f(&h), c.flows.len(), span(&reaches), f(&c.reservoir));
             // The chains (docs/83): each read whole; the best margin shown.
             let Some(enc) =
@@ -469,15 +917,12 @@ fn main() {
                         (0..n)
                             .filter(|&j| j != i)
                             .map(|j| {
-                                let c = (0..ms[i].phase.len().min(ms[j].phase.len())).fold(
-                                    ratio(1, 1),
-                                    |c, k| {
-                                        c * conductor::flows::in_step(
-                                            &ms[i].phase[k],
-                                            &ms[j].phase[k],
-                                        )
-                                    },
-                                );
+                                let c = (0..conductor::flows::PLANES).fold(ratio(1, 1), |c, k| {
+                                    c * conductor::flows::in_step(
+                                        &ms[i].phase_at(k),
+                                        &ms[j].phase_at(k),
+                                    )
+                                });
                                 ratio(1, 1) - c
                             })
                             .min()
@@ -562,7 +1007,7 @@ fn main() {
                     .iter()
                     .map(|x| {
                         (
-                            x.phase[0].clone(),
+                            x.phase_at(0),
                             x.amount.clone() * conductor::flows::weight(&x.key),
                             conductor::chem::charge(&x.key),
                         )

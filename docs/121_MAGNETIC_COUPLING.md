@@ -359,3 +359,18 @@ correction below (2026-11-07).
       outside drawn in; at its rest it stays; `o = 0` stays on its orbit;
       the boost inside the horizon; spin unchanged by it; the vacuum's
       law the continuum's with reach and hold exchanged (docs/117 §12.6).
+
+## 15. LAW-COUPLING v2 (operator 2026-11-11, Mycelium 78.182 item 9)
+
+§14's pole `σ_i` and fluidity `o_i` are restated by LAW-COUPLING v2
+(docs/129 §1): the pole is the push's, `1 − 2π` with `π = p·δ/w` at the
+body's place (the protons' charge left open by their bound electrons), and
+the grip is the bond ends' strength, `κ = (U_i/3w_i)·(U_c/3w_c)`, the
+enclosed magnetism `M` the enclosed bond ends. Each isoclinic plane couples
+at its own reach `r_p` with its own extent, and a body's share is `Σ_p
+α_p·m_p`, `α_p = W_p/3W`. On the vacuum leg the push is inverted and the
+strength unchanged. The base (the core's throat) reads its push at its
+rim, `δ = ½`. A dipole of no nucleons is refused, `UnbodiedDipole {
+pole_plane }`. Built: `flows::dipole`, `flows::plane_shares`,
+`flows::magnet`; `flows::shear` reads the same dipole.
+

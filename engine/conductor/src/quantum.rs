@@ -23,11 +23,19 @@ use cfe::ratio::{ratio, Ratio};
 /// projected on the body's planes, never flattened to one plane). Untilted
 /// reads isotropic (a third a plane).
 pub fn twist(rate: &Ratio, core_tilt: &[Ratio], body_tilt: &[Ratio]) -> Ratio {
+    twist_at(&ratio(1, 2), rate, core_tilt, body_tilt)
+}
+
+/// The twist a body takes at its own place (docs/128 §13.1; docs/100 §2,
+/// "twist per turn is the deficit"): by its own deficit `delta` there, its
+/// share of the core's planes and its galaxy's clock, `φ = δ·Σ_k t_c,k·t_k·ν`.
+/// At the core's own ring `δ = ½` (`twist`).
+pub fn twist_at(delta: &Ratio, rate: &Ratio, core_tilt: &[Ratio], body_tilt: &[Ratio]) -> Ratio {
     let (g, b) = (
         crate::flows::tilt_of(core_tilt),
         crate::flows::tilt_of(body_tilt),
     );
-    ratio(1, 2)
+    delta.clone()
         * g.iter()
             .zip(&b)
             .fold(ratio(0, 1), |s, (gk, bk)| s + gk.clone() * bk.clone())

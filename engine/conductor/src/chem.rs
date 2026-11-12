@@ -192,44 +192,6 @@ impl Dimensions {
     pub fn whole(&self) -> u32 {
         self.held + self.open
     }
-
-    /// The dipole's pole, its span over its whole, `(3Z − 3Q)/3w = (Z −
-    /// Q)/w`, in `[−1, 1]`: `−1` all proton, `0` balanced, positive
-    /// neutron-rich. Read on the vacuum's inverted face it negates.
-    pub fn pole(&self, inverted: bool) -> Ratio {
-        if self.whole() == 0 {
-            return ratio(0, 1);
-        }
-        // The pole opened by degrees (`coupling::pole`, operator 2026-11-06):
-        // the L1 cosine of the angle between the held and open poles.
-        let p = crate::coupling::pole(
-            &ratio(i64::from(self.held), 1),
-            &ratio(i64::from(self.open), 1),
-        );
-        if inverted {
-            -p
-        } else {
-            p
-        }
-    }
-
-    /// Its open share: the electrons' open dimensions over the whole nucleon
-    /// dimensions, `U/3w`, in `[0, 1]`. Read on the vacuum's inverted face it is
-    /// the complement.
-    pub fn open_share(&self, inverted: bool) -> Ratio {
-        if self.whole() == 0 {
-            return ratio(0, 1);
-        }
-        let o = ratio(
-            i64::from(self.electrons_open.min(self.whole())),
-            i64::from(self.whole()),
-        );
-        if inverted {
-            ratio(1, 1) - o
-        } else {
-            o
-        }
-    }
 }
 
 /// A kind's dimensions: its nucleons' dipole and its electrons' open
@@ -243,6 +205,44 @@ pub fn dimensions(kind: &Kind) -> Dimensions {
         held: 3 * z,
         open: 3 * q,
         electrons_open: unpaired(kind),
+    }
+}
+
+/// A holding's survival basket entry (Mycelium #238, 78.182 item 10; docs/129
+/// §2), stated by physical meaning in Mycelium's letters: its protons `Z`
+/// (netstratum's `Q`), its neutrons `Q` (netstratum's `Z`), its bound
+/// electrons `E_bound = 3Z − U` (the protons' dimensions less the electrons'
+/// unpaired ends, `U` read as the electrons' state, never a pole) and its
+/// mass `M = 3(Z + Q)`, each summed over the holding's kinds by amount.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BasketEntry {
+    /// Its protons, Mycelium's `Z`.
+    pub protons: cfe::ratio::Ratio,
+    /// Its neutrons, Mycelium's `Q`.
+    pub neutrons: cfe::ratio::Ratio,
+    /// Its bound electrons, `3Z − U`.
+    pub bound_electrons: cfe::ratio::Ratio,
+    /// Its mass, `3(Z + Q)`.
+    pub mass: cfe::ratio::Ratio,
+}
+
+/// The basket entry of a holding (kind, amount).
+pub fn basket_entry<'a>(
+    holding: impl IntoIterator<Item = (&'a Kind, &'a cfe::ratio::Ratio)>,
+) -> BasketEntry {
+    use cfe::ratio::ratio;
+    let (mut p, mut n, mut u) = (ratio(0, 1), ratio(0, 1), ratio(0, 1));
+    for (k, a) in holding {
+        let f = dimensions(k);
+        p += a.clone() * ratio(i64::from(f.open / 3), 1);
+        n += a.clone() * ratio(i64::from(f.held / 3), 1);
+        u += a.clone() * ratio(i64::from(f.electrons_open.min(f.whole())), 1);
+    }
+    BasketEntry {
+        bound_electrons: ratio(3, 1) * p.clone() - u,
+        mass: ratio(3, 1) * (p.clone() + n.clone()),
+        protons: p,
+        neutrons: n,
     }
 }
 
@@ -383,18 +383,31 @@ mod tests {
 
 #[cfg(test)]
 mod dimensions_tests {
-    use super::{dimensions, hydrogen, Kind};
+    use super::{basket_entry, dimensions, hydrogen, Kind};
     use cfe::ratio::ratio;
+
+    #[test]
+    fn the_basket_entry_states_a_holding_by_physical_meaning() {
+        // docs/129 §2: hydrogen, one proton and its electron unpaired:
+        // Mycelium's (Z 1, Q 0, E_bound 3·1 − 1, M 3), by amount.
+        let h = hydrogen();
+        let two = ratio(2, 1);
+        let e = basket_entry([(&h, &two)]);
+        assert_eq!(
+            (e.protons.clone(), e.neutrons.clone()),
+            (ratio(2, 1), ratio(0, 1))
+        );
+        assert_eq!(e.bound_electrons, ratio(4, 1));
+        assert_eq!(e.mass, ratio(6, 1));
+        // The mass counts every nucleon's three dimensions, both counts kept.
+        assert_eq!(e.mass, ratio(3, 1) * (e.protons + e.neutrons));
+    }
 
     #[test]
     fn hydrogens_dimensions_are_its_protons_with_its_electron_beside() {
         // docs/95 §0, docs/97: one proton, no neutron, its electron open.
         let h = dimensions(&hydrogen());
         assert_eq!((h.held, h.open, h.electrons_open), (0, 3, 1));
-        assert_eq!(h.pole(false), ratio(-1, 1), "all proton: the open pole");
-        assert_eq!(h.open_share(false), ratio(1, 3));
-        assert_eq!(h.pole(true), ratio(1, 1), "the vacuum reads it inverted");
-        assert_eq!(h.open_share(true), ratio(2, 3));
     }
 
     #[test]

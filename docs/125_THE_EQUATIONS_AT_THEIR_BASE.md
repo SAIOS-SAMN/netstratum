@@ -200,7 +200,8 @@ So **R is the axis plane's phase in the turning** (the orientation, docs/117
 - **Replaces** E16's `½·U/w`. A body's push now depends on its phase, so
   `pulse::push_of` takes the body's pulse phase.
 
-**Item 3, emission's open share:** docs/122 law 3 governs (operator
+**Item 3, emission's open share** (superseded 2026-11-11 by docs/127 §4:
+the counterweight is the manifold's recycled share): docs/122 law 3 governs (operator
 2026-11-05: heat and light from bonds and friction). docs/104's `(1 − e)`
 row and its "in code now" column are corrected with it.
 

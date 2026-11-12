@@ -43,8 +43,8 @@ fn main() {
         let mut in_systems = 0usize;
         let mut widest = 0u64;
         let mut see = |x: &conductor::flows::Mote| {
-            widest = widest.max(bits(&x.ell_o())).max(bits(&x.ell_orth));
-            for p in &x.phase {
+            widest = widest.max(bits(&x.ell_o())).max(bits(&x.ell_orth()));
+            for p in x.orientation.g() {
                 widest = widest.max(bits(p));
             }
         };
@@ -101,14 +101,17 @@ fn main() {
                 for (n, r) in [
                     ("amount", &x.amount),
                     ("ell_o", &x.ell_o()),
-                    ("ell_orth", &x.ell_orth),
+                    ("ell_orth", &x.ell_orth()),
                     ("agitation", &x.agitation),
                     ("lever_place", &x.lever_place),
                 ] {
                     put(format!("{tier}.mote.{n}"), r);
                 }
-                for p in x.phase.iter() {
-                    put(format!("{tier}.mote.phase"), p);
+                for l in x.spins_orth.iter() {
+                    put(format!("{tier}.mote.spins_orth"), l);
+                }
+                for p in x.orientation.g().iter() {
+                    put(format!("{tier}.mote.orientation"), p);
                 }
                 for l in x.lever.iter() {
                     put(format!("{tier}.mote.lever"), l);
@@ -119,13 +122,13 @@ fn main() {
             for (n, r) in [
                 ("amount", &x.amount),
                 ("ell_o", &x.ell_o()),
-                ("ell_orth", &x.ell_orth),
+                ("ell_orth", &x.ell_orth()),
                 ("agitation", &x.agitation),
             ] {
                 put(format!("ocean.{n}"), r);
             }
-            for p in x.phase.iter() {
-                put("ocean.phase".into(), p);
+            for p in x.orientation.g().iter() {
+                put("ocean.orientation".into(), p);
             }
         }
         for c in &u.cores {
@@ -209,6 +212,13 @@ fn main() {
             }
             if std::env::var_os("NETSTRATUM_PROFILE").is_some() {
                 conductor::profile::mark("breathe:echo");
+                let ord = std::sync::atomic::Ordering::Relaxed;
+                eprintln!(
+                    "bond pairs at bell {}: {} on whole numbers, {} by the rational test",
+                    b + 1,
+                    conductor::flows::BOND_PAIRS.0.swap(0, ord),
+                    conductor::flows::BOND_PAIRS.1.swap(0, ord)
+                );
                 let spent = conductor::profile::drain();
                 let whole: f64 = spent.iter().map(|(_, d)| d.as_secs_f64()).sum();
                 for (name, d) in spent.iter().take(14) {
@@ -270,7 +280,7 @@ fn main() {
                         widest = widest.max(o.abs());
                     }
                     whole += w;
-                    let ph = conductor::flows::space_of(&x.phase);
+                    let ph = conductor::flows::space_of(&x.phase());
                     if ph.iter().any(|p| *p != ph[0]) {
                         apart += 1;
                     }
@@ -700,9 +710,9 @@ fn main() {
         }
         for x in &motes {
             amounts = amounts.max(bits(&x.amount));
-            spins = spins.max(bits(&x.ell_o())).max(bits(&x.ell_orth));
+            spins = spins.max(bits(&x.ell_o())).max(bits(&x.ell_orth()));
             agitation = agitation.max(bits(&x.agitation));
-            for p in &x.phase {
+            for p in x.orientation.g() {
                 phases = phases.max(bits(p));
             }
         }

@@ -102,10 +102,7 @@ fn open_frames(x: &Mote, unit: &Ratio) -> Ratio {
 }
 
 fn world_heat(b: &Body, unit: &Ratio) -> Ratio {
-    let own = b.heat.clone() * mass(&b.kept) / unit.clone();
-    b.satellites
-        .iter()
-        .fold(own, |s, m| s + world_heat(m, unit))
+    crate::formation::world_heat(b) / unit.clone()
 }
 
 /// Read the universe's energy book.
@@ -183,8 +180,10 @@ mod tests {
             key: crate::chem::Kind::parse(key).expect("a kind"),
             amount,
             spins: Mote::spins_of(&ell, &[]),
-            ell_orth: ratio(0, 1),
-            phase: crate::flows::rest(ratio(1, 2)),
+            spins_orth: vec![ratio(0, 1); 3],
+            orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
+                1, 2,
+            ))),
             agitation,
             born: 0,
             vacuum: false,

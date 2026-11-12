@@ -13,8 +13,19 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 |---|---|---|
 | **grain** | The unit of amount: one nucleon's worth of matter. A universe is founded with an exact number of grains (e.g. `2^55`). | `pulse.rs` (`Manifest`) |
 | **bell** | One tick of the simulation. Every law advances by whole bells; nothing is integrated continuously. | `breath.rs` |
+| **Cl(5,4)** | The state's algebra over ℚ (docs/131): each frame plane's whole `e₊ₖ` and span `e₋ₖ`, R's pole axis `e_R`, the universe's pair `e₊, e₋`; 16 turnings, 20 boosts. A body's motion is the product of its continuum, vacuum and scale factors. | `orientation.rs` |
 | **ring** | The pulse a body emits each bell, travelling outward. A ring crosses distance `r` in `r` bells. | `ring.rs` |
+| **ring (of a half)** | The solid a half's motion sweeps on S³ in one ring: a tube of Hopf fibres about the half's reach, with a **width** `2R±e±` (its face reads the share inside `R = H`), a **content** `V± = H(<R±(1+e±)) − H(<R±(1−e±))` (the holding it encloses, which the shear reads), an **axis** `a± = h±·ℓ±·h̄±` (its spin carried into space) and a **tilt** against the invariable axis (docs/128 §11). | `strip::Ring`, `strip::half_rings` |
+| **pole plane** | The plane a dipole stands on (Mycelium #239, adopted 2026-11-11, docs/129 §4); a refusal names it (`UnbodiedDipole { pole_plane }`). | `flows::CouplingRefusal` |
+| **pole unit** | A pole plane's unit (Mycelium #239, docs/129 §4). | — |
+| **PassageState** `{ hold, reach }` | The passage's state carried across a tube (LAW-PASSAGE, Mycelium 78.172; docs/129 §4–§5). | — |
+| **chiral split** | The tilt between a ring's two halves' axes, `tilt(a+, a−)`: the isoclinic torsion a parcel carries in space, none with `C = 1` and no partner spin (docs/128 §13.4). | `strip::Ring::chiral` |
+| **push** `π` | LAW-COUPLING v2's open charge at a body's place: `π = p·δ/w` (protons `p`, nucleons `w`, `δ` the passage face's share there), its antipole `π̄ = 1 − π`; pole `1 − 2π`; inverted on the vacuum face (docs/129 §1). | `flows::dipole` |
+| **strength (of a dipole)** | The bond ends `U/3w`, the coupling's grip, never a pole (LAW-COUPLING v2, docs/129 §1). | `flows::Dipole` |
+| **invariable axis** `A±` | The manifold's reference for tilt on each half: the holding-weighted sum of its rings' axes, `Σ w·a±`, the normal of the invariable plane. | `strip::invariable_axes` |
+| **tilt (of a ring)** | Its inclination share `τ = \|A×a\|₁/(\|A·a\| + \|A×a\|₁)` (0 in the invariable plane, 1 polar), its sense `sign(A·a)` (prograde or retrograde) and its line of nodes `A×a`, read from the product `A·ā`. Distinct from a mote's tilt shares `t_k` (`Mote::tilt`), the direction of its spin. | `orientation::tilt` |
 | **echo** | A ring as received and re-emitted by the bodies it reaches. A body holds each arriving ring for its own period, then passes it on. | `ring.rs` |
+| **beat (of an echo)** | The echo's perturbation of a body: an automorphism of its form about its own spin by `A = p·ν/(1 − ρ)` turns (the bounce's push through the layers, the reverberation summed), answered by the fluid's drag on its departure from the medium's beat; unitary, its twist and spin unchanged (docs/130). | `flows::echo_beats`, `Orientation::beat` |
 | **universal bell period** `T_u` | The round trip of the universe's first echo at the founding: `2(R + H)` whole bells. Galaxies re-read their orbits once per universal echo. | `Universe::t_u` |
 | **holding** `H` | How much a body holds back the rings passing through it; mass is holding (`M = H`), with no separate gravitational constant. `H(<r)` is the holding inside reach `r`. | `ring.rs`, `flows::Enclosed` |
 | **deficit** `δ` | The share of a ring withheld at reach `r`: `δ = H / (r + H)`. Always below 1. A place's clock runs at `1 − δ`. | `ring::deficit` |
@@ -29,6 +40,11 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 | **R** | The electron's phase state of a nuclide, `R = κ_e·(1 − 2·frac(p))`, where `p` is the pulse phase in turns and `κ_e = 2·Z(Q)/Q` its coherence. Bound electrons (`R > 0`) close its frames; free electrons open them. | `nuclides.rs` |
 | **place** (of a nuclide) | Where its nucleons stand on the 12-dimensional sphere S^11: its turning, its open degree, and how many directions are claimed and paired. | `nuclides::Place` |
 | **open frames** | The unpaired directions of a kind. They are its magnetism and decide how it bonds. | `flows::open` |
+| **face (per plane)** | A plane's face is the share of the parcel's own extent standing inside the ring on that plane, `λ_k ∈ [0, 1]`: `0` the continuum, `1` the vacuum (docs/128 §2). Read through the transit, the plane's share is `δ_k + λ_k(1 − 2δ_k)` and its sense `1 − 2λ_k`. | `strip::plane_face` |
+| **deformation** | A body's departure from the manifold's conformed state at its place, per lane and component (docs/127 §2): its heat on H, its twist, its lift on S. A body's own state change is a deformation of the manifold. | docs/127 |
+| **conformation** | The manifold moving its bodies toward its conformed state at a place, the holding-weighted reading of the range, `Σ w·x` kept (docs/127 §3). | docs/127 |
+| **restoration** | A deformation relaxing by its lane's keep a ring (docs/127 §4). | docs/127 |
+| **dissipation** | What restoration removes, entering the manifold rather than a body: radiated at the place's unlocked share, recycled at its held share to the bodies conforming there (docs/127 §4, E62). | docs/127 |
 | **nucleon dipole** | A kind's dimensions (docs/95 §0, docs/97): each nucleon standing in three axes, `3Q` the protons' **open dimensions** and `3Z` the neutrons' **held dimensions**, `3w` in all ("frame" retired, mycelium #239). Its pole is `(Z − Q)/w`. The electrons' open dimensions `U` and their phase R stand beside it, never folded into it. | `chem::Dimensions` |
 | **grip** | How tightly a kind holds against heat, from its tightness `τ`; a kind parts where `a + τ > κ_w·h`. | `nuclides::grip` |
 | **densest element** | The heaviest nuclide the founding produced. Every later capture stops there. | `Universe::densest` |
@@ -63,6 +79,7 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 | **the three planes** | Space is three spatial planes plus the R coordinate; a mote's tilt is its spin's share in each plane. | docs/95, `flows::space_of` |
 | **pulse** and **push** `p` | Each bell a core re-pulses at full strength. Its push share is `p = ½·Q/(A + Q)` (`Q` its open frames' magnetism, `A` its holding); matter is held where `H/(R + H) ≥ p`. | `pulse::galaxy_push` |
 | **torque** | The pulse's effect on a mote's spin: it adds spin on one hemisphere of the bell and removes it on the other; what does not land in step becomes heat. Always paired with the hold's return. | `flows::torque`, `flows::spin_torque` |
+| **drag**, **counterflow** | Drag: the force a medium exerts against a parcel moving through it. Counterflow: its source, the jetstream's other leg (the vacuum drawn in along the axis against the continuum's outflow). The forward rate `b = s/(1 − s)`, read through the strip's pass, is `−1/b`, so drag is the same traversal on the other face, share `1 − s`. It takes from the parcel's departure from the medium's transit by the medium's crowding, and gives it to the medium; `Σ w·σ·s` is kept. Distinct from the twist's pressure `P_k`. | `strip::drag`, docs/128 §4a |
 | **agitation** | A mote's heat: the share of its turning absorbed and not re-locked. | `flows::Mote::agitation` |
 | **heat** | Motion out of step: the spread of a body's turning about its own mean, first degree (docs/124 §3). Friction is decoherence, motion leaving step for heat. | docs/124; `flows::Mote::agitation` |
 | **temperature** | Heat per unit of holding, the share `a`. | docs/124 §3 |

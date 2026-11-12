@@ -12,6 +12,139 @@ change is named here.
 
 ### Added
 
+- The stride (docs/132; operator 2026-11-12, "increase the velocity of the
+  entire system without fracturing the equations"): derived. A galaxy's
+  laws run only on an echo's arrival (twice in g557's 557 bells); the stride
+  advances each law by its own composition up to the next event. Built so
+  far: the flow law over n bells (`ring::compose_n`) and the echo's draw as
+  probabilities: between echoes there is no push, and across echoes the
+  push's mean response at a resonance `a/q` is `mean_response(qψ₀, q·len)/q`,
+  at most `1/q`, so the echoes carry no expected spin but at low-order
+  resonances; the disc's spin is the transport's and the release's.
+
+- The state on Cl(5,4) over ℚ (docs/131; operator 2026-11-12, "uniform
+  phase states as defined by fluid hydromagnetics"): the nine axes, each
+  pair's character read from its squares (16 turnings, 20 boosts), the pole
+  swap and the carry `M·x·M̃`. A body's orientation holds its motion as the
+  product of three commuting factors, the continuum's (the six built
+  planes), the vacuum's (the spans' turnings, opposite hand) and the
+  scale's (the conformal dilator, flow law), each in closed form; the save
+  record carries the vacuum and the scale where they move. The general
+  Cayley form on Cl(5,4) measured 43 ms an advance against 0.19 ms, and did
+  not finish with boosts in it, so the other boosts act by carry (docs/131
+  §9 step 2). Nothing moves the new factors yet: no change to how the
+  universe moves.
+- The spin the disc needs, read against the spin the bounce gives
+  (`observe streams`, docs/128 §14.1): on g557 the ring and the rim
+  coincide at 1.256, and the vacuum carries 0.10–0.37 of the spin needed.
+
+- The jetstream's distribution measured (docs/128 §14; operator 2026-11-11,
+  zero stars in the home): `observe streams G` reads each stream by side of
+  its ring, the throat crossings of one bell's torque and the bands the
+  galaxy would bind. On g557 the home's disc stands on the vacuum stream
+  inside the core's ring (3,773 of 3,827 motes, median `R/H` 0.06) and binds
+  no band. The throat test now reads the R side's passage signed, with its
+  windings (`flows::r_side`, `flows::enters_throat`): since the R side is
+  turned by the shear either way, the wrapped reading counted forward moves
+  as crossings (2,139 against 215 in one bell). The exit across the passage
+  was measured and not adopted: every exit landed beyond the galaxy's rim.
+- The ablation probe, `observe ablate G [N]` (operator 2026-11-11: "why are
+  we not doing localized formula ablations"): each law alone on a galaxy's
+  real disc from a checkpoint (its first N motes, N against 4N), with its
+  work counters, its invariant's remainder and its effect. Its first runs
+  found and fixed: the vacuum stream's face inverted past the luminal bound
+  (rates ~900 against ~1); `hold_phase` holding exact readings, so `G`
+  carried 75-digit denominators by bell 557 (the scalar collapse; readings
+  now on the grain, records read onto it); exact holding sums in the
+  magnet, the manifold's twist and the range sums (terms on the grain); and
+  `Enclosed::reach_at_rate`'s scan of every step, now a bisection on the
+  running least of `H_k/place_k`, the same reach.
+- Tilt from quantum torsion (docs/128 §13, EQUATIONS E70; operator
+  2026-11-11, approved). Each bell a mote's spins precess about the core's
+  wound axis by the twist at its own place (`φ = δ·Σ t_c·t·ν`, falling with
+  reach) and tip about the twist's pressure on what its tube holds; the
+  spin moved between the planes is the core's antipole's (`S_k + A_k`
+  kept), restoring the wound plane's lead that §12 starved. The ring reads
+  the chiral split between its halves' axes. With §4b and §12.3 the disc
+  settles on a warp, not a flat plane.
+- The echo weighed (docs/130, EQUATIONS E69; operator 2026-11-11). At each
+  echo's arrival every mote takes a beat: the universal bounce's push
+  carried through the layers between (`p·ν`, its nested clock), its
+  reverberation between the two rims summed in closed form (`a/(1 − ρ)`,
+  `ρ = ¼`), the fluid's drag answering its departure from the medium's beat
+  (`Σ w·A` kept), applied to its form as an automorphism about its own spin:
+  unitary, its twist and spin unchanged (`flows::echo_beats`,
+  `Orientation::beat`).
+- The ring in every dimension, and the shear out of the plane (docs/128
+  §12, EQUATIONS E68; operator 2026-11-11). Each isoclinic plane is its own
+  ring with its capacity `W_k = 3W·α_k`, tube, volume and shear
+  (`flows::plane_rings`), and the partner orbits' target is read on each
+  plane's own ring. A ring tilted against the rings its tube meets is
+  conformed toward their axis, keeping its sense and size, the range paying
+  (`flows::conform_axes`): the disc forms by contact, the warp's shear.
+  `settle_disc`'s global pull and the target laid by the tilt retire.
+- The rulings of 2026-11-11 adopted (docs/129; Mycelium 78.182, operator:
+  "if mycelium sends you rulings its because i ruled for mycelium - adopt").
+  LAW-COUPLING v2 built: a body's dipole is the push `π = p·δ/w` at its place
+  and the bond ends' strength `U/3w` (`flows::dipole`), each isoclinic plane
+  coupling at its own reach weighted by `α_p = W_p/3W` (`flows::magnet`), a
+  dipole of no nucleons refused `UnbodiedDipole { pole_plane }`; the shear
+  reads the same dipole. v1's pole `(Z − Q)/w` (`coupling::pole`,
+  `Dimensions::pole`) and fluidity (`Dimensions::open_share`) retire. The
+  basket entry, the reserve's faces, the pole-plane names and the traversal
+  envelope are stated for netstratum (docs/129 §2–§5).
+- The ring with volume, axis and tilt (docs/128 §11, EQUATIONS E67;
+  operator 2026-11-11). A half's motion sweeps a solid torus on S³: its
+  tube's width (the face) and content (the holding it encloses, which the
+  shear reads), its axis in space (its spin carried by its half) and its
+  tilt against the manifold's invariable axis, read from the product of the
+  axes (inclination share, sense, line of nodes). Readings, exact
+  (`strip::half_rings`, `strip::invariable_axes`, `orientation::tilt`).
+- Drag's orthogonal axis (docs/128 §4b; operator 2026-11-11). Across the
+  traversal, on the ring's axis, the medium's pressure repels the ring's
+  crossing at the inverse velocity of pressure, `M(b_P) = −1/b_P` (share
+  `1 − P`), by the same drag law that acts along the traversal; the crossing
+  is kept by the exchange. Readings (`strip::ring_pressure`,
+  `strip::along_and_crossing`).
+- Each half moves at its ring's own transit (docs/128 §9.6,
+  `flows::ring_motions`): the face from its tube, the twist's pressure, and
+  drag on both axes (the counterflow along, the repulsion across), read for
+  the manifold at the bell's start. The crossing's loss turns a ring toward
+  the invariable plane. Each half reads its transit on the face it stands
+  on, so the stream flag no longer sets the deficit and no transit passes ½
+  (the first build inverted the vacuum's face and broke the luminal bound;
+  found by the ablation probe).
+- The unitary morphodynamic state (docs/128 §10, EQUATIONS E66; operator
+  2026-11-11). A body's turning state factors exactly into its form, an
+  automorphism holding R (its orbits), and its twist, one isoclinic turning
+  against R, both unit quaternions (`Orientation::form_twist`). The R side
+  is orbits sheared by the manifold, never a driven loop.
+- The bell on the group (docs/128 §9, EQUATIONS E65; operator 2026-11-11,
+  "rewrite entirely in non-euclidean space"). A mote carries its spin on all
+  six planes of its orientation (`Mote::spins_orth`, three partner spins in
+  place of one loop spin). Each half of the spin moves by one Cayley vector
+  a ring at its own reach and rate, composed on S³ × S³; the tilt's
+  per-plane turning, the loop laid on every partner alike and §8 step 3's
+  per-plane reach retire. The bond test (`flows::collections`) decides
+  pairs on certified whole-number bounds, with a work counter.
+- Drag, the jetstream's counterflow (docs/128 §4a, EQUATIONS E64; operator
+  2026-11-11). The forward traversal's rate read through the strip's pass is
+  `−1/b`, so drag is the same jetstream on the other face, share `1 − s`. It
+  takes from the parcel's departure from the medium's transit by the
+  medium's crowding and gives it to the medium, keeping `Σ w·σ·s`. Readings
+  in `conductor::strip` with their witnesses.
+- `conductor::strip`, the pass per plane (docs/128, EQUATIONS E63; operator
+  2026-11-11). Each plane's own velocity on its own circle, its face as the
+  share of the parcel across the ring (continuous, one per plane), the
+  transit's share and sense, and the medium's pressure resisting before the
+  ring and aiding past it. Readings with their witnesses; the laws follow.
+- docs/127, the manifold deformed, conformed and restored (operator
+  2026-11-11; EQUATIONS E59–E62, register K16). Exuded properties are the
+  manifold's deformation, never a body's holding. What restoration removes is
+  dissipated into the manifold, radiated at the place's unlocked share and
+  recycled at its held share to the bodies conforming there, so the energy
+  book closes by construction. Its history: the half twist's read exposed
+  heat leaking at every body boundary.
 - docs/108 §1a, gaps against what is measured, with G1 Kepler's third law:
   `ring::period` reads `P ∝ R` far out, where the solar system measures
   `P ∝ R^{3/2}`. It is open physics, tied to the per-plane reach and the
@@ -149,6 +282,28 @@ change is named here.
 
 ### Changed
 
+- The torque turns each plane's pair on its own circle (docs/128 §8,
+  EQUATIONS E63). Motes carry the orientation `G`; each plane's form
+  (`strip::PlaneForm`) is its turning pair, its axis's poles and its reach
+  and face. The plane turns `2·s_k′` a bell at its own share on its own face,
+  resisted by the core's twist pressure, and its R partner turns with it.
+  This retires the tilt's `2δ·t_k`. `flows::torque` takes the twist pressure.
+- Heat recycled across the manifold's dissipation (#182, docs/127 §4,
+  EQUATIONS E62). A mote's restored heat enters its enclosure's manifold,
+  which recycles the held share `1 − δ` at its place to the motes whose own
+  enclosures meet its own, by holding times held share, and radiates the
+  rest as light. `flows::emit` takes the enclosure's holding unit.
+- Heat travels with the matter that carries it (docs/126 §3a, docs/124 §3).
+  Matter leaving a star (outburst, shed layers, dissolutions, infall), motes
+  escaping a system and worlds crossing as motes carry their source's heat
+  per holding (`formation::star_heat`, `held_heat`, `world_heat`), never 0.
+  Infall mixes into the star by holding (`mixed_heat`).
+- The vacuum as a Möbius strip (docs/126, EQUATIONS E37, E37a; operator
+  2026-11-11). The pass carries the strip's half twist, each plane `½·t_k`
+  by the mote's lead, in place of a flat ½ on every plane. The core's twist
+  pressure (`torsion::core_twist`, one reading) releases on the continuum
+  and consumes, reversed, on the vacuum face at the throat, where recycling
+  deconstructs `E/(S + E) ⊕ (−P₁) ⊕ (−P₂) ⊕ (−P₃)`.
 - A body's push oriented on the open pole, with its antipole (docs/125 §4.1,
   EQUATIONS E16): `p = Q·(1 − g)/w`, the protons' charge left open at the
   body's place, `p̄ = 1 − p` on the vacuum leg; no `½`, replacing `½·U/w`. The
@@ -177,6 +332,12 @@ change is named here.
   the same exact values, without the running sum whose denominator grew
   with every mote (amounts carry wide denominators). At bell 186 on the
   2^40 founding, the read fell from 15 s of the echo's 26 s to under 1 s.
+- Motes carry the orientation `G` (#117 step 2b, #157; docs/117 §11.7):
+  `Mote::phase` is retired, its phases now readings of `G`. The bell's two
+  rings compose whole at `b = δ/(1 − δ)` a plane, and the swing is read pair
+  by pair, so a plane passes through the centre alone. The mote record holds
+  twelve values, and a record of per-plane phases is refused. Stars and
+  worlds follow (#159).
 - H's state is the generator (docs/117 §11.7, derived, not built; amends
   docs/120 §8d): a mote's and a body's orientation is held as the generator
   `G` over six elliptic planes with `K` per plane, its rate a ring the hold
