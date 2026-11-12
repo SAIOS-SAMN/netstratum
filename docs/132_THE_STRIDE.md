@@ -34,7 +34,7 @@ composition law, in closed form, never by a rate multiplied by n:
 | a turning (Cayley motion) | `R` | `Rⁿ`, held as the generator and n (docs/117 §11.4) |
 | a boost (flow law) | `D(u) = (1 + u)/(1 − u)` | `D(u)ⁿ`; its rate `(Dⁿ − 1)/(Dⁿ + 1)` |
 | a relaxation toward a target the step keeps (an attractor, E38) | `x ↦ x* + k·(x − x*)` | `x ↦ x* + kⁿ·(x − x*)` |
-| an exchange among a range (shear, fluid, conform, drag): each step pays its neighbours by holding | an affine map `x ↦ A·x + b` on the range's components, `Σ w·x` kept | `Aⁿ·x + (Σ_{i<n} Aⁱ)·b` while the ranges stand (§1.1) |
+| an exchange (shear, fluid, conform, drag): the mote's motion against the medium's field, the range paying by holding | `x ↦ x ⊕ y(x̄)` or `x̄ + k(x − x̄)`, `Σ w·x` kept | the same motion composed n times against the standing field (§1.1) |
 
 `kⁿ` and `Dⁿ` are powers of exact rationals: compositions of one law with
 itself, not squares of lengths (design law 2 refuses a norm read by its
@@ -47,20 +47,39 @@ during the stride, and n compositions of `x ↦ x* + k(x − x*)` are
 `x* + kⁿ(x − x*)` exactly. A motion's n-fold composition is its power. The
 equations are the same equations, composed.
 
-### 1.1 The exchanges are coupled
+### 1.1 The exchanges are motions against the medium's field
 
-An exchange's step on one mote is paid by its range, so its n-bell form is
-not `kⁿ` mote by mote: the payments move the neighbours off their own
-targets, and they relax back in the bells after. Between events the map is
-affine with a fixed matrix `A` (each row the mote's keep and its range's
-payments), so n bells are `Aⁿ` and its geometric sum, exact. `A` is sparse
-(the ranges) but its powers fill in across a connected range, so `Aⁿ` by
-squaring costs the range's size squared a squaring. Per mote `kⁿ` holds
-only for a law whose step pays no one (an attractor on its own kept target,
-the motion, the flow law). Measured cost a single application on g557's
-3,827 motes (`observe ablate`): conform_partners 5.4 s, conform_axes 2.2 s,
-the magnet 16.8 s, ring_motions 15.8 s. So the exchanges' stride form is
-the build's real cost, and is read before step 3 (§4).
+**Corrected 2026-11-12** (operator: "you're using the wrong topology and
+fighting the physics with rigidity"). A first reading took each exchange
+as motes coupled pair by pair through their payments, so n bells became a
+matrix power `Aⁿ` over every range. That is the cartesian topology the
+record refuses ("peels and shears, not sweeps"; ranges, never scans): it
+treats the motes as nodes of a graph, when they are parcels of one medium on
+the manifold.
+
+- **The medium is a field.** What a mote's range gives it is read by the
+  range sums on the reach line (`flows::range_sums`, `n log n`): the
+  holding-weighted rate `x̄(R)` the tube meets at its place. That is the
+  medium's field at the mote, not a sum over named partners.
+- **An exchange is a motion of the mote against the field.** The shear's
+  pull composes the mote's rate with its step toward the field by the flow
+  law (`coupling::pulled`, `ring::compose`): a boost. The drag gives its
+  departure from the field's transit (`strip::drag_against`, `σs′ ⊖ s̄`).
+  The conform laws relax toward a target by the attractor's keep. Each is a
+  one-parameter motion of the mote's own state, with the field as its
+  coefficient.
+- **The payments are the field's conservation.** The range pays by holding
+  so that `Σ w·x` stands: the field is the exchange's invariant. Read as the
+  field, the payments do not couple mote to mote; they are what keeps the
+  coefficient standing.
+- **So n bells are each mote's own motion composed n times** while the field
+  stands (between events, §2): the flow law by `ring::compose_n`, the keep by
+  `kⁿ`, each mote alone, `n log n` for the field's read once. The grain's
+  residual of `Σ w·x` over the stride is paid by holding over each range
+  once, at the stride's end, as one bell's payment is now.
+- **The field moves only where the medium does:** when parcels cross into or
+  out of a tube (a range event, §2) or the motion carries the reach line.
+  Those are the events that end a stride.
 
 ## 2. Events end a stride
 
