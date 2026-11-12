@@ -34,7 +34,7 @@ composition law, in closed form, never by a rate multiplied by n:
 | a turning (Cayley motion) | `R` | `Rⁿ`, held as the generator and n (docs/117 §11.4) |
 | a boost (flow law) | `D(u) = (1 + u)/(1 − u)` | `D(u)ⁿ`; its rate `(Dⁿ − 1)/(Dⁿ + 1)` |
 | a relaxation toward a target the step keeps (an attractor, E38) | `x ↦ x* + k·(x − x*)` | `x ↦ x* + kⁿ·(x − x*)` |
-| an exchange among a range toward its holding-weighted mean (shear, fluid, conform, drag) | the mean is kept, each departure kept by `k_i` | `kᵢⁿ` on each departure while the range stands |
+| an exchange among a range (shear, fluid, conform, drag): each step pays its neighbours by holding | an affine map `x ↦ A·x + b` on the range's components, `Σ w·x` kept | `Aⁿ·x + (Σ_{i<n} Aⁱ)·b` while the ranges stand (§1.1) |
 
 `kⁿ` and `Dⁿ` are powers of exact rationals: compositions of one law with
 itself, not squares of lengths (design law 2 refuses a norm read by its
@@ -46,6 +46,21 @@ mean (an exchange pays by holding, `Σ w·x` kept), so the target does not move
 during the stride, and n compositions of `x ↦ x* + k(x − x*)` are
 `x* + kⁿ(x − x*)` exactly. A motion's n-fold composition is its power. The
 equations are the same equations, composed.
+
+### 1.1 The exchanges are coupled
+
+An exchange's step on one mote is paid by its range, so its n-bell form is
+not `kⁿ` mote by mote: the payments move the neighbours off their own
+targets, and they relax back in the bells after. Between events the map is
+affine with a fixed matrix `A` (each row the mote's keep and its range's
+payments), so n bells are `Aⁿ` and its geometric sum, exact. `A` is sparse
+(the ranges) but its powers fill in across a connected range, so `Aⁿ` by
+squaring costs the range's size squared a squaring. Per mote `kⁿ` holds
+only for a law whose step pays no one (an attractor on its own kept target,
+the motion, the flow law). Measured cost a single application on g557's
+3,827 motes (`observe ablate`): conform_partners 5.4 s, conform_axes 2.2 s,
+the magnet 16.8 s, ring_motions 15.8 s. So the exchanges' stride form is
+the build's real cost, and is read before step 3 (§4).
 
 ## 2. Events end a stride
 
@@ -99,14 +114,68 @@ only bound.
 4. Read on a copy of g557: matter between the ring and the rim, bands, and
    the cost a stride against a bell.
 
-## 5. Open
+## 5. The torque over a stride, read as probabilities
 
-1. Laws whose coefficient is read from the moving state itself, not from a
-   kept target (the torque's response to the phase it passes, `mean_response`):
-   their n-bell form is the integral the response already takes over a
-   passage (docs/128 §9.6); whether a whole stride is one passage is to be
-   derived.
-2. The shear's rate on the vacuum face (`stream_delta`, `1 − δ`) rises with
+The open point was the torque: its response is read from the phase it sweeps
+(`flows::mean_response`), so its coefficient moves with the state.
+
+**Between echoes there is no push.** The torque is the echo's push (`p`, the
+core's state against its throat, `pulse::home_push`; `breath::breathe` reads
+it inside an arrival). Between arrivals `p` is not delivered, so the torque
+does not enter a stride. At an arrival it acts over that bell's passage, as
+built, and that bell is stepped singly (§2, event 5). A stride carries the
+transport and the motion; the torque stands at its ends.
+
+**Across echoes, the push is a draw on the phase.** Where an echo meets a
+mote is fixed by the state, but over many echoes it is read by the share of
+time the mote's phase spends in each part of its circle, its occupation
+measure:
+
+    ρ(ψ) = (1/ω(ψ)) / ∮ dψ/ω        (ω the phase's speed a bell)
+
+- **The response is the sawtooth `1 − 2·frac(ψ)`:** odd about the half turn,
+  `r(1 − f) = −r(f)`. Between echoes no torque moves the spin, so `ω` stands
+  over the turn and `ρ` is uniform: the gaining hemisphere (`f < ½`) and the
+  losing one are met with probability ½ each, and the expected response over
+  a passage of any length is
+
+      E[mean_response(ψ, len)] = ∮ ρ(ψ)·mean_response(ψ, len) dψ = 0
+
+  So the echo's push carries **no expected spin**: across echoes it is a
+  draw of mean zero, each draw bounded by `|Δℓ_k| ≤ p·len_k/2`. The push
+  redistributes spin among motes and phases; it does not raise the spin of
+  the matter on average.
+- **Except at a resonance.** The draw is fair only where the echo's
+  landing phases fill the circle. A mote turning `ν = T_u·ω` turns between
+  echoes meets each echo `frac(ν)` further on; where `frac(ν) = a/q` with `q`
+  small, it is met at the same `q` phases again and again, and the push has a
+  mean of the response at those phases, `Σ_{j<q} r(ψ₀ + j·a/q)/q`, which is
+  not zero. That is an orbital resonance with the pulse (nature's Kirkwood
+  gaps): such motes are driven in or out steadily, the rest only spread.
+- **So the disc's spin cannot come from the echoes.** With the push fair
+  on average, matter that stands inside the ring stays there under echoes
+  alone. What moves spin outward on average is the transport (the shear and
+  the fluid, by strides, §1) and what the bounce lays at release (docs/131
+  §7). This is the measured state of g557 read as a law.
+
+**The phase over a stride.** The transport moves the spin by closed forms
+(`kⁿ`), so `ω` moves with it and the phase at the stride's end is
+`ψ_n = ψ₀ + Σ_{i<n} ω(ℓ_i)`, a sum over a known sequence: each term is
+exact and cheap (one reading a bell, no law), so it is summed, never
+approximated. Between reads it is held as its base and its formula and
+rendered on observation (the 2026-10-24 ruling).
+
+**Witnesses** (adding to §3):
+5. A mote with no torque between echoes, met by echoes whose spacing is
+   irrational against its turn, gains spin whose mean over K echoes tends to
+   zero with bound `p·len/2` per echo (read exactly at K = N and 4N on
+   rational spacings with large `q`).
+6. At a resonance `frac(ν) = a/q`, the mean draw equals the response's mean
+   at the `q` landing phases.
+
+## 6. Open
+
+1. The shear's rate on the vacuum face (`stream_delta`, `1 − δ`) rises with
    reach, so on the vacuum the pull toward the range's rate moves spin
    inward. With docs/131 step 5 (the stream a reading) the shear reads one
    rate on both faces.
