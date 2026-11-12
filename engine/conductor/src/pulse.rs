@@ -1242,11 +1242,16 @@ pub fn orbit_galaxies(
             let ell_o = crate::ring::grain(&mean(&|x| x.ell_o()));
             let ell_orth = crate::ring::grain(&mean(&|x| x.ell_orth()));
             let planes = set.iter().map(|&j| moves[j].len()).min().unwrap_or(0);
+            // The members' moves enter the mean on the grain (docs/133 §4):
+            // each is a phase reading with its own denominator, so their
+            // exact sum would carry the lcm of all of them.
             let shift: Vec<Ratio> = (0..planes)
                 .map(|k| {
-                    set.iter().fold(ratio(0, 1), |s, &j| {
-                        s + booked(&firm[j]) * moves[j][k].clone()
-                    }) / total.clone()
+                    crate::ring::grain(
+                        &(set.iter().fold(ratio(0, 1), |s, &j| {
+                            s + booked(&firm[j]) * crate::ring::grain(&moves[j][k])
+                        }) / total.clone()),
+                    )
                 })
                 .collect();
             for &j in set {
@@ -1257,7 +1262,10 @@ pub fn orbit_galaxies(
                 // orientation plane by plane.
                 for (k, d) in shift.iter().enumerate() {
                     x.orientation
-                        .shift(k, &crate::flows::wrap(&(d.clone() - moves[j][k].clone())))
+                        .shift(
+                            k,
+                            &crate::flows::wrap(&(d.clone() - crate::ring::grain(&moves[j][k]))),
+                        )
                         .expect("a turning is a motion");
                 }
             }

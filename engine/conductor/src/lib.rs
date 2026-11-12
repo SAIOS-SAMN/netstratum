@@ -7956,6 +7956,9 @@ pub mod profile {
         let now = Instant::now();
         let mut last = LAST.lock().expect("profile mark");
         if let Some((held, at)) = last.take() {
+            if traced() {
+                eprintln!("mark: {held} {:.1?} -> {name}", now - at);
+            }
             let mut book = BOOK.lock().expect("profile book");
             match book.iter_mut().find(|(h, _)| *h == held) {
                 Some((_, total)) => *total += now - at,
