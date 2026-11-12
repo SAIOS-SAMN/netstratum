@@ -126,23 +126,29 @@ ran (the Kelvin–Helmholtz mechanism): the binding falls inward, the
 potential it gives up becomes motion, and the motion that is not kept in
 step becomes heat. In the model:
 
-1. **Contraction releases potential.** A binding that collapses from where
-   it stood, `Φ_out`, to its core's hold, `Φ_in`, releases
-   `m·(Φ_in − Φ_out)` (docs/106 §1: the deeper the hold, the more given up).
-2. **What stays in step is the star's spin.** The binding's own
-   circulation (the `circulation_f` ignition already reads) is kept as the
-   star's motion; turning is conserved, `Σ m·ℓ` unchanged.
-3. **The rest is heat.** The released potential less the motion kept in
-   step enters the star core's heat; `potential + motion + heat` is
-   unchanged across the collapse.
+1. **The fall's potential is its members' motion.** The state level carries
+   no radial law (operator 2026-11-06): a member's reach, and so its
+   potential, is a reading of its spin in its enclosure, `R = ℓ/H(<ℓ)`. In
+   the binding's own frame a member turns `ℓ′ = d·H_c(<d)` (its phase place
+   and the hold of every member more in step, docs/99 §2.2).
+2. **What stays in step is the star's spin.** The star's own spin is their
+   holding-weighted mean, `ℓ̄′`; `Σ w·ℓ′` is kept.
+3. **The rest is heat.** The members' motion out of step, their spread about
+   that mean, first degree, `S′ = Σ w·|ℓ′ − ℓ̄′|`, ends as they join: per unit
+   of what fell it is the contraction's heat. It is the same join law as two
+   stars sticking (`formation::spread`, EQUATIONS E56), one law at every
+   tier; a separate potential term would count it twice. The star core's
+   heat is it plus the heat the members carried in (`formation::core_heat`).
 4. **The heat stands where its sources meet its emission** (docs/122 law
    5): sources contraction, the burn's bond energy and absorbed light; the
-   loss is emission by the unlocked face, `a·u`; it approaches `a* = q/u` in
-   closed form.
-5. **Its state of matter is read, never set:** the cut at ignition and the
-   re-cut at each outburst read `open_at(z, a)` with the star core's own
-   heat. A star core whose heat strips hydrogen keeps it to burn; one that
-   does not is not yet a star (a collapse too shallow to ignite).
+   loss is emission by the face, ½ a ring at the system's throat
+   (`formation::star_glow`).
+5. **Its state of matter is read, never set:** the cut at ignition, the
+   re-cut at each outburst and the wind read `open_at(z, a)` at the star
+   core's own heat. A star core whose heat strips hydrogen keeps it to burn;
+   one that does not is not yet a star. What an outburst throws leaves cool
+   (operator 2026-10-18: "heat dissipates into the void/vacuum… only the
+   deep star core is hot").
 
 This retires `ionizing = 1` at ignition, the re-cut's heat 0, and the
 `hot-heart` branch's constant: one heat, from one law.

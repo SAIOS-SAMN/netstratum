@@ -1474,9 +1474,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // motes at each kind's carried spin and the star's phases.
             // The outburst is thrown cool (operator 2026-10-18: "heat
             // dissipates into the void/vacuum"): only the deep star core is hot;
-            // the outer layers it is thrown from hold whole atoms.
+            // the outer layers it is thrown from hold whole atoms. So the cut
+            // of what the core holds reads the core's own heat (docs/124 §5),
+            // and what it throws leaves cool (the spray's motes at heat 0).
             crate::profile::mark("sys:star_core");
-            let heat = ratio(0, 1);
+            let heat = crate::formation::core_heat(&sys);
             let burst = if rang {
                 crate::formation::star_core_cut(&sys.kept, &ratio(0, 1), &heat)
                     .map(|(_, released, _)| released)
@@ -1575,16 +1577,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         })
                         .min(ratio(1, 1));
                     if chi > ratio(0, 1) {
+                        let core_hot = crate::formation::core_heat(&sys);
                         for (k, a) in sys.kept.clone() {
                             let left =
                                 a.clone() - back.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
                             // Its open share as the star holds it, at its
-                            // star core's heat (the cut's reading, `star_core_cut`; a
-                            // ringing star core strips hydrogen, heat 1), never
-                            // the cold atom's: one reading per quantity.
+                            // star core's heat (the cut's reading,
+                            // `formation::core_heat`), never the cold atom's:
+                            // one reading per quantity.
                             let w = crate::pulse::nucleus(
                                 &(left.clone()
-                                    * crate::flows::open_hot(&k, &ratio(1, 1))
+                                    * crate::flows::open_hot(&k, &core_hot)
                                     * chi.clone()),
                             )
                             .min(left);
@@ -3042,6 +3045,30 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let g_b = crate::polarity::faces(&tide).0;
                 crate::nuclides::release(&mut star, &(a_binding.clone() + tau_b), &g_b);
                 crate::profile::mark("breath:births-ignite");
+                // Contraction heating (docs/124 §5): the members' motion out of
+                // step that the collapse ends, their spread about the star's
+                // own spin in the binding's frame (`ℓ′ = d·H_c(<d)`, docs/99
+                // §2.2), per unit of what fell, the same join law as two stars
+                // sticking (`formation::spread`, EQUATIONS E56). The state level
+                // carries no radial law (operator 2026-11-06), so the potential
+                // the fall gives up is this spread, never counted again. The
+                // star core's heat is it and the heat its members carried in.
+                let fell_w = fell_spins
+                    .iter()
+                    .fold(ratio(0, 1), |a, (w, _, _)| a + w.clone());
+                let contraction = if fell_w.is_zero() {
+                    ratio(0, 1)
+                } else {
+                    crate::ring::grain(
+                        &(crate::formation::spread(
+                            &fell_spins
+                                .iter()
+                                .map(|(w, d, h)| (w.clone(), d.clone() * h.clone()))
+                                .collect::<Vec<_>>(),
+                        ) / fell_w),
+                    )
+                };
+                let core_heat = a_binding.clone() + contraction.clone();
                 let lit = crate::formation::ignition_share(&a_binding).and_then(|_| {
                     crate::formation::system(
                         &star,
@@ -3051,6 +3078,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         &fell_spins,
                         &path,
                         &tide,
+                        &core_heat,
                     )
                 });
                 let parted_h = h_share(&star);
@@ -3094,7 +3122,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     phase: phases_own,
                     load: ratio(0, 1),
                     remnant: false,
-                    heat: ratio(0, 1),
+                    heat: contraction.clone(),
                     tilt: crate::flows::blend(
                         &members
                             .iter()
