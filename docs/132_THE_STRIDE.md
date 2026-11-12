@@ -145,13 +145,19 @@ measure:
   draw of mean zero, each draw bounded by `|Δℓ_k| ≤ p·len_k/2`. The push
   redistributes spin among motes and phases; it does not raise the spin of
   the matter on average.
-- **Except at a resonance.** The draw is fair only where the echo's
-  landing phases fill the circle. A mote turning `ν = T_u·ω` turns between
-  echoes meets each echo `frac(ν)` further on; where `frac(ν) = a/q` with `q`
-  small, it is met at the same `q` phases again and again, and the push has a
-  mean of the response at those phases, `Σ_{j<q} r(ψ₀ + j·a/q)/q`, which is
-  not zero. That is an orbital resonance with the pulse (nature's Kirkwood
-  gaps): such motes are driven in or out steadily, the rest only spread.
+- **At a resonance, a mean of `1/q` at most** (witnessed, `ring::stride_tests`).
+  A mote turning `ν = T_u·ω` turns between echoes meets each echo
+  `frac(ν)` further on. Where `frac(ν) = a/q` it is met at the same `q`
+  phases, a `q`-th of a turn apart, and the push's mean response is exactly
+  the response over `q` times the arc, read from `q` times the phase, over
+  `q`:
+
+      mean_q = mean_response(q·ψ₀, q·len) / q,      |mean_q| ≤ 1/q
+
+  So every resonance has a mean, of size at most `1/q`: a low-order one
+  (`q` small) drives its motes in or out steadily, a high-order one barely,
+  and the fair draw (mean zero) is the limit `q → ∞`. This is an orbital
+  resonance with the pulse, as nature's Kirkwood gaps are with Jupiter.
 - **So the disc's spin cannot come from the echoes.** With the push fair
   on average, matter that stands inside the ring stays there under echoes
   alone. What moves spin outward on average is the transport (the shear and
@@ -166,12 +172,9 @@ approximated. Between reads it is held as its base and its formula and
 rendered on observation (the 2026-10-24 ruling).
 
 **Witnesses** (adding to §3):
-5. A mote with no torque between echoes, met by echoes whose spacing is
-   irrational against its turn, gains spin whose mean over K echoes tends to
-   zero with bound `p·len/2` per echo (read exactly at K = N and 4N on
-   rational spacings with large `q`).
-6. At a resonance `frac(ν) = a/q`, the mean draw equals the response's mean
-   at the `q` landing phases.
+5. At a resonance `frac(ν) = a/q` the mean draw is
+   `mean_response(q·ψ₀, q·len)/q`, bounded by `1/q`, at q = N and 4N
+   (built: `ring::stride_tests`).
 
 ## 6. Open
 

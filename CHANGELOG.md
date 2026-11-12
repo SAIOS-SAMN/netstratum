@@ -12,6 +12,16 @@ change is named here.
 
 ### Added
 
+- The stride (docs/132; operator 2026-11-12, "increase the velocity of the
+  entire system without fracturing the equations"): derived. A galaxy's
+  laws run only on an echo's arrival (twice in g557's 557 bells); the stride
+  advances each law by its own composition up to the next event. Built so
+  far: the flow law over n bells (`ring::compose_n`) and the echo's draw as
+  probabilities: between echoes there is no push, and across echoes the
+  push's mean response at a resonance `a/q` is `mean_response(qψ₀, q·len)/q`,
+  at most `1/q`, so the echoes carry no expected spin but at low-order
+  resonances; the disc's spin is the transport's and the release's.
+
 - The state on Cl(5,4) over ℚ (docs/131; operator 2026-11-12, "uniform
   phase states as defined by fluid hydromagnetics"): the nine axes, each
   pair's character read from its squares (16 turnings, 20 boosts), the pole

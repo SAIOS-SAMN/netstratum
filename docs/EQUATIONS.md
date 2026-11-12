@@ -2081,6 +2081,16 @@ about the body's own spin:
     a = p·ν    ν = Π(1 − δ)    A = a/(1 − ρ), ρ = ½·½    D = A ⊖ Ā    T = (1 − A)·g·w·D
     F ↦ F·m(rate(A′)·t)    C, ℓ unchanged    Σ w·A′ = Σ w·A (within the grain)
 
+**E72 · The stride and the echo's draw.** `ring::compose_n`,
+`flows::mean_response` (docs/132 §1, §5; operator 2026-11-12). The flow law
+over n bells, composed, never scaled:
+
+    x ⊕ⁿ = ((1 + x)ⁿ − (1 − x)ⁿ)/((1 + x)ⁿ + (1 − x)ⁿ)
+
+and the echo's push met at a resonance `frac(T_u·ω) = a/q`, its mean
+response over the q landings `mean_response(q·ψ₀, q·len)/q`, bounded by
+`1/q`: no expected spin in the limit `q → ∞`.
+
 **E71 · The state on Cl(5,4): nine axes, three commuting factors.**
 `orientation::{AXES, NEGATIVES, pairs, is_turning, pole_swap, carried}`,
 `Orientation::{factors, advance_vacuum, advance_scale}` (docs/131;
