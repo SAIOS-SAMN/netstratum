@@ -5,7 +5,7 @@ mycelium #305; "one operator is amongst you all"): one body-state signature
 across every kernel, **Cl(13,1)** = Cl(n+1,1) at n = 12, the Hopf carrier
 S¹ → S¹¹ → CP⁵. It supersedes docs/131's Cl(5,4).
 
-**Status:** derived 2026-11-13, not built. The plane assignment is
+**Status:** derived 2026-11-13; §6.2 built (`orientation.rs`: the base rotor, the scale; the Cl(5,4) axes and vacuum factor retired). The plane assignment is
 Xylarium's carrier (xyl_core::hopf, rotor, cga; xylarium #183), read
 jointly; Netstratum's fixtures go to Xylarium before the build.
 
@@ -15,9 +15,9 @@ jointly; Netstratum's fixtures go to Xylarium before the build.
 |---|---|
 | 3 spatial axes `e₊ₖ` with the orbit spins `ℓ_k = ℓ_o·t_k` | **the base**: places on the enclosure's S^360 (S^60 for a system); the orbit is motion on the base, not planes of the fibre |
 | 3 spans `e₋ₖ` (negative): the vacuum as axes | **retired as axes.** The vacuum is a face: each plane's **share split** between its two faces, read by δ (§2) |
-| R's axis `e_R`, the circulation on `e_kR` (`spins_orth`) | **R is a phase on every plane**, `R_p = κ(1 − 2·frac(ψ_p))` (§3); `spins_orth` retires |
+| R's axis `e_R`, the circulation on `e_kR` (`spins_orth`) | **R is a phase on every plane** of the fibre, `R_p = κ(1 − 2·frac(ψ_p))` (§3). The circulation's orbits stay as the base rotor's partner planes with the orbit's axial leg (§6.2) |
 | the universe pair `e₊, e₋`, the scale dilator on `e₊e₋` | **kept**: `D(ρ) = (ρ + 1) + (ρ − 1)E`, `E = e_o ∧ e_∞`, composed by the flow law (§4) |
-| six built planes of R⁴ on isoclinic SU(2) halves | **six complex planes of C⁶**, each a commuting U(1) (§1) |
+| six built planes of R⁴ on isoclinic SU(2) halves | the **base rotor** on four of the base's directions (three spatial and the axial leg), the same six planes and halves (§6.2); and the fibre's **six complex planes of C⁶**, each a commuting U(1) (§1) |
 | 16 turnings, 20 boosts | 91 bivectors, 78 turnings (the base axes' pairs), 13 boosts (each with `e₋`); only the per-plane turnings, the tilt and the dilator are motions of a body |
 | pole swap (negate the spans) | the conformal inversion `t → 1/t`, the reflection through the unit sphere (§5) |
 
@@ -118,32 +118,34 @@ About 70 uses of the retiring items, sorted by what replaces each:
 | (c) move the circulation spin or the face | ~38 | §6.2 |
 | (d) the save record and display | 8 | the new record (§6 step 3) |
 
-## 6.2 The circulation is the weighted Seifert action's rates
+## 6.2 The circulation is on the base (revised after the joint read)
 
-The R side's orbits (docs/128 §9–§14; operator 2026-11-11: "the R side is
-orbits, spun by the manifold's shear") are not lost. The common phase has a
-weight per plane, `z_p → e^{i·w_p·θ}z_p`, so each plane turns at its own rate
-`w_p·θ̇`. Netstratum's partner spins `ℓ_kR` are those rates on three of the
-isoclinic planes:
+The fibre's weights are whole windings per plane (Xylarium, xyl_core::hopf).
+They change only at an event, such as a pinch, never as a rate a shear moves.
+So the R side's orbits (docs/128 §9–§14; operator 2026-11-11: "the R side is
+orbits, spun by the manifold's shear") cannot be the fibre's weights. They
+are motions on the base, as Xylarium holds a body's orbital plane:
 
-    ℓ_kR = w_{p(k)}·θ̇,   ℓ_⊥ = Σ_k ℓ_kR
-
-- **The halves:** `ℓ± = ℓ_k ∓ ℓ_kR` (docs/128 §11) read the base's spatial
-  rate against its plane's fibre rate. The chiral split stands where the
-  weights differ, and vanishes where they are equal.
-- **The conformation to the shear** (docs/128 §10.3; `conform_partners`)
-  relaxes each weight toward its plane's shear target, the range paying,
-  `Σ m·w` kept: the same law with the weight as its state.
-- **The face crossing** (Möbius, the throat, the exits, the recycling) is the
-  split passing ½ (§2): written as a motion of `c_p`, never as a flag set.
-- **The free action:** any weights with every plane's `w_p ≠ 0` keep the action
-  free. A weight driven to 0 on the axis plane is refused by the body's
-  builder (§9 item 1).
-
-**Open, to read jointly with Xylarium:** which three of the five isoclinic
-planes carry the spatial directions' partners. The planes are
-interchangeable in multiplicity and fill (T18), so the choice must be read
-from each plane's pole `t_j = J_j/(6H_j)`, never assigned.
+- **The base rotor** is held on four of the base's directions: the three
+  spatial axes and the orbit's **axial leg** (axis 4, where docs/131 held
+  `e_R`). Its six planes are the three spatial planes and each one's partner
+  with the axial leg. These are `Orientation`'s six planes, now on the base's
+  Euclidean signature.
+- **No spatial direction is assigned a fibre plane** (T18: the isoclinic
+  planes are interchangeable, and ranking them would choose members by
+  position).
+- The partner spins `ℓ_kR` (`Mote::spins_orth`), the halves
+  `ℓ± = ℓ_k ∓ ℓ_kR`, the conformation to the shear and the chiral split
+  stand as built: they are the base rotor's laws.
+- **The face flag** (`Mote::vacuum`) is the parity of the mote's passes
+  through the inversion (§5): a topological reading kept as a bit, set
+  where the inversion is passed (the Möbius pass, the throat, the exits).
+- **Retired:** the Cl(5,4) axes and constants (`WHOLE`, `SPAN`, `R_AXIS`,
+  `NEGATIVES`, `pairs`, `is_turning`, `pole_swap`, `carried`) and the
+  vacuum factor (`advance_vacuum`, `factors`). No law read them; only
+  tests did.
+- **The save record** is 12 values, or 13 when the scale moves. Saved g557
+  states read unchanged, since the vacuum factor never moved there.
 
 ## 7. Witnesses (fixtures, read jointly with Xylarium)
 
