@@ -92,7 +92,14 @@ composition (planned).
   - Xylarium proposes R11, the throat: `s = (H + J)/(2H + J)`, `δ_h = 1/3`.
   - Push and resistance (`p ⊕ (−r)`) goes into R4, the bead's recipe into
     R6, capacity into R7, and the conservation of turning into R9.
-- **Filed:** mycelium #298 (R4), #299 (R2).
+- **Filed:** mycelium #298 (R4: read, joins FORMS-COUPLING as `flow_n`,
+  `keep_n`), #299 (R2: the same form as `Parcel`, fixtures only), #300 (R3).
+- **R7's sphere:** the capacity form takes n as an argument; both kernels
+  declare n = 12 (S^11), recorded in the fixtures, with one more at n = 4
+  (forms A7b: no constant in the library).
+- **R10** dropped: 78.176 is Mycelium's proposal, not a forms row.
+- **One body-state signature across kernels** would be an operator ruling
+  between the projects (raised by Mycelium); until then each declares its own.
 
 ## 5. How it goes up
 
