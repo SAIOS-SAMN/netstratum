@@ -2092,6 +2092,13 @@ nucleus the impulse `F_z` carries
 `Σ n·w·ℓ = Σ n·F` exact; `b = 1` is the per-kind carry it replaces, `b = 0`
 one spin. Read by `pulse::{push_cut, disperse, cascade}`, `flows::founding`,
 `formation::{shells, carried, star_core_cut}` and the bounce's release.
+**The parcel** (docs/134 §6; `flows::Mote::parts`,
+`plasma::{bounce_split, pool_spin, own_spin}`): a mote is a mix, its
+readings its parts' sums (holding `Σa·w`, open frames `Σa·U`, charge `Σa·Q`, a
+per-kind reading by holding); the bounce's release leaves as one pooled parcel
+`{z: n_z(1 − b_z)}` at `p·S` and each kind's bound part at `p·w̄/w_z`. A
+one-kind parcel reads as its kind; a merge adds parts by kind; the throat parts
+a mix into its kinds (`recycle::part`).
 
 **E72 · The stride and the echo's draw.** `ring::compose_n`,
 `flows::mean_response` (docs/132 §1, §5; operator 2026-11-12). The flow law

@@ -487,7 +487,7 @@ pub fn held_heat(sys: &crate::pulse::Body) -> Ratio {
     sys.flows
         .iter()
         .fold(star_heat(sys) * mass(&sys.kept), |h, x| {
-            h + x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key)
+            h + x.agitation.clone() * x.holding()
         })
 }
 
@@ -1125,7 +1125,7 @@ pub fn system(
                 agitation: crate::ring::grain(&x.agitation.clone().max(disc_agitation.clone())),
                 ..x.clone()
             });
-            inside += x.amount.clone() * crate::flows::weight(&x.key) / total.clone();
+            inside += x.holding() / total.clone();
         }
         i = j;
     }
@@ -1137,9 +1137,7 @@ pub fn system(
         outside
             .iter()
             .filter(|(_, d, _)| d < r)
-            .fold(h_s.clone(), |a, (x, _, _)| {
-                a + x.amount.clone() * crate::flows::weight(&x.key) / total.clone()
-            })
+            .fold(h_s.clone(), |a, (x, _, _)| a + x.holding() / total.clone())
     };
     let thrown: Vec<(crate::chem::Kind, Ratio)> = if held_f.is_zero() {
         Vec::new()
@@ -1163,13 +1161,14 @@ pub fn system(
     ));
     let mut medium = Manifest::new();
     for x in &motes {
-        *medium.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+        for (k, a) in &x.parts {
+            *medium.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+        }
     }
     // The medium's spin, in the system's own frame: each mote's share times
     // its spins.
     let medium_spin = motes.iter().fold(ratio(0, 1), |s, x| {
-        s + x.amount.clone() * crate::flows::weight(&x.key) / total.clone()
-            * (x.ell_o() + x.ell_orth())
+        s + x.holding() / total.clone() * (x.ell_o() + x.ell_orth())
     });
     Some((star, medium, medium_spin, motes))
 }
@@ -1350,13 +1349,7 @@ pub fn system_frame_of(
         kept.clone() / total.clone(),
         sys.flows
             .iter()
-            .map(|x| {
-                (
-                    x.ell_o(),
-                    x.amount.clone() * crate::flows::weight(&x.key) / total.clone(),
-                    x.lift.clone(),
-                )
-            })
+            .map(|x| (x.ell_o(), x.holding() / total.clone(), x.lift.clone()))
             .chain(
                 sys.satellites
                     .iter()
@@ -1857,7 +1850,7 @@ pub fn settle_system(
         b.satellites.iter().fold(ratio(0, 1), |s, w| {
             s + mass(&w.total()) / unit.clone() * w.ell.clone()
         }) + b.flows.iter().fold(ratio(0, 1), |s, x| {
-            s + x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * x.ell_o()
+            s + x.holding() / unit.clone() * x.ell_o()
         })
     };
     let spin_before = spin_of(sys);
@@ -1870,8 +1863,10 @@ pub fn settle_system(
     let mut pool: Manifest = std::mem::take(&mut sys.medium);
     let motes = std::mem::take(&mut sys.flows);
     for x in &motes {
-        if let Some(a) = pool.get_mut(&x.key) {
-            *a -= x.amount.clone();
+        for (k, m) in &x.parts {
+            if let Some(a) = pool.get_mut(k) {
+                *a -= m.clone();
+            }
         }
     }
     let unmoted: Manifest = pool.into_iter().filter(|(_, a)| a.is_positive()).collect();
@@ -1879,7 +1874,7 @@ pub fn settle_system(
     let mut mix = sys.kept.clone();
     for (kind, a) in motes
         .iter()
-        .map(|x| (&x.key, &x.amount))
+        .flat_map(|x| x.parts.iter())
         .chain(unmoted.iter())
     {
         *mix.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
@@ -1921,9 +1916,7 @@ pub fn settle_system(
     // The partition of what entered (register B15): every mote and world is
     // read once, as escaping, falling to the star or entering convergence,
     // each with its spin; their sum is checked against the spin read before.
-    let mote_spin = |x: &crate::flows::Mote| {
-        x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * x.ell_o()
-    };
+    let mote_spin = |x: &crate::flows::Mote| x.holding() / unit.clone() * x.ell_o();
     let mut parted = ratio(0, 1);
     for x in motes {
         parted += mote_spin(&x);
@@ -1935,16 +1928,20 @@ pub fn settle_system(
         // No mirror (docs/117 §12): a mote's reach is read in this enclosure
         // and kept; one inside the star's ring belongs to the star.
         if r > rim {
-            escaped_heat += x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key);
-            *escaped.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+            escaped_heat += x.agitation.clone() * x.holding();
+            for (k, a) in &x.parts {
+                *escaped.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            }
             continue;
         }
         if r < b0 {
-            to_star_heat += x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key);
-            *to_star.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+            to_star_heat += x.agitation.clone() * x.holding();
+            for (k, a) in &x.parts {
+                *to_star.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            }
             continue;
         }
-        let matter: Manifest = [(x.key.clone(), x.amount.clone())].into();
+        let matter: Manifest = x.parts.clone();
         let phase = x.phase();
         bodies.push((
             r,
@@ -2183,8 +2180,10 @@ pub fn settle_system(
         let mut loose = stripped.clone();
         if matter.is_empty() {
             for x in from {
-                if let Some(a) = loose.get_mut(&x.key) {
-                    *a -= x.amount.clone();
+                for (k, m) in &x.parts {
+                    if let Some(a) = loose.get_mut(k) {
+                        *a -= m.clone();
+                    }
                 }
                 belt_motes.push(x);
             }
@@ -2192,8 +2191,7 @@ pub fn settle_system(
         for (kind, a) in loose {
             if a.is_positive() {
                 belt_motes.push(crate::flows::Mote {
-                    key: kind,
-                    amount: a,
+                    parts: crate::flows::Mote::one(kind, a),
                     spins: crate::flows::Mote::spins_of(
                         &crate::ring::grain(&(r.clone() * inner.clone())),
                         &tilt,

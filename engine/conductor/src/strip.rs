@@ -222,7 +222,7 @@ pub fn plane_faces(x: &Mote, enc: &Enclosed, whole: &Ratio) -> Vec<PlaneFace> {
     let m = if whole.is_zero() {
         ratio(0, 1)
     } else {
-        x.amount.clone() * crate::flows::weight(&x.key) / whole.clone()
+        x.holding() / whole.clone()
     };
     x.spins.iter().map(|l| plane_face(enc, l, &m)).collect()
 }
@@ -258,7 +258,7 @@ pub fn half_rings(x: &Mote, enc: &Enclosed, whole: &Ratio) -> [Option<Ring>; 2] 
     let m = if whole.is_zero() {
         ratio(0, 1)
     } else {
-        x.amount.clone() * crate::flows::weight(&x.key) / whole.clone()
+        x.holding() / whole.clone()
     };
     let (plus, minus) = spin_halves(&x.spins, &x.spins_orth);
     let (a_plus, a_minus) = x.orientation.half_axes(&plus, &minus);
@@ -318,7 +318,7 @@ pub fn invariable_axes(motes: &[Mote], whole: &Ratio) -> [[Ratio; 3]; 2] {
         return a;
     }
     for x in motes {
-        let w = x.amount.clone() * crate::flows::weight(&x.key) / whole.clone();
+        let w = x.holding() / whole.clone();
         let (plus, minus) = spin_halves(&x.spins, &x.spins_orth);
         let (ap, am) = x.orientation.half_axes(&plus, &minus);
         for k in 0..3 {
@@ -350,8 +350,6 @@ pub struct PlaneForm {
 /// its plane's own circle in `enc` (`whole` the enclosure's holding unit).
 pub fn plane_forms(x: &Mote, enc: &Enclosed, whole: &Ratio) -> Vec<PlaneForm> {
     use crate::orientation::{reading, PARTNER, SPATIAL};
-    let dims = crate::chem::dimensions(&x.key);
-    let third = |v: u32| ratio(i64::from(v), 3);
     let faces = plane_faces(x, enc, whole);
     let g = x.orientation.g();
     (0..SPATIAL.len())
@@ -364,7 +362,11 @@ pub fn plane_forms(x: &Mote, enc: &Enclosed, whole: &Ratio) -> Vec<PlaneForm> {
                     (ra - rb) / ratio(2, 1),
                 ),
                 pair: (a, b),
-                poles: (third(dims.held), third(dims.open)),
+                // A parcel's poles a nucleus, its parts' by count (docs/134 §6).
+                poles: (
+                    x.by_count(|k| ratio(i64::from(crate::chem::dimensions(k).held), 3)),
+                    x.by_count(|k| ratio(i64::from(crate::chem::dimensions(k).open), 3)),
+                ),
                 reach: faces
                     .get(j)
                     .cloned()
@@ -380,8 +382,7 @@ mod tests {
 
     fn turning_mote(amount: Ratio, orth: Vec<Ratio>) -> Mote {
         crate::flows::Mote {
-            key: crate::chem::Kind::atom(4).expect("a kind"),
-            amount,
+            parts: crate::flows::Mote::one(crate::chem::Kind::atom(4).expect("a kind"), amount),
             spins: vec![ratio(3, 4), ratio(1, 2), ratio(1, 4)],
             spins_orth: orth,
             orientation: crate::orientation::Orientation::from_phases(&[
@@ -486,8 +487,10 @@ mod tests {
         // readings, a third of the nuclide's dimensions on each axis, the
         // reach from its own circle; the three axes' poles make the whole.
         let mut x = crate::flows::Mote {
-            key: crate::chem::Kind::atom(4).expect("a kind"),
-            amount: ratio(2, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::atom(4).expect("a kind"),
+                ratio(2, 1),
+            ),
             spins: crate::flows::Mote::spins_of(
                 &ratio(3, 2),
                 &[ratio(1, 2), ratio(1, 3), ratio(1, 6)],
@@ -509,7 +512,7 @@ mod tests {
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let forms = plane_forms(&x, &enc, &ratio(1, 1));
         assert_eq!(forms.len(), 3);
-        let dims = crate::chem::dimensions(&x.key);
+        let dims = crate::chem::dimensions(&x.label());
         let held = forms.iter().fold(ratio(0, 1), |s, f| s + f.poles.0.clone());
         let open = forms.iter().fold(ratio(0, 1), |s, f| s + f.poles.1.clone());
         assert_eq!(
@@ -532,14 +535,7 @@ mod tests {
                 b,
                 "α − β its partner"
             );
-            assert_eq!(
-                f.reach,
-                plane_face(
-                    &enc,
-                    &x.spins[j],
-                    &(x.amount.clone() * crate::flows::weight(&x.key))
-                )
-            );
+            assert_eq!(f.reach, plane_face(&enc, &x.spins[j], &(x.holding())));
         }
         x.orientation.hold_phase(0, &ratio(1, 3));
         assert_ne!(

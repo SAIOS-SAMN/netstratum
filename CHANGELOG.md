@@ -36,6 +36,11 @@ change is named here.
   replacing the per-kind carry `p·w̄/w` at seven sites. Read on one 2^40
   founding to its first echo, before → after: T_u 186 → 110; the ocean's
   hydrogen 18;27·60^5 grains → none; 106 stars → 35, holding hydrogen 1 → 3.
+  The plasma's parcel (docs/134 §6): a mote is a mix (`Mote::parts`), the
+  release's ionized pool one parcel at `p·S`, each bound part its own; read on
+  the same founding to bell 112: 35 stars → 4 (none holding hydrogen), the
+  ocean's hydrogen none → 7;51·60^5 grains, the intergalactic medium a third
+  of the whole.
 - The stride (docs/132; operator 2026-11-12, "increase the velocity of the
   entire system without fracturing the equations"): derived. A galaxy's
   laws run only on an echo's arrival (twice in g557's 557 bells); the stride

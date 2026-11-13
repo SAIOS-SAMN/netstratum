@@ -4,7 +4,7 @@
 the atomic state isn't taking into consideration by moving them at different
 levels"; "this needs derivation and an additional layer of physics".
 
-**Status:** derived 2026-11-13; §1–§2 built (`conductor::plasma`), read §3.1. Read
+**Status:** derived 2026-11-13; §1–§2 and §6 built (`conductor::plasma`, `flows::Mote::parts`), read §3.1. Read
 against docs/105 §3 (the electrons' pair), `cfe::almanac::atom::open_at`
 (ionization by heat), `pulse::push_cut`, `pulse::cascade`,
 `breath::breathe` (the bounce's release), `flows::founding` and
@@ -120,7 +120,7 @@ that were each sorted at birth. That is the next defect of the same layer
    still travels in its own parcel. A mote as a mix (its manifest, one state)
    is the plasma's parcel.
 
-## 6. The plasma's parcel (§4.5, derived 2026-11-13)
+## 6. The plasma's parcel (§4.5, derived and built 2026-11-13)
 
 A release's ionized share of every kind moves at one spin `S` (§2), so it is
 one parcel: a **mix**. Each kind's bound share moves by its own inertia at
@@ -155,6 +155,13 @@ This is the seam's parcel form agreed with Xylarium (§5).
    as one parcel.
 3. A merge keeps each kind's amount exactly.
 4. The record of a mixed parcel reads back.
+
+**Read** (one 2^40 founding, `.testtmp/plasma/mix`, laid to bell 112, T_u 110,
+against §3.1's shared release with one-kind motes): stars at the first echo
+35 → 4, none holding hydrogen (was 3); hydrogen in the galaxy's flows none →
+7;51·60^5 grains and in the ocean none → 7;51·60^5; the intergalactic medium
+≈ 0 → a third of the whole. The stars still form one or two kinds each. g557
+reads unchanged (its motes are one-kind parcels).
 
 ## 5. The seam with Xylarium (agreed 2026-11-13)
 

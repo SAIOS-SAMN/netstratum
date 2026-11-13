@@ -51,29 +51,62 @@ pub fn bound_share(k: &Kind, g: &Ratio, heat: &Ratio) -> Ratio {
 /// `b·F/w + (1 − b)·S`, `S` the ionized pool's impulse over its holding.
 pub fn carried(parts: &[(Ratio, Ratio, Ratio, Ratio)]) -> Vec<Ratio> {
     let one = ratio(1, 1);
-    let (impulse, holding) = parts.iter().fold(
-        (ratio(0, 1), ratio(0, 1)),
-        |(i, h), (n, w, f, b)| {
-            let free = n.clone() * (one.clone() - b.clone());
-            (i + free.clone() * f.clone(), h + free * w.clone())
-        },
-    );
-    let pool = if holding.is_zero() {
+    let pool = pool_spin(parts);
+    parts
+        .iter()
+        .map(|(_, w, f, b)| b.clone() * own_spin(w, f) + (one.clone() - b.clone()) * pool.clone())
+        .collect()
+}
+
+/// The ionized pool's spin `S = Σ n(1 − b)F / Σ n(1 − b)w` over the parts
+/// `(n, w, F, b)`: the one spin the pool's parcel leaves with (docs/134 §6).
+pub fn pool_spin(parts: &[(Ratio, Ratio, Ratio, Ratio)]) -> Ratio {
+    let one = ratio(1, 1);
+    let (impulse, holding) =
+        parts
+            .iter()
+            .fold((ratio(0, 1), ratio(0, 1)), |(i, h), (n, w, f, b)| {
+                let free = n.clone() * (one.clone() - b.clone());
+                (i + free.clone() * f.clone(), h + free * w.clone())
+            });
+    if holding.is_zero() {
         ratio(0, 1)
     } else {
         impulse / holding
-    };
-    parts
+    }
+}
+
+/// A bound part's own spin `F/w`, by its own inertia.
+pub fn own_spin(w: &Ratio, f: &Ratio) -> Ratio {
+    if w.is_zero() {
+        ratio(0, 1)
+    } else {
+        f.clone() / w.clone()
+    }
+}
+
+/// The bounce's split at the throat, cold (docs/134 §6): each kind of `pool`
+/// given the impulse `w̄` a nucleus; returns the pool's spin over `p`, `S`,
+/// and each kind's bound share `b` at the throat's held face, heat 0. The
+/// pooled parcel leaves at `p·S`, each bound part at `p·w̄/w`.
+pub fn bounce_split(pool: &Manifest, mean: &Ratio) -> (Ratio, Manifest) {
+    let g = crate::polarity::throat_held();
+    let b: Manifest = pool
+        .keys()
+        .map(|k| (k.clone(), bound_share(k, &g, &ratio(0, 1))))
+        .collect();
+    let parts: Vec<(Ratio, Ratio, Ratio, Ratio)> = pool
         .iter()
-        .map(|(_, w, f, b)| {
-            let own = if w.is_zero() {
-                ratio(0, 1)
-            } else {
-                f.clone() / w.clone()
-            };
-            b.clone() * own + (one.clone() - b.clone()) * pool.clone()
+        .map(|(k, n)| {
+            (
+                n.clone(),
+                ratio(i64::from(crate::chem::weight(k)), 1),
+                mean.clone(),
+                b[k].clone(),
+            )
         })
-        .collect()
+        .collect();
+    (pool_spin(&parts), b)
 }
 
 /// The bounce's release at the throat, cold (docs/134 §2): each kind of
@@ -93,11 +126,7 @@ pub fn bounce_unit(pool: &Manifest, mean: &Ratio) -> Manifest {
             )
         })
         .collect();
-    kinds
-        .into_iter()
-        .cloned()
-        .zip(carried(&parts))
-        .collect()
+    kinds.into_iter().cloned().zip(carried(&parts)).collect()
 }
 
 #[cfg(test)]
@@ -119,7 +148,9 @@ mod tests {
         let held = parts
             .iter()
             .zip(&ell)
-            .fold(r(0, 1), |s, ((n, w, _, _), l)| s + n.clone() * w.clone() * l.clone());
+            .fold(r(0, 1), |s, ((n, w, _, _), l)| {
+                s + n.clone() * w.clone() * l.clone()
+            });
         let given = parts
             .iter()
             .fold(r(0, 1), |s, (n, _, f, _)| s + n.clone() * f.clone());
@@ -153,8 +184,18 @@ mod tests {
         assert_eq!(bound_share(&iron, &g, &r(12, 1)), r(1, 26));
         assert_eq!(bound_share(&iron, &g, &r(26, 1)), r(0, 1));
         let warm = bound_share(&iron, &g, &r(1, 1));
-        assert!(warm > r(0, 1) && warm <= g, "{warm} {}", crate::chem::charge(&iron));
-        let top = cfe::almanac::atom::windings(crate::chem::charge(&iron)).expect("w").1.iter().map(|w| w.0.clone()).max().expect("t");
+        assert!(
+            warm > r(0, 1) && warm <= g,
+            "{warm} {}",
+            crate::chem::charge(&iron)
+        );
+        let top = cfe::almanac::atom::windings(crate::chem::charge(&iron))
+            .expect("w")
+            .1
+            .iter()
+            .map(|w| w.0.clone())
+            .max()
+            .expect("t");
         assert!(bound_share(&iron, &g, &top) < warm);
         assert_eq!(bound_share(&iron, &g, &top), r(0, 1));
     }
@@ -164,9 +205,9 @@ mod tests {
         let mut pool = Manifest::new();
         pool.insert(crate::chem::hydrogen(), r(10, 1));
         pool.insert(crate::chem::Kind::element(26).expect("iron"), r(1, 1));
-        let total = pool
-            .iter()
-            .fold(r(0, 1), |s, (k, a)| s + a.clone() * r(i64::from(crate::chem::weight(k)), 1));
+        let total = pool.iter().fold(r(0, 1), |s, (k, a)| {
+            s + a.clone() * r(i64::from(crate::chem::weight(k)), 1)
+        });
         let mean = total / r(11, 1);
         let unit = bounce_unit(&pool, &mean);
         let b = crate::polarity::throat_held();
@@ -174,5 +215,39 @@ mod tests {
             let w = r(i64::from(crate::chem::weight(k)), 1);
             assert_eq!(*l, b.clone() * mean.clone() / w + (r(1, 1) - b.clone()));
         }
+    }
+
+    /// Witness 2 (docs/134 §6): the release split into one pooled parcel
+    /// and each kind's bound part keeps every kind's nuclei and the impulse,
+    /// `Σ n·w·ℓ = Σ n·F`, the pool as one parcel.
+    #[test]
+    fn the_split_release_keeps_the_nuclei_and_the_impulse() {
+        let mut pool = Manifest::new();
+        pool.insert(crate::chem::hydrogen(), r(10, 1));
+        pool.insert(crate::chem::Kind::element(26).expect("iron"), r(3, 1));
+        pool.insert(crate::chem::Kind::element(6).expect("carbon"), r(5, 2));
+        let w = |k: &crate::chem::Kind| r(i64::from(crate::chem::weight(k)), 1);
+        let total = pool.iter().fold(r(0, 1), |s, (k, a)| s + a.clone() * w(k));
+        let count = pool.values().fold(r(0, 1), |s, a| s + a.clone());
+        let mean = total / count.clone();
+        let (spin, b) = bounce_split(&pool, &mean);
+        let pooled: Manifest = pool
+            .iter()
+            .map(|(k, a)| (k.clone(), a.clone() * (r(1, 1) - b[k].clone())))
+            .collect();
+        let bound: Manifest = pool
+            .iter()
+            .map(|(k, a)| (k.clone(), a.clone() - pooled[k].clone()))
+            .collect();
+        for k in pool.keys() {
+            assert_eq!(pooled[k].clone() + bound[k].clone(), pool[k]);
+        }
+        let carried = pooled
+            .iter()
+            .fold(r(0, 1), |s, (k, a)| s + a.clone() * w(k) * spin.clone())
+            + bound.iter().fold(r(0, 1), |s, (k, a)| {
+                s + a.clone() * w(k) * own_spin(&w(k), &mean)
+            });
+        assert_eq!(carried, count * mean);
     }
 }

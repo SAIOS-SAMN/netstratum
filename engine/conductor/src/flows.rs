@@ -185,12 +185,16 @@ pub fn space_of(phase: &[Ratio]) -> Vec<Ratio> {
         .collect()
 }
 
-/// A mote: matter as held turning, its state carried forward.
+/// A mote: a parcel of matter as held turning, its state carried forward
+/// (docs/134 §6): a MIX, its parts `{kind → amount}` under one state. A
+/// release's ionized pool is one parcel of many kinds; a bound share a parcel
+/// of one. Every reading of it is its parts' sum, never a representative kind;
+/// a one-kind parcel reads exactly as that kind's mote did.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Mote {
-    pub key: crate::chem::Kind,
-    /// Its amount on the ledger (grains of its kind).
-    pub amount: Ratio,
+    /// Its parts on the ledger, grains of each kind (non-empty, every amount
+    /// above zero).
+    pub parts: crate::pulse::Manifest,
     /// Its orbit spin per spatial plane (in `SPACE` order), own units:
     /// `ℓ_k = ℓ_o·t_k`. The orbit spin `ℓ_o` is their sum (reach `ℓ_o/H`),
     /// its tilt their shares of it (`ell_o`, `tilt`).
@@ -227,6 +231,160 @@ pub struct Mote {
 }
 
 impl Mote {
+    /// A parcel of one kind.
+    pub fn one(key: crate::chem::Kind, amount: Ratio) -> crate::pulse::Manifest {
+        [(key, amount)].into_iter().collect()
+    }
+
+    /// Its count of nuclei, `Σ a` (grains of all its kinds).
+    pub fn count(&self) -> Ratio {
+        self.parts.values().fold(ratio(0, 1), |s, a| s + a.clone())
+    }
+
+    /// Its holding, `Σ a·w`: the nucleons gravity pulls.
+    pub fn holding(&self) -> Ratio {
+        self.parts
+            .iter()
+            .fold(ratio(0, 1), |s, (k, a)| s + a.clone() * weight(k))
+    }
+
+    /// Its open frames, `Σ a·U` (the electrons' unpaired ends).
+    pub fn open_frames(&self) -> Ratio {
+        self.parts.iter().fold(ratio(0, 1), |s, (k, a)| {
+            s + a.clone() * ratio(i64::from(crate::chem::unpaired(k)), 1)
+        })
+    }
+
+    /// Its charge, `Σ a·Q`.
+    pub fn charge(&self) -> Ratio {
+        self.parts.iter().fold(ratio(0, 1), |s, (k, a)| {
+            s + a.clone() * ratio(i64::from(crate::chem::charge(k)), 1)
+        })
+    }
+
+    /// Whether every part is closed (no open frame): inert.
+    pub fn closed(&self) -> bool {
+        self.parts.keys().all(|k| crate::chem::unpaired(k) == 0)
+    }
+
+    /// The holding-weighted share of a per-kind reading `f` over its parts,
+    /// `Σ a·w·f(k) / Σ a·w`: on a one-kind parcel, `f` of that kind exactly.
+    pub fn by_holding(&self, f: impl Fn(&crate::chem::Kind) -> Ratio) -> Ratio {
+        let h = self.holding();
+        if h.is_zero() {
+            return ratio(0, 1);
+        }
+        self.parts
+            .iter()
+            .fold(ratio(0, 1), |s, (k, a)| s + a.clone() * weight(k) * f(k))
+            / h
+    }
+
+    /// The count-weighted share of a per-kind reading `f`, `Σ a·f(k)/Σ a`:
+    /// on a one-kind parcel, `f` of that kind exactly.
+    pub fn by_count(&self, f: impl Fn(&crate::chem::Kind) -> Ratio) -> Ratio {
+        let n = self.count();
+        if n.is_zero() {
+            return ratio(0, 1);
+        }
+        self.parts
+            .iter()
+            .fold(ratio(0, 1), |s, (k, a)| s + a.clone() * f(k))
+            / n
+    }
+
+    /// Its mean weight a nucleus, `Σ a·w/Σ a` (the kind's weight on a
+    /// one-kind parcel).
+    pub fn mean_weight(&self) -> Ratio {
+        let n = self.count();
+        if n.is_zero() {
+            return ratio(0, 1);
+        }
+        self.holding() / n
+    }
+
+    /// Its parts scaled by `f`, each on the nucleus grid, none above its own.
+    pub fn parts_scaled(&self, f: &Ratio) -> crate::pulse::Manifest {
+        self.parts
+            .iter()
+            .map(|(k, a)| {
+                (
+                    k.clone(),
+                    crate::pulse::nucleus(&(a.clone() * f.clone())).min(a.clone()),
+                )
+            })
+            .filter(|(_, a)| *a > ratio(0, 1))
+            .collect()
+    }
+
+    /// Adds `more` to its parts, kind by kind.
+    pub fn add_parts(&mut self, more: &crate::pulse::Manifest) {
+        for (k, a) in more {
+            *self.parts.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+        }
+    }
+
+    /// Takes `less` from its parts, kind by kind, dropping parts left empty.
+    pub fn take_parts(&mut self, less: &crate::pulse::Manifest) {
+        for (k, a) in less {
+            if let Some(x) = self.parts.get_mut(k) {
+                *x -= a.clone();
+            }
+        }
+        self.parts.retain(|_, a| *a > ratio(0, 1));
+    }
+
+    /// Its dipole at the deficit `δ` on `pole_plane` (docs/129 §1.1), its
+    /// parts summed: the push `ΣaQ·δ/Σaw` (inverted on the vacuum face) and
+    /// the strength `ΣaU/(3·Σaw)`, `U` at most the kind's whole dimensions;
+    /// on a one-kind parcel, [`dipole`] of that kind exactly.
+    pub fn dipole(&self, delta: &Ratio, pole_plane: usize) -> Result<Dipole, CouplingRefusal> {
+        let w = self.holding();
+        if w.is_zero() {
+            return Err(CouplingRefusal::UnbodiedDipole { pole_plane });
+        }
+        let (q, u) = self
+            .parts
+            .iter()
+            .fold((ratio(0, 1), ratio(0, 1)), |(q, u), (k, a)| {
+                let f = crate::chem::dimensions(k);
+                (
+                    q + a.clone() * ratio(i64::from(f.open / 3), 1),
+                    u + a.clone() * ratio(i64::from(f.electrons_open.min(f.whole())), 1),
+                )
+            });
+        let push = q * delta.clone() / w.clone();
+        let push = if self.vacuum {
+            ratio(1, 1) - push
+        } else {
+            push
+        };
+        Ok(Dipole {
+            push,
+            strength: u / (ratio(3, 1) * w),
+        })
+    }
+
+    /// Its label for matching a parcel to itself across bounces (identity
+    /// only, never read by a law): its kind, or a mix's first by the
+    /// manifest's order.
+    pub fn label(&self) -> crate::chem::Kind {
+        self.parts
+            .keys()
+            .next()
+            .cloned()
+            .unwrap_or_else(crate::chem::hydrogen)
+    }
+
+    /// Its name for display: its kinds, joined.
+    pub fn name(&self) -> String {
+        self.parts
+            .keys()
+            .map(|k| k.to_string())
+            .collect::<Vec<_>>()
+            .join("+")
+    }
+
     /// The plane spins from an orbit spin and a tilt: `ℓ_k = ℓ·t_k`, an
     /// empty tilt isotropic (a third in each plane).
     pub fn spins_of(ell: &Ratio, tilt: &[Ratio]) -> Vec<Ratio> {
@@ -330,8 +488,8 @@ impl Mote {
 pub fn true_phase(x: &Mote, k: usize) -> Ratio {
     let at = x.phase_at(k);
     match x.lever.get(k) {
-        Some(l) if !l.is_zero() && !x.amount.is_zero() => {
-            at + l.clone() / x.amount.clone() * x.lever_place.clone()
+        Some(l) if !l.is_zero() && !x.count().is_zero() => {
+            at + l.clone() / x.count() * x.lever_place.clone()
         }
         _ => at,
     }
@@ -356,8 +514,8 @@ pub fn settle(
         let ahead = next.clone() - at.clone();
         let ahead = ahead.clone() - ahead.floor();
         let forward = ahead < ratio(1, 2);
-        let exact = x.amount.clone() * f.clone();
-        let whole = crate::pulse::nucleus(&exact).min(x.amount.clone());
+        let exact = x.count() * f.clone();
+        let whole = crate::pulse::nucleus(&exact).min(x.count());
         let below = exact - whole.clone();
         if !below.is_zero() {
             cross.note(*k, crate::enfold::Fate::Acknowledged, &below);
@@ -378,8 +536,13 @@ pub fn weight(k: &crate::chem::Kind) -> Ratio {
 /// nuclei's fibres' grip, `κ_w·g` at the held share `g` of its place (docs/105
 /// §3), a cluster's by its parts' holding. In `[0, 1]`.
 pub fn grip_share(x: &Mote, g: &Ratio) -> Ratio {
-    let p = g.clone();
-    let parts = x.key.parts();
+    x.by_holding(|k| kind_grip(k, g))
+}
+
+/// A kind's nuclear grip at the held share `g`: its parts' fibres' grip by
+/// their holding.
+fn kind_grip(k: &crate::chem::Kind, g: &Ratio) -> Ratio {
+    let parts = k.parts();
     let whole = parts
         .iter()
         .fold(0u64, |s, (n, w)| s + u64::from(*n) * u64::from(*w));
@@ -388,7 +551,7 @@ pub fn grip_share(x: &Mote, g: &Ratio) -> Ratio {
     }
     parts.iter().fold(ratio(0, 1), |s, (n, w)| {
         s + ratio(i64::from(*n) * i64::from(*w), 1)
-            * crate::nuclides::grip(*w, &p).unwrap_or_else(|| ratio(0, 1))
+            * crate::nuclides::grip(*w, g).unwrap_or_else(|| ratio(0, 1))
     }) / ratio(i64::try_from(whole).unwrap_or(i64::MAX), 1)
 }
 
@@ -548,7 +711,7 @@ pub fn step_with(x: &Mote, psi: &[Ratio]) -> Ratio {
 /// `C_Δ = Σ_k t_k · in_step(Δφ_k^i, Δφ_k^j) ≥ ½`, by each one's tilt.
 pub fn bonded(a: &Mote, b: &Mote, da: &[Ratio], db: &[Ratio]) -> bool {
     let half = ratio(1, 2);
-    if crate::chem::unpaired(&a.key) == 0 || crate::chem::unpaired(&b.key) == 0 {
+    if a.closed() || b.closed() {
         return false;
     }
     if step_with(a, &b.phase()) < half || step_with(b, &a.phase()) < half {
@@ -622,7 +785,7 @@ pub fn collections(motes: &[Mote], moves: &[Vec<Ratio>]) -> Vec<Vec<usize>> {
             let t = tilt_of(&x.tilt());
             let phase = x.phase();
             let mut w = Bounds {
-                open: crate::chem::unpaired(&x.key) != 0,
+                open: !x.closed(),
                 phase: [(0, 0); 3],
                 tilt: [(0, 0); 3],
                 moved: [(0, 0); 3],
@@ -899,7 +1062,7 @@ pub fn magnet(
     // a disc compounds them (the scalar collapse).
     let hold: Vec<Ratio> = motes
         .iter()
-        .map(|x| crate::ring::grain(&(x.amount.clone() * weight(&x.key) / total.clone())))
+        .map(|x| crate::ring::grain(&(x.holding() / total.clone())))
         .collect();
     let alpha: Vec<[Ratio; 3]> = motes.iter().map(plane_shares).collect();
     let mut share: Vec<Option<Ratio>> = vec![None; n];
@@ -916,16 +1079,7 @@ pub fn magnet(
                     .map(|l| l.abs())
                     .unwrap_or_else(|| ratio(0, 1));
                 let (r, _, d) = lifted(enc, &ell, &x.lift);
-                let f = crate::chem::dimensions(&x.key);
-                let dip = dipole(
-                    f.open / 3,
-                    f.held / 3,
-                    f.electrons_open.min(f.whole()),
-                    &d,
-                    x.vacuum,
-                    plane,
-                )
-                .ok();
+                let dip = x.dipole(&d, plane).ok();
                 (r, d, dip)
             })
             .collect();
@@ -1014,7 +1168,7 @@ pub fn own_enclosure(mote: &Mote, enc: &Enclosed, whole: &Ratio) -> [Ratio; 2] {
     let m = if whole.is_zero() {
         ratio(0, 1)
     } else {
-        mote.amount.clone() * weight(&mote.key) / whole.clone()
+        mote.holding() / whole.clone()
     };
     [
         crate::ring::pinch_share(&m, &mote.hold_in(enc)),
@@ -1571,10 +1725,7 @@ pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32, total: &Ratio) -> Ra
     if n == 0 || motes.iter().all(|x| x.agitation.is_zero()) {
         return ratio(0, 1);
     }
-    let w: Vec<Ratio> = motes
-        .iter()
-        .map(|x| x.amount.clone() * weight(&x.key))
-        .collect();
+    let w: Vec<Ratio> = motes.iter().map(|x| x.holding()).collect();
     let mut reach = Vec::with_capacity(n);
     let mut delta = Vec::with_capacity(n);
     let mut extent = Vec::with_capacity(n);
@@ -1668,7 +1819,7 @@ fn torque_one(
     let m = if total.is_zero() {
         ratio(0, 1)
     } else {
-        x.amount.clone() * weight(&x.key) / total.clone()
+        x.holding() / total.clone()
     };
     let place = crate::enfold::place(&r_o, &m, &h);
     let heat_was = x.agitation.clone();
@@ -1758,7 +1909,7 @@ pub fn ring_motions(
             if total.is_zero() {
                 ratio(0, 1)
             } else {
-                x.amount.clone() * weight(&x.key) / total.clone()
+                x.holding() / total.clone()
             }
         })
         .collect();
@@ -2119,7 +2270,7 @@ pub fn plane_rings(x: &Mote, enc: &Enclosed, total: &Ratio) -> [Option<PlaneRing
     let m = if total.is_zero() {
         ratio(0, 1)
     } else {
-        x.amount.clone() * weight(&x.key) / total.clone()
+        x.holding() / total.clone()
     };
     let alpha = plane_shares(x);
     std::array::from_fn(|k| {
@@ -2207,7 +2358,7 @@ pub fn conform_axes(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio
             if total.is_zero() {
                 ratio(0, 1)
             } else {
-                x.amount.clone() * weight(&x.key) / total.clone()
+                x.holding() / total.clone()
             }
         })
         .collect();
@@ -2325,7 +2476,7 @@ pub fn torsion_turns(
             if total.is_zero() {
                 ratio(0, 1)
             } else {
-                x.amount.clone() * weight(&x.key) / total.clone()
+                x.holding() / total.clone()
             }
         })
         .collect();
@@ -2416,7 +2567,7 @@ pub fn echo_beats(
             if total.is_zero() {
                 ratio(0, 1)
             } else {
-                x.amount.clone() * weight(&x.key) / total.clone()
+                x.holding() / total.clone()
             }
         })
         .collect();
@@ -2519,7 +2670,7 @@ pub fn conform_partners(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (R
             if total.is_zero() {
                 ratio(0, 1)
             } else {
-                x.amount.clone() * weight(&x.key) / total.clone()
+                x.holding() / total.clone()
             }
         })
         .collect();
@@ -2751,16 +2902,11 @@ fn shear_booked(
     // Each mote's readings at the bell's start: its holding w, its share m in
     // the enclosure's unit, its open frames in that unit, its pole and open
     // share, its reach and extent, and its rate on each plane.
-    let w: Vec<Ratio> = motes
-        .iter()
-        .map(|x| x.amount.clone() * weight(&x.key))
-        .collect();
+    let w: Vec<Ratio> = motes.iter().map(|x| x.holding()).collect();
     let m: Vec<Ratio> = w.iter().map(|h| h.clone() / total.clone()).collect();
     let frames: Vec<Ratio> = motes
         .iter()
-        .map(|x| {
-            x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1) / total.clone()
-        })
+        .map(|x| x.open_frames() / total.clone())
         .collect();
     // The dipole at each mote's place (LAW-COUPLING v2, docs/129 §1): its
     // pole the push's, `1 − 2π` with `π = p·δ/w`, inverted on the vacuum
@@ -2769,17 +2915,8 @@ fn shear_booked(
     let dips: Vec<Option<Dipole>> = motes
         .iter()
         .map(|x| {
-            let f = crate::chem::dimensions(&x.key);
             let (_, d) = x.reach_in(enc);
-            dipole(
-                f.open / 3,
-                f.held / 3,
-                f.electrons_open.min(f.whole()),
-                &d,
-                x.vacuum,
-                0,
-            )
-            .ok()
+            x.dipole(&d, 0).ok()
         })
         .collect();
     let pole: Vec<Ratio> = dips
@@ -2960,8 +3097,7 @@ pub fn spray(
             }
             let ell_o = crate::ring::grain(&carried.iter().find(|(c, _)| c == k)?.1);
             Some(Mote {
-                key: k.clone(),
-                amount: a.clone(),
+                parts: Mote::one(k.clone(), a.clone()),
                 spins: Mote::spins_of(&ell_o, &[]),
                 spins_orth: vec![ratio(0, 1); 3],
                 orientation: crate::orientation::Orientation::from_phases(&phase),
@@ -3016,13 +3152,15 @@ pub fn read_cut(motes: &[Mote], enc: &Enclosed, whole: &Ratio) -> (Manifest, Man
         } else {
             ratio(0, 1)
         };
-        let k = crate::ring::grain(&(x.amount.clone() * share)).min(x.amount.clone());
-        let f = x.amount.clone() - k.clone();
-        if k > ratio(0, 1) {
-            *kept.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += k;
-        }
-        if f > ratio(0, 1) {
-            *free.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += f;
+        for (key, a) in &x.parts {
+            let k = crate::ring::grain(&(a.clone() * share.clone())).min(a.clone());
+            let f = a.clone() - k.clone();
+            if k > ratio(0, 1) {
+                *kept.entry(key.clone()).or_insert_with(|| ratio(0, 1)) += k;
+            }
+            if f > ratio(0, 1) {
+                *free.entry(key.clone()).or_insert_with(|| ratio(0, 1)) += f;
+            }
         }
     }
     (kept, free)
@@ -3173,9 +3311,7 @@ pub fn beads(
     let ee: Vec<Ratio> = motes
         .iter()
         .zip(&hh)
-        .map(|(x, h)| {
-            crate::ring::pinch_share(&(x.amount.clone() * weight(&x.key) / total.clone()), h)
-        })
+        .map(|(x, h)| crate::ring::pinch_share(&(x.holding() / total.clone()), h))
         .collect();
     let lov: Vec<Ratio> = rr
         .iter()
@@ -3201,7 +3337,7 @@ pub fn beads(
             .map(|&j| {
                 let (d0, d1) = (delta_of(j, &lov[j]), delta_of(j, &hiv[j]));
                 let band = (d0.clone() - d1.clone()) / (d0 + d1);
-                let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
+                let m = motes[j].holding() / total.clone();
                 (
                     lov[j].clone(),
                     hiv[j].clone(),
@@ -3214,15 +3350,16 @@ pub fn beads(
     };
     // The fibres (ruling of 2026-10-18: the individual fibres are beaded,
     // then the fibres braided together): a fibre is one kind's run on one
-    // face, motes whose dispersal bands overlap, linked transitively.
-    let mut fibres: std::collections::BTreeMap<(Vec<bool>, crate::chem::Kind), Vec<usize>> =
+    // face, motes whose dispersal bands overlap, linked transitively; a
+    // mixed parcel (docs/134 §6) runs with the parcels of its own kinds.
+    let mut fibres: std::collections::BTreeMap<(Vec<bool>, Vec<crate::chem::Kind>), Vec<usize>> =
         std::collections::BTreeMap::new();
     for (i, x) in motes.iter().enumerate() {
         if (!disc_leg || on_disc_leg(x)) && !rr[i].is_zero() {
             fibres
                 .entry((
                     (0..PLANES).map(|k| frac(&x.phase_at(k)) < half).collect(),
-                    x.key.clone(),
+                    x.parts.keys().cloned().collect(),
                 ))
                 .or_default()
                 .push(i);
@@ -3297,9 +3434,7 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, total: &Ratio) -> Vec<Strand> {
     let ee: Vec<Ratio> = motes
         .iter()
         .zip(&hh)
-        .map(|(x, h)| {
-            crate::ring::pinch_share(&(x.amount.clone() * weight(&x.key) / total.clone()), h)
-        })
+        .map(|(x, h)| crate::ring::pinch_share(&(x.holding() / total.clone()), h))
         .collect();
     let lov: Vec<Ratio> = rr
         .iter()
@@ -3323,11 +3458,12 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, total: &Ratio) -> Vec<Strand> {
         let (mut x, mut held, mut a_w, mut r_w) =
             (ratio(0, 1), ratio(0, 1), ratio(0, 1), ratio(0, 1));
         for &j in &members {
-            let m = motes[j].amount.clone() * weight(&motes[j].key) / total.clone();
+            let m = motes[j].holding() / total.clone();
             // The additive bond (docs/103 §6): holding, open frames and the
             // nuclei's grip, each a share of the same reach.
             let g_j = crate::polarity::faces(&delta_of(j, &rr[j])).0;
-            x += m.clone() * (ratio(1, 1) + open(&motes[j].key) + grip_share(&motes[j], &g_j));
+            x +=
+                m.clone() * (ratio(1, 1) + motes[j].by_holding(open) + grip_share(&motes[j], &g_j));
             a_w += m.clone() * motes[j].agitation.clone();
             r_w += m.clone() * rr[j].clone();
             held += m;
@@ -3360,7 +3496,7 @@ pub fn strands(motes: &[Mote], enc: &Enclosed, total: &Ratio) -> Vec<Strand> {
         let reach_w = r_w / held.clone();
         // The hold the chain turns about, by holding.
         let h_w = members.iter().fold(ratio(0, 1), |s, &j| {
-            s + motes[j].amount.clone() * weight(&motes[j].key) / total.clone() * hh[j].clone()
+            s + motes[j].holding() / total.clone() * hh[j].clone()
         }) / held.clone();
         let face = (ratio(1, 1) - h_w.clone() / (reach_w.clone() + h_w)) / ratio(2, 1);
         // A chain with no extent at all (no push to spread it) is not read as
@@ -3485,7 +3621,7 @@ pub fn disc_plane(motes: &[Mote]) -> Vec<Ratio> {
     blend(
         &motes
             .iter()
-            .map(|x| (x.amount.clone() * weight(&x.key), x.ell_o(), x.tilt()))
+            .map(|x| (x.holding(), x.ell_o(), x.tilt()))
             .collect::<Vec<_>>(),
     )
 }
@@ -3539,8 +3675,7 @@ pub fn band_pairs(
         if total.is_zero() {
             ratio(0, 1)
         } else {
-            motes[i].amount.clone() * weight(&motes[i].key) / total.clone() * loose.clone()
-                / whole.clone()
+            motes[i].holding() / total.clone() * loose.clone() / whole.clone()
         }
     };
     let pair = |x: &Ratio| {
@@ -3650,17 +3785,12 @@ pub fn band_pairs(
         crate::profile::mark("pairs:sums");
         let mid = (o_lo.clone() + o_hi.clone()) / ratio(2, 1);
         let h_mid = enc.hold_within(&mid);
-        let held_of = |i: usize, s: &Ratio| {
-            motes[i].amount.clone() * s.clone() * weight(&motes[i].key) / g_total.clone()
-        };
+        let held_of = |i: usize, s: &Ratio| motes[i].holding() * s.clone() / g_total.clone();
         let m = members
             .iter()
             .fold(ratio(0, 1), |acc, (i, s)| acc + held_of(*i, s));
         let mu = members.iter().fold(ratio(0, 1), |acc, (i, s)| {
-            acc + motes[*i].amount.clone()
-                * s.clone()
-                * ratio(i64::from(crate::chem::unpaired(&motes[*i].key)), 1)
-                / g_total.clone()
+            acc + motes[*i].open_frames() * s.clone() / g_total.clone()
         });
         if m.is_zero() {
             continue;
@@ -3848,7 +3978,9 @@ pub fn merge(
             continue;
         };
         if let Some(y) = at.get(&kx).map(|&i| &mut out[i]) {
-            let (my, mx) = (y.amount.clone(), x.amount.clone());
+            // Joined by holding (docs/134 §6): on one kind the same shares as
+            // by amount; on a mix, what keeps `Σ m·ℓ`.
+            let (my, mx) = (y.holding(), x.holding());
             let both = my.clone() + mx.clone();
             if both.is_zero() {
                 continue;
@@ -3857,10 +3989,9 @@ pub fn merge(
             let exact_c = (my.clone() * y.ell_orth() + mx.clone() * x.ell_orth()) / both.clone();
             let (go, gc) = (g(&exact_o), g(&exact_c));
             if !total.is_zero() {
-                remainder += both.clone() * weight(&x.key) / total.clone()
+                remainder += both.clone() / total.clone()
                     * ((exact_o - go.clone()) + (exact_c - gc.clone()));
             }
-            let w = weight(&x.key);
             let heat = (my.clone() * y.agitation.clone() + mx.clone() * x.agitation.clone())
                 / both.clone();
             y.agitation = g(&heat);
@@ -3884,11 +4015,9 @@ pub fn merge(
                 o
             };
             let (oy, ox) = (ascend(y), ascend(&x));
-            y.amount = both.clone();
-            let joined_o = crate::orientation::Orientation::mean(&[
-                (&oy, my.clone() * w.clone()),
-                (&ox, mx.clone() * w.clone()),
-            ]);
+            y.add_parts(&x.parts);
+            let joined_o =
+                crate::orientation::Orientation::mean(&[(&oy, my.clone()), (&ox, mx.clone())]);
             let mut levers: Vec<(usize, Ratio, Ratio)> = Vec::new();
             for k in 0..PLANES {
                 cross.note(k, crate::enfold::Fate::Ascended, &ratio(0, 1));
@@ -3987,8 +4116,7 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
                     r.clone()
                 };
                 Mote {
-                    key: (*k).clone(),
-                    amount: (*a).clone(),
+                    parts: Mote::one((*k).clone(), (*a).clone()),
                     spins: Mote::spins_of(&crate::ring::grain(&ell), &[]),
                     spins_orth: vec![ratio(0, 1); 3],
                     orientation: crate::orientation::Orientation::from_phases(&phase),
@@ -4068,7 +4196,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio
         return (ratio(0, 1), ratio(0, 1), 0);
     }
     let rings_by_face = beads(motes, enc, total, false);
-    let share = |x: &Mote| x.amount.clone() * weight(&x.key) / total.clone();
+    let share = |x: &Mote| x.holding() / total.clone();
     let mut dl = vec![ratio(0, 1); motes.len()];
     let mut moved_p = ratio(0, 1);
     // docs/110: the spin the balance around the shells' circles moved, and
@@ -4099,9 +4227,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio
                         .collect::<Vec<_>>(),
                 );
                 let magnet = members.iter().fold(ratio(0, 1), |a, &i| {
-                    a + motes[i].amount.clone()
-                        * ratio(i64::from(crate::chem::unpaired(&motes[i].key)), 1)
-                        / total.clone()
+                    a + motes[i].open_frames() / total.clone()
                         * in_step(&motes[i].phase_at(1), &field_mean)
                 });
                 // Its width, its members' own extents edge to edge (each
@@ -4275,9 +4401,7 @@ pub fn fluid(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio
                             a + share(&motes[i]) * motes[i].agitation.clone()
                         });
                         let magnet = idx.iter().fold(ratio(0, 1), |a, &i| {
-                            a + motes[i].amount.clone()
-                                * ratio(i64::from(crate::chem::unpaired(&motes[i].key)), 1)
-                                / total.clone()
+                            a + motes[i].open_frames() / total.clone()
                                 * in_step(&motes[i].phase_at(1), &field_mean)
                         });
                         let pressure = if arc.is_zero() {
@@ -4457,23 +4581,23 @@ pub fn around(cells: &[CellRead]) -> (Vec<Ratio>, Ratio) {
 
 /// The motes' total holding (by weight).
 pub fn holding(motes: &[Mote]) -> Ratio {
-    motes
-        .iter()
-        .fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key))
+    motes.iter().fold(ratio(0, 1), |s, x| s + x.holding())
 }
 
 /// The motes' manifest.
 pub fn manifest(motes: &[Mote]) -> Manifest {
     let mut m = Manifest::new();
     for x in motes {
-        *m.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+        for (k, a) in &x.parts {
+            *m.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+        }
     }
     m
 }
 
 #[cfg(test)]
 mod reading_tests {
-    use super::{founding, hold_along, weight, within_reach, Mote, Work};
+    use super::{founding, hold_along, within_reach, Mote, Work};
     use cfe::ratio::{ratio, Ratio};
 
     /// The founding's motes of the first `k` kinds, one grain each: the
@@ -4492,9 +4616,7 @@ mod reading_tests {
     /// band `R(1 ± p)`, the density the member's holding share.
     fn fibre(ms: &[Mote]) -> (Vec<Ratio>, Vec<(Ratio, Ratio, Ratio)>) {
         let (h, p) = (ratio(2, 1), ratio(1, 2));
-        let total = ms
-            .iter()
-            .fold(ratio(0, 1), |s, x| s + x.amount.clone() * weight(&x.key));
+        let total = ms.iter().fold(ratio(0, 1), |s, x| s + x.holding());
         let reach: Vec<Ratio> = ms.iter().map(|x| x.ell_o() / h.clone()).collect();
         let bands = ms
             .iter()
@@ -4503,7 +4625,7 @@ mod reading_tests {
                 (
                     r.clone() * (ratio(1, 1) - p.clone()),
                     r.clone() * (ratio(1, 1) + p.clone()),
-                    x.amount.clone() * weight(&x.key) / total.clone(),
+                    x.holding() / total.clone(),
                 )
             })
             .collect();
@@ -4590,8 +4712,8 @@ mod reading_tests {
 mod passage_tests {
     use super::{
         around, blend, conform_partners, mean_response, partner_target, passage_of, phase_beads,
-        rest, restoring, shear_rate, space_of, spin_torque, tilt_from, tilt_of, weight, CellRead,
-        Enclosed, Mote,
+        rest, restoring, shear_rate, space_of, spin_torque, tilt_from, tilt_of, CellRead, Enclosed,
+        Mote,
     };
     use cfe::ratio::{ratio, Ratio};
     use num_traits::Zero;
@@ -4647,8 +4769,10 @@ mod passage_tests {
     fn a_motes_lever_keeps_its_true_place() {
         use super::{settle, true_phase, Mote};
         let mut x = Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(1, 1), &[]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[ratio(1, 60), ratio(0, 1)]),
@@ -4689,8 +4813,10 @@ mod passage_tests {
     fn motes_the_bounce_moves_together_bond_and_motes_moved_apart_do_not() {
         // docs/111 §4.2: near on the sphere, open, and moved in step.
         let mote = |key: &str, ph: (i64, i64)| Mote {
-            key: crate::chem::Kind::parse(key).expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse(key).expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(1, 1), &[]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[
@@ -4829,8 +4955,10 @@ mod passage_tests {
 
     fn sheared(key: &str, ell: Ratio, partners: Vec<Ratio>, vacuum: bool) -> Mote {
         Mote {
-            key: crate::chem::Kind::parse(key).expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse(key).expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ell, &tilt_from(&[ratio(1, 1), ratio(2, 1), ratio(1, 1)])),
             spins_orth: partners,
             orientation: crate::orientation::Orientation::default(),
@@ -4881,10 +5009,7 @@ mod passage_tests {
             sheared("W0004", ratio(7, 4), vec![ratio(0, 1); 3], false),
         ];
         let total = ratio(1, 1);
-        let w: Vec<Ratio> = motes
-            .iter()
-            .map(|x| x.amount.clone() * weight(&x.key))
-            .collect();
+        let w: Vec<Ratio> = motes.iter().map(|x| x.holding()).collect();
         let book = |ms: &[Mote], k: usize| {
             ms.iter().zip(&w).fold(ratio(0, 1), |s, (x, wi)| {
                 s + wi.clone() * x.spins_orth[k].clone()
@@ -4943,8 +5068,10 @@ mod passage_tests {
         // tilt where they hold none.
         let tilt = tilt_from(&[ratio(1, 1), ratio(2, 1), ratio(3, 1)]);
         let mut x = Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(1, 2), &tilt),
             spins_orth: vec![ratio(1, 4), ratio(-1, 8), ratio(1, 8)],
             orientation: crate::orientation::Orientation::default(),
@@ -4979,8 +5106,10 @@ mod passage_tests {
         let mut moves = Vec::new();
         for i in 0..48i64 {
             let mut x = Mote {
-                key: crate::chem::Kind::parse(kinds[(i % 4) as usize]).expect("a kind"),
-                amount: ratio(1, 1),
+                parts: crate::flows::Mote::one(
+                    crate::chem::Kind::parse(kinds[(i % 4) as usize]).expect("a kind"),
+                    ratio(1, 1),
+                ),
                 spins: Mote::spins_of(
                     &ratio(1, 2),
                     &tilt_from(&[ratio(1 + i % 3, 1), ratio(2, 1), ratio(1 + i % 5, 1)]),
@@ -5151,8 +5280,10 @@ mod passage_tests {
         // A torqued mote keeps its tilt a partition of one and its orbit spin
         // the L1 sum of its planes.
         let mut x = Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(1, 2), &[ratio(1, 2), ratio(1, 3), ratio(1, 6)]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&rest(ratio(1, 2))),
@@ -5193,8 +5324,10 @@ mod passage_tests {
         use super::{mobius, Mote, SPACE};
         let tilt = vec![ratio(1, 2), ratio(1, 3), ratio(1, 6)];
         let mut x = Mote {
-            key: crate::chem::Kind::parse("W0041").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0041").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(1, 3), &tilt),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[
@@ -5323,8 +5456,10 @@ mod passage_tests {
             vec![(ratio(1, 2), ratio(1, 4)), (ratio(3, 1), ratio(1, 2))],
         );
         let mut x = Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(2, 1), &[]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&super::rest(ratio(0, 1))),
@@ -5366,8 +5501,10 @@ mod passage_tests {
         );
         // The Möbius pass reverses its sense.
         let mut x = Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(3, 1), &[ratio(1, 2), ratio(1, 2), ratio(0, 1)]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&super::rest(ratio(1, 10))),
@@ -5385,7 +5522,7 @@ mod passage_tests {
         // Relaxed by the shear out of the plane (docs/128 §12.3): a wound
         // mote among settled ones it meets loosens its lead.
         let heavy = Mote {
-            amount: ratio(1000, 1),
+            parts: Mote::one(x.label(), ratio(1000, 1)),
             spins: Mote::spins_of(&x.ell_o(), &flat),
             ..x.clone()
         };
@@ -5404,8 +5541,10 @@ mod passage_tests {
         use super::{step_with, Mote};
         use cfe::ratio::Ratio;
         let mote = |phase: Vec<Ratio>, tilt: Vec<Ratio>| Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(1, 1), &tilt),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&phase),
@@ -5439,8 +5578,10 @@ mod passage_tests {
     fn a_motes_nuclear_grip_is_its_nuclei_at_its_place() {
         use super::{grip_share, Mote};
         let mote = |key: &str, loop_at: (i64, i64)| Mote {
-            key: crate::chem::Kind::parse(key).expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse(key).expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(1, 1), &[]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&super::rest(ratio(
@@ -5472,8 +5613,10 @@ mod passage_tests {
             let mut phase = super::rest(ratio(loop_at.0, loop_at.1));
             phase[0] = ratio(j, 40);
             Mote {
-                key: crate::chem::Kind::parse("W0016").expect("a kind"),
-                amount: ratio(1, 1),
+                parts: crate::flows::Mote::one(
+                    crate::chem::Kind::parse("W0016").expect("a kind"),
+                    ratio(1, 1),
+                ),
                 spins: Mote::spins_of(&ratio(3, 2), &[ratio(1, 1), ratio(0, 1), ratio(0, 1)]),
                 spins_orth: vec![ratio(0, 1); 3],
                 orientation: crate::orientation::Orientation::from_phases(&phase),
@@ -5508,8 +5651,10 @@ mod passage_tests {
         use super::{luminal, stream, Enclosed, Mote, Strand};
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let mote = |ell: (i64, i64), vacuum: bool| Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(ell.0, ell.1), &[]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[ratio(1, 10), ratio(1, 7)]),
@@ -5543,8 +5688,10 @@ mod passage_tests {
         // About a base of 1: reach 3 reads δ = ¼, reach ⅓ reads δ = ¾.
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let mote = |ell: (i64, i64), vacuum: bool| Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(ell.0, ell.1), &[]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&[ratio(1, 10), ratio(1, 7)]),
@@ -5709,8 +5856,10 @@ mod extent_degree_tests {
         // Register K3: an arc d of the L1 circle of radius R is d/(8R) of a
         // turn; d = R*e, so 45 degrees times e on each side.
         let x = Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ratio(1, 1), &[]),
             spins_orth: Mote::orth_of(&ratio(1, 2), &[]),
             orientation: crate::orientation::Orientation::from_phases(&super::rest(ratio(1, 2))),
@@ -5734,14 +5883,13 @@ mod extent_degree_tests {
 
 #[cfg(test)]
 mod coupling_tests {
-    use super::{meeting, own_enclosure, shear_booked, weight, Enclosed, Mote, SPACE};
+    use super::{meeting, own_enclosure, shear_booked, Enclosed, Mote, SPACE};
     use cfe::ratio::{ratio, Ratio};
     use num_traits::{Signed, Zero};
 
     fn mote(kind: &str, amount: Ratio, ell: Ratio, tilt: &[Ratio], phase: Vec<Ratio>) -> Mote {
         Mote {
-            key: crate::chem::Kind::parse(kind).expect("a kind"),
-            amount,
+            parts: crate::flows::Mote::one(crate::chem::Kind::parse(kind).expect("a kind"), amount),
             spins: Mote::spins_of(&ell, tilt),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&phase),
@@ -5758,9 +5906,8 @@ mod coupling_tests {
     fn books(ms: &[Mote]) -> Vec<Ratio> {
         (0..SPACE.len())
             .map(|k| {
-                ms.iter().fold(ratio(0, 1), |s, x| {
-                    s + x.amount.clone() * weight(&x.key) * x.spins[k].clone()
-                })
+                ms.iter()
+                    .fold(ratio(0, 1), |s, x| s + x.holding() * x.spins[k].clone())
             })
             .collect()
     }
@@ -5946,7 +6093,7 @@ mod coupling_tests {
         let total = super::holding(&motes);
         let bodies: Vec<(Ratio, Ratio)> = motes
             .iter()
-            .map(|x| (x.ell_o(), x.amount.clone() * weight(&x.key) / total.clone()))
+            .map(|x| (x.ell_o(), x.holding() / total.clone()))
             .collect();
         let enc = Enclosed::new(ratio(1, 3), bodies);
         let reach: Vec<Ratio> = motes.iter().map(|x| x.reach_in(&enc).0).collect();
@@ -5978,8 +6125,10 @@ mod emission_tests {
 
     fn hot(kind: &str, ell: Ratio, heat: Ratio, vacuum: bool) -> Mote {
         Mote {
-            key: crate::chem::Kind::parse(kind).expect("a kind"),
-            amount: ratio(3, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse(kind).expect("a kind"),
+                ratio(3, 1),
+            ),
             spins: Mote::spins_of(&ell, &[]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&rest(ratio(1, 2))),
@@ -6019,9 +6168,8 @@ mod emission_tests {
         ];
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let held = |m: &[Mote]| {
-            m.iter().fold(ratio(0, 1), |s, x| {
-                s + x.agitation.clone() * x.amount.clone() * weight(&x.key)
-            })
+            m.iter()
+                .fold(ratio(0, 1), |s, x| s + x.agitation.clone() * x.holding())
         };
         let before = held(&motes);
         let light = emit(&mut motes, &enc, 2, &ratio(1, 1));
@@ -6041,9 +6189,8 @@ mod emission_tests {
         ];
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let held = |m: &[Mote]| {
-            m.iter().fold(ratio(0, 1), |s, x| {
-                s + x.agitation.clone() * x.amount.clone() * weight(&x.key)
-            })
+            m.iter()
+                .fold(ratio(0, 1), |s, x| s + x.agitation.clone() * x.holding())
         };
         let before = held(&motes);
         let light = emit(&mut motes, &enc, 1, &ratio(1, 1));
@@ -6116,8 +6263,10 @@ mod friction_tests {
         // heated` (breath).
         for (phase0, m) in [(ratio(1, 10), ratio(1, 1)), (ratio(3, 7), ratio(2, 5))] {
             let mut x = Mote {
-                key: crate::chem::Kind::parse("W0001").expect("a kind"),
-                amount: ratio(1, 1),
+                parts: crate::flows::Mote::one(
+                    crate::chem::Kind::parse("W0001").expect("a kind"),
+                    ratio(1, 1),
+                ),
                 spins: Mote::spins_of(&ratio(1, 2), &[ratio(1, 2), ratio(1, 3), ratio(1, 6)]),
                 spins_orth: vec![ratio(0, 1); 3],
                 orientation: crate::orientation::Orientation::from_phases(&rest(ratio(1, 2))),
@@ -6147,8 +6296,10 @@ mod ring_motion_tests {
 
     fn mote(spins: [i64; 3], amount: i64, vacuum: bool) -> Mote {
         Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(amount, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(amount, 1),
+            ),
             spins: spins.iter().map(|&l| ratio(l, 1)).collect(),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::default(),
@@ -6254,8 +6405,10 @@ mod coupling_v2_tests {
     #[test]
     fn the_plane_shares_are_first_degree_and_whole() {
         let mut x = Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: vec![ratio(3, 1), ratio(-1, 1), ratio(0, 1)],
             spins_orth: vec![ratio(0, 1), ratio(1, 1), ratio(1, 1)],
             orientation: crate::orientation::Orientation::default(),
@@ -6281,8 +6434,10 @@ mod plane_ring_tests {
 
     fn mote(spins: [i64; 3], amount: i64) -> Mote {
         Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(amount, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(amount, 1),
+            ),
             spins: spins.iter().map(|&l| ratio(l, 1)).collect(),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::default(),
@@ -6356,8 +6511,7 @@ mod plane_ring_tests {
             (0..3)
                 .map(|k| {
                     ms.iter().fold(ratio(0, 1), |s, x| {
-                        s + x.amount.clone() * crate::flows::weight(&x.key) / total.clone()
-                            * x.spins[k].clone()
+                        s + x.holding() / total.clone() * x.spins[k].clone()
                     })
                 })
                 .collect()
@@ -6368,9 +6522,7 @@ mod plane_ring_tests {
                 ms.iter()
                     .enumerate()
                     .filter(|(j, _)| *j != i)
-                    .fold(ratio(0, 1), |s, (_, x)| {
-                        s + x.amount.clone() * x.spins[k].clone()
-                    })
+                    .fold(ratio(0, 1), |s, (_, x)| s + x.count() * x.spins[k].clone())
             })
         };
         let tilt_of = |ms: &[Mote], i: usize| {
@@ -6432,8 +6584,10 @@ mod echo_beat_tests {
 
     fn mote(spins: [i64; 3], amount: i64) -> Mote {
         Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(amount, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(amount, 1),
+            ),
             spins: spins.iter().map(|&l| ratio(l, 1)).collect(),
             spins_orth: vec![ratio(1, 8), ratio(0, 1), ratio(-1, 16)],
             orientation: crate::orientation::Orientation::from_phases(&[
@@ -6508,10 +6662,7 @@ mod echo_beat_tests {
         assert_eq!(b[0], crate::ring::grain(&(ratio(1, 2) * nu * ratio(4, 3))));
         // Bodies at different depths: the fluid moves beat, never makes it.
         let mut mixed = vec![mote([3, 2, 1], 2), mote([4, 2, 1], 1), mote([3, 3, 1], 3)];
-        let w: Vec<Ratio> = mixed
-            .iter()
-            .map(|x| x.amount.clone() * super::weight(&x.key) / total.clone())
-            .collect();
+        let w: Vec<Ratio> = mixed.iter().map(|x| x.holding() / total.clone()).collect();
         let before: Vec<Ratio> = mixed
             .iter()
             .map(|x| {
@@ -6606,8 +6757,10 @@ mod torsion_turn_tests {
         // tipping move its spin between the planes; the antipole's book is
         // the caller's (`S_k + A_k`), read here as the planes' change.
         let mote = |spins: [i64; 3], phases: [i64; 4]| Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: spins.iter().map(|&l| ratio(l, 1)).collect(),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(
@@ -6646,8 +6799,10 @@ mod torsion_turn_tests {
         // docs/128 §13.4.
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let mut x = Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 2),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 2),
+            ),
             spins: vec![ratio(3, 4), ratio(1, 2), ratio(1, 4)],
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::default(),
@@ -6744,5 +6899,93 @@ mod throat_entry_tests {
             !enters_throat(&ratio(1, 5), &ratio(-2, 5)),
             "short of the ½ below"
         );
+    }
+}
+
+#[cfg(test)]
+mod parcel_tests {
+    //! The plasma's parcel (docs/134 §6).
+    use super::*;
+
+    fn parcel(parts: &[(&str, i64)]) -> Mote {
+        Mote {
+            parts: parts
+                .iter()
+                .map(|(k, a)| (crate::chem::Kind::parse(k).expect("a kind"), ratio(*a, 1)))
+                .collect(),
+            spins: Mote::spins_of(&ratio(1, 2), &[]),
+            spins_orth: vec![ratio(0, 1); 3],
+            orientation: crate::orientation::Orientation::from_phases(&rest(ratio(1, 2))),
+            agitation: ratio(1, 3),
+            born: 0,
+            vacuum: false,
+            lever: Vec::new(),
+            lever_place: ratio(0, 1),
+            lift: ratio(0, 1),
+        }
+    }
+
+    /// Witness 1: a one-kind parcel's readings are its kind's.
+    #[test]
+    fn a_one_kind_parcel_reads_as_its_kind() {
+        let x = parcel(&[("W0056", 3)]);
+        let k = crate::chem::Kind::parse("W0056").expect("a kind");
+        let a = ratio(3, 1);
+        assert_eq!(x.holding(), a.clone() * weight(&k));
+        assert_eq!(
+            x.open_frames(),
+            a.clone() * ratio(i64::from(crate::chem::unpaired(&k)), 1)
+        );
+        assert_eq!(x.closed(), crate::chem::unpaired(&k) == 0);
+        assert_eq!(x.by_holding(open), open(&k));
+        let g = ratio(1, 2);
+        assert_eq!(grip_share(&x, &g), kind_grip(&k, &g));
+        let f = crate::chem::dimensions(&k);
+        let d = ratio(2, 5);
+        assert_eq!(
+            x.dipole(&d, 0),
+            dipole(
+                f.open / 3,
+                f.held / 3,
+                f.electrons_open.min(f.whole()),
+                &d,
+                false,
+                0
+            )
+        );
+    }
+
+    /// A mix reads its parts' sums, never a representative kind.
+    #[test]
+    fn a_mix_reads_its_parts_sums() {
+        let x = parcel(&[("W0001", 10), ("W0056", 1)]);
+        assert_eq!(x.count(), ratio(11, 1));
+        assert_eq!(x.holding(), ratio(10 + 56, 1));
+        assert_eq!(x.mean_weight(), ratio(66, 11));
+        let d = x.dipole(&ratio(1, 2), 0).expect("a dipole");
+        let q = x.charge();
+        assert_eq!(d.push, q * ratio(1, 2) / ratio(66, 1));
+    }
+
+    /// Witness 3: merging sums the parts, each kind's amount exactly.
+    #[test]
+    fn a_merge_keeps_each_kinds_amount() {
+        let mut motes = vec![
+            parcel(&[("W0001", 10), ("W0004", 2)]),
+            parcel(&[("W0001", 3), ("W0004", 1)]),
+        ];
+        let before: Manifest = motes.iter().fold(Manifest::new(), |mut m, x| {
+            for (k, a) in &x.parts {
+                *m.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            }
+            m
+        });
+        let mut beads: std::collections::BTreeMap<Vec<bool>, Vec<(Vec<usize>, Ratio)>> =
+            std::collections::BTreeMap::new();
+        beads.insert(vec![false], vec![(vec![0, 1], ratio(1, 1))]);
+        let mut cross = crate::enfold::Cross::default();
+        merge(&mut motes, &beads, &ratio(100, 1), &|_| None, &mut cross);
+        assert_eq!(motes.len(), 1);
+        assert_eq!(motes[0].parts, before);
     }
 }
