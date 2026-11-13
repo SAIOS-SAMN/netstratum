@@ -3350,8 +3350,10 @@ pub fn beads(
     };
     // The fibres (ruling of 2026-10-18: the individual fibres are beaded,
     // then the fibres braided together): a fibre is one kind's run on one
-    // face, motes whose dispersal bands overlap, linked transitively; a
-    // mixed parcel (docs/134 §6) runs with the parcels of its own kinds.
+    // face, motes whose dispersal bands overlap, linked transitively. A
+    // mixed parcel is the plasma's (docs/134 §6): the ionized medium moves as
+    // one, so every mixed parcel on a face runs in one fibre, the plasma's,
+    // whatever its parts (keyed by no kind).
     let mut fibres: std::collections::BTreeMap<(Vec<bool>, Vec<crate::chem::Kind>), Vec<usize>> =
         std::collections::BTreeMap::new();
     for (i, x) in motes.iter().enumerate() {
@@ -3359,7 +3361,11 @@ pub fn beads(
             fibres
                 .entry((
                     (0..PLANES).map(|k| frac(&x.phase_at(k)) < half).collect(),
-                    x.parts.keys().cloned().collect(),
+                    if x.parts.len() > 1 {
+                        Vec::new()
+                    } else {
+                        x.parts.keys().cloned().collect()
+                    },
                 ))
                 .or_default()
                 .push(i);
