@@ -144,7 +144,13 @@ operators of the network.
   and worlds follow). It can be founded, advanced and read;
   it cannot yet be played directly, and civilizations are seated on its star
   systems by the conductor. Several values are still imported from Earth's
-  physics and are scheduled to be derived (docs/108).
+  physics and are scheduled to be derived (docs/108). A body's state is on
+  Cl(13,1), the one signature shared with every kernel: its rotor on the
+  base, the S¹¹ fibre read (docs/136). Matter is moved by the plasma layer:
+  each kind's bound share at its place and heat, the ionized share of every
+  kind moving as one parcel (docs/134). Retaining light bound matter in the
+  galaxies (the drift between the bound and ionized shares) is the open law;
+  until it is built, the first echo forms few or no stars.
 - **Trajectory.** The pulse as one expanding wavefront echoed only at
   surfaces, contained by the firmament until bonded collections of its
   matter escape, with the zero galaxy first and every body's extent and

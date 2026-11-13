@@ -2356,6 +2356,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     });
                 };
                 let mut pooled = crate::pulse::Manifest::new();
+                // Each kind's bound part, read before it leaves: (kind, amount,
+                // carried, capture half turns).
+                let mut bound_parts: Vec<(crate::chem::Kind, Ratio, Ratio, Ratio)> = Vec::new();
                 for (k, a) in held_now {
                     let w = crate::flows::weight(&k);
                     let c = p.clone() * shared[&k].clone();
@@ -2389,15 +2392,43 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     if own > ratio(0, 1) {
                         let c_own = p.clone() * crate::plasma::own_spin(&w, &mean);
                         let z = ratio(i64::from(crate::chem::charge(&k)), 2);
-                        leave(
-                            core,
-                            crate::flows::Mote::one(k, own),
-                            &c_own,
-                            &z,
-                            &mut released,
-                        );
+                        bound_parts.push((k, own, c_own, z));
                     }
                 }
+                // The passage (docs/134 §7, A7, T5): each bound part passes out
+                // from the throat through its bounce's pool, a meeting by the
+                // founding's one law (`pulse::cascade`'s filter), read all at
+                // once against the release: the passing part takes from the
+                // pool's mix, which rides out with it at the holding mean of
+                // their carried spins (momentum kept).
+                let c_pool0 = p.clone() * pool_unit.clone();
+                // In the bounce's own units (regeneration, operator ruling
+                // (i): each core re-pulses at full strength in its own units),
+                // what this bounce releases holds 1, as the founding's
+                // release does in the cascade's filter.
+                let whole_g = bound_parts.iter().fold(mass(&pooled), |s, (k, a, _, _)| {
+                    s + a.clone() * crate::flows::weight(k)
+                });
+                let passed = crate::plasma::passage(
+                    &pooled,
+                    &c_pool0,
+                    &bound_parts
+                        .iter()
+                        .map(|(k, a, c, _)| (k.clone(), a.clone(), c.clone()))
+                        .collect::<Vec<_>>(),
+                    &whole_g,
+                );
+                for ((k, own, _, z), (take, c_join)) in bound_parts.into_iter().zip(passed) {
+                    let mut parts = crate::flows::Mote::one(k, own);
+                    for (kk, x) in take {
+                        if let Some(v) = pooled.get_mut(&kk) {
+                            *v -= x.clone();
+                        }
+                        *parts.entry(kk).or_insert_with(|| ratio(0, 1)) += x;
+                    }
+                    leave(core, parts, &c_join, &z, &mut released);
+                }
+                pooled.retain(|_, a| *a > ratio(0, 1));
                 if !pooled.is_empty() {
                     // The pool's capture half turns: its parts' charge by
                     // holding (a derived choice for a mix, to be revisited:
@@ -2408,8 +2439,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             * crate::flows::weight(k)
                             * ratio(i64::from(crate::chem::charge(k)), 1)
                     }) / h;
-                    let c_pool = p.clone() * pool_unit.clone();
-                    leave(core, pooled, &c_pool, &(q / ratio(2, 1)), &mut released);
+                    leave(core, pooled, &c_pool0, &(q / ratio(2, 1)), &mut released);
                 }
                 core.throat.retain(|_, a| *a > ratio(0, 1));
                 released.2 = mass(&core.throat) / unit.clone();

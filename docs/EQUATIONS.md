@@ -2091,7 +2091,13 @@ nucleus the impulse `F_z` carries
 
 `Σ n·w·ℓ = Σ n·F` exact; `b = 1` is the per-kind carry it replaces, `b = 0`
 one spin. Read by `pulse::{push_cut, disperse, cascade}`, `flows::founding`,
-`formation::{shells, carried, star_core_cut}` and the bounce's release.
+`formation::{shells, carried, star_core_cut}` and the bounce's release. A mote
+is a parcel, a mix `{kind → amount}` under one state (§6): the release writes
+the pool `{z: n_z(1 − b_z)}` at `p·S` as one parcel and each bound share alone
+at `p·w̄/w`. Each bound part passing out through its pool takes
+`½·crossed·gripped·m_b/(m_b + m_π)` of the pool's mix (A7, `plasma::passage`;
+docs/134 §7). The throat's `b = ½` is exact, since the table's loosest
+winding is ½ (lithium) and the throat's heat is at most ⅓ (§7, T1).
 **The parcel** (docs/134 §6; `flows::Mote::parts`,
 `plasma::{bounce_split, pool_spin, own_spin}`): a mote is a mix, its
 readings its parts' sums (holding `Σa·w`, open frames `Σa·U`, charge `Σa·Q`, a

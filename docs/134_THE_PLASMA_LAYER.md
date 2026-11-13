@@ -246,18 +246,22 @@ reach), which exceeds the rim exactly in that range of `w`. Hydrogen
 bounce's hydrogen is bound. This is the read's `flows = ocean` for hydrogen,
 `7;51·60⁵` each. ∎
 
-**T5 (the passage catches the bound share).** At release, a kind's bound
-parcel leaves from the throat through the pooled parcel of the same bounce,
-which stands inside its reach (`S`-reach < its reach). By A7 it is caught at
-the fraction
-`f = ½·crossed·gripped·m_b/(m_b + m_π)`, and what is caught joins the pool,
-its spin the holding mean (A5), `Σ n·w·ℓ` kept.
+**T5 (the passage at release, corrected 2026-11-13).** At release, a kind's
+bound part leaves from the throat outward through its bounce's pool. By A7,
+read in the cascade's own direction (the lighter matter passing out
+catches), it takes the share
+`f = ½·crossed·gripped·m_b/(m_b + m_π)` of the pool's mix. The take rides
+out with it, at the holding mean of the two carried spins, `Σ m·c` kept.
 
-*Proof.* The two parcels start at the throat (one place), and the bound one
-moves outward past the pool's reach (T4's ordering). That is A7's passage,
-lighter matter passing out through heavier matter that stays in, so A7
-applies by the design law of one grammar at every tier. The joining keeps
-momentum, since a merge is a holding mean (`flows::merge`). ∎
+*Proof.* The two parcels start at the throat, and the bound one moves
+outward past the pool's inner edge (T4's ordering). That is A7's passage, so
+by the design law of one grammar at every tier A7 applies, in its own
+direction: `pulse::cascade`'s pairs are (i catching, j giving), and i is the
+lighter one, passing out. The joining is a holding mean
+(`flows::merge`). ∎
+
+*An earlier draft of T5 had the direction reversed (the pool catching the
+bound share). The cascade's code reads the other way.*
 
 **T6 (what the release lacks).** The bounce's release (`breath::breathe`)
 applies A1, A2, A5, A6 and A8, but not A7. The founding's cascade applies
@@ -268,20 +272,37 @@ the missing law is the passage.
 pushed and paid, with no meeting read between the parcels of one bounce.
 `pulse::cascade` reads the meetings. ∎
 
-### 7.4 The answer
+### 7.4 The answer, and the read
 
 1. The throat's bound share is exactly ½ (T1). No heat law changes it.
 2. Splitting each kind into its pooled and bound parcels is forced (T3). The
    35-star read rested on a spin no matter has.
-3. Light bound shares leave for the ocean unless caught (T4). The founding
-   catches them by the passage law (A7). The bounce does not apply it (T6).
-4. **Build:** apply A7 at the bounce's release. Each bound parcel passing out
-   through its bounce's pool is caught at `f` (T5), and the caught matter
-   joins the pool. Prediction: the bound hydrogen's exit falls by the caught
-   share, and the pool, which holds every kind, gains it. The stars then form
-   from matter that holds hydrogen. Falsified if the caught share at the rim
-   is zero, in which case the grip `T` across the pair is the term to read
-   next.
+3. Light bound shares leave for the ocean unless something holds them (T4).
+4. The bounce now applies A7 (T5, T6: `plasma::passage`, built). Read on one
+   2^40 founding to its first echo (bell 112), before → after:
+
+| | split, no passage | split, with passage (A7) |
+|---|---|---|
+| stars | 4 | 0 |
+| hydrogen in the flows (grains) | 7;51·60⁵ | 7;43·60⁵ |
+| hydrogen in the ocean | 7;51·60⁵ | 7;58·60⁵ |
+| intergalactic medium | 19;59·60⁻² | 24;34·60⁻² |
+
+**T7 (A7 cannot hold the light bound share).** A passage moves the take at the
+holding mean of the two carried spins, and the passing part is the outer one.
+So the take's spin rises (`c_π → c̄ > c_π`) and the part's falls, while the part
+still stands outside the pool. Matter is carried outward, never inward. By A8
+light bound matter still leaves, and now carries heavy matter with it.
+
+*Proof.* `c̄ = (m_b·c_b + m_t·c_π)/(m_b + m_t)` lies between `c_π` and `c_b`,
+and `c_b > c_π` (T4). ∎
+
+**So the retention is not a passage. It is the exchange of momentum between
+the bound and the ionized shares,** a relaxation of the bound part's spin
+toward the pool's with both parcels kept (§4.1, the drift): docs/105's
+two-pole master equation on spin, with the meeting rate a bell as its rate.
+That is the next law to derive. The passage stays, as the bounce's reading
+of A7.
 
 ## 5. The seam with Xylarium (agreed 2026-11-13)
 

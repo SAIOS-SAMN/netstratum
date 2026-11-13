@@ -109,6 +109,120 @@ pub fn bounce_split(pool: &Manifest, mean: &Ratio) -> (Ratio, Manifest) {
     (pool_spin(&parts), b)
 }
 
+/// The passage at a bounce's release (docs/134 §7, A7, T5): each bound part
+/// `(kind, amount, carried c)` passes out from the throat through the pool
+/// (`pool` at carried `c_pool`). A meeting, by the founding's one law
+/// (`pulse::cascade`'s filter: the lighter matter passing out CATCHES from
+/// the matter it passes, which rides out with it), all read at once against
+/// the release, in the bounce's own units (`whole`, what it releases).
+/// - The pool spreads over `c_π(1 ± s_π)`, `s_π = ½c_π/(c_π + 1)` its
+///   release share; a part reaching past `c_π(1 − s_π)` crosses the share
+///   `crossed` of it, contact `½·crossed`.
+/// - The grip splits as at every tier: `s` the grips' tightness ratio,
+///   `D = s·m/(m + 1 − contact)`, `T` the deficits' contrast with
+///   `d = 1/(c + 1)`, the gripped fraction `min(D, T)/T`.
+/// - Each part takes `contact·gripped·m_b/(m_b + m_π)` of the pool's mix, on
+///   the nucleus grid, every take of a kind scaled by what the pool holds
+///   over what is asked.
+///
+/// Returns each part's take and its carried after the take joins it, the
+/// holding mean (`Σ m·c` kept: the take leaves at the pool's own carried).
+pub fn passage(
+    pool: &Manifest,
+    c_pool: &Ratio,
+    parts: &[(Kind, Ratio, Ratio)],
+    whole: &Ratio,
+) -> Vec<(Manifest, Ratio)> {
+    let one = ratio(1, 1);
+    let zero = || ratio(0, 1);
+    let w = |k: &Kind| ratio(i64::from(crate::chem::weight(k)), 1);
+    let m_pool = crate::pulse::mass(pool);
+    if m_pool.is_zero() || whole.is_zero() {
+        return parts.iter().map(|(_, _, c)| (Manifest::new(), c.clone())).collect();
+    }
+    let s_pool = ratio(1, 2) * c_pool.clone() / (c_pool.clone() + one.clone());
+    let (lo, hi) = (
+        c_pool.clone() * (one.clone() - s_pool.clone()),
+        c_pool.clone() * (one.clone() + s_pool),
+    );
+    let d = |c: &Ratio| one.clone() / (c.clone() + one.clone());
+    let g_pool = crate::formation::grip(pool);
+    let mj = m_pool / whole.clone();
+    // Each part's share of the pool's mix, read against the release.
+    let shares: Vec<Ratio> = parts
+        .iter()
+        .map(|(k, a, c)| {
+            if *c <= lo || a.is_zero() {
+                return zero();
+            }
+            let crossed = if *c >= hi {
+                one.clone()
+            } else {
+                (c.clone() - lo.clone()) / (hi.clone() - lo.clone())
+            };
+            let contact = ratio(1, 2) * crossed;
+            let part: Manifest = [(k.clone(), a.clone())].into_iter().collect();
+            let gi = crate::formation::grip(&part);
+            let s = if gi.is_zero() || g_pool.is_zero() {
+                zero()
+            } else if gi < g_pool {
+                gi / g_pool.clone()
+            } else {
+                g_pool.clone() / gi
+            };
+            let mi = a.clone() * w(k) / whole.clone();
+            let mij = mi.clone() + mj.clone();
+            let bind = s * mij.clone() / (mij.clone() + one.clone() - contact.clone());
+            let (di, dj) = (d(c), d(c_pool));
+            let t = (if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() })
+                / (di + dj);
+            if t.is_zero() {
+                return zero();
+            }
+            contact * (bind.min(t.clone()) / t) * mi / mij
+        })
+        .collect();
+    let asks: Vec<Manifest> = shares
+        .iter()
+        .map(|f| {
+            pool.iter()
+                .map(|(k, a)| (k.clone(), crate::pulse::nucleus(&(a.clone() * f.clone())).min(a.clone())))
+                .filter(|(_, a)| *a > ratio(0, 1))
+                .collect()
+        })
+        .collect();
+    let mut asked = Manifest::new();
+    for t in &asks {
+        for (k, a) in t {
+            *asked.entry(k.clone()).or_insert_with(zero) += a.clone();
+        }
+    }
+    parts
+        .iter()
+        .zip(asks)
+        .map(|((k, a, c), t)| {
+            let take: Manifest = t
+                .into_iter()
+                .map(|(kk, x)| {
+                    let has = pool[&kk].clone();
+                    let all = asked[&kk].clone();
+                    let x = if all > has { crate::pulse::nucleus(&(x * has / all)) } else { x };
+                    (kk, x)
+                })
+                .filter(|(_, x)| *x > ratio(0, 1))
+                .collect();
+            let own = a.clone() * w(k);
+            let got = crate::pulse::mass(&take);
+            let joined = if got.is_zero() {
+                c.clone()
+            } else {
+                (own.clone() * c.clone() + got.clone() * c_pool.clone()) / (own + got)
+            };
+            (take, joined)
+        })
+        .collect()
+}
+
 /// The bounce's release at the throat, cold (docs/134 §2): each kind of
 /// `pool` given the impulse `w̄` a nucleus (the push's `p·w̄` over `p`), at
 /// the throat's held face, heat 0. Returns each kind's spin over `p`.
@@ -266,5 +380,34 @@ mod tests {
         assert_eq!(least, r(1, 2));
         let three = cfe::almanac::atom::windings(3).expect("lithium").1;
         assert!(three.iter().any(|(t, v, _)| *t == r(1, 2) && *v == 1));
+    }
+
+    /// docs/134 §7 T5: a bound part passing out through the pool takes from
+    /// its mix; momentum kept (`Σ m·c` of the part and its take); a part
+    /// inside the pool's inner edge takes nothing; no kind is taken past what
+    /// the pool holds.
+    #[test]
+    fn the_passage_keeps_momentum_and_takes_only_where_it_passes() {
+        let h = crate::chem::hydrogen();
+        let fe = crate::chem::Kind::element(26).expect("iron");
+        let mut pool = Manifest::new();
+        pool.insert(h.clone(), r(40, 1));
+        pool.insert(fe.clone(), r(4, 1));
+        let c_pool = r(1, 3);
+        let parts = vec![(h.clone(), r(40, 1), r(5, 1)), (fe.clone(), r(4, 1), r(1, 100))];
+        let whole = crate::pulse::mass(&pool) + r(40, 1) + r(4 * 56, 1);
+        let out = passage(&pool, &c_pool, &parts, &whole);
+        let (take, joined) = &out[0];
+        assert!(!take.is_empty(), "hydrogen passing out takes from the pool");
+        for (k, a) in take {
+            assert!(*a <= pool[k]);
+        }
+        let got = crate::pulse::mass(take);
+        assert_eq!(
+            joined.clone() * (r(40, 1) + got.clone()),
+            r(40, 1) * r(5, 1) + got * c_pool.clone()
+        );
+        assert!(out[1].0.is_empty(), "iron inside the pool's edge takes nothing");
+        assert_eq!(out[1].1, r(1, 100));
     }
 }

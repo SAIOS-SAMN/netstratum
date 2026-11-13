@@ -36,6 +36,14 @@ change is named here.
   replacing the per-kind carry `p·w̄/w` at seven sites. Read on one 2^40
   founding to its first echo, before → after: T_u 186 → 110; the ocean's
   hydrogen 18;27·60^5 grains → none; 106 stars → 35, holding hydrogen 1 → 3.
+- The plasma's parcel and the release derived (docs/134 §6–§7): a mote is a
+  mix of kinds under one state; the release writes the ionized pool as one
+  parcel and each bound share alone; the bounce applies the founding's
+  passage law (`plasma::passage`). Theorems: the throat strips nothing
+  (`b = ½` exactly; witness: the table's loosest winding is lithium's ½); the
+  split is forced; the passage carries matter outward, never in (T7). Read
+  (2^40 to bell 112): stars 35 → 4 (split) → 0 (with the passage); the
+  retention of light bound matter is the drift, next.
   The plasma's parcel (docs/134 §6): a mote is a mix (`Mote::parts`), the
   release's ionized pool one parcel at `p·S`, each bound part its own; read on
   the same founding to bell 112: 35 stars → 4 (none holding hydrogen), the
