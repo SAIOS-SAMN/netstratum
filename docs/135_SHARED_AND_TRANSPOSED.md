@@ -96,6 +96,8 @@ composition (planned).
   `keep_n`), #299 (R2: the same form as `Parcel`, fixtures only), #300 (R3).
 - **R7's sphere:** the capacity form takes n as an argument; both kernels
   declare n = 12 (S^11), recorded in the fixtures, with one more at n = 4
+  (#301, penetration screening agreed: Xylarium deletes its shortcut);
+  R8 filed as #302 (with the seam form), R9 as #303
   (forms A7b: no constant in the library).
 - **R10** dropped: 78.176 is Mycelium's proposal, not a forms row.
 - **One body-state signature across kernels** would be an operator ruling
