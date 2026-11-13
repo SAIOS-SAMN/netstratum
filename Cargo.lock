@@ -13,16 +13,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "algebra"
-version = "0.4.0-rc.1"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.4.0-rc.1#31440d67ae37135a6c405df423968649e105f9d4"
-dependencies = [
- "num-bigint",
- "num-rational",
- "num-traits",
-]
-
-[[package]]
 name = "arrayvec"
 version = "0.7.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -356,9 +346,9 @@ checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
 [[package]]
 name = "forms"
 version = "0.4.0-rc.1"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.4.0-rc.1#31440d67ae37135a6c405df423968649e105f9d4"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=15beb6eab082b1526cc296aa802d5450558f7e92#15beb6eab082b1526cc296aa802d5450558f7e92"
 dependencies = [
- "algebra",
+ "mycelium-algebra",
  "num-bigint",
  "num-rational",
  "num-traits",
@@ -503,9 +493,8 @@ dependencies = [
 [[package]]
 name = "mycelium"
 version = "0.4.0-rc.1"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.4.0-rc.1#31440d67ae37135a6c405df423968649e105f9d4"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=15beb6eab082b1526cc296aa802d5450558f7e92#15beb6eab082b1526cc296aa802d5450558f7e92"
 dependencies = [
- "algebra",
  "blake3",
  "ctrlc",
  "ed25519-dalek",
@@ -513,6 +502,7 @@ dependencies = [
  "fs2",
  "getrandom 0.2.17",
  "inotify",
+ "mycelium-algebra",
  "num-bigint",
  "num-integer",
  "num-rational",
@@ -528,9 +518,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "mycelium-algebra"
+version = "0.4.0-rc.1"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=15beb6eab082b1526cc296aa802d5450558f7e92#15beb6eab082b1526cc296aa802d5450558f7e92"
+dependencies = [
+ "num-bigint",
+ "num-rational",
+ "num-traits",
+]
+
+[[package]]
 name = "mycelium-sdk"
 version = "0.4.0-rc.1"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?tag=v0.4.0-rc.1#31440d67ae37135a6c405df423968649e105f9d4"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=15beb6eab082b1526cc296aa802d5450558f7e92#15beb6eab082b1526cc296aa802d5450558f7e92"
 dependencies = [
  "ed25519-dalek",
  "forms",

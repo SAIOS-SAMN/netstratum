@@ -592,7 +592,7 @@ impl House {
         let outputs = mycelium_sdk::task::decode_samples(outs)
             .ok()
             .and_then(|tests| {
-                mycelium_sdk::task::TaskEnvelope {
+                mycelium_sdk::task::TaskFamily {
                     id,
                     train: Vec::new(),
                     tests,

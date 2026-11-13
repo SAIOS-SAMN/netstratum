@@ -10,6 +10,17 @@ change is named here.
 
 ## Unreleased
 
+### Changed
+
+- Mycelium SDK pinned to main 15beb6ea (wire 0x0300), the commit Mycelium's
+  standing mesh runs (127.0.0.1:8500–8502); the rc.1 mesh is gone and no
+  v0.5.0 tag exists. Contract changes taken in place: every universe act
+  (ledger, manifest, map) is signed over its crossing record (X1, #160),
+  netstratum's acts carrying none across the tube (`Crossing::still` at the
+  act's TUniversal point); tasks read as `TaskFamily`; a local throat's
+  sides are `poses`. Read: `ns-hypha laws --at 127.0.0.1:8500` returns the six
+  served laws.
+
 ### Added
 
 - The plasma layer (docs/134; operator 2026-11-13, "an additional layer of
