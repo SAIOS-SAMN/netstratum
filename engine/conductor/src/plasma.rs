@@ -124,6 +124,7 @@ mod tests {
             .iter()
             .fold(r(0, 1), |s, (n, _, f, _)| s + n.clone() * f.clone());
         assert_eq!(held, given);
+        assert_eq!(ell, vec![r(2069, 1460), r(1485, 2336), r(2909, 20440)]);
     }
 
     #[test]
@@ -147,6 +148,10 @@ mod tests {
         assert_eq!(bound_share(&h, &g, &r(0, 1)), g);
         assert_eq!(bound_share(&h, &g, &r(1, 1)), r(0, 1));
         let iron = crate::chem::Kind::element(26).expect("iron");
+        // R8's fixtures (mycelium law row): iron's shell 2 (tightness 12)
+        // stripped at heat 12 leaves its two 1s electrons, b = ½·2/26.
+        assert_eq!(bound_share(&iron, &g, &r(12, 1)), r(1, 26));
+        assert_eq!(bound_share(&iron, &g, &r(26, 1)), r(0, 1));
         let warm = bound_share(&iron, &g, &r(1, 1));
         assert!(warm > r(0, 1) && warm <= g, "{warm} {}", crate::chem::charge(&iron));
         let top = cfe::almanac::atom::windings(crate::chem::charge(&iron)).expect("w").1.iter().map(|w| w.0.clone()).max().expect("t");
