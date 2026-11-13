@@ -12,6 +12,12 @@ change is named here.
 
 ### Added
 
+- The plasma layer (docs/134; operator 2026-11-13, "an additional layer of
+  physics"): a kind's electrons' bound share `b = g·E(a)/Q` and every
+  release shared through it, `ℓ = b·F/w + (1 − b)·S`, `Σ n·w·ℓ` exact,
+  replacing the per-kind carry `p·w̄/w` at seven sites. Read on one 2^40
+  founding to its first echo, before → after: T_u 186 → 110; the ocean's
+  hydrogen 18;27·60^5 grains → none; 106 stars → 35, holding hydrogen 1 → 3.
 - The stride (docs/132; operator 2026-11-12, "increase the velocity of the
   entire system without fracturing the equations"): derived. A galaxy's
   laws run only on an echo's arrival (twice in g557's 557 bells); the stride

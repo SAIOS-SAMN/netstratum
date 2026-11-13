@@ -4,7 +4,7 @@
 the atomic state isn't taking into consideration by moving them at different
 levels"; "this needs derivation and an additional layer of physics".
 
-**Status:** derived 2026-11-13; §2–§3 built (`conductor::plasma`). Read
+**Status:** derived 2026-11-13; §1–§2 built (`conductor::plasma`), read §3.1. Read
 against docs/105 §3 (the electrons' pair), `cfe::almanac::atom::open_at`
 (ionization by heat), `pulse::push_cut`, `pulse::cascade`,
 `breath::breathe` (the bounce's release), `flows::founding` and
@@ -81,7 +81,28 @@ heat strips, and the binding moves toward one mix.
 3. Cold `b = g`; hydrogen at heat 1 has `b = 0`; a kind with no protons `b = 1`.
 4. The bounce at one `b`: `S = p`.
 
-## 4. Open
+## 3.1 The read
+
+One 2^40 founding under each law, laid to just past its first echo
+(`.testtmp/plasma/{old,u}`), before → after:
+
+| | before (per kind) | after (shared) |
+|---|---|---|
+| T_u | 186 | 110 |
+| stars at the first echo | 106 | 35 |
+| stars holding hydrogen | 1 | 3 |
+| hydrogen in the ocean (grains) | 18;27·60^5 | none |
+| hydrogen in the throats | 30;13·60^5 | 32;58·60^5 |
+| hydrogen kept by stars | 14;59·60^5 | 15;42·60^5 |
+
+The shared release no longer throws hydrogen past the galaxy: the founding's
+rim draws in (T_u 110). The stars still form nearly one kind each (the three
+holding hydrogen hold only hydrogen; 34 of 35 bindings had none fall in),
+because each mote carries one kind (`Mote::key`): a binding gathers parcels
+that were each sorted at birth. That is the next defect of the same layer
+(§4.5).
+
+
 
 1. **The drift.** After release each kind's departure from the parcel's spin
    relaxes by the attractor's keep, `ℓ̄ + k_z(ℓ_z − ℓ̄)`, `k_z` read from the
@@ -94,3 +115,7 @@ heat strips, and the binding moves toward one mix.
    the neutral share slips through the field (ambipolar diffusion).
 4. **The electron fluid on R.** The bound share is a reading; the electrons'
    phase on `e_R` (docs/131) is carried by the ions, not yet a motion of its own.
+5. **A parcel of one kind.** A mote holds one kind, so the medium is an array
+   by kind, never a mix: the shared release moves the kinds together, but each
+   still travels in its own parcel. A mote as a mix (its manifest, one state)
+   is the plasma's parcel.

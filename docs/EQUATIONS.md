@@ -2081,6 +2081,18 @@ about the body's own spin:
     a = p·ν    ν = Π(1 − δ)    A = a/(1 − ρ), ρ = ½·½    D = A ⊖ Ā    T = (1 − A)·g·w·D
     F ↦ F·m(rate(A′)·t)    C, ℓ unchanged    Σ w·A′ = Σ w·A (within the grain)
 
+**E73 · The plasma layer: the release shared through the charge.**
+`plasma::{kept_electrons, bound_share, carried, bounce_unit}` (docs/134;
+operator 2026-11-13). A kind's electrons are bound where held at the place
+and tighter than the heat, `b_z = g·E_z(a)/Q_z`; a release giving each
+nucleus the impulse `F_z` carries
+
+    ℓ_z = b_z·F_z/w_z + (1 − b_z)·S,     S = Σ n(1 − b)F / Σ n(1 − b)w
+
+`Σ n·w·ℓ = Σ n·F` exact; `b = 1` is the per-kind carry it replaces, `b = 0`
+one spin. Read by `pulse::{push_cut, disperse, cascade}`, `flows::founding`,
+`formation::{shells, carried, star_core_cut}` and the bounce's release.
+
 **E72 · The stride and the echo's draw.** `ring::compose_n`,
 `flows::mean_response` (docs/132 §1, §5; operator 2026-11-12). The flow law
 over n bells, composed, never scaled:
