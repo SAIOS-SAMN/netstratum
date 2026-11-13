@@ -107,6 +107,44 @@ It is read, never stored: the antipolar face is the same state read through it.
 4. docs/131 is marked superseded; EQUATIONS E71 is rewritten; GLOSSARY gains
    Cl(13,1), the common phase and the share split.
 
+## 6.1 The uses, mapped (audit 2026-11-13)
+
+About 70 uses of the retiring items, sorted by what replaces each:
+
+| category | uses | replaced by |
+|---|---|---|
+| (a) read R's phase (the loop phase, `circulation`, `r_side`, `plane_forms`, `from_phases`, the throat passage's R crossing ½) | 8 | `R_p = κ(1 − 2·frac(ψ_p))` (§3) |
+| (b) read the vacuum face (`stream_delta` and the 16 laws that read it: conform, shear, beads, strands, bands, fluid, emit, dipole, magnet, torsion sense, luminal, merge keys, shine, arrival frame, counterflow) | 17 | the plane's share split `(c, d)` (§2): which face a mote reads is a reading of its split, not a flag |
+| (c) move the circulation spin or the face | ~38 | §6.2 |
+| (d) the save record and display | 8 | the new record (§6 step 3) |
+
+## 6.2 The circulation is the weighted Seifert action's rates
+
+The R side's orbits (docs/128 §9–§14; operator 2026-11-11: "the R side is
+orbits, spun by the manifold's shear") are not lost. The common phase has a
+weight per plane, `z_p → e^{i·w_p·θ}z_p`, so each plane turns at its own rate
+`w_p·θ̇`. Netstratum's partner spins `ℓ_kR` are those rates on three of the
+isoclinic planes:
+
+    ℓ_kR = w_{p(k)}·θ̇,   ℓ_⊥ = Σ_k ℓ_kR
+
+- **The halves:** `ℓ± = ℓ_k ∓ ℓ_kR` (docs/128 §11) read the base's spatial
+  rate against its plane's fibre rate. The chiral split stands where the
+  weights differ, and vanishes where they are equal.
+- **The conformation to the shear** (docs/128 §10.3; `conform_partners`)
+  relaxes each weight toward its plane's shear target, the range paying,
+  `Σ m·w` kept: the same law with the weight as its state.
+- **The face crossing** (Möbius, the throat, the exits, the recycling) is the
+  split passing ½ (§2): written as a motion of `c_p`, never as a flag set.
+- **The free action:** any weights with every plane's `w_p ≠ 0` keep the action
+  free. A weight driven to 0 on the axis plane is refused by the body's
+  builder (§9 item 1).
+
+**Open, to read jointly with Xylarium:** which three of the five isoclinic
+planes carry the spatial directions' partners. The planes are
+interchangeable in multiplicity and fill (T18), so the choice must be read
+from each plane's pole `t_j = J_j/(6H_j)`, never assigned.
+
 ## 7. Witnesses (fixtures, read jointly with Xylarium)
 
 1. **Free action:** turning the common phase by one whole turn (each plane by
