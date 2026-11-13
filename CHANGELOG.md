@@ -23,6 +23,13 @@ change is named here.
 
 ### Added
 
+- The state on Cl(13,1) (docs/136; operator ruling 2026-11-13, one
+  body-state signature across kernels, superseding docs/131's Cl(5,4)). A
+  body's place and rotor are on the base; the S¹¹ fibre is read by each
+  plane's share split and R's phase; plane assignment read jointly with
+  Xylarium (four fixtures reproduced). `orientation.rs` keeps the rotor and
+  the scale, retires the Cl(5,4) axes and the vacuum factor (read by no law);
+  the record is 12 values, 13 with the scale; g557 reads unchanged.
 - The stride (docs/132; operator 2026-11-12, "increase the velocity of the
   entire system without fracturing the equations"): derived. A galaxy's
   laws run only on an echo's arrival (twice in g557's 557 bells); the stride
