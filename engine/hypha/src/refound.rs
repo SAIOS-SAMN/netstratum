@@ -184,7 +184,7 @@ pub fn post_ledger(session: &Session, home: &Path, var_root: &Path, u: u64) -> i
 /// The crossing record an act carries that moves no body across the
 /// universal core tube (Mycelium X1, #160): at the act's TUniversal point, no
 /// past cone, one phase of period 1, the identity motion.
-fn still(point: &TPoint) -> mycelium_sdk::forms::Crossing {
+pub(crate) fn still(point: &TPoint) -> mycelium_sdk::forms::Crossing {
     mycelium_sdk::forms::Crossing::still(
         mycelium_sdk::forms::Place {
             at: point.clone(),
