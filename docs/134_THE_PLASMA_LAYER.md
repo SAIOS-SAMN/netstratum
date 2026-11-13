@@ -119,3 +119,15 @@ that were each sorted at birth. That is the next defect of the same layer
    by kind, never a mix: the shared release moves the kinds together, but each
    still travels in its own parcel. A mote as a mix (its manifest, one state)
    is the plasma's parcel.
+
+## 5. The seam with Xylarium (agreed 2026-11-13)
+
+- Xylarium reads the bound share at the inverse place: `b'_z = [r/(r + M)]·E_z(a)/Z`
+  (its Z is Netstratum's Q), its convergent face `δ` at `r' = M²/r`, the same
+  function as Netstratum's `g`; on the far face only.
+- Both strip by the tightness threshold (`open_at`); both releases are cold.
+- The medium's resistance offsets the pool's spin only, `S' = S ⊕ (−r_medium)`;
+  the take `Σ n(1 − b)w(S − S')` is booked to the medium's charged share, so
+  `Σ n·w·ℓ' + take = Σ n·F` exactly.
+- The mixed parcel shared at the seam is a recipe `{kind → amount}` under one
+  state (reach, phase, span), mass read from the counts.
