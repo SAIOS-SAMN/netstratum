@@ -115,10 +115,46 @@ that were each sorted at birth. That is the next defect of the same layer
    the neutral share slips through the field (ambipolar diffusion).
 4. **The electron fluid on R.** The bound share is a reading; the electrons'
    phase on `e_R` (docs/131) is carried by the ions, not yet a motion of its own.
-5. **A parcel of one kind.** A mote holds one kind, so the medium is an array
+5. **A parcel of one kind** (derived in §6). A mote holds one kind, so the medium is an array
    by kind, never a mix: the shared release moves the kinds together, but each
    still travels in its own parcel. A mote as a mix (its manifest, one state)
    is the plasma's parcel.
+
+## 6. The plasma's parcel (§4.5, derived 2026-11-13)
+
+A release's ionized share of every kind moves at one spin `S` (§2), so it is
+one parcel: a **mix**. Each kind's bound share moves by its own inertia at
+`F_z/w_z`, so it is a parcel of that kind alone. A mote is a mix: its parts
+`{kind → amount}` under one state (place, spins, orientation, agitation, face).
+This is the seam's parcel form agreed with Xylarium (§5).
+
+- **Readings of a parcel** are its parts' sums, never a representative kind:
+  - its holding `Σ a·w`;
+  - its open frames `Σ a·U`;
+  - its charge `Σ a·Q`;
+  - its dimensions `Σ a·dims`;
+  - its grip, read on its parts' manifest (`formation::grip`).
+  A law that read one kind's property per mote reads the parcel's
+  holding-weighted share of it. A parcel with no open frames is closed
+  (inert).
+- **A one-kind parcel reads exactly as the mote of that kind did.** Every
+  law's value on a one-kind parcel is unchanged.
+- **The release** writes, per bounce:
+  - one parcel of the pool, `{z: n_z(1 − b_z)}` at `S`, on the nucleon grid;
+  - per kind, the bound share `n_z·b_z` at `F_z/w_z`.
+
+  The pool's phase reads its own carried spin, the same reading a kind's
+  release reads.
+- **Merging** sums parts: parcels of one bead join, and their parts add by kind.
+- **The save record** writes a parcel's parts. A one-kind parcel is written
+  as before, so g557 reads unchanged.
+
+**Witnesses:**
+1. A one-kind parcel's readings equal the kind's.
+2. A release conserves nucleons by kind and `Σ n·w·ℓ = Σ n·F`, with the pool
+   as one parcel.
+3. A merge keeps each kind's amount exactly.
+4. The record of a mixed parcel reads back.
 
 ## 5. The seam with Xylarium (agreed 2026-11-13)
 
