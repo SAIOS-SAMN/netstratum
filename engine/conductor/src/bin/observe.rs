@@ -523,6 +523,21 @@ fn ablate(u: &pulse::Universe, i: usize, unit: &Ratio, limit: Option<usize>) {
             f(&rem)
         );
     }
+    // emit: the heat into the manifold, two rings; the width of the light
+    // it returns (a sum over every mote of its range's quotients).
+    {
+        let mut m = base.clone();
+        let t = Instant::now();
+        let glow = flows::emit(&mut m, &enc, 2, &total);
+        let el = t.elapsed();
+        let bits = |r: &Ratio| r.numer().bits() + r.denom().bits();
+        let widest = m.iter().map(|x| bits(&x.agitation)).max().unwrap_or(0);
+        println!(
+            "  emit ({el:.1?}): light {} bits (denominator {}), widest agitation after {widest} bits",
+            bits(&glow),
+            glow.denom().bits()
+        );
+    }
     // magnet: LAW-COUPLING v2 on reach.
     {
         let mut m = base.clone();

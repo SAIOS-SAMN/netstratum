@@ -1581,9 +1581,12 @@ pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32, total: &Ratio) -> Ra
     for x in motes.iter() {
         let (r, d) = x.reach_in(enc);
         extent.push(r.clone() * own_enclosure(x, enc, total)[0].clone());
-        keep.push(crate::polarity::faces_on(&d, crate::polarity::Axis::of_stream(x.vacuum)).0);
+        // Coefficients enter the products on the grain (docs/133 §4).
+        keep.push(crate::ring::grain(
+            &crate::polarity::faces_on(&d, crate::polarity::Axis::of_stream(x.vacuum)).0,
+        ));
         reach.push(r);
-        delta.push(d);
+        delta.push(crate::ring::grain(&crate::polarity::faces(&d).0));
     }
     let range = meeting(&reach, &extent);
     let mut light = ratio(0, 1);
@@ -1596,8 +1599,7 @@ pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32, total: &Ratio) -> Ra
             let kept = crate::ring::grain(&(motes[i].agitation.clone() * keep[i].clone()));
             let given = (motes[i].agitation.clone() - kept.clone()) * w[i].clone();
             motes[i].agitation = kept;
-            let (g_m, _) = crate::polarity::faces(&delta[i]);
-            let recycled = g_m * given.clone();
+            let recycled = delta[i].clone() * given.clone();
             let whole = range[i]
                 .iter()
                 .fold(ratio(0, 1), |s, &j| s + w[j].clone() * keep[j].clone());
@@ -1606,9 +1608,14 @@ pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32, total: &Ratio) -> Ra
                 continue;
             }
             light += given - recycled.clone();
+            // Each member's share on the grain; what the grain leaves radiates.
             for &j in &range[i] {
-                gain[j] += recycled.clone() * w[j].clone() * keep[j].clone() / whole.clone();
+                let share = crate::ring::grain(&(w[j].clone() * keep[j].clone() / whole.clone()));
+                let part = recycled.clone() * share;
+                light -= part.clone();
+                gain[j] += part;
             }
+            light += recycled;
         }
         for (j, g) in gain.into_iter().enumerate() {
             if g.is_zero() || w[j].is_zero() {
