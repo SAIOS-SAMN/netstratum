@@ -51,6 +51,13 @@ change is named here.
   (`plasma::drift`, on the grain). Read: the ocean's hydrogen and the
   intergalactic medium both go to none; the first star's binding holds a
   tenth hydrogen, but its core's cut keeps none, which is next.
+- The fall's heat (docs/134 §10.2, EQUATIONS E74): a binding falling from
+  its own deficit `δ₀` to the star core's ½ gives up `½ − δ₀`. Half stays as
+  the star core's heat, kept in `Body.heat` so every later cut reads it; half
+  leaves as light across the galaxy. Both halves are named in the energy
+  book ("fall"). Read on a 2^40 founding, bells 109→112: the first star's core
+  heat 0.166 → 0.336; light made 51;22·60⁻² → 1;50,11·60⁻¹, balanced; unaccounted heat unchanged; hydrogen kept still none, because
+  the calibre between tiers (§10.3) is not yet driven.
   The plasma's parcel (docs/134 §6): a mote is a mix (`Mote::parts`), the
   release's ionized pool one parcel at `p·S`, each bound part its own; read on
   the same founding to bell 112: 35 stars → 4 (none holding hydrogen), the

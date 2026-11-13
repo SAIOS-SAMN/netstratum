@@ -2886,9 +2886,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 Vec<crate::flows::Mote>,
                 Vec<(Ratio, Ratio, Ratio)>,
                 Ratio,
+                Ratio,
             )> = Vec::new();
             crate::profile::mark("breath:bindings-take");
-            for (reach, shares) in bindings {
+            for (reach, shares, delta0) in bindings {
                 // Each member as it stood, its share of its mote.
                 let mut members: Vec<crate::flows::Mote> = Vec::new();
                 for (j, s) in shares {
@@ -3043,10 +3044,12 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let whole_c = m.clone();
                 takes.push((
                     reach, fell, outside, whole_c, a, spin, phases, orth_mean, members, fell_spins,
-                    rho_birth,
+                    rho_birth, delta0,
                 ));
             }
             crate::profile::mark("breath:births-each");
+            // The light the births' falls give up (docs/134 §10.2).
+            let mut fall_light = ratio(0, 1);
             for (
                 reach,
                 star,
@@ -3059,6 +3062,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 members,
                 fell_spins,
                 rho_birth,
+                delta0,
             ) in takes
             {
                 let whole_mass = whole_held.clone();
@@ -3133,10 +3137,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // step that the collapse ends, their spread about the star's
                 // own spin in the binding's frame (`ℓ′ = d·H_c(<d)`, docs/99
                 // §2.2), per unit of what fell, the same join law as two stars
-                // sticking (`formation::spread`, EQUATIONS E56). The state level
-                // carries no radial law (operator 2026-11-06), so the potential
-                // the fall gives up is this spread, never counted again. The
-                // star core's heat is it and the heat its members carried in.
+                // sticking (`formation::spread`, EQUATIONS E56): motion the
+                // members already had. The potential the fall itself gives up
+                // is read below from the deficits (`a_fall`). The star core's
+                // heat is these two and the heat its members carried in.
                 let fell_w = fell_spins
                     .iter()
                     .fold(ratio(0, 1), |a, (w, _, _)| a + w.clone());
@@ -3152,7 +3156,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         ) / fell_w),
                     )
                 };
-                let core_heat = a_binding.clone() + contraction.clone();
+                // The fall's heat (docs/134 §10.2): the binding falls from its
+                // own deficit `δ₀` to the star core's, ½; at ½ the faces are
+                // equal, so the held face keeps `g = ½` of the potential
+                // released as heat and the unlocked face emits the rest (the
+                // virial balance read from the faces, no constant entered).
+                let a_fall = crate::formation::fall_heat(&delta0);
+                let core_heat = a_binding.clone() + contraction.clone() + a_fall.clone();
                 let lit = crate::formation::ignition_share(&a_binding).and_then(|_| {
                     crate::formation::system(
                         &star,
@@ -3184,6 +3194,16 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let Some(ignition) = crate::formation::ignition_share(&a_binding) else {
                     continue;
                 };
+                // The fall's two halves (docs/134 §10.2), on what the star
+                // keeps: the whole potential released is heat made (named in
+                // the books); the held half stays, kept in `heat` so every
+                // later cut reads the one heat it was cut at; the unlocked
+                // half leaves as light, shone once the echo's births stand.
+                if !unit.is_zero() {
+                    let given = a_fall.clone() * held_at_birth.clone();
+                    heat_made.push(("fall", ratio(2, 1) * given.clone() / unit.clone()));
+                    fall_light += given;
+                }
                 let mut sys = Body {
                     solid: false,
                     coupled: None,
@@ -3206,7 +3226,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     phase: phases_own,
                     load: ratio(0, 1),
                     remnant: false,
-                    heat: contraction.clone(),
+                    heat: contraction.clone() + a_fall,
                     tilt: crate::flows::blend(
                         &members
                             .iter()
@@ -3242,6 +3262,17 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 stars += 1;
             }
             core.flows.retain(|x| !x.parts.is_empty());
+            // The falls' light crosses the galaxy on the continuum face, to
+            // its motes and into its systems, as the throat's does.
+            if !fall_light.is_zero() && !unit.is_zero() {
+                let enc_l = galaxy_enc(core);
+                let (got, _) = shine(&mut core.flows, &mut [], &enc_l, &fall_light, &g_mass);
+                let (inside, _) =
+                    shine_systems(&mut core.satellites, &fall_light, &enc_l, &g_mass, &unit);
+                light.made += fall_light.clone() / unit.clone();
+                light.received += (got.clone() + inside.clone()) / unit.clone();
+                light.drained += (fall_light - got - inside) / unit.clone();
+            }
             // Each mote's place for the condensation: the cap its own gravity
             // holds in the galaxy's enclosure.
             crate::profile::mark("breath:births-enclose");

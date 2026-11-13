@@ -293,6 +293,20 @@ pub fn crest_collapse(
     Some((w, count))
 }
 
+/// The fall's heat (docs/134 §10.2): a binding falling from its own deficit
+/// `δ₀` to the star core's, ½, gives up the potential `½ − δ₀`. At ½ the two
+/// faces are equal, so the held face keeps `g = ½` of it as heat and the
+/// unlocked face emits the rest as light (the virial balance, read from the
+/// faces): `a = g·(½ − δ₀)`, on the grain, none where `δ₀ ≥ ½`.
+pub fn fall_heat(delta0: &Ratio) -> Ratio {
+    let g = crate::polarity::throat_held();
+    if *delta0 < g {
+        crate::ring::grain(&(g.clone() * (g - delta0.clone())))
+    } else {
+        ratio(0, 1)
+    }
+}
+
 /// Ignition, the quantum star core (operator 2026-10-15; with Xylarium): a
 /// star is the core's pair one tier down, a containment ring at its centre
 /// (its star core) holding its body's grains as one ring of its own, at reach =
@@ -2379,6 +2393,22 @@ mod heat_carriage_tests {
         let per = per_holding(&heat, &holding);
         assert_eq!(per.clone() * ratio(2, 1) + per * ratio(3, 1), heat);
         assert_eq!(per_holding(&ratio(1, 1), &ratio(0, 1)), ratio(0, 1));
+    }
+}
+
+#[cfg(test)]
+mod fall_tests {
+    use super::fall_heat;
+    use cfe::ratio::ratio;
+
+    /// docs/134 §10.2: the fall's heat is half the potential released, below
+    /// a quarter, none from a binding already at the star core's deficit.
+    #[test]
+    fn the_fall_keeps_half_the_potential_as_heat() {
+        assert_eq!(fall_heat(&ratio(1, 6)), ratio(1, 6));
+        assert_eq!(fall_heat(&ratio(1, 2)), ratio(0, 1));
+        assert_eq!(fall_heat(&ratio(3, 4)), ratio(0, 1));
+        assert_eq!(fall_heat(&ratio(0, 1)), ratio(1, 4));
     }
 }
 

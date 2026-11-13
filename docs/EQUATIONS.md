@@ -2081,6 +2081,24 @@ about the body's own spin:
     a = p·ν    ν = Π(1 − δ)    A = a/(1 − ρ), ρ = ½·½    D = A ⊖ Ā    T = (1 − A)·g·w·D
     F ↦ F·m(rate(A′)·t)    C, ℓ unchanged    Σ w·A′ = Σ w·A (within the grain)
 
+**E74 · The fall's heat.** `formation::fall_heat`, `flows::band_pairs`
+(the binding's own deficit), `breath::breathe` at the births (docs/134
+§10.2; operator 2026-11-13). A binding falls from its own deficit `δ₀`, its
+holding's bond at its half-width, to the star core's, ½. At ½ the faces are
+equal, so the potential released is held half as heat and emitted half as
+light:
+
+    λ = 2m/R    δ₀ = λ/(1 + λ)    a_fall = g·(½ − δ₀) = ½·(½ − δ₀)    (none where δ₀ ≥ ½)
+    a_core = a_b + S_c + a_fall    heat made 2·a_fall·M_kept    light a_fall·M_kept
+
+The star keeps `S_c + a_fall` in its heat, so the ignition cut and every
+later cut (outburst, wind) read one heat. The light crosses the galaxy as
+the throat's does. **Built and read** (2^40, bells 109→112): the first
+star's `a_core` goes from ≈ 0.166 to ≈ 0.336. The energy line's unaccounted
+heat is unchanged to the grain, so both halves are booked. `a_fall < ¼`, so
+alone it cannot reach hydrogen's tightness 1: the calibre between tiers
+(§10.3) is the remaining term.
+
 **E73 · The plasma layer: the release shared through the charge.**
 `plasma::{kept_electrons, bound_share, carried, bounce_unit}` (docs/134;
 operator 2026-11-13). A kind's electrons are bound where held at the place

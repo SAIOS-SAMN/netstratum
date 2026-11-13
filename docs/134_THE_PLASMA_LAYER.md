@@ -466,6 +466,33 @@ from the faces, with no constant entered:
 *Bound:* `a_fall < ¼`. Alone it cannot reach `t_H = 1`. So the fall's heat is
 a missing term, but by itself it does not close the gap.
 
+**Built (2026-11-13, EQUATIONS E74).**
+- **The binding's deficit.** `flows::band_pairs` returns each binding's own
+  deficit as it forms, `δ₀ = λ/(1 + λ)` with `λ = 2m/R`, its crest's gravity
+  at its half-width.
+- **The heat.** `formation::fall_heat` gives `a_fall`. The star keeps
+  `S_c + a_fall` in `Body.heat`, so the ignition cut and every later cut
+  (outburst, wind, `formation::core_heat`) read the one heat.
+- **The books.** The whole release `2·a_fall·M_kept` is named as heat made
+  ("fall"). Its unlocked half leaves as light across the galaxy and into its
+  systems, as the throat's light does.
+
+**Read** (2^40, the bell-109 checkpoint to bell 112, before → after):
+
+| | before | after |
+|---|---|---|
+| `δ₀` | — | `9;37·60⁻¹` ≈ 0.160 |
+| `a_b`, `S_c` | `6;44`, `3;13` (·60⁻¹) | unchanged |
+| `a_fall` | none | `10;11·60⁻¹` ≈ 0.170 |
+| `a_core` | `9;58·60⁻¹` ≈ 0.166 | `20;09·60⁻¹` ≈ 0.336 |
+| light made | `51;22·60⁻²` | `1;50,11·60⁻¹`, balanced |
+| unaccounted heat | `47;52,45·60⁻²` | `47;52,45·60⁻²` |
+| hydrogen kept | none | none |
+
+The fall is booked whole: the unaccounted heat is unchanged to the grain.
+The heat doubles, as §10.2 bounds it, and stays below `t_H`. Conservation
+(holding + magnetism, 3Z) holds.
+
 ### 10.3 The capacity that is not vented: the calibre between tiers
 
 `a_core` is measured on the **star's** ruler: a share of a bond, held in the
@@ -501,7 +528,7 @@ the calibre.
 ### 10.4 What needs to happen
 
 1. **The fall's heat** (§10.2): `a_fall = ½·(½ − δ₀)` added to the core's
-   heat, the other half emitted as light.
+   heat, the other half emitted as light. **Built** (E74).
 2. **The calibre** (§10.3): drive the scale dilator. Each body carries its
    tier's calibre as `ρ`, set by the dilation between its tier and the one
    above it. A comparison across tiers reads one through `D(ρ)`, never as

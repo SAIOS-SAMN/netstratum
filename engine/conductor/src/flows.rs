@@ -3645,14 +3645,15 @@ pub fn disc_plane(motes: &[Mote]) -> Vec<Ratio> {
 /// pair holds where its matter's bond meets its heat and the tide across
 /// it (`formation::crest_collapse`, docs/96 §8); a band where a
 /// star already stands is that star's (its capture reads it). Returns the
-/// holding bands as bindings: (the band's middle reach, each member's share),
-/// every member on the disc leg (docs/99 §2.1).
+/// holding bands as bindings: (the band's middle reach, each member's share,
+/// the binding's own deficit as it forms), every member on the disc leg
+/// (docs/99 §2.1).
 pub fn band_pairs(
     motes: &[Mote],
     enc: &Enclosed,
     plane: &[Ratio],
     g_total: &Ratio,
-) -> Vec<(Ratio, Vec<(usize, Ratio)>)> {
+) -> Vec<(Ratio, Vec<(usize, Ratio)>, Ratio)> {
     let ring = enc.base();
     let whole = enc.whole();
     if ring.is_zero() || whole.is_zero() || motes.is_empty() {
@@ -3886,8 +3887,14 @@ pub fn band_pairs(
                 .collect();
             arcs.entry(at).or_default().push((i, sh));
         }
+        // Each binding's own deficit as it forms (docs/134 §10.2): its
+        // holding's bond at its half-width, `λ/(1 + λ)`, `λ = 2m/R` (the
+        // crest's gravity alone; its count cancels, `m/n` over `R/n`), the
+        // well it falls from to the star core's deficit ½.
+        let lambda = ratio(2, 1) * m.clone() / mid.clone();
+        let delta0 = crate::ring::grain(&crate::formation::bond(&lambda));
         for (_, binding) in arcs {
-            out.push((crate::ring::grain(&mid), binding));
+            out.push((crate::ring::grain(&mid), binding, delta0.clone()));
         }
     }
     out
@@ -5641,7 +5648,7 @@ mod passage_tests {
         let g = super::holding(&motes) * ratio(2, 1);
         let bindings = band_pairs(&motes, &enc, &[ratio(1, 1), ratio(0, 1), ratio(0, 1)], &g);
         assert!(!bindings.is_empty(), "the ring binds");
-        for (_, members) in &bindings {
+        for (_, members, _) in &bindings {
             for (i, _) in members {
                 assert!(
                     on_disc_leg(&motes[*i]),

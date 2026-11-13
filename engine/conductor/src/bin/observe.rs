@@ -275,7 +275,7 @@ fn streams(u: &pulse::Universe, i: usize, unit: &Ratio) {
         );
     }
     let bands = flows::band_pairs(&core.flows, &enc, &core.tilt, &pulse::mass(&core.total()));
-    let members: usize = bands.iter().map(|(_, m)| m.len()).sum();
+    let members: usize = bands.iter().map(|(_, m, _)| m.len()).sum();
     println!(
         "  bands the galaxy would bind now: {} ({members} members)",
         bands.len()
