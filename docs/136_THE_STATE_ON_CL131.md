@@ -123,10 +123,24 @@ It is read, never stored: the antipolar face is the same state read through it.
 
 ## 8. Open
 
-1. **Netstratum's orbit tilt** (the shares `t_k` of `ℓ_o` over three spatial
-   planes) becomes the orbit's plane on the base. Its law on the S^360
-   measure space is to be derived with the base's own metric
-   (docs/120, the coordinate), not as three planes.
-2. **The weights `w_p`:** Xylarium reads them from capture. Netstratum's
-   captures (`nuclides`) give the same reading if the capture phase is
-   `w_p·s·Z`; to be checked in the fixtures.
+1. **The orbit's plane is a rotor** (Xylarium, xyl_core::rotor): an even
+   versor of turns on named planes, carrying the anchor's reference plane to
+   the orbit's. The tilt is one generator inside it. Two bodies' planes are
+   compared by the relative versor `P_b⁻¹·P_a` per plane, never as one angle.
+   Netstratum's shares `t_k` of `ℓ_o` over three spatial planes become that
+   rotor; its law on the base is to be derived.
+2. **The capture phase** (confirmed): `ψ_p = (w_p·s·Z) mod 1`, where `s` is
+   the share the jet carries through the throat and `Z` is the protons
+   (Netstratum's Q). In the common phase `w_p = 1`, so `ψ = frac(s·Q)`.
+
+## 9. The joint read (2026-11-13)
+
+Xylarium reproduced all four of §7's fixtures in xyl_core, as tests on its
+branch `vacuum-yield`:
+1. The common turn by 360° returns every point, and weights (0,1,1,1,1,1) fix
+   the axis circle. A body state built on a frozen turn is refused by its
+   builder; the type only shows the fixed circle.
+2. `faces(1,1) = (½, ½)`, `faces(3,5) = (3/8, 5/8)`, and the antipole reads 5/8.
+3. `electron_phase` is `κ(1 − 2·frac(ψ))`, odd about ½.
+4. `dilator(2)·dilator(3)` is projectively `dilator(6)`, and
+   `flow(1/3, 1/2) = 5/7`.
