@@ -1,5 +1,33 @@
 # 135 — What every universe shares, and what each may transpose
 
+> **Superseded in part, 2026-11-13 (operator direction via Mycelium, MU-HOSTING
+> §5a.2a, mycelium #304):** the universal physics is already served by the
+> hypha through the Concordance, and the R-rows below are **in-universe
+> physics: they stay in the kernels.** Mycelium #298–#303 are closed, and their
+> fixtures are kept as Netstratum's own tests (`plasma::tests`,
+> `cfe::almanac::atom::r7_penetration_fixtures`, `ring::stride_tests`).
+>
+> - **Served by the hypha** (read from a court, never restated):
+>   - the six universal laws at LAW_VERSION 5 (conformal in Cl(4,1), momentum,
+>     rigidity, time, reservoir, continuity; ACT_LAWS 0–2);
+>   - the register's parameters (mode 5);
+>   - the clause register, signature and alignment (modes 7–9);
+>   - the `forms` crate (reference, passage, coordinate, coupling, turning);
+>   - the coordinate origin and the TUniversal position;
+>   - the founding by manifest and grant (ACT_DOMAIN 17, 18);
+>   - conservation at the tube (fold nets, carried lines, holonomy,
+>     `BasketEntry::holds()`).
+> - **Netstratum's own:**
+>   - constants and per-kind matter (neutrons, shells, seals, chemistry);
+>   - the in-universe dynamics (two-pole equilibria, the atom's fill, the
+>     plasma release, the throat's interior);
+>   - the founding table and the body-state signature.
+> - **Rule:** a new universal form enters only when a crossing kind states
+>   its object and the hypha must check it at the tube.
+>
+> What follows is kept as Netstratum's own register of in-universe laws and
+> the transpositions each universe declares.
+
 **Operator 2026-11-13:** "we need coordination on which of these shared
 components are required and which can be transposed for universe diversity
 and push the shared libraries that make a functional universe/kernel up to
