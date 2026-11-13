@@ -1,107 +1,42 @@
-//! H's orientation held as the generator (docs/117 §11.7, #117 step 2), on
-//! the state's algebra Cl(5,4) over ℚ (docs/131, operator 2026-11-12): a
-//! body's motion is one generator `G` over the nine axes, with its windings
-//! `K` per turning plane, never one angle per plane.
+//! A body's orientation on the base (docs/136; operator ruling 2026-11-13:
+//! one body-state signature across kernels, Cl(13,1), superseding docs/131's
+//! Cl(5,4)). Its place is on the enclosure's sphere, the base; the S¹¹ fibre
+//! over it is read by the faces (docs/136 §2) and R's phase (§3), never
+//! stored as axes. What is held here is the body's ROTOR on the base: its
+//! motion on four of the base's directions, the three spatial axes and the
+//! orbit's axial leg (axis 4, where docs/131 held `e_R`), held as one
+//! generator `G` over their six planes with its windings `K` per plane
+//! (docs/117 §11.7), never one angle per plane (Xylarium's reading, docs/136
+//! §8: "a body's orbital plane is held as a rotor").
 //!
-//! - **The axes** (docs/131 §1, [`AXES`]): each plane's whole `e₊ₖ` and span
-//!   `e₋ₖ`, R's pole axis `e_R`, and the universe's pair `e₊, e₋`; the spans
-//!   and `e₋` square to −1 ([`NEGATIVES`]). A pair of axes of one sign is a
-//!   turning, of each sign a boost ([`is_turning`]): 16 and 20.
-//! - **The built planes** ([`PLANES`]): the three spatial planes `e₊₂e₊₃`,
-//!   `e₊₃e₊₁`, `e₊₁e₊₂` (in `flows::SPACE` order), then their R-plane
-//!   partners, the dual pairs of §11.6, `e₊₁e_R`, `e₊₂e_R`, `e₊₃e_R`: the
-//!   continuum's subspace `e₊₁e₊₂e₊₃e_R`, held as six components. Every other
-//!   part of `G` (the vacuum's turnings, the boosts, the universe's planes and
-//!   any part of higher grade the composition makes) is held beside them as
-//!   one exact value ([`Orientation::wide`]); together they are the one
-//!   generator.
+//! - **The planes** ([`PLANES`]): the three spatial planes `e₂e₃`, `e₃e₁`,
+//!   `e₁e₂` (in `flows::SPACE` order), then each one's partner with the
+//!   axial leg, `e₁e₄`, `e₂e₄`, `e₃e₄`, the R side's orbits (docs/128 §9),
+//!   all on the base's own Euclidean signature.
 //! - **The rate a ring** ([`rate`]): `b = δ/(1 − δ) = H/R`, the hold over
 //!   the reach, the one linear-fractional map sending rest, the rim and the
 //!   throat (`δ = 0, ½, 1`) to the Cayley rates `0, 1, ∞` (§11.7.3). The
-//!   vacuum's inversion `δ ↦ 1 − δ` is the reciprocal `b ↦ 1/b`.
+//!   inversion `δ ↦ 1 − δ` (docs/136 §5) is the reciprocal `b ↦ 1/b`.
 //! - **The advance** ([`Orientation::advance`]): `G ← generator(cayley(G)·
-//!   cayley(B))`, whole, by `conductor::turning`'s composition, never plane
-//!   by plane; its parts on the planes between are made by the composition
-//!   (register K6 retired). Each component is held on the grain. A motion on
-//!   the continuum's subspace alone is composed on its isoclinic halves, the
-//!   same law in closed form; any other by the Cayley form on Cl(5,4)
-//!   ([`Orientation::advance_wide`]).
+//!   cayley(B))`, whole, composed on its isoclinic halves in closed form.
+//!   Each component is held on the grain.
 //! - **One cover, and the windings:** `R` and `−R` turn every vector alike,
-//!   so the motion is held as the one whose scalar part is not negative (a
-//!   plane alone then stands at `|g| ≤ 1`); a whole turn gives the
-//!   components back. A plane's `K` rises by one each time its reading
-//!   passes 0 under a forward drive and falls on a pass backward: exact for
-//!   a plane turned alone (`K = ⌊θ/360°⌋`, §11.1), a reading of the plane's
-//!   component where other planes turn with it (78.173 §8.3: windings stay
-//!   on the planes that wound them). A boost has no period and never winds.
+//!   so the motion is held as the one whose scalar part is not negative; a
+//!   plane's `K` rises by one each time its reading passes 0 under a forward
+//!   drive and falls on a pass backward (78.173 §8.3).
+//! - **The scale** ([`Orientation::advance_scale`]): the conformal dilator
+//!   on `e₊e₋` (docs/136 §4), its rate composed by the flow law.
 //! - **The reading the laws act on** ([`reading`]): `ψ = g/(1 + |g|)` turns,
-//!   taken into `[0, 1)`, the L1 reading §8d names, rational, exact at the
-//!   hemisphere kinks (`g = 0` and `g = 1` are `0` and `½` a turn), and one
-//!   ring from rest gives back the motion law's `δ` exactly. Degrees
-//!   (`tan(θ/4) = g`) are rendered on observation only. The isoclinic
-//!   readings (form, twist, half axes) are read on the continuum's subspace.
+//!   taken into `[0, 1)`; degrees are rendered on observation only.
 use crate::turning::{base_axis, Clifford, Regime, TurningRefusal};
 use cfe::ratio::{ratio, Ratio};
 use num_bigint::BigInt;
 use num_integer::Integer;
 use num_traits::{One, Signed, Zero};
 
-/// Each frame plane's whole, `e₊ₖ` (docs/131 §1): bits 0–2.
-pub const WHOLE: [usize; 3] = [1, 2, 4];
-/// The universe's whole, `e₊` (origin and infinity together): bit 3.
-pub const UNIVERSE_WHOLE: usize = 8;
-/// The universe's span, `e₋` (origin against infinity): bit 4.
-pub const UNIVERSE_SPAN: usize = 16;
-/// R, the electron's phase, the pole axis `e_R`: base axis 4, bit 5.
-pub const R_AXIS: usize = 32;
-/// Each frame plane's span, `e₋ₖ`: base axes 5–7, bits 6–8.
-pub const SPAN: [usize; 3] = [64, 128, 256];
-/// The nine axes of Cl(5,4), as blade masks.
-pub const AXES: [usize; 9] = [1, 2, 4, 8, 16, 32, 64, 128, 256];
-/// The axes that square to −1: the spans and the universe's span.
-pub const NEGATIVES: usize = UNIVERSE_SPAN | 64 | 128 | 256;
-
-/// The 36 pairs of axes, as grade-2 masks ascending.
-pub fn pairs() -> Vec<usize> {
-    let mut v: Vec<usize> = AXES
-        .iter()
-        .enumerate()
-        .flat_map(|(i, a)| AXES[i + 1..].iter().map(move |b| a | b))
-        .collect();
-    v.sort_unstable();
-    v
-}
-
-/// A pair's character, read from its axes' squares by the product
-/// (docs/117 §3): a turning where its unit squares to −1, a boost where to
-/// +1. False for anything but a pair.
-pub fn is_turning(mask: usize) -> bool {
-    Regime::of(&Clifford::blade(NEGATIVES, mask, ratio(1, 1))) == Ok(Regime::Elliptic)
-}
-
-/// The pole swap of frame plane `k` (docs/117 §10.1, docs/131 §4): the
-/// reflection along its span `e₋ₖ`, exchanging its held and open poles; on a
-/// value, every blade holding `e₋ₖ` negated. An involution.
-pub fn pole_swap(k: usize, x: &Clifford) -> Clifford {
-    let s = SPAN[k];
-    x.terms().fold(
-        Clifford::blade(x.negatives(), 0, ratio(0, 1)),
-        |acc, (m, c)| {
-            let c = if m & s != 0 { -c.clone() } else { c.clone() };
-            acc.sum(&Clifford::blade(x.negatives(), m, c))
-                .expect("one signature")
-        },
-    )
-}
-
-/// A value carried by a motion, `M·x·M̃` (docs/131 §4): exact, the
-/// conjugation, no norm read.
-pub fn carried(m: &Clifford, x: &Clifford) -> Result<Clifford, TurningRefusal> {
-    m.product(x)?.product(&crate::turning::reversed(m))
-}
-
-/// The six turning planes: the units each joins (1–3 spatial, 4 = R).
-/// Spatial first in `flows::SPACE` order, then each one's R-plane partner.
+/// The six turning planes: the units each joins (1–3 spatial, 4 the
+/// orbit's axial leg). Spatial first in `flows::SPACE` order, then each
+/// one's partner with the axial leg (the R side's orbits).
 pub const PLANES: [(usize, usize); 6] = [(2, 3), (3, 1), (1, 2), (1, 4), (2, 4), (3, 4)];
 
 /// The spatial planes' places in [`PLANES`].
@@ -124,14 +59,14 @@ fn blade(p: usize) -> (usize, Ratio) {
 
 /// The generator with components `c` on [`PLANES`].
 pub fn bivector(c: &[Ratio; 6]) -> Clifford {
-    let mut g = Clifford::blade(NEGATIVES, 0, ratio(0, 1));
+    let mut g = Clifford::blade(0, 0, ratio(0, 1));
     for (p, x) in c.iter().enumerate() {
         if x.is_zero() {
             continue;
         }
         let (mask, sign) = blade(p);
         g = g
-            .sum(&Clifford::blade(NEGATIVES, mask, sign * x.clone()))
+            .sum(&Clifford::blade(0, mask, sign * x.clone()))
             .expect("one signature");
     }
     g
@@ -471,31 +406,10 @@ impl Motion {
 pub struct Orientation {
     g: [Ratio; 6],
     pub windings: [i64; 6],
-    /// The vacuum's factor (docs/131 §2, §9): its generator on the spans'
-    /// turnings `e₋₂e₋₃`, `e₋₃e₋₁`, `e₋₁e₋₂` (about axes 1, 2, 3), on the
-    /// grain, with their windings.
-    vacuum: [Ratio; 3],
-    pub vacuum_windings: [i64; 3],
     /// The scale's factor: its rate on the conformal dilator `e₊e₋`, a
     /// boost, composed by the flow law; it never winds.
     scale: Ratio,
     phases: Vec<Ratio>,
-}
-
-/// The vacuum's turning about axis k, as a blade mask with the sign of
-/// `e₋ₗe₋ₘ` (`{l, m}` after k, cyclic) against its ascending blade.
-fn vacuum_blade(k: usize) -> (usize, Ratio) {
-    let (l, m) = ((k + 1) % 3, (k + 2) % 3);
-    let sign = if l < m { ratio(1, 1) } else { ratio(-1, 1) };
-    (SPAN[l] | SPAN[m], sign)
-}
-
-/// The vacuum's factor as a quaternion half. On the spans the units multiply
-/// with the opposite hand (`(e₋₂e₋₃)(e₋₃e₋₁) = +e₋₁e₋₂`, the inverted face's
-/// mirror), so its generator is carried on [`Half`] negated, and read back
-/// negated.
-fn vacuum_half(u: &[Ratio; 3]) -> Half {
-    Half::motion(&std::array::from_fn(|k| -u[k].clone()))
 }
 
 impl Default for Orientation {
@@ -510,8 +424,6 @@ impl Orientation {
         let mut o = Orientation {
             g,
             windings,
-            vacuum: std::array::from_fn(|_| ratio(0, 1)),
-            vacuum_windings: [0; 3],
             scale: ratio(0, 1),
             phases: Vec::new(),
         };
@@ -555,74 +467,9 @@ impl Orientation {
         self.advance_by(b, 1)
     }
 
-    /// The vacuum's generator on its three turnings (about axes 1, 2, 3).
-    pub fn vacuum(&self) -> &[Ratio; 3] {
-        &self.vacuum
-    }
-
     /// The scale's rate on the conformal dilator.
     pub fn scale(&self) -> &Ratio {
         &self.scale
-    }
-
-    /// The whole motion's generators as exact values on Cl(5,4), one per
-    /// factor: the continuum's, the vacuum's and the scale's. The factors
-    /// stand on disjoint axes and commute; the motion is their product.
-    pub fn factors(&self) -> [Clifford; 3] {
-        let vac = (0..3).fold(Clifford::blade(NEGATIVES, 0, ratio(0, 1)), |acc, k| {
-            let (m, sign) = vacuum_blade(k);
-            acc.sum(&Clifford::blade(
-                NEGATIVES,
-                m,
-                sign * self.vacuum[k].clone(),
-            ))
-            .expect("one signature")
-        });
-        [
-            bivector(&self.g),
-            vac,
-            Clifford::blade(
-                NEGATIVES,
-                UNIVERSE_WHOLE | UNIVERSE_SPAN,
-                self.scale.clone(),
-            ),
-        ]
-    }
-
-    /// The vacuum's factor moved by the rate `b` (its components about axes
-    /// 1, 2, 3), composed whole on its quaternion half, each component
-    /// floored onto the grain on its own sense; windings as
-    /// [`Orientation::advance`]'s.
-    pub fn advance_vacuum(&mut self, b: &[Ratio; 3]) -> Result<(), TurningRefusal> {
-        if b.iter().all(Zero::is_zero) {
-            return Ok(());
-        }
-        let was: [Ratio; 3] = std::array::from_fn(|k| reading(&self.vacuum[k]));
-        let r = vacuum_half(&self.vacuum).product(&vacuum_half(b));
-        let r = if r.n[0].is_negative() != r.d.is_negative() && !r.n[0].is_zero() {
-            r.negated()
-        } else {
-            r
-        };
-        let d = &r.d + &r.n[0];
-        if d.is_zero() {
-            return Err(TurningRefusal::NoGenerator);
-        }
-        let places = BigInt::from(60).pow(6);
-        let (num_sign, den) = if d.is_negative() { (-1, -d) } else { (1, d) };
-        self.vacuum = std::array::from_fn(|k| {
-            let num = -(&r.n[k + 1]) * BigInt::from(num_sign);
-            Ratio::new((num * &places).div_floor(&den), places.clone())
-        });
-        for k in 0..3 {
-            let now = reading(&self.vacuum[k]);
-            if b[k] > ratio(0, 1) && now < was[k] {
-                self.vacuum_windings[k] += 1;
-            } else if b[k] < ratio(0, 1) && now > was[k] {
-                self.vacuum_windings[k] -= 1;
-            }
-        }
-        Ok(())
     }
 
     /// The scale moved by the rate `u` on the dilator, by the flow law
@@ -910,19 +757,12 @@ impl Orientation {
                 .fold(ratio(0, 1), |s, (o, w)| s + o.g[p].clone() * w.clone());
             out.g[p] = crate::ring::grain(&(sum / whole.clone()));
         }
-        for k in 0..3 {
-            let sum = parts
-                .iter()
-                .fold(ratio(0, 1), |s, (o, w)| s + o.vacuum[k].clone() * w.clone());
-            out.vacuum[k] = crate::ring::grain(&(sum / whole.clone()));
-        }
         let sum = parts
             .iter()
             .fold(ratio(0, 1), |s, (o, w)| s + o.scale.clone() * w.clone());
         out.scale = crate::ring::grain(&(sum / whole.clone()));
         if let Some((o, _)) = parts.iter().max_by(|a, b| a.1.cmp(&b.1)) {
             out.windings = o.windings;
-            out.vacuum_windings = o.vacuum_windings;
         }
         out.refresh();
         out
@@ -972,37 +812,24 @@ impl Orientation {
     }
 
     /// Encoded for the save record: the six components, then the six
-    /// windings, twelve exact values; where it moves off the continuum
-    /// (docs/131), then the vacuum's three components and three windings and
-    /// the scale, nineteen.
+    /// windings, twelve exact values; where the scale moves, the scale's
+    /// rate after them, thirteen (docs/136 §6).
     pub fn values(&self) -> Vec<Ratio> {
         let mut v: Vec<Ratio> = self.g.to_vec();
         v.extend(self.windings.iter().map(|&n| ratio(n, 1)));
-        if self.vacuum.iter().all(Zero::is_zero)
-            && self.vacuum_windings == [0; 3]
-            && self.scale.is_zero()
-        {
-            return v;
+        if !self.scale.is_zero() {
+            v.push(self.scale.clone());
         }
-        v.extend(self.vacuum.iter().cloned());
-        v.extend(self.vacuum_windings.iter().map(|&n| ratio(n, 1)));
-        v.push(self.scale.clone());
         v
     }
 
     /// Read back from [`Orientation::values`]; refused unless twelve or
-    /// nineteen values with whole windings. Each component is held on the
-    /// grain, as `G` is: a record written while `hold_phase` held exact
-    /// readings carries them wide.
+    /// thirteen values with whole windings. Each component is held on the
+    /// grain, as `G` is.
     pub fn from_values(v: &[Ratio]) -> Option<Orientation> {
-        if v.len() != 12 && v.len() != 19 {
+        if v.len() != 12 && v.len() != 13 {
             return None;
         }
-        let whole = |x: &Ratio| -> Option<i64> {
-            x.is_integer()
-                .then(|| i64::try_from(x.to_integer()).ok())
-                .flatten()
-        };
         let mut o = Orientation::default();
         for p in 0..6 {
             o.g[p] = crate::ring::grain(&v[p]);
@@ -1011,12 +838,8 @@ impl Orientation {
             }
             o.windings[p] = i64::try_from(v[6 + p].to_integer()).ok()?;
         }
-        if v.len() == 19 {
-            for k in 0..3 {
-                o.vacuum[k] = crate::ring::grain(&v[12 + k]);
-                o.vacuum_windings[k] = whole(&v[15 + k])?;
-            }
-            o.scale = crate::ring::grain(&v[18]);
+        if v.len() == 13 {
+            o.scale = crate::ring::grain(&v[12]);
         }
         o.refresh();
         Some(o)
@@ -1452,13 +1275,9 @@ mod grain_tests {
 }
 
 #[cfg(test)]
-mod cl54_tests {
-    //! The state's algebra, Cl(5,4) over ℚ (docs/131 §8).
+mod base_tests {
+    //! The rotor on the base and the scale (docs/136 §7).
     use super::*;
-
-    fn one(mask: usize, c: Ratio) -> Clifford {
-        Clifford::blade(NEGATIVES, mask, c)
-    }
 
     fn part(x: &Clifford, mask: usize) -> Ratio {
         x.terms()
@@ -1467,65 +1286,23 @@ mod cl54_tests {
             .unwrap_or_else(|| ratio(0, 1))
     }
 
-    /// Witness 1: each pair's character read from its axes' squares, 16
-    /// turnings (10 positive, 6 negative) and 20 boosts.
+    /// A motion on the six planes composes in closed form to the general
+    /// Cayley form's components on the base's Euclidean signature.
     #[test]
-    fn sixteen_turnings_and_twenty_boosts_by_the_squares() {
-        let all = pairs();
-        assert_eq!(all.len(), 36);
-        let turning: Vec<usize> = all.iter().copied().filter(|&m| is_turning(m)).collect();
-        assert_eq!(turning.len(), 16);
-        let negative = turning.iter().filter(|&&m| m & NEGATIVES == m).count();
-        assert_eq!((turning.len() - negative, negative), (10, 6));
-        // The built planes are continuum turnings; each plane's own
-        // dilation and the conformal dilator are boosts.
-        assert!((0..6).all(|p| is_turning(blade(p).0)));
-        assert!((0..3).all(|k| !is_turning(WHOLE[k] | SPAN[k])));
-        assert!(!is_turning(UNIVERSE_WHOLE | UNIVERSE_SPAN));
-        // The vacuum's orbit about axis 1 is a turning on the spans.
-        assert!(is_turning(SPAN[1] | SPAN[2]));
-    }
-
-    /// Witness 4: the pole swap is an involution, and it reverses a plane's
-    /// span while keeping its whole.
-    #[test]
-    fn the_pole_swap_is_an_involution_reversing_the_span() {
-        let (z, q) = (ratio(3, 1), ratio(1, 1));
-        let x = one(WHOLE[0], z.clone() + q.clone())
-            .sum(&one(SPAN[0], z.clone() - q.clone()))
-            .expect("one signature");
-        let swapped = pole_swap(0, &x);
-        assert_eq!(part(&swapped, WHOLE[0]), z.clone() + q.clone());
-        assert_eq!(part(&swapped, SPAN[0]), q - z);
-        assert_eq!(pole_swap(0, &swapped), x);
-        let g = one(WHOLE[1] | SPAN[0], ratio(1, 2))
-            .sum(&one(SPAN[0] | SPAN[2], ratio(1, 3)))
-            .expect("one signature");
-        assert_eq!(pole_swap(0, &pole_swap(0, &g)), g);
-    }
-
-    /// The general form's components, each on the grain on its blade's
-    /// own sense.
-    fn on_grain(x: &Clifford) -> Vec<(usize, Ratio)> {
-        x.terms().map(|(m, c)| (m, crate::ring::grain(c))).collect()
-    }
-
-    /// Witness 2: a motion on the built planes composes in closed form to
-    /// the general Cayley form's components on Cl(5,4).
-    #[test]
-    fn the_built_motion_is_the_general_form_on_its_subspace() {
+    fn the_built_motion_is_the_general_form_on_the_base() {
         let g: [Ratio; 6] = std::array::from_fn(|p| crate::ring::grain(&ratio(p as i64 + 1, 7)));
         let b: [Ratio; 6] = std::array::from_fn(|p| crate::ring::grain(&ratio(1, p as i64 + 5)));
         let mut o = Orientation::of_generator(g.clone(), [0; 6]);
         o.advance(&b).expect("a motion");
-        // Held on the one cover, as the orientation holds it.
         let r = crate::turning::compose(
             &crate::turning::motion(&bivector(&g)).expect("a motion"),
             &crate::turning::motion(&bivector(&b)).expect("a motion"),
         )
         .expect("composed");
         let r = if part(&r, 0) < ratio(0, 1) {
-            one(0, ratio(0, 1)).difference(&r).expect("one signature")
+            Clifford::blade(0, 0, ratio(0, 1))
+                .difference(&r)
+                .expect("one signature")
         } else {
             r
         };
@@ -1537,85 +1314,30 @@ mod cl54_tests {
         assert_eq!(o.g(), &general);
     }
 
-    /// The vacuum's factor in closed form is the general form on the spans,
-    /// with the inverted face's hand.
+    /// Witness 4 (docs/136 §7, read jointly with Xylarium): the dilator's
+    /// rates compose by the flow law, `D(2)·D(3) = D(6)`, rates 1/3 ⊕ 1/2 =
+    /// 5/7; and the record reads back with the scale, thirteen values.
     #[test]
-    fn the_vacuum_factor_is_the_general_form_on_the_spans() {
-        let v: [Ratio; 3] = [ratio(1, 3), ratio(-1, 5), ratio(2, 7)];
-        let b: [Ratio; 3] = [ratio(1, 4), ratio(1, 6), ratio(-1, 9)];
-        let mut o = Orientation::default();
-        o.advance_vacuum(&v).expect("a motion");
-        let start = o.factors()[1].clone();
-        assert_eq!(on_grain(&start), on_grain(&o.factors()[1]));
-        o.advance_vacuum(&b).expect("a motion");
-        let mut step = Orientation::default();
-        step.advance_vacuum(&b).expect("a motion");
-        let general = crate::turning::compose_rates(&start, &step.factors()[1]).expect("composed");
-        let read: [Ratio; 3] = std::array::from_fn(|k| {
-            let (m, sign) = vacuum_blade(k);
-            crate::ring::grain(&(sign * part(&general, m)))
-        });
-        assert_eq!(o.vacuum(), &read);
-        assert!((0..3).all(|k| is_turning(vacuum_blade(k).0)));
-    }
-
-    /// The three factors stand on disjoint axes and commute; the scale
-    /// composes by the flow law and never winds; the record reads back.
-    #[test]
-    fn the_factors_commute_and_the_record_reads_back() {
+    fn the_dilator_composes_by_the_flow_law_and_the_record_reads_back() {
+        let (pos, neg) = (1usize << 5, 1usize << 6);
+        let rate = |u: &Ratio| Clifford::blade(neg, pos | neg, u.clone());
+        assert_eq!(
+            Regime::of(&rate(&ratio(1, 1))),
+            Ok(Regime::Hyperbolic)
+        );
+        let composed = crate::turning::compose_rates(&rate(&ratio(1, 3)), &rate(&ratio(1, 2)))
+            .expect("composes");
+        assert_eq!(composed, rate(&ratio(5, 7)));
         let mut o = Orientation::of_generator(
             std::array::from_fn(|p| crate::ring::grain(&ratio(1, p as i64 + 3))),
             [0; 6],
         );
-        o.advance_vacuum(&[ratio(1, 5), ratio(0, 1), ratio(1, 7)])
-            .expect("a motion");
+        assert_eq!(o.values().len(), 12);
         o.advance_scale(&ratio(1, 3)).expect("a boost");
         o.advance_scale(&ratio(1, 2)).expect("a boost");
         assert_eq!(o.scale(), &crate::ring::grain(&ratio(5, 7)));
-        let f = o.factors();
-        let m: Vec<Clifford> = f
-            .iter()
-            .map(|x| crate::turning::motion(x).expect("a motion"))
-            .collect();
-        for a in 0..3 {
-            for b in 0..3 {
-                assert_eq!(
-                    m[a].product(&m[b]).expect("product"),
-                    m[b].product(&m[a]).expect("product")
-                );
-            }
-        }
-        assert_eq!(o.values().len(), 19);
+        assert_eq!(o.values().len(), 13);
         assert_eq!(Orientation::from_values(&o.values()), Some(o.clone()));
         assert_eq!(o.advance_scale(&ratio(1, 1)), Err(TurningRefusal::NoMotion));
-    }
-
-    /// Witness 3: a continuum turning carried by equal dilations of its two
-    /// planes gains a part on the vacuum's turning, its size by the reverse
-    /// product kept.
-    #[test]
-    fn spin_passes_to_the_vacuum_by_the_planes_dilation_kept_in_size() {
-        let l = one(WHOLE[1] | WHOLE[2], ratio(1, 1));
-        let boost = one(WHOLE[1] | SPAN[1], ratio(1, 3))
-            .sum(&one(WHOLE[2] | SPAN[2], ratio(1, 3)))
-            .expect("one signature");
-        let m = crate::turning::motion(&boost).expect("a motion");
-        let c = carried(&m, &l).expect("carried");
-        assert!(!part(&c, SPAN[1] | SPAN[2]).is_zero(), "a vacuum part");
-        assert!(!part(&c, WHOLE[1] | WHOLE[2]).is_zero(), "a continuum part");
-        let size = |x: &Clifford| x.product(&crate::turning::reversed(x)).expect("product");
-        assert_eq!(size(&c), size(&l));
-    }
-
-    /// Witness 5: the conformal dilator composes by the flow law.
-    #[test]
-    fn the_conformal_dilator_composes_by_the_flow_law() {
-        let e = one(UNIVERSE_WHOLE | UNIVERSE_SPAN, ratio(1, 1));
-        assert_eq!(Regime::of(&e), Ok(Regime::Hyperbolic));
-        let (u1, u2) = (ratio(1, 2), ratio(1, 3));
-        let rate = |u: &Ratio| one(UNIVERSE_WHOLE | UNIVERSE_SPAN, u.clone());
-        let composed = crate::turning::compose_rates(&rate(&u1), &rate(&u2)).expect("composes");
-        let flow = (u1.clone() + u2.clone()) / (ratio(1, 1) + u1 * u2);
-        assert_eq!(composed, rate(&flow));
     }
 }

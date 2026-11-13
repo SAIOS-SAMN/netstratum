@@ -206,10 +206,11 @@ pub struct Mote {
     pub orientation: crate::orientation::Orientation,
     pub agitation: Ratio,
     pub born: u64,
-    /// Its stream KIND, inherited from where it entered and carried
-    /// forward, never reassigned: false the continuum (the core's founding
-    /// outflow, a star's outbursts and wind), true the vacuum (ocean
-    /// arrivals).
+    /// The parity of its passes through the inversion (docs/136 §5, §6.2):
+    /// false on the continuum's face (the core's founding outflow, a star's
+    /// outbursts and wind), true on the vacuum's (ocean arrivals, a Möbius
+    /// pass). A topological reading kept as a bit, set only where the
+    /// inversion is passed.
     pub vacuum: bool,
     /// The lever (docs/85 §9): per plane, the whole nuclei of its holding
     /// (signed, in grains) standing one place past its mark, so its holding's

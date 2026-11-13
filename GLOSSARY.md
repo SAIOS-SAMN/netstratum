@@ -13,6 +13,7 @@ are relative to `engine/conductor/src/` unless stated otherwise.
 |---|---|---|
 | **grain** | The unit of amount: one nucleon's worth of matter. A universe is founded with an exact number of grains (e.g. `2^55`). | `pulse.rs` (`Manifest`) |
 | **bell** | One tick of the simulation. Every law advances by whole bells; nothing is integrated continuously. | `breath.rs` |
+| **Cl(13,1)** | The one body-state signature across kernels (docs/136; operator 2026-11-13): Cl(n+1,1) at n = 12, the Hopf carrier S¹ → S¹¹ → CP⁵. A body's place is on the base (its enclosure's sphere) with its rotor there; the S¹¹ fibre over it is read by each plane's share split δ and R's phase. | `orientation.rs` |
 | **bound share** | Of a kind's electrons, the share bound at its place and heat, `b = g·E(a)/Q` (docs/134): held by the pair's face `g` and tighter than the heat. The bound share answers a release by its own inertia, the ionized share as one plasma. | `plasma.rs` |
 | **Cl(5,4)** | The state's algebra over ℚ (docs/131): each frame plane's whole `e₊ₖ` and span `e₋ₖ`, R's pole axis `e_R`, the universe's pair `e₊, e₋`; 16 turnings, 20 boosts. A body's motion is the product of its continuum, vacuum and scale factors. | `orientation.rs` |
 | **ring** | The pulse a body emits each bell, travelling outward. A ring crosses distance `r` in `r` bells. | `ring.rs` |

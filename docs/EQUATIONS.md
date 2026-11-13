@@ -2103,19 +2103,16 @@ and the echo's push met at a resonance `frac(T_u·ω) = a/q`, its mean
 response over the q landings `mean_response(q·ψ₀, q·len)/q`, bounded by
 `1/q`: no expected spin in the limit `q → ∞`.
 
-**E71 · The state on Cl(5,4): nine axes, three commuting factors.**
-`orientation::{AXES, NEGATIVES, pairs, is_turning, pole_swap, carried}`,
-`Orientation::{factors, advance_vacuum, advance_scale}` (docs/131;
-operator 2026-11-12). Nine axes over ℚ, the spans and `e₋` negative; a pair
-is a turning or a boost by its squares (16 and 20). The motion is the product
-of three factors on disjoint axes:
-
-    continuum on e₊₁e₊₂e₊₃e_R (six planes, isoclinic halves)
-    vacuum on e₋₂e₋₃, e₋₃e₋₁, e₋₁e₋₂ (one half, opposite hand)
-    scale on e₊e₋: s ⊕ u = (s + u)/(1 + s·u)
-
-The pole swap of plane k negates every blade holding `e₋ₖ` (an involution);
-a value is carried by `M·x·M̃`.
+**E71 · The state on Cl(13,1): the base rotor, the fibre read.**
+`orientation::{PLANES, bivector, Orientation::{advance, advance_scale}}`
+(docs/136; operator 2026-11-13, one signature across kernels, superseding
+docs/131's Cl(5,4)). A body's place is on the base, with its rotor held on four
+base directions (the three spatial axes and the orbit's axial leg): six planes
+composed on isoclinic halves. The scale is the conformal dilator on `e₊e₋`,
+its rate composed by the flow law. The S¹¹ fibre over the place is read, never
+stored: each plane's share split `c = δ = H/(R + H)` and R's phase
+`R_p = κ(1 − 2·frac(ψ_p))`. Witnesses: `orientation::base_tests`, plus the
+joint read with Xylarium (docs/136 §9).
 
 **E70 · Tilt from quantum torsion.** `flows::torsion_turns`,
 `quantum::twist_at`, `orientation::turned`, `torsion::wound`,

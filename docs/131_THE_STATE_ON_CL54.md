@@ -4,7 +4,9 @@
 have to have uniform phase states as defined by fluid hydromagnetics"; then
 "yes - Cl(5,4) over Q, proceed".
 
-**Status:** derived 2026-11-12. Build order in §9, witnesses in §8. Read
+**Superseded 2026-11-13 by docs/136 (Cl(13,1), operator ruling via Mycelium).**
+
+**Status (before):** derived 2026-11-12. Build order in §9, witnesses in §8. Read
 against docs/95 §0, docs/97, docs/117 §2–§3 and §10, docs/128 §9–§14 and
 `conductor::turning` (exact in any signature).
 
