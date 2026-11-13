@@ -108,7 +108,7 @@ that were each sorted at birth. That is the next defect of the same layer
    relaxes by the attractor's keep, `ℓ̄ + k_z(ℓ_z − ℓ̄)`, `k_z` read from the
    meetings a bell of charged kinds (docs/132 §1.1's exchange form, `k_zⁿ`
    over a stride). Not built: the release's coupling is.
-2. **The throat's heat.** The galaxy core holds no heat; the release is cold
+2. **The throat's heat** (resolved by §7, T1: nothing is stripped there, `b = ½` exactly). The galaxy core holds no heat; the release is cold
    by construction. Docs/105's heat pair (`a* = u·e/(u·e + g + e − g·e)`) at
    the throat would make it a reading.
 3. **The magnet on the charged share.** docs/121's coupling reads `Σ` charge;
@@ -162,6 +162,126 @@ against §3.1's shared release with one-kind motes): stars at the first echo
 7;51·60^5 grains and in the ocean none → 7;51·60^5; the intergalactic medium
 ≈ 0 → a third of the whole. The stars still form one or two kinds each. g557
 reads unchanged (its motes are one-kind parcels).
+
+## 7. The release, derived: axioms, theorems, proofs (2026-11-13)
+
+**Operator:** "derive the answers with proofs, theorems, and axioms". The
+question: why the mixed-parcel read (§6) gave 4 stars and none holding
+hydrogen, against 35 and 3 before it.
+
+### 7.1 Axioms (each is a law already standing; none is new)
+
+- **A1 (impulse).** A bounce gives every nucleus in the throat the impulse
+  `F = p·w̄`, where `w̄` is the galaxy's mean weight (`pulse::push_cut`,
+  docs/96 §7).
+- **A2 (the pair).** A kind's electrons bind at the held face `g` of the place
+  (docs/105 §3). At the throat `g = u = ½` (docs/104 §1.2).
+- **A3 (stripping).** A winding of tightness `t` is stripped at heat `a` iff
+  `t ≤ a` (`atom::open_at`; R7's fill on S¹¹).
+- **A4 (heat).** Heat stands at the heat pair's equilibrium
+  `a* = u·e/(u·e + g + e − g·e)`, where `e ∈ [0, 1]` is the open share
+  (docs/105 §3).
+- **A5 (parcel).** A parcel has one state: one place, one spin. Matter that
+  moves at two spins is two parcels (§6).
+- **A6 (coupling).** The ionized share of every kind moves as one; the bound
+  share by its own inertia (§2).
+- **A7 (passage).** Matter passing out through matter inside its reach meets
+  it. The share caught is `contact·gripped·m_i/(m_i + m_j)`, with
+  `contact = ½·crossed` and `gripped = min(s·D, T)/T` (`pulse::cascade`'s
+  filter, operators 2026-10-18: "every later, lighter stack passes out
+  through the heavy stacks that stay in, each passage a meeting"). Design
+  law: one grammar at every tier.
+- **A8 (exit).** A parcel whose reach passes the rim leaves for the ocean.
+
+### 7.2 Lemma (the loosest winding)
+
+**L1.** Over the founded table (Z 1–1092 on S¹¹), the least tightness of any
+occupied winding is `½`, at Z = 3 (lithium's (2,0)).
+
+*Proof.* A winding (s, l) has tightness `(Z − inside)/s` (R7). The minimum
+over the table is a finite exact computation, read from `cfe` by exhaustion
+(witness `plasma::tests::the_loosest_winding_is_lithiums`). ∎
+
+### 7.3 Theorems
+
+**T1 (the throat strips nothing).** At the throat, every kind with protons
+has `b = ½`, cold or at its heat's equilibrium.
+
+*Proof.* At the throat `g = u = ½` (A2), so A4 gives
+`a* = (e/2)/(e/2 + ½ + e/2) = e/(1 + 2e)`. This rises in `e`, so
+`a* ≤ 1/3` on `e ∈ [0, 1]`. By L1 every occupied winding has `t ≥ ½ > 1/3 ≥ a*`,
+so by A3 none is stripped, and `E(a*) = Q`. Then `b = g·E/Q = g = ½` (§1). ∎
+
+*Consequence:* the open item §4.2 (the throat's heat) changes nothing at the
+throat. The cold release is exact, not an approximation.
+
+**T2 (the pool's spin).** At one bound share `b < 1`, the pool's spin per
+unit push is `S = w̄/w̄_π`, where `w̄_π` is the mean weight of the matter in
+the throat.
+
+*Proof.* By A1 and A6,
+`S = Σ n(1 − b)·w̄ / Σ n(1 − b)·w = w̄·N/(N·w̄_π)` with `N = Σ n`. The
+factor `(1 − b)` cancels because it is uniform by T1. ∎
+
+**T3 (the split is forced).** A kind's take leaves as two parcels: its
+ionized share at `p·S` and its bound share at `p·w̄/w`. One parcel per kind
+at the mean `ℓ̄_z = b·p·w̄/w + (1 − b)·p·S` contradicts A5 wherever
+`w ≠ w̄_π`.
+
+*Proof.* By A6 the two shares of kind z move at `p·S` and `p·w̄/w`. These
+are equal iff `w = w̄/S = w̄_π` (T2). Otherwise the kind's matter has two
+spins, so by A5 it is two parcels. The mean `ℓ̄_z` is the holding-weighted
+mean of the two (the momentum of A1 kept), the spin of no matter. ∎
+
+*So the earlier read (35 stars) was built on per-kind motes at `ℓ̄_z`, the
+spin of no matter. The mixed-parcel read is what A1–A6 give.*
+
+**T4 (light bound shares leave).** The bound share of a kind with
+`w < span·p·w̄/(rim − 1)` passes the rim at release and, by A8, leaves for
+the ocean, unless something stops it before the rim.
+
+*Proof.* Its reach is `1 + span·p·w̄/w` (`flows::founding`, the release's
+reach), which exceeds the rim exactly in that range of `w`. Hydrogen
+(`w = 1`, the least) is the first such kind. With `b = ½` (T1), half of each
+bounce's hydrogen is bound. This is the read's `flows = ocean` for hydrogen,
+`7;51·60⁵` each. ∎
+
+**T5 (the passage catches the bound share).** At release, a kind's bound
+parcel leaves from the throat through the pooled parcel of the same bounce,
+which stands inside its reach (`S`-reach < its reach). By A7 it is caught at
+the fraction
+`f = ½·crossed·gripped·m_b/(m_b + m_π)`, and what is caught joins the pool,
+its spin the holding mean (A5), `Σ n·w·ℓ` kept.
+
+*Proof.* The two parcels start at the throat (one place), and the bound one
+moves outward past the pool's reach (T4's ordering). That is A7's passage,
+lighter matter passing out through heavier matter that stays in, so A7
+applies by the design law of one grammar at every tier. The joining keeps
+momentum, since a merge is a holding mean (`flows::merge`). ∎
+
+**T6 (what the release lacks).** The bounce's release (`breath::breathe`)
+applies A1, A2, A5, A6 and A8, but not A7. The founding's cascade applies
+A7; the bounce does not. So the 4-star read is A1–A6 and A8 without A7, and
+the missing law is the passage.
+
+*Proof.* By inspection of the release loop (`held_now`): each parcel is
+pushed and paid, with no meeting read between the parcels of one bounce.
+`pulse::cascade` reads the meetings. ∎
+
+### 7.4 The answer
+
+1. The throat's bound share is exactly ½ (T1). No heat law changes it.
+2. Splitting each kind into its pooled and bound parcels is forced (T3). The
+   35-star read rested on a spin no matter has.
+3. Light bound shares leave for the ocean unless caught (T4). The founding
+   catches them by the passage law (A7). The bounce does not apply it (T6).
+4. **Build:** apply A7 at the bounce's release. Each bound parcel passing out
+   through its bounce's pool is caught at `f` (T5), and the caught matter
+   joins the pool. Prediction: the bound hydrogen's exit falls by the caught
+   share, and the pool, which holds every kind, gains it. The stars then form
+   from matter that holds hydrogen. Falsified if the caught share at the rim
+   is zero, in which case the grip `T` across the pair is the term to read
+   next.
 
 ## 5. The seam with Xylarium (agreed 2026-11-13)
 

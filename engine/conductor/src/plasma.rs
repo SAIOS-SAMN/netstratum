@@ -250,4 +250,21 @@ mod tests {
             });
         assert_eq!(carried, count * mean);
     }
+
+    /// docs/134 §7 L1: over the founded table (Z 1–1092 on S¹¹) the least
+    /// tightness of any occupied winding is ½, lithium's (2,0); so the
+    /// throat's heat (`a* ≤ 1/3`, T1) strips nothing.
+    #[test]
+    fn the_loosest_winding_is_lithiums() {
+        let least = (1..=1092u32)
+            .filter_map(cfe::almanac::atom::windings)
+            .flat_map(|(_, ws)| ws.into_iter())
+            .filter(|(_, v, _)| *v > 0)
+            .map(|(t, _, _)| t)
+            .min()
+            .expect("windings");
+        assert_eq!(least, r(1, 2));
+        let three = cfe::almanac::atom::windings(3).expect("lithium").1;
+        assert!(three.iter().any(|(t, v, _)| *t == r(1, 2) && *v == 1));
+    }
 }
