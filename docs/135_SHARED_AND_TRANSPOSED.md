@@ -1,0 +1,86 @@
+# 135 — What every universe shares, and what each may transpose
+
+**Operator 2026-11-13:** "we need coordination on which of these shared
+components are required and which can be transposed for universe diversity
+and push the shared libraries that make a functional universe/kernel up to
+the hypha shared physics library".
+
+**Status:** proposed 2026-11-13, Netstratum's side. Sent to Mycelium (the
+shared library's maintainer) and Xylarium for their columns. Read against
+Mycelium's LAW register (LAW-COORDINATE v1, LAW-COUPLING v2, LAW-TRAVERSAL;
+docs/120, docs/129), docs/104, docs/105, docs/131, docs/132, docs/134.
+
+## 0. The rule that sorts them
+
+A universe is diverse by its **inputs and its orientation**, never by its
+laws. A law that differs between kernels makes the seam a translation of
+physics, not of letters: what crosses could not be checked. So:
+
+- **Required (shared):** a master formula, its composition law and its
+  conservation identity. Written once, in the shared library, with its
+  witness. A kernel reads it; it never re-derives it.
+- **Transposed (per universe):** what the master formulas are applied to and
+  which face a kernel reads them from. A transposition is declared at the
+  seam (as the letters are, docs/129 §0) and maps exactly (`t → 1/t`).
+- **Derived, neither:** everything the formulas produce from the inputs
+  (the echo's period `T_u`, the densest element, the vessel, the bands, the
+  stars). A derived value is never an input and never shared: it differs
+  between universes because their inputs do.
+
+A value that is none of these (a tuned constant) is open physics
+(docs/108), not diversity.
+
+## 1. Required: the shared physics library
+
+| # | Component | Master formula / identity | Netstratum source | Witness |
+|---|---|---|---|---|
+| R1 | The carrier | exact ℚ; the grain base 60 (LAW-COORDINATE v1) | `cfe::ratio`, `ring::grain` | grain idempotent; ledger exact |
+| R2 | The face law | `δ = H/(R + H)`; faces `(g, u)`, `g + u = 1`, read from the open or closed axis | `polarity::faces_on`, `ring::deficit` | `g + u = 1`; the throat `g = u` |
+| R3 | The two-pole master equation | `x* = α/(α + β)`, `x_n = x* + (x₀ − x*)(1 − α − β)ⁿ` | `polarity::{equilibrium, after}` | `A + B` exact; closed form = n steps |
+| R4 | The flow law and its powers | `x ⊕ y = (x + y)/(1 + xy)`; `x⊕ⁿ` closed form; the keep `kⁿ` | `ring::{compose, compose_n}` | `ring::stride_tests` (N, 4N) |
+| R5 | The state's algebra | Cl(5,4) over ℚ: nine axes, 16 turnings, 20 boosts; the pole swap; carry `M·x·M̃` (Cl(n+1,1) at the court's seam) | `orientation::{AXES, NEGATIVES, pairs, is_turning, pole_swap, carried}` | `orientation::cl54_tests` |
+| R6 | The nucleon dipole and basket | the dipole `3Q` open / `3Z` held, the electrons' `U` beside; basket `(protons, neutrons, E_bound, M)` (LAW-COUPLING v2, #238) | `chem::{dimensions, basket_entry}` | the basket sums by amount |
+| R7 | The atom's fill and its stripping | `R_n = Z·n(n+1)/2`; winding tightness; stripped at `t ≤ a` | `cfe::almanac::atom::{windings, open_at}` | hydrogen's lone winding 1 |
+| R8 | The plasma release | `b = g·E(a)/Q`; `ℓ = b·F/w + (1 − b)·S`, `Σ n·w·ℓ = Σ n·F` | `plasma::{bound_share, carried}` | `plasma::tests` |
+| R9 | The conservation set | nucleons; `Σ m·ℓ` per plane; charge; light made = emitted + kept | across `flows`, `breath` (`conservation` line) | the breath's conservation read |
+| R10 | Traversal | LAW-TRAVERSAL (78.176 §5) | docs/129 §5 | Mycelium's |
+
+## 2. Transposed: each universe's own
+
+| # | Component | What a kernel declares | Netstratum | Xylarium |
+|---|---|---|---|---|
+| T1 | Orientation | which nucleon stands open | protons open (Q) | protons as Z (inverse) |
+| T2 | The face read | the place's reading of R2: continuum or its inverse (`t → 1/t`) | the place; the far face inverted | the far face (docs/134 §5) |
+| T3 | The founding table | the elements founded and their amounts | Netstratum builds the table (memory: table and hypha roles) | its own |
+| T4 | The size | the founded grains (`2^40`, `2^55`) | per founding | per founding |
+| T5 | The position | the hypha-assigned TUniversal coordinate | assigned by the hypha | assigned by the hypha |
+| T6 | The H base | per kernel (78.173 §8.4: not uniform) | its own | its own |
+| T7 | The stride | how many bells a read stands for (docs/132): observation, not physics | per read | per read |
+
+Each of T1–T7 changes what the shared formulas act on, never the formulas.
+Two universes differing only in T1 are the same physics read from opposite
+poles: the seam maps one onto the other exactly.
+
+## 3. Derived: what diversity looks like
+
+From T3–T5 alone the formulas give each universe its own `T_u`, its densest
+element, its bands and its stars. The plasma layer's read (docs/134 §3.1) is
+an example: one law change moved `T_u` from 186 to 110 on one founding. That
+is why a law is never transposed: it would make every derived value
+incomparable across the seam.
+
+## 4. Not ready to share
+
+These are open in Netstratum and are not proposed until derived and
+witnessed: the throat's heat (docs/134 §4.2), the drift (§4.1), the mixed
+parcel (§4.5), the stride's event reader (docs/132 §2), the burn on any
+composition (planned).
+
+## 5. How it goes up
+
+The shared library is Mycelium's (operator: parameters uniform across
+kernels are Mycelium's). Netstratum writes only its own tree: it proposes
+R1–R10 with their sources and witnesses; Mycelium places them; each kernel
+then reads them from the library and deletes its own copy (one model per
+quantity). Netstratum's R-rows already Mycelium-held (R1's base, R6, R10) are
+read, not proposed.
