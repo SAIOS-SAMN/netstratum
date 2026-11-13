@@ -3945,11 +3945,12 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
     if total.is_zero() {
         return Some(Vec::new());
     }
+    let unit = crate::plasma::bounce_unit(grains, &mean);
     let kinds: Vec<(&crate::chem::Kind, &Ratio, Ratio, Ratio)> = grains
         .iter()
         .filter(|(_, a)| **a > ratio(0, 1))
         .map(|(k, a)| {
-            let carried = p.clone() * mean.clone() / weight(k);
+            let carried = p.clone() * unit[k].clone();
             let place = match span {
                 Some(sp) => ratio(1, 1) + sp.clone() * carried,
                 None => carried,

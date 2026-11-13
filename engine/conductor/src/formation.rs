@@ -60,9 +60,10 @@ pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio
         return (Vec::new(), Vec::new(), ratio(1, 1));
     };
     let (mut held_out, mut out) = (Vec::new(), Vec::new());
+    let unit = crate::plasma::bounce_unit(all, &mean);
     for (k, amount) in all {
         let w = ratio(i64::from(weight(k)), 1);
-        let ell = push.clone() * mean.clone() / w.clone();
+        let ell = push.clone() * unit[k].clone();
         let r = ell / h.clone();
         let delta = h.clone() / (r.clone() + h.clone());
         // The dispersal (`pulse::disperse`; operator: "disc and gas both
@@ -563,11 +564,28 @@ pub fn carried(
     if total.is_zero() || count.is_zero() {
         return Vec::new();
     }
+    binding_spins(binding, heat, total, count)
+        .into_iter()
+        .map(|(k, ell)| (k, ell + turning.clone()))
+        .collect()
+}
+
+/// Each kind's spin from the star core's push (its pair's ½) on its open
+/// frames, `F_z = ½·(e_z/ē)·w̄` a nucleus, shared through its charge at the
+/// core's heat (docs/134 §2; `plasma::carried`): the bound share by its own
+/// inertia, the ionized share as one plasma.
+fn binding_spins(
+    binding: &Manifest,
+    heat: &Ratio,
+    total: Ratio,
+    count: Ratio,
+) -> Vec<(crate::chem::Kind, Ratio)> {
     let open_mean = open_mass(binding, heat) / total.clone();
     let mean_weight = total / count;
-    binding
-        .keys()
-        .map(|k| {
+    let g = crate::polarity::throat_held();
+    let parts: Vec<(Ratio, Ratio, Ratio, Ratio)> = binding
+        .iter()
+        .map(|(k, a)| {
             let w = ratio(i64::from(crate::chem::weight(k)), 1);
             let open = ratio(
                 i64::from(
@@ -577,13 +595,18 @@ pub fn carried(
                 ),
                 1,
             ) / w.clone();
-            let ell = if open_mean.is_zero() {
+            let f = if open_mean.is_zero() {
                 ratio(0, 1)
             } else {
-                ratio(1, 2) * open / open_mean.clone() * mean_weight.clone() / w
-            } + turning.clone();
-            (k.clone(), ell)
+                ratio(1, 2) * open / open_mean.clone() * mean_weight.clone()
+            };
+            (a.clone(), w, f, crate::plasma::bound_share(k, &g, heat))
         })
+        .collect();
+    binding
+        .keys()
+        .cloned()
+        .zip(crate::plasma::carried(&parts))
         .collect()
 }
 
@@ -597,35 +620,22 @@ pub fn star_core_cut(
     if total.is_zero() || count.is_zero() {
         return None;
     }
-    let open_mean = open_mass(binding, heat) / total.clone();
     // Regeneration (operator ruling (i), with Xylarium): the star core pushes
     // at full amplitude in its own units, its pair's ½; a tide enters as
     // agitation, never as a weaker push, or it would be counted twice.
     let push = ratio(1, 2);
-    let mean_weight = total.clone() / count;
-    let mut kinds: Vec<(crate::chem::Kind, Ratio, Ratio)> = binding
-        .iter()
-        .map(|(k, a)| {
-            let w = ratio(i64::from(crate::chem::weight(k)), 1);
-            let open = ratio(
-                i64::from(
-                    crate::chem::atom_w(k)
-                        .map(|z| cfe::almanac::atom::open_at(crate::chem::protons(z), heat))
-                        .unwrap_or_else(|| crate::chem::unpaired(k)),
-                ),
-                1,
-            ) / w.clone();
-            // Carried SPINS add (with Xylarium): the place's turning (in
-            // the plane orthogonal to the orbit, the rotoreflection) turns
-            // every kind alike, no weight ratio.
-            let ell = if open_mean.is_zero() {
-                ratio(0, 1)
-            } else {
-                push.clone() * open / open_mean.clone() * mean_weight.clone() / w.clone()
-            } + turning.clone();
-            (k.clone(), ell, a.clone() * w / total.clone())
-        })
-        .collect();
+    // Carried SPINS add (with Xylarium): the place's turning (in the plane
+    // orthogonal to the orbit, the rotoreflection) turns every kind alike,
+    // no weight ratio.
+    let mut kinds: Vec<(crate::chem::Kind, Ratio, Ratio)> =
+        binding_spins(binding, heat, total.clone(), count)
+            .into_iter()
+            .map(|(k, ell)| {
+                let w = ratio(i64::from(crate::chem::weight(&k)), 1);
+                let share = binding[&k].clone() * w / total.clone();
+                (k, ell + turning.clone(), share)
+            })
+            .collect();
     kinds.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
     // No throat, no STATE (operators 2026-10-17, with Xylarium): a star core
     // (torsion) and a planetary core (magnetism) have no bounce, so they

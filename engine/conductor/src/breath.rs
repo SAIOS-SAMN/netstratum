@@ -2234,7 +2234,8 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // the incremental flow of tidal forces between the vacuum and the
             // continuum which releases the elements into the void). Of each
             // kind the throat still holds, carried by the push to `c = p·w̄/w`
-            // against the core's state (docs/96 §7), the tide on the unlocked
+            // shared through its charge (docs/134 §2) against the core's
+            // state (docs/96 §7), the tide on the unlocked
             // face releases `s = ½(1 − δ) = ½·c/(c + base)` this bounce, in whole
             // nuclei. It leaves outbound on the continuum (R forward) from the
             // ring to its dispersal reach `1 + span·c`, turning at the balance
@@ -2272,9 +2273,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     .iter()
                     .map(|(k, a)| (k.clone(), a.clone()))
                     .collect();
+                // Each kind's push shared through its charge (docs/134 §2).
+                let shared = crate::plasma::bounce_unit(&core.throat, &mean);
                 for (k, a) in held_now {
                     let w = crate::flows::weight(&k);
-                    let c = p.clone() * mean.clone() / w.clone();
+                    let c = p.clone() * shared[&k].clone();
                     // Read against the core's state (docs/96 §7).
                     let base = ratio(1, 1);
                     if (c.clone() + base.clone()).is_zero() {

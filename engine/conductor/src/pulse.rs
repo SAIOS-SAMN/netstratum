@@ -510,10 +510,12 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate:
             Some(before)
         })
         .collect();
+    // Each kind's spin a unit of push, shared through its charge (docs/134 §2).
+    let unit = crate::plasma::bounce_unit(grains, &mean);
     let holds = |idx: usize| {
         let held = &above[idx];
         let push = held.clone() / (ratio(1, 1) + held.clone());
-        let ell = push.clone() * mean.clone() / ratio(i64::from(weight(order[idx].0)), 1);
+        let ell = push.clone() * unit[order[idx].0].clone();
         let h = ratio(1, 1) + held.clone();
         h.clone() / (ell / h.clone() + h) >= push
     };
@@ -554,14 +556,14 @@ pub fn push_cut(grains: &Manifest) -> Option<(Ratio, Ratio, Ratio, Option<crate:
 /// The distribution keeps moving after (the waves, the breath): this is
 /// only where the founding pulse leaves it.
 pub fn disperse(grains: &Manifest) -> Manifest {
-    let weight = |k: &crate::chem::Kind| crate::chem::weight(k);
     let Some((p, h, mean)) = galaxy_push(grains) else {
         return Manifest::new();
     };
+    let unit = crate::plasma::bounce_unit(grains, &mean);
     grains
         .iter()
         .filter_map(|(k, amount)| {
-            let ell = p.clone() * mean.clone() / ratio(i64::from(weight(k)), 1);
+            let ell = p.clone() * unit[k].clone();
             let r = ell / h.clone();
             let lo = r.clone() * (ratio(1, 1) - p.clone());
             let span = ratio(2, 1) * p.clone() * r;
@@ -711,16 +713,32 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
     close(from, prof.len(), &mut stack_share);
     // Every kind leaves as a SHELL: a mix at one reach (with Xylarium: shells
     // as mixes, so a passage adds to a mix, never a new shell).
+    // The impulse shared through the charge (docs/134 §2): each kind's
+    // impulse `K + s_i` a nucleus, its bound share at the throat, cold.
+    let g_throat = crate::polarity::throat_held();
+    let parts: Vec<(Ratio, Ratio, Ratio, Ratio)> = kinds
+        .iter()
+        .zip(&stack_share)
+        .map(|((k, a), s)| {
+            (
+                a.clone(),
+                w(k),
+                spin.clone() + s.clone(),
+                crate::plasma::bound_share(k, &g_throat, &ratio(0, 1)),
+            )
+        })
+        .collect();
+    let ells = crate::plasma::carried(&parts);
     let mut shells: Vec<(Manifest, Ratio)> = kinds
         .into_iter()
-        .zip(stack_share)
-        .map(|((k, a), s)| {
+        .zip(ells)
+        .map(|((k, a), ell)| {
             // Element-agnostic (operator 2026-10-18: "the push must be agnostic
             // to the element by anything other than the force produced by the
             // bounces of the antipoles ... inertia is fine"): the one force
             // `K + s`, each kind moving by its own inertia, never against the
             // population's mean weight; `s` its stack's share.
-            let reach = g(&((spin.clone() + s) / w(&k) / h.clone()));
+            let reach = g(&(ell / h.clone()));
             ([(k, a)].into_iter().collect::<Manifest>(), reach)
         })
         .collect();
