@@ -62,7 +62,7 @@ pub trait HouseActs {
     ) -> io::Result<Result<MailRead, Refusal>>;
     /// A court task for `voice` from the registry, or `None` where it holds
     /// nothing for it.
-    fn pull_task(&self, voice: &[u8; 32]) -> io::Result<Option<mycelium_sdk::task::TaskEnvelope>>;
+    fn pull_task(&self, voice: &[u8; 32]) -> io::Result<Option<mycelium_sdk::task::TaskFamily>>;
     /// A solve filed under `key` with its rule's tape: the court's verdict code
     /// and μ, or `None` where the reply does not read.
     fn file_solve(
@@ -88,8 +88,8 @@ impl HouseActs for Session {
             .ok_or_else(|| undecoded("origin"))
     }
     fn uplink_fold(&self, f: &SignedFold) -> io::Result<Uplinked> {
-        uplink::decode_uplink_reply(&self.speak(uplink::encode_uplink(f))?)
-            .ok_or_else(|| undecoded("fold"))
+        let act = uplink::encode_uplink(f).ok_or_else(|| undecoded("fold act"))?;
+        uplink::decode_uplink_reply(&self.speak(act)?).ok_or_else(|| undecoded("fold"))
     }
     fn challenge(&self, c: &SignedChallenge) -> io::Result<Challenged> {
         challenge::decode_challenge_reply(&self.speak(challenge::encode_challenge(c))?)
@@ -134,9 +134,9 @@ impl HouseActs for Session {
         let act = seat::encode_read_mail(&ReadMail::sign_standing(key, after, epoch, nonce()?));
         seat::decode_mail_reply_standing(&self.speak(act)?).ok_or_else(|| undecoded("perception"))
     }
-    fn pull_task(&self, voice: &[u8; 32]) -> io::Result<Option<mycelium_sdk::task::TaskEnvelope>> {
+    fn pull_task(&self, voice: &[u8; 32]) -> io::Result<Option<mycelium_sdk::task::TaskFamily>> {
         let reply = self.speak(mycelium_sdk::task::encode_task_request(voice))?;
-        Ok(mycelium_sdk::task::decode_task_envelope(&reply))
+        Ok(mycelium_sdk::task::decode_task(&reply))
     }
     fn file_solve(
         &self,

@@ -50,7 +50,7 @@ fn the_gate_map_act_is_read_by_the_court_as_netstratums_local_throat() {
     let MapRecord::LocalThroat {
         throat,
         keeper,
-        frames,
+        poses: frames,
         ..
     } = &s.act.record
     else {
@@ -73,7 +73,10 @@ fn the_gate_map_act_is_read_by_the_court_as_netstratums_local_throat() {
     assert_eq!(frames.1, to(&end.to), "side 1 stands at the core");
     reserve
         .verifying_key()
-        .verify(&s.act.signed_bytes(), &Signature::from_bytes(&s.sig))
+        .verify(
+            &mycelium_sdk::forms::crossed(s.act.signed_bytes(), &s.crossing).unwrap(),
+            &Signature::from_bytes(&s.sig),
+        )
         .expect("signed by the reserve");
     // Broken: a different key's signature does not verify as the reserve's.
     let other = SigningKey::from_bytes(&[13; 32]);
@@ -83,7 +86,10 @@ fn the_gate_map_act_is_read_by_the_court_as_netstratums_local_throat() {
     };
     assert!(reserve
         .verifying_key()
-        .verify(&f.act.signed_bytes(), &Signature::from_bytes(&f.sig))
+        .verify(
+            &mycelium_sdk::forms::crossed(f.act.signed_bytes(), &f.crossing).unwrap(),
+            &Signature::from_bytes(&f.sig)
+        )
         .is_err());
     // Broken: a flipped byte in the record is refused by the decoder or the signature.
     let mut torn = frame.clone();
@@ -92,7 +98,10 @@ fn the_gate_map_act_is_read_by_the_court_as_netstratums_local_throat() {
     let survives = match decode_domain_request(&torn) {
         Some(DomainRequest::Map(t)) => reserve
             .verifying_key()
-            .verify(&t.act.signed_bytes(), &Signature::from_bytes(&t.sig))
+            .verify(
+                &mycelium_sdk::forms::crossed(t.act.signed_bytes(), &t.crossing).unwrap(),
+                &Signature::from_bytes(&t.sig),
+            )
             .is_ok(),
         _ => false,
     };
@@ -126,7 +135,10 @@ fn the_ledger_entry_commits_to_netstratums_checkpoints() {
     assert_ne!(s.entry.commitment, [0; 32]);
     reserve
         .verifying_key()
-        .verify(&s.entry.signed_bytes(), &Signature::from_bytes(&s.sig))
+        .verify(
+            &mycelium_sdk::forms::crossed(s.entry.signed_bytes(), &s.crossing).unwrap(),
+            &Signature::from_bytes(&s.sig),
+        )
         .expect("signed by the reserve");
     // Broken: a changed checkpoint changes the commitment.
     std::fs::write(var.join("ancients.bin"), b"arose twice").unwrap();
