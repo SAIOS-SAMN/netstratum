@@ -304,6 +304,86 @@ two-pole master equation on spin, with the meeting rate a bell as its rate.
 That is the next law to derive. The passage stays, as the bounce's reading
 of A7.
 
+## 8. The drift: momentum's degradation on the continuum (2026-11-13)
+
+**Operator 2026-11-13:** "momentum is the constant degradation of velocity on
+the continuum into the inversion across the vacuum where the physics changes
+drag into velocity".
+
+### 8.1 Axiom
+
+- **A9 (drag and its inversion).** A parcel moving against the medium, on
+  the continuum (the open axis), keeps the velocity share `δ = H/(R + H)` of
+  its departure from the medium's spin each bell and gives the drag share
+  `1 − δ` to the medium. Across the inversion (the vacuum, the closed axis)
+  the faces exchange (docs/117 §8.2, `polarity::faces_on`): the drag share
+  becomes velocity. The keep is `δ` on the continuum and `1 − δ` on the
+  vacuum, the one face law read as momentum.
+
+### 8.2 Theorems
+
+**T8 (the drift keeps momentum).** A bound part `b` (holding `m_b`, carried
+`c_b`, keep `k_b`) against the pool `π` (`m_π`, `c_π`) gives
+
+    c_b' = c_π + k_b·(c_b − c_π),     c_π' = c_π + Σ_b m_b(1 − k_b)(c_b − c_π)/m_π
+
+and `Σ m·c` is unchanged.
+
+*Proof.* `Σ_b m_b·c_b' + m_π·c_π'
+= Σ_b m_b(c_π + k_b(c_b − c_π)) + m_π·c_π + Σ_b m_b(1 − k_b)(c_b − c_π)
+= Σ_b m_b·c_b + m_π·c_π`. ∎
+
+What the drag takes is the medium's: it is booked to the pool, the
+medium's charged share (§5).
+
+**T9 (n bells in closed form).** While the medium's spin stands, n bells give
+`c_b⁽ⁿ⁾ = c_π + k_bⁿ·(c_b − c_π)`, the attractor's keep composed n times
+(docs/132 §1).
+
+*Proof.* Induction on n, the keep composed with itself. ∎
+
+**T10 (the light part is held).** On the continuum the keep is `δ_b`, which
+falls as the part stands further out (`δ = 1/(c + 1)` at carried `c`). So a
+light bound part, carried furthest (T4), keeps the least of its excess and
+is pulled most toward the pool. Its excess after the release's bell is
+`(c_b − c_π)/(c_b + 1) < 1` for any `c_b`.
+
+*Proof.* `δ_b·(c_b − c_π) = (c_b − c_π)/(c_b + 1) < 1` for `c_π ≥ 0`. ∎
+
+So a bound part's carried spin after its release's bell is at most
+`c_π + 1`, whatever its weight. Whether it passes the rim is then read on the
+pool's spin plus less than one, not on `p·w̄/w`.
+
+### 8.3 Build
+
+At the bounce's release, after the parcels are split (§6) and before the
+passage (§7), one bell of drift (T8) acts on the continuum, where the
+released parcels leave (`vacuum = false`): each bound part relaxes toward the
+pool by its keep `δ_b = 1/(c_b + 1)`, and the pool takes the drag. The
+passage then reads the drifted spins. Between echoes the drift composes
+over the stride (T9, docs/132).
+
+### 8.4 The read
+
+One 2^40 founding to its first echo (bell 112), before (split and passage,
+§7.4) → after (with the drift, on the grain):
+
+| | before | after |
+|---|---|---|
+| intergalactic medium | 24;34·60⁻² of the whole | none |
+| hydrogen in the ocean (grains) | 7;58·60⁵ | none |
+| hydrogen in the galaxy's flows | 7;43·60⁵ | 50;06·60³ |
+| stars | 0 | 1 |
+| what fell into the star: hydrogen share by mass | — | 6;09·60⁻¹ (0.10) |
+| hydrogen the star core kept | — | none: its cut sent it to the star's disc |
+
+The drift holds every bound part in the galaxy: nothing reaches the ocean.
+One binding gathers most of the flows (3;03·60⁶ of holding fell, 2;31·60⁶
+into the star core). The first star's binding holds hydrogen, a tenth of its
+mass, but the star core's cut (`formation::star_core_cut`) keeps none of it.
+That cut is the next law to read. Total hydrogen by nuclei is unchanged
+(12;57·60⁻¹ of the universe). The breath's conservation holds.
+
 ## 5. The seam with Xylarium (agreed 2026-11-13)
 
 - Xylarium reads the bound share at the inverse place: `b'_z = [r/(r + M)]·E_z(a)/Z`

@@ -2409,6 +2409,22 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 let whole_g = bound_parts.iter().fold(mass(&pooled), |s, (k, a, _, _)| {
                     s + a.clone() * crate::flows::weight(k)
                 });
+                // The drift (docs/134 §8, A9, T8): the release's bell of drag
+                // on the continuum, where the parcels leave; each bound part
+                // relaxes toward the pool by its keep `δ`, the pool takes the
+                // drag (momentum kept). The passage reads the drifted spins.
+                let (drifted, c_pool0) = crate::plasma::drift(
+                    &mass(&pooled),
+                    &c_pool0,
+                    &bound_parts
+                        .iter()
+                        .map(|(k, a, c, _)| (a.clone() * crate::flows::weight(k), c.clone()))
+                        .collect::<Vec<_>>(),
+                    false,
+                );
+                for (bp, c) in bound_parts.iter_mut().zip(drifted) {
+                    bp.2 = c;
+                }
                 let passed = crate::plasma::passage(
                     &pooled,
                     &c_pool0,

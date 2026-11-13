@@ -2097,7 +2097,10 @@ the pool `{z: n_z(1 − b_z)}` at `p·S` as one parcel and each bound share alon
 at `p·w̄/w`. Each bound part passing out through its pool takes
 `½·crossed·gripped·m_b/(m_b + m_π)` of the pool's mix (A7, `plasma::passage`;
 docs/134 §7). The throat's `b = ½` is exact, since the table's loosest
-winding is ½ (lithium) and the throat's heat is at most ⅓ (§7, T1).
+winding is ½ (lithium) and the throat's heat is at most ⅓ (§7, T1). Before the passage, the release's bell of drift (A9, `plasma::drift`;
+§8) relaxes each bound part toward the pool, `c' = c_π + δ(c − c_π)`, with
+keep `δ = 1/(c + 1)` on the continuum (`1 − δ` on the vacuum). The pool takes
+the drag, `Σ m·c` is kept, and every spin is on the grain.
 **The parcel** (docs/134 §6; `flows::Mote::parts`,
 `plasma::{bounce_split, pool_spin, own_spin}`): a mote is a mix, its
 readings its parts' sums (holding `Σa·w`, open frames `Σa·U`, charge `Σa·Q`, a

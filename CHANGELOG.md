@@ -44,6 +44,13 @@ change is named here.
   split is forced; the passage carries matter outward, never in (T7). Read
   (2^40 to bell 112): stars 35 → 4 (split) → 0 (with the passage); the
   retention of light bound matter is the drift, next.
+- The drift (docs/134 §8; operator 2026-11-13: "momentum is the constant
+  degradation of velocity on the continuum into the inversion across the
+  vacuum where the physics changes drag into velocity"): a bound part keeps
+  `δ` of its departure from the pool a bell, the pool takes the drag
+  (`plasma::drift`, on the grain). Read: the ocean's hydrogen and the
+  intergalactic medium both go to none; the first star's binding holds a
+  tenth hydrogen, but its core's cut keeps none, which is next.
   The plasma's parcel (docs/134 §6): a mote is a mix (`Mote::parts`), the
   release's ionized pool one parcel at `p·S`, each bound part its own; read on
   the same founding to bell 112: 35 stars → 4 (none holding hydrogen), the

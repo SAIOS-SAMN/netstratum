@@ -109,6 +109,46 @@ pub fn bounce_split(pool: &Manifest, mean: &Ratio) -> (Ratio, Manifest) {
     (pool_spin(&parts), b)
 }
 
+/// The drift (docs/134 §8, A9, T8): each bound part `(holding m_b, carried
+/// c_b)` against the pool (`m_π`, `c_π`) on the continuum keeps the velocity
+/// share `k_b = δ_b = 1/(c_b + 1)` of its departure from the pool's spin a
+/// bell and gives the drag share to the pool, the medium's charged share
+/// (on the vacuum the faces exchange: `k = 1 − δ`, `vacuum` true).
+/// `c_b' = c_π + k_b(c_b − c_π)`, `c_π' = c_π + Σ m_b(c_b − c_b')/m_π`.
+/// On the grain (docs/133 §4): the keep enters the product on the grain and
+/// each spin written is floored onto it; the pool takes exactly what the
+/// parts gave (`Σ m·c` kept before the pool's floor), and the pool's floor's
+/// remainder stays with whoever pays for the spin it leaves with (the
+/// core's reservoir pays only what a parcel carries). Returns the parts'
+/// carried spins and the pool's.
+pub fn drift(
+    m_pool: &Ratio,
+    c_pool: &Ratio,
+    parts: &[(Ratio, Ratio)],
+    vacuum: bool,
+) -> (Vec<Ratio>, Ratio) {
+    let one = ratio(1, 1);
+    let g = |x: &Ratio| crate::ring::grain(x);
+    if m_pool.is_zero() {
+        return (
+            parts.iter().map(|(_, c)| c.clone()).collect(),
+            c_pool.clone(),
+        );
+    }
+    let mut given = ratio(0, 1);
+    let out = parts
+        .iter()
+        .map(|(m, c)| {
+            let delta = g(&(one.clone() / (c.clone() + one.clone())));
+            let k = if vacuum { one.clone() - delta } else { delta };
+            let now = g(&(c_pool.clone() + k * (c.clone() - c_pool.clone())));
+            given += m.clone() * (c.clone() - now.clone());
+            now
+        })
+        .collect();
+    (out, g(&(c_pool.clone() + given / m_pool.clone())))
+}
+
 /// The passage at a bounce's release (docs/134 §7, A7, T5): each bound part
 /// `(kind, amount, carried c)` passes out from the throat through the pool
 /// (`pool` at carried `c_pool`). A meeting, by the founding's one law
@@ -126,7 +166,8 @@ pub fn bounce_split(pool: &Manifest, mean: &Ratio) -> (Ratio, Manifest) {
 ///   over what is asked.
 ///
 /// Returns each part's take and its carried after the take joins it, the
-/// holding mean (`Σ m·c` kept: the take leaves at the pool's own carried).
+/// holding mean on the grain (the floor's remainder stays with the core's
+/// reservoir, which pays only what a parcel carries).
 pub fn passage(
     pool: &Manifest,
     c_pool: &Ratio,
@@ -138,7 +179,10 @@ pub fn passage(
     let w = |k: &Kind| ratio(i64::from(crate::chem::weight(k)), 1);
     let m_pool = crate::pulse::mass(pool);
     if m_pool.is_zero() || whole.is_zero() {
-        return parts.iter().map(|(_, _, c)| (Manifest::new(), c.clone())).collect();
+        return parts
+            .iter()
+            .map(|(_, _, c)| (Manifest::new(), c.clone()))
+            .collect();
     }
     let s_pool = ratio(1, 2) * c_pool.clone() / (c_pool.clone() + one.clone());
     let (lo, hi) = (
@@ -174,8 +218,11 @@ pub fn passage(
             let mij = mi.clone() + mj.clone();
             let bind = s * mij.clone() / (mij.clone() + one.clone() - contact.clone());
             let (di, dj) = (d(c), d(c_pool));
-            let t = (if di > dj { di.clone() - dj.clone() } else { dj.clone() - di.clone() })
-                / (di + dj);
+            let t = (if di > dj {
+                di.clone() - dj.clone()
+            } else {
+                dj.clone() - di.clone()
+            }) / (di + dj);
             if t.is_zero() {
                 return zero();
             }
@@ -186,7 +233,12 @@ pub fn passage(
         .iter()
         .map(|f| {
             pool.iter()
-                .map(|(k, a)| (k.clone(), crate::pulse::nucleus(&(a.clone() * f.clone())).min(a.clone())))
+                .map(|(k, a)| {
+                    (
+                        k.clone(),
+                        crate::pulse::nucleus(&(a.clone() * f.clone())).min(a.clone()),
+                    )
+                })
                 .filter(|(_, a)| *a > ratio(0, 1))
                 .collect()
         })
@@ -206,7 +258,11 @@ pub fn passage(
                 .map(|(kk, x)| {
                     let has = pool[&kk].clone();
                     let all = asked[&kk].clone();
-                    let x = if all > has { crate::pulse::nucleus(&(x * has / all)) } else { x };
+                    let x = if all > has {
+                        crate::pulse::nucleus(&(x * has / all))
+                    } else {
+                        x
+                    };
                     (kk, x)
                 })
                 .filter(|(_, x)| *x > ratio(0, 1))
@@ -216,7 +272,9 @@ pub fn passage(
             let joined = if got.is_zero() {
                 c.clone()
             } else {
-                (own.clone() * c.clone() + got.clone() * c_pool.clone()) / (own + got)
+                crate::ring::grain(
+                    &((own.clone() * c.clone() + got.clone() * c_pool.clone()) / (own + got)),
+                )
             };
             (take, joined)
         })
@@ -394,7 +452,10 @@ mod tests {
         pool.insert(h.clone(), r(40, 1));
         pool.insert(fe.clone(), r(4, 1));
         let c_pool = r(1, 3);
-        let parts = vec![(h.clone(), r(40, 1), r(5, 1)), (fe.clone(), r(4, 1), r(1, 100))];
+        let parts = vec![
+            (h.clone(), r(40, 1), r(5, 1)),
+            (fe.clone(), r(4, 1), r(1, 100)),
+        ];
         let whole = crate::pulse::mass(&pool) + r(40, 1) + r(4 * 56, 1);
         let out = passage(&pool, &c_pool, &parts, &whole);
         let (take, joined) = &out[0];
@@ -403,11 +464,44 @@ mod tests {
             assert!(*a <= pool[k]);
         }
         let got = crate::pulse::mass(take);
-        assert_eq!(
-            joined.clone() * (r(40, 1) + got.clone()),
-            r(40, 1) * r(5, 1) + got * c_pool.clone()
+        let exact = (r(40, 1) * r(5, 1) + got.clone() * c_pool.clone()) / (r(40, 1) + got);
+        assert_eq!(*joined, crate::ring::grain(&exact));
+        assert!(
+            out[1].0.is_empty(),
+            "iron inside the pool's edge takes nothing"
         );
-        assert!(out[1].0.is_empty(), "iron inside the pool's edge takes nothing");
         assert_eq!(out[1].1, r(1, 100));
+    }
+
+    /// docs/134 §8 T8, T10: the drift keeps `Σ m·c` within the pool's one
+    /// floor (`< m_π` grains of a grain), every spin written on the grain; a
+    /// light part carried far keeps less than one of its excess over the pool.
+    #[test]
+    fn the_drift_keeps_momentum_and_holds_the_light_part() {
+        let parts = vec![(r(1, 1), r(30, 1)), (r(56, 1), r(1, 2))];
+        let (m_pool, c_pool) = (r(200, 1), crate::ring::grain(&r(1, 3)));
+        let (out, pool) = drift(&m_pool, &c_pool, &parts, false);
+        let before = parts
+            .iter()
+            .fold(m_pool.clone() * c_pool.clone(), |s, (m, c)| {
+                s + m.clone() * c.clone()
+            });
+        let after = parts
+            .iter()
+            .zip(&out)
+            .fold(m_pool.clone() * pool.clone(), |s, ((m, _), c)| {
+                s + m.clone() * c.clone()
+            });
+        let floor = before - after;
+        assert!(floor >= r(0, 1) && floor < m_pool.clone() * crate::ring::grain_step());
+        for c in out.iter().chain(std::iter::once(&pool)) {
+            assert_eq!(crate::ring::grain(c), *c, "on the grain");
+        }
+        assert!(
+            out[0].clone() - c_pool.clone() < r(1, 1),
+            "the light part is held"
+        );
+        let (vac, _) = drift(&m_pool, &c_pool, &parts, true);
+        assert!(vac[0] > out[0], "on the vacuum the drag is velocity");
     }
 }
