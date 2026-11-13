@@ -419,6 +419,99 @@ continuum flux".
   from its contraction against hydrogen's tightness, on the model's own
   rulers.
 
+## 10. Why the star core is too cold: the formulas (2026-11-13)
+
+**Operator 2026-11-13:** "derive why it's too cold and what needs to happen
+as a physics component that is not completed or dimensional capacity that is
+not un-vented. Not from laws but from physics as formulas."
+
+### 10.1 The heat as it is computed
+
+At ignition (`breath::breathe`, the births; `formation::core_heat`):
+
+    a_core = a_b + S_c,     S_c = Σ w·|ℓ − ℓ̄| / Σ w
+
+- `a_b` is the binding's agitation, a share of its bond. A star lights only
+  where the ignition share `x = (1 − 2a_b)/(1 + 2a_b)` is positive, so
+  `a_b < ½`.
+- `S_c` is the members' motion out of step about the binding's mean spin:
+  kinetic energy the parcels already had.
+- Hydrogen is stripped at `a_core ≥ t_H = 1`, where `t = (Z − inside)/n` is
+  a winding's enclosed charge over its period.
+
+**Result 1.** A lit star strips hydrogen only if `S_c > ½`.
+
+*Proof.* `a_core ≥ 1` with `a_b < ½` requires `S_c > ½`. ∎
+
+The first star read `a_core ≈ 0.166`.
+
+### 10.2 What is missing: the potential the fall gives up
+
+A self-gravitating body that contracts converts potential into motion. Half
+of the released potential stays as heat and half leaves as light (the virial
+balance, `K = −U/2`). The heat above counts only motion the members already
+had. **The potential released by the fall itself is never turned into heat**
+(the code: "the potential the fall gives up is this spread, never counted
+again").
+
+On the model's own formulas the potential is the deficit, the well's depth
+as a share, `δ = H/(R + H)`. A binding falls from its own deficit `δ₀`
+(`m/(w + m)` at its width) to the star core's condition `w = m`, deficit ½.
+At deficit ½ the two faces are equal (`g = u = ½`): half of what is released
+is held, as heat, and half is unlocked, as light. That is the virial ½, read
+from the faces, with no constant entered:
+
+    a_fall = g·(½ − δ₀) = ½·(½ − δ₀)
+
+*Bound:* `a_fall < ¼`. Alone it cannot reach `t_H = 1`. So the fall's heat is
+a missing term, but by itself it does not close the gap.
+
+### 10.3 The capacity that is not vented: the calibre between tiers
+
+`a_core` is measured on the **star's** ruler: a share of a bond, held in the
+star's own units. `t_H` is measured on the **atom's** ruler: enclosed charge
+per period, held in hydrogen's own units. Every tier is regenerated to its
+own units (operator ruling (i)), each reading `H = 1` at its own throat or
+core, so the scale between two tiers is never carried. Comparing `a_core`
+with `t_H` reads two rulers as one. That is a collapse of the scale
+dimension.
+
+The dimension is in the state. The conformal dilator on `e₊e₋` (docs/136
+§4, `Orientation::advance_scale`) is the change of calibre `D(ρ)`: it
+fixes both poles and keeps the faces. No formula in the conductor drives it
+(only its tests call it). So the scale is a dimension the state has and the
+dynamics never use.
+
+**Result 2.** The heat a star core holds per nucleus, in hydrogen's unit, is
+its star-tier heat carried down the calibre between the star's tier and the
+atom's:
+
+    a_atom = D(ρ_star→atom) · a_core
+
+with `ρ` composed by the flow law over the tiers between, each step its own
+calibre (`D(ρ₁)·D(ρ₂) = D(ρ₁ ⊕ ρ₂)`, the joint fixture with Xylarium).
+Gravity's weakness per pair is already carried by the coupling
+`κ = (star_hold/universe_hold) / Σ nuclei·Q_out` (`formation::coupling`).
+Its collective form over the star's `N` nuclei, `N·κ = (star_hold/
+universe_hold)/Q_out`, is the gravity of the whole star per unit of charge.
+The ratio left uncarried is the ratio of lengths between the tiers, the star
+core's extent against the atom's (`R_n = Z·n(n + 1)/2` on S¹¹). That ratio is
+the calibre.
+
+### 10.4 What needs to happen
+
+1. **The fall's heat** (§10.2): `a_fall = ½·(½ − δ₀)` added to the core's
+   heat, the other half emitted as light.
+2. **The calibre** (§10.3): drive the scale dilator. Each body carries its
+   tier's calibre as `ρ`, set by the dilation between its tier and the one
+   above it. A comparison across tiers reads one through `D(ρ)`, never as
+   one number: the heat against a winding, and the coupling's charge
+   against gravity.
+3. **The read that decides:** with 1 and 2, the first star's
+   `D(ρ)·(a_b + S_c + a_fall)` against `t_H = 1`. This is falsified if the
+   calibre between the star and the atom carries the heat down rather than
+   up.
+
 ## 5. The seam with Xylarium (agreed 2026-11-13)
 
 - Xylarium reads the bound share at the inverse place: `b'_z = [r/(r + M)]·E_z(a)/Z`
