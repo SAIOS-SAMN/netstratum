@@ -384,6 +384,41 @@ mass, but the star core's cut (`formation::star_core_cut`) keeps none of it.
 That cut is the next law to read. Total hydrogen by nuclei is unchanged
 (12;57·60⁻¹ of the universe). The breath's conservation holds.
 
+## 9. Throats and cores: where the flux turns, where energy is made (2026-11-13)
+
+**Operator 2026-11-13:** "we have throats and cores: the star produces
+energy on continuums and the cores are the starting/ending of the vacuum to
+continuum flux".
+
+- **A10 (throats and star cores).**
+  - The universal and galactic cores are **throats**: the ends of the flux,
+    where the vacuum turns into the continuum and back through the inversion
+    (§5). Their push is the bounce, the tide across that turn, the same
+    impulse `p·w̄` for every nucleus.
+  - A star core has **no throat** (operators 2026-10-17: "no throat, no
+    state", `H = held`). It stands wholly on the continuum and produces
+    energy there, by the burn. Its push is that energy on the open frames,
+    `F_z = ½·(e_z/ē)·w̄` (`formation::binding_spins`): radiation pressure.
+    Bound electrons take it; a stripped kind, with no open frame, is not
+    pushed.
+- **T11 (a star core keeps its hydrogen iff its heat strips it).** With no
+  inversion, a star's matter drifts with keep `δ` (A9, the continuum). A
+  bound hydrogen has the largest open share (its lone electron) and is
+  pushed hardest. At heat `a ≥ 1` (hydrogen's tightness, A3) it is stripped:
+  `F_H = 0`, `b_H = 0`, and it rides the hot plasma's pooled spin.
+
+  *Proof.* §1 and §2 with `E_H(a) = 0` for `a ≥ 1`. ∎
+- **Read** (the first star, `.testtmp/plasma/drift`, born bell 110): core
+  heat `9;58·60⁻¹ ≈ 0.166` (its ignition share's agitation plus the heat its
+  contraction made). That is below hydrogen's tightness 1, so by T11 its
+  hydrogen is bound, pushed hardest, and sent to the disc: the read's "kept
+  none".
+- **Open:** the heat a star core reaches at ignition. In nature a stellar
+  core ionizes hydrogen wholly. Here the contraction's heat (docs/124 §5)
+  stands at a sixth of hydrogen's grip. The law to derive is the core's heat
+  from its contraction against hydrogen's tightness, on the model's own
+  rulers.
+
 ## 5. The seam with Xylarium (agreed 2026-11-13)
 
 - Xylarium reads the bound share at the inverse place: `b'_z = [r/(r + M)]·E_z(a)/Z`
