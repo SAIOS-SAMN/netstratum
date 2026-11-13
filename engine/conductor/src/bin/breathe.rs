@@ -99,7 +99,7 @@ fn main() {
             }
             for x in &b.flows {
                 for (n, r) in [
-                    ("amount", &x.amount),
+                    ("amount", &x.count()),
                     ("ell_o", &x.ell_o()),
                     ("ell_orth", &x.ell_orth()),
                     ("agitation", &x.agitation),
@@ -120,7 +120,7 @@ fn main() {
         }
         for x in &u.ocean {
             for (n, r) in [
-                ("amount", &x.amount),
+                ("amount", &x.count()),
                 ("ell_o", &x.ell_o()),
                 ("ell_orth", &x.ell_orth()),
                 ("agitation", &x.agitation),
@@ -274,7 +274,7 @@ fn main() {
                 let mut sum = [0f64; 3];
                 let (mut whole, mut widest, mut apart) = (0f64, 0f64, 0usize);
                 for x in &motes {
-                    let w = x.amount.to_f64().unwrap_or(0.0);
+                    let w = x.count().to_f64().unwrap_or(0.0);
                     for (j, o) in off(&x.tilt()).iter().enumerate() {
                         sum[j] += w * o;
                         widest = widest.max(o.abs());
@@ -709,7 +709,7 @@ fn main() {
             }
         }
         for x in &motes {
-            amounts = amounts.max(bits(&x.amount));
+            amounts = amounts.max(bits(&x.count()));
             spins = spins.max(bits(&x.ell_o())).max(bits(&x.ell_orth()));
             agitation = agitation.max(bits(&x.agitation));
             for p in x.orientation.g() {
@@ -963,11 +963,13 @@ fn main() {
         let mut held_by: Vec<String> = Vec::new();
         for core in &u.cores {
             throats += of(&core.throat, &h);
-            flows += core
-                .flows
-                .iter()
-                .filter(|x| x.key == h)
-                .fold(cfe::ratio::ratio(0, 1), |a, x| a + x.amount.clone());
+            flows += core.flows.iter().fold(cfe::ratio::ratio(0, 1), |a, x| {
+                a + x
+                    .parts
+                    .get(&h)
+                    .cloned()
+                    .unwrap_or_else(|| cfe::ratio::ratio(0, 1))
+            });
             for s in &core.satellites {
                 stars += 1;
                 kept += of(&s.kept, &h);
@@ -988,11 +990,13 @@ fn main() {
                 }
             }
         }
-        let ocean = u
-            .ocean
-            .iter()
-            .filter(|x| x.key == h)
-            .fold(cfe::ratio::ratio(0, 1), |a, x| a + x.amount.clone());
+        let ocean = u.ocean.iter().fold(cfe::ratio::ratio(0, 1), |a, x| {
+            a + x
+                .parts
+                .get(&h)
+                .cloned()
+                .unwrap_or_else(|| cfe::ratio::ratio(0, 1))
+        });
         let f = |x: &cfe::ratio::Ratio| conductor::reading::sector(x).to_string();
         println!(
             "fuel — weight 1, hydrogen (grains): the stars keep {} ({} of {} stars hold any; weight 2 kept {}), the galaxies' flows {}, their throats {}, the ocean {}; the stars' lightest kept kind, by weight: {:?}",

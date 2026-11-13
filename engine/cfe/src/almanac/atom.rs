@@ -359,4 +359,30 @@ mod tests {
         assert!(!closes(&[2, 1]), "a closed atom bonds nothing");
         assert!(!closes(&[1]), "no partner");
     }
+
+    /// R7's joint-read fixtures with Xylarium (netstratum docs/135 §4.1,
+    /// mycelium law row): on S^11 a winding is screened only by the shells
+    /// it does not penetrate. Shell 3 opens at Z 29: its s-winding reads
+    /// (29 − 2)/3, not (29 − 28)/3.
+    #[test]
+    fn r7_penetration_fixtures() {
+        let has = |z: u32, t: Ratio, e: u64| {
+            windings(z)
+                .expect("atom")
+                .1
+                .iter()
+                .any(|(tt, v, _)| *tt == t && *v == e)
+        };
+        assert!(has(3, ratio(3, 1), 2) && has(3, ratio(1, 2), 1));
+        assert!(has(11, ratio(9, 2), 2) && has(11, ratio(9, 2), 7));
+        assert!(has(29, ratio(9, 1), 1));
+        assert!(has(31, ratio(29, 4), 1));
+        assert!(has(209, ratio(207, 3), 2));
+        assert!(has(209, ratio(207, 4), 1));
+        assert!(windings(209)
+            .expect("atom")
+            .1
+            .iter()
+            .any(|(t, _, _)| *t == ratio(181, 3)));
+    }
 }

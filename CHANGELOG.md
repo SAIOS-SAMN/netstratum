@@ -30,6 +30,39 @@ change is named here.
   Xylarium (four fixtures reproduced). `orientation.rs` keeps the rotor and
   the scale, retires the Cl(5,4) axes and the vacuum factor (read by no law);
   the record is 12 values, 13 with the scale; g557 reads unchanged.
+- The plasma layer (docs/134; operator 2026-11-13, "an additional layer of
+  physics"): a kind's electrons' bound share `b = g·E(a)/Q` and every
+  release shared through it, `ℓ = b·F/w + (1 − b)·S`, `Σ n·w·ℓ` exact,
+  replacing the per-kind carry `p·w̄/w` at seven sites. Read on one 2^40
+  founding to its first echo, before → after: T_u 186 → 110; the ocean's
+  hydrogen 18;27·60^5 grains → none; 106 stars → 35, holding hydrogen 1 → 3.
+- The plasma's parcel and the release derived (docs/134 §6–§7): a mote is a
+  mix of kinds under one state; the release writes the ionized pool as one
+  parcel and each bound share alone; the bounce applies the founding's
+  passage law (`plasma::passage`). Theorems: the throat strips nothing
+  (`b = ½` exactly; witness: the table's loosest winding is lithium's ½); the
+  split is forced; the passage carries matter outward, never in (T7). Read
+  (2^40 to bell 112): stars 35 → 4 (split) → 0 (with the passage); the
+  retention of light bound matter is the drift, next.
+- The drift (docs/134 §8; operator 2026-11-13: "momentum is the constant
+  degradation of velocity on the continuum into the inversion across the
+  vacuum where the physics changes drag into velocity"): a bound part keeps
+  `δ` of its departure from the pool a bell, the pool takes the drag
+  (`plasma::drift`, on the grain). Read: the ocean's hydrogen and the
+  intergalactic medium both go to none; the first star's binding holds a
+  tenth hydrogen, but its core's cut keeps none, which is next.
+- The fall's heat (docs/134 §10.2, EQUATIONS E74): a binding falling from
+  its own deficit `δ₀` to the star core's ½ gives up `½ − δ₀`. Half stays as
+  the star core's heat, kept in `Body.heat` so every later cut reads it; half
+  leaves as light across the galaxy. Both halves are named in the energy
+  book ("fall"). Read on a 2^40 founding, bells 109→112: the first star's core
+  heat 0.166 → 0.336; light made 51;22·60⁻² → 1;50,11·60⁻¹, balanced; unaccounted heat unchanged; hydrogen kept still none, because
+  the calibre between tiers (§10.3) is not yet driven.
+  The plasma's parcel (docs/134 §6): a mote is a mix (`Mote::parts`), the
+  release's ionized pool one parcel at `p·S`, each bound part its own; read on
+  the same founding to bell 112: 35 stars → 4 (none holding hydrogen), the
+  ocean's hydrogen none → 7;51·60^5 grains, the intergalactic medium a third
+  of the whole.
 - The stride (docs/132; operator 2026-11-12, "increase the velocity of the
   entire system without fracturing the equations"): derived. A galaxy's
   laws run only on an echo's arrival (twice in g557's 557 bells); the stride

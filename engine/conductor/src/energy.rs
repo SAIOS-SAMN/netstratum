@@ -27,7 +27,7 @@
 //! each form's change and makes no claim that their sum closes: the first
 //! reading is the size of each one's change against the light made
 //! (docs/122 §5 step 1; docs/124 §8 item 1).
-use crate::flows::{weight, Mote};
+use crate::flows::Mote;
 use crate::pulse::{mass, Body, Universe};
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
@@ -91,14 +91,14 @@ impl Terms {
 }
 
 fn mote_mass(x: &Mote, unit: &Ratio) -> Ratio {
-    x.amount.clone() * weight(&x.key) / unit.clone()
+    x.holding() / unit.clone()
 }
 
 /// A mote's open frames (its part of the bond), in units of the unit mass.
 /// `Universe::total` reads the bodies and the ocean, not the galaxies' and
 /// systems' motes, so these are added mote by mote.
 fn open_frames(x: &Mote, unit: &Ratio) -> Ratio {
-    x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1) / unit.clone()
+    x.open_frames() / unit.clone()
 }
 
 fn world_heat(b: &Body, unit: &Ratio) -> Ratio {
@@ -177,8 +177,7 @@ mod tests {
 
     fn mote(key: &str, amount: Ratio, ell: Ratio, agitation: Ratio) -> Mote {
         Mote {
-            key: crate::chem::Kind::parse(key).expect("a kind"),
-            amount,
+            parts: crate::flows::Mote::one(crate::chem::Kind::parse(key).expect("a kind"), amount),
             spins: Mote::spins_of(&ell, &[]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(

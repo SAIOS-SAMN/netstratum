@@ -2081,6 +2081,52 @@ about the body's own spin:
     a = p·ν    ν = Π(1 − δ)    A = a/(1 − ρ), ρ = ½·½    D = A ⊖ Ā    T = (1 − A)·g·w·D
     F ↦ F·m(rate(A′)·t)    C, ℓ unchanged    Σ w·A′ = Σ w·A (within the grain)
 
+**E74 · The fall's heat.** `formation::fall_heat`, `flows::band_pairs`
+(the binding's own deficit), `breath::breathe` at the births (docs/134
+§10.2; operator 2026-11-13). A binding falls from its own deficit `δ₀`, its
+holding's bond at its half-width, to the star core's, ½. At ½ the faces are
+equal, so the potential released is held half as heat and emitted half as
+light:
+
+    λ = 2m/R    δ₀ = λ/(1 + λ)    a_fall = g·(½ − δ₀) = ½·(½ − δ₀)    (none where δ₀ ≥ ½)
+    a_core = a_b + S_c + a_fall    heat made 2·a_fall·M_kept    light a_fall·M_kept
+
+The star keeps `S_c + a_fall` in its heat, so the ignition cut and every
+later cut (outburst, wind) read one heat. The light crosses the galaxy as
+the throat's does. **Built and read** (2^40, bells 109→112): the first
+star's `a_core` goes from ≈ 0.166 to ≈ 0.336. The energy line's unaccounted
+heat is unchanged to the grain, so both halves are booked. `a_fall < ¼`, so
+alone it cannot reach hydrogen's tightness 1: the calibre between tiers
+(§10.3) is the remaining term.
+
+**E73 · The plasma layer: the release shared through the charge.**
+`plasma::{kept_electrons, bound_share, carried, bounce_unit}` (docs/134;
+operator 2026-11-13). A kind's electrons are bound where held at the place
+and tighter than the heat, `b_z = g·E_z(a)/Q_z`; a release giving each
+nucleus the impulse `F_z` carries
+
+    ℓ_z = b_z·F_z/w_z + (1 − b_z)·S,     S = Σ n(1 − b)F / Σ n(1 − b)w
+
+`Σ n·w·ℓ = Σ n·F` exact; `b = 1` is the per-kind carry it replaces, `b = 0`
+one spin. Read by `pulse::{push_cut, disperse, cascade}`, `flows::founding`,
+`formation::{shells, carried, star_core_cut}` and the bounce's release. A mote
+is a parcel, a mix `{kind → amount}` under one state (§6): the release writes
+the pool `{z: n_z(1 − b_z)}` at `p·S` as one parcel and each bound share alone
+at `p·w̄/w`. Each bound part passing out through its pool takes
+`½·crossed·gripped·m_b/(m_b + m_π)` of the pool's mix (A7, `plasma::passage`;
+docs/134 §7). The throat's `b = ½` is exact, since the table's loosest
+winding is ½ (lithium) and the throat's heat is at most ⅓ (§7, T1). Before the passage, the release's bell of drift (A9, `plasma::drift`;
+§8) relaxes each bound part toward the pool, `c' = c_π + δ(c − c_π)`, with
+keep `δ = 1/(c + 1)` on the continuum (`1 − δ` on the vacuum). The pool takes
+the drag, `Σ m·c` is kept, and every spin is on the grain.
+**The parcel** (docs/134 §6; `flows::Mote::parts`,
+`plasma::{bounce_split, pool_spin, own_spin}`): a mote is a mix, its
+readings its parts' sums (holding `Σa·w`, open frames `Σa·U`, charge `Σa·Q`, a
+per-kind reading by holding); the bounce's release leaves as one pooled parcel
+`{z: n_z(1 − b_z)}` at `p·S` and each kind's bound part at `p·w̄/w_z`. A
+one-kind parcel reads as its kind; a merge adds parts by kind; the throat parts
+a mix into its kinds (`recycle::part`).
+
 **E72 · The stride and the echo's draw.** `ring::compose_n`,
 `flows::mean_response` (docs/132 §1, §5; operator 2026-11-12). The flow law
 over n bells, composed, never scaled:

@@ -100,7 +100,7 @@ pub fn manifold_twist(motes: &[crate::flows::Mote]) -> Option<[Ratio; 3]> {
         };
         // Each term on the grain: an amount's exact denominator, summed over
         // a disc's motes, compounds (the scalar collapse).
-        let w = crate::ring::grain(&(x.amount.clone() * crate::flows::weight(&x.key)));
+        let w = crate::ring::grain(&(x.holding()));
         for k in 0..3 {
             let share = v[k].clone() / (ratio(1, 1) + v[k].abs());
             sum[k] += crate::ring::grain(&(w.clone() * share));
@@ -177,7 +177,7 @@ pub fn tension(tilt: &[Ratio], plane: &[Ratio]) -> Ratio {
 pub fn plane_spin(motes: &[crate::flows::Mote]) -> Vec<Ratio> {
     let mut sums = vec![ratio(0, 1); crate::flows::SPACE.len()];
     for x in motes {
-        let w = x.amount.clone() * crate::flows::weight(&x.key);
+        let w = x.holding();
         for (k, l) in x.spins.iter().enumerate().take(sums.len()) {
             sums[k] += w.clone() * l.clone();
         }
@@ -276,8 +276,10 @@ mod tests {
         // docs/100 §8.2: the plane spin moves between the planes (never
         // made), and the antipole holds the opposite, plane by plane.
         let mote = |ell: i64, tilt: [i64; 3]| crate::flows::Mote {
-            key: crate::chem::Kind::parse("W0004").expect("a kind"),
-            amount: ratio(3, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0004").expect("a kind"),
+                ratio(3, 1),
+            ),
             spins: crate::flows::Mote::spins_of(&ratio(ell, 1), &tilt.map(|t| ratio(t, 6))),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&vec![
@@ -372,8 +374,10 @@ mod tests {
 
     fn mote(orientation: crate::orientation::Orientation) -> crate::flows::Mote {
         crate::flows::Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: vec![ratio(1, 3); 3],
             spins_orth: vec![ratio(0, 1); 3],
             orientation,

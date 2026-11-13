@@ -105,9 +105,7 @@ fn system_rate(u: &pulse::Universe, g: usize, s: usize, unit: &Ratio) -> Ratio {
 /// The disc's mean inclination share against its own axis `Σ w·ℓ`,
 /// holding-weighted (docs/128 §11.3).
 fn mean_tilt(motes: &[conductor::flows::Mote], total: &Ratio) -> Ratio {
-    let w = |x: &conductor::flows::Mote| {
-        x.amount.clone() * conductor::flows::weight(&x.key) / total.clone()
-    };
+    let w = |x: &conductor::flows::Mote| x.holding() / total.clone();
     let l3 = |x: &conductor::flows::Mote| -> [Ratio; 3] {
         std::array::from_fn(|k| x.spins.get(k).cloned().unwrap_or_else(|| ratio(0, 1)))
     };
@@ -142,9 +140,7 @@ fn streams(u: &pulse::Universe, i: usize, unit: &Ratio) {
     } else {
         pulse::core_state(core)
     };
-    let w = |x: &flows::Mote| {
-        conductor::ring::grain(&(x.amount.clone() * flows::weight(&x.key) / total.clone()))
-    };
+    let w = |x: &flows::Mote| conductor::ring::grain(&(x.holding() / total.clone()));
     // (stream, inside its ring): count, holding, the reaches over the hold.
     let mut rows: std::collections::BTreeMap<(bool, bool), (usize, Ratio, Vec<Ratio>)> =
         Default::default();
@@ -279,7 +275,7 @@ fn streams(u: &pulse::Universe, i: usize, unit: &Ratio) {
         );
     }
     let bands = flows::band_pairs(&core.flows, &enc, &core.tilt, &pulse::mass(&core.total()));
-    let members: usize = bands.iter().map(|(_, m)| m.len()).sum();
+    let members: usize = bands.iter().map(|(_, m, _)| m.len()).sum();
     println!(
         "  bands the galaxy would bind now: {} ({members} members)",
         bands.len()
@@ -307,7 +303,7 @@ fn ablate(u: &pulse::Universe, i: usize, unit: &Ratio, limit: Option<usize>) {
         .take(limit.unwrap_or(usize::MAX))
         .cloned()
         .collect();
-    let w = |x: &flows::Mote| x.amount.clone() * flows::weight(&x.key) / total.clone();
+    let w = |x: &flows::Mote| x.holding() / total.clone();
     // The carriers' denominators: the widest of the holdings and the spins.
     let digits = |r: &Ratio| r.denom().to_string().len();
     let wide_w = base.iter().map(|x| digits(&w(x))).max().unwrap_or(0);
@@ -880,8 +876,9 @@ fn main() {
                 for x in &c.flows {
                     let r = x.ell_o() / h.clone();
                     if r >= lo && r <= hi {
-                        *band.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) +=
-                            x.amount.clone();
+                        for (k, a) in &x.parts {
+                            *band.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+                        }
                     }
                 }
                 let bm = pulse::mass(&band);
@@ -915,7 +912,12 @@ fn main() {
             let top = u
                 .firmament()
                 .iter()
-                .filter_map(|x| conductor::chem::atom_w(&x.key))
+                .flat_map(|x| {
+                    x.parts
+                        .keys()
+                        .filter_map(conductor::chem::atom_w)
+                        .collect::<Vec<_>>()
+                })
                 .max()
                 .unwrap_or(0);
             let seam = (2..=top)
@@ -962,7 +964,11 @@ fn main() {
                 read_of(&firm, at, "all");
                 let vessel: Vec<conductor::flows::Mote> = firm
                     .iter()
-                    .filter(|x| conductor::chem::atom_w(&x.key).is_some_and(|z| z >= seam))
+                    .filter(|x| {
+                        x.parts
+                            .keys()
+                            .all(|k| conductor::chem::atom_w(k).is_some_and(|z| z >= seam))
+                    })
                     .cloned()
                     .collect();
                 read_of(&vessel, at, &format!("vessel Z>={seam}"));
@@ -1023,8 +1029,11 @@ fn main() {
                     .map(|x| {
                         (
                             x.phase_at(0),
-                            x.amount.clone() * conductor::flows::weight(&x.key),
-                            conductor::chem::charge(&x.key),
+                            x.holding(),
+                            (x.charge() / x.count())
+                                .to_integer()
+                                .try_into()
+                                .unwrap_or(0),
                         )
                     })
                     .collect();
@@ -1049,9 +1058,7 @@ fn main() {
                         groups.push(Vec::new());
                     }
                 }
-                let fh = firm.iter().fold(ratio(0, 1), |s, x| {
-                    s + x.amount.clone() * conductor::flows::weight(&x.key)
-                });
+                let fh = firm.iter().fold(ratio(0, 1), |s, x| s + x.holding());
                 let desc: Vec<String> = groups
                     .iter()
                     .filter(|g| !g.is_empty())
@@ -1142,11 +1149,7 @@ fn main() {
             // Belts: the debris standing in a system's own medium as motes.
             let debris: Vec<Ratio> = stars
                 .iter()
-                .map(|s| {
-                    s.flows
-                        .iter()
-                        .fold(ratio(0, 1), |a, x| a + x.amount.clone())
-                })
+                .map(|s| s.flows.iter().fold(ratio(0, 1), |a, x| a + x.count()))
                 .collect();
             let with_belts = debris.iter().filter(|d| **d > ratio(0, 1)).count();
             println!("  belts: {} systems carry debris motes, total {} (units); remnants' released systems re-anchored count in systems",
@@ -1231,7 +1234,7 @@ fn main() {
                 .collect();
             let in_media: Vec<(&conductor::chem::Kind, &Ratio)> = stars
                 .iter()
-                .flat_map(|s| s.flows.iter().map(|x| (&x.key, &x.amount)))
+                .flat_map(|s| s.flows.iter().flat_map(|x| x.parts.iter()))
                 .filter(|(k, _)| conductor::chem::atom_w(k).is_none())
                 .collect();
             let sum = |v: &[(&conductor::chem::Kind, &Ratio)], k: Option<&str>| {

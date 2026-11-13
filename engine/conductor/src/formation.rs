@@ -60,9 +60,10 @@ pub fn shells(all: &Manifest, disc: &Manifest) -> (Vec<Shell>, Vec<Shell>, Ratio
         return (Vec::new(), Vec::new(), ratio(1, 1));
     };
     let (mut held_out, mut out) = (Vec::new(), Vec::new());
+    let unit = crate::plasma::bounce_unit(all, &mean);
     for (k, amount) in all {
         let w = ratio(i64::from(weight(k)), 1);
-        let ell = push.clone() * mean.clone() / w.clone();
+        let ell = push.clone() * unit[k].clone();
         let r = ell / h.clone();
         let delta = h.clone() / (r.clone() + h.clone());
         // The dispersal (`pulse::disperse`; operator: "disc and gas both
@@ -292,6 +293,20 @@ pub fn crest_collapse(
     Some((w, count))
 }
 
+/// The fall's heat (docs/134 §10.2): a binding falling from its own deficit
+/// `δ₀` to the star core's, ½, gives up the potential `½ − δ₀`. At ½ the two
+/// faces are equal, so the held face keeps `g = ½` of it as heat and the
+/// unlocked face emits the rest as light (the virial balance, read from the
+/// faces): `a = g·(½ − δ₀)`, on the grain, none where `δ₀ ≥ ½`.
+pub fn fall_heat(delta0: &Ratio) -> Ratio {
+    let g = crate::polarity::throat_held();
+    if *delta0 < g {
+        crate::ring::grain(&(g.clone() * (g - delta0.clone())))
+    } else {
+        ratio(0, 1)
+    }
+}
+
 /// Ignition, the quantum star core (operator 2026-10-15; with Xylarium): a
 /// star is the core's pair one tier down, a containment ring at its centre
 /// (its star core) holding its body's grains as one ring of its own, at reach =
@@ -486,7 +501,7 @@ pub fn held_heat(sys: &crate::pulse::Body) -> Ratio {
     sys.flows
         .iter()
         .fold(star_heat(sys) * mass(&sys.kept), |h, x| {
-            h + x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key)
+            h + x.agitation.clone() * x.holding()
         })
 }
 
@@ -563,11 +578,28 @@ pub fn carried(
     if total.is_zero() || count.is_zero() {
         return Vec::new();
     }
+    binding_spins(binding, heat, total, count)
+        .into_iter()
+        .map(|(k, ell)| (k, ell + turning.clone()))
+        .collect()
+}
+
+/// Each kind's spin from the star core's push (its pair's ½) on its open
+/// frames, `F_z = ½·(e_z/ē)·w̄` a nucleus, shared through its charge at the
+/// core's heat (docs/134 §2; `plasma::carried`): the bound share by its own
+/// inertia, the ionized share as one plasma.
+fn binding_spins(
+    binding: &Manifest,
+    heat: &Ratio,
+    total: Ratio,
+    count: Ratio,
+) -> Vec<(crate::chem::Kind, Ratio)> {
     let open_mean = open_mass(binding, heat) / total.clone();
     let mean_weight = total / count;
-    binding
-        .keys()
-        .map(|k| {
+    let g = crate::polarity::throat_held();
+    let parts: Vec<(Ratio, Ratio, Ratio, Ratio)> = binding
+        .iter()
+        .map(|(k, a)| {
             let w = ratio(i64::from(crate::chem::weight(k)), 1);
             let open = ratio(
                 i64::from(
@@ -577,13 +609,18 @@ pub fn carried(
                 ),
                 1,
             ) / w.clone();
-            let ell = if open_mean.is_zero() {
+            let f = if open_mean.is_zero() {
                 ratio(0, 1)
             } else {
-                ratio(1, 2) * open / open_mean.clone() * mean_weight.clone() / w
-            } + turning.clone();
-            (k.clone(), ell)
+                ratio(1, 2) * open / open_mean.clone() * mean_weight.clone()
+            };
+            (a.clone(), w, f, crate::plasma::bound_share(k, &g, heat))
         })
+        .collect();
+    binding
+        .keys()
+        .cloned()
+        .zip(crate::plasma::carried(&parts))
         .collect()
 }
 
@@ -597,35 +634,22 @@ pub fn star_core_cut(
     if total.is_zero() || count.is_zero() {
         return None;
     }
-    let open_mean = open_mass(binding, heat) / total.clone();
     // Regeneration (operator ruling (i), with Xylarium): the star core pushes
     // at full amplitude in its own units, its pair's ½; a tide enters as
     // agitation, never as a weaker push, or it would be counted twice.
     let push = ratio(1, 2);
-    let mean_weight = total.clone() / count;
-    let mut kinds: Vec<(crate::chem::Kind, Ratio, Ratio)> = binding
-        .iter()
-        .map(|(k, a)| {
-            let w = ratio(i64::from(crate::chem::weight(k)), 1);
-            let open = ratio(
-                i64::from(
-                    crate::chem::atom_w(k)
-                        .map(|z| cfe::almanac::atom::open_at(crate::chem::protons(z), heat))
-                        .unwrap_or_else(|| crate::chem::unpaired(k)),
-                ),
-                1,
-            ) / w.clone();
-            // Carried SPINS add (with Xylarium): the place's turning (in
-            // the plane orthogonal to the orbit, the rotoreflection) turns
-            // every kind alike, no weight ratio.
-            let ell = if open_mean.is_zero() {
-                ratio(0, 1)
-            } else {
-                push.clone() * open / open_mean.clone() * mean_weight.clone() / w.clone()
-            } + turning.clone();
-            (k.clone(), ell, a.clone() * w / total.clone())
-        })
-        .collect();
+    // Carried SPINS add (with Xylarium): the place's turning (in the plane
+    // orthogonal to the orbit, the rotoreflection) turns every kind alike,
+    // no weight ratio.
+    let mut kinds: Vec<(crate::chem::Kind, Ratio, Ratio)> =
+        binding_spins(binding, heat, total.clone(), count)
+            .into_iter()
+            .map(|(k, ell)| {
+                let w = ratio(i64::from(crate::chem::weight(&k)), 1);
+                let share = binding[&k].clone() * w / total.clone();
+                (k, ell + turning.clone(), share)
+            })
+            .collect();
     kinds.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
     // No throat, no STATE (operators 2026-10-17, with Xylarium): a star core
     // (torsion) and a planetary core (magnetism) have no bounce, so they
@@ -1115,7 +1139,7 @@ pub fn system(
                 agitation: crate::ring::grain(&x.agitation.clone().max(disc_agitation.clone())),
                 ..x.clone()
             });
-            inside += x.amount.clone() * crate::flows::weight(&x.key) / total.clone();
+            inside += x.holding() / total.clone();
         }
         i = j;
     }
@@ -1127,9 +1151,7 @@ pub fn system(
         outside
             .iter()
             .filter(|(_, d, _)| d < r)
-            .fold(h_s.clone(), |a, (x, _, _)| {
-                a + x.amount.clone() * crate::flows::weight(&x.key) / total.clone()
-            })
+            .fold(h_s.clone(), |a, (x, _, _)| a + x.holding() / total.clone())
     };
     let thrown: Vec<(crate::chem::Kind, Ratio)> = if held_f.is_zero() {
         Vec::new()
@@ -1153,13 +1175,14 @@ pub fn system(
     ));
     let mut medium = Manifest::new();
     for x in &motes {
-        *medium.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+        for (k, a) in &x.parts {
+            *medium.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+        }
     }
     // The medium's spin, in the system's own frame: each mote's share times
     // its spins.
     let medium_spin = motes.iter().fold(ratio(0, 1), |s, x| {
-        s + x.amount.clone() * crate::flows::weight(&x.key) / total.clone()
-            * (x.ell_o() + x.ell_orth())
+        s + x.holding() / total.clone() * (x.ell_o() + x.ell_orth())
     });
     Some((star, medium, medium_spin, motes))
 }
@@ -1340,13 +1363,7 @@ pub fn system_frame_of(
         kept.clone() / total.clone(),
         sys.flows
             .iter()
-            .map(|x| {
-                (
-                    x.ell_o(),
-                    x.amount.clone() * crate::flows::weight(&x.key) / total.clone(),
-                    x.lift.clone(),
-                )
-            })
+            .map(|x| (x.ell_o(), x.holding() / total.clone(), x.lift.clone()))
             .chain(
                 sys.satellites
                     .iter()
@@ -1847,7 +1864,7 @@ pub fn settle_system(
         b.satellites.iter().fold(ratio(0, 1), |s, w| {
             s + mass(&w.total()) / unit.clone() * w.ell.clone()
         }) + b.flows.iter().fold(ratio(0, 1), |s, x| {
-            s + x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * x.ell_o()
+            s + x.holding() / unit.clone() * x.ell_o()
         })
     };
     let spin_before = spin_of(sys);
@@ -1860,8 +1877,10 @@ pub fn settle_system(
     let mut pool: Manifest = std::mem::take(&mut sys.medium);
     let motes = std::mem::take(&mut sys.flows);
     for x in &motes {
-        if let Some(a) = pool.get_mut(&x.key) {
-            *a -= x.amount.clone();
+        for (k, m) in &x.parts {
+            if let Some(a) = pool.get_mut(k) {
+                *a -= m.clone();
+            }
         }
     }
     let unmoted: Manifest = pool.into_iter().filter(|(_, a)| a.is_positive()).collect();
@@ -1869,7 +1888,7 @@ pub fn settle_system(
     let mut mix = sys.kept.clone();
     for (kind, a) in motes
         .iter()
-        .map(|x| (&x.key, &x.amount))
+        .flat_map(|x| x.parts.iter())
         .chain(unmoted.iter())
     {
         *mix.entry(kind.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
@@ -1911,9 +1930,7 @@ pub fn settle_system(
     // The partition of what entered (register B15): every mote and world is
     // read once, as escaping, falling to the star or entering convergence,
     // each with its spin; their sum is checked against the spin read before.
-    let mote_spin = |x: &crate::flows::Mote| {
-        x.amount.clone() * crate::flows::weight(&x.key) / unit.clone() * x.ell_o()
-    };
+    let mote_spin = |x: &crate::flows::Mote| x.holding() / unit.clone() * x.ell_o();
     let mut parted = ratio(0, 1);
     for x in motes {
         parted += mote_spin(&x);
@@ -1925,16 +1942,20 @@ pub fn settle_system(
         // No mirror (docs/117 §12): a mote's reach is read in this enclosure
         // and kept; one inside the star's ring belongs to the star.
         if r > rim {
-            escaped_heat += x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key);
-            *escaped.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+            escaped_heat += x.agitation.clone() * x.holding();
+            for (k, a) in &x.parts {
+                *escaped.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            }
             continue;
         }
         if r < b0 {
-            to_star_heat += x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key);
-            *to_star.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+            to_star_heat += x.agitation.clone() * x.holding();
+            for (k, a) in &x.parts {
+                *to_star.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+            }
             continue;
         }
-        let matter: Manifest = [(x.key.clone(), x.amount.clone())].into();
+        let matter: Manifest = x.parts.clone();
         let phase = x.phase();
         bodies.push((
             r,
@@ -2173,8 +2194,10 @@ pub fn settle_system(
         let mut loose = stripped.clone();
         if matter.is_empty() {
             for x in from {
-                if let Some(a) = loose.get_mut(&x.key) {
-                    *a -= x.amount.clone();
+                for (k, m) in &x.parts {
+                    if let Some(a) = loose.get_mut(k) {
+                        *a -= m.clone();
+                    }
                 }
                 belt_motes.push(x);
             }
@@ -2182,8 +2205,7 @@ pub fn settle_system(
         for (kind, a) in loose {
             if a.is_positive() {
                 belt_motes.push(crate::flows::Mote {
-                    key: kind,
-                    amount: a,
+                    parts: crate::flows::Mote::one(kind, a),
                     spins: crate::flows::Mote::spins_of(
                         &crate::ring::grain(&(r.clone() * inner.clone())),
                         &tilt,
@@ -2371,6 +2393,22 @@ mod heat_carriage_tests {
         let per = per_holding(&heat, &holding);
         assert_eq!(per.clone() * ratio(2, 1) + per * ratio(3, 1), heat);
         assert_eq!(per_holding(&ratio(1, 1), &ratio(0, 1)), ratio(0, 1));
+    }
+}
+
+#[cfg(test)]
+mod fall_tests {
+    use super::fall_heat;
+    use cfe::ratio::ratio;
+
+    /// docs/134 §10.2: the fall's heat is half the potential released, below
+    /// a quarter, none from a binding already at the star core's deficit.
+    #[test]
+    fn the_fall_keeps_half_the_potential_as_heat() {
+        assert_eq!(fall_heat(&ratio(1, 6)), ratio(1, 6));
+        assert_eq!(fall_heat(&ratio(1, 2)), ratio(0, 1));
+        assert_eq!(fall_heat(&ratio(3, 4)), ratio(0, 1));
+        assert_eq!(fall_heat(&ratio(0, 1)), ratio(1, 4));
     }
 }
 
