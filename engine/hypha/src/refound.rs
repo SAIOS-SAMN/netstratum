@@ -126,6 +126,7 @@ pub fn ledger_frame(
 ) -> io::Result<(Vec<u8>, usize)> {
     use mycelium_sdk::house::atlas::{encode_ledger, LedgerEntry};
     use mycelium_sdk::house::commitment::commitment;
+    let point_of_entry = point.clone();
     let records = checkpoint_records(var_root);
     let commitment =
         commitment(&records).ok_or_else(|| io::Error::other("a checkpoint key repeats"))?;
@@ -134,12 +135,17 @@ pub fn ledger_frame(
         u,
         commitment,
         events: [0; 32],
-        point,
+        point: point.clone(),
         parent,
         applied: Default::default(),
         nonce: fresh()?,
     };
-    Ok((encode_ledger(&entry.sign(reserve)), records.len()))
+    let signed = entry
+        .sign(still(&point_of_entry), reserve)
+        .ok_or_else(|| io::Error::other("the ledger entry's record cannot be written"))?;
+    let act = encode_ledger(&signed)
+        .ok_or_else(|| io::Error::other("the ledger act cannot be written"))?;
+    Ok((act, records.len()))
 }
 
 pub fn post_ledger(session: &Session, home: &Path, var_root: &Path, u: u64) -> io::Result<String> {
@@ -175,6 +181,19 @@ pub fn post_ledger(session: &Session, home: &Path, var_root: &Path, u: u64) -> i
 
 /// The origin a final point was read under: its genesis and its epoch. A
 /// recut draws a new one.
+/// The crossing record an act carries that moves no body across the
+/// universal core tube (Mycelium X1, #160): at the act's TUniversal point, no
+/// past cone, one phase of period 1, the identity motion.
+fn still(point: &TPoint) -> mycelium_sdk::forms::Crossing {
+    mycelium_sdk::forms::Crossing::still(
+        mycelium_sdk::forms::Place {
+            at: point.clone(),
+            parents: Vec::new(),
+        },
+        vec![1],
+    )
+}
+
 pub fn origin_of(point: &TPoint) -> String {
     let g: String = point.origin.genesis[..8]
         .iter()
@@ -302,7 +321,7 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
     // reserve. Granted, or refused by the court's standing (short, granted
     // already, one in flight, no new closures), nothing moved; any other
     // refusal names a fault on this side and stops the rest.
-    let granted = post_manifest(session, &union, id, var_root)?;
+    let granted = post_manifest(session, &union, id, var_root, &point)?;
     said.push(format!("3 manifest: {granted:?}"));
     if !matches!(
         granted,
@@ -433,6 +452,7 @@ pub fn post_manifest(
     reserve: &ed25519_dalek::SigningKey,
     domain: [u8; 32],
     var_root: &Path,
+    point: &TPoint,
 ) -> io::Result<Granted> {
     let (_, u) = conductor::pulse::read(var_root)
         .ok_or_else(|| io::Error::other("the universe did not read (pulse.bin)"))?;
@@ -446,7 +466,7 @@ pub fn post_manifest(
         nuclei,
         nonce: fresh()?,
     }
-    .sign(reserve)
+    .sign(still(point), reserve)
     .ok_or_else(unwritten_manifest)?;
     let act = encode_manifest(&signed).ok_or_else(unwritten_manifest)?;
     decode_grant_reply(&session.speak(act)?)
@@ -544,18 +564,20 @@ pub fn map_frame(
     let record = MapRecord::LocalThroat {
         throat: *blake3::hash(format!("netstratum gate {}", end.id).as_bytes()).as_bytes(),
         keeper: crate::house::line_key(&end.keeper),
-        frames: (frame(&end.from), frame(&end.to)),
+        poses: (frame(&end.from), frame(&end.to)),
         freshness: end.freshness,
     };
-    Ok(encode_map(
+    encode_map(
         &MapAct {
             domain,
-            point,
+            point: point.clone(),
             record,
             nonce: fresh()?,
         }
-        .sign(reserve),
-    ))
+        .sign(still(&point), reserve)
+        .ok_or_else(|| io::Error::other("the map act's record cannot be written"))?,
+    )
+    .ok_or_else(|| io::Error::other("the map act cannot be written"))
 }
 
 /// 5. The gates as LOCAL throats (map record kind 2), each signed by the
