@@ -134,7 +134,11 @@ a dynamic force:**
 4. **The drift (A9) across the inversion.** "Drag into velocity across the
    inversion" is a coupling between faces. In this form it is a boost on a
    plane through `e₋`, and its composition with the continuum's planes turns
-   by W2.
+   by W2. *Read in the code (2026-11-15):* `plasma::drift` moves one carried
+   spin `c` per parcel toward the pool's by the keep `δ` (`1 − δ` on the
+   vacuum). That is a relaxation of one scalar, with no plane beside it and
+   no flow-law composition, so W2 has nothing to turn. It is restated only
+   when the parcel carries its spin per plane.
 
 ## 4. Build order (#206)
 
@@ -160,7 +164,16 @@ a dynamic force:**
      moves between the planes the motion touches and keeps its angles.
 
    No law in the engine carries spin yet; that is step 3.
-3. The shear restated (#199), then the release and the drift.
+3. **Built.** The shear restated (#199, §5). The release (`breath`, a parcel
+   leaving with `x_k` and the core's pressures `P_k`) composes whole by
+   `compose_whole`: the boost gives each plane's rate, and the turning turns
+   the parcel's motion as it leaves. The drift has no planes (§3.4).
+   Read l109 → 222 against the shear-only run:
+   - tilt ties 295 against 318;
+   - 2917 of 2969 motes apart in phase, against 2918;
+   - light given by recycling `51;20,03·60⁻⁹` against `17;26,56·60⁻⁹`;
+   - the shear moved the same `2;05,25·60⁻³`;
+   - the 3Z conservation true; fuel and bodies unchanged.
 4. Read on a laid checkpoint: where W2's turning moves spin between planes,
    against the per-plane run.
 

@@ -46,6 +46,10 @@ change is named here.
   - the shear moved 2;05,25·60⁻³ against 2;17,12 before;
   - 2918 of 2969 motes apart in phase, against 2904 of 2968;
   - the 3Z conservation true, and fuel and bodies unchanged.
+  The release composes a parcel's rates with the core's pressures whole as
+  well, the turning turning the parcel as it leaves. Read: tilt ties 295
+  (was 318), 3Z conservation true, fuel and bodies unchanged. The drift
+  moves one scalar and has no planes to compose.
   Step 2: the spin ledger is one bivector (`flows::{Mote::spin,
   spin_ledger}`). The per-plane books are its components. A motion carries a
   spin by `turning::carry`, keeping its angles.
