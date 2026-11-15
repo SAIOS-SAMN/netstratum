@@ -539,6 +539,67 @@ the calibre.
    calibre between the star and the atom carries the heat down rather than
    up.
 
+## 11. Heat placed: the electrons' phase rate (2026-11-15)
+
+**Operator 2026-11-15:** "heat is a semantic misalignment in your
+statement"; "heat is a rate of motion, how fast the electron phase state is
+changing/regulating: align on missing or mistranslated physics for
+placement".
+
+### 11.1 The alignment
+
+- **Heat is a rate.** It is how fast an atom's electron phase (R) changes
+  against its nucleus. Motion out of step changes it (docs/124: heat is
+  motion out of step). An atom turning rigidly with its place does not.
+- **A winding's tightness is a rate too.** `t = (Z − inside)/n` is its
+  enclosed hold over its period, the ring law's rate at the atom's tier.
+- **Stripping compares the two rates.** A winding is stripped where the
+  phase is driven at least as fast as it holds, `t ≤ ḣ`.
+- **What the code stores is a share.** `Body.heat`, `Mote::agitation` and
+  `formation::core_heat` hold motion out of step over holding. A share
+  crosses to its rate by the Cayley map the model already uses for every
+  share and rate, `ḣ = a/(1 − a)` (`orientation::rate`;
+  `plasma::phase_rate`).
+
+### 11.2 The placements audited
+
+| place | reads | was | now |
+|---|---|---|---|
+| a star core's birth cut (`formation::system` → `star_core_cut`, `binding_spins`, `open_mass`) | its core's agitation | the share against `t` | `phase_rate` |
+| its outbursts' cut, and the throat-back share (`breath`) | `core_heat(sys)` | the share against `t` | `phase_rate` |
+| a world's layers (`layer_chemistry`) | the layer's heat share `heat·H/(R + H)` | the share against `t` | `phase_rate` of the layer's share |
+| the bounce's release and the founding (`plasma::bounce_*`, `pulse::cascade`) | cold, `a = 0` | 0 | `phase_rate(0) = 0`, unchanged |
+| a world's kelvin (`life::HYDROGEN_K`) | heat × 157,800 K | an import (docs/108 O1) | still an import; display only |
+
+A first draft of this alignment also composed the place's well turning
+(`δ/(1 − δ)`) into the phase rate. It stripped hydrogen inside every world's
+own hold and broke `a_cool_world_keeps_layers_and_makes_water_in_them`. That
+was correct of the witness: rigid co-turning moves no electron's phase
+against its nucleus. The term is gone.
+
+**§10.3 withdrawn.** The calibre between tiers is not needed to compare heat
+with a winding, since both are rates and rates cross tiers by the one Cayley
+map. The cube root it would have needed does not arise.
+
+### 11.3 What the alignment shows: ignition and ionization meet at one point
+
+**T12.** A star core lights only where its hydrogen keeps its electron.
+
+*Proof.* A star core lights only at `a < ½` (`formation::ignition_share`,
+`x = (1 − 2a)/(1 + 2a) > 0`). Hydrogen is stripped at
+`ḣ = a/(1 − a) ≥ t_H = 1`, that is at `a ≥ ½`. The two conditions are
+complements at the same point. ∎
+
+In nature a burning core is ionized. Here it cannot be. The term that sets
+the bound is the ignition share's derivation: "light pushes back before the
+star core forms", `½ ≥ a + x/(x + m)`. It reads heat as a push against the
+bond. By A10 and T11 the push of a star core's energy acts on open frames
+(radiation pressure), and an ionized core has none. So **the next
+misplacement is the ignition criterion.** It charges the core's heat as a
+push on matter that, once stripped, the push does not reach. Derived next:
+the ignition balance with the push read on the open frames that remain at
+the core's phase rate.
+
 ## 5. The seam with Xylarium (agreed 2026-11-13)
 
 - Xylarium reads the bound share at the inverse place: `b'_z = [r/(r + M)]·E_z(a)/Z`

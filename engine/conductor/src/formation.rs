@@ -950,7 +950,12 @@ pub fn layer_chemistry(kept: &mut Manifest, heat: &Ratio) {
     let Some((bands, h)) = layer_bands(kept, heat) else {
         return;
     };
-    let at = |r: &Ratio| heat.clone() * h.clone() / (r.clone() + h.clone());
+    // The heat at each layer, its share by the layer's deficit (heat falls
+    // outward), read as the electrons' phase rate (docs/134 §11).
+    let mix = kept.clone();
+    let at = |r: &Ratio| {
+        crate::plasma::phase_rate_mix(&mix, &(heat.clone() * h.clone() / (r.clone() + h.clone())))
+    };
     // Deep clusters part.
     let mut parted = Manifest::new();
     for (k, lo, hi) in &bands {
@@ -1123,7 +1128,9 @@ pub fn system(
     // ended (`core_heat`, read by the caller); its state of matter is read
     // from it, never set: a winding at or below it is stripped (`open_at`),
     // so a core hot enough keeps its hydrogen as fuel.
-    let ionizing = core_heat.clone();
+    // Heat as the electrons' phase rate (docs/134 §11): the core's motion
+    // out of step read as its rate; a winding at or below it is stripped.
+    let ionizing = crate::plasma::phase_rate_mix(binding, core_heat);
     let _ = agitation;
     // Dissociation (the chemistry layer): the hot star core breaks every molecule
     // back to its parts (hydrogen's winding, tightness 1, is stripped), so a

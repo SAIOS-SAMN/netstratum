@@ -1475,7 +1475,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // of what the core holds reads the core's own heat (docs/124 §5),
             // and what it throws leaves cool (the spray's motes at heat 0).
             crate::profile::mark("sys:star_core");
-            let heat = crate::formation::core_heat(&sys);
+            // Heat as the electrons' phase rate (docs/134 §11): the core's
+            // motion out of step read as its rate.
+            let heat = crate::plasma::phase_rate_mix(&sys.kept, &crate::formation::core_heat(&sys));
             // The cut, read once: what it releases and the hold it keeps.
             let (burst, held_k) = if rang {
                 crate::formation::star_core_cut(&sys.kept, &ratio(0, 1), &heat)
@@ -1571,7 +1573,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         })
                         .min(ratio(1, 1));
                     if chi > ratio(0, 1) {
-                        let core_hot = crate::formation::core_heat(&sys);
+                        let core_hot = crate::plasma::phase_rate_mix(
+                            &sys.kept,
+                            &crate::formation::core_heat(&sys),
+                        );
                         for (k, a) in sys.kept.clone() {
                             let left =
                                 a.clone() - back.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));

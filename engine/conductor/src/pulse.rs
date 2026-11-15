@@ -712,7 +712,11 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
                 a.clone(),
                 w(k),
                 spin.clone() + s.clone(),
-                crate::plasma::bound_share(k, &g_throat, &ratio(0, 1)),
+                crate::plasma::bound_share(
+                    k,
+                    &g_throat,
+                    &crate::plasma::phase_rate_for(k, &ratio(0, 1)),
+                ),
             )
         })
         .collect();
