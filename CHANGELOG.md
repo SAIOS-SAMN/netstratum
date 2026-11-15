@@ -25,7 +25,9 @@ change is named here.
 
 - The hypha's uplink and seat sessions dial inside Noise (`Session::with_noise`,
   `ns_hypha::noise_home`): each home keeps its static key in `noise.key` and
-  pins the hyphae in `noise.pins`. They were plaintext before. Read: `standing`
+  pins the hyphae in `noise.pins`; an external mind opts in with
+  `attach::Client::with_noise` (its key file's directory as its home). They
+  were plaintext before. Read: `standing`
   on 127.0.0.1:8500 reports "dialled inside Noise".
 - The stride, S1 (docs/132 §4.1, #197): the attractor laws over n bells in
   closed form (`flows::{keep_over, relax_over}`). The galaxy's conformations
