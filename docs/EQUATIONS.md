@@ -2127,6 +2127,19 @@ per-kind reading by holding); the bounce's release leaves as one pooled parcel
 one-kind parcel reads as its kind; a merge adds parts by kind; the throat parts
 a mix into its kinds (`recycle::part`).
 
+**E76 · Rates as versors.** `turning::{versor, projective,
+compose_versors, power, split, holonomy}` (docs/138, #206; operator
+2026-11-15). A rate is a bivector `B`, whole on every plane it moves; its
+versor is `V = 1 + B`, read up to a scalar. Versors compose by the geometric
+product, never plane by plane:
+
+    (1 + β₁e₀₁)(1 + β₂e₀₂) = 1 + β₁e₀₁ + β₂e₀₂ + β₁β₂·e₁₂ = B·R
+
+The boost is `B = V·R⁻¹` and the turning `R = 1 + V_s`, where `V_s` is the
+part of V on the planes that turn. On one plane the product is the flow law
+(E72). A path closed on paper, `V₂⁻¹V₁⁻¹V₂V₁`, leaves a boost and a turning.
+The Cayley motion of `b·e` reads `1 + (2b/(1 + b·b))·e`.
+
 **E75 · The capture phase.** `pulse::{capture_face, capture_phases}`
 (docs/134 §12; operator 2026-11-15). A kind's capture phase is the turning
 its body's capture chain has accumulated up to it, charge ascending:

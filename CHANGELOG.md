@@ -23,6 +23,12 @@ change is named here.
 
 ### Added
 
+- Rates as versors, step 1 (docs/138, E76, #206): `turning::{versor,
+  projective, compose_versors, power, split, holonomy}`. A rate is a
+  bivector, whole on every plane it moves; its versor is `1 + B`. Two boosts
+  on different planes compose to a boost times the turning between them
+  (W2), and a path closed on paper leaves a boost and a turning (W4). The
+  W4 fixture's `e₁₂` sign is corrected to −⅓.
 - The stride, S1 (docs/132 §4.1, #197): the attractor laws over n bells in
   closed form (`flows::{keep_over, relax_over}`). The galaxy's conformations
   at an echo's arrival stand for the bells each mote has lived since the

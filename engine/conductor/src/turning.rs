@@ -26,6 +26,15 @@
 //!   sectors) is not mirrored here yet.
 //! - **The only inverse is the Cayley form's** (MU-RECURSION 78.32(1)): it
 //!   solves `u·y = 1` exactly in the subalgebra `u`'s blades generate.
+//! - **Rates as versors** (docs/138, #206). The same motion read up to a
+//!   scalar is the versor `V = 1 + B` of the rate bivector `B`, whole on
+//!   every plane it moves ([`versor`], [`projective`]). The Cayley motion of `b·e` reads, on a
+//!   boost plane, `1 + (2b/(1 + b·b))·e`: one model, two readings.
+//!   Versors compose by the geometric product ([`compose_versors`]); a
+//!   power is the law composed with itself ([`power`]). Two boosts on
+//!   planes sharing the time unit leave a boost times a turning on the
+//!   plane between them ([`split`], W2), and a path that closes on paper
+//!   leaves a residue in the algebra ([`holonomy`], W4).
 use cfe::ratio::Ratio;
 use num_traits::{One, Signed, Zero};
 use std::collections::BTreeMap;
@@ -71,6 +80,13 @@ pub enum TurningRefusal {
     NoGenerator,
     /// Two values whose signatures disagree.
     Mismatched { first: usize, then: usize },
+    /// A versor with no scalar part, which no half-rate reads: `1 + β·e`
+    /// at `β = ±1` on a boost plane is null (`V·Ṽ = 0`), and a product of
+    /// versors can land there.
+    Null,
+    /// A versor that is not a boost times a turning on the plane named:
+    /// the blade masks the boost would keep that are not boost planes.
+    NotSplit { masks: Vec<usize> },
 }
 
 impl Clifford {
@@ -380,6 +396,94 @@ pub fn composed(regime: Regime, b1: &Ratio, b2: &Ratio) -> Result<Ratio, Turning
     }
 }
 
+/// The versor of the rate `B`, `V = 1 + B` (docs/138 V1): the rate is the
+/// bivector itself, on every plane it moves at once, its coefficient on
+/// each plane that plane's half-rate. Refused `NotGenerator` where `B`
+/// holds a part that is not a bivector, `Null` where `V·Ṽ` vanishes (a
+/// half-rate of `±1` on a boost plane alone).
+pub fn versor(rate: &Clifford) -> Result<Clifford, TurningRefusal> {
+    let masks = masks_where(rate, |g| g != 2);
+    if !masks.is_empty() {
+        return Err(TurningRefusal::NotGenerator { masks });
+    }
+    let v = scalar(rate.negatives, Ratio::one()).sum(rate)?;
+    match v.product(&reversed(&v))?.terms.is_empty() {
+        true => Err(TurningRefusal::Null),
+        false => Ok(v),
+    }
+}
+
+/// `v` read up to a scalar: divided by its scalar part, so each plane's
+/// coefficient is its half-rate. Refused `Null` where the scalar part is 0.
+pub fn projective(v: &Clifford) -> Result<Clifford, TurningRefusal> {
+    let s = v.terms.get(&0).cloned().ok_or(TurningRefusal::Null)?;
+    scalar(v.negatives, Ratio::one() / s).product(v)
+}
+
+/// Two versors composed, `first·then` read up to a scalar (docs/138 V2):
+/// the geometric product, never plane by plane.
+pub fn compose_versors(first: &Clifford, then: &Clifford) -> Result<Clifford, TurningRefusal> {
+    projective(&first.product(then)?)
+}
+
+/// `vⁿ` read up to a scalar: the versor composed with itself `n` times, by
+/// squarings (`⌈log₂ n⌉` of them and one product per set bit), exact.
+pub fn power(v: &Clifford, n: u64) -> Result<Clifford, TurningRefusal> {
+    let (mut out, mut base, mut k) = (scalar(v.negatives, Ratio::one()), projective(v)?, n);
+    while k != 0 {
+        if k & 1 == 1 {
+            out = compose_versors(&out, &base)?;
+        }
+        k >>= 1;
+        if k != 0 {
+            base = compose_versors(&base, &base)?;
+        }
+    }
+    Ok(out)
+}
+
+/// `v` split as a boost times a turning, `V ∝ B·R` (docs/138 W2). The
+/// turning is `R = 1 + V_s`, `V_s` the part of `V` on the planes that turn
+/// (each squaring to `−1`), read whole as a bivector; the boost is
+/// `B = V·R⁻¹`. Refused `NotSplit` with the masks `B` keeps that are
+/// neither its scalar nor a boost plane.
+pub fn split(v: &Clifford) -> Result<(Clifford, Clifford), TurningRefusal> {
+    let v = projective(v)?;
+    let plane = |m: usize| Regime::of(&Clifford::blade(v.negatives, m, Ratio::one()));
+    let turning = Clifford {
+        negatives: v.negatives,
+        terms: v
+            .terms
+            .iter()
+            .filter(|(m, _)| plane(**m) == Ok(Regime::Elliptic))
+            .map(|(m, c)| (*m, c.clone()))
+            .collect(),
+    };
+    let r = versor(&turning)?;
+    let boost = v.product(&inverse(&r).ok_or(TurningRefusal::NoMotion)?)?;
+    let masks: Vec<usize> = boost
+        .terms
+        .keys()
+        .copied()
+        .filter(|m| *m != 0 && plane(*m) != Ok(Regime::Hyperbolic))
+        .collect();
+    match masks.is_empty() {
+        true => Ok((boost, r)),
+        false => Err(TurningRefusal::NotSplit { masks }),
+    }
+}
+
+/// The residue of the path `first → then → first⁻¹ → then⁻¹`,
+/// `then⁻¹·first⁻¹·then·first` read up to a scalar (docs/138 W4), each
+/// inverse the reverse (`V·Ṽ` is a scalar). It is `1` only where the two
+/// commute; otherwise the path does not close in the algebra.
+pub fn holonomy(first: &Clifford, then: &Clifford) -> Result<Clifford, TurningRefusal> {
+    compose_versors(
+        &compose_versors(&reversed(then), &reversed(first))?,
+        &compose_versors(then, first)?,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     //! LAW-COORDINATE fixture 11b and §8.1, conformed to Mycelium's
@@ -636,5 +740,168 @@ mod tests {
                 masks: vec![unit(1, 1) | unit(1, 2)]
             })
         );
+    }
+}
+
+#[cfg(test)]
+mod versor_tests {
+    //! docs/138's fixtures, exact in `Cl(2,1)` on `e₀, e₁, e₂`: `e₀` (base
+    //! axis 1) squares to `−1`, `e₁` and `e₂` to `+1`. The boost planes are
+    //! `e₀₁` and `e₀₂`, the turning plane between them `e₁₂`.
+    use super::*;
+    use cfe::ratio::ratio;
+
+    const SIG: usize = 1;
+    const E01: usize = 0b011;
+    const E02: usize = 0b101;
+    const E12: usize = 0b110;
+
+    fn q(n: i64, d: i64) -> Ratio {
+        ratio(n, d)
+    }
+
+    fn plane(mask: usize) -> Clifford {
+        Clifford::blade(SIG, mask, q(1, 1))
+    }
+
+    fn value(parts: &[(usize, Ratio)]) -> Clifford {
+        parts
+            .iter()
+            .fold(Clifford::blade(SIG, 0, q(0, 1)), |s, (m, c)| {
+                s.sum(&Clifford::blade(SIG, *m, c.clone()))
+                    .expect("one signature")
+            })
+    }
+
+    fn boost(beta: Ratio, mask: usize) -> Clifford {
+        versor(&Clifford::blade(SIG, mask, beta)).expect("a versor")
+    }
+
+    fn pow(x: &Ratio, n: u64) -> Ratio {
+        (0..n).fold(q(1, 1), |p, _| p * x.clone())
+    }
+
+    /// W1: on one plane the versors compose by the flow law, `⅓` then `½`
+    /// is `5/7`; n of them is `((1 + β)ⁿ − (1 − β)ⁿ)/((1 + β)ⁿ + (1 − β)ⁿ)`;
+    /// and the Cayley motion of `b` reads the half-rate `2b/(1 + b·b)`.
+    #[test]
+    fn parallel_boosts_compose_by_the_flow_law() {
+        let one = compose_versors(&boost(q(1, 3), E01), &boost(q(1, 2), E01)).expect("composes");
+        assert_eq!(one, value(&[(0, q(1, 1)), (E01, q(5, 7))]));
+        let beta = q(1, 3);
+        for n in [7u64, 28] {
+            let (up, down) = (
+                pow(&(q(1, 1) + beta.clone()), n),
+                pow(&(q(1, 1) - beta.clone()), n),
+            );
+            let flow = (up.clone() - down.clone()) / (up + down);
+            assert_eq!(
+                power(&boost(beta.clone(), E01), n).expect("a power"),
+                value(&[(0, q(1, 1)), (E01, flow)])
+            );
+        }
+        for b in [q(1, 2), q(-2, 7), q(3, 5)] {
+            let cayley = on_plane(&b, &plane(E01)).expect("a motion");
+            let read = q(2, 1) * b.clone() / (q(1, 1) + b.clone() * b);
+            assert_eq!(projective(&cayley).expect("a versor"), boost(read, E01));
+        }
+    }
+
+    /// W2: `(1 + ⅓e₀₁)(1 + ½e₀₂) = 1 + ⅓e₀₁ + ½e₀₂ + ⅙e₁₂`, a boost
+    /// `1 + (15/37)e₀₁ + (16/37)e₀₂` times the turning `1 + ⅙e₁₂`, the
+    /// turning's half-rate `β₁β₂`; and the product reads the same through
+    /// the unit Cayley motions.
+    #[test]
+    fn non_parallel_boosts_turn_the_plane_between_them() {
+        let (v1, v2) = (boost(q(1, 3), E01), boost(q(1, 2), E02));
+        let v = compose_versors(&v1, &v2).expect("composes");
+        assert_eq!(
+            v,
+            value(&[(0, q(1, 1)), (E01, q(1, 3)), (E02, q(1, 2)), (E12, q(1, 6))])
+        );
+        let (b, r) = split(&v).expect("splits");
+        assert_eq!(
+            b,
+            value(&[(0, q(1, 1)), (E01, q(15, 37)), (E02, q(16, 37))])
+        );
+        assert_eq!(r, value(&[(0, q(1, 1)), (E12, q(1, 6))]));
+        assert_eq!(b.product(&r).expect("one signature"), v, "V = B·R exactly");
+        // One rate on both planes at once is another motion: no turning.
+        let both = Clifford::blade(SIG, E01, q(1, 3))
+            .sum(&Clifford::blade(SIG, E02, q(1, 2)))
+            .expect("one signature");
+        let (b0, r0) = split(&versor(&both).expect("a versor")).expect("splits");
+        assert_eq!(
+            (b0, r0),
+            (versor(&both).expect("a versor"), value(&[(0, q(1, 1))]))
+        );
+        // The per-plane law books the boost planes alone and drops e₁₂.
+        let (m1, m2) = (
+            on_plane(&q(1, 5), &plane(E01)).expect("a motion"),
+            on_plane(&q(1, 4), &plane(E02)).expect("a motion"),
+        );
+        assert_eq!(
+            projective(&compose(&m1, &m2).expect("composes")).expect("a versor"),
+            compose_versors(
+                &projective(&m1).expect("a versor"),
+                &projective(&m2).expect("a versor")
+            )
+            .expect("composes")
+        );
+    }
+
+    /// W4: the path `V₁ → V₂ → V₁⁻¹ → V₂⁻¹` leaves `1 − (3/11)e₀₁ +
+    /// (2/11)e₀₂ − (6/11)e₁₂`, a boost and a turning; on one plane it
+    /// closes.
+    #[test]
+    fn a_path_closed_on_paper_leaves_a_boost_and_a_turning() {
+        let (v1, v2) = (boost(q(1, 3), E01), boost(q(1, 2), E02));
+        let residue = holonomy(&v1, &v2).expect("composes");
+        assert_eq!(
+            residue,
+            value(&[
+                (0, q(1, 1)),
+                (E01, q(-3, 11)),
+                (E02, q(2, 11)),
+                (E12, q(-6, 11))
+            ])
+        );
+        let (b, r) = split(&residue).expect("splits");
+        assert_eq!(b.product(&r).expect("one signature"), residue);
+        assert!(b.terms().all(|(m, _)| m != E12) && r.terms().any(|(m, _)| m == E12));
+        let closed = holonomy(&v1, &boost(q(1, 2), E01)).expect("composes");
+        assert_eq!(closed, value(&[(0, q(1, 1))]), "parallel boosts commute");
+    }
+
+    /// A power at N and at 4N: `V^{4N} = (V^N)⁴`, and both split into a
+    /// boost and a turning on `e₁₂`.
+    #[test]
+    fn a_power_at_n_and_4n_rederives() {
+        let v = compose_versors(&boost(q(1, 3), E01), &boost(q(1, 2), E02)).expect("composes");
+        let n = 7u64;
+        let far = power(&v, 4 * n).expect("a power");
+        assert_eq!(
+            far,
+            power(&power(&v, n).expect("a power"), 4).expect("a power")
+        );
+        let stepped = (0..4 * n).try_fold(value(&[(0, q(1, 1))]), |p, _| compose_versors(&p, &v));
+        assert_eq!(stepped.expect("composes"), far);
+        let (b, r) = split(&far).expect("splits");
+        assert_eq!(b.product(&r).expect("one signature"), far);
+    }
+
+    #[test]
+    fn versors_refuse_by_name() {
+        let rate = |m: usize, c: Ratio| Clifford::blade(SIG, m, c);
+        assert_eq!(versor(&rate(E01, q(1, 1))), Err(TurningRefusal::Null));
+        assert!(
+            versor(&rate(E12, q(1, 1))).is_ok(),
+            "a turning is never null"
+        );
+        assert!(matches!(
+            versor(&rate(0b111, q(1, 2))),
+            Err(TurningRefusal::NotGenerator { .. })
+        ));
+        assert_eq!(projective(&plane(E01)), Err(TurningRefusal::Null));
     }
 }

@@ -4,7 +4,8 @@
 issue. We're constantly being drawn back to straight lines moving on a piece
 of paper, and curvature without closure as a dynamic opposing force."
 
-**Status:** derived 2026-11-15, with fixtures computed exactly. Not built.
+**Status:** derived 2026-11-15. Step 1 is built (`conductor::turning`, E76): the
+fixtures below are its witnesses. Steps 2–4 are open.
 
 ## 0. What stands
 
@@ -24,8 +25,9 @@ paper.
 - **V1 (a rate is a boost).** A rate on a plane is a boost in the algebra
   (docs/136, Cl(13,1); the hypha's conformal law in Cl(4,1)). It is held in
   its rational Cayley form, the form the engine's turnings already use
-  (`orientation::Motion`): `V(β) ∝ 1 + β·B`, with `B` the plane's unit
-  bivector. A boost plane joins `e₋` (`e₀`, `e₀² = −1`) with a spatial axis,
+  (`orientation::Motion`): `V ∝ 1 + B`, with `B` the rate's bivector, held
+  whole on every plane it moves, never as a scalar times a plane. On one
+  plane, `B = β·e`. A boost plane joins `e₋` (`e₀`, `e₀² = −1`) with a spatial axis,
   so `B² = +1`. Here `β = tanh(θ/2)` is the half-rate, and the rate is
   `x = 2β/(1 + β²)`.
 - **V2 (composition is the geometric product).** Two motions compose as
@@ -72,9 +74,9 @@ between them is motion that no per-plane ledger books. *Proof.* W1 and W2. ∎
 It leaves both a boost (the path's failure to close) and a turning (its
 holonomy). Both vanish only where `β₁β₂ = 0`.
 
-*Fixture:* β = ⅓, ½ gives `11/18 − (1/6)·e₀₁ + (1/9)·e₀₂ + (1/3)·e₁₂`, that
-is, half-rates −3/11 and 2/11 left on the boost planes and a turning of 6/11
-on `e₁₂`. ∎
+*Fixture:* β = ⅓, ½ gives `11/18 − (1/6)·e₀₁ + (1/9)·e₀₂ − (1/3)·e₁₂`, that
+is, half-rates −3/11 and 2/11 left on the boost planes and a turning of −6/11
+on `e₁₂`. (The first draft had +⅓ on `e₁₂`; the build's product gives −⅓.) ∎
 
 This is the curvature of rate space: it is hyperbolic, not the paper the
 per-plane law draws on. The residue is a motion. In this sense **closure is
@@ -106,9 +108,16 @@ a dynamic force:**
 
 ## 4. Build order (#206)
 
-1. `turning`: boosts in Cayley form on named planes, composition by the
-   geometric product, and the decomposition `B·R` (W2), exact. Witnesses: the
-   fixtures above, plus N and 4N for a power.
+1. **Built.** In `turning` (E76): `versor(B) = 1 + B` of a whole rate
+   bivector; `compose_versors` by the geometric product; `power` by
+   squarings; `split` into `B·R`, where the turning is V's part on the
+   turning planes read as a bivector, not as a coefficient; `holonomy` (W4).
+   Witnesses (`turning::versor_tests`):
+   - the fixtures above;
+   - the flow law at n = 7 and 28;
+   - `V^{4N} = (V^N)⁴` at N = 7, and equal to 4N single products;
+   - the Cayley reading `2b/(1 + b·b)`;
+   - a rate on two planes at once has no turning.
 2. The ledger: spin read as the motion's bivector, with conservation stated
    on it. The per-plane identities become its projections.
 3. The shear restated (#199), then the release and the drift.
