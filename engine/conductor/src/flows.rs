@@ -7344,6 +7344,13 @@ mod front_tests {
         let held = enc.hold_within(&rim);
         assert_eq!(held, rim, "the equator: R = H(<R)");
         assert_eq!(crate::ring::deficit(&rim, &held), ratio(1, 2));
-        assert_eq!(enc.front(&rim), ratio(2, 1) * rim);
+        assert_eq!(enc.front(&rim), ratio(2, 1) * rim.clone());
+        // The held share is the hold over the front's coordinate at every
+        // reach, `δ = H(<r)/τ(r)`: the seam's ½ is `H/(R_h + H)` on either
+        // face, read without a density at a point.
+        for r in [ratio(1, 4), ratio(2, 1), rim, ratio(7, 2)] {
+            let h = enc.hold_within(&r);
+            assert_eq!(crate::ring::deficit(&r, &h), h / enc.front(&r));
+        }
     }
 }
