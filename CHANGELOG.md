@@ -36,7 +36,8 @@ change is named here.
   that closes on paper leaves a boost and a turning: rate space is curved.
   Time as coordinates (#207): a stride is the separation of two time
   coordinates, the front's `τ(r) = r + H(<r)`, with density
-  `dτ/dr = 1 + dH/dr`.
+  `dτ/dr = 1 + dH/dr`. Built: each mote's stride is its proper time, the
+  separation read on its nested clock (`breath::proper_bells`).
 - Heat placed as the electrons' phase rate (docs/134 §11; operator
   2026-11-15): stripping reads the agitation share as its rate `a/(1 − a)`
   (`plasma::phase_rate`), at the star core's cuts and a world's layers. T12:

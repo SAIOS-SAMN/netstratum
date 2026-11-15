@@ -165,11 +165,25 @@ only bound.
   shear with the exchanges that compose. It must be restated as a motion
   against the field before it can stride. Until then it runs one bell an
   echo.
-- **Time as coordinates (operator 2026-11-15, #207).** S1's stride counts
-  bells, `clamp(bell − born, 1, T_u)`, an index. Time is a coordinate: a
-  stride is the separation of two time coordinates, a mote's previous and
-  current meetings with the front at its own `t(r) = r + H(<r)`. S1's
-  closed forms stand, and their exponent is to become that separation.
+- **Time as coordinates (operator 2026-11-15, #207).** Time is a coordinate,
+  and a duration is the separation of two points' coordinates.
+  - **Built: each mote's stride is its own time.** The stride is the
+    separation since its previous event (its birth, or the galaxy's previous
+    arrival), `Δτ` source bells, read on its nested clock: the galaxy's share
+    and its own at its place, `r/(r + H(<r))`. So the stride is its proper
+    time, `⌊Δτ·nested(g, r/(r + H))⌋`, at least one bell
+    (`breath::proper_bells`). Deeper in the well a mote's clock receives less
+    of the source, so less of its own time passes: the density of time,
+    `dτ/dr = 1 + dH/dr`. Witness:
+    `proper_time_tests::a_bodys_own_time_is_the_separation_on_its_clock`.
+    Read (l109 → 222, against S1's bell count): every line is identical
+    except the torque identity's residual (6;21·60⁻⁶ → 5;54·60⁻⁶). The
+    conformations' extra relaxation moved nothing that decides at these two
+    echoes, whether counted on one clock or on each mote's own.
+  - **Open:** a mote's meeting with the front at its own `t(r) = r + H(<r)`
+    (`ring::arrival`), so the echo is read at each mote's own coordinate
+    rather than at the arrival bell. Every other galaxy law (torque, emission,
+    magnet, bindings) still acts once at the arrival bell.
 - **Not yet: events (#198).** S1's strides stand on the field between echoes
   without the event reader. An attractor never overshoots its target
   (`0 < k < 1`), but a spin order or a range can change inside a stride

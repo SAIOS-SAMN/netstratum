@@ -61,6 +61,19 @@ pub fn galaxy_rate(u: &Universe, i: usize, unit: &Ratio) -> Option<Ratio> {
     Some(rate(d, &nearer))
 }
 
+/// A body's own time across a separation of `since` source bells (#207: time
+/// as coordinates): the separation read on its nested clock, its galaxy's
+/// share and its own at reach `r` about the hold `held` within it,
+/// `r/(r + H)`, floored to whole bells, at least one. Deeper in the well its
+/// clock receives less of the source, so fewer of its own bells pass.
+pub fn proper_bells(since: u64, galaxy: Option<&Ratio>, r: &Ratio, held: &Ratio) -> u32 {
+    let share = nested(galaxy, crate::ring::rate(r, held));
+    let proper = (ratio(i64::try_from(since).unwrap_or(i64::MAX), 1) * share)
+        .floor()
+        .to_integer();
+    u32::try_from(proper.max(num_bigint::BigInt::from(1))).unwrap_or(u32::MAX)
+}
+
 /// The nested clock: a body's clock against the source is the product of the
 /// shares each receiver between them takes, the galaxy's (none for the home)
 /// and its own about what is inside its reach.
@@ -2598,15 +2611,23 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &ledger_unit,
                 &mut cross,
             );
-            // The stride (docs/132 §1.1; #197): the galaxy's transport runs at
-            // its echo's arrival, standing for the bells since its previous
-            // arrival, `T_u`. Each mote's own relaxation is composed over the
-            // bells it has lived of them, from its birth or the previous
-            // arrival, at least this bell; its field stands between echoes.
+            // The stride (docs/132 §1.1; #197), read on each mote's own time
+            // (#207: time as coordinates). The transport at this arrival stands
+            // for the separation since the mote's previous event (its birth,
+            // or the galaxy's previous arrival), `Δτ` source bells, read on its
+            // own clock: the share of the source's rings it receives, its
+            // galaxy's and its own at its place, `r/(r + H(<r))`
+            // (`nested`, `ring::rate`). Its proper time is `Δτ` times that
+            // share, slower deeper in the well (the density of time,
+            // `dτ/dr = 1 + dH/dr`), at least this bell. Its field stands between
+            // echoes.
             let span = t_u.max(1);
+            let clock_enc = enc.as_ref().unwrap_or(&throat);
+            let g_clock = g_rate.clone();
             let lived = move |x: &crate::flows::Mote| -> u32 {
                 let since = bell.saturating_sub(x.born).clamp(1, span);
-                u32::try_from(since).unwrap_or(u32::MAX)
+                let r = x.reach_in(clock_enc).0;
+                proper_bells(since, g_clock.as_ref(), &r, &clock_enc.hold_within(&r))
             };
             // The partner orbits conformed to the manifold's shear (docs/128
             // §10.3), the range paying by holding.
@@ -3434,6 +3455,32 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         e.light.drained += l.drained;
     }
     events
+}
+
+#[cfg(test)]
+mod proper_time_tests {
+    use super::proper_bells;
+    use cfe::ratio::ratio;
+
+    /// #207: a body's own time across a separation is the separation on its
+    /// nested clock: all of it where nothing holds, less deeper in the well,
+    /// less again inside a slower galaxy, never under one bell.
+    #[test]
+    fn a_bodys_own_time_is_the_separation_on_its_clock() {
+        let r = ratio(3, 1);
+        assert_eq!(proper_bells(110, None, &r, &ratio(0, 1)), 110);
+        assert_eq!(proper_bells(110, None, &r, &ratio(1, 1)), 82, "110·3/4");
+        assert!(
+            proper_bells(110, None, &r, &ratio(3, 1)) < 82,
+            "deeper, slower"
+        );
+        assert_eq!(proper_bells(110, Some(&ratio(1, 2)), &r, &ratio(1, 1)), 41);
+        assert_eq!(
+            proper_bells(1, None, &r, &ratio(100, 1)),
+            1,
+            "at least one bell"
+        );
+    }
 }
 
 #[cfg(test)]
