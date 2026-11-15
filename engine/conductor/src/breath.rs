@@ -2598,12 +2598,23 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &ledger_unit,
                 &mut cross,
             );
+            // The stride (docs/132 §1.1; #197): the galaxy's transport runs at
+            // its echo's arrival, standing for the bells since its previous
+            // arrival, `T_u`. Each mote's own relaxation is composed over the
+            // bells it has lived of them, from its birth or the previous
+            // arrival, at least this bell; its field stands between echoes.
+            let span = t_u.max(1);
+            let lived = move |x: &crate::flows::Mote| -> u32 {
+                let since = bell.saturating_sub(x.born).clamp(1, span);
+                u32::try_from(since).unwrap_or(u32::MAX)
+            };
             // The partner orbits conformed to the manifold's shear (docs/128
             // §10.3), the range paying by holding.
             let _ = crate::flows::conform_partners(
                 &mut core.flows,
                 enc.as_ref().unwrap_or(&throat),
                 &ledger_unit,
+                &lived,
             );
             // The disc forms by the shear out of the plane (`flows::
             // conform_axes`). A core whose disc holds nothing
@@ -2621,6 +2632,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &mut core.flows,
                 enc.as_ref().unwrap_or(&throat),
                 &ledger_unit,
+                &lived,
             );
             // Tilt from quantum torsion (docs/128 §13): the precession about
             // the core's lead and the tipping by the twist's pressure, the

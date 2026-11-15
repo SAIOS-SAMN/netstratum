@@ -23,6 +23,20 @@ change is named here.
 
 ### Added
 
+- The stride, S1 (docs/132 §4.1, #197): the attractor laws over n bells in
+  closed form (`flows::{keep_over, relax_over}`). The galaxy's conformations
+  at an echo's arrival stand for the bells each mote has lived since the
+  previous arrival. Found: the shear's pull has no closed n-bell form (#199).
+  Issues #197–#205 track the stride and the open derivations (T12, T1 as a
+  rate, the nuclear valley, the scale dilator, the founding's electron
+  phase). Read to the second echo: no binding forms with or without it.
+- Rates as versors (docs/138, #206): boosts compose by the geometric
+  product. Parallel boosts give the flow law; non-parallel ones give a
+  turning between their planes (half-rate `β₁β₂`, Thomas–Wigner). A path
+  that closes on paper leaves a boost and a turning: rate space is curved.
+  Time as coordinates (#207): a stride is the separation of two time
+  coordinates, the front's `τ(r) = r + H(<r)`, with density
+  `dτ/dr = 1 + dH/dr`.
 - Heat placed as the electrons' phase rate (docs/134 §11; operator
   2026-11-15): stripping reads the agitation share as its rate `a/(1 − a)`
   (`plasma::phase_rate`), at the star core's cuts and a world's layers. T12:

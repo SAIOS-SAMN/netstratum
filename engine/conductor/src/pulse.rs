@@ -1398,7 +1398,7 @@ pub fn orbit_galaxies(
             let _ = crate::flows::echo_beats(&mut u.ocean, &enc_o, &ledger_u, &ratio(1, 2), None);
             let (given, _, heated) =
                 crate::flows::torque(&mut u.ocean, &enc_o, &ratio(1, 2), &ledger_u, &mut cross);
-            let _ = crate::flows::conform_partners(&mut u.ocean, &enc_o, &ledger_u);
+            let _ = crate::flows::conform_partners(&mut u.ocean, &enc_o, &ledger_u, &|_| 1);
             if !u.unit.is_zero() {
                 collective.ocean_heat = heated * ledger_u.clone() / u.unit.clone();
             }

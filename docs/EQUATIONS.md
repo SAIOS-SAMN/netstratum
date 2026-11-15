@@ -2144,7 +2144,10 @@ over n bells, composed, never scaled:
 
     x ⊕ⁿ = ((1 + x)ⁿ − (1 − x)ⁿ)/((1 + x)ⁿ + (1 − x)ⁿ)
 
-and the echo's push met at a resonance `frac(T_u·ω) = a/q`, its mean
+The attractor's keep over n bells, `x* + kⁿ(x − x*)` (`flows::{keep_over,
+relax_over}`, #197), is read by `conform_partners` and `conform_axes` over
+each mote's stride, the range paying once. And the echo's push met at a
+resonance `frac(T_u·ω) = a/q`, its mean
 response over the q landings `mean_response(q·ψ₀, q·len)/q`, bounded by
 `1/q`: no expected spin in the limit `q → ∞`.
 

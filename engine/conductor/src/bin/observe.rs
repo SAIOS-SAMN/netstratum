@@ -451,7 +451,7 @@ fn ablate(u: &pulse::Universe, i: usize, unit: &Ratio, limit: Option<usize>) {
     {
         let mut m = base.clone();
         let t = Instant::now();
-        let (moved, rem) = flows::conform_partners(&mut m, &enc, &total);
+        let (moved, rem) = flows::conform_partners(&mut m, &enc, &total, &|_| 1);
         println!(
             "  conform_partners ({:.1?}): moved {}; Σ w·ℓ_R remainder {}",
             t.elapsed(),
@@ -463,7 +463,7 @@ fn ablate(u: &pulse::Universe, i: usize, unit: &Ratio, limit: Option<usize>) {
     {
         let mut m = base.clone();
         let t = Instant::now();
-        let (moved, rem) = flows::conform_axes(&mut m, &enc, &total);
+        let (moved, rem) = flows::conform_axes(&mut m, &enc, &total, &|_| 1);
         println!(
             "  conform_axes ({:.1?}): moved {}; Σ w·ℓ remainder {}; mean tilt {} -> {}",
             t.elapsed(),

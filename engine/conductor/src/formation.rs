@@ -1944,7 +1944,7 @@ pub fn settle_system(
     // to the star's shear on the system's own enclosure, the same law as the
     // galaxy's (`flows::conform_partners`), the range paying by holding.
     if let Some(enc) = frame.as_ref() {
-        let (_, remainder) = crate::flows::conform_partners(&mut sys.flows, enc, &total);
+        let (_, remainder) = crate::flows::conform_partners(&mut sys.flows, enc, &total, &|_| 1);
         read.partners = remainder;
     }
     let mut pool: Manifest = std::mem::take(&mut sys.medium);

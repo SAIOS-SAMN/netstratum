@@ -2356,9 +2356,16 @@ pub fn partner_target(x: &Mote, enc: &Enclosed, total: &Ratio) -> Option<Vec<Rat
 /// holding on every plane, so `Σ w·ℓ_k` stands per plane but for the grain.
 /// A lone ring and a coaxial ring are not moved; a ring standing at right
 /// angles to its volume's axis (`ς = 0`) is not moved; a retrograde ring
-/// keeps its sense. Read from the bell's start, then applied. Returns the
-/// spin moved, `Σ w·|Δℓ_k|`, and the grain's remainder, `Σ w·Δℓ_k`.
-pub fn conform_axes(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio) {
+/// keeps its sense. Over a stride each ring's relaxation is composed over its
+/// `rings(mote)` bells (`relax_over`, docs/132 §1.1), the range paying once.
+/// Read from the bell's start, then applied. Returns the spin moved,
+/// `Σ w·|Δℓ_k|`, and the grain's remainder, `Σ w·Δℓ_k`.
+pub fn conform_axes(
+    motes: &mut [Mote],
+    enc: &Enclosed,
+    total: &Ratio,
+    rings: &dyn Fn(&Mote) -> u32,
+) -> (Ratio, Ratio) {
     let n = motes.len();
     let planes = SPACE.len();
     let w: Vec<Ratio> = motes
@@ -2423,7 +2430,7 @@ pub fn conform_axes(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio
         let whole = crate::orientation::size(&axis);
         for k in 0..planes.min(motes[i].spins.len()) {
             let target = t.sense.clone() * size.clone() * axis[k].clone() / whole.clone();
-            let to = target.clone() + keep.clone() * (own[k].clone() - target);
+            let to = relax_over(&target, &keep, &own[k], rings(&motes[i]));
             let step = crate::ring::grain(&(to - own[k].clone()));
             if step.is_zero() {
                 continue;
@@ -2668,10 +2675,18 @@ pub fn enters_throat(was: &Ratio, now: &Ratio) -> bool {
 /// docs/127 §3): each mote's partner spins relax toward their target by the
 /// attractor's keep at its deficit (E38), `ℓ_kR′ = ℓ* + k·(ℓ_kR − ℓ*)`, and
 /// the range meeting it on reach pays the change by holding, so `Σ w·ℓ_kR`
-/// stands on every partner plane. Read from the bell's start, then applied;
-/// each step on the grain. Returns the spin moved, `Σ w·|Δℓ_kR|`, and the
+/// stands on every partner plane. Over a stride each mote's own relaxation
+/// is composed over its `rings(mote)` bells (`relax_over`, docs/132 §1.1),
+/// the field standing, and the range pays the whole change once at the
+/// stride's end. Read from the bell's start, then applied; each step on the
+/// grain. Returns the spin moved, `Σ w·|Δℓ_kR|`, and the
 /// grain's remainder, `Σ w·Δℓ_kR` over every mote and its range.
-pub fn conform_partners(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (Ratio, Ratio) {
+pub fn conform_partners(
+    motes: &mut [Mote],
+    enc: &Enclosed,
+    total: &Ratio,
+    rings: &dyn Fn(&Mote) -> u32,
+) -> (Ratio, Ratio) {
     let n = motes.len();
     let w: Vec<Ratio> = motes
         .iter()
@@ -2716,7 +2731,7 @@ pub fn conform_partners(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (R
                 .get(k)
                 .cloned()
                 .unwrap_or_else(|| ratio(0, 1));
-            let to = target[k].clone() + keep.clone() * (now.clone() - target[k].clone());
+            let to = relax_over(&target[k], &keep, &now, rings(&motes[i]));
             let step = crate::ring::grain(&(to - now));
             if step.is_zero() {
                 continue;
@@ -3649,6 +3664,21 @@ pub fn stream(motes: &[Mote], strands: &[Strand], push: &dyn Fn(&Mote) -> Ratio)
 /// which is `1 − 1/D(δ)` with `D` LAW-DILATION (`ring::dilation`): at the
 /// throat `D(½) = 3`, a keep of ⅔. None at `δ = 1`, where nothing drags and
 /// the whole displacement is kept.
+/// The attractor's keep over `n` bells (docs/132 §1, the stride): `n`
+/// relaxations toward a target the field holds standing, `x ↦ x* + k(x − x*)`,
+/// composed are `x* + kⁿ(x − x*)`. The keep enters on the grain once (docs/133
+/// §4) and its power is exact; one bell is `n = 1`.
+pub fn keep_over(keep: &Ratio, n: u32) -> Ratio {
+    let k = crate::ring::grain(keep);
+    (0..n).fold(ratio(1, 1), |acc, _| acc * k.clone())
+}
+
+/// One relaxation over `n` bells toward `target` at the keep `keep`, exact:
+/// `target + keep_over(keep, n)·(now − target)`.
+pub fn relax_over(target: &Ratio, keep: &Ratio, now: &Ratio, n: u32) -> Ratio {
+    target.clone() + keep_over(keep, n) * (now.clone() - target.clone())
+}
+
 pub fn attractor_keep(delta: &Ratio) -> Option<Ratio> {
     let d = crate::ring::dilation(delta)?;
     if d.is_zero() {
@@ -5109,6 +5139,59 @@ mod passage_tests {
         assert_eq!(enc.reach_at_rate(&ratio(0, 1)), None);
     }
 
+    /// docs/132 §3 witness 1 (#197): the attractor's keep over n bells in
+    /// closed form equals n single relaxations, exact, at N and 4N.
+    #[test]
+    fn the_keep_over_a_stride_is_n_single_relaxations() {
+        let (target, keep, start) = (ratio(2, 7), ratio(5, 9), ratio(-3, 4));
+        for n in [7u32, 28] {
+            let k = crate::ring::grain(&keep);
+            let mut x = start.clone();
+            for _ in 0..n {
+                x = target.clone() + k.clone() * (x - target.clone());
+            }
+            assert_eq!(super::relax_over(&target, &keep, &start, n), x);
+        }
+        assert_eq!(super::relax_over(&target, &keep, &start, 0), start);
+    }
+
+    /// The stride's conformation (#197): over n bells the partners go further
+    /// toward their target than over one, and `Σ w·ℓ_kR` stands but for the
+    /// grain, the range paying the whole change once.
+    #[test]
+    fn a_stride_of_the_partner_orbits_keeps_the_book_and_goes_further() {
+        let enc = Enclosed::new(ratio(1, 1), Vec::new());
+        let make = || {
+            vec![
+                sheared("W0001", ratio(3, 2), vec![ratio(0, 1); 3], false),
+                sheared(
+                    "W0001",
+                    ratio(8, 5),
+                    vec![ratio(1, 10), ratio(0, 1), ratio(-1, 20)],
+                    false,
+                ),
+                sheared("W0004", ratio(7, 4), vec![ratio(0, 1); 3], false),
+            ]
+        };
+        let total = ratio(1, 1);
+        let (mut one, mut many) = (make(), make());
+        let w: Vec<Ratio> = one.iter().map(|x| x.holding()).collect();
+        let book = |ms: &[Mote]| -> Ratio {
+            (0..3)
+                .map(|k| {
+                    ms.iter().zip(&w).fold(ratio(0, 1), |s, (x, wi)| {
+                        s + wi.clone() * x.spins_orth[k].clone()
+                    })
+                })
+                .sum()
+        };
+        let was = book(&many);
+        let (m1, _) = conform_partners(&mut one, &enc, &total, &|_| 1);
+        let (mn, rem) = conform_partners(&mut many, &enc, &total, &|_| 12);
+        assert!(mn > m1, "a stride moves further than a bell");
+        assert_eq!(book(&many) - was, rem, "only the grain's remainder");
+    }
+
     #[test]
     fn the_partner_orbits_conform_to_the_shear_and_the_range_pays() {
         // docs/128 §10.3, docs/127 §3: Σ w·ℓ_kR stands but for the grain.
@@ -5136,7 +5219,7 @@ mod passage_tests {
             target.iter().any(|t| !t.is_zero()),
             "the shear sets a target"
         );
-        let (moved, remainder) = conform_partners(&mut motes, &enc, &total);
+        let (moved, remainder) = conform_partners(&mut motes, &enc, &total, &|_| 1);
         assert!(moved > ratio(0, 1), "the partners moved");
         let after: Ratio = (0..3).map(|k| book(&motes, k)).sum();
         let was: Ratio = before.iter().cloned().sum();
@@ -5643,7 +5726,7 @@ mod passage_tests {
         };
         let mut motes = vec![heavy, x.clone()];
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
-        let _ = conform_axes(&mut motes, &enc, &ratio(1001, 1));
+        let _ = conform_axes(&mut motes, &enc, &ratio(1001, 1), &|_| 1);
         let plane = disc_plane(&motes);
         assert!(
             torsion(&motes[1].tilt(), &plane) < torsion(&x.tilt(), &plane),
@@ -6644,7 +6727,7 @@ mod plane_ring_tests {
             crate::orientation::tilt(&arr(&ms[i].spins), &axis(ms, i)).expect("a tilt")
         };
         let was = tilt_of(&motes, 3);
-        let (moved, rem) = conform_axes(&mut motes, &enc, &total);
+        let (moved, rem) = conform_axes(&mut motes, &enc, &total, &|_| 1);
         assert!(moved > ratio(0, 1));
         let after = plane_sum(&motes);
         let grains = crate::ring::grain_step() * ratio(6 * 6 * 3, 1);
@@ -6671,15 +6754,15 @@ mod plane_ring_tests {
         let enc = Enclosed::new(ratio(1, 1), Vec::new());
         let total = ratio(10, 1);
         let mut lone = vec![mote([4, 2, 0], 1)];
-        let _ = conform_axes(&mut lone, &enc, &total);
+        let _ = conform_axes(&mut lone, &enc, &total, &|_| 1);
         assert_eq!(lone[0].spins, mote([4, 2, 0], 1).spins);
         let mut pair = vec![mote([6, 0, 0], 3), mote([6, 0, 0], 1)];
-        let _ = conform_axes(&mut pair, &enc, &total);
+        let _ = conform_axes(&mut pair, &enc, &total, &|_| 1);
         assert_eq!(pair[1].spins, mote([6, 0, 0], 1).spins, "coaxial");
         // Two equal rings at a right angle: each tube holds both, so each
         // turns toward their diagonal, and each plane's spin is kept.
         let mut square = vec![mote([6, 0, 0], 1), mote([0, 6, 0], 1)];
-        let _ = conform_axes(&mut square, &enc, &total);
+        let _ = conform_axes(&mut square, &enc, &total, &|_| 1);
         assert!(square[0].spins[1] > ratio(0, 1) && square[1].spins[0] > ratio(0, 1));
         for k in 0..3 {
             let sum = square[0].spins[k].clone() + square[1].spins[k].clone();
