@@ -192,6 +192,18 @@ an orientation held as its generator. The two exact ways out:
 2. Keep the generator, and book the turning as a versor beside it until it
    is read.
 
+This is not a scale lost in the split. Composing rational unit motions
+keeps a rational unit, but its polar factors are rational only up to a
+scalar. *Fixture:* the half-rates ⅓ on `e₀₁` and ½ on `e₀₂` give the unit
+motions `5/4 + ¾e₀₁` and `5/3 + (4/3)e₀₂`. Their product is
+`25/12 + (5/4)e₀₁ + (5/3)e₀₂ + e₁₂`, a unit (`V·Ṽ = 1`). It carries `e₀`
+with `γ = 697/72`. The unit boost needs `√(2(1 + γ)) = √(769/36)`, and the
+unit turning `1 + (12/25)e₁₂` needs `√(769/625)`. So what is held must be the
+whole motion, or versors up to a scalar, never a unit boost and a unit
+turning apart. Way 1 then holds projective versors, and Way 2's generator
+also cannot hold the half turn, the pole (Mycelium, 2026-11-15). A held
+versor still carries K per plane beside it (law 11).
+
 The generator with K per plane is the form shared across the core tube
 (78.173 §8.4, settled with Mycelium on 2026-11-07). Way 1 changes a
 cross-kernel form, so it goes to Mycelium and the operator before any code.
