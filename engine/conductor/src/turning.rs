@@ -27,8 +27,10 @@
 //! - **The only inverse is the Cayley form's** (MU-RECURSION 78.32(1)): it
 //!   solves `u·y = 1` exactly in the subalgebra `u`'s blades generate.
 //! - **Rates as versors** (docs/138, #206). The same motion read up to a
-//!   scalar is the versor `V = 1 + B` of the rate bivector `B`, whole on
-//!   every plane it moves ([`versor`], [`projective`]). The Cayley motion of `b·e` reads, on a
+//!   scalar is the versor of the rate bivector `B`, whole on every plane it
+//!   moves, each plane at its own angle: `V = Σ W_m`, its wedge powers,
+//!   `1 + B` on one plane ([`versor`], [`projective`]). The planes and
+//!   their angles are read back exactly ([`invariants`], [`plane_of`]). The Cayley motion of `b·e` reads, on a
 //!   boost plane, `1 + (2b/(1 + b·b))·e`: one model, two readings.
 //!   Versors compose by the geometric product ([`compose_versors`]); a
 //!   power is the law composed with itself ([`power`]). Two boosts on
@@ -88,6 +90,10 @@ pub enum TurningRefusal {
     /// A time that is not a vector squaring to a negative scalar: its
     /// blade masks.
     NotTime { masks: Vec<usize> },
+    /// Two planes of a rate at one angle: its parts are not unique there.
+    Isoclinic,
+    /// An angle that is none of the rate's: no part squares to it.
+    NotAngle,
 }
 
 impl Clifford {
@@ -397,20 +403,116 @@ pub fn composed(regime: Regime, b1: &Ratio, b2: &Ratio) -> Result<Ratio, Turning
     }
 }
 
-/// The versor of the rate `B`, `V = 1 + B` (docs/138 V1): the rate is the
-/// bivector itself, on every plane it moves at once, its coefficient on
-/// each plane that plane's half-rate. Refused `NotGenerator` where `B`
-/// holds a part that is not a bivector, `Null` where `V·Ṽ` vanishes (a
-/// half-rate of `±1` on a boost plane alone).
-pub fn versor(rate: &Clifford) -> Result<Clifford, TurningRefusal> {
+/// `a ∧ b`: the product's blades whose masks are disjoint (exact for the
+/// blades of a bivector's wedge powers).
+fn outer(a: &Clifford, b: &Clifford) -> Result<Clifford, TurningRefusal> {
+    a.agree(b)?;
+    let mut terms = BTreeMap::new();
+    for (x, cx) in &a.terms {
+        for (y, cy) in &b.terms {
+            if x & y == 0 {
+                let blade = Clifford::blade(a.negatives, *x, cx.clone())
+                    .product(&Clifford::blade(a.negatives, *y, cy.clone()))?;
+                for (m, c) in blade.terms {
+                    Clifford::put(&mut terms, m, c);
+                }
+            }
+        }
+    }
+    Ok(Clifford {
+        negatives: a.negatives,
+        terms,
+    })
+}
+
+/// The rate's wedge powers `W_m = B^{∧m}/m!`, from `W₀ = 1` to the last
+/// that is not zero. For `B = Σ B_k`, its parts on orthogonal commuting
+/// planes, `W_m` is the sum of the products of `m` distinct parts; the
+/// count past `W₀` is the number of planes, `K`.
+pub fn wedge_powers(rate: &Clifford) -> Result<Vec<Clifford>, TurningRefusal> {
     let masks = masks_where(rate, |g| g != 2);
     if !masks.is_empty() {
         return Err(TurningRefusal::NotGenerator { masks });
     }
-    let v = scalar(rate.negatives, Ratio::one()).sum(rate)?;
+    let mut out = vec![scalar(rate.negatives, Ratio::one())];
+    while let Some(last) = out.last() {
+        let m = Ratio::from_integer(out.len().into());
+        let next = scalar(rate.negatives, Ratio::one() / m).product(&outer(last, rate)?)?;
+        if next.terms.is_empty() {
+            break;
+        }
+        out.push(next);
+    }
+    Ok(out)
+}
+
+/// The versor of the rate `B` (docs/138 V1): the rate is the bivector
+/// itself, on every plane it moves at once, each plane at its own angle,
+/// its coefficient there that plane's half-rate. For `B = Σ B_k` on
+/// orthogonal commuting planes, `V = Π(1 + B_k) = Σ W_m`, the wedge
+/// powers: exact with no plane read apart. One plane gives `1 + B`.
+/// Refused `NotGenerator` where `B` holds a part that is not a bivector,
+/// `Null` where `V·Ṽ = Π(1 − B_k·B_k)` vanishes.
+pub fn versor(rate: &Clifford) -> Result<Clifford, TurningRefusal> {
+    let v = wedge_powers(rate)?
+        .iter()
+        .try_fold(scalar(rate.negatives, Ratio::zero()), |s, w| s.sum(w))?;
     match v.product(&reversed(&v))?.terms.is_empty() {
         true => Err(TurningRefusal::Null),
         false => Ok(v),
+    }
+}
+
+/// The rate's invariants: `e_m`, the scalar part of `W_m·W_m`, which is the
+/// `m`-th elementary symmetric function of the planes' `μ_k = B_k·B_k`. The
+/// angles are the roots of `Σ (−1)^m e_m λ^{K−m}`, held by these
+/// coefficients where a root is not rational.
+pub fn invariants(rate: &Clifford) -> Result<Vec<Ratio>, TurningRefusal> {
+    wedge_powers(rate)?
+        .iter()
+        .map(|w| {
+            Ok(w.product(w)?
+                .terms
+                .get(&0)
+                .cloned()
+                .unwrap_or_else(Ratio::zero))
+        })
+        .collect()
+}
+
+/// The rate's part on the plane whose angle is `μ = B_k·B_k`, exact:
+///
+///     B_k = (Σ_m μ^{K−1−m} W_{2m+1}) · (Σ_m μ^{K−1−m} W_{2m})⁻¹
+///
+/// since `W_m(B) = W_m(C) + B_k·W_{m−1}(C)`, with `C` the other planes, makes
+/// `B_k` times the second sum the first. Refused `Isoclinic` where another
+/// plane shares the angle (the second sum has no inverse), `NotAngle` where
+/// `μ` is not one of the angles.
+pub fn plane_of(rate: &Clifford, mu: &Ratio) -> Result<Clifford, TurningRefusal> {
+    let w = wedge_powers(rate)?;
+    let k = w.len() - 1;
+    let zero = || scalar(rate.negatives, Ratio::zero());
+    let (mut odd, mut even) = (zero(), zero());
+    for m in 0..k {
+        let weight = scalar(
+            rate.negatives,
+            (0..k - 1 - m).fold(Ratio::one(), |p, _| p * mu.clone()),
+        );
+        if let Some(x) = w.get(2 * m + 1) {
+            odd = odd.sum(&weight.product(x)?)?;
+        }
+        if let Some(x) = w.get(2 * m) {
+            even = even.sum(&weight.product(x)?)?;
+        }
+    }
+    let part = odd.product(&inverse(&even).ok_or(TurningRefusal::Isoclinic)?)?;
+    let square = part.product(&part)?;
+    let simple = masks_where(&part, |g| g != 2).is_empty()
+        && same(&square, &scalar(rate.negatives, mu.clone()))
+        && !part.terms.is_empty();
+    match simple {
+        true => Ok(part),
+        false => Err(TurningRefusal::NotAngle),
     }
 }
 
@@ -998,5 +1100,143 @@ mod versor_tests {
             split(&boost(q(1, 3), E01), &plane(E01)),
             Err(TurningRefusal::NotTime { .. })
         ));
+    }
+}
+
+#[cfg(test)]
+mod angle_tests {
+    //! A rate on several planes at once, each at its own angle, in `Cl(6,0)`
+    //! and in `Cl(3,1)`. The planes are turned off the base axes by a
+    //! motion so no mask names them.
+    use super::*;
+    use cfe::ratio::ratio;
+
+    fn q(n: i64, d: i64) -> Ratio {
+        ratio(n, d)
+    }
+
+    fn e(sig: usize, axes: &[usize], c: Ratio) -> Clifford {
+        axes.iter().fold(Clifford::blade(sig, 0, c), |w, i| {
+            w.product(&Clifford::blade(
+                sig,
+                base_axis(*i).expect("an axis"),
+                Ratio::one(),
+            ))
+            .expect("one signature")
+        })
+    }
+
+    fn one(sig: usize) -> Clifford {
+        Clifford::blade(sig, 0, Ratio::one())
+    }
+
+    fn total(parts: &[Clifford]) -> Clifford {
+        parts
+            .iter()
+            .skip(1)
+            .fold(parts[0].clone(), |s, p| s.sum(p).expect("one signature"))
+    }
+
+    /// Three planes at `½`, `⅓`, `⅕`, turned off the axes by
+    /// `(1 + ½e₂₃)(1 + ⅓e₄₅)(1 + ¼e₁₆)`.
+    fn three() -> Vec<Clifford> {
+        let t = [
+            e(0, &[2, 3], q(1, 2)),
+            e(0, &[4, 5], q(1, 3)),
+            e(0, &[1, 6], q(1, 4)),
+        ]
+        .iter()
+        .try_fold(one(0), |w, b| w.product(&one(0).sum(b)?))
+        .expect("a motion");
+        let inv = inverse(&t).expect("a motion");
+        [
+            e(0, &[1, 2], q(1, 2)),
+            e(0, &[3, 4], q(1, 3)),
+            e(0, &[5, 6], q(1, 5)),
+        ]
+        .iter()
+        .map(|b| {
+            t.product(b)
+                .and_then(|x| x.product(&inv))
+                .expect("one signature")
+        })
+        .collect()
+    }
+
+    #[test]
+    fn the_versor_holds_every_plane_at_its_own_angle() {
+        let parts = three();
+        let rate = total(&parts);
+        let v = versor(&rate).expect("a versor");
+        for order in [[0, 1, 2], [2, 0, 1], [1, 2, 0]] {
+            let product = order
+                .iter()
+                .try_fold(one(0), |w, k| w.product(&one(0).sum(&parts[*k])?))
+                .expect("one signature");
+            assert_eq!(product, v, "V = Π(1 + B_k), in any order");
+        }
+        assert!(
+            v.terms().any(|(m, _)| m.count_ones() == 6),
+            "the volume of all three"
+        );
+        assert_eq!(
+            wedge_powers(&rate).expect("powers").len(),
+            4,
+            "three planes"
+        );
+    }
+
+    #[test]
+    fn the_angles_and_planes_read_back_exactly() {
+        let parts = three();
+        let rate = total(&parts);
+        let mu = [q(-1, 4), q(-1, 9), q(-1, 25)];
+        let e_m = invariants(&rate).expect("invariants");
+        assert_eq!(
+            e_m,
+            vec![
+                q(1, 1),
+                mu.iter().cloned().fold(q(0, 1), |s, x| s + x),
+                mu[0].clone() * mu[1].clone()
+                    + mu[0].clone() * mu[2].clone()
+                    + mu[1].clone() * mu[2].clone(),
+                mu[0].clone() * mu[1].clone() * mu[2].clone(),
+            ]
+        );
+        for (k, m) in mu.iter().enumerate() {
+            assert_eq!(plane_of(&rate, m).expect("a plane"), parts[k]);
+        }
+        assert_eq!(plane_of(&rate, &q(-1, 7)), Err(TurningRefusal::NotAngle));
+    }
+
+    /// A boost and a turning on orthogonal planes of `Cl(3,1)` (`e₀`
+    /// negative): `⅓e₀₁ + ½e₂₃` keeps the volume `⅙e₀₁₂₃`, and reads back
+    /// with angles `1/9` (a boost) and `−1/4` (a turning).
+    #[test]
+    fn a_boost_and_a_turning_at_once() {
+        let sig = base_axis(1).expect("an axis");
+        let (b, r) = (e(sig, &[1, 2], q(1, 3)), e(sig, &[3, 4], q(1, 2)));
+        let rate = b.sum(&r).expect("one signature");
+        let v = versor(&rate).expect("a versor");
+        assert_eq!(
+            v,
+            total(&[
+                one(sig),
+                b.clone(),
+                r.clone(),
+                e(sig, &[1, 2, 3, 4], q(1, 6))
+            ])
+        );
+        assert_eq!(plane_of(&rate, &q(1, 9)).expect("a plane"), b);
+        assert_eq!(plane_of(&rate, &q(-1, 4)).expect("a plane"), r);
+    }
+
+    #[test]
+    fn isoclinic_planes_refuse() {
+        let rate = e(0, &[1, 2], q(1, 2))
+            .sum(&e(0, &[3, 4], q(1, 2)))
+            .expect("one signature");
+        assert_eq!(plane_of(&rate, &q(-1, 4)), Err(TurningRefusal::Isoclinic));
+        assert!(versor(&rate).is_ok());
     }
 }

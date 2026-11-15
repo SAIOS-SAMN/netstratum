@@ -25,7 +25,9 @@ change is named here.
 
 - Rates as versors, step 1 (docs/138, E76, #206): `turning::{versor,
   projective, compose_versors, power, split, holonomy}`. A rate is a
-  bivector, whole on every plane it moves; its versor is `1 + B`. Two boosts
+  bivector, whole on every plane it moves, each plane at its own angle; its
+  versor is the sum of its wedge powers, and each plane and angle reads
+  back exactly (`wedge_powers`, `invariants`, `plane_of`). Two boosts
   on different planes compose to a boost times the turning between them
   (W2). Boost and turning are read against an observer's own time, never
   the blade masks (`split`, `parts`, W2′). A path closed on paper leaves a

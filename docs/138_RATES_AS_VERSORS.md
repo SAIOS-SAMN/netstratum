@@ -30,6 +30,22 @@ paper.
   plane, `B = β·e`. A boost plane joins `e₋` (`e₀`, `e₀² = −1`) with a spatial axis,
   so `B² = +1`. Here `β = tanh(θ/2)` is the half-rate, and the rate is
   `x = 2β/(1 + β²)`.
+- **V1′ (each plane at its own angle).** A rate on several planes is
+  `B = Σ B_k`, its parts on orthogonal commuting planes, each with its own
+  angle `μ_k = B_k·B_k`. Its versor is `V = Π(1 + B_k) = Σ_m W_m`, the sum of
+  its wedge powers `W_m = B^{∧m}/m!`. This is exact, and no plane is read
+  apart: `1 + B` is the case of one plane. The angles are the roots of
+  `Σ (−1)^m e_m λ^{K−m}`, where `e_m` is the scalar part of `W_m·W_m`. Each
+  plane reads back exactly:
+  `B_k = (Σ_m μ_k^{K−1−m} W_{2m+1})(Σ_m μ_k^{K−1−m} W_{2m})⁻¹`.
+
+  *Proof.* `W_m(B) = W_m(C) + B_k·W_{m−1}(C)`, with C the other planes, and
+  `B_k·B_k = μ_k`. Multiplying the second sum by `B_k` gives the first. Two
+  planes at one angle (isoclinic) leave the second sum without an inverse,
+  and their parts are not unique. *Fixtures:* three planes at ½, ⅓, ⅕ in
+  Cl(6,0), turned off the axes, read back each plane and the angles −¼,
+  −1/9, −1/25. In Cl(3,1), `⅓e₀₁ + ½e₂₃` (a boost and a turning at once)
+  keeps the volume `⅙e₀₁₂₃`. ∎
 - **V2 (composition is the geometric product).** Two motions compose as
   `V₂·V₁`, exact over ℚ, up to a scalar. Like `kⁿ` and `Dⁿ`, this is a law
   composed with itself, not a length squared (docs/132 §1).
@@ -126,13 +142,15 @@ a dynamic force:**
    bivector; `compose_versors` by the geometric product; `power` by
    squarings; `split` into `B·R` and `parts`, both against an observer's
    time (W2′), never the blade masks; `holonomy` (W4).
-   Witnesses (`turning::versor_tests`):
+   Each plane is held at its own angle (V1′): `wedge_powers`, `invariants`,
+   `plane_of`. Witnesses (`turning::{versor_tests, angle_tests}`):
    - the fixtures above;
    - the flow law at n = 7 and 28;
    - `V^{4N} = (V^N)⁴` at N = 7, and equal to 4N single products;
    - the Cayley reading `2b/(1 + b·b)`;
    - a rate on two planes at once has no turning;
-   - the moving observer's split (W2′).
+   - the moving observer's split (W2′);
+   - three angles in Cl(6,0) and a boost with a turning in Cl(3,1) (V1′).
 2. The ledger: spin read as the motion's bivector, with conservation stated
    on it. The per-plane identities become its projections.
 3. The shear restated (#199), then the release and the drift.

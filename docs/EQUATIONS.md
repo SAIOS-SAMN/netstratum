@@ -2127,10 +2127,14 @@ per-kind reading by holding); the bounce's release leaves as one pooled parcel
 one-kind parcel reads as its kind; a merge adds parts by kind; the throat parts
 a mix into its kinds (`recycle::part`).
 
-**E76 · Rates as versors.** `turning::{versor, projective,
+**E76 · Rates as versors.** `turning::{versor, plane_of, projective,
 compose_versors, power, split, holonomy}` (docs/138, #206; operator
-2026-11-15). A rate is a bivector `B`, whole on every plane it moves; its
-versor is `V = 1 + B`, read up to a scalar. Versors compose by the geometric
+2026-11-15). A rate is a bivector `B`, whole on every plane it moves, each
+plane at its own angle `μ_k = B_k·B_k`. Its versor is
+`V = Π(1 + B_k) = Σ W_m`, the sum of its wedge powers `W_m = B^{∧m}/m!`,
+read up to a scalar; on one plane this is `1 + B`. Each plane reads back as
+`B_k = (Σ μ_k^{K−1−m} W_{2m+1})(Σ μ_k^{K−1−m} W_{2m})⁻¹`
+(`turning::{wedge_powers, invariants, plane_of}`). Versors compose by the geometric
 product, never plane by plane:
 
     (1 + β₁e₀₁)(1 + β₂e₀₂) = 1 + β₁e₀₁ + β₂e₀₂ + β₁β₂·e₁₂ = B·R
