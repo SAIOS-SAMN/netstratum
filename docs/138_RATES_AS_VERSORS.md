@@ -215,7 +215,29 @@ PR #345):**
 Netstratum holds each orientation as its motion (`Orientation::motion`). On
 the grain the motion is `cayley(⌊generator(R)⌋)`, so it stays an exact unit.
 
-Still open for the shear: the mote's whole motion, its boost included,
-composed with the pull's. A boost part read as a rate on the grain needs the
-versor's norm `1 + c·c` under an integer square root.
+**Built (#199):**
+- `coupling::compose_whole` composes the rates and the pulls whole, gives
+  the boost's part on each plane as the new rate, and reads the turning
+  projectively. No root is needed for the rates.
+- `flows::shear_booked` moves each spin by its new rate as before, and the
+  range pays per plane as before, so `Σ m·ℓ_k` is kept.
+- The turning advances the mote's motion after the bell
+  (`Orientation::turn_by`). Its generator `C/(1 + √(R·R̃))` takes the root
+  on the grain, as its floor. This is the one root in the law.
+
+Witnesses:
+- `coupling::tests::rates_compose_whole_and_turn_the_plane_between`: one
+  plane is the flow law; two planes give W2 in the order `V(Y)·V(X)`
+  (boost 9/37, 20/37, turning ⅙, norm 37/36);
+- `orientation::motion_tests::a_projective_turning_enters_by_its_generator`;
+- `flows::coupling_tests::a_component_past_zero_flips_its_plane_and_the_composition_turns_the_rest`:
+  the motion is `H·W`, with W a small turning on the spatial planes.
+
+Read on `.testtmp/plasma/l109` to bell 222, against the proper-time run:
+- the shear moved `2;05,25·60⁻³` outward, against `2;17,12·60⁻³`, about 9%
+  less: the whole composition's denominator `1 + x·y` runs over every plane;
+- 2918 of 2969 motes apart in phase, against 2904 of 2968; one merge fewer;
+- light given by recycling `17;26,56·60⁻⁹` against `53;54,07·60⁻⁹`;
+- the 3Z conservation true; fuel, bodies and echoes unchanged; the widest
+  carrier held at 38 bits for spins and reaches.
 

@@ -3025,6 +3025,7 @@ fn shear_booked(
     let sums = range_sums(&reach, &extent, &f);
     let mut dl = vec![vec![ratio(0, 1); planes]; n];
     let mut pays = vec![vec![ratio(0, 1); planes]; n];
+    let mut turns: Vec<Option<([Ratio; 3], Ratio)>> = vec![None; n];
     let mut moved = ratio(0, 1);
     for i in 0..n {
         let near = &range[i];
@@ -3032,38 +3033,66 @@ fn shear_booked(
         if near.is_empty() || whole.is_zero() || m[i].is_zero() {
             continue;
         }
+        // The pull on each plane, by that plane's field (its neighbours'
+        // dipoles at their hemispheres there).
+        let pulls: Vec<Ratio> = (0..planes)
+            .map(|k| {
+                let x = &rate[i][k];
+                if x.is_zero() || !bound(x) || motes[i].spins.get(k).is_none() {
+                    return ratio(0, 1);
+                }
+                // The range's rate on this plane, by holding.
+                let xbar = sums[i][1 + k].clone() / whole.clone();
+                if !bound(&xbar) {
+                    return ratio(0, 1);
+                }
+                let field = crate::coupling::field(
+                    &near
+                        .iter()
+                        .map(|&j| crate::coupling::Neighbour {
+                            holding: w[j].clone(),
+                            pole: pole[j].clone(),
+                            open: o[j].clone(),
+                            nearness: crate::coupling::nearness(
+                                &(reach[i].clone() - reach[j].clone()),
+                                &(frames[i].clone() + frames[j].clone()),
+                            ),
+                            side: crate::coupling::hemisphere(&at(&motes[i], k), &at(&motes[j], k)),
+                        })
+                        .collect::<Vec<_>>(),
+                );
+                crate::coupling::pull(x, &xbar, &pole[i], &o[i], &field)
+                    .unwrap_or_else(|| ratio(0, 1))
+            })
+            .collect();
+        if pulls.iter().all(Zero::is_zero) {
+            continue;
+        }
+        // The rates and the pulls composed whole (docs/138 §5): the boost's
+        // part on each plane is the new rate; the turning between the
+        // planes turns the mote (its Thomas–Wigner turning), after the bell.
+        let held: Vec<Ratio> = (0..planes)
+            .map(|k| {
+                let x = &rate[i][k];
+                match bound(x) && motes[i].spins.get(k).is_some() {
+                    true => x.clone(),
+                    false => ratio(0, 1),
+                }
+            })
+            .collect();
+        let Some((rates, c, norm)) = crate::coupling::compose_whole(&held, &pulls) else {
+            continue;
+        };
+        if c.iter().any(|x| !x.is_zero()) {
+            turns[i] = Some((c, norm));
+        }
         for k in 0..planes {
-            let x = &rate[i][k];
+            let x = &held[k];
             let Some(lk) = motes[i].spins.get(k) else {
                 continue;
             };
-            if x.is_zero() || !bound(x) {
-                continue;
-            }
-            // The range's rate on this plane, by holding.
-            let xbar = sums[i][1 + k].clone() / whole.clone();
-            if !bound(&xbar) {
-                continue;
-            }
-            let field = crate::coupling::field(
-                &near
-                    .iter()
-                    .map(|&j| crate::coupling::Neighbour {
-                        holding: w[j].clone(),
-                        pole: pole[j].clone(),
-                        open: o[j].clone(),
-                        nearness: crate::coupling::nearness(
-                            &(reach[i].clone() - reach[j].clone()),
-                            &(frames[i].clone() + frames[j].clone()),
-                        ),
-                        side: crate::coupling::hemisphere(&at(&motes[i], k), &at(&motes[j], k)),
-                    })
-                    .collect::<Vec<_>>(),
-            );
-            let Some(x2) = crate::coupling::pulled(x, &xbar, &pole[i], &o[i], &field) else {
-                continue;
-            };
-            if x2 == *x {
+            let x2 = rates[k].clone();
+            if x.is_zero() || x2 == *x || !bound(&x2) {
                 continue;
             }
             // The spin follows the rate at the mote's reach, the step read on
@@ -3133,6 +3162,15 @@ fn shear_booked(
                 s
             };
             x.spins[k] = stored;
+        }
+    }
+    // Each mote's Thomas–Wigner turning, composed into its motion after the
+    // bell (docs/138 §5).
+    for (x, t) in motes.iter_mut().zip(&turns) {
+        if let Some((c, norm)) = t {
+            x.orientation
+                .turn_by(c, norm)
+                .expect("a turning on the spatial planes is a motion");
         }
     }
     (moved, left)
@@ -6267,7 +6305,7 @@ mod coupling_tests {
     }
 
     #[test]
-    fn a_component_past_zero_flips_its_own_planes_phase_only() {
+    fn a_component_past_zero_flips_its_plane_and_the_composition_turns_the_rest() {
         // Two hydrogen motes (3Z frames: two held, one open, pole +1/3 by
         // degrees), aligned: they repel. The outer turns hardly at all on the
         // first plane, its rate there far under the inner's, so the push
@@ -6293,12 +6331,32 @@ mod coupling_tests {
         ];
         shear_booked(&mut motes, &enc, &total, true);
         let b = &motes[1];
-        assert_eq!(b.phase_at(SPACE[0]), ratio(1, 2), "the first plane through");
         assert!(b.spins[0] > ratio(0, 1), "its magnitude kept");
-        assert_eq!(b.phase_at(SPACE[1]), ratio(0, 1));
-        assert_eq!(b.phase_at(SPACE[2]), ratio(0, 1));
+        // Its motion is the half turn on the first plane, then the turning
+        // between the planes its rate and pull compose (docs/138 §5):
+        // `R = H·W`, W a small turning on the spatial planes alone.
+        let mut h = crate::orientation::Orientation::default();
+        h.half_turn(SPACE[0]).expect("a half turn");
+        let w = crate::turning::reversed(&h.motion())
+            .product(&b.orientation.motion())
+            .expect("one signature");
+        let g = crate::orientation::components(&crate::turning::generator(&w).expect("a motion"))
+            .expect("on the planes");
+        assert!(
+            crate::orientation::PARTNER.iter().all(|&p| g[p].is_zero()),
+            "spatial alone"
+        );
+        assert!(
+            g.iter().any(|x| !x.is_zero()),
+            "the turning between the planes"
+        );
+        assert!(g.iter().all(|x| x.abs() < ratio(1, 100)), "small: {g:?}");
         assert_eq!(b.phase_at(super::LOOP), ratio(0, 1));
-        assert!(motes[0].phase().iter().all(|p| p.is_zero()));
+        // The inner mote passes through no plane: its motion is its turning
+        // between the planes alone, small, on the spatial planes.
+        let g0 = motes[0].orientation.g();
+        assert!(crate::orientation::PARTNER.iter().all(|&p| g0[p].is_zero()));
+        assert!(g0.iter().all(|x| x.abs() < ratio(1, 100)), "small: {g0:?}");
     }
 
     #[test]

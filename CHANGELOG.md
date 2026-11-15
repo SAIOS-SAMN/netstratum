@@ -39,6 +39,13 @@ change is named here.
   the blade masks (`split`, `parts`, W2′). A path closed on paper leaves a
   boost and a turning (W4). The
   W4 fixture's `e₁₂` sign is corrected to −⅓.
+  Step 3, the shear (#199): a mote's rates and pulls compose whole
+  (`coupling::compose_whole`), and its Thomas–Wigner turning advances its
+  motion (`Orientation::turn_by`, the root on the grain). Read from l109 to
+  bell 222:
+  - the shear moved 2;05,25·60⁻³ against 2;17,12 before;
+  - 2918 of 2969 motes apart in phase, against 2904 of 2968;
+  - the 3Z conservation true, and fuel and bodies unchanged.
   Step 2: the spin ledger is one bivector (`flows::{Mote::spin,
   spin_ledger}`). The per-plane books are its components. A motion carries a
   spin by `turning::carry`, keeping its angles.

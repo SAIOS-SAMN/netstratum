@@ -2148,6 +2148,11 @@ A spin is one bivector `L` on the six planes (`flows::Mote::spin`). The
 ledger is `Σ m·L` (`flows::spin_ledger`), and its components are the
 per-plane books. A motion carries the spin as `V·L·Ṽ/(V·Ṽ)`
 (`turning::carry`), keeping its angles.
+The shear composes a mote's rates and pulls whole (`coupling::compose_whole`,
+#199): `V′ = V(Y)·V(X)`, with `V(X) = 1 + Σ x_k·e₀n_k`. The boost's part on
+each plane is the new rate (the flow law on one plane). The Thomas–Wigner
+turning `1 + C` advances the mote's motion by the generator
+`C/(1 + √(R·R̃))`, with the root on the grain (`Orientation::turn_by`).
 
 **E75 · The capture phase.** `pulse::{capture_face, capture_phases}`
 (docs/134 §12; operator 2026-11-15). A kind's capture phase is the turning

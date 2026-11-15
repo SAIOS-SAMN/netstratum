@@ -547,6 +547,28 @@ impl Orientation {
         Ok(())
     }
 
+    /// A turning read as a projective versor `1 + C` on the spatial planes
+    /// (its parts `c` in [`SPATIAL`] order, its norm `R·R̃ = 1 + |c|`
+    /// composed) composed after the orientation whole: its generator is
+    /// `G = C/(1 + √(R·R̃))`. The root is read on the grain, as its floor
+    /// (`⌊√⌊n·60¹²⌋⌋/60⁶`), and so is each component. This is the one place a
+    /// root enters: the turning's unit form exists only up to it (docs/138
+    /// §5).
+    pub fn turn_by(&mut self, c: &[Ratio; 3], norm: &Ratio) -> Result<(), TurningRefusal> {
+        if norm <= &ratio(0, 1) {
+            return Err(TurningRefusal::Null);
+        }
+        let places = BigInt::from(60).pow(6);
+        let scaled = (norm.numer() * &places * &places).div_floor(norm.denom());
+        let root = Ratio::new(scaled.sqrt(), places);
+        let den = ratio(1, 1) + root;
+        let mut b: [Ratio; 6] = std::array::from_fn(|_| ratio(0, 1));
+        for j in 0..3 {
+            b[SPATIAL[j]] = crate::ring::grain(&(c[j].clone() / den.clone()));
+        }
+        self.advance(&b)
+    }
+
     /// One plane turned on its own by the reading `turns ∈ [0, 1)` (a pass
     /// through the centre is `½`, rate 1), composed whole.
     pub fn turn_plane(&mut self, p: usize, turns: &Ratio) -> Result<(), TurningRefusal> {
@@ -1307,6 +1329,22 @@ mod motion_tests {
         }
         let back = Orientation::from_values(&o.values()).expect("reads back");
         assert_eq!(back, o, "the record gives the motion back exactly");
+    }
+
+    /// A turning `1 + C` with `R·R̃` a rational square enters exactly: `1 +
+    /// (4/3)e₂₃` has norm `25/9`, root `5/3`, generator `½`, the Cayley
+    /// motion of `½` on that plane.
+    #[test]
+    fn a_projective_turning_enters_by_its_generator() {
+        let mut o = Orientation::default();
+        o.turn_by(&[ratio(4, 3), ratio(0, 1), ratio(0, 1)], &ratio(25, 9))
+            .expect("a motion");
+        assert_eq!(o.g()[SPATIAL[0]], ratio(1, 2));
+        assert!(o.g().iter().skip(1).all(Zero::is_zero));
+        assert_eq!(
+            o.turn_by(&[ratio(1, 1), ratio(0, 1), ratio(0, 1)], &ratio(0, 1)),
+            Err(TurningRefusal::Null)
+        );
     }
 }
 
