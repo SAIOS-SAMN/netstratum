@@ -2127,6 +2127,13 @@ per-kind reading by holding); the bounce's release leaves as one pooled parcel
 one-kind parcel reads as its kind; a merge adds parts by kind; the throat parts
 a mix into its kinds (`recycle::part`).
 
+**E77 · Time as coordinates: the front's coordinate.** `flows::Enclosed::{front,
+separation}`, `flows::Mote::front_in` (docs/132 §4.1, #207; operator
+2026-11-15). The front's coordinate at reach r is `τ(r) = r + H(<r)`, in
+rings at c = 1. The time between two places is `τ(b) − τ(a)`. At the
+equator, `R = H(<R)`, it is `τ = 2R` with held share ½: the seam with
+Xylarium (their `M = H/2`).
+
 **E76 · Rates as versors.** `turning::{versor, plane_of, projective,
 compose_versors, power, split, holonomy}` (docs/138, #206; operator
 2026-11-15). A rate is a bivector `B`, whole on every plane it moves, each

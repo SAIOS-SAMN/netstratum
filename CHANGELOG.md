@@ -29,6 +29,10 @@ change is named here.
 
 ### Added
 
+- Time as coordinates, the front's coordinate (docs/132 §4.1, E77, #207):
+  `Enclosed::{front, separation}` and `Mote::front_in`. τ(r) = r + H(<r), and
+  a duration is the separation of two coordinates. The seam with Xylarium
+  sits at the equator (#245).
 - Rates as versors, step 1 (docs/138, E76, #206): `turning::{versor,
   projective, compose_versors, power, split, holonomy}`. A rate is a
   bivector, whole on every plane it moves, each plane at its own angle; its

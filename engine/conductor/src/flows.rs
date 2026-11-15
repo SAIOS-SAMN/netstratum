@@ -458,6 +458,13 @@ impl Mote {
         self.spins.iter().map(|l| l.clone() / ell.clone()).collect()
     }
 
+    /// Its time as a coordinate (#207): the front's coordinate at its reach,
+    /// `τ = R + H(<R)` (`Enclosed::front`); the time between two motes is the
+    /// separation of theirs.
+    pub fn front_in(&self, enc: &Enclosed) -> Ratio {
+        enc.front(&self.reach_in(enc).0)
+    }
+
     /// Its reach in an enclosure and the held share there (docs/121 §14.6):
     /// on its orbit (lift 0) the spin balance `ℓ/H(<ℓ)` and its deficit, as
     /// `Enclosed::reach` reads them; lifted, `R_ℓ·D(u)` and the hold standing
@@ -1368,6 +1375,22 @@ impl Enclosed {
     /// law's containment read by place, for a body known by where it stands).
     pub fn hold_within(&self, r: &Ratio) -> Ratio {
         self.within[self.places.partition_point(|at| at < r)].clone()
+    }
+
+    /// The front's coordinate at reach `r`, `τ(r) = r + H(<r)` (docs/111 §2,
+    /// docs/132 §4.1, #207): the time is the coordinate of the place the front
+    /// meets, in rings at `c = 1`, the hold inside it its delay.
+    pub fn front(&self, r: &Ratio) -> Ratio {
+        crate::ring::arrival(r, &self.hold_within(r))
+    }
+
+    /// The time between two reaches, the separation of their coordinates:
+    /// `τ(b) − τ(a) = (b − a) + (H(<b) − H(<a))`. Over a stretch holding
+    /// nothing the density of time `Δτ/Δr` is 1; each body the stretch
+    /// crosses adds its hold (`dτ/dr = 1 + dH/dr`, read between two points,
+    /// never at one).
+    pub fn separation(&self, a: &Ratio, b: &Ratio) -> Ratio {
+        self.front(b) - self.front(a)
     }
 
     /// The spin a body standing at reach `r` carries (register B11, one
@@ -7272,5 +7295,55 @@ mod parcel_tests {
         merge(&mut motes, &beads, &ratio(100, 1), &|_| None, &mut cross);
         assert_eq!(motes.len(), 1);
         assert_eq!(motes[0].parts, before);
+    }
+}
+
+#[cfg(test)]
+mod front_tests {
+    //! Time as coordinates (#207): the front's coordinate `τ(r) = r + H(<r)`
+    //! and the time between two places as the separation of their
+    //! coordinates.
+    use super::*;
+
+    fn enclosure() -> Enclosed {
+        // A base of 1 and two bodies (spin, holding): reaches 3/2 and 9/4.
+        Enclosed::new(
+            ratio(1, 1),
+            vec![(ratio(3, 2), ratio(1, 2)), (ratio(27, 8), ratio(1, 3))],
+        )
+    }
+
+    #[test]
+    fn time_is_the_separation_of_two_coordinates() {
+        let enc = enclosure();
+        let (a, b, c) = (ratio(1, 2), ratio(2, 1), ratio(7, 2));
+        assert_eq!(
+            enc.separation(&a, &b) + enc.separation(&b, &c),
+            enc.separation(&a, &c),
+            "separations add along the reach"
+        );
+        assert_eq!(enc.separation(&c, &a), -enc.separation(&a, &c));
+        // Between two places with no body between them, time runs at the
+        // reach's own rate: Δτ = Δr.
+        let (p, q) = (ratio(1, 4), ratio(1, 2));
+        assert_eq!(enc.hold_within(&p), enc.hold_within(&q));
+        assert_eq!(enc.separation(&p, &q), q.clone() - p.clone());
+        // Across a stretch the bodies within add their hold to its time.
+        let crossed = enc.hold_within(&c) - enc.hold_within(&a);
+        assert!(crossed > ratio(0, 1));
+        assert_eq!(enc.separation(&a, &c), c.clone() - a.clone() + crossed);
+    }
+
+    /// At the rim (the equator, `R = H(<R)`) the held share about the pair
+    /// is ½, and the front's coordinate there is twice the reach: the seam
+    /// with Xylarium (`τ_seam = R_h + H(<R_h)`, their `M = H/2`).
+    #[test]
+    fn the_seam_at_the_equator_reads_half() {
+        let enc = enclosure();
+        let rim = enc.rim();
+        let held = enc.hold_within(&rim);
+        assert_eq!(held, rim, "the equator: R = H(<R)");
+        assert_eq!(crate::ring::deficit(&rim, &held), ratio(1, 2));
+        assert_eq!(enc.front(&rim), ratio(2, 1) * rim);
     }
 }
