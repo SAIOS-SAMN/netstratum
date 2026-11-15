@@ -37,7 +37,10 @@ change is named here.
   218→222 completes in about 6 min (it had run past 40).
 - Manifest v2: `pulse::nuclei` gives (protons, neutrons); the manifest posts
   `Nucleus { z: protons, q: neutrons }` (Mycelium's letters, docs/129 §0);
-  `ns-hypha endowment` reads the court's account, and `standing` prints μ per lane.
+  `ns-hypha endowment` reads the court's account through the paged
+  READ-ENDOWMENT (`read_endowment`, mycelium #332; pin 60c94245), and
+  `standing` prints μ per lane. Read on the recut mesh: manifest Sealed, the
+  endowment assembled in 2 pages, 1,495 nucleus entries.
 - The state on Cl(13,1) (docs/136; operator ruling 2026-11-13, one
   body-state signature across kernels, superseding docs/131's Cl(5,4)). A
   body's place and rotor are on the base; the S¹¹ fibre is read by each

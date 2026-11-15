@@ -255,7 +255,7 @@ fn main() -> ExitCode {
 /// manifest, its μ per lane, founding or growth, applied), and the nuclei the
 /// universe holds by them, read back as the court states them.
 fn endowment_cmd(up: &Uplink, home: &Path) -> ExitCode {
-    use ns_hypha::mycelium_sdk::house::{decode_endowment_reading, encode_endowment_read};
+    use ns_hypha::mycelium_sdk::house::read_endowment;
     let domain = match ns_hypha::fold::tier_key(home, "domain") {
         Ok(k) => k.verifying_key().to_bytes(),
         Err(e) => {
@@ -263,17 +263,17 @@ fn endowment_cmd(up: &Uplink, home: &Path) -> ExitCode {
             return ExitCode::from(2);
         }
     };
-    let reply = match up.session().speak(encode_endowment_read(domain)) {
-        Ok(r) => r,
-        Err(e) => {
-            eprintln!("ns-hypha: the endowment was not read: {e}");
-            return ExitCode::from(1);
-        }
-    };
-    let Some(r) = decode_endowment_reading(&reply) else {
-        eprintln!("ns-hypha: the endowment reading did not decode");
+    // Paged (mycelium #332): each page asked at its offset, the whole
+    // assembled and checked against its hash by the SDK.
+    let mut pages = 0usize;
+    let Some(r) = read_endowment(domain, |ask| {
+        pages += 1;
+        up.session().speak(ask).ok()
+    }) else {
+        eprintln!("ns-hypha: the endowment did not assemble ({pages} pages asked)");
         return ExitCode::from(1);
     };
+    println!("endowment read in {pages} pages");
     let lanes = |m: &ns_hypha::mycelium_sdk::house::GrantRead| {
         m.mu.lanes()
             .iter()
