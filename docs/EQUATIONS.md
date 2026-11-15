@@ -2184,6 +2184,12 @@ stored: each plane's share split `c = δ = H/(R + H)` and R's phase
 `R_p = κ(1 − 2·frac(ψ_p))`. Witnesses: `orientation::base_tests`, plus the
 joint read with Xylarium (docs/136 §9).
 
+The held form is the whole unit motion `R`, with K per plane beside it
+(78.173 §8.5, ruled 2026-11-15 for every kernel): `Orientation::motion`. The
+generator is its reading. On the grain the motion is
+`R = cayley(⌊generator(R)⌋)`, an exact unit with bounded denominators.
+Witness: `orientation::motion_tests`.
+
 **E70 · Tilt from quantum torsion.** `flows::torsion_turns`,
 `quantum::twist_at`, `orientation::turned`, `torsion::wound`,
 `strip::Ring::chiral` (docs/128 §13; operator 2026-11-11, approved). Two

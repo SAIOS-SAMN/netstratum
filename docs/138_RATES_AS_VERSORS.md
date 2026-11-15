@@ -204,7 +204,18 @@ turning apart. Way 1 then holds projective versors, and Way 2's generator
 also cannot hold the half turn, the pole (Mycelium, 2026-11-15). A held
 versor still carries K per plane beside it (law 11).
 
-The generator with K per plane is the form shared across the core tube
-(78.173 §8.4, settled with Mycelium on 2026-11-07). Way 1 changes a
-cross-kernel form, so it goes to Mycelium and the operator before any code.
+**Ruled (operator, 2026-11-15, for every kernel; Mycelium 78.173 §8.5,
+PR #345):**
+- the shared form is the whole unit motion R, with K per plane beside it;
+- the generator is a reading where it exists;
+- boost and turning parts split off a motion are read as projective
+  versors;
+- composition is `R₁R₂` on whole motions.
+
+Netstratum holds each orientation as its motion (`Orientation::motion`). On
+the grain the motion is `cayley(⌊generator(R)⌋)`, so it stays an exact unit.
+
+Still open for the shear: the mote's whole motion, its boost included,
+composed with the pull's. A boost part read as a rate on the grain needs the
+versor's norm `1 + c·c` under an integer square root.
 

@@ -395,15 +395,25 @@ impl Motion {
     }
 }
 
-/// A body's orientation: its generator's components on [`PLANES`], each on
-/// the grain, and its windings per plane.
+/// A body's orientation: its whole unit motion `R`, with its windings `K`
+/// per plane beside it (78.173 §8.5, ruled 2026-11-15 for every kernel: the
+/// shared form is the motion, the generator a reading where it exists).
 ///
-/// Its readings in the phase layout are kept beside it, refreshed at every
-/// write of `G` (the laws read them inside their pair loops; a reading is a
-/// division, so it is taken once per change, never per read). They are a
-/// reading of `G`, never saved and never written on their own.
+/// On the grain the motion is `R = cayley(⌊generator(R)⌋)`: its generator's
+/// reading floored and the motion rebuilt from it. `R` stays an exact unit
+/// (the Cayley form of any rational generator is one), and its denominators
+/// stay bounded by the grain's. A unit motion floored component by component
+/// would not stay a unit, and up to a scalar its two halves would not stay
+/// of one norm (docs/138 §5).
+///
+/// The generator's components on [`PLANES`] and the readings in the phase
+/// layout are kept beside it. They are refreshed at every write of the
+/// motion (the laws read them inside their pair loops; a reading is a
+/// division, so it is taken once per change, never per read), and are
+/// never written on their own.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Orientation {
+    motion: Motion,
     g: [Ratio; 6],
     pub windings: [i64; 6],
     /// The scale's factor: its rate on the conformal dilator `e₊e₋`, a
@@ -422,6 +432,7 @@ impl Orientation {
     /// From a generator's components on [`PLANES`] and its windings.
     pub fn of_generator(g: [Ratio; 6], windings: [i64; 6]) -> Orientation {
         let mut o = Orientation {
+            motion: Motion::of(&g),
             g,
             windings,
             scale: ratio(0, 1),
@@ -431,9 +442,24 @@ impl Orientation {
         o
     }
 
-    /// Its generator's components on [`PLANES`].
+    /// Its generator's components on [`PLANES`]: a reading of the motion.
     pub fn g(&self) -> &[Ratio; 6] {
         &self.g
+    }
+
+    /// Its whole unit motion `R`, held (78.173 §8.5), in the algebra of
+    /// [`bivector`]: `R·R̃ = 1`.
+    pub fn motion(&self) -> Clifford {
+        crate::turning::motion(&bivector(&self.g)).expect("a generator's Cayley form")
+    }
+
+    /// The motion re-held at the generator reading `g` (each component on
+    /// the grain): the laws that act on the reading (a held phase, a
+    /// merger, a record read back) write the motion through it.
+    fn hold(&mut self, g: [Ratio; 6]) {
+        self.motion = Motion::of(&g);
+        self.g = g;
+        self.refresh();
     }
 
     fn refresh(&mut self) {
@@ -489,7 +515,7 @@ impl Orientation {
         }
         let was = self.readings();
         let step = Motion::of(b);
-        let mut r = Motion::of(&self.g);
+        let mut r = self.motion.clone();
         for _ in 0..rings {
             r = r.then(&step);
         }
@@ -508,8 +534,8 @@ impl Orientation {
             Err(TurningRefusal::NoGenerator) => r.negated().generator_on_grain()?,
             Err(e) => return Err(e),
         };
-        self.g = g;
-        self.refresh();
+        // On the grain: the motion rebuilt from its floored generator.
+        self.hold(g);
         let now = self.readings();
         for p in 0..6 {
             if b[p] > ratio(0, 1) && now[p] < was[p] {
@@ -590,8 +616,9 @@ impl Orientation {
                 let p = SPATIAL[j];
                 let to = of_reading(&crate::ring::grain(v));
                 if self.g[p] != to {
-                    self.g[p] = to;
-                    self.refresh();
+                    let mut g = self.g.clone();
+                    g[p] = to;
+                    self.hold(g);
                 }
             }
             None => {
@@ -600,14 +627,15 @@ impl Orientation {
                 if to == mean {
                     return;
                 }
+                let mut g = self.g.clone();
                 for p in PARTNER {
-                    self.g[p] = crate::ring::grain(&if mean.is_zero() {
+                    g[p] = crate::ring::grain(&if mean.is_zero() {
                         to.clone()
                     } else {
                         self.g[p].clone() * to.clone() / mean.clone()
                     });
                 }
-                self.refresh();
+                self.hold(g);
             }
         }
     }
@@ -643,7 +671,7 @@ impl Orientation {
     /// twist `C = p·q̄`, the isoclinic turning against R, each `(scalar, i,
     /// j, k)`. `p` is the `P+` half of its motion and `q` the `P−` half.
     pub fn form_twist(&self) -> ([Ratio; 4], [Ratio; 4]) {
-        let Motion(p, q) = Motion::of(&self.g);
+        let Motion(p, q) = self.motion.clone();
         (q.ratios(), p.product(&q.conjugate()).ratios())
     }
 
@@ -651,7 +679,7 @@ impl Orientation {
     /// generator of `C`, `v = C_vec/(1 + C₀)`, isoclinic (one value per dual
     /// pair). None where `C = −1` (the halves opposed, a half turn of R).
     pub fn twist_generator(&self) -> Option<[Ratio; 3]> {
-        let Motion(p, q) = Motion::of(&self.g);
+        let Motion(p, q) = self.motion.clone();
         let c = p.product(&q.conjugate());
         let den = &c.d + &c.n[0];
         if den.is_zero() {
@@ -665,14 +693,14 @@ impl Orientation {
     /// Each half's axis in space (docs/128 §11.1): its spin in the body's
     /// own axes carried by its half, `a+ = p·ℓ+·p̄`, `a− = q·ℓ−·q̄`, exact.
     pub fn half_axes(&self, plus: &[Ratio; 3], minus: &[Ratio; 3]) -> ([Ratio; 3], [Ratio; 3]) {
-        let Motion(p, q) = Motion::of(&self.g);
+        let Motion(p, q) = self.motion.clone();
         (p.carry(plus), q.carry(minus))
     }
 
     /// A direction in space carried back into the body's own axes by each
     /// half (the inverse of [`Orientation::half_axes`]): `p̄·a+·p`, `q̄·a−·q`.
     pub fn body_axes(&self, plus: &[Ratio; 3], minus: &[Ratio; 3]) -> ([Ratio; 3], [Ratio; 3]) {
-        let Motion(p, q) = Motion::of(&self.g);
+        let Motion(p, q) = self.motion.clone();
         (p.conjugate().carry(plus), q.conjugate().carry(minus))
     }
 
@@ -751,12 +779,13 @@ impl Orientation {
         if whole.is_zero() {
             return out;
         }
-        for p in 0..6 {
+        let g: [Ratio; 6] = std::array::from_fn(|p| {
             let sum = parts
                 .iter()
                 .fold(ratio(0, 1), |s, (o, w)| s + o.g[p].clone() * w.clone());
-            out.g[p] = crate::ring::grain(&(sum / whole.clone()));
-        }
+            crate::ring::grain(&(sum / whole.clone()))
+        });
+        out.hold(g);
         let sum = parts
             .iter()
             .fold(ratio(0, 1), |s, (o, w)| s + o.scale.clone() * w.clone());
@@ -811,8 +840,9 @@ impl Orientation {
         }
     }
 
-    /// Encoded for the save record: the six components, then the six
-    /// windings, twelve exact values; where the scale moves, the scale's
+    /// Encoded for the save record: the motion by its generator reading's six
+    /// components (on the grain, the motion is exactly their Cayley form),
+    /// then the six windings, twelve exact values; where the scale moves, the scale's
     /// rate after them, thirteen (docs/136 §6).
     pub fn values(&self) -> Vec<Ratio> {
         let mut v: Vec<Ratio> = self.g.to_vec();
@@ -831,8 +861,8 @@ impl Orientation {
             return None;
         }
         let mut o = Orientation::default();
+        let g: [Ratio; 6] = std::array::from_fn(|p| crate::ring::grain(&v[p]));
         for p in 0..6 {
-            o.g[p] = crate::ring::grain(&v[p]);
             if !v[6 + p].is_integer() {
                 return None;
             }
@@ -841,7 +871,7 @@ impl Orientation {
         if v.len() == 13 {
             o.scale = crate::ring::grain(&v[12]);
         }
-        o.refresh();
+        o.hold(g);
         Some(o)
     }
 }
@@ -1239,6 +1269,44 @@ mod tests {
             let d = (back.g()[k].clone() - o.g()[k].clone()).abs();
             assert!(d <= crate::ring::grain_step(), "plane {k} within a grain");
         }
+    }
+}
+
+#[cfg(test)]
+mod motion_tests {
+    //! 78.173 §8.5: the held form is the whole unit motion, the generator its
+    //! reading, the windings beside it.
+    use super::*;
+
+    #[test]
+    fn the_held_motion_stays_a_unit_on_the_grain() {
+        let mut o = Orientation::default();
+        let b: [Ratio; 6] = [
+            ratio(1, 3),
+            ratio(-1, 5),
+            ratio(2, 7),
+            ratio(1, 4),
+            ratio(0, 1),
+            ratio(-3, 8),
+        ];
+        for n in 1..=12 {
+            o.advance(&b).expect("advances");
+            let r = o.motion();
+            let one = Clifford::blade(0, 0, ratio(1, 1));
+            assert_eq!(
+                r.product(&crate::turning::reversed(&r))
+                    .expect("one signature"),
+                one,
+                "R·R̃ = 1 at step {n}"
+            );
+            assert_eq!(
+                components(&crate::turning::generator(&r).expect("a generator")).expect("planes"),
+                *o.g(),
+                "the generator is the motion's reading"
+            );
+        }
+        let back = Orientation::from_values(&o.values()).expect("reads back");
+        assert_eq!(back, o, "the record gives the motion back exactly");
     }
 }
 

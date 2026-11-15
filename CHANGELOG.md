@@ -12,6 +12,12 @@ change is named here.
 
 ### Changed
 
+- A body's orientation is held as its whole unit motion R, with K per plane
+  beside it, and its generator is a reading (78.173 §8.5, ruled 2026-11-15
+  for every kernel). On the grain the motion is `cayley(⌊generator(R)⌋)`, an
+  exact unit. The laws and the save record are unchanged: all 313 conductor
+  tests pass, and `motion_tests` witnesses `R·R̃ = 1` and the record read
+  back.
 - Mycelium SDK pinned to main 15beb6ea (wire 0x0300), the commit Mycelium's
   standing mesh runs (127.0.0.1:8500–8502); the rc.1 mesh is gone and no
   v0.5.0 tag exists. Contract changes taken in place: every universe act
