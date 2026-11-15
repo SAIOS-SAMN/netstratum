@@ -2135,8 +2135,9 @@ product, never plane by plane:
 
     (1 + β₁e₀₁)(1 + β₂e₀₂) = 1 + β₁e₀₁ + β₂e₀₂ + β₁β₂·e₁₂ = B·R
 
-The boost is `B = V·R⁻¹` and the turning `R = 1 + V_s`, where `V_s` is the
-part of V on the planes that turn. On one plane the product is the flow law
+Boost and turning are read against an observer's time `t`, never the base
+axes: the rate parts as `½(B ∓ tBt⁻¹)`; the boost is `B ∝ 1 + t′t⁻¹`, with
+`t′ = V·t·Ṽ/(V·Ṽ)`, and the turning `R ∝ B̃·V` keeps `t` (`turning::parts`). On one plane the product is the flow law
 (E72). A path closed on paper, `V₂⁻¹V₁⁻¹V₂V₁`, leaves a boost and a turning.
 The Cayley motion of `b·e` reads `1 + (2b/(1 + b·b))·e`.
 

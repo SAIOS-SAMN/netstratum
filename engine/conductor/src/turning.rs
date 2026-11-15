@@ -33,7 +33,8 @@
 //!   Versors compose by the geometric product ([`compose_versors`]); a
 //!   power is the law composed with itself ([`power`]). Two boosts on
 //!   planes sharing the time unit leave a boost times a turning on the
-//!   plane between them ([`split`], W2), and a path that closes on paper
+//!   plane between them ([`split`], W2), boost and turning read against an
+//!   observer's own time ([`parts`]), never by the base axes, and a path that closes on paper
 //!   leaves a residue in the algebra ([`holonomy`], W4).
 use cfe::ratio::Ratio;
 use num_traits::{One, Signed, Zero};
@@ -84,9 +85,9 @@ pub enum TurningRefusal {
     /// at `β = ±1` on a boost plane is null (`V·Ṽ = 0`), and a product of
     /// versors can land there.
     Null,
-    /// A versor that is not a boost times a turning on the plane named:
-    /// the blade masks the boost would keep that are not boost planes.
-    NotSplit { masks: Vec<usize> },
+    /// A time that is not a vector squaring to a negative scalar: its
+    /// blade masks.
+    NotTime { masks: Vec<usize> },
 }
 
 impl Clifford {
@@ -442,35 +443,53 @@ pub fn power(v: &Clifford, n: u64) -> Result<Clifford, TurningRefusal> {
     Ok(out)
 }
 
-/// `v` split as a boost times a turning, `V ∝ B·R` (docs/138 W2). The
-/// turning is `R = 1 + V_s`, `V_s` the part of `V` on the planes that turn
-/// (each squaring to `−1`), read whole as a bivector; the boost is
-/// `B = V·R⁻¹`. Refused `NotSplit` with the masks `B` keeps that are
-/// neither its scalar nor a boost plane.
-pub fn split(v: &Clifford) -> Result<(Clifford, Clifford), TurningRefusal> {
-    let v = projective(v)?;
-    let plane = |m: usize| Regime::of(&Clifford::blade(v.negatives, m, Ratio::one()));
-    let turning = Clifford {
-        negatives: v.negatives,
-        terms: v
-            .terms
-            .iter()
-            .filter(|(m, _)| plane(**m) == Ok(Regime::Elliptic))
-            .map(|(m, c)| (*m, c.clone()))
-            .collect(),
+/// `t` read as a time: a vector squaring to a negative scalar, with its
+/// inverse. Refused `NotTime` with the masks otherwise.
+fn time_of(t: &Clifford) -> Result<Clifford, TurningRefusal> {
+    let refused = || TurningRefusal::NotTime {
+        masks: t.terms.keys().copied().collect(),
     };
-    let r = versor(&turning)?;
-    let boost = v.product(&inverse(&r).ok_or(TurningRefusal::NoMotion)?)?;
-    let masks: Vec<usize> = boost
-        .terms
-        .keys()
-        .copied()
-        .filter(|m| *m != 0 && plane(*m) != Ok(Regime::Hyperbolic))
-        .collect();
-    match masks.is_empty() {
-        true => Ok((boost, r)),
-        false => Err(TurningRefusal::NotSplit { masks }),
+    if t.terms.is_empty() || t.terms.keys().any(|m| grade(*m) != 1) {
+        return Err(refused());
     }
+    let square = t.product(t)?;
+    match square.terms.iter().collect::<Vec<_>>().as_slice() {
+        [(0, c)] if c.is_negative() => inverse(t).ok_or_else(refused),
+        _ => Err(refused()),
+    }
+}
+
+/// The rate `B` parted against the time `t`, by the algebra and never by
+/// the blades' masks: the turning `½(B + tBt⁻¹)` commutes with `t`, the
+/// boost `½(B − tBt⁻¹)` anticommutes with it. Which planes boost and which
+/// turn is the observer's, read from its own time.
+pub fn parts(rate: &Clifford, t: &Clifford) -> Result<(Clifford, Clifford), TurningRefusal> {
+    let inv = time_of(t)?;
+    let mirrored = t.product(rate)?.product(&inv)?;
+    let half = scalar(rate.negatives, Ratio::one() / Ratio::from_integer(2.into()));
+    Ok((
+        half.product(&rate.difference(&mirrored)?)?,
+        half.product(&rate.sum(&mirrored)?)?,
+    ))
+}
+
+/// `v` split as a boost times a turning against the time `t`, `V ∝ B·R`
+/// (docs/138 W2). `V` carries `t` to `t′ = V·t·Ṽ/(V·Ṽ)`; the boost is the
+/// one motion in the plane of `t` and `t′` that does, `B ∝ 1 + t′t⁻¹`; the
+/// turning is `R ∝ B̃·V`, which keeps `t`. Orthogonality is read from the
+/// observer's time, not from the base axes. Refused `NotTime` where `t` is
+/// not a time, `Null` where `t′ = −t`.
+pub fn split(v: &Clifford, t: &Clifford) -> Result<(Clifford, Clifford), TurningRefusal> {
+    let inv = time_of(t)?;
+    let v = projective(v)?;
+    let norm = v.product(&reversed(&v))?;
+    let carried = v
+        .product(t)?
+        .product(&reversed(&v))?
+        .product(&inverse(&norm).ok_or(TurningRefusal::Null)?)?;
+    let boost = projective(&scalar(v.negatives, Ratio::one()).sum(&carried.product(&inv)?)?)?;
+    let turning = projective(&reversed(&boost).product(&v)?)?;
+    Ok((boost, turning))
 }
 
 /// The residue of the path `first → then → first⁻¹ → then⁻¹`,
@@ -777,6 +796,14 @@ mod versor_tests {
         versor(&Clifford::blade(SIG, mask, beta)).expect("a versor")
     }
 
+    fn time() -> Clifford {
+        Clifford::blade(SIG, 0b001, q(1, 1))
+    }
+
+    fn commutes(a: &Clifford, b: &Clifford) -> bool {
+        a.product(b).expect("one signature") == b.product(a).expect("one signature")
+    }
+
     fn pow(x: &Ratio, n: u64) -> Ratio {
         (0..n).fold(q(1, 1), |p, _| p * x.clone())
     }
@@ -819,18 +846,18 @@ mod versor_tests {
             v,
             value(&[(0, q(1, 1)), (E01, q(1, 3)), (E02, q(1, 2)), (E12, q(1, 6))])
         );
-        let (b, r) = split(&v).expect("splits");
+        let (b, r) = split(&v, &time()).expect("splits");
         assert_eq!(
             b,
             value(&[(0, q(1, 1)), (E01, q(15, 37)), (E02, q(16, 37))])
         );
         assert_eq!(r, value(&[(0, q(1, 1)), (E12, q(1, 6))]));
-        assert_eq!(b.product(&r).expect("one signature"), v, "V = B·R exactly");
+        assert_eq!(compose_versors(&b, &r).expect("composes"), v, "V ∝ B·R");
         // One rate on both planes at once is another motion: no turning.
         let both = Clifford::blade(SIG, E01, q(1, 3))
             .sum(&Clifford::blade(SIG, E02, q(1, 2)))
             .expect("one signature");
-        let (b0, r0) = split(&versor(&both).expect("a versor")).expect("splits");
+        let (b0, r0) = split(&versor(&both).expect("a versor"), &time()).expect("splits");
         assert_eq!(
             (b0, r0),
             (versor(&both).expect("a versor"), value(&[(0, q(1, 1))]))
@@ -866,8 +893,8 @@ mod versor_tests {
                 (E12, q(-6, 11))
             ])
         );
-        let (b, r) = split(&residue).expect("splits");
-        assert_eq!(b.product(&r).expect("one signature"), residue);
+        let (b, r) = split(&residue, &time()).expect("splits");
+        assert_eq!(compose_versors(&b, &r).expect("composes"), residue);
         assert!(b.terms().all(|(m, _)| m != E12) && r.terms().any(|(m, _)| m == E12));
         let closed = holonomy(&v1, &boost(q(1, 2), E01)).expect("composes");
         assert_eq!(closed, value(&[(0, q(1, 1))]), "parallel boosts commute");
@@ -886,8 +913,68 @@ mod versor_tests {
         );
         let stepped = (0..4 * n).try_fold(value(&[(0, q(1, 1))]), |p, _| compose_versors(&p, &v));
         assert_eq!(stepped.expect("composes"), far);
-        let (b, r) = split(&far).expect("splits");
-        assert_eq!(b.product(&r).expect("one signature"), far);
+        let (b, r) = split(&far, &time()).expect("splits");
+        assert_eq!(compose_versors(&b, &r).expect("composes"), far);
+    }
+
+    /// Orthogonality is the observer's: against a moving observer's time
+    /// `t = W·e₀·W̃` the same `V` splits into another boost and turning,
+    /// each mixing blades the base axes would part; the boost carries `t`
+    /// to `V·t·Ṽ`, the turning keeps `t`, and `V ∝ B·R` either way. The
+    /// rate's parts commute and anticommute with `t`.
+    #[test]
+    fn orthogonality_is_read_from_the_observers_time() {
+        let v = compose_versors(&boost(q(1, 3), E01), &boost(q(1, 2), E02)).expect("composes");
+        let w = boost(q(1, 4), E01);
+        let moving = w
+            .product(&time())
+            .and_then(|x| x.product(&reversed(&w)))
+            .expect("one signature");
+        assert_eq!(moving, value(&[(0b001, q(17, 16)), (0b010, q(1, 2))]));
+        let (b, r) = split(&v, &moving).expect("splits");
+        assert_eq!(
+            b,
+            value(&[
+                (0, q(1, 1)),
+                (E01, q(2399, 8149)),
+                (E02, q(4624, 8149)),
+                (E12, q(2176, 8149))
+            ])
+        );
+        assert_eq!(
+            r,
+            value(&[(0, q(1, 1)), (E02, q(-28, 675)), (E12, q(-119, 1350))])
+        );
+        assert_eq!(compose_versors(&b, &r).expect("composes"), v);
+        assert!(
+            commutes(&r, &moving),
+            "the turning keeps the observer's time"
+        );
+        let carried = |x: &Clifford| {
+            projective(
+                &x.product(&moving)
+                    .and_then(|y| y.product(&reversed(x)))
+                    .expect("one signature")
+                    .product(&moving)
+                    .expect("one signature"),
+            )
+            .expect("a versor")
+        };
+        assert_eq!(carried(&b), carried(&v), "the boost carries t where V does");
+        let rate = value(&[(E01, q(1, 3)), (E02, q(1, 2)), (E12, q(1, 6))]);
+        for t in [time(), moving] {
+            let (boosting, turning) = parts(&rate, &t).expect("parts");
+            assert_eq!(boosting.sum(&turning).expect("one signature"), rate);
+            assert!(commutes(&turning, &t));
+            let anti = boosting
+                .product(&t)
+                .and_then(|x| x.sum(&t.product(&boosting)?))
+                .expect("one signature");
+            assert_eq!(anti, value(&[]), "the boost anticommutes with t");
+        }
+        let (boosting, turning) = parts(&rate, &time()).expect("parts");
+        assert_eq!(boosting, value(&[(E01, q(1, 3)), (E02, q(1, 2))]));
+        assert_eq!(turning, value(&[(E12, q(1, 6))]));
     }
 
     #[test]
@@ -903,5 +990,13 @@ mod versor_tests {
             Err(TurningRefusal::NotGenerator { .. })
         ));
         assert_eq!(projective(&plane(E01)), Err(TurningRefusal::Null));
+        assert!(matches!(
+            split(&boost(q(1, 3), E01), &plane(0b010)),
+            Err(TurningRefusal::NotTime { .. })
+        ));
+        assert!(matches!(
+            split(&boost(q(1, 3), E01), &plane(E01)),
+            Err(TurningRefusal::NotTime { .. })
+        ));
     }
 }

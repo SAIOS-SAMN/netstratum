@@ -61,6 +61,20 @@ and `B = 1 + a·e₀₁ + b·e₀₂`, with
 coefficients gives `a`, `b` and `γ`. *Fixture:* β = ⅓, ½ gives
 `1 + ⅓e₀₁ + ½e₀₂ + ⅙e₁₂`, and `B·R` reproduces it exactly. ∎
 
+**W2′ (orthogonality is the observer's).** Which planes boost and which
+turn is read against an observer's own time `t`, not against the base axes:
+- the rate parts as `½(B ∓ tBt⁻¹)`, a boost that anticommutes with `t` and a
+  turning that commutes with it;
+- `V` carries `t` to `t′ = V·t·Ṽ/(V·Ṽ)`, the boost is `B ∝ 1 + t′t⁻¹`, and
+  the turning `R ∝ B̃·V` keeps `t`.
+
+*Proof.* `1 + t′t⁻¹` is the motion in the plane of `t` and `t′` taking one
+to the other, so `B̃V` fixes `t`. *Fixture:* at `t = e₀` this is W2. Against
+`t = W·e₀·W̃` with `W = 1 + ¼e₀₁`, so `t = (17/16)e₀ + ½e₁`, the same V
+splits into `B = 1 + (2399/8149)e₀₁ + (4624/8149)e₀₂ + (2176/8149)e₁₂` and
+`R = 1 − (28/675)e₀₂ − (119/1350)e₁₂`. Each mixes blades the base axes keep
+apart, and `V ∝ B·R`. ∎
+
 **W3 (the turning is real motion the per-plane law drops).** Composing per
 plane keeps `a` and `b` (approximately, each by the flow law alone) and loses
 `γ`. Whenever two boost planes move at once, the turning `γ` on the plane
@@ -110,14 +124,15 @@ a dynamic force:**
 
 1. **Built.** In `turning` (E76): `versor(B) = 1 + B` of a whole rate
    bivector; `compose_versors` by the geometric product; `power` by
-   squarings; `split` into `B·R`, where the turning is V's part on the
-   turning planes read as a bivector, not as a coefficient; `holonomy` (W4).
+   squarings; `split` into `B·R` and `parts`, both against an observer's
+   time (W2′), never the blade masks; `holonomy` (W4).
    Witnesses (`turning::versor_tests`):
    - the fixtures above;
    - the flow law at n = 7 and 28;
    - `V^{4N} = (V^N)⁴` at N = 7, and equal to 4N single products;
    - the Cayley reading `2b/(1 + b·b)`;
-   - a rate on two planes at once has no turning.
+   - a rate on two planes at once has no turning;
+   - the moving observer's split (W2′).
 2. The ledger: spin read as the motion's bivector, with conservation stated
    on it. The per-plane identities become its projections.
 3. The shear restated (#199), then the release and the drift.
