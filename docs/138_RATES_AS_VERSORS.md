@@ -163,3 +163,36 @@ a dynamic force:**
 3. The shear restated (#199), then the release and the drift.
 4. Read on a laid checkpoint: where W2's turning moves spin between planes,
    against the per-plane run.
+
+## 5. The shear restated (#199): derivation, and where it stops
+
+The shear moves a mote's rate `x_k = 2δ·ℓ_k/ℓ_o` on each spatial plane by
+the pull `y_k = −σ·F_k·o·(x̄_k ⊖ x_k)` (`coupling::pulled`), one plane at a
+time. Restated:
+- the rates form one boost, `X = Σ x_k·e₀∧n_k`, with `n_k` the axis dual to
+  plane k, and so does the pull, `Y`;
+- they compose whole: `V′ = V(Y)·V(X)`. With the rate itself as the
+  coefficient, the parallel case is the engine's `x ⊕ y` exactly (W1);
+- `split(V′, e₀)` gives the boost, whose components are the new rates (the
+  spin follows them as now, `ℓ′_k = ℓ_k·x′_k/x_k`), and the turning
+  `R = 1 + c·e`, whose part on each spatial plane is `x∧y/(1 + x·y)` to first
+  order: the Thomas–Wigner turning of the mote;
+- the bound is the versor's own, `V·Ṽ ≠ 0`, the whole rate inside the
+  luminal bound, not each plane apart.
+
+**Where it stops.** The turning R is exact over ℚ only as a versor: its
+coefficient `c` is a rate. A mote's orientation holds its motion as the
+Cayley generator `g` with `motion(g) ∝ (1 + g·e)²`, and the generator of
+`1 + c·e` is `g` with `2g/(1 − g·g) = c`. That `g` is irrational unless
+`1 + c·c` is a rational square. So the Wigner turning cannot be composed into
+an orientation held as its generator. The two exact ways out:
+1. Hold each orientation as its versor (rational, closed under composition
+   and under `split`), with the generator as a reading. The phase readings
+   then move onto `c`.
+2. Keep the generator, and book the turning as a versor beside it until it
+   is read.
+
+The generator with K per plane is the form shared across the core tube
+(78.173 §8.4, settled with Mycelium on 2026-11-07). Way 1 changes a
+cross-kernel form, so it goes to Mycelium and the operator before any code.
+
