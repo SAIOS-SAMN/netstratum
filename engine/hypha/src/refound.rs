@@ -452,7 +452,8 @@ pub fn concord(
 /// The seam: the hypha never reads a kernel's letter names. Mycelium's
 /// letters are Z = protons and Q = neutrons, the inverse of netstratum's
 /// (docs/97: Q protons, Z neutrons), so each nucleus crosses as
-/// `Nucleus { z: protons, q: neutrons }`, isotopes apart. A nucleus with no
+/// `Nucleus::of(protons, neutrons)`, isotopes apart, its electron phase
+/// share `R = 0` (manifest v3). A nucleus with no
 /// proton is no element and is refused by name here, never dropped.
 pub fn post_manifest(
     session: &Session,
@@ -476,7 +477,10 @@ pub fn post_manifest(
         let count = c
             .to_biguint()
             .ok_or_else(|| io::Error::other("a count passes the manifest's carrier"))?;
-        nuclei.push((Nucleus { z, q: neutrons }, count));
+        // R, the electron phase share (manifest v3, 78.184 §5): left to
+        // netstratum's physics, `R = 0`, until its capture's electron phase is
+        // derived as that share (docs/134 §12.3, #205).
+        nuclei.push((Nucleus::of(z, neutrons), count));
     }
     let signed = Manifest {
         domain,

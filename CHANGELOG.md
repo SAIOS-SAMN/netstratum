@@ -67,7 +67,10 @@ change is named here.
   `ns-hypha endowment` reads the court's account through the paged
   READ-ENDOWMENT (`read_endowment`, mycelium #332; pin 60c94245), and
   `standing` prints μ per lane. Read on the recut mesh: manifest Sealed, the
-  endowment assembled in 2 pages, 1,495 nucleus entries.
+  endowment assembled in 2 pages, 1,495 nucleus entries. Manifest v3 (pin
+  fb98c2e1): each nucleus posts `Nucleus::of(protons, neutrons)`, `R = 0`
+  (#205). Re-founded on the step-5 mesh (delivery per final point): the
+  manifest is sealed at μ 0 and the reserve holds 0, awaiting T's advance.
 - The state on Cl(13,1) (docs/136; operator ruling 2026-11-13, one
   body-state signature across kernels, superseding docs/131's Cl(5,4)). A
   body's place and rotor are on the base; the S¹¹ fibre is read by each
