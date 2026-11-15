@@ -23,6 +23,18 @@ change is named here.
 
 ### Added
 
+- Heat placed as the electrons' phase rate (docs/134 §11; operator
+  2026-11-15): stripping reads the agitation share as its rate `a/(1 − a)`
+  (`plasma::phase_rate`), at the star core's cuts and a world's layers. T12:
+  ignition (`a < ½`) and hydrogen's stripping (`a ≥ ½`) meet at one point, so
+  the ignition criterion is next.
+- The capture phase (docs/134 §12, E75; operator 2026-11-15: "straight-line
+  rigidity"): each kind's phase is its capture chain's accumulated face,
+  `φ_k = Σ s_j` (`pulse::capture_phases`), replacing `Q·½` in the founding and
+  the release and `Q × push` in a star's spray. It is not the seam's rest point
+  (§12.3), so manifest v3 entries state `R = 0`. Read (l109 → 112): 1 star →
+  0. The rigid parity had stacked the release onto two antipodes; spread over
+  the turn, the matter gathers only by motion between echoes (the stride).
 - The gravitational catch (docs/137): axioms A1–A7, theorems T1–T9 (the
   catch is the matter's; a heavier star draws a body of the same spin nearer,
   T3′; a lone parcel's orthogonal catch is ⅔ of its orbit, T5; the catch is

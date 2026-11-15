@@ -3118,13 +3118,15 @@ pub fn spray(
     push: &Ratio,
 ) -> Vec<Mote> {
     let at = |k: usize| base.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
+    let phases = crate::pulse::capture_phases(released);
     released
         .iter()
         .filter(|(_, a)| **a > ratio(0, 1))
         .filter_map(|(k, a)| {
-            // The capture phase: Z × the parent's push share (the star's own),
-            // so the kinds leave over the whole turn, never two antipodes.
-            let z = ratio(i64::from(crate::chem::charge(k)), 1) * push.clone();
+            // The capture phase (docs/134 §12): the turning the releasing
+            // body's own capture chain has accumulated up to this kind.
+            let z = phases.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
+            let _ = push;
             // From the star's own phase in each plane (docs/96: the planes
             // part by the star's own history, never a set offset).
             let mut phase = rest(crate::ring::grain(&frac(
@@ -4104,12 +4106,13 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
     let Some((p, _, mean)) = crate::pulse::galaxy_push(grains) else {
         return Some(Vec::new());
     };
-    // The phases stand against the source's own bell (docs/95). The captures turn them (with Xylarium): each pass of the
-    // outbound stream through the throat is one capture and turns the
-    // crossing point by a = ½, so kind Z leaves at the source's phase plus
-    // `Z·½`, and on the orthogonal orbit it starts on the axial leg, outbound (`½ +
-    // Z·½`). Two groups at the founding, parted by each kind's own orthogonal orbit rate
-    // `δ(R_z)` at its own reach thereafter. (The per-universe offset, the
+    // The phases stand against the source's own bell (docs/95). The captures
+    // turn them: each kind leaves at the turning its capture chain has
+    // accumulated up to it, `φ_k = Σ_{j ≤ k} s_j`, each `s_j` the unlocked face
+    // at its own capture event, a hemisphere, never a static ½ (docs/134 §12,
+    // `pulse::capture_phases`); on the orthogonal orbit it starts on the axial
+    // leg, outbound (`½ + φ_k`). The kinds part thereafter by each one's own
+    // orthogonal orbit rate `δ(R_z)` at its own reach. (The per-universe offset, the
     // hypha-assigned TUniversal position, is owed with Mycelium.)
     // from the ring (operator 2026-10-25: "make worlds appear"; docs/94 §2:
     // nothing can orbit inside the ring, where `2δ > 1` breaks the luminal
@@ -4127,6 +4130,7 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
         return Some(Vec::new());
     }
     let unit = crate::plasma::bounce_unit(grains, &mean);
+    let phases = crate::pulse::capture_phases(grains);
     let kinds: Vec<(&crate::chem::Kind, &Ratio, Ratio, Ratio)> = grains
         .iter()
         .filter(|(_, a)| **a > ratio(0, 1))
@@ -4155,8 +4159,9 @@ pub fn founding(grains: &Manifest, span: Option<&Ratio>) -> Option<Vec<Mote>> {
         kinds
             .iter()
             .map(|(k, a, r, _)| {
-                // The captures' half turn a pass, in every plane alike.
-                let turn = ratio(i64::from(crate::chem::charge(k)), 2);
+                // The capture phase (docs/134 §12): the chain's accumulated
+                // turning up to this kind, in every plane alike.
+                let turn = phases.get(*k).cloned().unwrap_or_else(|| ratio(0, 1));
                 let mut phase = rest(frac(&(ratio(1, 2) + turn.clone())));
                 for &s in &SPACE {
                     phase[s] = frac(&turn);

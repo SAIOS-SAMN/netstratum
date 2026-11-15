@@ -2127,6 +2127,17 @@ per-kind reading by holding); the bounce's release leaves as one pooled parcel
 one-kind parcel reads as its kind; a merge adds parts by kind; the throat parts
 a mix into its kinds (`recycle::part`).
 
+**E75 · The capture phase.** `pulse::{capture_face, capture_phases}`
+(docs/134 §12; operator 2026-11-15). A kind's capture phase is the turning
+its body's capture chain has accumulated up to it, charge ascending:
+
+    φ_k = Σ_{j ≤ k} s_j,     s_j = ½·h_j/(2h_j + 1)
+
+Here `h_j` is the holding share captured before kind j, read on the
+releasing body's own mix. Read by the cascade (`K = Σ s`), the founding's
+motes, the bounce's release (a pool by its parts' holding) and a star's
+spray. It replaces `Q·½` and `Q × push`.
+
 **E72 · The stride and the echo's draw.** `ring::compose_n`,
 `flows::mean_response` (docs/132 §1, §5; operator 2026-11-12). The flow law
 over n bells, composed, never scaled:

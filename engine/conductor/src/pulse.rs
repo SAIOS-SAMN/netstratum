@@ -618,6 +618,55 @@ pub struct Universe {
     pub firm_prev: Vec<(crate::chem::Kind, Vec<Ratio>)>,
 }
 
+/// The unlocked face at a capture (docs/134 §12; operators 2026-10-18, "the
+/// unlocked face, it's a hemisphere, keep it"): `½·R/(R + H)` with `R = held`
+/// so far and `H = 1 + held`, on the grain. A hemisphere, never a static ½.
+pub fn capture_face(held: &Ratio) -> Ratio {
+    grain(&(ratio(1, 2) * held.clone() / (held.clone() + ratio(1, 1) + held.clone())))
+}
+
+/// The capture chain over `kinds` (charge ascending): each kind's share, the
+/// face at its own event, and the holding share captured in all.
+fn capture_chain(kinds: &[(crate::chem::Kind, Ratio)], total: &Ratio) -> (Vec<Ratio>, Ratio) {
+    let mut held = ratio(0, 1);
+    let mut share = Vec::with_capacity(kinds.len());
+    for (k, a) in kinds {
+        share.push(capture_face(&held));
+        held = grain(
+            &(held + a.clone() * ratio(i64::from(crate::chem::weight(k)), 1) / total.clone()),
+        );
+    }
+    (share, held)
+}
+
+/// The capture phase of each kind of `m` (docs/134 §12): the turning the
+/// capture chain has accumulated up to and including it,
+/// `φ_k = Σ_{j ≤ k} s_j`, `s_j` the face at each capture event, the chain
+/// built charge ascending in the body's own units (regeneration: each core's
+/// chain is its own). A reading of the mix, never stored; in turns, exact.
+pub fn capture_phases(m: &Manifest) -> Manifest {
+    let total = mass(m);
+    if total.is_zero() {
+        return Manifest::new();
+    }
+    let mut kinds: Vec<(crate::chem::Kind, Ratio)> = m
+        .iter()
+        .filter(|(_, a)| **a > ratio(0, 1))
+        .map(|(k, a)| (k.clone(), a.clone()))
+        .collect();
+    kinds.sort_by_key(|(k, _)| crate::chem::charge(k));
+    let (share, _) = capture_chain(&kinds, &total);
+    let mut acc = ratio(0, 1);
+    kinds
+        .into_iter()
+        .zip(share)
+        .map(|((k, _), s)| {
+            acc += s;
+            (k, acc.clone())
+        })
+        .collect()
+}
+
 /// The pulse: the manifest deployed from `seed`. The unit of mass is the
 /// deepest core's hole.
 /// The founding cascade (operators 2026-10-18, Xylarium 11.0 (15), the
@@ -657,15 +706,8 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         .map(|(k, a)| (k.clone(), a.clone()))
         .collect();
     kinds.sort_by_key(|(k, _)| crate::chem::charge(k));
-    let face = |held: &Ratio| {
-        g(&(ratio(1, 2) * held.clone() / (held.clone() + ratio(1, 1) + held.clone())))
-    };
-    let mut held = ratio(0, 1);
-    let mut share = Vec::with_capacity(kinds.len());
-    for (k, a) in &kinds {
-        share.push(face(&held));
-        held = g(&(held + a.clone() * w(k) / total.clone()));
-    }
+    let face = |held: &Ratio| capture_face(held);
+    let (share, held) = capture_chain(&kinds, &total);
     let spin = share.iter().fold(ratio(0, 1), |a, b| a + b.clone());
     let h = ratio(1, 1) + held.clone();
     let s_final = face(&held);
@@ -3053,6 +3095,44 @@ mod record_tests {
         let by_tilt: Vec<Ratio> = tilt.iter().map(|t| x.ell_orth() * t.clone()).collect();
         assert_eq!(read.spins_orth, by_tilt, "carried by the tilt");
         assert_eq!(read.spins, x.spins);
+    }
+}
+
+#[cfg(test)]
+mod capture_tests {
+    use super::{capture_face, capture_phases, grain, mass, Manifest};
+    use cfe::ratio::ratio;
+
+    /// docs/134 §12: the capture chain's phases. Hydrogen, first in the chain,
+    /// stands at 0; each share is a hemisphere's face, under ¼; the phases
+    /// accumulate charge ascending; the last is the chain's whole turning.
+    #[test]
+    fn the_capture_phase_is_the_chains_accumulated_face() {
+        let k = |q: u32| crate::chem::Kind::element(q).expect("element");
+        let mut m = Manifest::new();
+        m.insert(k(1), ratio(70, 1));
+        m.insert(k(2), ratio(20, 1));
+        m.insert(k(8), ratio(3, 1));
+        m.insert(k(26), ratio(1, 1));
+        let phi = capture_phases(&m);
+        assert_eq!(phi[&k(1)], ratio(0, 1));
+        let order = [k(1), k(2), k(8), k(26)];
+        for w in order.windows(2) {
+            let step = phi[&w[1]].clone() - phi[&w[0]].clone();
+            assert!(
+                step > ratio(0, 1) && step < ratio(1, 4),
+                "a hemisphere's face"
+            );
+        }
+        let total = mass(&m);
+        let mut held = ratio(0, 1);
+        let mut whole = ratio(0, 1);
+        for q in [1u32, 2, 8, 26] {
+            whole += capture_face(&held);
+            let w = ratio(i64::from(crate::chem::weight(&k(q))), 1);
+            held = grain(&(held + m[&k(q)].clone() * w / total.clone()));
+        }
+        assert_eq!(phi[&k(26)], whole);
     }
 }
 

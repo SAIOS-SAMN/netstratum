@@ -2295,6 +2295,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // kind's bound part alone at `p·w̄/w`.
                 let shared = crate::plasma::bounce_unit(&core.throat, &mean);
                 let (pool_unit, bound) = crate::plasma::bounce_split(&core.throat, &mean);
+                // Each kind's capture phase (docs/134 §12): the turning this
+                // throat's own capture chain has accumulated up to it.
+                let captured = crate::pulse::capture_phases(&core.throat);
                 // One parcel leaving with the carried `c`, its capture half
                 // turns `z`: its spins, its phases, the antipole's and the
                 // reservoir's payments for what it leaves with, and the mote.
@@ -2375,7 +2378,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 };
                 let mut pooled = crate::pulse::Manifest::new();
                 // Each kind's bound part, read before it leaves: (kind, amount,
-                // carried, capture half turns).
+                // carried, capture phase).
                 let mut bound_parts: Vec<(crate::chem::Kind, Ratio, Ratio, Ratio)> = Vec::new();
                 for (k, a) in held_now {
                     let w = crate::flows::weight(&k);
@@ -2409,7 +2412,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     }
                     if own > ratio(0, 1) {
                         let c_own = p.clone() * crate::plasma::own_spin(&w, &mean);
-                        let z = ratio(i64::from(crate::chem::charge(&k)), 2);
+                        let z = captured.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
                         bound_parts.push((k, own, c_own, z));
                     }
                 }
@@ -2464,16 +2467,16 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
                 pooled.retain(|_, a| *a > ratio(0, 1));
                 if !pooled.is_empty() {
-                    // The pool's capture half turns: its parts' charge by
-                    // holding (a derived choice for a mix, to be revisited:
-                    // a kind's half turns are its protons, `Q/2`).
+                    // The pool's capture phase (docs/134 §12): its parts'
+                    // phases by holding, first degree (the merge's mean of
+                    // phases), each the throat chain's accumulated turning.
                     let h = mass(&pooled);
-                    let q = pooled.iter().fold(ratio(0, 1), |s, (k, a)| {
+                    let phi = pooled.iter().fold(ratio(0, 1), |s, (k, a)| {
                         s + a.clone()
                             * crate::flows::weight(k)
-                            * ratio(i64::from(crate::chem::charge(k)), 1)
+                            * captured.get(k).cloned().unwrap_or_else(|| ratio(0, 1))
                     }) / h;
-                    leave(core, pooled, &c_pool0, &(q / ratio(2, 1)), &mut released);
+                    leave(core, pooled, &c_pool0, &phi, &mut released);
                 }
                 core.throat.retain(|_, a| *a > ratio(0, 1));
                 released.2 = mass(&core.throat) / unit.clone();
