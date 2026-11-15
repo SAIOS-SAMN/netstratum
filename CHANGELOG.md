@@ -33,6 +33,9 @@ change is named here.
   the blade masks (`split`, `parts`, W2′). A path closed on paper leaves a
   boost and a turning (W4). The
   W4 fixture's `e₁₂` sign is corrected to −⅓.
+  Step 2: the spin ledger is one bivector (`flows::{Mote::spin,
+  spin_ledger}`). The per-plane books are its components. A motion carries a
+  spin by `turning::carry`, keeping its angles.
 - The stride, S1 (docs/132 §4.1, #197): the attractor laws over n bells in
   closed form (`flows::{keep_over, relax_over}`). The galaxy's conformations
   at an echo's arrival stand for the bells each mote has lived since the

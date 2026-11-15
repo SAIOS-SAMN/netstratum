@@ -241,6 +241,17 @@ impl Mote {
         self.parts.values().fold(ratio(0, 1), |s, a| s + a.clone())
     }
 
+    /// Its spin as one bivector on the six planes (docs/138 §3.1): the
+    /// orbit's spatial planes and their R partners, whole
+    /// (`orientation::bivector`). The per-plane spins are its components.
+    pub fn spin(&self) -> crate::turning::Clifford {
+        let at = |v: &Vec<Ratio>, k: usize| v.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
+        crate::orientation::bivector(&std::array::from_fn(|p| match p {
+            0..=2 => at(&self.spins, p),
+            _ => at(&self.spins_orth, p - 3),
+        }))
+    }
+
     /// Its holding, `Σ a·w`: the nucleons gravity pulls.
     pub fn holding(&self) -> Ratio {
         self.parts
@@ -525,6 +536,20 @@ pub fn settle(
     if x.lever.iter().all(|l| l.is_zero()) {
         x.lever = Vec::new();
     }
+}
+
+/// The spin ledger: `Σ m·L`, every mote's holding times its spin bivector,
+/// one value over all six planes (docs/138 §3.1). Each per-plane book
+/// `Σ m·ℓ_k` is its component on plane k.
+pub fn spin_ledger(motes: &[Mote]) -> crate::turning::Clifford {
+    motes.iter().fold(
+        crate::orientation::bivector(&std::array::from_fn(|_| ratio(0, 1))),
+        |s, x| {
+            let m = crate::turning::Clifford::blade(0, 0, x.holding());
+            s.sum(&m.product(&x.spin()).expect("one signature"))
+                .expect("one signature")
+        },
+    )
 }
 
 /// A kind's weight (its hold).
@@ -6150,6 +6175,10 @@ mod coupling_tests {
         let (moved, left) = shear_booked(&mut motes, &enc, &total, true);
         assert!(moved > ratio(0, 1));
         let after = books(&motes);
+        // The books are the ledger bivector's components on the planes.
+        let ledger =
+            crate::orientation::components(&super::spin_ledger(&motes)).expect("on the planes");
+        assert_eq!(ledger[..SPACE.len()].to_vec(), after);
         for k in 0..SPACE.len() {
             assert!(motes.iter().all(|x| x.spins[k] >= ratio(0, 1)));
             assert_eq!(

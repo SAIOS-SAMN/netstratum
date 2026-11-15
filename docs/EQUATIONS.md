@@ -2144,6 +2144,10 @@ axes: the rate parts as `½(B ∓ tBt⁻¹)`; the boost is `B ∝ 1 + t′t⁻¹
 `t′ = V·t·Ṽ/(V·Ṽ)`, and the turning `R ∝ B̃·V` keeps `t` (`turning::parts`). On one plane the product is the flow law
 (E72). A path closed on paper, `V₂⁻¹V₁⁻¹V₂V₁`, leaves a boost and a turning.
 The Cayley motion of `b·e` reads `1 + (2b/(1 + b·b))·e`.
+A spin is one bivector `L` on the six planes (`flows::Mote::spin`). The
+ledger is `Σ m·L` (`flows::spin_ledger`), and its components are the
+per-plane books. A motion carries the spin as `V·L·Ṽ/(V·Ṽ)`
+(`turning::carry`), keeping its angles.
 
 **E75 · The capture phase.** `pulse::{capture_face, capture_phases}`
 (docs/134 §12; operator 2026-11-15). A kind's capture phase is the turning

@@ -151,8 +151,15 @@ a dynamic force:**
    - a rate on two planes at once has no turning;
    - the moving observer's split (W2′);
    - three angles in Cl(6,0) and a boost with a turning in Cl(3,1) (V1′).
-2. The ledger: spin read as the motion's bivector, with conservation stated
-   on it. The per-plane identities become its projections.
+2. **Built.** The ledger is one bivector:
+   - `flows::Mote::spin` holds a mote's spin on its six planes as one
+     bivector;
+   - `flows::spin_ledger` is `Σ m·L`, and the per-plane books `Σ m·ℓ_k` are
+     its components (witnessed on the shear's book);
+   - `turning::carry` gives `V·L·Ṽ/(V·Ṽ)`, a spin carried by a motion. It
+     moves between the planes the motion touches and keeps its angles.
+
+   No law in the engine carries spin yet; that is step 3.
 3. The shear restated (#199), then the release and the drift.
 4. Read on a laid checkpoint: where W2's turning moves spin between planes,
    against the per-plane run.

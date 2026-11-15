@@ -594,6 +594,15 @@ pub fn split(v: &Clifford, t: &Clifford) -> Result<(Clifford, Clifford), Turning
     Ok((boost, turning))
 }
 
+/// `x` carried by the motion `v`: `V·x·Ṽ/(V·Ṽ)`, exact (docs/138 §3.1). A
+/// spin carried by a turning moves between the planes it touches, its angles
+/// kept (`invariants`). Refused `Null` where `V·Ṽ` has no inverse.
+pub fn carry(v: &Clifford, x: &Clifford) -> Result<Clifford, TurningRefusal> {
+    let norm = v.product(&reversed(v))?;
+    let held = inverse(&norm).ok_or(TurningRefusal::Null)?;
+    v.product(x)?.product(&reversed(v))?.product(&held)
+}
+
 /// The residue of the path `first → then → first⁻¹ → then⁻¹`,
 /// `then⁻¹·first⁻¹·then·first` read up to a scalar (docs/138 W4), each
 /// inverse the reverse (`V·Ṽ` is a scalar). It is `1` only where the two
@@ -1238,5 +1247,25 @@ mod angle_tests {
             .expect("one signature");
         assert_eq!(plane_of(&rate, &q(-1, 4)), Err(TurningRefusal::Isoclinic));
         assert!(versor(&rate).is_ok());
+    }
+
+    /// A spin carried by a turning moves between the planes the turning
+    /// touches and keeps its angles; carried by a motion on its own plane, it
+    /// stays as it was.
+    #[test]
+    fn a_carried_spin_keeps_its_angles() {
+        let parts = three();
+        let spin = total(&parts);
+        let turn = one(0).sum(&e(0, &[2, 5], q(2, 3))).expect("one signature");
+        let moved = carry(&turn, &spin).expect("carried");
+        assert_ne!(moved, spin);
+        assert!(
+            moved.terms().all(|(m, _)| m.count_ones() == 2),
+            "still a bivector"
+        );
+        assert_eq!(invariants(&moved), invariants(&spin));
+        let own = e(0, &[1, 2], q(1, 2));
+        let along = one(0).sum(&e(0, &[1, 2], q(3, 7))).expect("one signature");
+        assert_eq!(carry(&along, &own).expect("carried"), own);
     }
 }
