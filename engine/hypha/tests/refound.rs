@@ -114,7 +114,8 @@ fn the_ledger_entry_commits_to_netstratums_checkpoints() {
     let domain = SigningKey::from_bytes(&[22; 32]).verifying_key().to_bytes();
     let var = scratch("ledger");
     // No checkpoints: Mycelium's law, the empty commitment is zero.
-    let (empty, n) = ledger_frame(&reserve, domain, &var, 100, point(), [0; 32]).unwrap();
+    let (empty, n) =
+        ledger_frame(&reserve, domain, &var, 100, point(), [0; 32], Vec::new()).unwrap();
     assert_eq!(n, 0);
     let Some(DomainRequest::Ledger(e)) = decode_domain_request(&empty) else {
         panic!("the court does not read it as a LEDGER entry")
@@ -123,7 +124,8 @@ fn the_ledger_entry_commits_to_netstratums_checkpoints() {
     // With checkpoints: committed, signed, parent and u as given.
     std::fs::write(var.join("ancients.bin"), b"arose").unwrap();
     std::fs::write(var.join("substrata").join("ab.tube"), b"tube").unwrap();
-    let (frame, n) = ledger_frame(&reserve, domain, &var, 101, point(), [9; 32]).unwrap();
+    let (frame, n) =
+        ledger_frame(&reserve, domain, &var, 101, point(), [9; 32], Vec::new()).unwrap();
     assert_eq!(n, 2, "both checkpoints committed");
     let Some(DomainRequest::Ledger(s)) = decode_domain_request(&frame) else {
         panic!("decodes")
@@ -142,7 +144,8 @@ fn the_ledger_entry_commits_to_netstratums_checkpoints() {
         .expect("signed by the reserve");
     // Broken: a changed checkpoint changes the commitment.
     std::fs::write(var.join("ancients.bin"), b"arose twice").unwrap();
-    let (changed, _) = ledger_frame(&reserve, domain, &var, 101, point(), [9; 32]).unwrap();
+    let (changed, _) =
+        ledger_frame(&reserve, domain, &var, 101, point(), [9; 32], Vec::new()).unwrap();
     let Some(DomainRequest::Ledger(c)) = decode_domain_request(&changed) else {
         panic!("decodes")
     };

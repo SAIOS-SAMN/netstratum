@@ -23,6 +23,11 @@ change is named here.
 
 ### Added
 
+- `ns-hypha apply <var-root>`: each grant the court reads as not applied is
+  listed `(manifest hash, u)` in the `applied` of the next ledger entry,
+  signed by the reserve at the world's beat (`refound::{ledger_frame,
+  post_ledger}` take the list). It is for Mycelium's grant-applied-in-ledger
+  fix, which until now refused every growth manifest InFlight.
 - The hypha's uplink and seat sessions dial inside Noise (`Session::with_noise`,
   `ns_hypha::noise_home`): each home keeps its static key in `noise.key` and
   pins the hyphae in `noise.pins`; an external mind opts in with

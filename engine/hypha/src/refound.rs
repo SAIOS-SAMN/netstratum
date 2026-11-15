@@ -115,7 +115,9 @@ fn checkpoint_records(var_root: &Path) -> Vec<(Vec<u8>, Vec<Arg>)> {
 ///    coordinate `u`, committing to the checkpoints, no events, parent zero for
 ///    the first (the head after it is kept in `home/ledger-head`).
 ///    The ledger entry's frame, built and signed by `reserve` (no session): the
-///    commitment over the checkpoints, no events, the given parent and point.
+///    commitment over the checkpoints, no events, the given parent and point,
+///    and the grants it applies, each `(manifest hash, u)` (empty but for
+///    `apply`).
 pub fn ledger_frame(
     reserve: &ed25519_dalek::SigningKey,
     domain: [u8; 32],
@@ -123,6 +125,7 @@ pub fn ledger_frame(
     u: u64,
     point: mycelium_sdk::house::tuniversal::TPoint,
     parent: [u8; 32],
+    applied: Vec<([u8; 32], u64)>,
 ) -> io::Result<(Vec<u8>, usize)> {
     use mycelium_sdk::house::atlas::{encode_ledger, LedgerEntry};
     use mycelium_sdk::house::commitment::commitment;
@@ -137,7 +140,7 @@ pub fn ledger_frame(
         events: [0; 32],
         point: point.clone(),
         parent,
-        applied: Default::default(),
+        applied,
         nonce: fresh()?,
     };
     let signed = entry
@@ -148,7 +151,13 @@ pub fn ledger_frame(
     Ok((act, records.len()))
 }
 
-pub fn post_ledger(session: &Session, home: &Path, var_root: &Path, u: u64) -> io::Result<String> {
+pub fn post_ledger(
+    session: &Session,
+    home: &Path,
+    var_root: &Path,
+    u: u64,
+    applied: Vec<([u8; 32], u64)>,
+) -> io::Result<String> {
     use mycelium_sdk::house::atlas::{decode_ledger_reply, Ledgered};
     let reserve = load_key(home, "tier-union.key")?;
     let domain = load_key(home, "tier-domain.key")?
@@ -161,7 +170,7 @@ pub fn post_ledger(session: &Session, home: &Path, var_root: &Path, u: u64) -> i
         .ok()
         .and_then(|b| b.get(..32).and_then(|s| s.try_into().ok()))
         .unwrap_or([0; 32]);
-    let (frame, committed) = ledger_frame(&reserve, domain, var_root, u, point, parent)?;
+    let (frame, committed) = ledger_frame(&reserve, domain, var_root, u, point, parent, applied)?;
     let records_len = committed;
     let reply = session.speak(frame)?;
     match decode_ledger_reply(&reply) {
@@ -351,7 +360,7 @@ pub fn refound(session: &Session, home: &Path, var_root: &Path) -> io::Result<(b
         .ok()
         .and_then(|t| t.trim().parse().ok())
         .unwrap_or(0);
-    let line = post_ledger(session, home, var_root, u)?;
+    let line = post_ledger(session, home, var_root, u, Vec::new())?;
     said.push(format!("4 {line}"));
     if !line.starts_with("LEDGER sealed") {
         return Ok((false, said));
