@@ -10,6 +10,8 @@
 //!   ns-hypha originate [<var-root>]     state the universe's origin once: its Big Bang, its torus
 //!   ns-hypha standing                   the domain's reserve as the court reads it: the
 //!                                       tier sitting, any pending, its μ per lane
+//!   ns-hypha endowment                  the court's account for the domain (ACT_DOMAIN 18):
+//!                                       each grant's μ per lane, and the nuclei granted
 //!   ns-hypha refound [<var-root>]       after the fleet's recut: found, originate, reserve union,
 //!                                       the first ledger entry; then the house maps the gates
 //!   ns-hypha seat [--every S] [--key F] [--worlds D] Netstratum's client kernel on the fleet: pull, think, file (signed with the house key)
@@ -232,6 +234,7 @@ fn main() -> ExitCode {
         }
         Some("refound") => refound_cmd(&up, &args, &home),
         Some("standing") => standing_cmd(&up, &home),
+        Some("endowment") => endowment_cmd(&up, &home),
         Some("census") => census_cmd(&args, Some(&up), &home),
         Some("prune") => prune_cmd(&up, &home),
         Some("publish") => publish_cmd(&up, &home),
@@ -247,6 +250,63 @@ fn main() -> ExitCode {
 /// The domain's reserve as the court reads it (a reading; nothing written):
 /// which tier sits, any redesignation pending, and the μ it holds per lane,
 /// what a tier's bond is posted from (78.129).
+/// The court's account for the domain (READ-ENDOWMENT, ACT_DOMAIN 18): what
+/// it has earned and granted per lane, each of this domain's grants (its
+/// manifest, its μ per lane, founding or growth, applied), and the nuclei the
+/// universe holds by them, read back as the court states them.
+fn endowment_cmd(up: &Uplink, home: &Path) -> ExitCode {
+    use ns_hypha::mycelium_sdk::house::{decode_endowment_reading, encode_endowment_read};
+    let domain = match ns_hypha::fold::tier_key(home, "domain") {
+        Ok(k) => k.verifying_key().to_bytes(),
+        Err(e) => {
+            eprintln!("ns-hypha: the domain key: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    let reply = match up.session().speak(encode_endowment_read(domain)) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("ns-hypha: the endowment was not read: {e}");
+            return ExitCode::from(1);
+        }
+    };
+    let Some(r) = decode_endowment_reading(&reply) else {
+        eprintln!("ns-hypha: the endowment reading did not decode");
+        return ExitCode::from(1);
+    };
+    let lanes = |m: &ns_hypha::mycelium_sdk::house::GrantRead| {
+        m.mu.lanes()
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(", ")
+    };
+    let show = |name: &str, mu: [num_rational::BigRational; 4]| {
+        let l: Vec<String> = mu.iter().map(ToString::to_string).collect();
+        println!("  {name} μ [{}]", l.join(", "));
+    };
+    show("earned", r.earned.lanes());
+    show("founding, to every universe", r.founding.lanes());
+    show("growth, to every universe", r.growth.lanes());
+    println!("  {} grants to this domain", r.grants.len());
+    for g in &r.grants {
+        let id: String = g
+            .manifest
+            .iter()
+            .take(4)
+            .map(|b| format!("{b:02x}"))
+            .collect();
+        println!(
+            "    manifest {id}: μ [{}], {}, {}",
+            lanes(g),
+            if g.founding { "founding" } else { "growth" },
+            if g.applied { "applied" } else { "not applied" }
+        );
+    }
+    println!("  nuclei held by the grants: {} entries", r.nuclei.len());
+    ExitCode::SUCCESS
+}
+
 fn standing_cmd(up: &Uplink, home: &Path) -> ExitCode {
     let hex = |k: &[u8; 32]| {
         k.iter()
@@ -281,7 +341,9 @@ fn standing_cmd(up: &Uplink, home: &Path) -> ExitCode {
                 "  reserve pending: {}",
                 r.pending.as_ref().map_or("none".into(), named)
             );
-            println!("  reserve holds μ: {:?}", r.balance);
+            // The four lanes' wholes (a reading), never the modes' tree.
+            let lanes: Vec<String> = r.balance.lanes().iter().map(ToString::to_string).collect();
+            println!("  reserve holds μ [{}]", lanes.join(", "));
             ExitCode::SUCCESS
         }
         Err(e) => {

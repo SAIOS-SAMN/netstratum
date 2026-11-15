@@ -68,45 +68,31 @@ pub fn nuclei_per_grain() -> num_bigint::BigInt {
     num_bigint::BigInt::from(60u32).pow(30)
 }
 
-/// A manifest's nuclei per Z (protons), Z ascending, each once, every count
-/// positive: what a universe holds as Mycelium's manifest states it. Each
-/// amount is a whole count of nuclei on the one grid (`nucleus`); a
-/// cluster's nuclei are its parts', each at its own Z. An amount off the
-/// grid is floored to whole nuclei, as `nucleus` floors it.
-pub fn nuclei_by_z(m: &Manifest) -> Vec<(u32, num_bigint::BigInt)> {
+/// A manifest's nuclei by their two counts, the nucleon dipole (operator
+/// 2026-11-13: "Z needs to be coupled to Q intrinsically, algebraically, and
+/// geometrically"; Mycelium MU-EQUATIONS §6.13): each nucleus keyed
+/// `(protons, neutrons)`, netstratum's `(Q, Z)` (docs/97), so isotopes stand
+/// apart. Ascending, each once, every count positive. Each amount is a whole
+/// count of nuclei on the one grid (`nucleus`); a cluster's nuclei are its
+/// parts', each at its own pair. An amount off the grid is floored to whole
+/// nuclei, as `nucleus` floors it. No kind is keyed by one letter: the
+/// uplink translates the letters at the seam.
+pub fn nuclei(m: &Manifest) -> Vec<((u32, u32), num_bigint::BigInt)> {
     let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
-    let mut by_z: BTreeMap<u32, num_bigint::BigInt> = BTreeMap::new();
+    let mut by_pair: BTreeMap<(u32, u32), num_bigint::BigInt> = BTreeMap::new();
     for (k, a) in m {
         let count = (a.clone() * Ratio::from_integer(grid.clone()))
             .floor()
             .to_integer();
         for &(n, w) in k.parts() {
-            *by_z.entry(crate::chem::protons(w)).or_default() +=
+            let q = crate::chem::protons(w);
+            *by_pair.entry((q, w.saturating_sub(q))).or_default() +=
                 &count * num_bigint::BigInt::from(n);
         }
     }
-    by_z.into_iter()
+    by_pair
+        .into_iter()
         .filter(|(_, c)| *c > num_bigint::BigInt::from(0))
-        .collect()
-}
-
-/// Nuclei per Z, as Mycelium's manifest carries them (ACT_DOMAIN 17).
-pub type Nuclei = BTreeMap<u16, num_bigint::BigInt>;
-
-/// A manifest of nuclei entering from the court (Mycelium's manifest carries
-/// nuclei per charge): each charge's count in grains as its element, its
-/// lightest nuclide (`Kind::element`), every kind in whole nuclei.
-pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
-    let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
-    nuclei
-        .iter()
-        .filter(|(_, count)| **count > num_bigint::BigInt::from(0))
-        .filter_map(|(z, count)| {
-            Some((
-                crate::chem::Kind::element(u32::from(*z))?,
-                Ratio::new(count.clone(), grid.clone()),
-            ))
-        })
         .collect()
 }
 
@@ -2662,10 +2648,14 @@ mod tests {
     }
 
     #[test]
-    fn a_manifests_nuclei_count_whole_per_z_its_clusters_by_their_parts() {
+    fn a_manifests_nuclei_count_whole_by_their_dipole_its_clusters_by_their_parts() {
         let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
         let k = |s: &str| crate::chem::Kind::parse(s).expect("a kind");
         let whole = |n: i64| Ratio::new(num_bigint::BigInt::from(n), grid.clone());
+        let pair = |w: u32| {
+            let q = crate::chem::protons(w);
+            (q, w - q)
+        };
         // Hydrogen, weight 4, and water: one centre and four hydrogens per
         // molecule.
         let m: Manifest = [
@@ -2674,15 +2664,48 @@ mod tests {
             (k("W0010·4W0001"), whole(2)),
         ]
         .into();
-        let z_water = crate::chem::protons(k("W0010").parts()[0].1);
-        let mut want: BTreeMap<u32, num_bigint::BigInt> = BTreeMap::new();
-        *want.entry(1).or_default() += num_bigint::BigInt::from(10 + 4 * 2);
-        *want.entry(crate::chem::protons(4)).or_default() += num_bigint::BigInt::from(3);
-        *want.entry(z_water).or_default() += num_bigint::BigInt::from(2);
-        assert_eq!(nuclei_by_z(&m), want.into_iter().collect::<Vec<_>>());
-        // Z ascending, each once.
-        let zs: Vec<u32> = nuclei_by_z(&m).iter().map(|(z, _)| *z).collect();
-        assert!(zs.windows(2).all(|p| p[0] < p[1]));
+        let mut want: BTreeMap<(u32, u32), num_bigint::BigInt> = BTreeMap::new();
+        *want.entry(pair(1)).or_default() += num_bigint::BigInt::from(10 + 4 * 2);
+        *want.entry(pair(4)).or_default() += num_bigint::BigInt::from(3);
+        *want.entry(pair(10)).or_default() += num_bigint::BigInt::from(2);
+        assert_eq!(nuclei(&m), want.into_iter().collect::<Vec<_>>());
+        // Ascending, each pair once; protons and neutrons sum to the weight.
+        let pairs: Vec<(u32, u32)> = nuclei(&m).iter().map(|(p, _)| *p).collect();
+        assert!(pairs.windows(2).all(|p| p[0] < p[1]));
+        assert_eq!(
+            pairs.iter().map(|(q, z)| q + z).collect::<Vec<_>>(),
+            vec![1, 4, 10]
+        );
+    }
+
+    #[test]
+    fn isotopes_stand_apart_in_the_manifest() {
+        // Operator 2026-11-13: an element is never keyed by one letter. Two
+        // weights with the same protons are two entries, never summed.
+        let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+        let one = Ratio::new(num_bigint::BigInt::from(1), grid);
+        let (a, b) = (1..400u32)
+            .flat_map(|a| (a + 1..400).map(move |b| (a, b)))
+            .find(|&(a, b)| {
+                let q = crate::chem::protons(a);
+                q > 0 && q == crate::chem::protons(b)
+            })
+            .expect("two isotopes in the table");
+        let m: Manifest = [
+            (
+                crate::chem::Kind::parse(&format!("W{a:04}")).expect("a kind"),
+                one.clone(),
+            ),
+            (
+                crate::chem::Kind::parse(&format!("W{b:04}")).expect("a kind"),
+                one,
+            ),
+        ]
+        .into();
+        let got = nuclei(&m);
+        assert_eq!(got.len(), 2, "isotopes {a} and {b} kept apart");
+        assert_eq!(got[0].0 .0, got[1].0 .0, "the same protons");
+        assert_ne!(got[0].0 .1, got[1].0 .1, "different neutrons");
     }
 
     #[test]

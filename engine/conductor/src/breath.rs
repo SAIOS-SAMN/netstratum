@@ -216,22 +216,28 @@ fn can_burn(sys: &Body, r_echo: u64) -> bool {
 /// whole.
 fn burnable(sys: &Body, r_echo: u64) -> crate::pulse::Manifest {
     use num_traits::Zero as _;
-    let share_now = if mass(&sys.total()).is_zero() {
+    let whole = mass(&sys.total());
+    let share_now = if whole.is_zero() {
         ratio(0, 1)
     } else {
-        mass(&sys.kept) / mass(&sys.total())
+        mass(&sys.kept) / whole
     };
     let rings_echo = r_echo.max(1);
     let pair = Ratio::new(
         2.into(),
         crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024),
     );
+    if mass(&sys.kept).is_zero() {
+        return crate::pulse::Manifest::new();
+    }
+    // The barrier's sums, read once for every kind (`formation::StarCharge`).
+    let charge = crate::formation::StarCharge::of(&sys.kept);
     sys.kept
         .iter()
         .filter(|(k, a)| {
             **a >= pair
                 && crate::chem::atom_w(k).is_some_and(|z| {
-                    crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1))
+                    crate::formation::burn_feed(z, &share_now, &charge, &ratio(1, 1))
                         .and_then(|feed| {
                             crate::compound::read(
                                 a,
@@ -1372,6 +1378,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         ("system", settled.residual.clone()),
                         ("unmoted", settled.unmoted.clone()),
                         ("settle matter", settled.matter.clone()),
+                        ("system partners", settled.partners.clone()),
                     ],
                     (settled.formed, settled.ignited, 0, 0),
                     [
@@ -1469,12 +1476,13 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // and what it throws leaves cool (the spray's motes at heat 0).
             crate::profile::mark("sys:star_core");
             let heat = crate::formation::core_heat(&sys);
-            let burst = if rang {
+            // The cut, read once: what it releases and the hold it keeps.
+            let (burst, held_k) = if rang {
                 crate::formation::star_core_cut(&sys.kept, &ratio(0, 1), &heat)
-                    .map(|(_, released, _)| released)
-                    .unwrap_or_default()
+                    .map(|(_, released, h)| (released, h))
+                    .unwrap_or_else(|| (crate::pulse::Manifest::new(), ratio(0, 1)))
             } else {
-                crate::pulse::Manifest::new()
+                (crate::pulse::Manifest::new(), ratio(0, 1))
             };
             if !burst.is_empty() {
                 // Each kind thrown at the spin the cut carried it with, read
@@ -1490,9 +1498,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 } else {
                     mass(&sys.kept) / mass(&sys.total())
                 };
-                let held_k = crate::formation::star_core_cut(&sys.kept, &ratio(0, 1), &heat)
-                    .map(|(_, _, h)| h)
-                    .unwrap_or_else(|| ratio(0, 1));
                 let frame = crate::formation::system_frame(&sys, &unit);
                 let thrown: Vec<(crate::chem::Kind, Ratio)> = if held_k.is_zero() {
                     Vec::new()
@@ -1772,6 +1777,20 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The light this star's rungs make this echo: each product pair
             // transduces `2u(z) − u(2z)` of magnetism into holding.
             let mut shone = ratio(0, 1);
+            // What every rung reads of the star, read once: a fusion keeps
+            // the star's holding and its system's (`2·made·w = made·2w`), so
+            // its share of its system stands through the rungs; the barrier's
+            // sums move with each fusion by what it changed
+            // (`formation::StarCharge::fuse`). The rungs cost one read of the
+            // star, never one each.
+            let total_m = mass(&sys.total());
+            let share_s = if total_m.is_zero() {
+                ratio(0, 1)
+            } else {
+                mass(&sys.kept) / total_m.clone()
+            };
+            let mut charge_s = crate::formation::StarCharge::of(&sys.kept);
+            let mut fused = false;
             for z in rungs {
                 // A rung whose product passes the universe's densest element
                 // does not run (docs/97 §14).
@@ -1786,13 +1805,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 if !sys.kept.contains_key(&key) {
                     continue;
                 }
+                if total_m.is_zero() {
+                    continue;
+                }
                 if let (Some(feed), Some(fuel)) = (
-                    crate::formation::burn(
-                        &sys.kept,
-                        &(mass(&sys.kept) / mass(&sys.total())),
-                        z,
-                        &in_phase,
-                    ),
+                    crate::formation::burn_feed(z, &share_s, &charge_s, &in_phase),
                     sys.kept.get(&key).cloned(),
                 ) {
                     // The product in whole nuclei, two fuel nuclei each: half
@@ -1811,23 +1828,18 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         }
                         *burned.entry(key.clone()).or_insert_with(|| ratio(0, 1)) +=
                             made.clone() * ratio(2, 1);
-                        let spin = mass(&sys.total()) * sys.ell.clone();
-                        less(
-                            &mut sys.kept,
-                            &[(key.clone(), made.clone() * ratio(2, 1))].into(),
-                        );
-                        *sys.kept
-                            .entry(made_kind.clone())
-                            .or_insert_with(|| ratio(0, 1)) += made;
-                        let after = mass(&sys.total());
-                        if !after.is_zero() {
-                            // The spin grain: the floored remainder goes
-                            // to the galaxy's gas (`ring::grain`).
-                            sys.ell = crate::ring::grain(&(spin.clone() / after.clone()));
-                            core.medium_spin += (spin - after * sys.ell.clone()) / unit.clone();
-                        }
+                        charge_s.fuse(&mut sys.kept, &key, &made_kind, &made);
+                        fused = true;
                     }
                 }
+            }
+            // The spin grain, once: the holding stood through every fusion, so
+            // the specific spin is unchanged and only its floor onto the grain
+            // is read; the remainder goes to the galaxy's gas (`ring::grain`).
+            if fused && !total_m.is_zero() {
+                let spin = total_m.clone() * sys.ell.clone();
+                sys.ell = crate::ring::grain(&(spin.clone() / total_m.clone()));
+                core.medium_spin += (spin - total_m * sys.ell.clone()) / unit.clone();
             }
             // The slow capture (docs/97 §10): each ring its clock received this
             // echo, its star core's nuclides capture its hydrogen, one nucleon a
@@ -1890,6 +1902,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     ("system", settled.residual.clone()),
                     ("unmoted", settled.unmoted.clone()),
                     ("settle matter", settled.matter.clone()),
+                    ("system partners", settled.partners.clone()),
                 ],
                 (settled.formed, settled.ignited, 0, 0),
                 [

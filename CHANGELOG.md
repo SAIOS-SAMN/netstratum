@@ -23,6 +23,21 @@ change is named here.
 
 ### Added
 
+- The gravitational catch (docs/137): axioms A1–A7, theorems T1–T9 (the
+  catch is the matter's; a heavier star draws a body of the same spin nearer,
+  T3′; a lone parcel's orthogonal catch is ⅔ of its orbit, T5; the catch is
+  paid, never made, T7), their traversal through the hypha, and witnesses
+  W1–W5. G1: the star's orthogonal catch runs on its disc
+  (`settle_system`); read on bells 218→222 it moves nothing readable on a
+  two-mote disc.
+- The echo bell's stalls removed by reading the loops: the burn reads its star
+  once (`formation::StarCharge`), `burnable` no longer quadratic, the duplicate
+  `star_core_cut` gone, `conform_partners`, `emit` and the shear's separable
+  sums on `range_sums`, `coupling::field` grained. Read: the echo at bells
+  218→222 completes in about 6 min (it had run past 40).
+- Manifest v2: `pulse::nuclei` gives (protons, neutrons); the manifest posts
+  `Nucleus { z: protons, q: neutrons }` (Mycelium's letters, docs/129 §0);
+  `ns-hypha endowment` reads the court's account, and `standing` prints μ per lane.
 - The state on Cl(13,1) (docs/136; operator ruling 2026-11-13, one
   body-state signature across kernels, superseding docs/131's Cl(5,4)). A
   body's place and rotor are on the base; the S¹¹ fibre is read by each

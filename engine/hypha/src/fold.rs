@@ -225,9 +225,12 @@ impl Uplink {
         // carries the still crossing at its TUniversal point; the carried
         // line fold rides inline with none of its own.
         .sign_crossed(
-            crate::refound::still(&self.session.tuniversal().ok_or_else(|| {
-                io::Error::other("no final TUniversal point read yet")
-            })?),
+            crate::refound::still(
+                &self
+                    .session
+                    .tuniversal()
+                    .ok_or_else(|| io::Error::other("no final TUniversal point read yet"))?,
+            ),
             reserve,
         )
         .ok_or_else(|| io::Error::other("the fold's crossing cannot be written"))?;

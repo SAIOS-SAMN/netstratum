@@ -1740,10 +1740,22 @@ pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32, total: &Ratio) -> Ra
         reach.push(r);
         delta.push(crate::ring::grain(&crate::polarity::faces(&d).0));
     }
-    let range = meeting(&reach, &extent);
+    // Each member's weight in the manifold, `w_j·g_j`, on the grain; the
+    // range meeting each mote, read by its sums (`range_sums`, register A28:
+    // the peel, never the pairs). The range's whole stands through the rings.
+    let weight: Vec<Ratio> = (0..n)
+        .map(|j| crate::ring::grain(&(w[j].clone() * keep[j].clone())))
+        .collect();
+    let wholes = range_sums(
+        &reach,
+        &extent,
+        &weight.iter().map(|c| vec![c.clone()]).collect::<Vec<_>>(),
+    );
     let mut light = ratio(0, 1);
     for _ in 0..rings {
-        let mut gain = vec![ratio(0, 1); n];
+        // What each mote recycles a unit of its range's weight, on the grain:
+        // every member takes it times its own weight, `w_j·g_j / Σ w·g`.
+        let mut rate = vec![vec![ratio(0, 1)]; n];
         for i in 0..n {
             if motes[i].agitation.is_zero() {
                 continue;
@@ -1752,23 +1764,20 @@ pub fn emit(motes: &mut [Mote], enc: &Enclosed, rings: u32, total: &Ratio) -> Ra
             let given = (motes[i].agitation.clone() - kept.clone()) * w[i].clone();
             motes[i].agitation = kept;
             let recycled = delta[i].clone() * given.clone();
-            let whole = range[i]
-                .iter()
-                .fold(ratio(0, 1), |s, &j| s + w[j].clone() * keep[j].clone());
+            let whole = &wholes[i][0];
             if whole.is_zero() {
                 light += given;
                 continue;
             }
-            light += given - recycled.clone();
-            // Each member's share on the grain; what the grain leaves radiates.
-            for &j in &range[i] {
-                let share = crate::ring::grain(&(w[j].clone() * keep[j].clone() / whole.clone()));
-                let part = recycled.clone() * share;
-                light -= part.clone();
-                gain[j] += part;
-            }
-            light += recycled;
+            // What the range takes, `rate·Σ w·g ≤ recycled`; the rest, the
+            // grain's floor and the unrecycled share, radiates.
+            rate[i][0] = crate::ring::grain(&(recycled / whole.clone()));
+            light += given - rate[i][0].clone() * whole.clone();
         }
+        let taken = range_sums(&reach, &extent, &rate);
+        let gain: Vec<Ratio> = (0..n)
+            .map(|j| weight[j].clone() * taken[j][0].clone())
+            .collect();
         for (j, g) in gain.into_iter().enumerate() {
             if g.is_zero() || w[j].is_zero() {
                 light += g;
@@ -2683,8 +2692,13 @@ pub fn conform_partners(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (R
         reach.push(r);
         delta.push(d);
     }
-    let range = meeting(&reach, &extent);
+    // The range meeting each mote, read by its sums (`range_sums`, register
+    // A28: the peel, never the pairs), each term on the grain as
+    // `conform_axes` holds it: its holding, then what each member is paid.
+    let holds: Vec<Vec<Ratio>> = w.iter().map(|wj| vec![crate::ring::grain(wj)]).collect();
+    let sums = range_sums(&reach, &extent, &holds);
     let mut change: Vec<[Ratio; 3]> = vec![std::array::from_fn(|_| ratio(0, 1)); n];
+    let mut paid: Vec<Vec<Ratio>> = vec![vec![ratio(0, 1); 3]; n];
     for i in 0..n {
         let Some(target) = partner_target(&motes[i], enc, total) else {
             continue;
@@ -2692,7 +2706,7 @@ pub fn conform_partners(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (R
         let Some(keep) = attractor_keep(&delta[i]) else {
             continue;
         };
-        let held: Ratio = range[i].iter().fold(ratio(0, 1), |s, &j| s + w[j].clone());
+        let held = sums[i][0].clone();
         if held.is_zero() || w[i].is_zero() {
             continue;
         }
@@ -2709,10 +2723,13 @@ pub fn conform_partners(motes: &mut [Mote], enc: &Enclosed, total: &Ratio) -> (R
             }
             change[i][k] += step.clone();
             // The range pays it by holding: each member `−w_i·Δ/W`.
-            let paid = -(w[i].clone() * step) / held.clone();
-            for &j in &range[i] {
-                change[j][k] += paid.clone();
-            }
+            paid[i][k] = crate::ring::grain(&(-(w[i].clone() * step) / held.clone()));
+        }
+    }
+    let owed = range_sums(&reach, &extent, &paid);
+    for (c, o) in change.iter_mut().zip(&owed) {
+        for k in 0..3 {
+            c[k] += o[k].clone();
         }
     }
     let (mut moved, mut remainder) = (ratio(0, 1), ratio(0, 1));
@@ -2951,12 +2968,27 @@ fn shear_booked(
     }
     let at = |x: &Mote, k: usize| x.phase_at(SPACE[k]);
     let bound = |r: &Ratio| r.abs() < ratio(1, 1);
+    // The field is pairwise (each neighbour by its own nearness and
+    // hemisphere), so its range is walked; every sum that separates over the
+    // range is read by its sums instead (`range_sums`, register A28): the
+    // range's holding, its rate by holding on each plane (each term on the
+    // grain, as `conform_axes` holds it), and its shares in the unit.
     let range = meeting(&reach, &extent);
+    let f: Vec<Vec<Ratio>> = (0..n)
+        .map(|j| {
+            let mut v = vec![w[j].clone()];
+            v.extend((0..planes).map(|k| crate::ring::grain(&(w[j].clone() * rate[j][k].clone()))));
+            v.push(m[j].clone());
+            v
+        })
+        .collect();
+    let sums = range_sums(&reach, &extent, &f);
     let mut dl = vec![vec![ratio(0, 1); planes]; n];
+    let mut pays = vec![vec![ratio(0, 1); planes]; n];
     let mut moved = ratio(0, 1);
     for i in 0..n {
         let near = &range[i];
-        let whole = near.iter().fold(ratio(0, 1), |s, &j| s + w[j].clone());
+        let whole = sums[i][0].clone();
         if near.is_empty() || whole.is_zero() || m[i].is_zero() {
             continue;
         }
@@ -2969,10 +3001,7 @@ fn shear_booked(
                 continue;
             }
             // The range's rate on this plane, by holding.
-            let xbar = near
-                .iter()
-                .fold(ratio(0, 1), |s, &j| s + w[j].clone() * rate[j][k].clone())
-                / whole.clone();
+            let xbar = sums[i][1 + k].clone() / whole.clone();
             if !bound(&xbar) {
                 continue;
             }
@@ -3014,17 +3043,26 @@ fn shear_booked(
             // denominators without bound); what the grain leaves is booked
             // with the shear's remainder.
             let pay = crate::ring::grain(&(given.clone() * total.clone() / whole.clone()));
-            let mut paid = ratio(0, 1);
-            for &j in near {
-                if !m[j].is_zero() {
-                    dl[j][k] -= pay.clone();
-                    paid += m[j].clone() * pay.clone();
-                }
-            }
+            // Every member with a share pays it; their shares' sum is the
+            // range's (a member with none adds none), so what was paid is
+            // `pay·Σ m_j`, exactly.
+            let paid = pay.clone() * sums[i][1 + planes].clone();
+            pays[i][k] = pay;
             if book {
                 left[k] += given.clone() - paid;
             }
             moved += given.abs();
+        }
+    }
+    // The payments, read by their sums: each member pays every range it
+    // stands in, a member with no share pays nothing.
+    let owed = range_sums(&reach, &extent, &pays);
+    for j in 0..n {
+        if m[j].is_zero() {
+            continue;
+        }
+        for k in 0..planes {
+            dl[j][k] -= owed[j][k].clone();
         }
     }
     for (i, x) in motes.iter_mut().enumerate() {
@@ -4725,8 +4763,8 @@ mod reading_tests {
 mod passage_tests {
     use super::{
         around, blend, conform_partners, mean_response, partner_target, passage_of, phase_beads,
-        rest, restoring, shear_rate, space_of, spin_torque, tilt_from, tilt_of, CellRead, Enclosed,
-        Mote,
+        rest, restoring, ring_volume, shear_rate, space_of, spin_torque, tilt_from, tilt_of,
+        CellRead, Enclosed, Mote,
     };
     use cfe::ratio::{ratio, Ratio};
     use num_traits::Zero;
@@ -4995,6 +5033,65 @@ mod passage_tests {
         let rigid = Enclosed::new(ratio(1, 1), vec![(ratio(1, 1), ratio(1, 1))]);
         assert_eq!(rigid.hold_within(&ratio(1, 1)), ratio(1, 1));
         assert_eq!(shear_rate(&rigid, &ratio(1, 1), &ratio(1, 2)), ratio(0, 1));
+    }
+
+    #[test]
+    fn the_stars_hold_cancels_in_the_shears_volume() {
+        // docs/137 T3: at fixed places ΔH carries no base, so
+        // σ(B) = σ(0) + B/r. Each body stands at place p with holding h, its
+        // spin the ring law's there, ℓ = p·H(<p).
+        let placed = |base: Ratio| {
+            let (p1, h1) = (ratio(3, 2), ratio(1, 4));
+            let (p2, h2) = (ratio(5, 2), ratio(1, 8));
+            let l1 = p1 * base.clone();
+            let l2 = p2 * (base.clone() + h1.clone());
+            Enclosed::new(base, vec![(l1, h1), (l2, h2)])
+        };
+        let (light, heavy) = (placed(ratio(1, 2)), placed(ratio(2, 1)));
+        for (r, e) in [(ratio(2, 1), ratio(1, 4)), (ratio(3, 1), ratio(1, 3))] {
+            assert_eq!(ring_volume(&light, &r, &e), ring_volume(&heavy, &r, &e));
+            assert_eq!(
+                shear_rate(&heavy, &r, &e) - shear_rate(&light, &r, &e),
+                (ratio(2, 1) - ratio(1, 2)) / r.clone(),
+                "the base enters at first degree"
+            );
+        }
+    }
+
+    #[test]
+    fn a_heavier_star_draws_a_body_of_the_same_spin_nearer() {
+        // docs/137 T3′: a body known by its spin stands at r = ℓ/H(<r); a
+        // greater base raises H, so it stands nearer.
+        let bodies = vec![(ratio(3, 2), ratio(1, 4)), (ratio(5, 2), ratio(1, 8))];
+        let light = Enclosed::new(ratio(1, 2), bodies.clone());
+        let heavy = Enclosed::new(ratio(2, 1), bodies.clone());
+        for (ell, _) in &bodies {
+            assert!(heavy.reach(ell).0 < light.reach(ell).0, "drawn nearer");
+            assert!(heavy.reach(ell).1 > light.reach(ell).1, "held deeper");
+        }
+    }
+
+    #[test]
+    fn a_lone_parcels_partner_spin_is_two_thirds_of_its_orbit() {
+        // docs/137 T5: one hold over the halves' reaches and nothing across
+        // the parcel: (ℓ−* − ℓ+*)/2 = (2/3)·r·H, whatever the extent.
+        for base in [ratio(1, 1), ratio(7, 3)] {
+            let point = Enclosed::new(base.clone(), Vec::new());
+            let spin_at_rate = |rate: &Ratio| {
+                let at = point.reach_at_rate(rate).expect("a reach");
+                at.clone() * point.hold_within(&at)
+            };
+            for (r, e) in [(ratio(2, 1), ratio(1, 4)), (ratio(5, 3), ratio(1, 2))] {
+                let b = point.hold_within(&r) / r.clone();
+                let sigma = shear_rate(&point, &r, &e);
+                assert_eq!(sigma, b, "T4: a lone parcel shears at its rate");
+                let half = sigma / ratio(2, 1);
+                let partner = (spin_at_rate(&(b.clone() - half.clone()))
+                    - spin_at_rate(&(b + half)))
+                    / ratio(2, 1);
+                assert_eq!(partner, ratio(2, 3) * r.clone() * base.clone());
+            }
+        }
     }
 
     #[test]
