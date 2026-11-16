@@ -850,3 +850,39 @@ from its fibre count alone. Then V4, the real pool (protons), where a fibre
 step needs a neutron the exchange makes.
 
 Each read conserves nucleons, and no candidate is fitted to the range.
+
+### 15.14 Correction to §15.13: the own-enclosure share is δ, not g
+
+docs/105 §2: under inverse gravity, the held share at a body's own place is
+`g = 1 − δ`, with `δ = H/(R + H)`. For a nucleus as a body (its fibres F its
+hold, its lone ends L its reach), `δ = F/(F + L)`. So its held share is
+`g_own = L/(F + L)`. §15.13 used δ where g belongs, and its 1610 and 2134 are
+withdrawn.
+
+Read correctly, `g_own` is high at light weights (many lone ends) and low
+at heavy ones, the reverse of the shape the range needs. It drains the fuel
+by weight 12 (scratch scan, conserving nucleons).
+
+**Where the record stands.** Every held share it gives fails the range:
+- **The throat**, a constant ½: 1508, the cliff's edge.
+- **A deeper place**: δ > ½, so g < ½, and the reach is lower (752 at 0.3).
+- **An outer place**: g > ½, which drains the fuel at light weights.
+- **The nucleus's own place**: L/(F + L), which drains the fuel.
+- **The front's advance**, one ring per capture: g rises to 0.9 within ten
+  captures, which drains the fuel.
+
+V4 against the real pool barely moves it. The pool re-equilibrates each
+ring at ½ by the master equation (rates summing to 1), so a fibre step's
+neutrons halve the step's cap but leave the budget as it was.
+
+So the range 1700–2500 is not reached by any held share the record
+derives with the founding's present climb. What remains is the climb's own
+structure:
+- **V8:** the seeds formed at once (every neutron paired before any
+  climbs), against seeds forming by the master equation over rings while
+  the climb runs;
+- **V4:** whether a capture can add more than one nucleon (a seed captures
+  seeds: the merger, `coordinate::fission`'s inverse).
+
+These are the next derivations. Until one of them is derived, the table's
+reach stays at 1508, and no held share is fitted to it.
