@@ -95,16 +95,58 @@ pub struct Recycled {
     pub hydrogen: Ratio,
 }
 
+/// A parted mote's one kind (the throat's motes hold one kind each after
+/// [`part`]).
+fn kind(x: &Mote) -> crate::chem::Kind {
+    x.label()
+}
+
+/// A parted mote's amount (its one part's; zero where it holds none).
+fn amt(x: &Mote) -> Ratio {
+    x.parts
+        .values()
+        .next()
+        .cloned()
+        .unwrap_or_else(|| ratio(0, 1))
+}
+
+/// Sets a parted mote's amount, keeping its kind (a zero held until the
+/// throat's matter is booked, then dropped).
+fn set_amt(x: &mut Mote, a: Ratio) {
+    let k = kind(x);
+    x.parts = Mote::one(k, a);
+}
+
 /// The clusters at `at` part in the throat's heat (1: every cluster's
 /// loosest winding is within it), each into its atoms, keeping the mote's
 /// state. Returns the throat's motes after parting (new ones appended).
 pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
+    // A mixed parcel parts first into its kinds (docs/134 §6), each keeping
+    // the parcel's state: the throat's heat takes the plasma's parcel apart
+    // nucleus by nucleus, as it parts a cluster into its atoms.
+    let mut at: Vec<usize> = at.to_vec();
+    for i in at.clone() {
+        if i >= motes.len() || motes[i].parts.len() < 2 {
+            continue;
+        }
+        let whole = motes[i].clone();
+        for (j, (k, a)) in whole.parts.iter().enumerate() {
+            let mut one = whole.clone();
+            one.parts = Mote::one(k.clone(), a.clone());
+            if j == 0 {
+                motes[i] = one;
+            } else {
+                motes.push(one);
+                at.push(motes.len() - 1);
+            }
+        }
+    }
     let mut out = Vec::new();
-    for &i in at {
+    for &i in &at {
         if i >= motes.len() {
             continue;
         }
-        let ps: Vec<(u32, u32)> = crate::chem::components(&motes[i].key).to_vec();
+        let ps: Vec<(u32, u32)> = crate::chem::components(&kind(&motes[i])).to_vec();
         match ps.as_slice() {
             [(1, _)] => out.push(i),
             _ => {
@@ -114,8 +156,7 @@ pub fn part(motes: &mut Vec<Mote>, at: &[usize]) -> Vec<usize> {
                         continue;
                     };
                     let mut atom = whole.clone();
-                    atom.key = kind;
-                    atom.amount = whole.amount.clone() * ratio(i64::from(n), 1);
+                    atom.parts = Mote::one(kind, amt(&whole) * ratio(i64::from(n), 1));
                     if j == 0 {
                         motes[i] = atom;
                         out.push(i);
@@ -155,8 +196,8 @@ pub fn recycle(
     }
     let h_in = at
         .iter()
-        .filter(|&&i| i < motes.len() && motes[i].key == crate::chem::hydrogen())
-        .fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone());
+        .filter(|&&i| i < motes.len() && kind(&motes[i]) == crate::chem::hydrogen())
+        .fold(ratio(0, 1), |acc, &i| acc + amt(&motes[i]));
     let e = b.clone() * s.clone();
     // The vacuum face of the strip (docs/126 §3): what the throat
     // deconstructs, `E/(S + E)`, composed with the core's twist pressure
@@ -173,10 +214,10 @@ pub fn recycle(
     let mut load: Vec<(usize, u32, Ratio)> = Vec::new();
     let mut light = ratio(0, 1);
     for &i in &stack.clone() {
-        let Some(z) = crate::chem::atom_w(&motes[i].key) else {
+        let Some(z) = crate::chem::atom_w(&kind(&motes[i])) else {
             continue;
         };
-        let a = motes[i].amount.clone();
+        let a = amt(&motes[i]);
         let pressed = crate::pulse::nucleus(&(a.clone() * built.clone())).min(a.clone());
         // Pressed only to the universe's densest element (docs/97 §14), its
         // product read before anything leaves (nucleons conserved: a pair
@@ -188,10 +229,12 @@ pub fn recycle(
         if let (Some(l), Some(product)) = (rung_light(z), product) {
             let pairs = crate::pulse::nucleus(&(pressed.clone() / ratio(2, 1)));
             if pairs > ratio(0, 1) {
-                motes[i].amount -= pairs.clone() * ratio(2, 1);
+                {
+                    let v = amt(&motes[i]) - (pairs.clone() * ratio(2, 1));
+                    set_amt(&mut motes[i], v);
+                }
                 let mut fused = motes[i].clone();
-                fused.key = product;
-                fused.amount = pairs.clone();
+                fused.parts = Mote::one(product, pairs.clone());
                 motes.push(fused);
                 stack.push(motes.len() - 1);
                 light += pairs.clone() * ratio(l, 1);
@@ -199,7 +242,7 @@ pub fn recycle(
             }
         }
         // The deconstructed share: what was not pressed.
-        let free = (a - pressed).min(motes[i].amount.clone());
+        let free = (a - pressed).min(amt(&motes[i]));
         if z >= 2 && free > ratio(0, 1) {
             load.push((i, z, free));
         }
@@ -244,15 +287,17 @@ pub fn recycle(
             }
             out.spent += n.clone() * ratio(peel_cost(z, k), 1) + deeper.clone() * ratio(next, 1);
             out.peeled += n.clone();
-            motes[i].amount -= n.clone();
+            {
+                let v = amt(&motes[i]) - (n.clone());
+                set_amt(&mut motes[i], v);
+            }
             let emit = |key: Option<crate::chem::Kind>,
                         amount: Ratio,
                         motes: &mut Vec<Mote>,
                         stack: &mut Vec<usize>| {
                 if let (Some(key), true) = (key, amount > ratio(0, 1)) {
                     let mut m = motes[i].clone();
-                    m.key = key;
-                    m.amount = amount;
+                    m.parts = Mote::one(key, amount);
                     motes.push(m);
                     stack.push(motes.len() - 1);
                 }
@@ -314,19 +359,19 @@ pub fn recycle(
     let mut order: Vec<usize> = stack
         .iter()
         .copied()
-        .filter(|&i| motes[i].amount > ratio(0, 1))
+        .filter(|&i| amt(&motes[i]) > ratio(0, 1))
         .collect();
-    order.sort_by_key(|&i| std::cmp::Reverse(crate::chem::weight(&motes[i].key)));
+    order.sort_by_key(|&i| std::cmp::Reverse(crate::chem::weight(&kind(&motes[i]))));
     let mut held: Vec<(crate::chem::Kind, Ratio)> = Vec::new();
     for i in order {
         if room <= ratio(0, 1) {
             break;
         }
-        let w = ratio(i64::from(crate::chem::weight(&motes[i].key)), 1);
-        let t = crate::pulse::nucleus(&(room.clone() / w.clone())).min(motes[i].amount.clone());
+        let w = ratio(i64::from(crate::chem::weight(&kind(&motes[i]))), 1);
+        let t = crate::pulse::nucleus(&(room.clone() / w.clone())).min(amt(&motes[i]));
         if t > ratio(0, 1) {
             room -= t.clone() * w;
-            held.push((motes[i].key.clone(), t));
+            held.push((kind(&motes[i]).clone(), t));
         }
     }
     crate::profile::mark("rec:trap");
@@ -340,9 +385,12 @@ pub fn recycle(
             if t <= ratio(0, 1) {
                 break;
             }
-            if motes[i].key == k && motes[i].amount > ratio(0, 1) {
-                let x = motes[i].amount.clone().min(t.clone());
-                motes[i].amount -= x.clone();
+            if kind(&motes[i]) == k && amt(&motes[i]) > ratio(0, 1) {
+                let x = amt(&motes[i]).min(t.clone());
+                {
+                    let v = amt(&motes[i]) - (x.clone());
+                    set_amt(&mut motes[i], v);
+                }
                 t -= x.clone();
                 carried += motes[i].agitation.clone() * x.clone() * crate::flows::weight(&k);
                 // Its carried spin goes with it into the container.
@@ -350,7 +398,7 @@ pub fn recycle(
                     x.clone() * crate::flows::weight(&k) * (motes[i].ell_o() + motes[i].ell_orth());
                 if at_throat.is_none() {
                     let mut m = motes[i].clone();
-                    m.amount = ratio(0, 1);
+                    set_amt(&mut m, ratio(0, 1));
                     m.set_ell_o(ratio(0, 1));
                     m.set_ell_orth(ratio(0, 1));
                     m.agitation = ratio(0, 1);
@@ -358,13 +406,14 @@ pub fn recycle(
                     at_throat = Some(m);
                 }
                 if let Some(m) = at_throat.as_mut() {
-                    m.amount += x;
+                    let v = amt(m) + x;
+                    set_amt(m, v);
                 }
             }
         }
         if let Some(mut m) = at_throat {
             m.vacuum = false;
-            let held = m.amount.clone() * crate::flows::weight(&k);
+            let held = amt(&m) * crate::flows::weight(&k);
             if held > ratio(0, 1) {
                 m.agitation = crate::ring::grain(&(carried.clone() / held.clone()));
                 out.light += carried - m.agitation.clone() * held;
@@ -387,19 +436,18 @@ pub fn recycle(
         .iter()
         .copied()
         .chain(trapped_at)
-        .filter(|&i| motes[i].amount > ratio(0, 1))
+        .filter(|&i| amt(&motes[i]) > ratio(0, 1))
         .collect();
     warm.sort_unstable();
     warm.dedup();
-    let holding = warm.iter().fold(ratio(0, 1), |acc, &i| {
-        acc + motes[i].amount.clone() * crate::flows::weight(&motes[i].key)
-    });
+    let holding = warm
+        .iter()
+        .fold(ratio(0, 1), |acc, &i| acc + motes[i].holding());
     if released > ratio(0, 1) && holding > ratio(0, 1) {
         let rise = crate::ring::grain(&(released.clone() / holding));
         for &i in &warm {
             motes[i].agitation += rise.clone();
-            out.heat +=
-                rise.clone() * motes[i].amount.clone() * crate::flows::weight(&motes[i].key);
+            out.heat += rise.clone() * motes[i].holding();
         }
         out.light += released - out.heat.clone();
     } else {
@@ -407,14 +455,17 @@ pub fn recycle(
     }
     out.hydrogen = stack
         .iter()
-        .filter(|&&i| motes[i].key == crate::chem::hydrogen())
-        .fold(ratio(0, 1), |acc, &i| acc + motes[i].amount.clone())
+        .filter(|&&i| kind(&motes[i]) == crate::chem::hydrogen())
+        .fold(ratio(0, 1), |acc, &i| acc + amt(&motes[i]))
         - h_in;
     // Everything that passed leaves on the continuum (operator 2026-10-19:
     // "redistributed back via the continuum"); the trapped stand at the
     // throat, continuum matter too.
     for &i in &stack {
         motes[i].vacuum = false;
+    }
+    for m in motes.iter_mut() {
+        m.parts.retain(|_, a| *a > ratio(0, 1));
     }
     out
 }
@@ -425,8 +476,7 @@ mod tests {
 
     fn mote(key: &str, amount: Ratio) -> Mote {
         Mote {
-            key: crate::chem::Kind::parse(key).expect("a kind"),
-            amount,
+            parts: crate::flows::Mote::one(crate::chem::Kind::parse(key).expect("a kind"), amount),
             spins: Mote::spins_of(&ratio(1, 2), &[]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
@@ -442,9 +492,7 @@ mod tests {
     }
 
     fn three_z(ms: &[Mote]) -> Ratio {
-        ms.iter().fold(ratio(0, 1), |s, m| {
-            s + m.amount.clone() * ratio(i64::from(crate::chem::weight(&m.key)), 1)
-        })
+        ms.iter().fold(ratio(0, 1), |s, m| s + m.holding())
     }
 
     #[test]
@@ -512,7 +560,7 @@ mod tests {
             Recycled::default()
         );
         assert_eq!(
-            ms[0].key,
+            ms[0].label(),
             crate::chem::Kind::parse("W0010").expect("a kind")
         );
     }
@@ -525,15 +573,10 @@ mod tests {
         // `bond + heat + light` after is `bond + heat` before plus the work
         // the peels used, exactly, with some matter trapped (its heat carried
         // with it) and some hot to begin with.
-        let bond = |ms: &[Mote]| {
-            ms.iter().fold(ratio(0, 1), |s, x| {
-                s + x.amount.clone() * ratio(i64::from(crate::chem::unpaired(&x.key)), 1)
-            })
-        };
+        let bond = |ms: &[Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + x.open_frames());
         let heat = |ms: &[Mote]| {
-            ms.iter().fold(ratio(0, 1), |s, x| {
-                s + x.agitation.clone() * x.amount.clone() * crate::flows::weight(&x.key)
-            })
+            ms.iter()
+                .fold(ratio(0, 1), |s, x| s + x.agitation.clone() * x.holding())
         };
         let mut ms = vec![
             mote("W0001", ratio(40, 1)),
@@ -596,8 +639,10 @@ mod tests {
     fn pressing_stops_at_the_densest_element_and_never_loses_a_nucleon() {
         use crate::flows::Mote;
         let mote = |key: &str| Mote {
-            key: crate::chem::Kind::parse(key).expect("a kind"),
-            amount: ratio(1000, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse(key).expect("a kind"),
+                ratio(1000, 1),
+            ),
             spins: Mote::spins_of(&ratio(1, 2), &[]),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
@@ -610,11 +655,7 @@ mod tests {
             lever_place: ratio(0, 1),
             lift: ratio(0, 1),
         };
-        let nucleons = |ms: &[Mote]| {
-            ms.iter().fold(ratio(0, 1), |s, x| {
-                s + x.amount.clone() * ratio(i64::from(crate::chem::weight(&x.key)), 1)
-            })
-        };
+        let nucleons = |ms: &[Mote]| ms.iter().fold(ratio(0, 1), |s, x| s + x.holding());
         // At the densest weight nothing presses past it; nucleons conserved.
         let mut ms = vec![mote("W1612")];
         let before = nucleons(&ms);
@@ -629,7 +670,9 @@ mod tests {
             None,
         );
         assert_eq!(nucleons(&ms), before);
-        assert!(ms.iter().all(|x| crate::chem::weight(&x.key) <= 1612));
+        assert!(ms
+            .iter()
+            .all(|x| x.parts.keys().all(|k| crate::chem::weight(k) <= 1612)));
         let _ = r;
         // Below it, pressing runs and still conserves.
         let mut ms = vec![mote("W0004")];

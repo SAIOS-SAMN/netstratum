@@ -105,6 +105,7 @@ pub mod nuclides;
 pub mod ocean;
 pub mod parliaments;
 pub mod places;
+pub mod plasma;
 pub mod polarity;
 pub mod pulse;
 pub mod quantum;

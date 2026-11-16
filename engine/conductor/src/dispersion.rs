@@ -22,7 +22,7 @@
 //! mean (not its own) shows which kinds stand out of step. The boosts and
 //! the volume part `B₁∧B₂` (docs/117 §11.3) are not carried by the motes
 //! yet, so they are not read here (#143).
-use crate::flows::{circle_mean, weight, Mote, PLANES, SPACE};
+use crate::flows::{circle_mean, Mote, PLANES, SPACE};
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 use std::collections::BTreeMap;
@@ -86,10 +86,7 @@ fn line(parts: &[(Ratio, Ratio)]) -> Ratio {
 
 /// Read the dispersion of `parts` by component.
 pub fn read(parts: &[Mote]) -> Dispersion {
-    let held: Vec<Ratio> = parts
-        .iter()
-        .map(|x| x.amount.clone() * weight(&x.key))
-        .collect();
+    let held: Vec<Ratio> = parts.iter().map(|x| x.holding()).collect();
     let holding = held.iter().fold(ratio(0, 1), |a, h| a + h.clone());
     if holding.is_zero() {
         return Dispersion::default();
@@ -124,12 +121,21 @@ pub fn read(parts: &[Mote]) -> Dispersion {
     let orth = line(&component(&|x| x.ell_orth()));
     let mut sums: BTreeMap<crate::chem::Kind, (Ratio, Vec<Ratio>)> = BTreeMap::new();
     for (x, w) in parts.iter().zip(&held) {
-        let e = sums
-            .entry(x.key.clone())
-            .or_insert_with(|| (ratio(0, 1), vec![ratio(0, 1); PLANES]));
-        e.0 += w.clone();
-        for (k, mean) in means.iter().enumerate() {
-            e.1[k] += w.clone() * on_circle(&x.phase_at(k), mean);
+        // A parcel's holding shared over its parts by their own (docs/134 §6).
+        let h = x.holding();
+        for (key, a) in &x.parts {
+            let w = if h.is_zero() {
+                ratio(0, 1)
+            } else {
+                w.clone() * a.clone() * crate::flows::weight(key) / h.clone()
+            };
+            let e = sums
+                .entry(key.clone())
+                .or_insert_with(|| (ratio(0, 1), vec![ratio(0, 1); PLANES]));
+            e.0 += w.clone();
+            for (k, mean) in means.iter().enumerate() {
+                e.1[k] += w.clone() * on_circle(&x.phase_at(k), mean);
+            }
         }
     }
     let phase_by_kind = sums
@@ -153,8 +159,10 @@ mod tests {
 
     fn part(key: &str, amount: i64, ell: Ratio, tilt: &[Ratio], phase: [Ratio; 4]) -> Mote {
         Mote {
-            key: crate::chem::Kind::parse(key).expect("a kind"),
-            amount: ratio(amount, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse(key).expect("a kind"),
+                ratio(amount, 1),
+            ),
             spins: Mote::spins_of(&ell, tilt),
             spins_orth: Mote::orth_of(&(ell.clone() / ratio(3, 1)), tilt),
             orientation: crate::orientation::Orientation::from_phases(phase.as_ref()),

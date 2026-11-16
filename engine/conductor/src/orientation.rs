@@ -1321,10 +1321,7 @@ mod base_tests {
     fn the_dilator_composes_by_the_flow_law_and_the_record_reads_back() {
         let (pos, neg) = (1usize << 5, 1usize << 6);
         let rate = |u: &Ratio| Clifford::blade(neg, pos | neg, u.clone());
-        assert_eq!(
-            Regime::of(&rate(&ratio(1, 1))),
-            Ok(Regime::Hyperbolic)
-        );
+        assert_eq!(Regime::of(&rate(&ratio(1, 1))), Ok(Regime::Hyperbolic));
         let composed = crate::turning::compose_rates(&rate(&ratio(1, 3)), &rate(&ratio(1, 2)))
             .expect("composes");
         assert_eq!(composed, rate(&ratio(5, 7)));

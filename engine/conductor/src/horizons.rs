@@ -10,7 +10,7 @@
 //! that plane (docs/117 §9.6). The built luminal bound reads the whole mote,
 //! `R < H`; where a plane's side differs from the whole's, the passage would
 //! move the mote where the built bound does not.
-use crate::flows::{tilt_of, weight, Enclosed};
+use crate::flows::{tilt_of, Enclosed};
 use crate::pulse::{mass, Body, Universe};
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
@@ -45,12 +45,7 @@ fn enclosure(core: &Body, unit: &Ratio, spin: &dyn Fn(&Ratio, &[Ratio]) -> Ratio
         ratio(1, 1),
         core.flows
             .iter()
-            .map(|x| {
-                (
-                    spin(&x.ell_o(), &x.tilt()),
-                    x.amount.clone() * weight(&x.key) / unit.clone(),
-                )
-            })
+            .map(|x| (spin(&x.ell_o(), &x.tilt()), x.holding() / unit.clone()))
             .chain(
                 core.satellites
                     .iter()
@@ -90,7 +85,9 @@ pub fn read(u: &Universe) -> Horizons {
         } else {
             let mut with = core.total();
             for x in &core.flows {
-                *with.entry(x.key.clone()).or_insert_with(|| ratio(0, 1)) += x.amount.clone();
+                for (k, a) in &x.parts {
+                    *with.entry(k.clone()).or_insert_with(|| ratio(0, 1)) += a.clone();
+                }
             }
             mass(&with)
         };
@@ -158,8 +155,10 @@ mod tests {
 
     fn mote(ell: Ratio, tilt: Vec<Ratio>) -> Mote {
         Mote {
-            key: crate::chem::Kind::parse("W0001").expect("a kind"),
-            amount: ratio(1, 1),
+            parts: crate::flows::Mote::one(
+                crate::chem::Kind::parse("W0001").expect("a kind"),
+                ratio(1, 1),
+            ),
             spins: Mote::spins_of(&ell, &tilt),
             spins_orth: vec![ratio(0, 1); 3],
             orientation: crate::orientation::Orientation::from_phases(&crate::flows::rest(ratio(
