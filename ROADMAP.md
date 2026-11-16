@@ -1,6 +1,9 @@
 # Roadmap
 
-The order of the work, issue by issue, is in [docs/PLAN.md](docs/PLAN.md).
+The order of the work is held in GitHub: the milestones v0.1.0–v0.6.0 and
+the project [Netstratum](https://github.com/orgs/SAIOS-SAMN/projects/3), by
+the rules in [docs/BUILD_OUT.md](docs/BUILD_OUT.md). The principles and the
+register's mapping stay in [docs/PLAN.md](docs/PLAN.md).
 
 What Netstratum is, what works today, and where each part is heading. This
 page is kept current; where a design document disagrees with it, this page

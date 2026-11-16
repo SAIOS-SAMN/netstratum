@@ -29,6 +29,11 @@ change is named here.
 
 ### Added
 
+- [docs/BUILD_OUT.md](docs/BUILD_OUT.md): how a doc section becomes a
+  milestone, an issue, a branch and a pull request, with the labels, the
+  project's fields and the gates. Milestones v0.1.0–v0.6.0 are each titled by
+  what they deliver; the project Netstratum (SAIOS-SAMN #3) holds every open
+  issue. The same shape is agreed with Mycelium and Xylarium (2026-11-16).
 - Time as coordinates, the front's coordinate (docs/132 §4.1, E77, #207):
   `Enclosed::{front, separation}` and `Mote::front_in`. τ(r) = r + H(<r), and
   a duration is the separation of two coordinates. The seam with Xylarium

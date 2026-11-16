@@ -26,6 +26,8 @@ defined in [GLOSSARY.md](GLOSSARY.md), not by their everyday meaning.
 4. Every law, with its authority (document section) and its implementation
    (`crate::fn`), is a row of [docs/EQUATIONS.md](docs/EQUATIONS.md).
 5. What works and where each part is heading: [ROADMAP.md](ROADMAP.md).
+   The order of work: the milestones and the project, by the rules in
+   [docs/BUILD_OUT.md](docs/BUILD_OUT.md).
 6. Search by identifier, not by prose: `grep -rn "fn deploy" engine/`.
 
 ## Rules that must hold

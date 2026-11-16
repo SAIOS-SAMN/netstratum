@@ -1,5 +1,11 @@
 # Plan
 
+**Since 2026-11-16 the order of work is held in GitHub**: the milestones
+v0.1.0–v0.6.0 and the project Netstratum, by the rules in
+[BUILD_OUT.md](BUILD_OUT.md) (its §5 maps the milestones). This file keeps
+the principles and the register's mapping below; where it and a milestone
+disagree, the milestone stands.
+
 The one order of work. It replaces the plan's earlier steps (v0.1.0 and
 v0.2.0 below, mapped into this order), docs/102 §4's order, and docs/118
 Part IV, which this plan carries forward. Every remediation is a row of the
