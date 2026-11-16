@@ -5,8 +5,8 @@ volume to that, either as a 'mote' in an 'ocean' or on a 'jetstream with
 volume' that is the mobius strip that turns the jetstream's polarity
 inverse: all roads lead back to the cores."
 
-**Status:** scoped and derived 2026-11-16. Not built; its forks go to the
-operator (§6).
+**Status:** scoped and derived 2026-11-16, including §6. Not built; #158
+and #220 build it.
 
 ## 0. What the record holds
 
@@ -130,17 +130,28 @@ A traversal never closes in open water, only at a core's throat.
    core's throat at both ends.
 5. `Σ m·ℓ` is unchanged by the cross-section's turn, which moves no spin.
 
-## 6. Forks for the operator
+## 6. The depth, the angle and where the volume lives: derived
 
-1. **The depth `ρ`.** Is it read on the mote's own share (`|δ − ½|`), or on
-   the current's own hold (a tube with its own `H` and `R`)? Only the second
-   gives the current a radius of its own.
-2. **The angle's planes.** Does `α` stand per spatial plane (three angles,
-   one per plane's diameter, with docs/128's face per plane its reading), or
-   is it one angle for the mote's whole current?
-3. **Where the volume lives.** On the orientation (the motion R gains the
-   cross-section's turning plane), or beside it as the current's own
-   coordinate.
+1. **The depth `ρ` is the mote's own departure from the ring,
+   `|δ − ½|`.** The jetstream is its core's orthogonal orbit (§0), not a
+   body with its own hold. So the tube's centre line is the core's ring and
+   its radius is read on the enclosure's own share. A current with its own
+   H would be a second body, and nothing in the record founds one.
+2. **The angle is per plane, `α_k`.** The face per plane is already
+   continuous (docs/128), so the cross-section's angle is read per spatial
+   plane, and docs/128's face per plane is its reading.
+3. **The volume lives on the orientation.** The angle round the centre
+   line on plane k is the turning on the plane that joins axis k to the
+   orbit's axial leg, the R partner `e_k∧e_R` (`orientation::PARTNER`). The
+   motion already holds that plane. The circuit's half turn of the
+   cross-section (J2) is a half turn on the R-partner planes per circuit of
+   the orbit, with the winding kept. It is the same planes that carry the
+   electrons' phase (docs/97 §15.9 F3), so the face and R stand on one
+   structure.
+
+   No new state is added. `Mote::vacuum` becomes the reading of the
+   R-partner planes' angles (L2), and #158 (the circulation per pair) is
+   its build.
 
 ## 7. Issues
 
