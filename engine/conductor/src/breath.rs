@@ -2337,27 +2337,39 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                             start.clone() + ratio(1, 2) * twist_t[j].clone() * rings_now.clone(),
                         ));
                     }
-                    let spins: Vec<Ratio> = {
-                        // Each plane's rate taken with its plane's pressure,
-                        // `x_k ⊕ P_k`, its spin following at its reach.
-                        let base_spins = crate::flows::Mote::spins_of(&ell, &twist_t);
-                        match planes_p.as_ref() {
-                            Some(pl) => base_spins
-                                .iter()
-                                .enumerate()
-                                .map(|(kp, l)| {
-                                    let x = twist_t[kp].clone();
-                                    match crate::ring::compose(&x, &pl[kp]) {
-                                        Some(x2) if !x.is_zero() => {
-                                            crate::ring::grain(&(l.clone() * x2 / x))
-                                        }
-                                        _ => l.clone(),
+                    // Each plane's rate taken with its plane's pressure,
+                    // composed whole (docs/138 §5, #206): the boost's part on
+                    // each plane is the rate it leaves with, its spin
+                    // following at its reach, and the turning between the
+                    // planes turns the parcel as it leaves.
+                    let base_spins = crate::flows::Mote::spins_of(&ell, &twist_t);
+                    let composed = planes_p
+                        .as_ref()
+                        .and_then(|pl| crate::coupling::compose_whole(&twist_t, pl));
+                    let spins: Vec<Ratio> = match composed.as_ref() {
+                        Some((rates, _, _)) => base_spins
+                            .iter()
+                            .enumerate()
+                            .map(|(kp, l)| {
+                                let x = twist_t[kp].clone();
+                                match rates.get(kp) {
+                                    Some(x2) if !x.is_zero() => {
+                                        crate::ring::grain(&(l.clone() * x2.clone() / x))
                                     }
-                                })
-                                .collect(),
-                            None => base_spins,
-                        }
+                                    _ => l.clone(),
+                                }
+                            })
+                            .collect(),
+                        None => base_spins,
                     };
+                    let mut orientation = crate::orientation::Orientation::from_phases(&phase);
+                    if let Some((_, c, norm)) = composed.as_ref() {
+                        if c.iter().any(|x| !x.is_zero()) {
+                            orientation
+                                .turn_by(c, norm)
+                                .expect("a turning on the spatial planes is a motion");
+                        }
+                    }
                     // The reservoir pays the spin it actually leaves with; the
                     // antipole pays the twist it carries off the plane, plane
                     // by plane (docs/100 §8.3).
@@ -2380,7 +2392,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         parts,
                         spins: spins.clone(),
                         spins_orth: vec![ratio(0, 1); 3],
-                        orientation: crate::orientation::Orientation::from_phases(&phase),
+                        orientation,
                         agitation: ratio(0, 1),
                         born: bell,
                         vacuum: false,

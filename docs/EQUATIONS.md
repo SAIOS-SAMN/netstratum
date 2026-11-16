@@ -2127,6 +2127,40 @@ per-kind reading by holding); the bounce's release leaves as one pooled parcel
 one-kind parcel reads as its kind; a merge adds parts by kind; the throat parts
 a mix into its kinds (`recycle::part`).
 
+**E77 · Time as coordinates: the front's coordinate.** `flows::Enclosed::{front,
+separation}`, `flows::Mote::front_in` (docs/132 §4.1, #207; operator
+2026-11-15). The front's coordinate at reach r is `τ(r) = r + H(<r)`, in
+rings at c = 1. The time between two places is `τ(b) − τ(a)`. At the
+equator, `R = H(<R)`, it is `τ = 2R` with held share ½: the seam with
+Xylarium (their `M = H/2`).
+
+**E76 · Rates as versors.** `turning::{versor, plane_of, projective,
+compose_versors, power, split, holonomy}` (docs/138, #206; operator
+2026-11-15). A rate is a bivector `B`, whole on every plane it moves, each
+plane at its own angle `μ_k = B_k·B_k`. Its versor is
+`V = Π(1 + B_k) = Σ W_m`, the sum of its wedge powers `W_m = B^{∧m}/m!`,
+read up to a scalar; on one plane this is `1 + B`. Each plane reads back as
+`B_k = (Σ μ_k^{K−1−m} W_{2m+1})(Σ μ_k^{K−1−m} W_{2m})⁻¹`
+(`turning::{wedge_powers, invariants, plane_of}`). Versors compose by the geometric
+product, never plane by plane:
+
+    (1 + β₁e₀₁)(1 + β₂e₀₂) = 1 + β₁e₀₁ + β₂e₀₂ + β₁β₂·e₁₂ = B·R
+
+Boost and turning are read against an observer's time `t`, never the base
+axes: the rate parts as `½(B ∓ tBt⁻¹)`; the boost is `B ∝ 1 + t′t⁻¹`, with
+`t′ = V·t·Ṽ/(V·Ṽ)`, and the turning `R ∝ B̃·V` keeps `t` (`turning::parts`). On one plane the product is the flow law
+(E72). A path closed on paper, `V₂⁻¹V₁⁻¹V₂V₁`, leaves a boost and a turning.
+The Cayley motion of `b·e` reads `1 + (2b/(1 + b·b))·e`.
+A spin is one bivector `L` on the six planes (`flows::Mote::spin`). The
+ledger is `Σ m·L` (`flows::spin_ledger`), and its components are the
+per-plane books. A motion carries the spin as `V·L·Ṽ/(V·Ṽ)`
+(`turning::carry`), keeping its angles.
+The shear composes a mote's rates and pulls whole (`coupling::compose_whole`,
+#199): `V′ = V(Y)·V(X)`, with `V(X) = 1 + Σ x_k·e₀n_k`. The boost's part on
+each plane is the new rate (the flow law on one plane). The Thomas–Wigner
+turning `1 + C` advances the mote's motion by the generator
+`C/(1 + √(R·R̃))`, with the root on the grain (`Orientation::turn_by`).
+
 **E75 · The capture phase.** `pulse::{capture_face, capture_phases}`
 (docs/134 §12; operator 2026-11-15). A kind's capture phase is the turning
 its body's capture chain has accumulated up to it, charge ascending:
@@ -2161,6 +2195,12 @@ its rate composed by the flow law. The S¹¹ fibre over the place is read, never
 stored: each plane's share split `c = δ = H/(R + H)` and R's phase
 `R_p = κ(1 − 2·frac(ψ_p))`. Witnesses: `orientation::base_tests`, plus the
 joint read with Xylarium (docs/136 §9).
+
+The held form is the whole unit motion `R`, with K per plane beside it
+(78.173 §8.5, ruled 2026-11-15 for every kernel): `Orientation::motion`. The
+generator is its reading. On the grain the motion is
+`R = cayley(⌊generator(R)⌋)`, an exact unit with bounded denominators.
+Witness: `orientation::motion_tests`.
 
 **E70 · Tilt from quantum torsion.** `flows::torsion_turns`,
 `quantum::twist_at`, `orientation::turned`, `torsion::wound`,
