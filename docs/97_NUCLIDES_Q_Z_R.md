@@ -580,3 +580,43 @@ also six. Whether N should extend over the four axes (16 patterns, the six
 planes, four volumes and the 4-volume) or stay on the three nucleon axes
 with R beside it is the mapping to check against E014. If the docs do not
 settle it between the two kernels, it goes to the operator.
+
+### 15.8 V3 against Xylarium, and the forks for the operator
+
+**Xylarium's check (2026-11-16, xylarium #128, #296).**
+- **The forms agree.** Xylarium's planes rest at `R_p = κ·(1 − 2ψ_p)`, and
+  D4 with D5 gives `R_k* = −(L/w)(1 − 2s_k)`. The two match with `κ ↔ L/w`
+  and `ψ_p ↔ 1 − s_k`.
+- **The parting variables do not.** Xylarium's plane parts by its effective
+  pass `ψ_p = frac(w_p·s·Z)` on its face, which depends on the kind's Z.
+  Netstratum's `s_k` is the body's pass on axis k at its place, the same for
+  every kind in the body.
+- **The structures differ.** Netstratum's three axes are the thirds of 3Z.
+  Xylarium holds the same three as one undivided dipole on its axis plane.
+  Its five isoclinic planes are orthogonal to the Z–Q split (T24) and carry
+  phase, not nucleon count.
+
+**Held until ruled (V12 as built):** both sides state their **summed**
+split: netstratum `Σ_k` over its axes (and over its patterns, 15.7), and
+Xylarium its axis plane's face pairs. D6's swap, summed over k, is
+Xylarium's pair swap on the axis plane, so the involution holds on both
+sides.
+
+**The forks** (put to the operator in #213):
+1. **F1, one share or two** (15.6). Either the bound nuclide's lone ends
+   rest at each axis's pass while the founding's single share governs the
+   free pool, or the two are one law.
+2. **F2, whose split, and does the pass see the kind.** Either netstratum
+   reads per-Hopf-plane passes, or Xylarium splits its axis-plane dipole
+   into thirds with their own passes. Separately, whether a plane's pass
+   depends on the kind:
+   - Xylarium's does, through Z;
+   - netstratum's could, through the kind's capture phase (docs/134 §12,
+     E75);
+   - today netstratum's does not.
+3. **F3, three axes or four** (15.7). Either N stands on the three nucleon
+   axes (8 patterns) with R beside it, or on four axes with R as the
+   fourth (16 patterns, the orientation's six planes).
+
+Nothing in V3 is coded before these are ruled. V1, V4–V9 and V13–V15
+proceed on the summed split.
