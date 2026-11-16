@@ -236,13 +236,15 @@ fn main() -> ExitCode {
         Some("standing") => standing_cmd(&up, &home),
         Some("endowment") => endowment_cmd(&up, &home),
         Some("apply") => apply_cmd(&up, &args, &home),
+        Some("mouth-accept") => mouth_cmd(&up, &args, &home, false),
+        Some("mouth-map") => mouth_cmd(&up, &args, &home, true),
         Some("census") => census_cmd(&args, Some(&up), &home),
         Some("prune") => prune_cmd(&up, &home),
         Some("publish") => publish_cmd(&up, &home),
         Some("follow") => follow_cmd(&up, &args, &home),
         Some("mark") => mark_cmd(&args, &home),
         _ => {
-            eprintln!("usage: ns-hypha laws|lexicon|probe|found|apply <var-root>|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
+            eprintln!("usage: ns-hypha laws|lexicon|probe|found|apply <var-root>|mouth-accept <id>|mouth-map <id> <side> <freshness>|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
             ExitCode::from(2)
         }
     }
@@ -356,6 +358,39 @@ fn apply_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
         }
         Err(e) => {
             eprintln!("ns-hypha: the ledger entry was not posted: {e}");
+            ExitCode::from(1)
+        }
+    }
+}
+
+/// A wormhole mouth (Mycelium 78.128, #109): accept the mouth `id` offered
+/// to this domain's reserve, or map this domain's side of it.
+fn mouth_cmd(up: &Uplink, args: &[String], home: &Path, map: bool) -> ExitCode {
+    let usage = || {
+        eprintln!("usage: ns-hypha mouth-accept <id hex> | mouth-map <id hex> <side> <freshness>");
+        ExitCode::from(2)
+    };
+    let Some(id) = args.get(2).and_then(|h| ns_hypha::mouth::id_of(h).ok()) else {
+        return usage();
+    };
+    let said = if map {
+        let (Some(side), Some(fresh)) = (
+            args.get(3).and_then(|s| s.parse::<u8>().ok()),
+            args.get(4).and_then(|s| s.parse::<u64>().ok()),
+        ) else {
+            return usage();
+        };
+        ns_hypha::mouth::map(up.session(), home, id, side, fresh).map(|m| format!("{m:?}"))
+    } else {
+        ns_hypha::mouth::accept(up.session(), home, id).map(|h| format!("{h:?}"))
+    };
+    match said {
+        Ok(line) => {
+            println!("{line}");
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("ns-hypha: the mouth act was not sent: {e}");
             ExitCode::from(1)
         }
     }
