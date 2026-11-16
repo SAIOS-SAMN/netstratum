@@ -2127,6 +2127,15 @@ per-kind reading by holding); the bounce's release leaves as one pooled parcel
 one-kind parcel reads as its kind; a merge adds parts by kind; the throat parts
 a mix into its kinds (`recycle::part`).
 
+**E78 · The jetstream as volume (scoped, not built).** docs/139 (#220;
+operator 2026-11-16). The Möbius current is a solid tube about the ring
+`δ = ½`. A mote in it stands at `(ψ, ρ, α)`: along the orbit, its depth from
+the centre line, and its angle round it. Each circuit turns the cross-section
+by `α ↦ α + ½`, and the face is read from α. Crossing the centre line is a
+throat crossing (`T ↦ T − 2(H − R)`), and every path's ends lie at a core.
+Replaces `Mote::vacuum`, `flows::mobius` and `flows::luminal`'s flip once its
+forks are ruled.
+
 **E77 · Time as coordinates: the front's coordinate.** `flows::Enclosed::{front,
 separation}`, `flows::Mote::front_in` (docs/132 §4.1, #207; operator
 2026-11-15). The front's coordinate at reach r is `τ(r) = r + H(<r)`, in
