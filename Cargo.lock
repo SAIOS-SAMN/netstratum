@@ -346,7 +346,7 @@ checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
 [[package]]
 name = "forms"
 version = "0.4.0-rc.1"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=f5ea695ca0eb474f7e8a921c22ae3f37c6940ff6#f5ea695ca0eb474f7e8a921c22ae3f37c6940ff6"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=751aa40e9bdc5c0826bbf60c7efc054f7ba10790#751aa40e9bdc5c0826bbf60c7efc054f7ba10790"
 dependencies = [
  "mycelium-algebra",
  "num-bigint",
@@ -493,7 +493,7 @@ dependencies = [
 [[package]]
 name = "mycelium"
 version = "0.4.0-rc.1"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=f5ea695ca0eb474f7e8a921c22ae3f37c6940ff6#f5ea695ca0eb474f7e8a921c22ae3f37c6940ff6"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=751aa40e9bdc5c0826bbf60c7efc054f7ba10790#751aa40e9bdc5c0826bbf60c7efc054f7ba10790"
 dependencies = [
  "blake3",
  "ctrlc",
@@ -520,7 +520,7 @@ dependencies = [
 [[package]]
 name = "mycelium-algebra"
 version = "0.4.0-rc.1"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=f5ea695ca0eb474f7e8a921c22ae3f37c6940ff6#f5ea695ca0eb474f7e8a921c22ae3f37c6940ff6"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=751aa40e9bdc5c0826bbf60c7efc054f7ba10790#751aa40e9bdc5c0826bbf60c7efc054f7ba10790"
 dependencies = [
  "num-bigint",
  "num-rational",
@@ -530,7 +530,7 @@ dependencies = [
 [[package]]
 name = "mycelium-sdk"
 version = "0.4.0-rc.1"
-source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=f5ea695ca0eb474f7e8a921c22ae3f37c6940ff6#f5ea695ca0eb474f7e8a921c22ae3f37c6940ff6"
+source = "git+https://github.com/SAIOS-SAMN/mycelium?rev=751aa40e9bdc5c0826bbf60c7efc054f7ba10790#751aa40e9bdc5c0826bbf60c7efc054f7ba10790"
 dependencies = [
  "ed25519-dalek",
  "forms",
