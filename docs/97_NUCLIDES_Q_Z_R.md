@@ -696,7 +696,7 @@ face is the window's:
 Nothing is set: it is the same share the founding already reads for its
 free nucleons.
 
-**D14 (the reach, read).** The climb with `σ(w; ¼)` at the throat's
+**D14 (the reach, read; withdrawn in §15.11: the scan ignored the free-nucleon budget).** The climb with `σ(w; ¼)` at the throat's
 `g = ½` ends where less than one whole nucleus arrives. The scan below was
 calibrated so that one chain stops at 1508 at 2^40, as read; it is a
 scratch scan, and the exact read lands with the code.
@@ -730,3 +730,45 @@ gravity and the manifest by population), before the kinds change.
 2. `h = neutron_share(seal_window(source_clock())) = ¼` exactly.
 3. On a fresh founding at 2^40 the frontier is in 1700–2500 (D14 read
    exactly), with nucleons conserved.
+
+### 15.11 Correction: the reach is bound by the founding's nucleons
+
+§15.10's D14 was wrong. Its scan thinned the arriving nuclei by survival
+but never spent the free nucleons each climb captures. Built and tested
+(2026-11-16), D12 at `h = ¼` stops the founding at **weight 12**: raising
+survival at light weights, where `L/w` is large, drains the free pool
+there. Nucleon conservation is the bound D14 left out.
+
+**The budget.** At the seal window's neutron share ¼:
+- every neutron pairs into a seed: `paired = min(p, n) = N/4`;
+- the seeds are `N/8`;
+- the free nucleons are `p − n = N/2`, all protons.
+
+So each seed can make at most 4 captures on average. One chain reaching
+1508 already spends 96.6% of the free pool (scan with conservation). The
+reach is fuel-bound, not survival-bound.
+
+**What the budget shows.**
+1. **The free pool is protons, but each climb "captures a neutron".** No
+   free neutron remains (`n − paired = 0`). The climb's own channel (V4),
+   applied honestly, is a proton capture from that pool. Its survival and
+   its product differ from a neutron's. This is the first thing to derive.
+2. **Reaching 1700–2500 within the budget** needs survival low where `L/w`
+   is large (light weights, where most seeds should stay) and near 1 where
+   a nucleus is held (heavy weights). D12 does the reverse, so it is
+   withdrawn.
+3. **Next derivations, in order:**
+   - V4: the founding's channels against its real pool, proton capture
+     included;
+   - V8: the free nucleons placed by the exchange, not paired away at
+     once;
+   - V6: the bounce's places, where seeds and fuel stand in different
+     ratios.
+
+   The reach is read only on a founding that conserves nucleons. No scan
+   without the budget is quoted again.
+
+D12, D13 and D14 are withdrawn as the reach mechanism. D13's share
+(`h = ¼`, the seal window's exchange) stands as a reading. The code is
+unchanged: the founding still climbs one chain to 1508.
+
