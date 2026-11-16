@@ -155,3 +155,36 @@ fn the_ledger_entry_commits_to_netstratums_checkpoints() {
     );
     let _ = std::fs::remove_dir_all(&var);
 }
+
+/// Manifest v4's entry (docs/97 §15.7, §15.9): the counts in thirds read
+/// from the fibres and the lone ends' patterns, for every nuclide the
+/// founding can hold. Today every lone end is open, so the held thirds are
+/// the fibres alone.
+#[test]
+fn every_v4_entry_reads_its_thirds_from_its_patterns() {
+    for w in 1..=3000u32 {
+        let (Some(p), Some(n)) = (
+            conductor::nuclides::protons(w),
+            conductor::nuclides::neutrons(w),
+        ) else {
+            continue;
+        };
+        let e = ns_hypha::refound::manifest_entry(p, n).expect("an element");
+        let fibres = n;
+        let held: u32 = (0..3)
+            .map(|k| {
+                e.pattern
+                    .iter()
+                    .enumerate()
+                    .filter(|(s, _)| s & (1 << k) != 0)
+                    .map(|(_, c)| *c)
+                    .sum::<u32>()
+            })
+            .sum();
+        let lone: u32 = e.pattern.iter().sum();
+        assert_eq!(e.q3, 3 * fibres + held, "w {w}: 3·neutrons = 3F + Σℓ_k");
+        assert_eq!(e.z3 + e.q3, 3 * w, "w {w}: 3A");
+        assert_eq!(e.z3, 3 * fibres + 3 * lone - held, "w {w}: 3·protons");
+        assert!(e.planes.is_empty());
+    }
+}
