@@ -351,25 +351,25 @@ the table's dimensions, never by a cap or a count.
 - states its witness (the definition of done).
 
 No Earth table enters. Every channel and share is one of the founding's own
-laws or its inverse, and every share is placed by a law (no leftovers).
+formulas or its inverse, and every share is placed by a formula (no leftovers).
 
 ### 15.1 The nuclide's own axes
 
 | # | Collapsed today | Opened | Witness |
 |---|---|---|---|
 | V1 | One nuclide per weight. `nuclides::table` walks the convergence one end at a time and returns one `(Q, Z)` for each w. `chem::Kind::atom(w)` and a kind's parts `(count, w)` key matter by weight alone. | A nuclide is its point `(Z, Q)` on the convergence. Every pair the convergence's places hold is a kind: isotopes (one Q, many Z) and isobars (one w, many Q). Kinds are keyed by `(Z, Q)`, and weight is the reading `Z + Q`. | `Kind` round-trips `(Z, Q)`. Two nuclides of one weight are distinct kinds. `chem::weight` is `Z + Q` for every kind. |
-| V2 | R, the electrons' phase, is read from the charge alone (`electron_phase(w, p)`) at one pulse phase. The manifest states R = 0. | R is the nuclide's third axis: the electrons' phase share signed by face (#205). A kind is `(Z, Q, R)`, and R stands at its rest point `R = −(Z − Q)/(Z + Q)` unless a law moves it (mycelium NotAtRest, #357). | Every founded kind's R is at its rest point, or is moved by a named law. Manifest v3 entries carry R exact. |
+| V2 | R, the electrons' phase, is read from the charge alone (`electron_phase(w, p)`) at one pulse phase. The manifest states R = 0. | R is the nuclide's third axis: the electrons' phase share signed by face (#205). A kind is `(Z, Q, R)`, and R stands at its rest point `R = −(Z − Q)/(Z + Q)` unless a formula moves it (mycelium NotAtRest, #357). | Every founded kind's R is at its rest point, or is moved by a named formula. Manifest v3 entries carry R exact. |
 | V3 | A nucleus is one `(Z, Q)` pair for the whole body. There are no frames per plane (#110), and 3Z/3Q is restated but not held (#176). | The frames per plane `(z_k, q_k)` on the three planes, founded evenly `((3Z − u)/3, u/3)` and moved on one plane by each capture or exchange. 3Z/3Q is held, with R beside it. | `Σ_k (z_k + q_k) = 3w` for every nucleus. The pole swap `(z_k, q_k) ↦ (q_k, z_k)` is an involution keeping 3Z (docs/123 §2). |
 
 ### 15.2 The climb's channels and shares
 
 | # | Collapsed today | Opened | Witness |
 |---|---|---|---|
-| V4 | One channel. `pulse::founding` climbs only by a neutron captured (`w → w + 1`, every climb "a neutron captured"). | The branches the founding's own laws give, each with its inverse:<br>- **capture:** a neutron, `Z + 1`, at the held face; a proton, `Q + 1`, where free protons stand;<br>- **pole exchange:** one nucleon's pole swapped, `(Z, Q) ↦ (Z ∓ 1, Q ± 1)`, by the master equation's `g` and `u` (`nuclides::exchange`, applied per nucleus, not to the pool alone);<br>- **freeing:** a nucleon leaving at the unlocked face, the inverse of capture;<br>- **parting:** a heavy nucleus splitting as the merger's inverse (`coordinate::fission`), where its hold no longer keeps it.<br>The arriving population spreads over every branch instead of thinning along one. | Nucleons are conserved exactly over the founding. Charge is booked through every exchange. Each channel composed with its inverse is the identity on the books. |
+| V4 | One channel. `pulse::founding` climbs only by a neutron captured (`w → w + 1`, every climb "a neutron captured"). | The branches the founding's own formulas give, each with its inverse:<br>- **capture:** a neutron, `Z + 1`, at the held face; a proton, `Q + 1`, where free protons stand;<br>- **pole exchange:** one nucleon's pole swapped, `(Z, Q) ↦ (Z ∓ 1, Q ± 1)`, by the master equation's `g` and `u` (`nuclides::exchange`, applied per nucleus, not to the pool alone);<br>- **freeing:** a nucleon leaving at the unlocked face, the inverse of capture;<br>- **parting:** a heavy nucleus splitting as the merger's inverse (`coordinate::fission`), where its hold no longer keeps it.<br>The arriving population spreads over every branch instead of thinning along one. | Nucleons are conserved exactly over the founding. Charge is booked through every exchange. Each channel composed with its inverse is the identity on the books. |
 | V5 | One survival per weight: `survival(w, p) = κ_w + (1 − κ_w)·g`, a scalar at one held share. | A survival for each nuclide and channel, `σ(Z, Q, R; channel)`, read by component: each plane's fibres bound at their own share, and the lone ends at the electrons' equilibrium. | It reduces to §14's σ on the one-chain path. Shares over a nuclide's channels sum to 1, staying included. |
 | V6 | One place. The founding crosses at the throat's held share `p₀ = polarity::throat_held()` and reads no other place. | The bounce's own places. Each part of the climb is read at the held share of the place the front meets, on its coordinate `τ(r) = r + H(<r)` (docs/132 §4.1, E77). The table is the sum of what every place makes. | At one place the sum is §14's table. Nucleons summed over places are conserved. |
 | V7 | One clock. One seal window and one neutron share for the whole founding (`neutron_share(seal_window(source_clock()))`). One pulse phase. | The exchange's fixed point at each place and time: the seal window read where each part of the bounce cools on its own clock, with the pulse phase per nucleus (§13). | Read at one place and time it is §8–§13's fixed point. The neutron share is never set. |
-| V8 | The free nucleons left are all returned as hydrogen (`w = 1`). | Each free nucleon is placed by the exchange law: a free neutron, a free proton, or captured, by its face. There is no remainder assignment. | The free nucleons' books close by law. Hydrogen is what the law leaves, not the rest. |
+| V8 | The free nucleons left are all returned as hydrogen (`w = 1`). | Each free nucleon is placed by the exchange formula: a free neutron, a free proton, or captured, by its face. There is no remainder assignment. | The free nucleons' books close by the formula. Hydrogen is what the formula leaves, not the rest. |
 
 ### 15.3 The table's bounds and its readers
 
@@ -385,7 +385,7 @@ laws or its inverse, and every share is placed by a law (no leftovers).
 | # | Collapsed today | Opened | Witness |
 |---|---|---|---|
 | V13 | The universal core holds the one-chain table. Its state `universal_state`, its hold, its rim and the first bounce are read on it. | The universal core holds the multi-dimensional table, and its state is read on it. | Read on a fresh founding: the core's state, its rim and the first bounce, before and after. |
-| V14 | The heaviest weight is 1508 at 2^40 grains and 1612 at 2^55. | The frontier's heaviest weight falls in 1700–2500, read by the laws above, never set. | `pulse::tests`: the frontier's heaviest weight is in 1700–2500, with nucleons conserved, on a fresh founding at the working count (2^40). |
+| V14 | The heaviest weight is 1508 at 2^40 grains and 1612 at 2^55. | The frontier's heaviest weight falls in 1700–2500, read by the formulas above, never set. | `pulse::tests`: the frontier's heaviest weight is in 1700–2500, with nucleons conserved, on a fresh founding at the working count (2^40). |
 | V15 | The valley of stability is missing: every kind is proton-rich (#203). | The neutron excess follows from V4–V7, with no table imported. | Read the rest point `(Z − Q)/w` across the frontier, beside nature (`beside_nature`), never fitted. |
 
 ### 15.5 Order and what stays open
@@ -496,7 +496,7 @@ before any code on either side.
 pass `s_k` (docs/128). The founding reads one share for the whole bounce
 (`neutron_share(seal_window(…))`). Here D4 governs the bound nuclide's lone
 ends, and the founding's share governs the free pool. If these two must be
-one law, the operator rules it (#213).
+one formula, the operator rules it (#213).
 
 ### 15.7 The volume opened on the planes
 
@@ -605,7 +605,7 @@ sides.
 **The forks** (put to the operator in #213):
 1. **F1, one share or two** (15.6). Either the bound nuclide's lone ends
    rest at each axis's pass while the founding's single share governs the
-   free pool, or the two are one law.
+   free pool, or the two are one formula.
 2. **F2, whose split, and does the pass see the kind.** Either netstratum
    reads per-Hopf-plane passes, or Xylarium splits its axis-plane dipole
    into thirds with their own passes. Separately, whether a plane's pass
