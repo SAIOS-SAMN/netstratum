@@ -103,7 +103,7 @@ another repository's issue.
 |---|---|---|
 | v0.1.0 | stars from released matter (docs/134, 137); the domain live on the mesh | Mycelium: manifest R (#205), T delivery |
 | v0.2.0 | motion whole: the unit motion as state, rates as versors (docs/138, 117 §11) | Mycelium: the turning form (78.173 §8.5) |
-| v0.3.0 | time as coordinates: strides, events, the echo at each mote's time (docs/132) | Xylarium: the time seam (#210 ↔ xylarium #280) |
+| v0.3.0 | time as coordinates: strides, events, the echo at each mote's time (docs/132) | Xylarium: the time seam on Δτ (#210 ↔ xylarium #280) |
 | v0.4.0 | energy closes: one ledger, the manifold's dissipation, starlight (docs/122, 124, 127) | — |
 | v0.5.0 | one model per quantity: consolidation, the eras, standards (docs/119, PLAN §4–6) | — |
 | v0.6.0 | the core tube: crossings with Xylarium (docs/123) | Xylarium: #109 ↔ xylarium #281 |
