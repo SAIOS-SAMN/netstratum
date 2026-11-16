@@ -8,6 +8,8 @@ element the founding produces), so that galaxies form with enough material
 for planets. Netstratum is the inverse of Xylarium: in Netstratum Q is the
 proton and Z the neutron; in Xylarium the reverse.
 
+**Status (2026-11-16):** §15 scopes the table on its own dimensions, up to weight 1700–2500 (#213, open). It supersedes §14's one-chain climb as the target.
+
 **Status (2026-10-28):** §1–§2 and §4 built (41b2a6b); §3, R, built
 (785a074, §13); §5 in nature's form; §8–§11 built; §12 built and partly
 superseded (its table cap of 1200 by §14, ff0c985; "the galaxies carry the
@@ -327,3 +329,77 @@ founding reaches a few weights higher a decade of grains.
   every kind whose spread stays in its throat, `(K + s_i)(1 + s_final)/(w·H)
   ≤ 1`, K = 266, H = 2, s_final = 1/6: weight 171 and up, 1434 of 1600
   kinds; their mass about 6·10^-14 of the whole.
+
+## 15. The table on its own dimensions: the scope (open, #213)
+
+**Operator, 2026-11-16:** "the elemental table (which needs
+multi-dimensional reconfiguration) needs to be up to weight 1700–2500 (not
+bound to earthly elements) to form the universal core properly." Then:
+"scope the resolution and definition to be exhaustive with opened vents."
+
+**Why §14 falls short.** The climb is one chain. Each weight holds one
+nuclide, and the seeds pass on `σ_{w+1} ≈ 0.89` of themselves at each
+weight, so the population thins geometrically. The read is weight 1508 at
+2^40 grains (l109: Q 872, Z 636; weights held 7..=1470) and 1612 at 2^55.
+A larger founding gains only a few weights a decade of grains, so no
+founding reaches 1700–2500 on one chain. The range is reached by opening
+the table's dimensions, never by a cap or a count.
+
+**Each vent below:**
+- states where the table is collapsed today (the code);
+- states the dimension to open (the resolution);
+- states its witness (the definition of done).
+
+No Earth table enters. Every channel and share is one of the founding's own
+laws or its inverse, and every share is placed by a law (no leftovers).
+
+### 15.1 The nuclide's own axes
+
+| # | Collapsed today | Opened | Witness |
+|---|---|---|---|
+| V1 | One nuclide per weight. `nuclides::table` walks the convergence one end at a time and returns one `(Q, Z)` for each w. `chem::Kind::atom(w)` and a kind's parts `(count, w)` key matter by weight alone. | A nuclide is its point `(Z, Q)` on the convergence. Every pair the convergence's places hold is a kind: isotopes (one Q, many Z) and isobars (one w, many Q). Kinds are keyed by `(Z, Q)`, and weight is the reading `Z + Q`. | `Kind` round-trips `(Z, Q)`. Two nuclides of one weight are distinct kinds. `chem::weight` is `Z + Q` for every kind. |
+| V2 | R, the electrons' phase, is read from the charge alone (`electron_phase(w, p)`) at one pulse phase. The manifest states R = 0. | R is the nuclide's third axis: the electrons' phase share signed by face (#205). A kind is `(Z, Q, R)`, and R stands at its rest point `R = −(Z − Q)/(Z + Q)` unless a law moves it (mycelium NotAtRest, #357). | Every founded kind's R is at its rest point, or is moved by a named law. Manifest v3 entries carry R exact. |
+| V3 | A nucleus is one `(Z, Q)` pair for the whole body. There are no frames per plane (#110), and 3Z/3Q is restated but not held (#176). | The frames per plane `(z_k, q_k)` on the three planes, founded evenly `((3Z − u)/3, u/3)` and moved on one plane by each capture or exchange. 3Z/3Q is held, with R beside it. | `Σ_k (z_k + q_k) = 3w` for every nucleus. The pole swap `(z_k, q_k) ↦ (q_k, z_k)` is an involution keeping 3Z (docs/123 §2). |
+
+### 15.2 The climb's channels and shares
+
+| # | Collapsed today | Opened | Witness |
+|---|---|---|---|
+| V4 | One channel. `pulse::founding` climbs only by a neutron captured (`w → w + 1`, every climb "a neutron captured"). | The branches the founding's own laws give, each with its inverse:<br>- **capture:** a neutron, `Z + 1`, at the held face; a proton, `Q + 1`, where free protons stand;<br>- **pole exchange:** one nucleon's pole swapped, `(Z, Q) ↦ (Z ∓ 1, Q ± 1)`, by the master equation's `g` and `u` (`nuclides::exchange`, applied per nucleus, not to the pool alone);<br>- **freeing:** a nucleon leaving at the unlocked face, the inverse of capture;<br>- **parting:** a heavy nucleus splitting as the merger's inverse (`coordinate::fission`), where its hold no longer keeps it.<br>The arriving population spreads over every branch instead of thinning along one. | Nucleons are conserved exactly over the founding. Charge is booked through every exchange. Each channel composed with its inverse is the identity on the books. |
+| V5 | One survival per weight: `survival(w, p) = κ_w + (1 − κ_w)·g`, a scalar at one held share. | A survival for each nuclide and channel, `σ(Z, Q, R; channel)`, read by component: each plane's fibres bound at their own share, and the lone ends at the electrons' equilibrium. | It reduces to §14's σ on the one-chain path. Shares over a nuclide's channels sum to 1, staying included. |
+| V6 | One place. The founding crosses at the throat's held share `p₀ = polarity::throat_held()` and reads no other place. | The bounce's own places. Each part of the climb is read at the held share of the place the front meets, on its coordinate `τ(r) = r + H(<r)` (docs/132 §4.1, E77). The table is the sum of what every place makes. | At one place the sum is §14's table. Nucleons summed over places are conserved. |
+| V7 | One clock. One seal window and one neutron share for the whole founding (`neutron_share(seal_window(source_clock()))`). One pulse phase. | The exchange's fixed point at each place and time: the seal window read where each part of the bounce cools on its own clock, with the pulse phase per nucleus (§13). | Read at one place and time it is §8–§13's fixed point. The neutron share is never set. |
+| V8 | The free nucleons left are all returned as hydrogen (`w = 1`). | Each free nucleon is placed by the exchange law: a free neutron, a free proton, or captured, by its face. There is no remainder assignment. | The free nucleons' books close by law. Hydrogen is what the law leaves, not the rest. |
+
+### 15.3 The table's bounds and its readers
+
+| # | Collapsed today | Opened | Witness |
+|---|---|---|---|
+| V9 | The read is bounded by weight (`nuclides::READ = 8192`). `Universe.densest` is one weight, and it caps every later climb: the stars' slow and rapid captures, and the burn's `w + w → 2w`. | The read is bounded on the convergence's degrees, not on weight. The densest is the table's frontier: the set of `(Z, Q)` edges where no whole nucleus arrives. Each later climb stops at its own frontier. | The frontier is the founding's own reading, never set. A star's capture past the frontier does not run. |
+| V10 | Every reader keys by weight: `chem::weight`, `atom_w`, `capture_slow` and `capture_rapid`, the burn's rungs, the plasma layer's bound share per kind (docs/134), the capture phases (E75), and `pulse::nuclei`. | Each reads `(Z, Q, R)`. The plasma layer's `b = g·E(a)/Q`, the capture chain's face and the burn's product all take the nuclide, not its weight. | One model per quantity, replaced in place. The reads below are unchanged where only one nuclide stood per weight. |
+| V11 | The seam carries one nucleus per weight (manifest v3, `Nucleus::of(z, q)`, R = 0). | Manifest v3 carries the whole table `{z, q, r}`, its μ by nuclide. A crossing's checks go by conserved quantity, not kind (78.184 §6: nucleons, charge under the swap). | The manifest is granted on a fresh mesh, and READ-ENDOWMENT reads every nuclide back. |
+| V12 | The antipolar face reads netstratum's table with Z ↔ Q swapped by letter only. | Xylarium's table is this table under the pole swap, nuclide by nuclide, per plane (V3), with 3Z kept and fusion and fission exchanged (docs/123 §2). | `swap(swap(T)) = T`. 3Z is conserved across the tube for the whole table. |
+
+### 15.4 What the table forms
+
+| # | Collapsed today | Opened | Witness |
+|---|---|---|---|
+| V13 | The universal core holds the one-chain table. Its state `universal_state`, its hold, its rim and the first bounce are read on it. | The universal core holds the multi-dimensional table, and its state is read on it. | Read on a fresh founding: the core's state, its rim and the first bounce, before and after. |
+| V14 | The heaviest weight is 1508 at 2^40 grains and 1612 at 2^55. | The frontier's heaviest weight falls in 1700–2500, read by the laws above, never set. | `pulse::tests`: the frontier's heaviest weight is in 1700–2500, with nucleons conserved, on a fresh founding at the working count (2^40). |
+| V15 | The valley of stability is missing: every kind is proton-rich (#203). | The neutron excess follows from V4–V7, with no table imported. | Read the rest point `(Z − Q)/w` across the frontier, beside nature (`beside_nature`), never fitted. |
+
+### 15.5 Order and what stays open
+
+1. **Derive.** V1–V3 define the nuclide. V4–V8 are the climb, derived here
+   with each channel's share from the master equation (docs/105 §3) and its
+   inverse. V9 is the frontier.
+2. **Build in place.** Order: `chem::Kind` on `(Z, Q, R)` (V1, V2), the
+   frames (V3), the climb (V4–V8), then the readers (V10). One model per
+   quantity.
+3. **Read.** V13–V15 on a fresh founding.
+4. **The seams:** V11 with Mycelium and V12 with Xylarium, agreed before
+   they are built.
+
+Nothing here is ruled beyond the operator's range and the shared rulings
+cited. If a derivation forks between two readings that the docs do not
+decide, the fork is put to the operator in #213.
