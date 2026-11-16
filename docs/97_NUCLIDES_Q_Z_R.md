@@ -802,3 +802,51 @@ own g:
 
 V6 is the next derivation. Its reach is read only on a founding that
 conserves nucleons (§15.11).
+
+### 15.13 V6 examined: what the held share must do, and the one candidate derived
+
+These are scratch scans (exploratory, not state). They conserve nucleons,
+use one-chain κ, keep today's seed share of 1/8, and are calibrated to 1508
+at 2^40.
+
+**A constant held share sits on a cliff.**
+
+| g | Frontier | Bound |
+|---|---|---|
+| 0.30 | 752 | tail |
+| 0.45 | 986 | tail |
+| **0.50** | **1508** | tail, with the fuel nearly spent |
+| 0.55 | 19 | fuel |
+| 0.70 | 10 | fuel |
+
+The founding's g = ½ (the throat) is the largest constant share that does
+not drain the fuel at light weights.
+
+**The shape the range needs.** Hold g = ½ through light weights and raise
+it at heavy ones:
+- from weight 200: 0.6 gives 2102, and 0.7 gives 2687;
+- from weight 500: 0.6 gives 1837, and 0.7 gives 2596.
+
+So the held share must rise with weight, slowly through the light weights.
+
+**The candidate the record derives: the nucleus's own enclosure.** A
+nucleus is a body. Its fibres are its hold (the glue) and its lone ends its
+reach, so its own held share is `F/(F + L)`. That is 0.25 at weight 10,
+about 0.85–0.92 at 50–200, and about 0.74 at 1500.
+- Read alone it gives **1610 at 2^40, 2134 at 2^55** and 1487 at 2^30.
+- It is tail-bound, with 10.6% of the fuel left. The fuel is no longer the
+  limit; the heavy tail's survival, about 0.94, is.
+- Composed with the throat's ½ as "held by either", it drains the fuel by
+  weight 10. As "held by both", it stops at about 700.
+
+**What this settles, and what is next.** V6 cannot be a constant place:
+the throat is already the best constant. The held share has to read the
+nucleus's own depth, and `F/(F + L)` is the first reading of it from the
+record. It does not reach 1700 at the working count on its own.
+
+The next derivation is the electrons' held share at a nucleus's own place,
+from the master equation at the nucleus's own deficit (docs/105 §3), not
+from its fibre count alone. Then V4, the real pool (protons), where a fibre
+step needs a neutron the exchange makes.
+
+Each read conserves nucleons, and no candidate is fitted to the range.
