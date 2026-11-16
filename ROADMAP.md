@@ -28,10 +28,11 @@ and the code are right.
 1. **#213, the elemental table to weight 1700–2500** (docs/97 §15). The
    scope (V1–V15), the per-plane state, the opened volume and F1–F3 are
    derived. The reach is bound by the founding's nucleons (§15.11): the fuel
-   budget and the survival tail meet near 1508 (§15.12). **Next is V6**, the
-   bounce's places, so the held share rises only at heavy weights. Then V4
-   against the real pool, which is all protons. No reach is quoted from a
-   scan that does not conserve nucleons.
+   budget and the survival tail meet near 1508 (§15.12). No held share the
+   record derives reaches the range (§15.13–§15.14). **Built:** the merger
+   channel, V4 (§15.15, E79). The frontier is **1708 at 2^40**, inside the
+   range. Next: the founding's cost in `deploy`, then the rest of the scope
+   (V1–V3 kinds, V8, V13's read of the core).
 2. **#206 step 4:** the read of where the composed turning moves spin
    between planes.
 3. **#220, the jetstream as volume** (docs/139, derived), built through

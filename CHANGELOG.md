@@ -12,6 +12,13 @@ change is named here.
 
 ### Changed
 
+- The founding climbs by two channels (docs/97 §15.15, E79, #213): a
+  nucleon captured, or a free seed merged (`w → w + 4`, the founding's own
+  pairing at every weight), with the pair share of the free seeds and the
+  free nucleons. Read on a fresh 2^40 founding: the heaviest weight is 1708
+  (Q 988, Z 720), up from 1508, with 1706 nuclides and the 3Z conservation
+  true. Witness: with no merger the table is §14's one chain exactly, and
+  nucleons are conserved.
 - Mycelium SDK pinned to f5ea695c (branch manifest-v4, mycelium #362 on
   #360). Manifest v4 entries come from `refound::manifest_entry`:
   - counts in thirds;

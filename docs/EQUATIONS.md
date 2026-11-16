@@ -2127,6 +2127,15 @@ per-kind reading by holding); the bounce's release leaves as one pooled parcel
 one-kind parcel reads as its kind; a merge adds parts by kind; the throat parts
 a mix into its kinds (`recycle::part`).
 
+**E79 · The founding's merger channel.** `pulse::climb_table` (docs/97
+§15.15, #213; V4). A nucleus at w captures one nucleon, `w → w + 1`, with
+share `1 − m` and survival `σ_{w+1}`. It merges with a free seed,
+`w → w + 4`, with share `m` and survival `σ_{w+4}`. Here `m = A/(A + P)` is
+the pair share of the free seeds and the free nucleons, and the free seeds
+are those that stayed at weight 4. Nucleons are conserved, and with no seed
+the climb is §14's one chain. Read: the frontier is 1708 at 2^40, against
+1508 for the one chain.
+
 **E78 · The jetstream as volume (scoped, not built).** docs/139 (#220;
 operator 2026-11-16). The Möbius current is a solid tube about the ring
 `δ = ½`. A mote in it stands at `(ψ, ρ, α)`: along the orbit, its depth from

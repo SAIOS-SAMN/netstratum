@@ -886,3 +886,62 @@ structure:
 
 These are the next derivations. Until one of them is derived, the table's
 reach stays at 1508, and no held share is fitted to it.
+
+### 15.15 V4 derived: the merger channel, the founding's own pairing at every weight
+
+**From the record.** The founding already holds a merger: its deuterons
+pair to weight 4, `2 + 2 → 4` (§8–§12, `pulse::founding`). The one-chain
+climb applies that channel once, at the seeds, and only ever captures one
+nucleon after. V4 asks for each channel at every weight, with its inverse.
+
+**M1 (the partner).** The merger's partner is a seed, weight 4: a closed
+nucleus (`F = 2, L = 0, κ = 1`). The free seeds are the ones that stayed at
+weight 4 when the seeds first climbed: the climb's own leftovers, placed by
+§14's survival. They are not set.
+
+**M2 (the channel's share).** A nucleus at w meets a free nucleon or a free
+seed in proportion to what stands in the pool (docs/105 §1: every share is
+a pair share of read quantities):
+
+    m = A/(A + P),     A the free seeds, P the free nucleons
+
+It merges with share `m` and captures one nucleon with share `1 − m`.
+
+**M3 (the survival).** Each channel survives by its product's own reading
+(§10, docs/105 §3):
+- a capture by `σ_{w+1}`;
+- a merger by `σ_{w+4}`.
+
+The rest stays at w.
+
+**M4 (the books).**
+- A capture spends one free nucleon, and a merger spends one free seed (4
+  nucleons).
+- Nucleons are conserved exactly.
+- With no free seed, `m = 0`, and the climb is §14's one chain exactly.
+
+**Read** (scratch scan, conserving nucleons, at the throat's `g = ½`):
+
+| Founding | One chain | With mergers |
+|---|---|---|
+| 2^30 grains | 1401 | 1632 |
+| 2^40 grains | 1508 | **1713** |
+| 2^55 grains | 1615 | 2096 |
+
+The free seeds are nearly spent at the end (0.16% of the nucleons), and
+4.4% of the free nucleons are left. The exact read lands with the code
+(`pulse::founding`).
+
+**Read, exact** (fresh founding at 2^40, `pulse found`, then one bell,
+2026-11-16): the heaviest kind is **weight 1708 (Q 988, Z 720)**, with
+1706 nuclides founded and the 3Z conservation true. The one chain gave 1508
+(Q 872, Z 636). The founding with `deploy` took about 14.5 minutes against
+about 3 before. The climb itself is cheap: the 2^55 founding test runs in
+seconds. The cost is in `deploy` over more and heavier kinds, suspected in
+the capture chain (E75), and is not yet attributed.
+
+**Witnesses:**
+1. Nucleons are conserved over the founding.
+2. With no free seed the table is §14's.
+3. Every product of a merger is a nucleus of weight `w + 4`.
+4. The frontier is read on a fresh founding, never set.
