@@ -462,7 +462,8 @@ pub fn concord(
 /// letters are Z = protons and Q = neutrons, the inverse of netstratum's
 /// (docs/97: Q protons, Z neutrons), so each nucleus crosses as
 /// `Nucleus::of(protons, neutrons)`, isotopes apart, its electron phase
-/// share `R = 0` (manifest v3). A nucleus with no
+/// share `R = 0` (manifest v3; v4 carries the counts in thirds, the eight
+/// lone-end patterns and the planes). A nucleus with no
 /// proton is no element and is refused by name here, never dropped.
 pub fn post_manifest(
     session: &Session,
@@ -475,21 +476,10 @@ pub fn post_manifest(
         .ok_or_else(|| io::Error::other("the universe did not read (pulse.bin)"))?;
     let mut nuclei = Vec::new();
     for ((protons, neutrons), c) in conductor::pulse::nuclei(&u.total()) {
-        let z = u16::try_from(protons)
-            .ok()
-            .filter(|z| *z > 0)
-            .ok_or_else(|| {
-                io::Error::other(format!(
-                    "a nucleus of {protons} protons and {neutrons} neutrons is no element the manifest carries"
-                ))
-            })?;
         let count = c
             .to_biguint()
             .ok_or_else(|| io::Error::other("a count passes the manifest's carrier"))?;
-        // R, the electron phase share (manifest v3, 78.184 §5): left to
-        // netstratum's physics, `R = 0`, until its capture's electron phase is
-        // derived as that share (docs/134 §12.3, #205).
-        nuclei.push((Nucleus::of(z, neutrons), count));
+        nuclei.push((manifest_entry(protons, neutrons)?, count));
     }
     let signed = Manifest {
         domain,
@@ -501,6 +491,35 @@ pub fn post_manifest(
     let act = encode_manifest(&signed).ok_or_else(unwritten_manifest)?;
     decode_grant_reply(&session.speak(act)?)
         .ok_or_else(|| io::Error::other("the grant did not decode"))
+}
+
+/// One nucleus as a v4 entry (78.184 §8; docs/97 §15.7, §15.9).
+/// - Its counts in thirds: Mycelium's letters, `z3 = 3·protons`,
+///   `q3 = 3·neutrons`.
+/// - Its lone ends' eight patterns `n_S`, S ⊆ {1, 2, 3} by bit: today every
+///   lone end is open, `n_∅ = L = protons − neutrons`.
+/// - No planes.
+///
+/// Netstratum's own witness, never the court's: `3·neutrons = 3F + Σ_k ℓ_k`,
+/// with `ℓ_k = Σ_{S∋k} n_S`. A nucleus with no proton is refused by name.
+pub fn manifest_entry(protons: u32, neutrons: u32) -> io::Result<Nucleus> {
+    let refused = || {
+        io::Error::other(format!(
+            "a nucleus of {protons} protons and {neutrons} neutrons is no element the manifest carries"
+        ))
+    };
+    if protons == 0 || u16::try_from(protons).is_err() {
+        return Err(refused());
+    }
+    let lone = protons.checked_sub(neutrons).ok_or_else(refused)?;
+    let mut pattern = vec![0u32; 8];
+    pattern[0] = lone;
+    Ok(Nucleus {
+        z3: 3 * protons,
+        q3: 3 * neutrons,
+        pattern,
+        planes: Vec::new(),
+    })
 }
 
 fn unwritten_manifest() -> io::Error {

@@ -12,6 +12,14 @@ change is named here.
 
 ### Changed
 
+- Mycelium SDK pinned to f5ea695c (branch manifest-v4, mycelium #362 on
+  #360). Manifest v4 entries come from `refound::manifest_entry`:
+  - counts in thirds;
+  - the eight lone-end patterns (docs/97 §15.7), every lone end open today;
+  - no planes.
+
+  Witness: `3·neutrons = 3F + Σℓ_k` for every nuclide to weight 3000. The
+  refound on the recut mesh is #362's live reading.
 - A body's orientation is held as its whole unit motion R, with K per plane
   beside it, and its generator is a reading (78.173 §8.5, ruled 2026-11-15
   for every kernel). On the grain the motion is `cayley(⌊generator(R)⌋)`, an
