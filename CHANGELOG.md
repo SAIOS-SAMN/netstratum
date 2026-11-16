@@ -23,6 +23,54 @@ change is named here.
 
 ### Added
 
+- The stride, S1 (docs/132 §4.1, #197): the attractor laws over n bells in
+  closed form (`flows::{keep_over, relax_over}`). The galaxy's conformations
+  at an echo's arrival stand for the bells each mote has lived since the
+  previous arrival. Found: the shear's pull has no closed n-bell form (#199).
+  Issues #197–#205 track the stride and the open derivations (T12, T1 as a
+  rate, the nuclear valley, the scale dilator, the founding's electron
+  phase). Read to the second echo: no binding forms with or without it.
+- Rates as versors (docs/138, #206): boosts compose by the geometric
+  product. Parallel boosts give the flow law; non-parallel ones give a
+  turning between their planes (half-rate `β₁β₂`, Thomas–Wigner). A path
+  that closes on paper leaves a boost and a turning: rate space is curved.
+  Time as coordinates (#207): a stride is the separation of two time
+  coordinates, the front's `τ(r) = r + H(<r)`, with density
+  `dτ/dr = 1 + dH/dr`. Built: each mote's stride is its proper time, the
+  separation read on its nested clock (`breath::proper_bells`).
+- Heat placed as the electrons' phase rate (docs/134 §11; operator
+  2026-11-15): stripping reads the agitation share as its rate `a/(1 − a)`
+  (`plasma::phase_rate`), at the star core's cuts and a world's layers. T12:
+  ignition (`a < ½`) and hydrogen's stripping (`a ≥ ½`) meet at one point, so
+  the ignition criterion is next.
+- The capture phase (docs/134 §12, E75; operator 2026-11-15: "straight-line
+  rigidity"): each kind's phase is its capture chain's accumulated face,
+  `φ_k = Σ s_j` (`pulse::capture_phases`), replacing `Q·½` in the founding and
+  the release and `Q × push` in a star's spray. It is not the seam's rest point
+  (§12.3), so manifest v3 entries state `R = 0`. Read (l109 → 112): 1 star →
+  0. The rigid parity had stacked the release onto two antipodes; spread over
+  the turn, the matter gathers only by motion between echoes (the stride).
+- The gravitational catch (docs/137): axioms A1–A7, theorems T1–T9 (the
+  catch is the matter's; a heavier star draws a body of the same spin nearer,
+  T3′; a lone parcel's orthogonal catch is ⅔ of its orbit, T5; the catch is
+  paid, never made, T7), their traversal through the hypha, and witnesses
+  W1–W5. G1: the star's orthogonal catch runs on its disc
+  (`settle_system`); read on bells 218→222 it moves nothing readable on a
+  two-mote disc.
+- The echo bell's stalls removed by reading the loops: the burn reads its star
+  once (`formation::StarCharge`), `burnable` no longer quadratic, the duplicate
+  `star_core_cut` gone, `conform_partners`, `emit` and the shear's separable
+  sums on `range_sums`, `coupling::field` grained. Read: the echo at bells
+  218→222 completes in about 6 min (it had run past 40).
+- Manifest v2: `pulse::nuclei` gives (protons, neutrons); the manifest posts
+  `Nucleus { z: protons, q: neutrons }` (Mycelium's letters, docs/129 §0);
+  `ns-hypha endowment` reads the court's account through the paged
+  READ-ENDOWMENT (`read_endowment`, mycelium #332; pin 60c94245), and
+  `standing` prints μ per lane. Read on the recut mesh: manifest Sealed, the
+  endowment assembled in 2 pages, 1,495 nucleus entries. Manifest v3 (pin
+  fb98c2e1): each nucleus posts `Nucleus::of(protons, neutrons)`, `R = 0`
+  (#205). Re-founded on the step-5 mesh (delivery per final point): the
+  manifest is sealed at μ 0 and the reserve holds 0, awaiting T's advance.
 - The state on Cl(13,1) (docs/136; operator ruling 2026-11-13, one
   body-state signature across kernels, superseding docs/131's Cl(5,4)). A
   body's place and rotor are on the base; the S¹¹ fibre is read by each

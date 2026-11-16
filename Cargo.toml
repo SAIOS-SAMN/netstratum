@@ -19,10 +19,11 @@ needless_range_loop = "allow"
 # Mycelium, the network substrate Netstratum's engine speaks through, by its
 # SDK only (`mycelium-sdk`: the session, the house's surface and the law
 # forms), pinned at a release or, where none is tagged, at the commit the
-# live mesh runs (mycelium main 15beb6ea, wire 0x0300, 2026-11-13); bumping it
-# is a contract change
+# live mesh runs (mycelium main fb98c2e1, wire 0x0300, 2026-11-15: manifest v3, Nucleus { z, q, r }; manifest
+# v2, nuclei keyed (protons, neutrons); READ-ENDOWMENT paged, #332); bumping
+# it is a contract change
 # (CONTRIBUTING.md, "Contracts").
-mycelium-sdk = { git = "https://github.com/SAIOS-SAMN/mycelium", rev = "15beb6eab082b1526cc296aa802d5450558f7e92" }
+mycelium-sdk = { git = "https://github.com/SAIOS-SAMN/mycelium", rev = "fb98c2e1cc02542e6af7b53cd26c9a4259e73c9a" }
 blake3 = "1.5"
 num-bigint = "0.4"
 num-rational = "0.4"

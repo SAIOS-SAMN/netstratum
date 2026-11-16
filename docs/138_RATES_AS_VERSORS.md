@@ -1,0 +1,116 @@
+# 138 — Rates as versors: curvature, and closure as a force
+
+**Operator 2026-11-15:** "derive it: compose rates as versors, file the
+issue. We're constantly being drawn back to straight lines moving on a piece
+of paper, and curvature without closure as a dynamic opposing force."
+
+**Status:** derived 2026-11-15, with fixtures computed exactly. Not built.
+
+## 0. What stands
+
+The flow law `x ⊕ y = (x + y)/(1 + xy)` (LAW-DILATION, `ring::compose`) is
+Einstein's collinear velocity addition: rapidities add, `x = tanh θ`. The
+engine applies it **plane by plane**:
+- the release's `x_k ⊕ P_k` on each plane;
+- the shear's pull on each plane (`coupling::pulled`);
+- the scale on its one plane `e₊e₋`.
+
+That law is exact only for parallel boosts. Two boosts on different planes do
+not compose that way. Holding the planes apart flattens the rate space onto
+paper.
+
+## 1. Axioms
+
+- **V1 (a rate is a boost).** A rate on a plane is a boost in the algebra
+  (docs/136, Cl(13,1); the hypha's conformal law in Cl(4,1)). It is held in
+  its rational Cayley form, the form the engine's turnings already use
+  (`orientation::Motion`): `V(β) ∝ 1 + β·B`, with `B` the plane's unit
+  bivector. A boost plane joins `e₋` (`e₀`, `e₀² = −1`) with a spatial axis,
+  so `B² = +1`. Here `β = tanh(θ/2)` is the half-rate, and the rate is
+  `x = 2β/(1 + β²)`.
+- **V2 (composition is the geometric product).** Two motions compose as
+  `V₂·V₁`, exact over ℚ, up to a scalar. Like `kⁿ` and `Dⁿ`, this is a law
+  composed with itself, not a length squared (docs/132 §1).
+
+## 2. Theorems (fixtures exact, in Cl(2,1) on `e₀, e₁, e₂`)
+
+**W1 (parallel boosts are the flow law).** On one plane,
+`(1 + β₁B)(1 + β₂B) = (1 + β₁β₂) + (β₁ + β₂)·B`, so the half-rate is
+`(β₁ + β₂)/(1 + β₁β₂)`, the flow law. The per-plane law is the collinear
+case of V2.
+
+*Proof.* `B² = 1`. *Fixture:* β = ⅓, ½ gives `7/6 + (5/6)·e₀₁`, half-rate 5/7. ∎
+
+**W2 (non-parallel boosts turn the plane between them).** On planes `e₀₁`
+and `e₀₂`:
+
+    (1 + β₁e₀₁)(1 + β₂e₀₂) = 1 + β₁e₀₁ + β₂e₀₂ + β₁β₂·e₁₂
+
+This is a boost `B` times a turning `R` on `e₁₂`, the plane of the two
+spatial directions (the Thomas–Wigner rotation). The turning's half-rate is
+exactly
+
+    γ = β₁β₂
+
+and `B = 1 + a·e₀₁ + b·e₀₂`, with
+`a = β₁(1 + β₂²)/(1 + β₁²β₂²)` and `b = β₂(1 − β₁²)/(1 + β₁²β₂²)`.
+
+*Proof.* `e₀₁e₀₂ = e₀e₁e₀e₂ = −e₀²·e₁e₂ = e₁₂`. Expanding `B·R` and matching
+coefficients gives `a`, `b` and `γ`. *Fixture:* β = ⅓, ½ gives
+`1 + ⅓e₀₁ + ½e₀₂ + ⅙e₁₂`, and `B·R` reproduces it exactly. ∎
+
+**W3 (the turning is real motion the per-plane law drops).** Composing per
+plane keeps `a` and `b` (approximately, each by the flow law alone) and loses
+`γ`. Whenever two boost planes move at once, the turning `γ` on the plane
+between them is motion that no per-plane ledger books. *Proof.* W1 and W2. ∎
+
+**W4 (curvature without closure).** A path that closes on paper,
+`V₁ → V₂ → V₁⁻¹ → V₂⁻¹`, does not close in the algebra:
+
+    V₂⁻¹V₁⁻¹V₂V₁ ∝ 1 + b′·e₀₁ + a′·e₀₂ + γ′·e₁₂
+
+It leaves both a boost (the path's failure to close) and a turning (its
+holonomy). Both vanish only where `β₁β₂ = 0`.
+
+*Fixture:* β = ⅓, ½ gives `11/18 − (1/6)·e₀₁ + (1/9)·e₀₂ + (1/3)·e₁₂`, that
+is, half-rates −3/11 and 2/11 left on the boost planes and a turning of 6/11
+on `e₁₂`. ∎
+
+This is the curvature of rate space: it is hyperbolic, not the paper the
+per-plane law draws on. The residue is a motion. In this sense **closure is
+a dynamic force:**
+- a body driven around a cycle of rates on two planes is turned (Thomas
+  precession) and displaced;
+- the turning opposes the drive's plane, turning its direction toward the
+  third plane;
+- nothing has to add this force: it is what the composition is.
+
+## 3. What it changes
+
+1. **The ledger is the bivector, not the planes.** Spin conservation per
+   plane (R9's `Σ m·ℓ_k` on each plane) is the projection of one
+   conservation: the motion's bivector, all planes together. W2's `γ` moves
+   spin from the boost planes into the plane between them. A per-plane book
+   reads that as a leak or a remainder.
+2. **The shear (#199).** The pull composed as a boost of the mote's motion
+   against the field's, `V_field⁻¹·V_mote`, is a one-parameter motion where
+   the field stands. It composes over n bells as a power of a versor, its
+   Wigner part included. This is the restatement #199 asks for.
+3. **The release (`x_k ⊕ P_k`).** A kind leaving with rates on several
+   planes leaves with their composed versor, its turning between the planes
+   included.
+4. **The drift (A9) across the inversion.** "Drag into velocity across the
+   inversion" is a coupling between faces. In this form it is a boost on a
+   plane through `e₋`, and its composition with the continuum's planes turns
+   by W2.
+
+## 4. Build order (#206)
+
+1. `turning`: boosts in Cayley form on named planes, composition by the
+   geometric product, and the decomposition `B·R` (W2), exact. Witnesses: the
+   fixtures above, plus N and 4N for a power.
+2. The ledger: spin read as the motion's bivector, with conservation stated
+   on it. The per-plane identities become its projections.
+3. The shear restated (#199), then the release and the drift.
+4. Read on a laid checkpoint: where W2's turning moves spin between planes,
+   against the per-plane run.

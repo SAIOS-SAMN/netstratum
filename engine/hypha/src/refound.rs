@@ -43,7 +43,7 @@ use mycelium_sdk::house::tuniversal::TPoint;
 use mycelium_sdk::house::universe::{Genesis, Geometry, Parent};
 use mycelium_sdk::house::{
     decode_grant_reply, decode_universe_reading, encode_manifest, encode_universe_read,
-    GrantRefusal, Granted, Manifest,
+    GrantRefusal, Granted, Manifest, Nucleus,
 };
 use mycelium_sdk::session::Session;
 use std::io;
@@ -444,9 +444,17 @@ pub fn concord(
     Ok((all, said))
 }
 
-/// THE MANIFEST: the universe's nuclei per Z (`conductor::pulse::nuclei_by_z`
-/// over what it holds), signed by the sitting reserve, and the court's grant
-/// or its refusal by name.
+/// THE MANIFEST: the universe's nuclei by their two counts
+/// (`conductor::pulse::nuclei`, protons and neutrons), signed by the sitting
+/// reserve, and the court's grant or its refusal by name (manifest v2,
+/// Mycelium #331, 78.184).
+///
+/// The seam: the hypha never reads a kernel's letter names. Mycelium's
+/// letters are Z = protons and Q = neutrons, the inverse of netstratum's
+/// (docs/97: Q protons, Z neutrons), so each nucleus crosses as
+/// `Nucleus::of(protons, neutrons)`, isotopes apart, its electron phase
+/// share `R = 0` (manifest v3). A nucleus with no
+/// proton is no element and is refused by name here, never dropped.
 pub fn post_manifest(
     session: &Session,
     reserve: &ed25519_dalek::SigningKey,
@@ -456,11 +464,24 @@ pub fn post_manifest(
 ) -> io::Result<Granted> {
     let (_, u) = conductor::pulse::read(var_root)
         .ok_or_else(|| io::Error::other("the universe did not read (pulse.bin)"))?;
-    let nuclei = conductor::pulse::nuclei_by_z(&u.total())
-        .into_iter()
-        .map(|(z, c)| Some((u16::try_from(z).ok()?, c.to_biguint()?)))
-        .collect::<Option<Vec<_>>>()
-        .ok_or_else(|| io::Error::other("a Z or a count passes the manifest's carrier"))?;
+    let mut nuclei = Vec::new();
+    for ((protons, neutrons), c) in conductor::pulse::nuclei(&u.total()) {
+        let z = u16::try_from(protons)
+            .ok()
+            .filter(|z| *z > 0)
+            .ok_or_else(|| {
+                io::Error::other(format!(
+                    "a nucleus of {protons} protons and {neutrons} neutrons is no element the manifest carries"
+                ))
+            })?;
+        let count = c
+            .to_biguint()
+            .ok_or_else(|| io::Error::other("a count passes the manifest's carrier"))?;
+        // R, the electron phase share (manifest v3, 78.184 §5): left to
+        // netstratum's physics, `R = 0`, until its capture's electron phase is
+        // derived as that share (docs/134 §12.3, #205).
+        nuclei.push((Nucleus::of(z, neutrons), count));
+    }
     let signed = Manifest {
         domain,
         nuclei,

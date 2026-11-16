@@ -68,45 +68,31 @@ pub fn nuclei_per_grain() -> num_bigint::BigInt {
     num_bigint::BigInt::from(60u32).pow(30)
 }
 
-/// A manifest's nuclei per Z (protons), Z ascending, each once, every count
-/// positive: what a universe holds as Mycelium's manifest states it. Each
-/// amount is a whole count of nuclei on the one grid (`nucleus`); a
-/// cluster's nuclei are its parts', each at its own Z. An amount off the
-/// grid is floored to whole nuclei, as `nucleus` floors it.
-pub fn nuclei_by_z(m: &Manifest) -> Vec<(u32, num_bigint::BigInt)> {
+/// A manifest's nuclei by their two counts, the nucleon dipole (operator
+/// 2026-11-13: "Z needs to be coupled to Q intrinsically, algebraically, and
+/// geometrically"; Mycelium MU-EQUATIONS §6.13): each nucleus keyed
+/// `(protons, neutrons)`, netstratum's `(Q, Z)` (docs/97), so isotopes stand
+/// apart. Ascending, each once, every count positive. Each amount is a whole
+/// count of nuclei on the one grid (`nucleus`); a cluster's nuclei are its
+/// parts', each at its own pair. An amount off the grid is floored to whole
+/// nuclei, as `nucleus` floors it. No kind is keyed by one letter: the
+/// uplink translates the letters at the seam.
+pub fn nuclei(m: &Manifest) -> Vec<((u32, u32), num_bigint::BigInt)> {
     let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
-    let mut by_z: BTreeMap<u32, num_bigint::BigInt> = BTreeMap::new();
+    let mut by_pair: BTreeMap<(u32, u32), num_bigint::BigInt> = BTreeMap::new();
     for (k, a) in m {
         let count = (a.clone() * Ratio::from_integer(grid.clone()))
             .floor()
             .to_integer();
         for &(n, w) in k.parts() {
-            *by_z.entry(crate::chem::protons(w)).or_default() +=
+            let q = crate::chem::protons(w);
+            *by_pair.entry((q, w.saturating_sub(q))).or_default() +=
                 &count * num_bigint::BigInt::from(n);
         }
     }
-    by_z.into_iter()
+    by_pair
+        .into_iter()
         .filter(|(_, c)| *c > num_bigint::BigInt::from(0))
-        .collect()
-}
-
-/// Nuclei per Z, as Mycelium's manifest carries them (ACT_DOMAIN 17).
-pub type Nuclei = BTreeMap<u16, num_bigint::BigInt>;
-
-/// A manifest of nuclei entering from the court (Mycelium's manifest carries
-/// nuclei per charge): each charge's count in grains as its element, its
-/// lightest nuclide (`Kind::element`), every kind in whole nuclei.
-pub fn from_nuclei(nuclei: &Nuclei) -> Manifest {
-    let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
-    nuclei
-        .iter()
-        .filter(|(_, count)| **count > num_bigint::BigInt::from(0))
-        .filter_map(|(z, count)| {
-            Some((
-                crate::chem::Kind::element(u32::from(*z))?,
-                Ratio::new(count.clone(), grid.clone()),
-            ))
-        })
         .collect()
 }
 
@@ -632,6 +618,55 @@ pub struct Universe {
     pub firm_prev: Vec<(crate::chem::Kind, Vec<Ratio>)>,
 }
 
+/// The unlocked face at a capture (docs/134 §12; operators 2026-10-18, "the
+/// unlocked face, it's a hemisphere, keep it"): `½·R/(R + H)` with `R = held`
+/// so far and `H = 1 + held`, on the grain. A hemisphere, never a static ½.
+pub fn capture_face(held: &Ratio) -> Ratio {
+    grain(&(ratio(1, 2) * held.clone() / (held.clone() + ratio(1, 1) + held.clone())))
+}
+
+/// The capture chain over `kinds` (charge ascending): each kind's share, the
+/// face at its own event, and the holding share captured in all.
+fn capture_chain(kinds: &[(crate::chem::Kind, Ratio)], total: &Ratio) -> (Vec<Ratio>, Ratio) {
+    let mut held = ratio(0, 1);
+    let mut share = Vec::with_capacity(kinds.len());
+    for (k, a) in kinds {
+        share.push(capture_face(&held));
+        held = grain(
+            &(held + a.clone() * ratio(i64::from(crate::chem::weight(k)), 1) / total.clone()),
+        );
+    }
+    (share, held)
+}
+
+/// The capture phase of each kind of `m` (docs/134 §12): the turning the
+/// capture chain has accumulated up to and including it,
+/// `φ_k = Σ_{j ≤ k} s_j`, `s_j` the face at each capture event, the chain
+/// built charge ascending in the body's own units (regeneration: each core's
+/// chain is its own). A reading of the mix, never stored; in turns, exact.
+pub fn capture_phases(m: &Manifest) -> Manifest {
+    let total = mass(m);
+    if total.is_zero() {
+        return Manifest::new();
+    }
+    let mut kinds: Vec<(crate::chem::Kind, Ratio)> = m
+        .iter()
+        .filter(|(_, a)| **a > ratio(0, 1))
+        .map(|(k, a)| (k.clone(), a.clone()))
+        .collect();
+    kinds.sort_by_key(|(k, _)| crate::chem::charge(k));
+    let (share, _) = capture_chain(&kinds, &total);
+    let mut acc = ratio(0, 1);
+    kinds
+        .into_iter()
+        .zip(share)
+        .map(|((k, _), s)| {
+            acc += s;
+            (k, acc.clone())
+        })
+        .collect()
+}
+
 /// The pulse: the manifest deployed from `seed`. The unit of mass is the
 /// deepest core's hole.
 /// The founding cascade (operators 2026-10-18, Xylarium 11.0 (15), the
@@ -671,15 +706,8 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         .map(|(k, a)| (k.clone(), a.clone()))
         .collect();
     kinds.sort_by_key(|(k, _)| crate::chem::charge(k));
-    let face = |held: &Ratio| {
-        g(&(ratio(1, 2) * held.clone() / (held.clone() + ratio(1, 1) + held.clone())))
-    };
-    let mut held = ratio(0, 1);
-    let mut share = Vec::with_capacity(kinds.len());
-    for (k, a) in &kinds {
-        share.push(face(&held));
-        held = g(&(held + a.clone() * w(k) / total.clone()));
-    }
+    let face = |held: &Ratio| capture_face(held);
+    let (share, held) = capture_chain(&kinds, &total);
     let spin = share.iter().fold(ratio(0, 1), |a, b| a + b.clone());
     let h = ratio(1, 1) + held.clone();
     let s_final = face(&held);
@@ -726,7 +754,11 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
                 a.clone(),
                 w(k),
                 spin.clone() + s.clone(),
-                crate::plasma::bound_share(k, &g_throat, &ratio(0, 1)),
+                crate::plasma::bound_share(
+                    k,
+                    &g_throat,
+                    &crate::plasma::phase_rate_for(k, &ratio(0, 1)),
+                ),
             )
         })
         .collect();
@@ -1366,7 +1398,7 @@ pub fn orbit_galaxies(
             let _ = crate::flows::echo_beats(&mut u.ocean, &enc_o, &ledger_u, &ratio(1, 2), None);
             let (given, _, heated) =
                 crate::flows::torque(&mut u.ocean, &enc_o, &ratio(1, 2), &ledger_u, &mut cross);
-            let _ = crate::flows::conform_partners(&mut u.ocean, &enc_o, &ledger_u);
+            let _ = crate::flows::conform_partners(&mut u.ocean, &enc_o, &ledger_u, &|_| 1);
             if !u.unit.is_zero() {
                 collective.ocean_heat = heated * ledger_u.clone() / u.unit.clone();
             }
@@ -2662,10 +2694,14 @@ mod tests {
     }
 
     #[test]
-    fn a_manifests_nuclei_count_whole_per_z_its_clusters_by_their_parts() {
+    fn a_manifests_nuclei_count_whole_by_their_dipole_its_clusters_by_their_parts() {
         let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
         let k = |s: &str| crate::chem::Kind::parse(s).expect("a kind");
         let whole = |n: i64| Ratio::new(num_bigint::BigInt::from(n), grid.clone());
+        let pair = |w: u32| {
+            let q = crate::chem::protons(w);
+            (q, w - q)
+        };
         // Hydrogen, weight 4, and water: one centre and four hydrogens per
         // molecule.
         let m: Manifest = [
@@ -2674,15 +2710,48 @@ mod tests {
             (k("W0010·4W0001"), whole(2)),
         ]
         .into();
-        let z_water = crate::chem::protons(k("W0010").parts()[0].1);
-        let mut want: BTreeMap<u32, num_bigint::BigInt> = BTreeMap::new();
-        *want.entry(1).or_default() += num_bigint::BigInt::from(10 + 4 * 2);
-        *want.entry(crate::chem::protons(4)).or_default() += num_bigint::BigInt::from(3);
-        *want.entry(z_water).or_default() += num_bigint::BigInt::from(2);
-        assert_eq!(nuclei_by_z(&m), want.into_iter().collect::<Vec<_>>());
-        // Z ascending, each once.
-        let zs: Vec<u32> = nuclei_by_z(&m).iter().map(|(z, _)| *z).collect();
-        assert!(zs.windows(2).all(|p| p[0] < p[1]));
+        let mut want: BTreeMap<(u32, u32), num_bigint::BigInt> = BTreeMap::new();
+        *want.entry(pair(1)).or_default() += num_bigint::BigInt::from(10 + 4 * 2);
+        *want.entry(pair(4)).or_default() += num_bigint::BigInt::from(3);
+        *want.entry(pair(10)).or_default() += num_bigint::BigInt::from(2);
+        assert_eq!(nuclei(&m), want.into_iter().collect::<Vec<_>>());
+        // Ascending, each pair once; protons and neutrons sum to the weight.
+        let pairs: Vec<(u32, u32)> = nuclei(&m).iter().map(|(p, _)| *p).collect();
+        assert!(pairs.windows(2).all(|p| p[0] < p[1]));
+        assert_eq!(
+            pairs.iter().map(|(q, z)| q + z).collect::<Vec<_>>(),
+            vec![1, 4, 10]
+        );
+    }
+
+    #[test]
+    fn isotopes_stand_apart_in_the_manifest() {
+        // Operator 2026-11-13: an element is never keyed by one letter. Two
+        // weights with the same protons are two entries, never summed.
+        let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+        let one = Ratio::new(num_bigint::BigInt::from(1), grid);
+        let (a, b) = (1..400u32)
+            .flat_map(|a| (a + 1..400).map(move |b| (a, b)))
+            .find(|&(a, b)| {
+                let q = crate::chem::protons(a);
+                q > 0 && q == crate::chem::protons(b)
+            })
+            .expect("two isotopes in the table");
+        let m: Manifest = [
+            (
+                crate::chem::Kind::parse(&format!("W{a:04}")).expect("a kind"),
+                one.clone(),
+            ),
+            (
+                crate::chem::Kind::parse(&format!("W{b:04}")).expect("a kind"),
+                one,
+            ),
+        ]
+        .into();
+        let got = nuclei(&m);
+        assert_eq!(got.len(), 2, "isotopes {a} and {b} kept apart");
+        assert_eq!(got[0].0 .0, got[1].0 .0, "the same protons");
+        assert_ne!(got[0].0 .1, got[1].0 .1, "different neutrons");
     }
 
     #[test]
@@ -3026,6 +3095,44 @@ mod record_tests {
         let by_tilt: Vec<Ratio> = tilt.iter().map(|t| x.ell_orth() * t.clone()).collect();
         assert_eq!(read.spins_orth, by_tilt, "carried by the tilt");
         assert_eq!(read.spins, x.spins);
+    }
+}
+
+#[cfg(test)]
+mod capture_tests {
+    use super::{capture_face, capture_phases, grain, mass, Manifest};
+    use cfe::ratio::ratio;
+
+    /// docs/134 §12: the capture chain's phases. Hydrogen, first in the chain,
+    /// stands at 0; each share is a hemisphere's face, under ¼; the phases
+    /// accumulate charge ascending; the last is the chain's whole turning.
+    #[test]
+    fn the_capture_phase_is_the_chains_accumulated_face() {
+        let k = |q: u32| crate::chem::Kind::element(q).expect("element");
+        let mut m = Manifest::new();
+        m.insert(k(1), ratio(70, 1));
+        m.insert(k(2), ratio(20, 1));
+        m.insert(k(8), ratio(3, 1));
+        m.insert(k(26), ratio(1, 1));
+        let phi = capture_phases(&m);
+        assert_eq!(phi[&k(1)], ratio(0, 1));
+        let order = [k(1), k(2), k(8), k(26)];
+        for w in order.windows(2) {
+            let step = phi[&w[1]].clone() - phi[&w[0]].clone();
+            assert!(
+                step > ratio(0, 1) && step < ratio(1, 4),
+                "a hemisphere's face"
+            );
+        }
+        let total = mass(&m);
+        let mut held = ratio(0, 1);
+        let mut whole = ratio(0, 1);
+        for q in [1u32, 2, 8, 26] {
+            whole += capture_face(&held);
+            let w = ratio(i64::from(crate::chem::weight(&k(q))), 1);
+            held = grain(&(held + m[&k(q)].clone() * w / total.clone()));
+        }
+        assert_eq!(phi[&k(26)], whole);
     }
 }
 

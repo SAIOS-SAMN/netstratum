@@ -390,10 +390,79 @@ pub fn tunnelling(w: u32) -> Option<Ratio> {
 ///   Returns the share a ring; None where the rung does not run, or its
 ///   share lies past the whole.
 pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option<Ratio> {
-    // A rung burns only the fuel the star holds.
     star.get(&crate::chem::Kind::atom(z)?)?;
-    let total = mass(star);
-    if total.is_zero() || coherence.is_zero() {
+    if mass(star).is_zero() {
+        return None;
+    }
+    burn_feed(z, share, &StarCharge::of(star), coherence)
+}
+
+/// A star's nuclei and their enclosed charge, `(Σ a, Σ a·Q_enclosed)`: the
+/// two sums every rung's barrier reads (`q̄ = charge/count`). Read once per
+/// star, then moved by each fusion ([`StarCharge::fuse`]) by exactly what
+/// it changed, so a star's rungs cost one read of the star, not one each.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct StarCharge {
+    pub count: Ratio,
+    pub charge: Ratio,
+}
+
+/// A kind's enclosed charge, the barrier's count (one reading for the sum
+/// and for each fusion's change).
+fn enclosed_of(k: &crate::chem::Kind) -> Ratio {
+    ratio(
+        i64::from(
+            crate::chem::parts(k)
+                .and_then(|(z, _)| crate::chem::atom_of(z))
+                .map(|x| x.enclosed)
+                .unwrap_or(0),
+        ),
+        1,
+    )
+}
+
+impl StarCharge {
+    /// The two sums over what the star holds.
+    pub fn of(star: &Manifest) -> StarCharge {
+        StarCharge {
+            count: star.values().fold(ratio(0, 1), |s, a| s + a.clone()),
+            charge: star
+                .iter()
+                .fold(ratio(0, 1), |s, (k, a)| s + a.clone() * enclosed_of(k)),
+        }
+    }
+
+    /// One rung's fusion in the star: `2·made` of `fuel` become `made` of
+    /// `product`. The star's holding is unchanged (`2·made·w = made·2w`);
+    /// the count falls by `made` and the charge by what the barrier reads
+    /// of the change, so the sums stand as [`StarCharge::of`] would read
+    /// them again.
+    pub fn fuse(
+        &mut self,
+        star: &mut Manifest,
+        fuel: &crate::chem::Kind,
+        product: &crate::chem::Kind,
+        made: &Ratio,
+    ) {
+        let pair = made.clone() * ratio(2, 1);
+        // Only the two kinds it changes are touched (no pass over the star).
+        if let Some(have) = star.get_mut(fuel) {
+            *have -= pair.clone();
+            if !have.is_positive() {
+                star.remove(fuel);
+            }
+        }
+        *star.entry(product.clone()).or_insert_with(|| ratio(0, 1)) += made.clone();
+        self.count = self.count.clone() - made.clone();
+        self.charge =
+            self.charge.clone() - pair * enclosed_of(fuel) + made.clone() * enclosed_of(product);
+    }
+}
+
+/// The share a ring a rung fuses ([`burn`]), from the star's sums already
+/// read: None where the rung does not run, or its share lies past the whole.
+pub fn burn_feed(z: u32, share: &Ratio, star: &StarCharge, coherence: &Ratio) -> Option<Ratio> {
+    if coherence.is_zero() {
         return None;
     }
     let open = |z: u32| i64::from(crate::chem::atom_of(z).map(|a| a.unpaired).unwrap_or(0));
@@ -409,20 +478,10 @@ pub fn burn(star: &Manifest, share: &Ratio, z: u32, coherence: &Ratio) -> Option
     // Over the product's weight, its nucleons `2w` (docs/97).
     let driver = ratio(dm, 2 * i64::from(z));
     let tau = tunnelling(z)?;
-    let count = star.values().fold(ratio(0, 1), |s, a| s + a.clone());
-    let charge = star.iter().fold(ratio(0, 1), |s, (k, a)| {
-        s + a.clone()
-            * ratio(
-                i64::from(
-                    crate::chem::parts(k)
-                        .and_then(|(z, _)| crate::chem::atom_of(z))
-                        .map(|x| x.enclosed)
-                        .unwrap_or(0),
-                ),
-                1,
-            )
-    });
-    let q_mean = charge / count;
+    if star.count.is_zero() {
+        return None;
+    }
+    let q_mean = star.charge.clone() / star.count.clone();
     if q_mean.is_zero() {
         return None;
     }
@@ -891,7 +950,12 @@ pub fn layer_chemistry(kept: &mut Manifest, heat: &Ratio) {
     let Some((bands, h)) = layer_bands(kept, heat) else {
         return;
     };
-    let at = |r: &Ratio| heat.clone() * h.clone() / (r.clone() + h.clone());
+    // The heat at each layer, its share by the layer's deficit (heat falls
+    // outward), read as the electrons' phase rate (docs/134 §11).
+    let mix = kept.clone();
+    let at = |r: &Ratio| {
+        crate::plasma::phase_rate_mix(&mix, &(heat.clone() * h.clone() / (r.clone() + h.clone())))
+    };
     // Deep clusters part.
     let mut parted = Manifest::new();
     for (k, lo, hi) in &bands {
@@ -1064,7 +1128,9 @@ pub fn system(
     // ended (`core_heat`, read by the caller); its state of matter is read
     // from it, never set: a winding at or below it is stripped (`open_at`),
     // so a core hot enough keeps its hydrogen as fuel.
-    let ionizing = core_heat.clone();
+    // Heat as the electrons' phase rate (docs/134 §11): the core's motion
+    // out of step read as its rate; a winding at or below it is stripped.
+    let ionizing = crate::plasma::phase_rate_mix(binding, core_heat);
     let _ = agitation;
     // Dissociation (the chemistry layer): the hot star core breaks every molecule
     // back to its parts (hydrogen's winding, tightness 1, is stripped), so a
@@ -1874,6 +1940,13 @@ pub fn settle_system(
     // by the system's enclosure from its own spin (register B3). Matter of
     // the medium no mote carries is kept as it is and counted.
     let frame = system_frame(sys, unit);
+    // The orthogonal catch (docs/137 T8): the disc's partner orbits conform
+    // to the star's shear on the system's own enclosure, the same law as the
+    // galaxy's (`flows::conform_partners`), the range paying by holding.
+    if let Some(enc) = frame.as_ref() {
+        let (_, remainder) = crate::flows::conform_partners(&mut sys.flows, enc, &total, &|_| 1);
+        read.partners = remainder;
+    }
     let mut pool: Manifest = std::mem::take(&mut sys.medium);
     let motes = std::mem::take(&mut sys.flows);
     for x in &motes {
@@ -2363,6 +2436,9 @@ pub struct Settled {
     /// The heat per holding of what escaped past the rim: its motes' own,
     /// holding-weighted (docs/124 §3).
     pub escaped_heat: Ratio,
+    /// The grain's remainder of the disc's partner-orbit conformation,
+    /// `Σ w·Δℓ_R` (docs/137 T7): zero where the range paid exactly.
+    pub partners: Ratio,
 }
 
 #[cfg(test)]
@@ -2409,6 +2485,46 @@ mod fall_tests {
         assert_eq!(fall_heat(&ratio(1, 2)), ratio(0, 1));
         assert_eq!(fall_heat(&ratio(3, 4)), ratio(0, 1));
         assert_eq!(fall_heat(&ratio(0, 1)), ratio(1, 4));
+    }
+}
+
+#[cfg(test)]
+mod burn_tests {
+    use super::{burn, burn_feed, product, StarCharge};
+    use crate::chem::Kind;
+    use crate::pulse::{mass, Manifest};
+    use cfe::ratio::ratio;
+
+    /// A star's rungs read its sums once and move them by each fusion: the
+    /// sums then stand as a fresh read gives them, the holding unchanged
+    /// (`2·made·w = made·2w`), and the feed is the one-off reading's.
+    #[test]
+    fn a_fusion_moves_the_stars_sums_by_what_it_changed() {
+        let k = |w: u32| Kind::atom(w).expect("an atom");
+        let mut star: Manifest = [
+            (k(1), ratio(900, 1)),
+            (k(4), ratio(60, 1)),
+            (k(12), ratio(7, 1)),
+        ]
+        .into();
+        let held = mass(&star);
+        let mut sums = StarCharge::of(&star);
+        let share = ratio(2, 3);
+        for (z, made) in [(1, ratio(100, 1)), (4, ratio(5, 1)), (1, ratio(3, 2))] {
+            assert_eq!(
+                burn_feed(z, &share, &sums, &ratio(1, 1)),
+                burn(&star, &share, z, &ratio(1, 1)),
+                "the feed from the running sums is the fresh reading's"
+            );
+            sums.fuse(&mut star, &k(z), &product(z).expect("a product"), &made);
+            assert_eq!(sums, StarCharge::of(&star), "the sums stand as read again");
+            assert_eq!(mass(&star), held, "a fusion keeps the holding");
+        }
+        // A fuel fused to nothing leaves the star.
+        let rest = star[&k(12)].clone() / ratio(2, 1);
+        sums.fuse(&mut star, &k(12), &product(12).expect("a product"), &rest);
+        assert!(!star.contains_key(&k(12)));
+        assert_eq!(sums, StarCharge::of(&star));
     }
 }
 

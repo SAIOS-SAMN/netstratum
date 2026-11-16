@@ -539,6 +539,155 @@ the calibre.
    calibre between the star and the atom carries the heat down rather than
    up.
 
+## 11. Heat placed: the electrons' phase rate (2026-11-15)
+
+**Operator 2026-11-15:** "heat is a semantic misalignment in your
+statement"; "heat is a rate of motion, how fast the electron phase state is
+changing/regulating: align on missing or mistranslated physics for
+placement".
+
+### 11.1 The alignment
+
+- **Heat is a rate.** It is how fast an atom's electron phase (R) changes
+  against its nucleus. Motion out of step changes it (docs/124: heat is
+  motion out of step). An atom turning rigidly with its place does not.
+- **A winding's tightness is a rate too.** `t = (Z − inside)/n` is its
+  enclosed hold over its period, the ring law's rate at the atom's tier.
+- **Stripping compares the two rates.** A winding is stripped where the
+  phase is driven at least as fast as it holds, `t ≤ ḣ`.
+- **What the code stores is a share.** `Body.heat`, `Mote::agitation` and
+  `formation::core_heat` hold motion out of step over holding. A share
+  crosses to its rate by the Cayley map the model already uses for every
+  share and rate, `ḣ = a/(1 − a)` (`orientation::rate`;
+  `plasma::phase_rate`).
+
+### 11.2 The placements audited
+
+| place | reads | was | now |
+|---|---|---|---|
+| a star core's birth cut (`formation::system` → `star_core_cut`, `binding_spins`, `open_mass`) | its core's agitation | the share against `t` | `phase_rate` |
+| its outbursts' cut, and the throat-back share (`breath`) | `core_heat(sys)` | the share against `t` | `phase_rate` |
+| a world's layers (`layer_chemistry`) | the layer's heat share `heat·H/(R + H)` | the share against `t` | `phase_rate` of the layer's share |
+| the bounce's release and the founding (`plasma::bounce_*`, `pulse::cascade`) | cold, `a = 0` | 0 | `phase_rate(0) = 0`, unchanged |
+| a world's kelvin (`life::HYDROGEN_K`) | heat × 157,800 K | an import (docs/108 O1) | still an import; display only |
+
+A first draft of this alignment also composed the place's well turning
+(`δ/(1 − δ)`) into the phase rate. It stripped hydrogen inside every world's
+own hold and broke `a_cool_world_keeps_layers_and_makes_water_in_them`. That
+was correct of the witness: rigid co-turning moves no electron's phase
+against its nucleus. The term is gone.
+
+**§10.3 withdrawn.** The calibre between tiers is not needed to compare heat
+with a winding, since both are rates and rates cross tiers by the one Cayley
+map. The cube root it would have needed does not arise.
+
+### 11.3 What the alignment shows: ignition and ionization meet at one point
+
+**T12.** A star core lights only where its hydrogen keeps its electron.
+
+*Proof.* A star core lights only at `a < ½` (`formation::ignition_share`,
+`x = (1 − 2a)/(1 + 2a) > 0`). Hydrogen is stripped at
+`ḣ = a/(1 − a) ≥ t_H = 1`, that is at `a ≥ ½`. The two conditions are
+complements at the same point. ∎
+
+In nature a burning core is ionized. Here it cannot be. The term that sets
+the bound is the ignition share's derivation: "light pushes back before the
+star core forms", `½ ≥ a + x/(x + m)`. It reads heat as a push against the
+bond. By A10 and T11 the push of a star core's energy acts on open frames
+(radiation pressure), and an ionized core has none. So **the next
+misplacement is the ignition criterion.** It charges the core's heat as a
+push on matter that, once stripped, the push does not reach. Derived next:
+the ignition balance with the push read on the open frames that remain at
+the core's phase rate.
+
+## 12. The capture phase: the chain's accumulated face (2026-11-15)
+
+**Operator 2026-11-15:** "you're getting stuck in straight-line rigidity and
+missing the fluidity; confirm your physics: ½ + Q/2".
+
+### 12.1 What stood: three readings of one quantity, two of them rigid
+
+| where | capture phase | form |
+|---|---|---|
+| `pulse::cascade` (the founding's stack) | each capture's share is the unlocked face at its own event, `s = ½·R/(R + H)`, with `R = held`, `H = 1 + held` | a flowing hemisphere |
+| `flows::founding`, the bounce's release (`breath`) | `Q·½`: "each capture turns the crossing point by `a = ½`" | modulo a turn, only 0 or ½: the protons' parity |
+| `flows::spray` (a star's release) | `Q × push` | a count times a share |
+
+The ½ is the throat's own fixed point, the only place the faces are equal
+(`R = H`, docs/104 §1.2). A capture happens at its own event, where
+`R = held` and `H = 1 + held`, not at the throat. So `Q·½` reads every
+capture as if it stood at the throat.
+
+### 12.2 The derivation
+
+A kind's capture phase is the turning the capture chain has accumulated up
+to it. The chain builds charge ascending, each event turning by the face
+there:
+
+    φ_k = Σ_{j ≤ k} s_j,     s_j = ½·h_j/(2h_j + 1)
+
+Here `h_j` is the holding share captured before kind j. It is read on the
+releasing body's own mix (regeneration: each core's chain is its own), so
+it is a reading, never stored, and exact (`pulse::capture_phases`).
+- The founding, the bounce's release and a star's spray all read it. A pool
+  reads its parts' phases by holding.
+- The cascade's epicentre spin `K = Σ s` is the last kind's `φ`.
+- Hydrogen, first in the chain, stands at 0.
+- Each step is a face under ¼.
+
+Witness: `pulse::capture_tests::the_capture_phase_is_the_chains_accumulated_face`.
+
+### 12.3 Against the seam's rest point
+
+Mycelium's manifest v3 (78.184 §5) checks an electron phase share `R ≠ 0`
+against the rest point `−(Z − Q)/(Z + Q)`, which is
+`(neutrons − protons)/weight` in Netstratum's letters. Read on the founded mix
+(`.testtmp/plasma/l109`, 1,495 kinds; the chain turns `4;08·60¹` turns in
+all):
+
+| kind (protons, weight) | φ (turns) | rest point |
+|---|---|---|
+| hydrogen (1, 1) | 0 | −1 |
+| carbon (6, 8) | 19;35·60⁻¹ | −30·60⁻¹ |
+| oxygen (8, 10) | 35;58·60⁻¹ | −36·60⁻¹ |
+| iron (26, 41) | 5;21,55 | −16;05·60⁻¹ |
+| lead (82, 109) | 16;31,35 | −30;16·60⁻¹ |
+
+They are not one quantity.
+- **R stays 0:** Netstratum's entries state `R = 0` until its electron phase
+  at capture is derived as the seam's share.
+- **A finding about the nuclear layer:** the rest point is negative for every
+  kind, because Netstratum's nuclei are proton-rich (carbon at weight 8, iron
+  at 41). The nucleon pair's equilibrium (docs/105 §3) and the founding's
+  climb set that. It is to be read against nature's valley of stability,
+  where light nuclei have `n ≈ p` and heavy ones `n > p`.
+
+### 12.4 The read
+
+The checkpoint `.testtmp/plasma/l109` was run to bell 112, the first echo,
+with the chain's phases in place of `Q·½`. Before → after:
+
+| | `Q·½` | the chain's φ |
+|---|---|---|
+| stars | 1 | 0 |
+| hydrogen in the galaxy's flows (grains) | 50;06·60³ (the rest in the first star's disc) | 15;42·60⁵ |
+| hydrogen in the ocean | none | none |
+| intergalactic medium | none | none |
+
+Under `Q·½` every kind left at one of two antipodes, its protons' parity,
+so the release stacked the whole throat's matter onto two phases. That is
+where the first star's binding came from. With the chain's phases the kinds
+leave spread over the turn (the chain turns `4;08·60¹` turns in all), and
+no binding holds at the first echo. All of the released hydrogen stays in
+the galaxy's flows.
+
+So the stars of the earlier reads were made by the rigid phase's artificial
+concentration. Matter spread over its orbit gathers only by its own motion
+between echoes, through the transport, the shear and the drift. That runs
+only at an echo's arrival today (docs/132, the stride, unbuilt). The next
+read must run past the first echo, and the stride is what lets it do so
+cheaply.
+
 ## 5. The seam with Xylarium (agreed 2026-11-13)
 
 - Xylarium reads the bound share at the inverse place: `b'_z = [r/(r + M)]·E_z(a)/Z`

@@ -61,6 +61,19 @@ pub fn galaxy_rate(u: &Universe, i: usize, unit: &Ratio) -> Option<Ratio> {
     Some(rate(d, &nearer))
 }
 
+/// A body's own time across a separation of `since` source bells (#207: time
+/// as coordinates): the separation read on its nested clock, its galaxy's
+/// share and its own at reach `r` about the hold `held` within it,
+/// `r/(r + H)`, floored to whole bells, at least one. Deeper in the well its
+/// clock receives less of the source, so fewer of its own bells pass.
+pub fn proper_bells(since: u64, galaxy: Option<&Ratio>, r: &Ratio, held: &Ratio) -> u32 {
+    let share = nested(galaxy, crate::ring::rate(r, held));
+    let proper = (ratio(i64::try_from(since).unwrap_or(i64::MAX), 1) * share)
+        .floor()
+        .to_integer();
+    u32::try_from(proper.max(num_bigint::BigInt::from(1))).unwrap_or(u32::MAX)
+}
+
 /// The nested clock: a body's clock against the source is the product of the
 /// shares each receiver between them takes, the galaxy's (none for the home)
 /// and its own about what is inside its reach.
@@ -216,22 +229,28 @@ fn can_burn(sys: &Body, r_echo: u64) -> bool {
 /// whole.
 fn burnable(sys: &Body, r_echo: u64) -> crate::pulse::Manifest {
     use num_traits::Zero as _;
-    let share_now = if mass(&sys.total()).is_zero() {
+    let whole = mass(&sys.total());
+    let share_now = if whole.is_zero() {
         ratio(0, 1)
     } else {
-        mass(&sys.kept) / mass(&sys.total())
+        mass(&sys.kept) / whole
     };
     let rings_echo = r_echo.max(1);
     let pair = Ratio::new(
         2.into(),
         crate::pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024),
     );
+    if mass(&sys.kept).is_zero() {
+        return crate::pulse::Manifest::new();
+    }
+    // The barrier's sums, read once for every kind (`formation::StarCharge`).
+    let charge = crate::formation::StarCharge::of(&sys.kept);
     sys.kept
         .iter()
         .filter(|(k, a)| {
             **a >= pair
                 && crate::chem::atom_w(k).is_some_and(|z| {
-                    crate::formation::burn(&sys.kept, &share_now, z, &ratio(1, 1))
+                    crate::formation::burn_feed(z, &share_now, &charge, &ratio(1, 1))
                         .and_then(|feed| {
                             crate::compound::read(
                                 a,
@@ -1372,6 +1391,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         ("system", settled.residual.clone()),
                         ("unmoted", settled.unmoted.clone()),
                         ("settle matter", settled.matter.clone()),
+                        ("system partners", settled.partners.clone()),
                     ],
                     (settled.formed, settled.ignited, 0, 0),
                     [
@@ -1468,13 +1488,16 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // of what the core holds reads the core's own heat (docs/124 §5),
             // and what it throws leaves cool (the spray's motes at heat 0).
             crate::profile::mark("sys:star_core");
-            let heat = crate::formation::core_heat(&sys);
-            let burst = if rang {
+            // Heat as the electrons' phase rate (docs/134 §11): the core's
+            // motion out of step read as its rate.
+            let heat = crate::plasma::phase_rate_mix(&sys.kept, &crate::formation::core_heat(&sys));
+            // The cut, read once: what it releases and the hold it keeps.
+            let (burst, held_k) = if rang {
                 crate::formation::star_core_cut(&sys.kept, &ratio(0, 1), &heat)
-                    .map(|(_, released, _)| released)
-                    .unwrap_or_default()
+                    .map(|(_, released, h)| (released, h))
+                    .unwrap_or_else(|| (crate::pulse::Manifest::new(), ratio(0, 1)))
             } else {
-                crate::pulse::Manifest::new()
+                (crate::pulse::Manifest::new(), ratio(0, 1))
             };
             if !burst.is_empty() {
                 // Each kind thrown at the spin the cut carried it with, read
@@ -1490,9 +1513,6 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 } else {
                     mass(&sys.kept) / mass(&sys.total())
                 };
-                let held_k = crate::formation::star_core_cut(&sys.kept, &ratio(0, 1), &heat)
-                    .map(|(_, _, h)| h)
-                    .unwrap_or_else(|| ratio(0, 1));
                 let frame = crate::formation::system_frame(&sys, &unit);
                 let thrown: Vec<(crate::chem::Kind, Ratio)> = if held_k.is_zero() {
                     Vec::new()
@@ -1566,7 +1586,10 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         })
                         .min(ratio(1, 1));
                     if chi > ratio(0, 1) {
-                        let core_hot = crate::formation::core_heat(&sys);
+                        let core_hot = crate::plasma::phase_rate_mix(
+                            &sys.kept,
+                            &crate::formation::core_heat(&sys),
+                        );
                         for (k, a) in sys.kept.clone() {
                             let left =
                                 a.clone() - back.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
@@ -1772,6 +1795,20 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
             // The light this star's rungs make this echo: each product pair
             // transduces `2u(z) − u(2z)` of magnetism into holding.
             let mut shone = ratio(0, 1);
+            // What every rung reads of the star, read once: a fusion keeps
+            // the star's holding and its system's (`2·made·w = made·2w`), so
+            // its share of its system stands through the rungs; the barrier's
+            // sums move with each fusion by what it changed
+            // (`formation::StarCharge::fuse`). The rungs cost one read of the
+            // star, never one each.
+            let total_m = mass(&sys.total());
+            let share_s = if total_m.is_zero() {
+                ratio(0, 1)
+            } else {
+                mass(&sys.kept) / total_m.clone()
+            };
+            let mut charge_s = crate::formation::StarCharge::of(&sys.kept);
+            let mut fused = false;
             for z in rungs {
                 // A rung whose product passes the universe's densest element
                 // does not run (docs/97 §14).
@@ -1786,13 +1823,11 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 if !sys.kept.contains_key(&key) {
                     continue;
                 }
+                if total_m.is_zero() {
+                    continue;
+                }
                 if let (Some(feed), Some(fuel)) = (
-                    crate::formation::burn(
-                        &sys.kept,
-                        &(mass(&sys.kept) / mass(&sys.total())),
-                        z,
-                        &in_phase,
-                    ),
+                    crate::formation::burn_feed(z, &share_s, &charge_s, &in_phase),
                     sys.kept.get(&key).cloned(),
                 ) {
                     // The product in whole nuclei, two fuel nuclei each: half
@@ -1811,23 +1846,18 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                         }
                         *burned.entry(key.clone()).or_insert_with(|| ratio(0, 1)) +=
                             made.clone() * ratio(2, 1);
-                        let spin = mass(&sys.total()) * sys.ell.clone();
-                        less(
-                            &mut sys.kept,
-                            &[(key.clone(), made.clone() * ratio(2, 1))].into(),
-                        );
-                        *sys.kept
-                            .entry(made_kind.clone())
-                            .or_insert_with(|| ratio(0, 1)) += made;
-                        let after = mass(&sys.total());
-                        if !after.is_zero() {
-                            // The spin grain: the floored remainder goes
-                            // to the galaxy's gas (`ring::grain`).
-                            sys.ell = crate::ring::grain(&(spin.clone() / after.clone()));
-                            core.medium_spin += (spin - after * sys.ell.clone()) / unit.clone();
-                        }
+                        charge_s.fuse(&mut sys.kept, &key, &made_kind, &made);
+                        fused = true;
                     }
                 }
+            }
+            // The spin grain, once: the holding stood through every fusion, so
+            // the specific spin is unchanged and only its floor onto the grain
+            // is read; the remainder goes to the galaxy's gas (`ring::grain`).
+            if fused && !total_m.is_zero() {
+                let spin = total_m.clone() * sys.ell.clone();
+                sys.ell = crate::ring::grain(&(spin.clone() / total_m.clone()));
+                core.medium_spin += (spin - total_m * sys.ell.clone()) / unit.clone();
             }
             // The slow capture (docs/97 §10): each ring its clock received this
             // echo, its star core's nuclides capture its hydrogen, one nucleon a
@@ -1890,6 +1920,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     ("system", settled.residual.clone()),
                     ("unmoted", settled.unmoted.clone()),
                     ("settle matter", settled.matter.clone()),
+                    ("system partners", settled.partners.clone()),
                 ],
                 (settled.formed, settled.ignited, 0, 0),
                 [
@@ -2277,6 +2308,9 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 // kind's bound part alone at `p·w̄/w`.
                 let shared = crate::plasma::bounce_unit(&core.throat, &mean);
                 let (pool_unit, bound) = crate::plasma::bounce_split(&core.throat, &mean);
+                // Each kind's capture phase (docs/134 §12): the turning this
+                // throat's own capture chain has accumulated up to it.
+                let captured = crate::pulse::capture_phases(&core.throat);
                 // One parcel leaving with the carried `c`, its capture half
                 // turns `z`: its spins, its phases, the antipole's and the
                 // reservoir's payments for what it leaves with, and the mote.
@@ -2357,7 +2391,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 };
                 let mut pooled = crate::pulse::Manifest::new();
                 // Each kind's bound part, read before it leaves: (kind, amount,
-                // carried, capture half turns).
+                // carried, capture phase).
                 let mut bound_parts: Vec<(crate::chem::Kind, Ratio, Ratio, Ratio)> = Vec::new();
                 for (k, a) in held_now {
                     let w = crate::flows::weight(&k);
@@ -2391,7 +2425,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                     }
                     if own > ratio(0, 1) {
                         let c_own = p.clone() * crate::plasma::own_spin(&w, &mean);
-                        let z = ratio(i64::from(crate::chem::charge(&k)), 2);
+                        let z = captured.get(&k).cloned().unwrap_or_else(|| ratio(0, 1));
                         bound_parts.push((k, own, c_own, z));
                     }
                 }
@@ -2446,16 +2480,16 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 }
                 pooled.retain(|_, a| *a > ratio(0, 1));
                 if !pooled.is_empty() {
-                    // The pool's capture half turns: its parts' charge by
-                    // holding (a derived choice for a mix, to be revisited:
-                    // a kind's half turns are its protons, `Q/2`).
+                    // The pool's capture phase (docs/134 §12): its parts'
+                    // phases by holding, first degree (the merge's mean of
+                    // phases), each the throat chain's accumulated turning.
                     let h = mass(&pooled);
-                    let q = pooled.iter().fold(ratio(0, 1), |s, (k, a)| {
+                    let phi = pooled.iter().fold(ratio(0, 1), |s, (k, a)| {
                         s + a.clone()
                             * crate::flows::weight(k)
-                            * ratio(i64::from(crate::chem::charge(k)), 1)
+                            * captured.get(k).cloned().unwrap_or_else(|| ratio(0, 1))
                     }) / h;
-                    leave(core, pooled, &c_pool0, &(q / ratio(2, 1)), &mut released);
+                    leave(core, pooled, &c_pool0, &phi, &mut released);
                 }
                 core.throat.retain(|_, a| *a > ratio(0, 1));
                 released.2 = mass(&core.throat) / unit.clone();
@@ -2577,12 +2611,31 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &ledger_unit,
                 &mut cross,
             );
+            // The stride (docs/132 §1.1; #197), read on each mote's own time
+            // (#207: time as coordinates). The transport at this arrival stands
+            // for the separation since the mote's previous event (its birth,
+            // or the galaxy's previous arrival), `Δτ` source bells, read on its
+            // own clock: the share of the source's rings it receives, its
+            // galaxy's and its own at its place, `r/(r + H(<r))`
+            // (`nested`, `ring::rate`). Its proper time is `Δτ` times that
+            // share, slower deeper in the well (the density of time,
+            // `dτ/dr = 1 + dH/dr`), at least this bell. Its field stands between
+            // echoes.
+            let span = t_u.max(1);
+            let clock_enc = enc.as_ref().unwrap_or(&throat);
+            let g_clock = g_rate.clone();
+            let lived = move |x: &crate::flows::Mote| -> u32 {
+                let since = bell.saturating_sub(x.born).clamp(1, span);
+                let r = x.reach_in(clock_enc).0;
+                proper_bells(since, g_clock.as_ref(), &r, &clock_enc.hold_within(&r))
+            };
             // The partner orbits conformed to the manifold's shear (docs/128
             // §10.3), the range paying by holding.
             let _ = crate::flows::conform_partners(
                 &mut core.flows,
                 enc.as_ref().unwrap_or(&throat),
                 &ledger_unit,
+                &lived,
             );
             // The disc forms by the shear out of the plane (`flows::
             // conform_axes`). A core whose disc holds nothing
@@ -2600,6 +2653,7 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
                 &mut core.flows,
                 enc.as_ref().unwrap_or(&throat),
                 &ledger_unit,
+                &lived,
             );
             // Tilt from quantum torsion (docs/128 §13): the precession about
             // the core's lead and the tipping by the twist's pressure, the
@@ -3401,6 +3455,32 @@ pub fn breathe(u: &mut Universe, _seed: &[u8; 32], t_u: u64, from: u64, until: u
         e.light.drained += l.drained;
     }
     events
+}
+
+#[cfg(test)]
+mod proper_time_tests {
+    use super::proper_bells;
+    use cfe::ratio::ratio;
+
+    /// #207: a body's own time across a separation is the separation on its
+    /// nested clock: all of it where nothing holds, less deeper in the well,
+    /// less again inside a slower galaxy, never under one bell.
+    #[test]
+    fn a_bodys_own_time_is_the_separation_on_its_clock() {
+        let r = ratio(3, 1);
+        assert_eq!(proper_bells(110, None, &r, &ratio(0, 1)), 110);
+        assert_eq!(proper_bells(110, None, &r, &ratio(1, 1)), 82, "110·3/4");
+        assert!(
+            proper_bells(110, None, &r, &ratio(3, 1)) < 82,
+            "deeper, slower"
+        );
+        assert_eq!(proper_bells(110, Some(&ratio(1, 2)), &r, &ratio(1, 1)), 41);
+        assert_eq!(
+            proper_bells(1, None, &r, &ratio(100, 1)),
+            1,
+            "at least one bell"
+        );
+    }
 }
 
 #[cfg(test)]

@@ -4,7 +4,8 @@
 the entire system without fracturing the equations: which should be
 allowable in a deterministic state".
 
-**Status:** derived 2026-11-12; not built. Read against docs/117 §11.4
+**Status:** derived 2026-11-12. S1 built 2026-11-15 (§4.1, #197). S2–S4
+are open (#198–#200). Read against docs/117 §11.4
 ("over n bells the motion is that rotor composed n times … held as its exact
 base and its formula: the generator and n"), docs/100 §8.1 (E38, the
 attractor's keep) and `breath::breathe`.
@@ -132,6 +133,61 @@ only bound.
    not only on arrivals; the echo stays the pulse's arrival.
 4. Read on a copy of g557: matter between the ring and the rim, bands, and
    the cost a stride against a bell.
+
+### 4.1 Built and found (2026-11-15)
+
+- **S1, the attractor laws (#197, built).**
+  - `flows::{keep_over, relax_over}` give `x* + kⁿ(x − x*)`: the keep on the
+    grain once (docs/133 §4) and its power exact.
+  - `conform_partners` and `conform_axes` take each mote's stride,
+    `rings(mote)`, and the range pays the whole change once at the stride's
+    end.
+  - At a galaxy's arrival the stride is the bells the mote has lived since
+    the galaxy's previous arrival, `clamp(bell − born, 1, T_u)`. Matter
+    released at this arrival lives one bell of it, never T_u it was not
+    there for.
+  - Witnesses: `the_keep_over_a_stride_is_n_single_relaxations` (N = 7 and
+    4N = 28, exact) and
+    `a_stride_of_the_partner_orbits_keeps_the_book_and_goes_further`.
+- **S1's read (l109 → 222, two echoes; this commit against 8d64f485):**
+  - Every star, world, fuel and hydrogen line is identical: no binding
+    holds at either echo.
+  - Where S1 acts: the front's cells go 1021 → 1020, its longest round trip
+    4;26 → 5;04 bells, and the torque identity's residual 54;45·60⁻⁷ →
+    6;21·60⁻⁶. Spin widths are 2 bits wider.
+  - Matter spread over the turn by the capture chain (docs/134 §12.4) is not
+    gathered by the attractors' extra relaxation alone. Holding plus
+    magnetism (3Z) is conserved in both runs. The manifest by kind changes in
+    both: matter changes kind, none is made.
+- **Found: the shear has no closed n-bell form (#199).** `coupling::pulled`
+  composes `x ⊕ y` with `y = −σ·F·o·(x̄ ⊖ x)`, a pull that depends on `x`. So
+  n bells are not `compose_n` of one rate, and §1's table is wrong to list the
+  shear with the exchanges that compose. It must be restated as a motion
+  against the field before it can stride. Until then it runs one bell an
+  echo.
+- **Time as coordinates (operator 2026-11-15, #207).** Time is a coordinate,
+  and a duration is the separation of two points' coordinates.
+  - **Built: each mote's stride is its own time.** The stride is the
+    separation since its previous event (its birth, or the galaxy's previous
+    arrival), `Δτ` source bells, read on its nested clock: the galaxy's share
+    and its own at its place, `r/(r + H(<r))`. So the stride is its proper
+    time, `⌊Δτ·nested(g, r/(r + H))⌋`, at least one bell
+    (`breath::proper_bells`). Deeper in the well a mote's clock receives less
+    of the source, so less of its own time passes: the density of time,
+    `dτ/dr = 1 + dH/dr`. Witness:
+    `proper_time_tests::a_bodys_own_time_is_the_separation_on_its_clock`.
+    Read (l109 → 222, against S1's bell count): every line is identical
+    except the torque identity's residual (6;21·60⁻⁶ → 5;54·60⁻⁶). The
+    conformations' extra relaxation moved nothing that decides at these two
+    echoes, whether counted on one clock or on each mote's own.
+  - **Open:** a mote's meeting with the front at its own `t(r) = r + H(<r)`
+    (`ring::arrival`), so the echo is read at each mote's own coordinate
+    rather than at the arrival bell. Every other galaxy law (torque, emission,
+    magnet, bindings) still acts once at the arrival bell.
+- **Not yet: events (#198).** S1's strides stand on the field between echoes
+  without the event reader. An attractor never overshoots its target
+  (`0 < k < 1`), but a spin order or a range can change inside a stride
+  unread.
 
 ## 5. The torque over a stride, read as probabilities
 

@@ -58,18 +58,23 @@ pub struct Neighbour {
 
 /// The field of a body's range on one plane, as one, against the range's
 /// whole holding (docs/121 §9.2): `Σ w_j·σ_j·o_j·n_j·h_j / Σ w_j`. Each term
-/// stands in `[−1, 1]`, so the field does.
+/// stands in `[−1, 1]`, so the field does. Each neighbour's term enters on
+/// the grain (the carrier, never the law): its nearness carries its pair's
+/// own denominator, and a sum over a range of thousands would compound them
+/// without bound (the scalar collapse; register A28).
 pub fn field(range: &[Neighbour]) -> Ratio {
     let whole = range.iter().fold(ratio(0, 1), |w, n| w + n.holding.clone());
     if whole.is_zero() {
         return ratio(0, 1);
     }
     range.iter().fold(ratio(0, 1), |f, n| {
-        f + n.holding.clone()
-            * n.pole.clone()
-            * n.side.clone()
-            * n.open.clone()
-            * n.nearness.clone()
+        f + crate::ring::grain(
+            &(n.holding.clone()
+                * n.pole.clone()
+                * n.side.clone()
+                * n.open.clone()
+                * n.nearness.clone()),
+        )
     }) / whole
 }
 

@@ -15,6 +15,34 @@ use crate::pulse::Manifest;
 use cfe::ratio::{ratio, Ratio};
 use num_traits::Zero;
 
+/// HEAT as the electrons' phase rate (docs/134 §11; operator 2026-11-15:
+/// "heat is a rate of motion, how fast the electron phase state is
+/// changing"): the agitation share `a` (motion out of step over holding,
+/// docs/124) read as its rate, `a/(1 − a)` (`orientation::rate`, the Cayley
+/// map every share and rate cross by). An atom turning with its place does
+/// not move its electron's phase against its nucleus; only motion out of
+/// step does. `None` at `a ≥ 1`: the phase outruns every winding.
+pub fn phase_rate(agitation: &Ratio) -> Option<Ratio> {
+    crate::orientation::rate(agitation)
+}
+
+/// The phase rate as the stripping reads it for kind `k`: where it outruns
+/// every winding, the kind's tightest, its 1s at `Q`, never a sentinel.
+pub fn phase_rate_for(k: &Kind, agitation: &Ratio) -> Ratio {
+    phase_rate(agitation).unwrap_or_else(|| ratio(i64::from(crate::chem::charge(k).max(1)), 1))
+}
+
+/// The phase rate for a mix: where it outruns every winding, the mix's
+/// tightest, its heaviest kind's `Q`.
+pub fn phase_rate_mix(m: &Manifest, agitation: &Ratio) -> Ratio {
+    phase_rate(agitation).unwrap_or_else(|| {
+        ratio(
+            i64::from(m.keys().map(crate::chem::charge).max().unwrap_or(1).max(1)),
+            1,
+        )
+    })
+}
+
 /// The electrons kind `k` keeps at heat `a` (hydrogen's unit): an atom its
 /// windings held tighter than `a`; a cluster every electron of its parts.
 pub fn kept_electrons(k: &Kind, heat: &Ratio) -> u64 {
@@ -93,7 +121,12 @@ pub fn bounce_split(pool: &Manifest, mean: &Ratio) -> (Ratio, Manifest) {
     let g = crate::polarity::throat_held();
     let b: Manifest = pool
         .keys()
-        .map(|k| (k.clone(), bound_share(k, &g, &ratio(0, 1))))
+        .map(|k| {
+            (
+                k.clone(),
+                bound_share(k, &g, &phase_rate_for(k, &ratio(0, 1))),
+            )
+        })
         .collect();
     let parts: Vec<(Ratio, Ratio, Ratio, Ratio)> = pool
         .iter()
@@ -294,7 +327,7 @@ pub fn bounce_unit(pool: &Manifest, mean: &Ratio) -> Manifest {
                 n.clone(),
                 ratio(i64::from(crate::chem::weight(k)), 1),
                 mean.clone(),
-                bound_share(k, &g, &ratio(0, 1)),
+                bound_share(k, &g, &phase_rate_for(k, &ratio(0, 1))),
             )
         })
         .collect();
