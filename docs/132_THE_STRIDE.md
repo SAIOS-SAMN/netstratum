@@ -188,8 +188,10 @@ only bound.
     one. At the equator (the rim, `R = H(<R)`) the held share is ½ and
     `τ = 2R`.
     This is the seam agreed with Xylarium (#245, operator ruling
-    2026-11-15): their `M` is our `H/2`, the T lane carries rings at
-    `c = 1` exactly, and a crossing carries `Δτ` only. Witnesses:
+    2026-11-15): their `M` is our `H/2`. The seam carries `Δτ` only, the
+    coordinate at `c = 1` as an exact rational. Each side converts it to its
+    own rings at its own face: Xylarium's ring is a throat-orbit traversal,
+    irrational against τ, so no ring crosses (#210). Witnesses:
     `front_tests`.
   - **Open:** the echo read at each mote's own coordinate rather than at the
     arrival bell, with every other galaxy law (torque, emission, magnet,
