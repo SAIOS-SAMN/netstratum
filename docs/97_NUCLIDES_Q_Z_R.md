@@ -772,3 +772,33 @@ D12, D13 and D14 are withdrawn as the reach mechanism. D13's share
 (`h = ¼`, the seal window's exchange) stands as a reading. The code is
 unchanged: the founding still climbs one chain to 1508.
 
+
+### 15.12 Where the reach is set: the budget and the tail meet
+
+This scan conserves nucleons. Seeds hold 4 nucleons each, and the rest is
+fuel. It uses one-chain survival at the throat (`g = ½`), calibrated to
+1508:
+
+| Seed share of N | Frontier |
+|---|---|
+| 1/8 (today) | 1508 |
+| 1/16 | 1499 |
+| 1/256 | 1461 |
+| 10⁻⁵ | 1329 |
+| 10⁻⁶ | 1179 |
+
+Fewer seeds lower the frontier, so the founding is not seed-starved. At
+today's share the fuel runs out at the weight where the survival tail
+(`σ ≈ 0.89`) leaves less than one nucleus: the two bounds meet near 1508.
+Raising survival everywhere drains the fuel at light weights (§15.11).
+
+So the reach needs **survival raised at heavy weights only**. In
+`σ = κ_w + (1 − κ_w)·g`, the only term that is not the nuclide's own is the
+place's held share g. The founding reads it once, at the throat. V6, the
+bounce's places along `τ(r) = r + H(<r)`, gives each part of the bounce its
+own g:
+- the climb at light weights runs where the bounce first seals;
+- the heavy tail runs where its part is held more deeply.
+
+V6 is the next derivation. Its reach is read only on a founding that
+conserves nucleons (§15.11).
