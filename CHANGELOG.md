@@ -29,6 +29,12 @@ change is named here.
 
 ### Added
 
+- docs/139, the jetstream as volume (scoped, #220, E78): the Möbius current
+  has a cross-section, the face is an angle round the ring, crossing the
+  centre line is a throat crossing, and every road leads home to a core.
+- docs/97 §15–§15.8: the table on its own dimensions, scoped by vents
+  V1–V15 (#213). V3 is derived per plane and opened to the volume (the lone
+  ends as a multivector of patterns). Forks F1–F3 are put to the operator.
 - [docs/BUILD_OUT.md](docs/BUILD_OUT.md): how a doc section becomes a
   milestone, an issue, a branch and a pull request, with the labels, the
   project's fields and the gates. Milestones v0.1.0–v0.6.0 are each titled by
