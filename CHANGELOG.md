@@ -44,6 +44,9 @@ change is named here.
 
 ### Added
 
+- `ns-hypha mouth-accept <id>` and `mouth-map <id> <side> <freshness>`
+  (`ns_hypha::mouth`, Mycelium 78.128, #109): the union reserve accepts a
+  wormhole mouth offered to the domain and maps its side of it.
 - docs/139, the jetstream as volume (scoped, #220, E78): the Möbius current
   has a cross-section, the face is an angle round the ring, crossing the
   centre line is a throat crossing, and every road leads home to a core.
