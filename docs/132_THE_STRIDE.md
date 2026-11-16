@@ -188,11 +188,34 @@ only bound.
     one. At the equator (the rim, `R = H(<R)`) the held share is ½ and
     `τ = 2R`.
     This is the seam agreed with Xylarium (#245, operator ruling
-    2026-11-15): their `M` is our `H/2`. The seam carries `Δτ` only, the
+    2026-11-15): their `M` is our `H/2`. On the T lane, `Δτ` is the
     coordinate at `c = 1` as an exact rational. Each side converts it to its
     own rings at its own face: Xylarium's ring is a throat-orbit traversal,
-    irrational against τ, so no ring crosses (#210). Witnesses:
-    `front_tests`.
+    irrational against τ, so no ring crosses (#210). The identity
+    `δ = H(<r)/τ(r) = ½` at the equator is a T-lane witness and stands
+    (`front_tests`; xylarium T20).
+  - **Corrected (xylarium PR #305, 2026-11-16): a crossing carries every
+    lane, not Δτ alone.**
+    - There is no metronome. T is written only by crossings,
+      `T ↦ T − 2(H − R)` (the pole swap), and by verified closures. A
+      space's own cycles are its windings K, which advance while T stands.
+    - A crossing carries the change on every lane:
+      - S;
+      - G;
+      - T, of which Δτ is this lane's part;
+      - H, the composite motion with its cross-plane terms (planes sharing
+        an axis open a third; disjoint planes carry a volume);
+      - K.
+
+      It carries them under a matching origin stack.
+    - Out and back through one throat cancels, but a path through several
+      pivots does not (docs/138 W4, the holonomy). Coming home means three
+      things:
+      - the composite motion closes;
+      - the light ledger balances on both faces;
+      - the windings resonate at the destination.
+
+      This is the core tube's done-when (#109).
   - **Open:** the echo read at each mote's own coordinate rather than at the
     arrival bell, with every other galaxy law (torque, emission, magnet,
     bindings) acting there. That is the event-ordered breathe (#198).
