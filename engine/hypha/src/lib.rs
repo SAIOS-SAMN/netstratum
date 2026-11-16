@@ -154,9 +154,18 @@ pub enum Vocab {
     Network,
 }
 
+/// The Noise home at `home` (`noise.key`, minted once; the hyphae's keys
+/// pinned on first use in `noise.pins`): every session from a home is
+/// dialled inside `Noise_XX` where the hypha speaks it (MU-PRECURSORS §3.1).
+pub fn noise_home(home: &Path) -> io::Result<mycelium_sdk::session::NoiseHome> {
+    mycelium_sdk::session::NoiseHome::open(home)
+        .map_err(|r| io::Error::other(format!("the Noise home at {}: {r:?}", home.display())))
+}
+
 impl Uplink {
     /// Open a session to `addr` (`host:port`) under the voice at
-    /// `home/voice.key`, minted there on first use.
+    /// `home/voice.key`, minted there on first use, inside Noise with the
+    /// home's static key (`noise_home`).
     pub fn open(addr: &str, home: &Path) -> io::Result<Uplink> {
         std::fs::create_dir_all(home)?;
         let key_path = home.join("voice.key");
@@ -166,7 +175,7 @@ impl Uplink {
         let voice = HyphaKey::load_or_mint(key_name).verifying_bytes();
         let kernel = mycelium_sdk::voice::Voice::from_voice(voice);
         Ok(Uplink {
-            session: Session::open(addr, kernel),
+            session: Session::open(addr, kernel).with_noise(noise_home(home)?),
             addr: addr.to_string(),
             voice,
         })

@@ -104,6 +104,20 @@ impl Client {
         }
     }
 
+    /// The client opted into Noise with the static key of `home`
+    /// (`noise.key`, minted once; the hyphae pinned in `noise.pins`): every
+    /// act from here on is dialled inside `Noise_XX` where the hypha speaks
+    /// it (MU-PRECURSORS §3.1).
+    pub fn with_noise(self, home: &std::path::Path) -> std::io::Result<Client> {
+        let noise = mycelium_sdk::session::NoiseHome::open(home).map_err(|r| {
+            std::io::Error::other(format!("the Noise home at {}: {r:?}", home.display()))
+        })?;
+        Ok(Client {
+            session: self.session.with_noise(noise),
+            ..self
+        })
+    }
+
     /// This mind's key.
     pub fn mind(&self) -> [u8; 32] {
         self.key.verifying_key().to_bytes()

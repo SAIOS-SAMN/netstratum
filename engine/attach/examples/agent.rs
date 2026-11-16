@@ -8,7 +8,8 @@
 //!
 //! The key file holds the mind's 32-byte ed25519 seed; the domain is
 //! Netstratum's domain key on that hypha (`ns-hypha` prints it when it founds
-//! the domain).
+//! the domain). The key file's directory is the mind's home: its Noise key
+//! (`noise.key`) is minted there and the hypha pinned in `noise.pins`.
 
 use attach::client::{Client, Event};
 use ed25519_dalek::SigningKey;
@@ -27,7 +28,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map_err(|_| "the domain is not 32 bytes")?;
     let seed = <[u8; 32]>::try_from(std::fs::read(key_file)?.as_slice())
         .map_err(|_| "the key file is not a 32-byte seed")?;
-    let mut client = Client::open(addr, SigningKey::from_bytes(&seed), domain);
+    // The key file's directory is the mind's home: its Noise key beside it.
+    let home = std::path::Path::new(key_file)
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or(std::path::Path::new("."));
+    let mut client = Client::open(addr, SigningKey::from_bytes(&seed), domain).with_noise(home)?;
 
     let (posted, _) = client.attach(metabolism)?;
     println!("attach requested ({metabolism}): {posted:?}");

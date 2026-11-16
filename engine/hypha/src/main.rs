@@ -235,13 +235,14 @@ fn main() -> ExitCode {
         Some("refound") => refound_cmd(&up, &args, &home),
         Some("standing") => standing_cmd(&up, &home),
         Some("endowment") => endowment_cmd(&up, &home),
+        Some("apply") => apply_cmd(&up, &args, &home),
         Some("census") => census_cmd(&args, Some(&up), &home),
         Some("prune") => prune_cmd(&up, &home),
         Some("publish") => publish_cmd(&up, &home),
         Some("follow") => follow_cmd(&up, &args, &home),
         Some("mark") => mark_cmd(&args, &home),
         _ => {
-            eprintln!("usage: ns-hypha laws|lexicon|probe|found|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
+            eprintln!("usage: ns-hypha laws|lexicon|probe|found|apply <var-root>|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
             ExitCode::from(2)
         }
     }
@@ -305,6 +306,59 @@ fn endowment_cmd(up: &Uplink, home: &Path) -> ExitCode {
     }
     println!("  nuclei held by the grants: {} entries", r.nuclei.len());
     ExitCode::SUCCESS
+}
+
+/// The domain's grants applied: each grant the court reads as not applied,
+/// listed `(manifest hash, u)` in the `applied` of the next ledger entry,
+/// signed by the reserve at the world's beat `u` (its crossing still).
+fn apply_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
+    use ns_hypha::mycelium_sdk::house::read_endowment;
+    let Some(root) = args.get(2).filter(|a| !a.starts_with("--")) else {
+        eprintln!("usage: ns-hypha apply <var-root>");
+        return ExitCode::from(2);
+    };
+    let domain = match ns_hypha::fold::tier_key(home, "domain") {
+        Ok(k) => k.verifying_key().to_bytes(),
+        Err(e) => {
+            eprintln!("ns-hypha: the domain key: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    let Some(r) = read_endowment(domain, |ask| up.session().speak(ask).ok()) else {
+        eprintln!("ns-hypha: the endowment did not assemble");
+        return ExitCode::from(1);
+    };
+    let u: u64 = std::fs::read_to_string(Path::new(root).join("conductor.beat"))
+        .ok()
+        .and_then(|t| t.trim().parse().ok())
+        .unwrap_or(0);
+    let applied: Vec<([u8; 32], u64)> = r
+        .grants
+        .iter()
+        .filter(|g| !g.applied)
+        .map(|g| (g.manifest, u))
+        .collect();
+    if applied.is_empty() {
+        println!("no grant waits to be applied");
+        return ExitCode::SUCCESS;
+    }
+    for (m, _) in &applied {
+        let id: String = m.iter().take(4).map(|b| format!("{b:02x}")).collect();
+        println!("applying grant {id} at u {u}");
+    }
+    match ns_hypha::refound::post_ledger(up.session(), home, Path::new(root), u, applied) {
+        Ok(line) => {
+            println!("{line}");
+            match line.starts_with("LEDGER sealed") {
+                true => ExitCode::SUCCESS,
+                false => ExitCode::from(1),
+            }
+        }
+        Err(e) => {
+            eprintln!("ns-hypha: the ledger entry was not posted: {e}");
+            ExitCode::from(1)
+        }
+    }
 }
 
 fn standing_cmd(up: &Uplink, home: &Path) -> ExitCode {

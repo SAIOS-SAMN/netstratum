@@ -57,6 +57,17 @@ change is named here.
   Step 2: the spin ledger is one bivector (`flows::{Mote::spin,
   spin_ledger}`). The per-plane books are its components. A motion carries a
   spin by `turning::carry`, keeping its angles.
+- `ns-hypha apply <var-root>`: each grant the court reads as not applied is
+  listed `(manifest hash, u)` in the `applied` of the next ledger entry,
+  signed by the reserve at the world's beat (`refound::{ledger_frame,
+  post_ledger}` take the list). It is for Mycelium's grant-applied-in-ledger
+  fix, which until now refused every growth manifest InFlight.
+- The hypha's uplink and seat sessions dial inside Noise (`Session::with_noise`,
+  `ns_hypha::noise_home`): each home keeps its static key in `noise.key` and
+  pins the hyphae in `noise.pins`; an external mind opts in with
+  `attach::Client::with_noise` (its key file's directory as its home). They
+  were plaintext before. Read: `standing`
+  on 127.0.0.1:8500 reports "dialled inside Noise".
 - The stride, S1 (docs/132 §4.1, #197): the attractor laws over n bells in
   closed form (`flows::{keep_over, relax_over}`). The galaxy's conformations
   at an echo's arrival stand for the bells each mote has lived since the

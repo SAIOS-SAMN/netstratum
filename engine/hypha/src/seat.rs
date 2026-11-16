@@ -130,7 +130,8 @@ impl Seat {
                 "netstratum's voice key is not in the seat's home",
             )
         })?;
-        let session = Session::open(addr, Voice::from_key(key.sk.clone()));
+        let session = Session::open(addr, Voice::from_key(key.sk.clone()))
+            .with_noise(crate::noise_home(home)?);
         Ok(Seat {
             session,
             key: key.sk.clone(),
