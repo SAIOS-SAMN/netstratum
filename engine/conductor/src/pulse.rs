@@ -126,34 +126,11 @@ pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     let paired = protons.clone().min(neutrons.clone());
     let seeds = &paired / BigInt::from(2);
     let deuterons = &paired - &seeds * BigInt::from(2);
-    let mut free = &neutrons - &paired + (&protons - &paired);
-    let mut counts: Vec<(u32, BigInt)> = Vec::new();
-    // The seeds climb, each step a neutron captured, while neutrons remain.
-    let mut arriving = seeds;
-    // The founding's pulse phase (docs/97 §13): the turn its nucleons have
-    // made when the seal window opens, on the source's clock, `ν·δ_window`.
+    let free = &neutrons - &paired + (&protons - &paired);
     // The founding crosses AT the throat (docs/105 §4): every capture reads
     // the throat's held share, the fixed point where it holds; no phase.
     let p0 = crate::polarity::throat_held();
-    for w in 4..crate::nuclides::READ {
-        if arriving <= zero {
-            break;
-        }
-        let climb = crate::nuclides::survival(w + 1, &p0)
-            .map(|s| {
-                (Ratio::from_integer(arriving.clone()) * s)
-                    .floor()
-                    .to_integer()
-            })
-            .unwrap_or_else(|| zero.clone())
-            .min(free.clone());
-        let stay = &arriving - &climb;
-        if stay > zero {
-            counts.push((w, stay));
-        }
-        free -= &climb;
-        arriving = climb;
-    }
+    let (counts, free) = climb_table(seeds, free, &p0, true);
     let mut out = Manifest::new();
     for (w, count) in [(1u32, free), (2, deuterons)].into_iter().chain(counts) {
         if count > zero {
@@ -163,6 +140,76 @@ pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
         }
     }
     out
+}
+
+/// The founding's climb (docs/97 §14, §15.15). The seeds, weight 4, climb
+/// the convergence by two channels with their pool's shares: a nucleon
+/// captured (`w → w + 1`, surviving `σ_{w+1}`), or a free seed merged
+/// (`w → w + 4`, surviving `σ_{w+4}`), the founding's own pairing at every
+/// weight.
+/// - The free seeds are those that stayed at weight 4.
+/// - A nucleus meets a seed with the pair share `m = A/(A + P)` of the free
+///   seeds A and free nucleons P.
+/// - What survives neither channel stays at w.
+///
+/// Each capture spends one free nucleon and each merger one free seed, in
+/// whole nuclei: nucleons are conserved exactly. With `mergers` false (or
+/// no free seed) it is §14's one chain. Returns the table above weight 3, by
+/// weight with its count, and the free nucleons left.
+fn climb_table(
+    seeds: num_bigint::BigInt,
+    mut free: num_bigint::BigInt,
+    p0: &Ratio,
+    mergers: bool,
+) -> (Vec<(u32, num_bigint::BigInt)>, num_bigint::BigInt) {
+    use num_bigint::BigInt;
+    let zero = BigInt::from(0);
+    let read = crate::nuclides::READ;
+    let whole = |x: Ratio| x.floor().to_integer();
+    let sigma = |w: u32| crate::nuclides::survival(w, p0);
+    let mut pop: Vec<BigInt> = vec![zero.clone(); read as usize + 5];
+    pop[4] = seeds;
+    let mut alpha = zero.clone();
+    let mut out = Vec::new();
+    for w in 4..read {
+        let i = w as usize;
+        let arriving = std::mem::replace(&mut pop[i], zero.clone());
+        if arriving <= zero {
+            continue;
+        }
+        let a = Ratio::from_integer(arriving.clone());
+        let m = if mergers && w > 4 && alpha > zero {
+            Ratio::new(alpha.clone(), &alpha + &free)
+        } else {
+            Ratio::from_integer(zero.clone())
+        };
+        let one = Ratio::from_integer(BigInt::from(1));
+        let cap = sigma(w + 1)
+            .map(|s| whole(a.clone() * (one.clone() - m.clone()) * s))
+            .unwrap_or_else(|| zero.clone())
+            .min(free.clone());
+        let mer = match (w + 4 < read, sigma(w + 4)) {
+            (true, Some(s)) => whole(a.clone() * m * s).min(alpha.clone()),
+            _ => zero.clone(),
+        };
+        free -= &cap;
+        alpha -= &mer;
+        pop[i + 1] += &cap;
+        if mer > zero {
+            pop[i + 4] += &mer;
+        }
+        let stay = &arriving - &cap - &mer;
+        if w == 4 {
+            // The seeds that stay are the free seeds the mergers draw.
+            alpha = stay;
+        } else if stay > zero {
+            out.push((w, stay));
+        }
+    }
+    if alpha > zero {
+        out.insert(0, (4, alpha));
+    }
+    (out, free)
 }
 
 /// The seed's fixed paths: draw `j` of `field` for the body at `path`.
@@ -2574,6 +2621,63 @@ pub fn read(var_root: &Path) -> Option<([u8; 32], Universe)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// docs/97 §15.15: the merger channel. With no merger the climb is
+    /// §14's one chain, recomputed here by its own recurrence. With mergers
+    /// nucleons are conserved, and the frontier never falls below the one
+    /// chain's.
+    #[test]
+    fn the_merger_channel_reduces_to_one_chain_and_keeps_the_nucleons() {
+        use num_bigint::BigInt;
+        let p0 = crate::polarity::throat_held();
+        let (seeds, free): (BigInt, BigInt) = (
+            BigInt::from(10u32).pow(30),
+            BigInt::from(10u32).pow(31) * BigInt::from(4),
+        );
+        let (chain, left) = super::climb_table(seeds.clone(), free.clone(), &p0, false);
+        // §14's recurrence, read directly.
+        let (mut arriving, mut f, mut want) = (seeds.clone(), free.clone(), Vec::new());
+        for w in 4..crate::nuclides::READ {
+            if arriving <= BigInt::from(0) {
+                break;
+            }
+            let climb = (Ratio::from_integer(arriving.clone())
+                * crate::nuclides::survival(w + 1, &p0).unwrap_or_else(|| ratio(0, 1)))
+            .floor()
+            .to_integer()
+            .min(f.clone());
+            let stay = &arriving - &climb;
+            if stay > BigInt::from(0) {
+                want.push((w, stay));
+            }
+            f -= &climb;
+            arriving = climb;
+        }
+        assert_eq!(
+            (chain.clone(), left.clone()),
+            (want, f),
+            "no merger: §14's one chain"
+        );
+        let nucleons = |t: &[(u32, BigInt)], free: &BigInt| {
+            t.iter()
+                .fold(free.clone(), |s, (w, c)| s + c * BigInt::from(*w))
+        };
+        let whole = &seeds * BigInt::from(4) + &free;
+        assert_eq!(nucleons(&chain, &left), whole);
+        let (merged, left2) = super::climb_table(seeds, free, &p0, true);
+        assert_eq!(
+            nucleons(&merged, &left2),
+            whole,
+            "nucleons conserved with mergers"
+        );
+        let top = |t: &[(u32, BigInt)]| t.iter().map(|(w, _)| *w).max().unwrap_or(0);
+        assert!(
+            top(&merged) >= top(&chain),
+            "{} against {}",
+            top(&merged),
+            top(&chain)
+        );
+    }
 
     #[test]
     fn the_founding_climbs_to_its_own_densest_element_no_fixed_cap() {
