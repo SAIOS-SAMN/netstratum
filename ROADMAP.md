@@ -150,7 +150,9 @@ operators of the network.
   each kind's bound share at its place and heat, the ionized share of every
   kind moving as one parcel, and the bound share's drift toward it holding
   light matter in the galaxies (docs/134). The star core's cut keeping the
-  hydrogen its binding brings is the open law.
+  hydrogen its binding brings is the open law. Rates compose as versors (docs/138): boosts on different planes turn the
+  plane between them, built in `turning`; the spin ledger as one bivector is
+  next (#206).
 - **Trajectory.** The pulse as one expanding wavefront echoed only at
   surfaces, contained by the firmament until bonded collections of its
   matter escape, with the zero galaxy first and every body's extent and

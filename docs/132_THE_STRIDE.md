@@ -180,10 +180,20 @@ only bound.
     except the torque identity's residual (6;21·60⁻⁶ → 5;54·60⁻⁶). The
     conformations' extra relaxation moved nothing that decides at these two
     echoes, whether counted on one clock or on each mote's own.
-  - **Open:** a mote's meeting with the front at its own `t(r) = r + H(<r)`
-    (`ring::arrival`), so the echo is read at each mote's own coordinate
-    rather than at the arrival bell. Every other galaxy law (torque, emission,
-    magnet, bindings) still acts once at the arrival bell.
+  - **Built: the front's coordinate.** `τ(r) = r + H(<r)`
+    (`Enclosed::front`, `Mote::front_in`), and the time between two places
+    as the separation of their coordinates (`Enclosed::separation`). Over a
+    stretch holding nothing, `Δτ = Δr`. Each body crossed adds its hold, so
+    the density of time `1 + dH/dr` is read between two points, never at
+    one. At the equator (the rim, `R = H(<R)`) the held share is ½ and
+    `τ = 2R`.
+    This is the seam agreed with Xylarium (#245, operator ruling
+    2026-11-15): their `M` is our `H/2`, the T lane carries rings at
+    `c = 1` exactly, and a crossing carries `Δτ` only. Witnesses:
+    `front_tests`.
+  - **Open:** the echo read at each mote's own coordinate rather than at the
+    arrival bell, with every other galaxy law (torque, emission, magnet,
+    bindings) acting there. That is the event-ordered breathe (#198).
 - **Not yet: events (#198).** S1's strides stand on the field between echoes
   without the event reader. An attractor never overshoots its target
   (`0 < k < 1`), but a spin order or a range can change inside a stride

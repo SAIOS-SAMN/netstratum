@@ -12,6 +12,11 @@
 //! Shear is the degree of modulation at every level (docs/121 §11): phase,
 //! quantum and state. `pulled` composes any level's rate, a share of that
 //! level's luminal bound; the lane it reads is the level.
+//!
+//! The spatial planes' rates are composed whole (docs/138 §5, #199):
+//! `compose_whole` takes the rates and the pulls as one boost each, gives the
+//! boost's part on each plane as the new rate, and reads the turning between
+//! the planes (Thomas–Wigner) projectively.
 
 use cfe::ratio::{ratio, Ratio};
 use num_traits::{Signed, Zero};
@@ -95,14 +100,126 @@ pub fn pulled(
     own_open: &Ratio,
     f: &Ratio,
 ) -> Option<Ratio> {
+    crate::ring::compose(x, &pull(x, range_rate, own_pole, own_open, f)?)
+}
+
+/// The pull on one plane, `y = −σ·F·o·(x̄ ⊖ x)`, before it is composed.
+pub fn pull(
+    x: &Ratio,
+    range_rate: &Ratio,
+    own_pole: &Ratio,
+    own_open: &Ratio,
+    f: &Ratio,
+) -> Option<Ratio> {
     let toward = minus(range_rate, x)?;
-    let y = -own_pole.clone() * f.clone() * own_open.clone() * toward;
-    crate::ring::compose(x, &y)
+    Some(-own_pole.clone() * f.clone() * own_open.clone() * toward)
+}
+
+/// The algebra of the rates (docs/138 §5): the three spatial axes and a time
+/// unit `e₀`, squaring to `−1`. The rate on spatial plane `k` (in
+/// `orientation::PLANES` order) is a boost along the axis dual to it,
+/// `e₀·n_k`.
+fn time_unit() -> usize {
+    crate::turning::base_axis(4).expect("an axis")
+}
+
+fn boost_plane(k: usize) -> crate::turning::Clifford {
+    use crate::turning::{base_axis, Clifford};
+    let e0 = time_unit();
+    Clifford::blade(e0, e0, ratio(1, 1))
+        .product(&Clifford::blade(
+            e0,
+            base_axis(k + 1).expect("an axis"),
+            ratio(1, 1),
+        ))
+        .expect("one signature")
+}
+
+fn coefficient(v: &crate::turning::Clifford, plane: &crate::turning::Clifford) -> Ratio {
+    let Some((mask, unit)) = plane.terms().next() else {
+        return ratio(0, 1);
+    };
+    v.terms()
+        .find(|(m, _)| *m == mask)
+        .map(|(_, c)| c.clone() / unit.clone())
+        .unwrap_or_else(|| ratio(0, 1))
+}
+
+/// The rates `x` and the pulls `y` on the three spatial planes composed
+/// whole, never plane by plane (docs/138 §5): `V′ = V(Y)·V(X)` with
+/// `V(X) = 1 + Σ x_k·e₀n_k`, split against the mote's time `e₀`. The boost's
+/// part on each plane is the new rate, and on one plane alone it is the flow
+/// law `x ⊕ y`. The turning `1 + C` between the planes (Thomas–Wigner) is
+/// read as its parts `c_p` on the spatial planes, in `orientation::PLANES`
+/// order, with its norm `R·R̃ = 1 + |c|`-composed. None where the composition
+/// leaves the luminal bound (a null versor).
+pub fn compose_whole(x: &[Ratio], y: &[Ratio]) -> Option<(Vec<Ratio>, [Ratio; 3], Ratio)> {
+    use crate::turning::{compose_versors, reversed, split, versor, Clifford};
+    let e0 = time_unit();
+    let rate = |v: &[Ratio]| {
+        (0..3).try_fold(Clifford::blade(e0, 0, ratio(0, 1)), |s, k| {
+            let c = v.get(k).cloned().unwrap_or_else(|| ratio(0, 1));
+            s.sum(&Clifford::blade(e0, 0, c).product(&boost_plane(k))?)
+        })
+    };
+    let v = compose_versors(&versor(&rate(y).ok()?).ok()?, &versor(&rate(x).ok()?).ok()?).ok()?;
+    let (boost, turning) = split(&v, &Clifford::blade(e0, e0, ratio(1, 1))).ok()?;
+    let rates = (0..3)
+        .map(|k| coefficient(&boost, &boost_plane(k)))
+        .collect();
+    let spatial: [Ratio; 3] = std::array::from_fn(|p| {
+        let (i, j) = crate::orientation::PLANES[p];
+        let plane = Clifford::blade(
+            e0,
+            crate::turning::base_axis(i).expect("an axis"),
+            ratio(1, 1),
+        )
+        .product(&Clifford::blade(
+            e0,
+            crate::turning::base_axis(j).expect("an axis"),
+            ratio(1, 1),
+        ))
+        .expect("one signature");
+        coefficient(&turning, &plane)
+    });
+    let norm = turning
+        .product(&reversed(&turning))
+        .ok()?
+        .terms()
+        .find(|(m, _)| *m == 0)
+        .map(|(_, c)| c.clone())?;
+    Some((rates, spatial, norm))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// On one plane the whole composition is the flow law and turns nothing;
+    /// on two it is docs/138's W2, `V(½ on n₂)·V(⅓ on n₁)`, the turning on
+    /// the plane between them.
+    #[test]
+    fn rates_compose_whole_and_turn_the_plane_between() {
+        let z = ratio(0, 1);
+        let (rates, c, norm) = compose_whole(
+            &[ratio(1, 3), z.clone(), z.clone()],
+            &[ratio(1, 2), z.clone(), z.clone()],
+        )
+        .expect("in the bound");
+        assert_eq!(rates, vec![ratio(5, 7), z.clone(), z.clone()]);
+        assert!(c.iter().all(Zero::is_zero) && norm == ratio(1, 1));
+        let (rates, c, norm) = compose_whole(
+            &[ratio(1, 3), z.clone(), z.clone()],
+            &[z.clone(), ratio(1, 2), z.clone()],
+        )
+        .expect("in the bound");
+        // The pull composed after the rate, `V(Y)·V(X)`: the later motion on
+        // the left (docs/138 V2).
+        assert_eq!(rates, vec![ratio(9, 37), ratio(20, 37), z.clone()]);
+        assert_eq!((c[0].clone(), c[1].clone()), (z.clone(), z.clone()));
+        assert_eq!(c[2].abs(), ratio(1, 6), "the turning's half-rate is x₁·y₂");
+        assert_eq!(norm, ratio(37, 36), "R·R̃ = 1 + c·c");
+    }
 
     #[test]
     fn the_alignment_opens_by_degrees() {

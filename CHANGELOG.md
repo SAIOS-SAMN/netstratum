@@ -12,6 +12,12 @@ change is named here.
 
 ### Changed
 
+- A body's orientation is held as its whole unit motion R, with K per plane
+  beside it, and its generator is a reading (78.173 §8.5, ruled 2026-11-15
+  for every kernel). On the grain the motion is `cayley(⌊generator(R)⌋)`, an
+  exact unit. The laws and the save record are unchanged: all 313 conductor
+  tests pass, and `motion_tests` witnesses `R·R̃ = 1` and the record read
+  back.
 - Mycelium SDK pinned to main 15beb6ea (wire 0x0300), the commit Mycelium's
   standing mesh runs (127.0.0.1:8500–8502); the rc.1 mesh is gone and no
   v0.5.0 tag exists. Contract changes taken in place: every universe act
@@ -23,6 +29,34 @@ change is named here.
 
 ### Added
 
+- Time as coordinates, the front's coordinate (docs/132 §4.1, E77, #207):
+  `Enclosed::{front, separation}` and `Mote::front_in`. τ(r) = r + H(<r), and
+  a duration is the separation of two coordinates. The seam with Xylarium
+  sits at the equator (#245).
+- Rates as versors, step 1 (docs/138, E76, #206): `turning::{versor,
+  projective, compose_versors, power, split, holonomy}`. A rate is a
+  bivector, whole on every plane it moves, each plane at its own angle; its
+  versor is the sum of its wedge powers, and each plane and angle reads
+  back exactly (`wedge_powers`, `invariants`, `plane_of`). Two boosts
+  on different planes compose to a boost times the turning between them
+  (W2). Boost and turning are read against an observer's own time, never
+  the blade masks (`split`, `parts`, W2′). A path closed on paper leaves a
+  boost and a turning (W4). The
+  W4 fixture's `e₁₂` sign is corrected to −⅓.
+  Step 3, the shear (#199): a mote's rates and pulls compose whole
+  (`coupling::compose_whole`), and its Thomas–Wigner turning advances its
+  motion (`Orientation::turn_by`, the root on the grain). Read from l109 to
+  bell 222:
+  - the shear moved 2;05,25·60⁻³ against 2;17,12 before;
+  - 2918 of 2969 motes apart in phase, against 2904 of 2968;
+  - the 3Z conservation true, and fuel and bodies unchanged.
+  The release composes a parcel's rates with the core's pressures whole as
+  well, the turning turning the parcel as it leaves. Read: tilt ties 295
+  (was 318), 3Z conservation true, fuel and bodies unchanged. The drift
+  moves one scalar and has no planes to compose.
+  Step 2: the spin ledger is one bivector (`flows::{Mote::spin,
+  spin_ledger}`). The per-plane books are its components. A motion carries a
+  spin by `turning::carry`, keeping its angles.
 - The stride, S1 (docs/132 §4.1, #197): the attractor laws over n bells in
   closed form (`flows::{keep_over, relax_over}`). The galaxy's conformations
   at an echo's arrival stand for the bells each mote has lived since the
