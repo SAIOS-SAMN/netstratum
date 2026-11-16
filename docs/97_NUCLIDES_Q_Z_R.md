@@ -671,3 +671,62 @@ phase.**
 
 V3's code proceeds on these. Nothing in §15 waits on a ruling.
 
+
+### 15.10 The reach derived: held lone ends survive, at the founding's own share
+
+**D12 (survival reads the held ends).** §10's survival is "bound by its
+fibres, or lone and held at the electrons' equilibrium",
+`σ = κ + (1 − κ)·g` with `κ = 2F/w`. Both ends of a fibre count as bound.
+On the opened planes (15.6), a lone end held on an axis is a held
+dimension, the glue (docs/95 §0), so it is bound as a fibre's held end is.
+With `h` the lone ends' held share (the mean over the axes of `ℓ_k/L`):
+
+    σ(w; h) = κ′ + (1 − κ′)·g,     κ′ = (2F + h·L)/w
+
+At `h = 0` this is §10's survival exactly (the reduction D3).
+
+**D13 (the founding's held share is its own exchange's).** By F1 (15.9),
+the lone ends rest at the exchange's fixed point at their holder's face.
+The founding's captures happen in the bounce at the seal window, so their
+face is the window's:
+- `grip(2, ½) = κ₂·held(2, ½) = 1·½`, so `δ_w = (1 + ½)/2 = ¾`
+  (`nuclides::seal_window` at the source clock 2);
+- `h = neutron_share(δ_w) = 1 − ¾ = ¼`.
+
+Nothing is set: it is the same share the founding already reads for its
+free nucleons.
+
+**D14 (the reach, read).** The climb with `σ(w; ¼)` at the throat's
+`g = ½` ends where less than one whole nucleus arrives. The scan below was
+calibrated so that one chain stops at 1508 at 2^40, as read; it is a
+scratch scan, and the exact read lands with the code.
+
+| Founding | One chain (`h = 0`) | Held ends (`h = ¼`) |
+|---|---|---|
+| 2^30 grains | — | 2347 |
+| 2^40 grains | 1508 | **2448** |
+| 2^55 grains | 1614 | 2573 |
+
+So the frontier falls in the operator's 1700–2500 at the working counts,
+and every number above is derived. The climb no longer thins along one
+chain. Each weight's survival is lifted by the share of its lone ends the
+founding's own exchange holds.
+
+**D15 (the representation, next).** The population at a weight is many
+nuclei whose lone ends rest at the product shares (D9 at `s_k = ¾`):
+`n_∅ : n_k : n_ij : n₁₂₃ = 27 : 9 : 3 : 1` over 64 per lone end, each
+member a whole nuclide. Its readings come out in thirds, `Z = F + Σℓ_k/3`.
+The electrons follow whole protons (`atom(Q)`). So the table needs one of
+two forms:
+- the population per weight, held as exact pattern shares, read as mean
+  thirds (Xylarium's form, `Q*/Z` rational);
+- its members, keyed by whole nuclide, with the share of each.
+
+D15 derives which, from where each reading is used (chemistry by member,
+gravity and the manifest by population), before the kinds change.
+
+**Witnesses** (with the code):
+1. `σ(w; 0)` equals §10's survival for every w.
+2. `h = neutron_share(seal_window(source_clock())) = ¼` exactly.
+3. On a fresh founding at 2^40 the frontier is in 1700–2500 (D14 read
+   exactly), with nucleons conserved.
