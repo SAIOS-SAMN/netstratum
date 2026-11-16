@@ -41,6 +41,9 @@ reads are time-boxed and are not part of the check.
   section.
 - Design questions and cross-project proposals are issues; an accepted
   decision is recorded in the design documents and the changelog.
+- How a doc section becomes a milestone, an issue, a branch and a pull
+  request, the labels, the project's fields and the gates:
+  [docs/BUILD_OUT.md](docs/BUILD_OUT.md).
 
 ## Contracts
 

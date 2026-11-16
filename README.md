@@ -102,7 +102,8 @@ protocol stack.
 | [docs/README.md](docs/README.md) | The index of the design record |
 | [protocols/](protocols/) | The NS protocol specifications |
 | [docs/PHYSICS.md](docs/PHYSICS.md) | How the computational physics is used: the engines, the live path, what is duplicated, what is not yet derived, and what it has produced |
-| [docs/PLAN.md](docs/PLAN.md) | The order of the work: the milestones and the issues in each |
+| [docs/BUILD_OUT.md](docs/BUILD_OUT.md) | How the work is planned and built: milestones, issues, the project, the gates |
+| [docs/PLAN.md](docs/PLAN.md) | The principles of the order of work and the register's mapping |
 | [docs/MYCELIUM.md](docs/MYCELIUM.md) | What Netstratum takes from Mycelium, how complete each use is, and the line between them |
 | [docs/EQUATIONS.md](docs/EQUATIONS.md) | Every law, with its authority and its implementation |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How changes are made and checked |
