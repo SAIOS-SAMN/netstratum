@@ -403,3 +403,97 @@ laws or its inverse, and every share is placed by a law (no leftovers).
 Nothing here is ruled beyond the operator's range and the shared rulings
 cited. If a derivation forks between two readings that the docs do not
 decide, the fork is put to the operator in #213.
+
+### 15.6 V3 derived: the nuclide on its three planes
+
+**From the record:**
+- **(a) Each nucleon stands once on every axis** (docs/95 §0). So a nuclide
+  of weight w holds `3w` dimensions, w on each axis.
+- **(b) A fibre is one proton and one neutron bound** (`nuclides::swapped`,
+  docs/97 §2). Exchanging the poles of a fibre leaves the fibre, and only
+  the lone ends change pole.
+- **(c) The master equation's exchange** (docs/105 §3,
+  `nuclides::exchange`) moves a held end to open at `g` and an open end to
+  held at `u`. Its fixed point is the held share `g/(g + u)`
+  (`polarity::equilibrium`).
+- **(d) The faces under inverse gravity** at the share δ are
+  `(g, u) = (1 − δ, δ)` (`polarity::faces`).
+- **(e) The pass per plane:** a body's share on plane k is its own, `s_k`
+  (docs/128, `conductor::strip`).
+- **(f) Charge moves between the poles only with R carrying the change**
+  (docs/95 §0).
+
+**D1 (the state).** A nuclide is its fibres F, its lone ends `L = w − 2F`,
+and on each axis k the lone ends held there, `ℓ_k ∈ [0, L]`. Its per-plane
+counts are
+
+    z_k = F + ℓ_k,     q_k = F + (L − ℓ_k),     z_k + q_k = w   on every axis.
+
+*Proof.* (a) puts w ends on each axis. (b) puts each fibre's two ends, one
+held and one open, on every axis, and leaves only the lone ends free to
+change pole. ∎
+
+**D2 (the readings).** Its neutrons and protons are the means over the
+axes:
+
+    Z = F + (ℓ₁ + ℓ₂ + ℓ₃)/3,     Q = w − Z
+
+These are exact thirds, rational like Xylarium's `Q*/Z` (its face pairs,
+#296). The whole-nucleon nuclide is the case `ℓ₁ = ℓ₂ = ℓ₃`. A nuclide's
+pole and strength on plane k are
+
+    σ_k = (z_k − q_k)/w,     o_k = q_k/w      (Mycelium 78.175 F1, with the seam's Z ↔ Q)
+
+**D3 (the reduction).** Today's table is `ℓ_k = 0` on every axis: every
+lone end open. The convergence's nuclide is `Q = F + L` and `Z = F`
+(`nuclides::table`'s `(fibres + free, fibres)`). This is why every founded
+kind is proton-rich (#203): no lone end is ever held.
+
+**D4 (the parting).** The exchange (c) acts on each plane's lone ends at
+that plane's own faces (d, e). So `ℓ_k` relaxes toward its fixed point
+
+    ℓ_k*/L = g_k/(g_k + u_k) = 1 − s_k
+
+with the fibres F and the weight w unchanged. Two planes part only where
+their passes differ. Where every plane passes alike, the planes coincide,
+and the nuclide is a whole-nucleon one. This is Xylarium's E014 ("the planes
+part only where a winding is not common") stated on netstratum's pass.
+
+**D5 (R per plane).** By (f), each lone end exchanged on plane k moves one
+unit of charge there, carried by the electrons' phase on that plane. At
+rest
+
+    R_k* = −σ_k = −(z_k − q_k)/w
+
+which is the rest point Mycelium checks (#357) read per plane. Its mean over
+the axes is the kind's `R* = −(Z − Q)/w`.
+
+**D6 (the swap).** The pole swap `(z_k, q_k) ↦ (q_k, z_k)` is `ℓ_k ↦ L − ℓ_k`
+with F kept. It is an involution, it keeps `z_k + q_k = w` (3Z) on every
+plane, and it maps `σ_k ↦ −σ_k`, `o_k ↦ 1 − o_k` and `R_k ↦ −R_k`
+(docs/123 §2). On exact face pairs, `swap(swap(T)) = T` (V12).
+
+**What it opens**
+- **Isotopes and isobars** (V1): one F and w with different `(ℓ₁, ℓ₂, ℓ₃)`,
+  and one w with different F, are distinct kinds.
+- **The climb's pole exchange** (V4): `ℓ_k ± 1` on one plane, at that
+  plane's faces.
+- **The valley of stability** (V15): as a read, never a target. A lone end
+  held where `1 − s_k > ½` gives a neutron excess.
+
+**Witnesses** (with the code, `nuclides` and `chem`):
+1. `z_k + q_k = w` on every axis for every nuclide.
+2. The exchange keeps F and w.
+3. `ℓ_k = 0` on every axis reproduces `nuclides::table` for every w ≤ READ.
+4. The swap is an involution keeping 3Z.
+5. At the fixed point, `R_k + σ_k = 0`.
+6. Planes with equal passes stay equal under the exchange.
+
+**For Xylarium (V3, xylarium #128).** D4 is checked against E014's parting
+before any code on either side.
+
+**Fork stated, not decided.** D4 reads the lone ends' rest at the plane's
+pass `s_k` (docs/128). The founding reads one share for the whole bounce
+(`neutron_share(seal_window(…))`). Here D4 governs the bound nuclide's lone
+ends, and the founding's share governs the free pool. If these two must be
+one law, the operator rules it (#213).
