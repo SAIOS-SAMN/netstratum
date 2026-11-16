@@ -602,21 +602,72 @@ Xylarium its axis plane's face pairs. D6's swap, summed over k, is
 Xylarium's pair swap on the axis plane, so the involution holds on both
 sides.
 
-**The forks** (put to the operator in #213):
-1. **F1, one share or two** (15.6). Either the bound nuclide's lone ends
-   rest at each axis's pass while the founding's single share governs the
-   free pool, or the two are one formula.
-2. **F2, whose split, and does the pass see the kind.** Either netstratum
-   reads per-Hopf-plane passes, or Xylarium splits its axis-plane dipole
-   into thirds with their own passes. Separately, whether a plane's pass
-   depends on the kind:
-   - Xylarium's does, through Z;
-   - netstratum's could, through the kind's capture phase (docs/134 §12,
-     E75);
-   - today netstratum's does not.
-3. **F3, three axes or four** (15.7). Either N stands on the three nucleon
-   axes (8 patterns) with R beside it, or on four axes with R as the
-   fourth (16 patterns, the orientation's six planes).
+**The forks are physics, derived in §15.9** (operator via Mycelium,
+2026-11-16, MU-HOSTING §5a.2a: in-universe physics is netstratum's own
+derivation, never a ruling).
 
-Nothing in V3 is coded before these are ruled. V1, V4–V9 and V13–V15
-proceed on the summed split.
+### 15.9 F1–F3 derived
+
+**F1: one formula, read at each holder's own face.** The founding's neutron
+share is `nuclides::neutron_share(δ) = equilibrium(faces(δ)) = 1 − δ` at the
+seal window's δ. D4's lone-end rest is `ℓ_k*/L = equilibrium(faces(s_k)) =
+1 − s_k`. These are the same function, the exchange's fixed point
+(docs/105 §3), at two arguments:
+- the free pool rests at the bounce's face;
+- a bound nucleus's lone ends rest at their plane's pass.
+
+There is one formula and no second rule.
+*Witness:* `neutron_share(x) = 1 − x = ℓ*/L at s = x` for every x.
+
+**F2: netstratum's split is derived, and the pass sees the kind through its
+phase.**
+- **The split.** Netstratum's split is the thirds of 3Z, because each
+  nucleon stands once on every axis (docs/95 §0). That is a derivation from
+  this kernel's own nucleon, not a choice between kernels. Xylarium's axis
+  plane is its own derivation. The seam compares the summed face pairs (V12,
+  §15.8), which both sides state exactly.
+- **The kind sees its own pass.** A plane's pass is read from the plane's
+  velocity, the medium's pressure, the phase state and the parcel's boundary
+  (docs/128). Each kind's parcel stands at its own capture phase: the bound
+  parcels at `φ_kind`, the chain's accumulated face (docs/134 §12, E75). So
+  the pass a kind sees on plane k is read at its own phase, `ψ_k + φ_kind`:
+  `s_k(kind)`. D4 becomes `ℓ_k*/L = 1 − s_k(kind)`. Kinds in one body part
+  their planes by their phases. This is the same form as Xylarium's
+  `ψ_p = frac(w_p·s·Z)`, where the phase also carries the kind.
+- *Witness:* two kinds at one place with equal φ rest alike, and with
+  different φ they part.
+
+**F3: four axes, R the fourth. The node is Spin(4) = S³ × S³.**
+- **The nucleons stand on three axes.** R is the axis that pairs with none
+  (docs/95 §0, §2), so the nucleon patterns stand on the three nucleon
+  axes, 8 patterns (§15.7).
+- **R stands on the R-partner planes.** The electrons' phase on axis k is
+  carried on the plane that joins axis k with R: `e_k∧e_R`, the
+  orientation's R partners (`orientation::PARTNER`, docs/117 §11.6). D5's
+  `R_k*` is that plane's rest. The node is the four axes' unit motions,
+  Spin(4) = S³ × S³, the two isoclinic halves `orientation::Motion` holds.
+  The five-unit reading (S⁷ → S⁴) would add the conformal `e₋`, the dilator
+  (#204), which no nucleon formula reads, so it is not the nucleus's node.
+- **The order, and the holonomy.** The three R-partner planes share `e_R`,
+  so they do not commute. They compose in the capture order, φ ascending
+  (E75), and their composite carries the holonomy on the spatial planes.
+  *Fixture (exact, Cl(4,0)):*
+  - `(1 + ½e₂R)(1 + ⅓e₁R) ∝ 1 + ⅓e₁R + ½e₂R + ⅙e₁₂`;
+  - the other order gives `−⅙e₁₂`.
+
+  The electrons' phases, composed in their capture order, turn the
+  nucleus's spatial plane between them. That is the coupling of R to the
+  orientation, and it falls out of the composition.
+- *Witness:* the composed R equals the per-plane rest motions composed in φ
+  order. The reverse order gives the reverse holonomy (forms claim, checked
+  in Cl(3,0) and here).
+
+**What the manifest entry must carry (to Mycelium, v4, mycelium #359).**
+- Keys `(3Z, 3Q)` are not enough, because §15.7 separates nuclides with
+  equal thirds and different patterns. An entry carries the lone-end
+  pattern counts `n_S`, 8 whole counts, from which 3Z and 3Q read.
+- R is carried as the three R-partner planes' (winding, phase), composed in
+  φ order.
+
+V3's code proceeds on these. Nothing in §15 waits on a ruling.
+
