@@ -8,7 +8,7 @@ element the founding produces), so that galaxies form with enough material
 for planets. Netstratum is the inverse of Xylarium: in Netstratum Q is the
 proton and Z the neutron; in Xylarium the reverse.
 
-**Status (2026-11-16):** §15 scopes the table on its own dimensions, up to weight 1700–2500 (#213, open). It supersedes §14's one-chain climb as the target.
+**Status (2026-11-16):** §15 scopes the table on its own dimensions, up to weight 1700–2500 (#213, open). It supersedes §14's one-chain climb as the target. Derived: §15.6–§15.9. The reach is fuel-bound (§15.11–§15.12). Next: V6, the bounce's places. The code still climbs one chain to 1508.
 
 **Status (2026-10-28):** §1–§2 and §4 built (41b2a6b); §3, R, built
 (785a074, §13); §5 in nature's form; §8–§11 built; §12 built and partly
@@ -772,3 +772,81 @@ D12, D13 and D14 are withdrawn as the reach mechanism. D13's share
 (`h = ¼`, the seal window's exchange) stands as a reading. The code is
 unchanged: the founding still climbs one chain to 1508.
 
+
+### 15.12 Where the reach is set: the budget and the tail meet
+
+This scan conserves nucleons. Seeds hold 4 nucleons each, and the rest is
+fuel. It uses one-chain survival at the throat (`g = ½`), calibrated to
+1508:
+
+| Seed share of N | Frontier |
+|---|---|
+| 1/8 (today) | 1508 |
+| 1/16 | 1499 |
+| 1/256 | 1461 |
+| 10⁻⁵ | 1329 |
+| 10⁻⁶ | 1179 |
+
+Fewer seeds lower the frontier, so the founding is not seed-starved. At
+today's share the fuel runs out at the weight where the survival tail
+(`σ ≈ 0.89`) leaves less than one nucleus: the two bounds meet near 1508.
+Raising survival everywhere drains the fuel at light weights (§15.11).
+
+So the reach needs **survival raised at heavy weights only**. In
+`σ = κ_w + (1 − κ_w)·g`, the only term that is not the nuclide's own is the
+place's held share g. The founding reads it once, at the throat. V6, the
+bounce's places along `τ(r) = r + H(<r)`, gives each part of the bounce its
+own g:
+- the climb at light weights runs where the bounce first seals;
+- the heavy tail runs where its part is held more deeply.
+
+V6 is the next derivation. Its reach is read only on a founding that
+conserves nucleons (§15.11).
+
+### 15.13 V6 examined: what the held share must do, and the one candidate derived
+
+These are scratch scans (exploratory, not state). They conserve nucleons,
+use one-chain κ, keep today's seed share of 1/8, and are calibrated to 1508
+at 2^40.
+
+**A constant held share sits on a cliff.**
+
+| g | Frontier | Bound |
+|---|---|---|
+| 0.30 | 752 | tail |
+| 0.45 | 986 | tail |
+| **0.50** | **1508** | tail, with the fuel nearly spent |
+| 0.55 | 19 | fuel |
+| 0.70 | 10 | fuel |
+
+The founding's g = ½ (the throat) is the largest constant share that does
+not drain the fuel at light weights.
+
+**The shape the range needs.** Hold g = ½ through light weights and raise
+it at heavy ones:
+- from weight 200: 0.6 gives 2102, and 0.7 gives 2687;
+- from weight 500: 0.6 gives 1837, and 0.7 gives 2596.
+
+So the held share must rise with weight, slowly through the light weights.
+
+**The candidate the record derives: the nucleus's own enclosure.** A
+nucleus is a body. Its fibres are its hold (the glue) and its lone ends its
+reach, so its own held share is `F/(F + L)`. That is 0.25 at weight 10,
+about 0.85–0.92 at 50–200, and about 0.74 at 1500.
+- Read alone it gives **1610 at 2^40, 2134 at 2^55** and 1487 at 2^30.
+- It is tail-bound, with 10.6% of the fuel left. The fuel is no longer the
+  limit; the heavy tail's survival, about 0.94, is.
+- Composed with the throat's ½ as "held by either", it drains the fuel by
+  weight 10. As "held by both", it stops at about 700.
+
+**What this settles, and what is next.** V6 cannot be a constant place:
+the throat is already the best constant. The held share has to read the
+nucleus's own depth, and `F/(F + L)` is the first reading of it from the
+record. It does not reach 1700 at the working count on its own.
+
+The next derivation is the electrons' held share at a nucleus's own place,
+from the master equation at the nucleus's own deficit (docs/105 §3), not
+from its fibre count alone. Then V4, the real pool (protons), where a fibre
+step needs a neutron the exchange makes.
+
+Each read conserves nucleons, and no candidate is fitted to the range.

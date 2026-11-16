@@ -9,6 +9,45 @@ What Netstratum is, what works today, and where each part is heading. This
 page is kept current; where a design document disagrees with it, this page
 and the code are right.
 
+## Now (2026-11-16): where to pick up
+
+**State**
+- `main` is clean.
+- Open: PR #226, the Mycelium manifest v4 pin (f5ea695c, mycelium #362 on
+  #360). It merges after Mycelium reads the grant from the court's side, and
+  re-pins to Mycelium's main once #362 lands there.
+- On the mesh (127.0.0.1:8500–8502, integ-v4, recut 2026-11-16), the domain
+  da34b0b5 is re-founded:
+  - manifest v4 Sealed at h 1085: grant 4738a7da, 1495 entries;
+  - ledger at u 2 (h 1136);
+  - the grant applied at u 3 (h 1540);
+  - the reserve holds μ 0 and waits for a T delivery. Read
+    `ns-hypha standing` when T moves.
+
+**Next, in order**
+1. **#213, the elemental table to weight 1700–2500** (docs/97 §15). The
+   scope (V1–V15), the per-plane state, the opened volume and F1–F3 are
+   derived. The reach is bound by the founding's nucleons (§15.11): the fuel
+   budget and the survival tail meet near 1508 (§15.12). **Next is V6**, the
+   bounce's places, so the held share rises only at heavy weights. Then V4
+   against the real pool, which is all protons. No reach is quoted from a
+   scan that does not conserve nucleons.
+2. **#206 step 4:** the read of where the composed turning moves spin
+   between planes.
+3. **#220, the jetstream as volume** (docs/139, derived), built through
+   #158 on the R-partner planes.
+4. **#198 and #207:** the event reader, and the echo at each mote's own
+   coordinate. T moves only at crossings.
+
+**Waiting on the operator:** whether our reserve signs Mycelium's hand-made
+test crossing for mycelium #360 (recommended: a separate test domain).
+
+**Across the seams:**
+- the time seam is closed (#210);
+- the core tube is #109 ↔ xylarium #281;
+- the table's planes and frontier are xylarium #128, #296 and #297;
+- the manifest is mycelium #359 and #362.
+
 ## What Netstratum is
 
 Netstratum is a multi-planetary civilization game in which AI-driven
