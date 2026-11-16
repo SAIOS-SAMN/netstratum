@@ -497,3 +497,86 @@ pass `s_k` (docs/128). The founding reads one share for the whole bounce
 (`neutron_share(seal_window(…))`). Here D4 governs the bound nuclide's lone
 ends, and the founding's share governs the free pool. If these two must be
 one law, the operator rules it (#213).
+
+### 15.7 The volume opened on the planes
+
+**Operator, 2026-11-16:** "open volume on plane."
+
+§15.6 keeps `ℓ_k`, the lone ends held on axis k. Those are three counts,
+each a projection onto one axis. A lone end stands once on every axis
+(15.6 (a)), so its pole on the three axes is one **pattern**: the set
+`S ⊆ {1, 2, 3}` of axes it is held on. The patterns are the blades of the
+axes' algebra:
+- `∅`: open on every axis (the scalar);
+- `{k}`: held on one axis (a vector);
+- `{i, j}`: held on the plane `e_ij` (a bivector);
+- `{1, 2, 3}`: held through the volume `e₁₂₃` (the trivector).
+
+**D7 (the state is a multivector of counts).** The lone ends are
+
+    N = Σ_S n_S·e_S,     n_S ≥ 0 whole,     Σ_S n_S = L
+
+The axis counts are its readings:
+
+    ℓ_k = Σ_{S ∋ k} n_S
+
+The plane `e_ij` holds `n_ij + n₁₂₃`, and the volume holds `n₁₂₃`. Each
+reading is first degree in N, and no count is squared or summed into a
+scalar before it is read. Three axis counts cannot tell the patterns
+apart. For example, `ℓ = (1, 1, 1)` is `n₁₂₃ = 1` (one end held through
+the volume) or `n₁ = n₂ = n₃ = 1` (three ends held on one axis each).
+These are different nuclides. §15.6 collapsed them.
+
+**D8 (whole nucleons are the scalar and the volume).** A lone end held on
+every axis is a neutron end. One open on every axis is a proton end. So the
+whole-nucleon nuclide is `N = n_∅ + n₁₂₃·e₁₂₃`, and
+
+    Z = F + n₁₂₃,     Q = F + n_∅
+
+Every other pattern (an end held on one axis or on one plane) is a nucleon
+end whose pole differs between axes. These are the states the opened
+dimensions add. Their Z is the exact mean `F + Σ_k ℓ_k/3` (D2).
+
+**D9 (the exchange moves an end between neighbouring patterns).** One
+exchange on plane k flips one lone end's pole on axis k: `S ↔ S ∪ {k}`, at
+that axis's faces `(g_k, u_k) = (1 − s_k, s_k)` (15.6 (c)–(e)). Its rest is
+the product of each axis's own share:
+
+    n_S*/L = Π_{k ∈ S} (1 − s_k) · Π_{k ∉ S} s_k
+
+Each factor is a different axis's share, first degree in each, and none is
+squared. Summed over the patterns containing k, it gives back 15.6's
+`ℓ_k*/L = 1 − s_k`.
+- Where the three passes are equal, the rest still holds every pattern.
+  Ends held through the volume and ends held on one axis stand side by
+  side. These are isotopes no axis count separates.
+
+**D10 (the swap is the complement).** The pole swap maps each end's
+pattern to its complement, `S ↦ {1, 2, 3} \ S`. Scalar and volume
+exchange, and each axis exchanges with the plane it does not lie in. It is
+an involution, it keeps L and F, and it keeps 3Z on every axis, since
+`ℓ_k ↦ L − ℓ_k` (D6). On exact counts `swap(swap(N)) = N`, so V12's face
+pairs carry N whole.
+
+**D11 (R on the volume).** By 15.6 (f), each flip carries one unit of
+charge on its axis, held in the electrons' phase there. So R is read per
+axis (D5), and the volume's part of N moves charge on all three axes at
+once.
+
+**Witnesses** (with the code):
+1. `Σ_S n_S = L`, and `ℓ_k = Σ_{S∋k} n_S`.
+2. The flip `S ↔ S ∪ {k}` keeps F and w.
+3. `N = L` (every end open) reproduces `nuclides::table` (D3).
+4. The complement is an involution keeping 3Z per axis.
+5. At rest, each `n_S` is its product share, and the axis readings are 15.6's.
+6. Two nuclides with one ℓ and different N are distinct kinds.
+
+**For Xylarium (V3, xylarium #128).** Netstratum's nucleon state lives on
+three axes: 8 patterns, with 3 planes and the volume. R is the axis that
+pairs with none (docs/95 §0). With R as a fourth axis, the orientation's
+planes are the six of four axes (`orientation::PLANES`: three spatial and
+three R partners). Xylarium holds an axis plane and five isoclinic planes,
+also six. Whether N should extend over the four axes (16 patterns, the six
+planes, four volumes and the 4-volume) or stay on the three nucleon axes
+with R beside it is the mapping to check against E014. If the docs do not
+settle it between the two kernels, it goes to the operator.
