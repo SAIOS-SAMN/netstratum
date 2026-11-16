@@ -8,7 +8,7 @@ element the founding produces), so that galaxies form with enough material
 for planets. Netstratum is the inverse of Xylarium: in Netstratum Q is the
 proton and Z the neutron; in Xylarium the reverse.
 
-**Status (2026-11-16):** §15 scopes the table on its own dimensions, up to weight 1700–2500 (#213, open). It supersedes §14's one-chain climb as the target.
+**Status (2026-11-16):** §15 scopes the table on its own dimensions, up to weight 1700–2500 (#213, open). It supersedes §14's one-chain climb as the target. Derived: §15.6–§15.9. The reach is fuel-bound (§15.11–§15.12). Next: V6, the bounce's places. The code still climbs one chain to 1508.
 
 **Status (2026-10-28):** §1–§2 and §4 built (41b2a6b); §3, R, built
 (785a074, §13); §5 in nature's form; §8–§11 built; §12 built and partly
