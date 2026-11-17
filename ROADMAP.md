@@ -28,9 +28,15 @@ v0.6.0, by the trajectory below.
 
 **Next, in order**
 1. **#246, the cradle** (docs/140): the progenitor's machine for found,
-   extend and seal. A table is held per (count, place), and a founding can
-   happen at any singularity. It takes in #233 (the founding's cost: the
-   table is computed once, and the all-pairs filter is derived separately).
+   extend and seal. It takes in #233. Its steps:
+   1. **#248:** `found(count, place, seed)`, with the table held per
+      (count, g);
+   2. **#249:** the test domain as one deed;
+   3. **#250:** extend, a live universe receiving matter by a receipted
+      deed (growth now, inbound crossings after #109);
+   4. **#251:** seal over the fold;
+   5. **#252:** founding at a galactic core (V6), where the table's reach
+      can grow.
 2. **#213, the table** (docs/97 §15):
    - V13, the universal core read on the 1708 table against the old one;
    - V1–V3, the kinds on (Z, Q, pattern), whole members with per-plane
