@@ -50,6 +50,11 @@ change is named here.
 
 ### Added
 
+- `cradle::singularity_tables` (docs/140 C2, #252), with the example
+  `singularities`: each core founds its own table at its own throat (g = ½)
+  from its own nucleons. Read at bell 222: one core, frontier 1703. No
+  galaxy core has formed yet (#7). A core's table depends only on its count,
+  so per-singularity founding does not extend the reach.
 - The cradle's seal deed (docs/140 §3, #251): `conductor::fold` is moved
   whole into `cradle::seal`, which `conductor --fold` and the CLI's
   `contract` now call. Witness: the era is archived whole into

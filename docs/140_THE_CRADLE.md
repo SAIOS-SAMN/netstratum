@@ -116,5 +116,13 @@ v0.1.0.
 3. `cradle::extend` for growth, then for the inbound crossing when #109
    derives the throat's keep formula. Witness 3.
 4. `cradle::seal`, `conductor::fold` moved into it whole (built, #251). Witness 4.
-5. Founding at a galactic core (V6, #213), witness 5. This is where the
-   table's reach can grow by the places that hold heavy matter.
+5. Founding at a galactic core (V6, #213), witness 5. Built as a read,
+   `cradle::singularity_tables` (example `singularities`). **Read
+   (2026-11-17, l109 to bell 222):** one core, the universal core, whose own
+   throat founds to 1703. No galaxy core has formed yet (#7), so the
+   comparison waits on #7. **What the read settles:** a core founds at its
+   own throat, where its held share is the fixed point ½, so its table
+   depends only on its own count, and the count adds only a few weights a
+   decade (docs/97 §14). Founding at every singularity does not extend the
+   table's reach past what the count gives. The reach is the climb's own
+   physics (docs/97 §15).
