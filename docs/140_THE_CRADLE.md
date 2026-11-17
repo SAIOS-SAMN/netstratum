@@ -72,7 +72,7 @@ v0.1.0.
   test domains and galactic cores at the same `(count, g)` reuse it. That
   answers #233's repetition. The filter's all-pairs cost (#233) is paid
   once per table, and is derived separately.
-- **D2 (extension is a delta).** An extend deed changes the throat's mix
+- **D2 (extension is a delta; built, #250, `cradle::extend`).** An extend deed changes the throat's mix
   by its parcel. The release, the capture phases and the flows read the new
   mix from that bell on. Nothing before the deed is re-run.
 - **D3 (a test domain is a found deed with fresh keys; built, #249,

@@ -50,6 +50,13 @@ change is named here.
 
 ### Added
 
+- The cradle's extend deed (docs/140 C3, D2, #250): `cradle::extend(var,
+  parcel, source)`. A live universe receives matter at its universal core's
+  throat from a named source (a growth grant, an inbound crossing, or a
+  core's bounce). The receipt is kept whole in `cradle.jrn`, and
+  `cradle::extensions` reads it back exactly. Witness: the total after is
+  the total before plus the parcel, and empty or negative parcels are
+  refused.
 - The test domain as one deed (docs/140 D3, #249): `ns-embassy found-test
   <var> <grains> [phrase] --home <var>/embassy`. In one command it mints
   fresh keys (refused where any tier key stands), founds with the cradle,
