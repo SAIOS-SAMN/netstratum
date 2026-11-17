@@ -1,7 +1,7 @@
 # Example deployment unit: paths assume a checkout at /opt/netstratum; adjust
 # WorkingDirectory and ExecStart to the local clone before installing.
 # Netstratum on the hypha — the follower tails G2's chronicles and folds every
-# people's new receipts onto a court at play rate (the standalone :7520 court is RETIRED 2026-10-09; this unit stays disabled until the coordinator names a court; ns-hypha has no default court) (engine/hypha
+# people's new receipts onto a court at play rate (the standalone :7520 court is RETIRED 2026-10-09; this unit stays disabled until the coordinator names a court; ns-embassy has no default court) (engine/embassy
 # follow.rs): per-receipt line entries, self-published folds, prune by
 # finality, line-head check before every round. Coordinator: xylarium-kernel.
 [Unit]
@@ -9,7 +9,7 @@ Description=netstratum follower (disabled: the :7520 court is retired)
 After=netstratum-conductor.service
 [Service]
 WorkingDirectory=/opt/netstratum
-ExecStart=/opt/netstratum/target/release/ns-hypha follow var-g2 --every 60 --per-round 8
+ExecStart=/opt/netstratum/target/release/ns-embassy follow var-g2 --every 60 --per-round 8
 Nice=10
 MemoryHigh=2G
 MemoryMax=3G

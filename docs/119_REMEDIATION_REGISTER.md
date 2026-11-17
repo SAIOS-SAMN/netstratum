@@ -207,7 +207,7 @@ inverse (S2 unless marked):**
 | F4 | Orphans: `ocular.rs` (empty), `lookahead.rs`, `enclosure::place`, `route`, `pulse::from_nuclei` (the court-to-universe manifest: the hypha's resources cannot enter), `flows::manifest`, `founding`, `torsion_signed`, `soc::choose_build`, `nuclides::{place, binds, mobius, swapped, exchange, electron_phase}`, most of `ring`, `polarity::after`, `chem::closed`, `formation::extent`, `Body.gas` (no producer) | Wire or delete; wire `from_nuclei` |
 | F5 | Untested era-1 modules: `enclosure`, `ocean`, `waking`; `breath` 5 tests in 2,965 lines, `pulse` 9 in 2,405, `formation` 5 in 2,312; `lib.rs` none in 8,133 | Witnesses with the state type |
 | F6 | docs/89's breaks: B2 fixed; B1 and B3 mostly fixed (B1 with B10's new bug); B5 and B7 changed; B4, B6, B8 present | Carry B4, B6, B8 forward here |
-| F7 | `ns-hypha::refound` still originates "the flat L1 torus, periods 64 cells" (refound.rs:192) | The era-1 origin |
+| F7 | `ns-embassy::refound` still originates "the flat L1 torus, periods 64 cells" (refound.rs:192) | The era-1 origin |
 | F8 | `enfold::residue` never receives the tier map's k (breath.rs:932): `Residue::Frame` never produced | The tier map (docs/89 B6) |
 
 ---
@@ -239,7 +239,7 @@ inverse (S2 unless marked):**
 |---|---|---|
 | H1 | **The physics' letters are ambiguous:** Z is protons in `pulse::nuclei_by_z` and neutrons in `nuclides` and the GLOSSARY; R, p and Q each mean two things in Netstratum's own GLOSSARY (S2) | One meaning each; restate the GLOSSARY |
 | H2 | One word, many things: "tier" (4), "frame" (5, in a codebase whose law is "phases, never frames"), "line" (2), "ring" (2), "plane" (2), `hold` (5 functions), "bounce" (4), "fold" (2), "seat" (2), "census" (2), `founding` and `mobius` (2 each), `grip` (3), `World`, `Place` (3), `Reading` (3), `Shell`, `Keeper`, two `Holding` types | One name, one meaning (Mycelium AGENTS) |
-| H3 | Collisions with Mycelium's meanings: the `hypha` crate (Mycelium's hypha is the server; this crate is the house and its uplink, and its `judge` files an answer), Breath, Ascension, Orbit, Shell, Horizon, Gauge, torsion, residue/residual, peel, mint (μ only), Judge, Act, stroke, Seat, Site, chart, fibre, Frame, epoch, Cover, `unfold`; Xylarium's conductor | Rename to the function |
+| H3 | Collisions with Mycelium's meanings: the `hypha` crate (Mycelium's hypha is the server; this crate is the house and its uplink, and its `judge` files an answer; **renamed `embassy`, `ns-embassy`, 2026-11-17**, since `uplink` is Xylarium's and Mycelium's word), Breath, Ascension, Orbit, Shell, Horizon, Gauge, torsion, residue/residual, peel, mint (μ only), Judge, Act, stroke, Seat, Site, chart, fibre, Frame, epoch, Cover, `unfold`; Xylarium's conductor | Rename to the function |
 | H4 | Files named for a story, not their contents: `breath.rs` (one 2,283-line function), `pulse.rs` (the universe model, founding, tiers and codec), `waking`, `ascension`, `soc`, `civic` (the economy), `realms`, `ocular` (empty), `refound`, `siting`/`seating`/`places` (three near-synonyms); the `pulse` binary founds a universe | One organ per file, named for it (MU-STANDARDS 1.2) |
 | H5 | Over 2,500 lines (1.1): lib.rs 8,133, flows.rs 3,930, breath.rs 2,965, cfe/dop.rs 8,938, kernel/lib.rs 3,315, cli main.rs 9,517, cli hubs.rs 3,269 | Split by organ |
 | H6 | `main.rs` and `lib.rs` holding logic (1.3, 1.5): conductor `main` 1,390 lines, `observe` 1,148, `breathe` 898; hypha's nine commands in one file | Argument parsing, boot order and loop only; commands under `src/bin/` |
@@ -379,7 +379,7 @@ the code does not do (§H).
 
 | id | sev | law | where | finding | remediation |
 |---|---|---|---|---|---|
-| J1 | S2 | law 8, 78.62 L1, 78.59 Ruling 1, 78.169(3) | era-1 physics; `ns-hypha::probe` | Nothing of the era-1 universe reaches the court; only the fixed probe builds a transition. A body is scalars, not ground plus modes plus momentum, so a crossing cannot be composed under the court's algebra | (F) The state type in the court's form; crossings stated at the vertex (docs/113) |
+| J1 | S2 | law 8, 78.62 L1, 78.59 Ruling 1, 78.169(3) | era-1 physics; `ns-embassy::probe` | Nothing of the era-1 universe reaches the court; only the fixed probe builds a transition. A body is scalars, not ground plus modes plus momentum, so a crossing cannot be composed under the court's algebra | (F) The state type in the court's form; crossings stated at the vertex (docs/113) |
 | J2 | **done (#58)** S1 | law 4, 78.130, 78.45 | flows.rs:637-676 (`collections`, PR #54) | A float screen (`MARGIN = 1e-6`) in a physics decision; "certified" only by a comment, with no test of the bound | Mycelium's certified enclosures (`Encl`) in place of f64, or the exact test alone |
 | J3 | **done (#58)** S1 | law 9, 78.21, 78.152 | hypha/src/house.rs:662-666 | The SEATS epoch posted on the wire is `SystemTime::now()`, a wall clock; beats paced by `sleep` (main.rs:345, 1388; hypha main.rs:402, 679, 741) | The epoch from the ledger's TUniversal point |
 | J4 | S2 | law 12, 78.43 | pulse.rs:595; breath.rs:470-490; main.rs:368, 911 | A stored, frozen period drives the schedule against the derived one (§C14), and is sealed into the origin's radius, which can never be edited | The established period; the origin's radius from it at the next founding |

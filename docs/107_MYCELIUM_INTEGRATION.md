@@ -11,10 +11,10 @@ item 5 is closed (Netstratum pins Mycelium `v0.2.0` from GitHub, `5c725ed`).
   and meets TUniversal only through ledger entries
   (`engine/conductor/src/main.rs:679-684`; docs/67 N8).
 - **Reads final points** through `mycelium::sdk::Session::tuniversal()`,
-  wrapped by `Seat::tuniversal` (`engine/hypha/src/seat.rs:158-161`), and
+  wrapped by `Seat::tuniversal` (`engine/embassy/src/seat.rs:158-161`), and
   asks the court with `encode_clock_request()` when it has none
-  (`refound.rs:153`). `ns-hypha` relays the greatest point any seat read
-  to `<var>/tuniversal` (`engine/hypha/src/main.rs:569-620`).
+  (`refound.rs:153`). `ns-embassy` relays the greatest point any seat read
+  to `<var>/tuniversal` (`engine/embassy/src/main.rs:569-620`).
 - **Stamps percepts** with the house's final point and `local_time = u`,
   so seated minds are located at `(TPoint, u)` (`house.rs:371-375`,
   `wire.rs:90`).

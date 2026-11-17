@@ -12,6 +12,12 @@ change is named here.
 
 ### Changed
 
+- The crate `hypha` (`ns-hypha`) is renamed `embassy` (`ns-embassy`), and
+  its `Uplink` type `Embassy` (register H3). Mycelium's servers are its
+  hyphas, `uplink` is Xylarium's crate and Mycelium's SDK module, and
+  `mycelium-client` is Mycelium's. The embassy is Netstratum's client of the
+  network: the domain's founding, the reserve's acts, the ledger, and the
+  mouth and treaty acts.
 - The founding climbs by two channels (docs/97 §15.15, E79, #213): a
   nucleon captured, or a free seed merged (`w → w + 4`, the founding's own
   pairing at every weight), with the pair share of the free seeds and the
@@ -39,7 +45,7 @@ change is named here.
   (ledger, manifest, map) is signed over its crossing record (X1, #160),
   netstratum's acts carrying none across the tube (`Crossing::still` at the
   act's TUniversal point); tasks read as `TaskFamily`; a local throat's
-  sides are `poses`. Read: `ns-hypha laws --at 127.0.0.1:8500` returns the six
+  sides are `poses`. Read: `ns-embassy laws --at 127.0.0.1:8500` returns the six
   served laws.
 
 ### Added
@@ -49,8 +55,8 @@ change is named here.
   (#198, #207), inbound, outbound and the round trip (#109), to the treaty's
   countersignature (#239). The operator ruled on 2026-11-17 that the trial
   runs on a test domain and the real domain trades from v0.6.0.
-- `ns-hypha mouth-accept <id>` and `mouth-map <id> <side> <freshness>`
-  (`ns_hypha::mouth`, Mycelium 78.128, #109): the union reserve accepts a
+- `ns-embassy mouth-accept <id>` and `mouth-map <id> <side> <freshness>`
+  (`ns_embassy::mouth`, Mycelium 78.128, #109): the union reserve accepts a
   wormhole mouth offered to the domain and maps its side of it.
 - docs/139, the jetstream as volume (scoped, #220, E78): the Möbius current
   has a cross-section, the face is an angle round the ring, crossing the
@@ -91,13 +97,13 @@ change is named here.
   Step 2: the spin ledger is one bivector (`flows::{Mote::spin,
   spin_ledger}`). The per-plane books are its components. A motion carries a
   spin by `turning::carry`, keeping its angles.
-- `ns-hypha apply <var-root>`: each grant the court reads as not applied is
+- `ns-embassy apply <var-root>`: each grant the court reads as not applied is
   listed `(manifest hash, u)` in the `applied` of the next ledger entry,
   signed by the reserve at the world's beat (`refound::{ledger_frame,
   post_ledger}` take the list). It is for Mycelium's grant-applied-in-ledger
   fix, which until now refused every growth manifest InFlight.
 - The hypha's uplink and seat sessions dial inside Noise (`Session::with_noise`,
-  `ns_hypha::noise_home`): each home keeps its static key in `noise.key` and
+  `ns_embassy::noise_home`): each home keeps its static key in `noise.key` and
   pins the hyphae in `noise.pins`; an external mind opts in with
   `attach::Client::with_noise` (its key file's directory as its home). They
   were plaintext before. Read: `standing`
@@ -143,7 +149,7 @@ change is named here.
   218→222 completes in about 6 min (it had run past 40).
 - Manifest v2: `pulse::nuclei` gives (protons, neutrons); the manifest posts
   `Nucleus { z: protons, q: neutrons }` (Mycelium's letters, docs/129 §0);
-  `ns-hypha endowment` reads the court's account through the paged
+  `ns-embassy endowment` reads the court's account through the paged
   READ-ENDOWMENT (`read_endowment`, mycelium #332; pin 60c94245), and
   `standing` prints μ per lane. Read on the recut mesh: manifest Sealed, the
   endowment assembled in 2 pages, 1,495 nucleus entries. Manifest v3 (pin
@@ -572,7 +578,7 @@ change is named here.
   served statement and the Concordance's hash against the pinned SDK's and
   signs the hash; the universe is read back after its origin; the
   universe's manifest (its nuclei per Z, `pulse::nuclei_by_z`) is posted
-  under the sitting reserve. `ns_hypha::SPOKEN` declares the acts spoken;
+  under the sitting reserve. `ns_embassy::SPOKEN` declares the acts spoken;
   Mycelium's in-process conformance read passes.
 - No plane is favoured by its index (docs/78, no fill orders): a tilt's
   rounding grains return to the planes that lost most, not the last plane;
@@ -605,7 +611,7 @@ change is named here.
 - Mycelium pinned at `v0.3.0-rc.1` (was `v0.2.0`): `sdk::Kernel` is
   `sdk::Voice`; `HyphaKey::vk_bytes` is `verifying_bytes`;
   `forms::xylarium` is `forms::shares`. A seat's role is Mycelium's opaque
-  tier, and Netstratum names its tiers in `ns_hypha::tiers` (progenitor 0,
+  tier, and Netstratum names its tiers in `ns_embassy::tiers` (progenitor 0,
   ancients 1, steward 2, sovereign 3, the bytes unchanged). Mycelium's task
   addresses change at this release; saved test data carrying old addresses
   is re-founded, never migrated.

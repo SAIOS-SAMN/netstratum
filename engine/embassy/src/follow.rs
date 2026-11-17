@@ -24,7 +24,7 @@
 use crate::census::{self, Census, Step, Stepper};
 use crate::fold::{at_key, at_of, fold, tier_key};
 use crate::line::{decode_entry, FoldLog, FoldMark, TierLine};
-use crate::Uplink;
+use crate::Embassy;
 use cfe::persist::{read_tail, TailCursor};
 use mycelium_sdk::house::challenge::{ChallengeRefusal, Challenged, Finality};
 use std::collections::BTreeMap;
@@ -58,7 +58,7 @@ pub fn people_of(dir: &Path) -> String {
 /// Publish one fold's prefix for replay (78.125 evidence), from the line's
 /// own entries. `Refused(Published)` — upheld before — is answered.
 pub fn publish_fold(
-    up: &Uplink,
+    up: &Embassy,
     key: &ed25519_dalek::SigningKey,
     line: &TierLine,
     mark: &FoldMark,
@@ -91,7 +91,7 @@ pub fn answered(c: &Challenged) -> bool {
 /// first that is not settled. Returns how many entries were archived, and the
 /// first finality read that failed, if one did.
 pub fn prune(
-    up: &Uplink,
+    up: &Embassy,
     line: &mut TierLine,
     log: &FoldLog,
 ) -> io::Result<(usize, Option<String>)> {
@@ -314,7 +314,7 @@ impl Follower {
     /// One round: read every chronicle's new tail, fold what moved, publish
     /// each admitted fold, prune what the court reads settled. An `Err` is
     /// the court not answering: nothing was lost, and the caller backs off.
-    pub fn round(&mut self, up: &Uplink) -> io::Result<Round> {
+    pub fn round(&mut self, up: &Embassy) -> io::Result<Round> {
         let mut round = Round::default();
         let mut cursors = crate::line::Cursors::open(&self.home, "colonies")?;
         let mut line = TierLine::open(&self.home, "colonies")?;

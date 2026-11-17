@@ -6,7 +6,7 @@ license.workspace = true
 description = "netstratum's words stated in the fleet's tongue: the translator from solver programs to mycelium rule elements (docs/60 D10b)"
 
 [dependencies]
-# The same pinned release ns-hypha speaks through (the root Cargo.toml).
+# The same pinned release ns-embassy speaks through (the root Cargo.toml).
 mycelium-sdk.workspace = true
 solver = { path = "../solver" }
 blake3.workspace = true

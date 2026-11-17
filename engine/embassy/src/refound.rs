@@ -23,7 +23,7 @@
 //!
 //! The house runs it itself (`House::tend`): when the court refuses its acts as
 //! an unknown domain (the recut), it re-founds once for the new origin epoch.
-//! `ns-hypha refound` runs the same steps by hand.
+//! `ns-embassy refound` runs the same steps by hand.
 //!
 //! The house and the conductor meet only through files beside the worlds: the
 //! conductor writes the gates to map at their hubs' places (`gates-map.bin`),

@@ -1,25 +1,25 @@
-//! `ns-hypha` — Netstratum on a Mycelium hypha.
+//! `ns-embassy` — Netstratum on a Mycelium hypha.
 //!
-//!   ns-hypha laws                       the court's law register
-//!   ns-hypha lexicon                    Netstratum's terms against the server's
-//!   ns-hypha probe                      a lawful and an unlawful transition, read by both
-//!   ns-hypha census <world-dir> [--last N] [--send]
+//!   ns-embassy laws                       the court's law register
+//!   ns-embassy lexicon                    Netstratum's terms against the server's
+//!   ns-embassy probe                      a lawful and an unlawful transition, read by both
+//!   ns-embassy census <world-dir> [--last N] [--send]
 //!                                       fold a people's chronicle; --send puts it to the court
-//!   ns-hypha found                      found Netstratum's domain on the court (once)
-//!   ns-hypha reserve <tier>             designate one of the domain's tiers its reserve (in trust)
-//!   ns-hypha originate [<var-root>]     state the universe's origin once: its Big Bang, its torus
-//!   ns-hypha standing                   the domain's reserve as the court reads it: the
+//!   ns-embassy found                      found Netstratum's domain on the court (once)
+//!   ns-embassy reserve <tier>             designate one of the domain's tiers its reserve (in trust)
+//!   ns-embassy originate [<var-root>]     state the universe's origin once: its Big Bang, its torus
+//!   ns-embassy standing                   the domain's reserve as the court reads it: the
 //!                                       tier sitting, any pending, its μ per lane
-//!   ns-hypha endowment                  the court's account for the domain (ACT_DOMAIN 18):
+//!   ns-embassy endowment                  the court's account for the domain (ACT_DOMAIN 18):
 //!                                       each grant's μ per lane, and the nuclei granted
-//!   ns-hypha refound [<var-root>]       after the fleet's recut: found, originate, reserve union,
+//!   ns-embassy refound [<var-root>]       after the fleet's recut: found, originate, reserve union,
 //!                                       the first ledger entry; then the house maps the gates
-//!   ns-hypha seat [--every S] [--key F] [--worlds D] Netstratum's client kernel on the fleet: pull, think, file (signed with the house key)
-//!   ns-hypha mark <world-dir>           record a people as folded through its chronicle's end
-//!   ns-hypha epoch <name>               set the hot colonies line aside, restart it at zero
-//!   ns-hypha prune                      archive hot entries whose folds the court reads settled
-//!   ns-hypha publish                    put every provisional hot fold's prefix to replay
-//!   ns-hypha follow <var-root> [--every S] [--rounds N] [--per-round F]
+//!   ns-embassy seat [--every S] [--key F] [--worlds D] Netstratum's client kernel on the fleet: pull, think, file (signed with the house key)
+//!   ns-embassy mark <world-dir>           record a people as folded through its chronicle's end
+//!   ns-embassy epoch <name>               set the hot colonies line aside, restart it at zero
+//!   ns-embassy prune                      archive hot entries whose folds the court reads settled
+//!   ns-embassy publish                    put every provisional hot fold's prefix to replay
+//!   ns-embassy follow <var-root> [--every S] [--rounds N] [--per-round F]
 //!                                       tail a universe's chronicles and fold them at play rate
 //!
 //! `census --send` then publishes the folds it had admitted (`--no-publish`
@@ -35,10 +35,10 @@
 //! `--home dir` (default var/uplink). Only `found`, `reserve`, `originate`, `refound` and `census --send` write
 //! anything on the court; every other command is a reading.
 
-use ns_hypha::census::{self, grains};
-use ns_hypha::fold::{fold, tier_key};
-use ns_hypha::line::{Cursors, FoldLog, FoldMark, TierLine};
-use ns_hypha::{laws_of, probe, Uplink};
+use ns_embassy::census::{self, grains};
+use ns_embassy::fold::{fold, tier_key};
+use ns_embassy::line::{Cursors, FoldLog, FoldMark, TierLine};
+use ns_embassy::{laws_of, probe, Embassy};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -63,17 +63,17 @@ fn main() -> ExitCode {
     // Every command from here speaks to a hypha, and there is no default court.
     let Some(at) = named else {
         eprintln!(
-            "ns-hypha: name the hypha with --at host:port (or NS_HYPHA); there is no default court"
+            "ns-embassy: name the hypha with --at host:port (or NS_HYPHA); there is no default court"
         );
         return ExitCode::from(2);
     };
     if cmd == Some("seat") {
         return seat_cmd(&args, &at, &home);
     }
-    let up = match Uplink::open(&at, &home) {
+    let up = match Embassy::open(&at, &home) {
         Ok(u) => u,
         Err(e) => {
-            eprintln!("ns-hypha: cannot open a session to {at}: {e}");
+            eprintln!("ns-embassy: cannot open a session to {at}: {e}");
             return ExitCode::from(2);
         }
     };
@@ -96,7 +96,7 @@ fn main() -> ExitCode {
                 ExitCode::SUCCESS
             }
             Err(e) => {
-                eprintln!("ns-hypha: the register was not read: {e}");
+                eprintln!("ns-embassy: the register was not read: {e}");
                 ExitCode::from(1)
             }
         },
@@ -114,7 +114,7 @@ fn main() -> ExitCode {
                     ExitCode::from(1)
                 }
                 Err(e) => {
-                    eprintln!("ns-hypha: the lexicon was not read: {e}");
+                    eprintln!("ns-embassy: the lexicon was not read: {e}");
                     ExitCode::from(1)
                 }
             }
@@ -168,7 +168,7 @@ fn main() -> ExitCode {
                 ExitCode::SUCCESS
             }
             Err(e) => {
-                eprintln!("ns-hypha: the domain was not founded: {e}");
+                eprintln!("ns-embassy: the domain was not founded: {e}");
                 ExitCode::from(1)
             }
         },
@@ -184,7 +184,7 @@ fn main() -> ExitCode {
             {
                 Ok(l) => l,
                 Err(e) => {
-                    eprintln!("ns-hypha: {root}'s universe ledger did not read: {e:?}");
+                    eprintln!("ns-embassy: {root}'s universe ledger did not read: {e:?}");
                     return ExitCode::from(1);
                 }
             };
@@ -194,14 +194,14 @@ fn main() -> ExitCode {
                 .find(|r| matches!(r.event(), cfe::dop::ClosureEvent::UniverseFounded { .. }))
                 .map(|r| r.own().0)
             else {
-                eprintln!("ns-hypha: {root} has no Big Bang on its universe ledger");
+                eprintln!("ns-embassy: {root} has no Big Bang on its universe ledger");
                 return ExitCode::from(1);
             };
             // Era 1: the closed sphere, its radius the bell's reach.
-            let radius = match ns_hypha::fold::universe_radius(Path::new(&root)) {
+            let radius = match ns_embassy::fold::universe_radius(Path::new(&root)) {
                 Ok(r) => r,
                 Err(e) => {
-                    eprintln!("ns-hypha: {root}'s radius did not read: {e}");
+                    eprintln!("ns-embassy: {root}'s radius did not read: {e}");
                     return ExitCode::from(1);
                 }
             };
@@ -211,14 +211,14 @@ fn main() -> ExitCode {
                     ExitCode::SUCCESS
                 }
                 Err(e) => {
-                    eprintln!("ns-hypha: the origin was not recorded: {e}");
+                    eprintln!("ns-embassy: the origin was not recorded: {e}");
                     ExitCode::from(1)
                 }
             }
         }
         Some("reserve") => {
             let Some(tier) = args.get(2) else {
-                eprintln!("usage: ns-hypha reserve <tier>");
+                eprintln!("usage: ns-embassy reserve <tier>");
                 return ExitCode::from(2);
             };
             match up.designate_reserve(&home, tier) {
@@ -227,7 +227,7 @@ fn main() -> ExitCode {
                     ExitCode::SUCCESS
                 }
                 Err(e) => {
-                    eprintln!("ns-hypha: the reserve was not designated: {e}");
+                    eprintln!("ns-embassy: the reserve was not designated: {e}");
                     ExitCode::from(1)
                 }
             }
@@ -245,7 +245,7 @@ fn main() -> ExitCode {
         Some("follow") => follow_cmd(&up, &args, &home),
         Some("mark") => mark_cmd(&args, &home),
         _ => {
-            eprintln!("usage: ns-hypha laws|lexicon|probe|found|apply <var-root>|mouth-accept <id>|mouth-map <id> <side> <freshness>|sign-take <draft-hex-file>|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
+            eprintln!("usage: ns-embassy laws|lexicon|probe|found|apply <var-root>|mouth-accept <id>|mouth-map <id> <side> <freshness>|sign-take <draft-hex-file>|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
             ExitCode::from(2)
         }
     }
@@ -258,12 +258,12 @@ fn main() -> ExitCode {
 /// it has earned and granted per lane, each of this domain's grants (its
 /// manifest, its μ per lane, founding or growth, applied), and the nuclei the
 /// universe holds by them, read back as the court states them.
-fn endowment_cmd(up: &Uplink, home: &Path) -> ExitCode {
-    use ns_hypha::mycelium_sdk::house::read_endowment;
-    let domain = match ns_hypha::fold::tier_key(home, "domain") {
+fn endowment_cmd(up: &Embassy, home: &Path) -> ExitCode {
+    use ns_embassy::mycelium_sdk::house::read_endowment;
+    let domain = match ns_embassy::fold::tier_key(home, "domain") {
         Ok(k) => k.verifying_key().to_bytes(),
         Err(e) => {
-            eprintln!("ns-hypha: the domain key: {e}");
+            eprintln!("ns-embassy: the domain key: {e}");
             return ExitCode::from(2);
         }
     };
@@ -274,11 +274,11 @@ fn endowment_cmd(up: &Uplink, home: &Path) -> ExitCode {
         pages += 1;
         up.session().speak(ask).ok()
     }) else {
-        eprintln!("ns-hypha: the endowment did not assemble ({pages} pages asked)");
+        eprintln!("ns-embassy: the endowment did not assemble ({pages} pages asked)");
         return ExitCode::from(1);
     };
     println!("endowment read in {pages} pages");
-    let lanes = |m: &ns_hypha::mycelium_sdk::house::GrantRead| {
+    let lanes = |m: &ns_embassy::mycelium_sdk::house::GrantRead| {
         m.mu.lanes()
             .iter()
             .map(ToString::to_string)
@@ -314,21 +314,21 @@ fn endowment_cmd(up: &Uplink, home: &Path) -> ExitCode {
 /// The domain's grants applied: each grant the court reads as not applied,
 /// listed `(manifest hash, u)` in the `applied` of the next ledger entry,
 /// signed by the reserve at the world's beat `u` (its crossing still).
-fn apply_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
-    use ns_hypha::mycelium_sdk::house::read_endowment;
+fn apply_cmd(up: &Embassy, args: &[String], home: &Path) -> ExitCode {
+    use ns_embassy::mycelium_sdk::house::read_endowment;
     let Some(root) = args.get(2).filter(|a| !a.starts_with("--")) else {
-        eprintln!("usage: ns-hypha apply <var-root>");
+        eprintln!("usage: ns-embassy apply <var-root>");
         return ExitCode::from(2);
     };
-    let domain = match ns_hypha::fold::tier_key(home, "domain") {
+    let domain = match ns_embassy::fold::tier_key(home, "domain") {
         Ok(k) => k.verifying_key().to_bytes(),
         Err(e) => {
-            eprintln!("ns-hypha: the domain key: {e}");
+            eprintln!("ns-embassy: the domain key: {e}");
             return ExitCode::from(2);
         }
     };
     let Some(r) = read_endowment(domain, |ask| up.session().speak(ask).ok()) else {
-        eprintln!("ns-hypha: the endowment did not assemble");
+        eprintln!("ns-embassy: the endowment did not assemble");
         return ExitCode::from(1);
     };
     let u: u64 = std::fs::read_to_string(Path::new(root).join("conductor.beat"))
@@ -349,7 +349,7 @@ fn apply_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
         let id: String = m.iter().take(4).map(|b| format!("{b:02x}")).collect();
         println!("applying grant {id} at u {u}");
     }
-    match ns_hypha::refound::post_ledger(up.session(), home, Path::new(root), u, applied) {
+    match ns_embassy::refound::post_ledger(up.session(), home, Path::new(root), u, applied) {
         Ok(line) => {
             println!("{line}");
             match line.starts_with("LEDGER sealed") {
@@ -358,7 +358,7 @@ fn apply_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
             }
         }
         Err(e) => {
-            eprintln!("ns-hypha: the ledger entry was not posted: {e}");
+            eprintln!("ns-embassy: the ledger entry was not posted: {e}");
             ExitCode::from(1)
         }
     }
@@ -366,12 +366,12 @@ fn apply_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
 
 /// A wormhole mouth (Mycelium 78.128, #109): accept the mouth `id` offered
 /// to this domain's reserve, or map this domain's side of it.
-fn mouth_cmd(up: &Uplink, args: &[String], home: &Path, map: bool) -> ExitCode {
+fn mouth_cmd(up: &Embassy, args: &[String], home: &Path, map: bool) -> ExitCode {
     let usage = || {
-        eprintln!("usage: ns-hypha mouth-accept <id hex> | mouth-map <id hex> <side> <freshness>");
+        eprintln!("usage: ns-embassy mouth-accept <id hex> | mouth-map <id hex> <side> <freshness>");
         ExitCode::from(2)
     };
-    let Some(id) = args.get(2).and_then(|h| ns_hypha::mouth::id_of(h).ok()) else {
+    let Some(id) = args.get(2).and_then(|h| ns_embassy::mouth::id_of(h).ok()) else {
         return usage();
     };
     let said = if map {
@@ -381,9 +381,9 @@ fn mouth_cmd(up: &Uplink, args: &[String], home: &Path, map: bool) -> ExitCode {
         ) else {
             return usage();
         };
-        ns_hypha::mouth::map(up.session(), home, id, side, fresh).map(|m| format!("{m:?}"))
+        ns_embassy::mouth::map(up.session(), home, id, side, fresh).map(|m| format!("{m:?}"))
     } else {
-        ns_hypha::mouth::accept(up.session(), home, id).map(|h| format!("{h:?}"))
+        ns_embassy::mouth::accept(up.session(), home, id).map(|h| format!("{h:?}"))
     };
     match said {
         Ok(line) => {
@@ -391,7 +391,7 @@ fn mouth_cmd(up: &Uplink, args: &[String], home: &Path, map: bool) -> ExitCode {
             ExitCode::SUCCESS
         }
         Err(e) => {
-            eprintln!("ns-hypha: the mouth act was not sent: {e}");
+            eprintln!("ns-embassy: the mouth act was not sent: {e}");
             ExitCode::from(1)
         }
     }
@@ -401,21 +401,21 @@ fn mouth_cmd(up: &Uplink, args: &[String], home: &Path, map: bool) -> ExitCode {
 /// draft's hex); prints the taken nuclei and the signature, sends nothing.
 fn sign_take_cmd(args: &[String], home: &Path) -> ExitCode {
     let Some(path) = args.get(2).filter(|a| !a.starts_with("--")) else {
-        eprintln!("usage: ns-hypha sign-take <draft-hex-file>");
+        eprintln!("usage: ns-embassy sign-take <draft-hex-file>");
         return ExitCode::from(2);
     };
     let hex = match std::fs::read_to_string(path) {
         Ok(h) => h.trim().to_string(),
         Err(e) => {
-            eprintln!("ns-hypha: the draft did not read: {e}");
+            eprintln!("ns-embassy: the draft did not read: {e}");
             return ExitCode::from(2);
         }
     };
-    let Some(draft) = ns_hypha::attach_unhex(&hex) else {
-        eprintln!("ns-hypha: the draft is not hex");
+    let Some(draft) = ns_embassy::attach_unhex(&hex) else {
+        eprintln!("ns-embassy: the draft is not hex");
         return ExitCode::from(2);
     };
-    match ns_hypha::mouth::sign_take(home, &draft) {
+    match ns_embassy::mouth::sign_take(home, &draft) {
         Ok((taken, sig)) => {
             for (n, c) in &taken {
                 println!(
@@ -433,23 +433,23 @@ fn sign_take_cmd(args: &[String], home: &Path) -> ExitCode {
             ExitCode::SUCCESS
         }
         Err(e) => {
-            eprintln!("ns-hypha: the take was not signed: {e}");
+            eprintln!("ns-embassy: the take was not signed: {e}");
             ExitCode::from(1)
         }
     }
 }
 
-fn standing_cmd(up: &Uplink, home: &Path) -> ExitCode {
+fn standing_cmd(up: &Embassy, home: &Path) -> ExitCode {
     let hex = |k: &[u8; 32]| {
         k.iter()
             .take(4)
             .map(|b| format!("{b:02x}"))
             .collect::<String>()
     };
-    let domain = match ns_hypha::fold::tier_key(home, "domain") {
+    let domain = match ns_embassy::fold::tier_key(home, "domain") {
         Ok(k) => k.verifying_key().to_bytes(),
         Err(e) => {
-            eprintln!("ns-hypha: the domain key: {e}");
+            eprintln!("ns-embassy: the domain key: {e}");
             return ExitCode::from(2);
         }
     };
@@ -457,7 +457,7 @@ fn standing_cmd(up: &Uplink, home: &Path) -> ExitCode {
         ["union", "colonies"]
             .iter()
             .find(|t| {
-                ns_hypha::fold::tier_key(home, t)
+                ns_embassy::fold::tier_key(home, t)
                     .is_ok_and(|key| key.verifying_key().to_bytes() == *k)
             })
             .map_or_else(|| hex(k), |t| format!("{t} ({})", hex(k)))
@@ -479,19 +479,19 @@ fn standing_cmd(up: &Uplink, home: &Path) -> ExitCode {
             ExitCode::SUCCESS
         }
         Err(e) => {
-            eprintln!("ns-hypha: the reserve was not read: {e}");
+            eprintln!("ns-embassy: the reserve was not read: {e}");
             ExitCode::from(1)
         }
     }
 }
 
 fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
-    let people = ns_hypha::follow::people_of(dir);
+    let people = ns_embassy::follow::people_of(dir);
     match cfe::persist::load(&dir.join("chronicle.tlv")) {
         Ok(c) => Ok((people, c)),
         Err(e) => {
             eprintln!(
-                "ns-hypha: {}: the chronicle did not load: {e:?}",
+                "ns-embassy: {}: the chronicle did not load: {e:?}",
                 dir.display()
             );
             Err(ExitCode::from(1))
@@ -501,8 +501,8 @@ fn load(dir: &Path) -> Result<(String, cfe::vrp::Chronicle), ExitCode> {
 
 /// Publish every hot fold the court still reads Provisional: its entries
 /// streamed for replay, so it is upheld before anyone can demand it.
-fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
-    use ns_hypha::mycelium_sdk::house::challenge::Finality;
+fn publish_cmd(up: &Embassy, home: &Path) -> ExitCode {
+    use ns_embassy::mycelium_sdk::house::challenge::Finality;
     let (line, log, key) = match TierLine::open(home, "colonies").and_then(|l| {
         Ok((
             l,
@@ -512,7 +512,7 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
     }) {
         Ok(x) => x,
         Err(e) => {
-            eprintln!("ns-hypha: the colonies line: {e}");
+            eprintln!("ns-embassy: the colonies line: {e}");
             return ExitCode::from(2);
         }
     };
@@ -523,7 +523,7 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
         .filter(|f| f.first >= line.offset && f.first + f.count <= line.total())
     {
         let span = format!("[{}, {})", f.first, f.first + f.count);
-        match ns_hypha::fold::at_of(&f.at).map(|at| up.finality(at)) {
+        match ns_embassy::fold::at_of(&f.at).map(|at| up.finality(at)) {
             Some(Ok((Finality::Provisional { .. }, _))) => {}
             Some(Ok((other, _))) => {
                 println!("  fold at entries {span}: {other:?}; nothing to publish");
@@ -540,8 +540,8 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
                 continue;
             }
         }
-        match ns_hypha::follow::publish_fold(up, &key, &line, f) {
-            Ok(c) if ns_hypha::follow::answered(&c) => {
+        match ns_embassy::follow::publish_fold(up, &key, &line, f) {
+            Ok(c) if ns_embassy::follow::answered(&c) => {
                 println!("  fold at entries {span}: answered — {c:?}")
             }
             Ok(c) => {
@@ -561,22 +561,22 @@ fn publish_cmd(up: &Uplink, home: &Path) -> ExitCode {
     }
 }
 
-/// Prune by finality (see `ns_hypha::follow::prune`).
-fn prune_cmd(up: &Uplink, home: &Path) -> ExitCode {
+/// Prune by finality (see `ns_embassy::follow::prune`).
+fn prune_cmd(up: &Embassy, home: &Path) -> ExitCode {
     let opened =
         TierLine::open(home, "colonies").and_then(|l| Ok((l, FoldLog::open(home, "colonies")?)));
     let (mut line, log) = match opened {
         Ok(x) => x,
         Err(e) => {
-            eprintln!("ns-hypha: the colonies line: {e}");
+            eprintln!("ns-embassy: the colonies line: {e}");
             return ExitCode::from(2);
         }
     };
-    match ns_hypha::follow::prune(up, &mut line, &log) {
+    match ns_embassy::follow::prune(up, &mut line, &log) {
         Ok((n, unread)) => {
             if let Some(e) = unread {
                 eprintln!(
-                    "ns-hypha: a finality was not read ({e}); pruned only what was read settled"
+                    "ns-embassy: a finality was not read ({e}); pruned only what was read settled"
                 );
             }
             println!(
@@ -587,18 +587,18 @@ fn prune_cmd(up: &Uplink, home: &Path) -> ExitCode {
             ExitCode::SUCCESS
         }
         Err(e) => {
-            eprintln!("ns-hypha: the prune did not land: {e}");
+            eprintln!("ns-embassy: the prune did not land: {e}");
             ExitCode::from(1)
         }
     }
 }
 
 /// Follow a universe: tail every people's chronicle and fold its new
-/// receipts onto the court at play rate (see `ns_hypha::follow`). A court
+/// receipts onto the court at play rate (see `ns_embassy::follow`). A court
 /// that does not answer backs the rounds off, doubling to ten minutes.
-fn follow_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
+fn follow_cmd(up: &Embassy, args: &[String], home: &Path) -> ExitCode {
     let Some(root) = args.get(2).filter(|a| !a.starts_with("--")) else {
-        eprintln!("usage: ns-hypha follow <var-root> [--every SECS] [--rounds N]");
+        eprintln!("usage: ns-embassy follow <var-root> [--every SECS] [--rounds N]");
         return ExitCode::from(2);
     };
     let every: u64 = flag(args, "--every")
@@ -607,10 +607,10 @@ fn follow_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
         .max(1);
     let rounds: Option<u64> = flag(args, "--rounds").and_then(|n| n.parse().ok());
     let per_round: Option<usize> = flag(args, "--per-round").and_then(|n| n.parse().ok());
-    let mut follower = match ns_hypha::follow::Follower::new(Path::new(root), home) {
+    let mut follower = match ns_embassy::follow::Follower::new(Path::new(root), home) {
         Ok(f) => f,
         Err(e) => {
-            eprintln!("ns-hypha: the follower did not open: {e}");
+            eprintln!("ns-embassy: the follower did not open: {e}");
             return ExitCode::from(2);
         }
     };
@@ -650,7 +650,7 @@ fn follow_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
 /// line at zero; every fold before reads PreLine).
 fn epoch_cmd(args: &[String], home: &Path) -> ExitCode {
     let Some(name) = args.get(2).filter(|a| !a.starts_with("--")) else {
-        eprintln!("usage: ns-hypha epoch <name>");
+        eprintln!("usage: ns-embassy epoch <name>");
         return ExitCode::from(2);
     };
     match TierLine::open(home, "colonies").and_then(|mut l| {
@@ -663,7 +663,7 @@ fn epoch_cmd(args: &[String], home: &Path) -> ExitCode {
             ExitCode::SUCCESS
         }
         Err(e) => {
-            eprintln!("ns-hypha: the epoch was not started: {e}");
+            eprintln!("ns-embassy: the epoch was not started: {e}");
             ExitCode::from(1)
         }
     }
@@ -673,7 +673,7 @@ fn epoch_cmd(args: &[String], home: &Path) -> ExitCode {
 /// folding it — for history already netted before the cursor existed.
 fn mark_cmd(args: &[String], home: &Path) -> ExitCode {
     let Some(dir) = args.get(2).filter(|a| !a.starts_with("--")) else {
-        eprintln!("usage: ns-hypha mark <world-dir>");
+        eprintln!("usage: ns-embassy mark <world-dir>");
         return ExitCode::from(2);
     };
     let (people, chronicle) = match load(Path::new(dir)) {
@@ -681,7 +681,7 @@ fn mark_cmd(args: &[String], home: &Path) -> ExitCode {
         Err(code) => return code,
     };
     let Some(last) = chronicle.receipts().last() else {
-        eprintln!("ns-hypha: {people}: an empty chronicle has nothing to mark");
+        eprintln!("ns-embassy: {people}: an empty chronicle has nothing to mark");
         return ExitCode::from(1);
     };
     let n = chronicle.receipts().len();
@@ -691,15 +691,15 @@ fn mark_cmd(args: &[String], home: &Path) -> ExitCode {
             ExitCode::SUCCESS
         }
         Err(e) => {
-            eprintln!("ns-hypha: the colonies cursors: {e}");
+            eprintln!("ns-embassy: the colonies cursors: {e}");
             ExitCode::from(2)
         }
     }
 }
 
-fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
+fn census_cmd(args: &[String], up: Option<&Embassy>, home: &Path) -> ExitCode {
     let Some(dir) = args.get(2).filter(|a| !a.starts_with("--")) else {
-        eprintln!("usage: ns-hypha census <world-dir> [--last N] [--send]");
+        eprintln!("usage: ns-embassy census <world-dir> [--last N] [--send]");
         return ExitCode::from(2);
     };
     let (people, chronicle) = match load(Path::new(dir)) {
@@ -716,7 +716,7 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
     let (mut cursors, mut line, mut folds) = match opened {
         Ok(x) => x,
         Err(e) => {
-            eprintln!("ns-hypha: the colonies line: {e}");
+            eprintln!("ns-embassy: the colonies line: {e}");
             return ExitCode::from(2);
         }
     };
@@ -726,7 +726,7 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
     let from = match cursors.at.get(&people) {
         Some(&(n, last)) => {
             if n > len || n == 0 || receipts[n - 1].own().0 != last {
-                eprintln!("ns-hypha: {people}: the chronicle no longer holds the receipt its cursor names (receipt {n}); refused");
+                eprintln!("ns-embassy: {people}: the chronicle no longer holds the receipt its cursor names (receipt {n}); refused");
                 return ExitCode::from(1);
             }
             n
@@ -745,7 +745,7 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
     let c = match census::take(&people, &chronicle, from, len) {
         Ok(c) => c,
         Err(e) => {
-            eprintln!("ns-hypha: {people}: no census: {e:?}");
+            eprintln!("ns-embassy: {people}: no census: {e:?}");
             return ExitCode::from(1);
         }
     };
@@ -776,7 +776,7 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
     let key = match tier_key(home, "colonies") {
         Ok(k) => k,
         Err(e) => {
-            eprintln!("ns-hypha: the colonies tier key: {e}");
+            eprintln!("ns-embassy: the colonies tier key: {e}");
             return ExitCode::from(2);
         }
     };
@@ -821,8 +821,8 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
             continue;
         }
         // Carried in the sitting reserve's fold (v0.4.0, 78.138).
-        let carried = ns_hypha::fold::tier_key(home, "union").and_then(|reserve| {
-            let domain = ns_hypha::fold::tier_key(home, "domain")?
+        let carried = ns_embassy::fold::tier_key(home, "union").and_then(|reserve| {
+            let domain = ns_embassy::fold::tier_key(home, "domain")?
                 .verifying_key()
                 .to_bytes();
             up.carry_fold(domain, &reserve, &signed)
@@ -830,7 +830,7 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
         match carried {
             Ok(Ok(at)) => {
                 let mark = FoldMark {
-                    at: ns_hypha::fold::at_key(&at),
+                    at: ns_embassy::fold::at_key(&at),
                     first: line.total(),
                     count: batch.len() as u64,
                 };
@@ -874,7 +874,7 @@ fn census_cmd(args: &[String], up: Option<&Uplink>, home: &Path) -> ExitCode {
     }
 }
 
-/// The seat (`ns_hypha::seat`): Netstratum's one client kernel on the fleet,
+/// The seat (`ns_embassy::seat`): Netstratum's one client kernel on the fleet,
 /// one task a stroke, a stroke every `--every` seconds (default 2), its tally
 /// printed every 20 strokes. Runs until stopped.
 fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
@@ -893,9 +893,9 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
         .collect();
     let mut seats = Vec::new();
     for addr in &hyphae {
-        match ns_hypha::seat::Seat::open_as(addr, home, &key) {
+        match ns_embassy::seat::Seat::open_as(addr, home, &key) {
             Ok(s) => seats.push((addr.clone(), s)),
-            Err(e) => eprintln!("ns-hypha: the seat did not open at {addr}: {e}"),
+            Err(e) => eprintln!("ns-embassy: the seat did not open at {addr}: {e}"),
         }
     }
     if seats.is_empty() {
@@ -910,10 +910,10 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     let worlds = std::path::PathBuf::from(
         flag(args, "--worlds").unwrap_or_else(|| "var-g2/worlds".to_string()),
     );
-    let mut house = match ns_hypha::house::House::open(home, &worlds) {
+    let mut house = match ns_embassy::house::House::open(home, &worlds) {
         Ok(h) => Some(h),
         Err(e) => {
-            eprintln!("ns-hypha: the house did not open: {e}");
+            eprintln!("ns-embassy: the house did not open: {e}");
             None
         }
     };
@@ -922,8 +922,8 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
     // faster than its budget) is left to rest, doubling each time it defers
     // again (to 64 strokes) and reset when a stroke completes.
     let mut rest: Vec<(u64, u64)> = vec![(0, 0); seats.len()];
-    let mut final_point: Option<ns_hypha::mycelium_sdk::house::tuniversal::TPoint> = None;
-    let mut written: Option<ns_hypha::mycelium_sdk::house::tuniversal::TPoint> = None;
+    let mut final_point: Option<ns_embassy::mycelium_sdk::house::tuniversal::TPoint> = None;
+    let mut written: Option<ns_embassy::mycelium_sdk::house::tuniversal::TPoint> = None;
     loop {
         let at = (strokes as usize) % seats.len();
         let (until, backoff) = rest[at];
@@ -997,15 +997,15 @@ fn seat_cmd(args: &[String], at: &str, home: &Path) -> ExitCode {
 
 /// The RE-founding (docs/67, docs/72 A4) by hand: the same steps the house
 /// runs itself when the court no longer knows the domain
-/// (`ns_hypha::refound::refound`): the domain, its origin, its reserve, its
+/// (`ns_embassy::refound::refound`): the domain, its origin, its reserve, its
 /// first ledger entry, then the marker. Keys are loaded, never minted.
-fn refound_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
+fn refound_cmd(up: &Embassy, args: &[String], home: &Path) -> ExitCode {
     let root = args
         .get(2)
         .filter(|a| !a.starts_with("--"))
         .cloned()
         .unwrap_or_else(|| "var-g2".into());
-    match ns_hypha::refound::refound(up.session(), home, Path::new(&root)) {
+    match ns_embassy::refound::refound(up.session(), home, Path::new(&root)) {
         Ok((sealed, said)) => {
             for line in said {
                 println!("{line}");
@@ -1017,7 +1017,7 @@ fn refound_cmd(up: &Uplink, args: &[String], home: &Path) -> ExitCode {
             }
         }
         Err(e) => {
-            eprintln!("ns-hypha: the re-founding stops: {e} (a missing key is never minted: a new key is a new domain)");
+            eprintln!("ns-embassy: the re-founding stops: {e} (a missing key is never minted: a new key is a new domain)");
             ExitCode::from(1)
         }
     }

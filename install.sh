@@ -178,7 +178,7 @@ preflight() {
 ensure_build() {
   [ "$do_build" -eq 1 ] || return 0
   step "Building the workspace binaries, release (the first run compiles from scratch)"
-  ( cd "$REPO" && cargo build --release -p conductor -p netstratum-cli -p ns-hypha )
+  ( cd "$REPO" && cargo build --release -p conductor -p netstratum-cli -p ns-embassy )
 }
 
 # The conductor binary. Prints the path and nothing else.

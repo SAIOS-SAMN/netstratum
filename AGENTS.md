@@ -12,7 +12,8 @@ receipt in an append-only chronicle) and a universe model (era 1, the
 `conductor` crate: a universe founded from a table of elements, whose
 galaxies, stars and worlds form by flows of matter). It connects to the
 [Mycelium](https://github.com/SAIOS-SAMN/mycelium) network through the
-`hypha` and `attach` crates. Terms such as bell, throat or firmament are
+`embassy` (`ns-embassy`) and `attach` crates; Mycelium's own servers are
+its hyphas. Terms such as bell, throat or firmament are
 defined in [GLOSSARY.md](GLOSSARY.md), not by their everyday meaning.
 
 ## How to find things

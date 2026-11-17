@@ -139,7 +139,7 @@ Eight base axes, in four planes:
 - **The court** (docs/113): only the crossings at the universal core's
   vertex are stated as Mycelium transitions, under LAW-PASSAGE.
 - **The hypha's resources**: a universe's manifest, its nuclei per Z,
-  granted by the endowment (built in `ns-hypha::refound`).
+  granted by the endowment (built in `ns-embassy::refound`).
 
 ### F10. One seed, laws that favour no axis — ruled (2026-11-04)
 
@@ -226,7 +226,7 @@ partition); the riding state `q`; R's plane as a plane; frames per axis.
 | `enclosure::{route, place}` | routes through the throats (F7) | follows |
 | `chem::*` | atoms from S¹¹ windings | follows; two counts of open ends (`chem::unpaired`, `L_e`) agree at 282 of 1495 weights (docs/115) |
 | `horizons::read` | the planes' horizons on the orthonormal basis | superseded by F2 (docs/117 §10) |
-| `ns-hypha::refound`, the manifest | the court and the endowment (F9) | follows |
+| `ns-embassy::refound`, the manifest | the court and the endowment (F9) | follows |
 | the sensorium | — | not built |
 | life, the peoples and the economy | docs/89 B1–B8: life reads its own physics, worlds receive no starlight after birth, the era-0 box under the economy, two laws for one thing | per docs/89 (not re-read here) |
 

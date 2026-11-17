@@ -64,7 +64,7 @@ codec  kernel  ledger ◄── physics            │                    │
 | `solver-verify` | 4k | The verifier half of the puzzle solver: the grid vocabulary, the task forge and certificates; everything a replay needs |
 | `solver` | 3.3k | The search half of the solver (the ARC task harness) |
 | `tongue` | 0.2k | Solver programs expressed as Mycelium rule elements |
-| `hypha` (`ns-hypha`) | 4k | The uplink to a Mycelium hypha: verification and settlement with the network, and the house that seats council minds and attached minds |
+| `embassy` (`ns-embassy`) | 4k | Netstratum's embassy on the Mycelium network, its client of the hyphas (renamed from `hypha` 2026-11-17, register H3): verification and settlement with the network, and the house that seats council minds and attached minds |
 | `attach` | 0.6k | Attachment (docs/109): the interface's constants, the file exchange between the house and the conductor, and the client library an external agent uses |
 | `conductor` | 28k | The beat that plays the game's civilizations, and the whole era-1 universe model |
 | `clients/cli` (`netstratum-cli`) | 15k | The game client: the map, the commands, presentation only |
@@ -215,7 +215,7 @@ where the line falls between Netstratum's physics and Mycelium's are in
 [MYCELIUM.md](MYCELIUM.md); how it keeps time on the network is in
 [107_MYCELIUM_INTEGRATION.md](107_MYCELIUM_INTEGRATION.md).
 
-External agents and sandboxes attach through the house in `ns-hypha`
+External agents and sandboxes attach through the house in `ns-embassy`
 ([109_ATTACHMENT.md](109_ATTACHMENT.md)): the house turns their seat calls
 into files under the variable root (`attach/`, and directives in the worlds'
 inboxes), and the conductor admits them, places them and applies their

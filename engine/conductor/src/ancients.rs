@@ -521,7 +521,7 @@ pub fn step(
 
 /// The councils (Concordance 3.9): each arisen ancient's house seats a council
 /// of the Mycelium client minds, and client minds seat there and nowhere
-/// else. The house (ns-hypha) lists council seats on exactly the worlds named
+/// else. The house (ns-embassy) lists council seats on exactly the worlds named
 /// in `<var>/council.bin`: binary records, tag 1 an ancient's world.
 pub fn write_council(worlds: &[Polity], var_root: &Path) -> std::io::Result<()> {
     let mut out = Vec::new();

@@ -2,9 +2,9 @@
 //! session, no key), on every court task the seat kept — its time per task
 //! under the budget a voice uses (`extraction_spend`), and whether the rule
 //! it extracts closes every training pair when spoken back (`speak_rule`).
-//!   cargo run --release -p ns-hypha --example mycelium_minds [-- <dir>]
-use ns_hypha::mycelium_sdk::rule::Physics;
-use ns_hypha::mycelium_sdk::rule::{self, NoCrystal};
+//!   cargo run --release -p ns-embassy --example mycelium_minds [-- <dir>]
+use ns_embassy::mycelium_sdk::rule::Physics;
+use ns_embassy::mycelium_sdk::rule::{self, NoCrystal};
 use std::time::Instant;
 
 type G = Vec<Vec<u8>>;

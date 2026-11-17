@@ -187,7 +187,7 @@ and each theorem's certificate is something a court reconstructs:
 
 | theorem | what is posted | what a court reconstructs |
 |---|---|---|
-| T1, T2 | each body's coordinate `S:G:T:H:K` (LAW-COORDINATE) and its turning (FORMS-TURNING) | the generator `b` from the motion; one ring of one body as a single-body `Transition` (motion: the rotor of `b·E` about the attractor; admitted by the conformal, momentum and time laws, as `ns_hypha::probe::turn` is) |
+| T1, T2 | each body's coordinate `S:G:T:H:K` (LAW-COORDINATE) and its turning (FORMS-TURNING) | the generator `b` from the motion; one ring of one body as a single-body `Transition` (motion: the rotor of `b·E` about the attractor; admitted by the conformal, momentum and time laws, as `ns_embassy::probe::turn` is) |
 | T3–T6 | the enclosure's holds as the posted bodies' coordinates | the identities, recomputed from the posted state (reconstruction, never replay) |
 | T7 | the before and after states of the range | `Σ w·Δℓ_R = ρ`, a closed path of payments with trivial holonomy |
 

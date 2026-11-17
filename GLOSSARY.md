@@ -137,4 +137,4 @@ and releases are exchanged under the inversion `δ ↦ 1 − δ`.
 | **forge / rung / solve** | The puzzle forge, seeded by the latest receipt; a rung is a difficulty level, and a solve is a verified answer with its certificate. | `engine/solver`, `engine/solver-verify` |
 | **mint** | The creation of new value or a new line, only through a lawful event (e.g. a solve, a cleave). | `engine/cfe`, `engine/kernel` |
 | **bands** | The tiers of peoples: progenitors, sovereigns, stewards, ancients and others. | docs/12, docs/70 |
-| **μ** | The reserve currency earned by court work on the Mycelium network. | `engine/hypha` |
+| **μ** | The reserve currency earned by court work on the Mycelium network. | `engine/embassy` |

@@ -7,7 +7,7 @@
 //! ```
 //!
 //! The key file holds the mind's 32-byte ed25519 seed; the domain is
-//! Netstratum's domain key on that hypha (`ns-hypha` prints it when it founds
+//! Netstratum's domain key on that hypha (`ns-embassy` prints it when it founds
 //! the domain). The key file's directory is the mind's home: its Noise key
 //! (`noise.key`) is minted there and the hypha pinned in `noise.pins`.
 

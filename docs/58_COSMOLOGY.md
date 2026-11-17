@@ -171,7 +171,7 @@ defines it as one that opens the room (creates capacity) rather than appointing.
 ## 7. The universe's matter budget, measured (G2, 2026-10-08)
 
 Every world's census summed by receipt kind
-(`cargo run --release -p ns-hypha --example sinks -- var-g2`), with aperture
+(`cargo run --release -p ns-embassy --example sinks -- var-g2`), with aperture
 legs paired by deal across the universe (`g2_legs`). These are the places
 Netstratum's own physics destroys matter today (amounts in whole units):
 
