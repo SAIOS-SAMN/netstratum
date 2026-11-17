@@ -64,7 +64,7 @@ The terms are a draft bilateral treaty from Xylarium (xylarium-uplink
 
 | Step | What | Milestone, issue |
 |---|---|---|
-| 0 | **The trial, now:** a separate test domain accepts seed 7's mouth and signs a taken motion, so the court's crossing code is read live. The real domain da34b0b5 does not trade until its crossing is physics. | #240 |
+| 0 | **The trial, done 2026-11-17:** the test domain 44ca2f01… accepted seed 7's trial mouth and signed its taken motion, the image of 1 × (Z 1, Q 1). The court **sealed** the traverse at h 7608, with a zero fee. The real domain da34b0b5 does not trade until its crossing is physics. | #240 (closed) |
 | 1 | **The kinds on their own dimensions:** (Z, Q, pattern) with per-plane phases (V1–V3), so inverted nuclei are kinds, not collapses | v0.1.0, #213 |
 | 2 | **Time moves at crossings:** the event reader, with each crossing writing `T ↦ T − 2(H − R)` | v0.3.0, #198, #207 |
 | 3 | **Inbound:** arrivals enter the universal core's throat. The throat's keep formula (taken ≤ released) and its tax are derived. Unread components are held as carried state. | v0.6.0, #109 |
