@@ -3,6 +3,11 @@
 //! written to the var's pulse.bin. The seed is the phrase's hash (the
 //! stand-in phrase where none is given); it orients the founding
 //! (`pulse::orient`). A var that already holds a universe is refused.
+//!
+//! The founding is the cradle's found deed (docs/140, #248). The deployed
+//! universe is held per (count, place) in the cradle's store (`CRADLE_STORE`,
+//! by default `var-cradle`), so a second founding of the same size is a load
+//! and an orientation.
 use conductor::pulse;
 use std::path::Path;
 
@@ -33,22 +38,31 @@ fn main() {
     // The founding distribution from the bounce's nucleons: the grains given,
     // as nuclei.
     let n = grains * pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024);
-    let manifest = pulse::founding(&n);
-    println!("founding — {} nuclides as grains", manifest.len());
+    let phrase = args
+        .get(4)
+        .map_or("netstratum era 1, unfounded stand-in", String::as_str);
+    let seed = *blake3::hash(phrase.as_bytes()).as_bytes();
+    let store = std::env::var("CRADLE_STORE").unwrap_or_else(|_| "var-cradle".into());
+    let g = conductor::polarity::throat_held();
+    let Some(f) = conductor::cradle::found(Some(Path::new(&store)), &n, &g, &seed) else {
+        println!("refused: the founding holds no disc, or its echo carries no ring");
+        return;
+    };
+    let (manifest, u) = (f.table, f.universe);
+    println!(
+        "founding — {} nuclides as grains; the deployment {} (cradle store {store})",
+        manifest.len(),
+        if f.reused {
+            "held, reused"
+        } else {
+            "made and held"
+        }
+    );
     // The isomorphic reading: the founding beside nature's (never imposed).
     if let Some((np, he, h)) = conductor::nuclides::beside_nature(&manifest) {
         let f = |x: &cfe::ratio::Ratio| conductor::reading::sector(x).to_string();
         println!("beside nature — neutrons per proton {} (nature about 1/7), weight-4 mass share {} (about 1/4), hydrogen {} (about 3/4)", f(&np), f(&he), f(&h));
     }
-    let phrase = args
-        .get(4)
-        .map_or("netstratum era 1, unfounded stand-in", String::as_str);
-    let seed = *blake3::hash(phrase.as_bytes()).as_bytes();
-    let Some(mut u) = pulse::deploy(&manifest) else {
-        println!("refused: the founding holds no disc, or its echo carries no ring");
-        return;
-    };
-    pulse::orient(&mut u, &seed);
     let unit = conductor::breath::unit_mass(&u);
     println!(
         "deployed — {} cores; conservation {}; spin {}; lean {:?}",

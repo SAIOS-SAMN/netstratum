@@ -113,6 +113,14 @@ pub fn nuclei(m: &Manifest) -> Vec<((u32, u32), num_bigint::BigInt)> {
 ///   Returns the manifest by nuclide, in grains (whole nuclei however few);
 ///   nucleons conserved exactly.
 pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
+    founding_at(nuclei, &crate::polarity::throat_held())
+}
+
+/// The founding at a place of held share `g` (docs/140 C2, the cradle's
+/// found): the bounce's nucleons, their seeds and their climb read at that
+/// place. The universal core's founding is the throat, `g = ½`
+/// ([`founding`]).
+pub fn founding_at(nuclei: &num_bigint::BigInt, g: &Ratio) -> Manifest {
     use num_bigint::BigInt;
     let zero = BigInt::from(0);
     let grid = nuclei_per_grain() * BigInt::from(1024);
@@ -127,10 +135,9 @@ pub fn founding(nuclei: &num_bigint::BigInt) -> Manifest {
     let seeds = &paired / BigInt::from(2);
     let deuterons = &paired - &seeds * BigInt::from(2);
     let free = &neutrons - &paired + (&protons - &paired);
-    // The founding crosses AT the throat (docs/105 §4): every capture reads
-    // the throat's held share, the fixed point where it holds; no phase.
-    let p0 = crate::polarity::throat_held();
-    let (counts, free) = climb_table(seeds, free, &p0, true);
+    // Every capture reads the place's held share (docs/105 §4: at the
+    // throat, the fixed point where it holds; no phase).
+    let (counts, free) = climb_table(seeds, free, g, true);
     let mut out = Manifest::new();
     for (w, count) in [(1u32, free), (2, deuterons)].into_iter().chain(counts) {
         if count > zero {

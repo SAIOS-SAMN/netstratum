@@ -50,6 +50,14 @@ change is named here.
 
 ### Added
 
+- The cradle's found deed (docs/140 §2 D1, #248): `cradle::found(store,
+  count, g, seed)`, with `pulse::founding_at(count, g)` at any place's held
+  share (the throat's ½ is `pulse::founding`). The deployed universe is
+  held per (count, g) in the cradle's store and reused; each founding
+  orients it by its seed. The `pulse` binary is its caller
+  (`CRADLE_STORE`, default `var-cradle`). Witness: a held founding equals a
+  fresh one and is reused, the seed does not key the deployment, and
+  nucleons are conserved.
 - docs/140, the cradle (#246): the progenitor's machine for founding,
   extending and sealing universes. One function `found(count, place, seed)`
   at any singularity, extension by receipted deeds, and the era's seal. It
