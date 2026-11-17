@@ -27,16 +27,19 @@ traded first on a separate test domain (#240). The real domain trades from
 v0.6.0, by the trajectory below.
 
 **Next, in order**
-1. **#246, the cradle** (docs/140): the progenitor's machine for found,
-   extend and seal. It takes in #233. Its steps:
-   1. **#248:** `found(count, place, seed)`, with the table held per
-      (count, g);
-   2. **#249:** the test domain as one deed;
-   3. **#250:** extend, a live universe receiving matter by a receipted
-      deed (growth now, inbound crossings after #109);
-   4. **#251:** seal over the fold;
-   5. **#252:** founding at a galactic core (V6), where the table's reach
-      can grow.
+1. **#246, the cradle** (docs/140): the progenitor's machine.
+   - **Built:**
+     - #248 `found`, the deployment held per (count, g);
+     - #249 the test domain as one deed (`ns-embassy found-test`);
+     - #250 `extend`, matter received by a receipted deed;
+     - #251 `seal`.
+   - **Open:**
+     - #250's live sources: growth when the court grants it, crossings
+       with #109;
+     - #252, the per-core read, blocked on #7 (no galaxy core forms yet).
+       Its finding: a core's own table depends only on its count.
+   - **#233:** the founding's first deployment still costs about 15
+     minutes, in the all-pairs filter.
 2. **#213, the table** (docs/97 §15):
    - V13, the universal core read on the 1708 table against the old one;
    - V1–V3, the kinds on (Z, Q, pattern), whole members with per-plane
