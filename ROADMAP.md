@@ -27,9 +27,10 @@ traded first on a separate test domain (#240). The real domain trades from
 v0.6.0, by the trajectory below.
 
 **Next, in order**
-1. **#233, the founding's cost.** The founding takes about 15 minutes at
-   2^40. `cascade`'s filter is all pairs over shells. Count its work, then
-   restate it on ranges if the derivation allows.
+1. **#246, the cradle** (docs/140): the progenitor's machine for found,
+   extend and seal. A table is held per (count, place), and a founding can
+   happen at any singularity. It takes in #233 (the founding's cost: the
+   table is computed once, and the all-pairs filter is derived separately).
 2. **#213, the table** (docs/97 §15):
    - V13, the universal core read on the 1708 table against the old one;
    - V1–V3, the kinds on (Z, Q, pattern), whole members with per-plane

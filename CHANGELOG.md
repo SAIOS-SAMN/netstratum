@@ -50,6 +50,10 @@ change is named here.
 
 ### Added
 
+- docs/140, the cradle (#246): the progenitor's machine for founding,
+  extending and sealing universes. One function `found(count, place, seed)`
+  at any singularity, extension by receipted deeds, and the era's seal. It
+  replaces the loose `pulse found`, refound and trial steps.
 - ROADMAP, "The trade with Xylarium": the trajectory from today's
   test-domain trial (#240) through the kinds (#213), time at crossings
   (#198, #207), inbound, outbound and the round trip (#109), to the treaty's
