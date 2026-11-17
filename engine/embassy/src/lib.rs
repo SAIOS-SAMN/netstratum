@@ -1,4 +1,7 @@
-//! Netstratum's uplink to a Mycelium hypha (MU-RECURSION 78.62).
+//! Netstratum's embassy on the Mycelium network: its client of the hyphas,
+//! Mycelium's servers (MU-RECURSION 78.62). Renamed from `hypha` on
+//! 2026-11-17 (register H3). `uplink` is Xylarium's crate and Mycelium's SDK
+//! module (`house::uplink`, the fold act), and is kept only for those.
 //!
 //! The hypha holds the laws (L0) and adjudicates; Netstratum keeps its own
 //! game — colonies, peoples, the STAMP economy, the chronicle — and puts
@@ -40,7 +43,7 @@ pub mod wire;
 /// The acts this uplink speaks to a hypha, by their names in Mycelium's
 /// client conformance statement (`mycelium_sdk::conformance::STATEMENT`),
 /// declared under the KERNEL profile: each is spoken somewhere in this
-/// crate (`wire`, `refound`, `seat`, [`Uplink`]). The conformance read
+/// crate (`wire`, `refound`, `seat`, [`Embassy`]). The conformance read
 /// (`tests/conformance.rs`) holds the list to the statement.
 pub const SPOKEN: &[&str] = &[
     "laws register",
@@ -66,7 +69,7 @@ pub const SPOKEN: &[&str] = &[
 /// 2026-10-09, docs/PORT.md) and the fleet's hyphae are real tiers, so every
 /// command names its hypha (`--at` / `NS_HYPHA`).
 /// One session to one hypha, under Netstratum's own voice.
-pub struct Uplink {
+pub struct Embassy {
     session: Session,
     pub addr: String,
     pub voice: [u8; 32],
@@ -163,11 +166,11 @@ pub fn noise_home(home: &Path) -> io::Result<mycelium_sdk::session::NoiseHome> {
         .map_err(|r| io::Error::other(format!("the Noise home at {}: {r:?}", home.display())))
 }
 
-impl Uplink {
+impl Embassy {
     /// Open a session to `addr` (`host:port`) under the voice at
     /// `home/voice.key`, minted there on first use, inside Noise with the
     /// home's static key (`noise_home`).
-    pub fn open(addr: &str, home: &Path) -> io::Result<Uplink> {
+    pub fn open(addr: &str, home: &Path) -> io::Result<Embassy> {
         std::fs::create_dir_all(home)?;
         let key_path = home.join("voice.key");
         let key_name = key_path.to_str().ok_or_else(|| {
@@ -175,7 +178,7 @@ impl Uplink {
         })?;
         let voice = HyphaKey::load_or_mint(key_name).verifying_bytes();
         let kernel = mycelium_sdk::voice::Voice::from_voice(voice);
-        Ok(Uplink {
+        Ok(Embassy {
             session: Session::open(addr, kernel).with_noise(noise_home(home)?),
             addr: addr.to_string(),
             voice,

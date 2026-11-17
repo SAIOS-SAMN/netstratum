@@ -43,7 +43,7 @@ Both are specified and built here, and proposed to the other kernels.
 
 Code: `engine/conductor/src/ascension.rs` (run by `year_bounce` once a
 bounce), the hub clearing (`stamp_market_step`, once a beat), and the house's
-tend (`engine/hypha/src/house.rs`, `refound.rs`).
+tend (`engine/embassy/src/house.rs`, `refound.rs`).
 
 1. **One keeper everywhere.** The throat's keeper (G3) is read once, with the
    envoys counted (`ancients::keepers`, reading `ascension.bin`): once a
@@ -107,7 +107,7 @@ tend (`engine/hypha/src/house.rs`, `refound.rs`).
    the first ledger entry with a zero parent, then the marker `refounded`
    naming the origin. Once per origin; a try the court stopped is tried again
    only after a task's patience. The gates are mapped only under a marker for
-   the present origin. `ns-hypha refound` runs the same steps by hand.
+   the present origin. `ns-embassy refound` runs the same steps by hand.
 
 **Declared (until a law derives them, docs/59):** a gate's cost is the
 ladder's dearest closure (the greatest `mint_bound`, 7 STAMP); a gate span's

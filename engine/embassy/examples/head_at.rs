@@ -1,7 +1,7 @@
 //! Where in the local colonies line does a given head stand? Prints the entry
 //! index (on the whole line) whose head matches, and how many hot entries and
 //! logged folds lie after it.
-use ns_hypha::line::{FoldLog, TierLine};
+use ns_embassy::line::{FoldLog, TierLine};
 fn main() {
     let want = std::env::args().nth(1).expect("hex prefix of a head");
     let home = std::path::Path::new("var/uplink");

@@ -78,7 +78,7 @@ STAMP sinks in 32_STAMP_MARKET §2.2 are doc-only.
 ## On the network
 
 Every G2 world is a people under Netstratum's domain on the :7520 court.
-`ns-hypha census var-g2/worlds/<world> --send` folds its new receipts per
+`ns-embassy census var-g2/worlds/<world> --send` folds its new receipts per
 receipt onto the colonies line and self-publishes. G2's compiled seats
 reuse the archive's world names, so a people's network name carries its
 universe (`var-g2/tun-reach`), and its identities, cursor and entries never

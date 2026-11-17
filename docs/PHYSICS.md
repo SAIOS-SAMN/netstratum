@@ -19,7 +19,7 @@ line references are given so each statement can be checked).
 | Exact kinematics | `physics` | `FlowState` (exact recurrences with inverses), `exhale`/`inhale`, `step_witness`, `Beacon` (seeded exact draws), `AxisVector`/`Triple` | Only `Beacon` and the carrier types: `FlowState`, the breath pair and the witness have no callers |
 | Relation algebra | `rfa-core` | Antisymmetric relational tensors, reduction, holonomy | Yes, in the kernel's judgement of discoveries (`kernel/src/lib.rs:866-880`); not physics |
 | Exact algebra | `substrate` | Rationals, a Clifford multivector, Smith normal form, volumes | Through `reduct` (cognition); the conductor's own use is in tests only |
-| Mycelium's laws | `mycelium` (pinned) | Transition verification, the share-compounding law, rule elements, the network clock | The compounding law is live (`compound.rs`); verification runs only as a diagnostic (`ns-hypha probe`) |
+| Mycelium's laws | `mycelium` (pinned) | Transition verification, the share-compounding law, rule elements, the network clock | The compounding law is live (`compound.rs`); verification runs only as a diagnostic (`ns-embassy probe`) |
 
 Two models therefore describe the same worlds. Era 1 is replacing era 0, and
 where era 1 does not yet provide a quantity it reads era 0's through a bridge

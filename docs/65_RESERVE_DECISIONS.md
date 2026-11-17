@@ -30,7 +30,7 @@ section names its source specification.
    atmosphere leaks: physical consumption, apart from μ.
 7. **All puzzle solving is the seated minds'.** A kernel relays court tasks
    to seated minds and files their answers under its reserve; it solves
-   nothing itself (applied in ns-hypha 2026-10-09).
+   nothing itself (applied in ns-embassy 2026-10-09).
 
 ## Earlier decisions on the reserve
 

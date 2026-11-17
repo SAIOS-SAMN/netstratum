@@ -1,7 +1,7 @@
 //! A universe's matter budget by receipt kind: every world's census,
 //! summed — what each kind made (sources) and unmade (sinks), per holding.
-//!   cargo run --release -p ns-hypha --example sinks -- var-g2
-use ns_hypha::census::{self, grains, Holding};
+//!   cargo run --release -p ns-embassy --example sinks -- var-g2
+use ns_embassy::census::{self, grains, Holding};
 use std::collections::BTreeMap;
 fn main() {
     let root = std::env::args().nth(1).unwrap_or_else(|| "var-g2".into());

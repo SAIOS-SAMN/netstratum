@@ -305,7 +305,7 @@ pub fn envoys(var_root: &Path) -> Vec<(String, String)> {
 }
 
 /// A4: the gates the house sealed on the hypha's map, as `(gate id, the place
-/// it was mapped at)` (`gates-mapped.bin`, tag 2, written by ns-hypha).
+/// it was mapped at)` (`gates-mapped.bin`, tag 2, written by ns-embassy).
 fn sealed(var_root: &Path) -> Vec<(String, Place)> {
     let bytes = std::fs::read(var_root.join("gates-mapped.bin")).unwrap_or_default();
     cfe::tlv::records(&bytes)

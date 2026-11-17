@@ -7,7 +7,7 @@ Einstein–Cartan core as the transitions the court rebuilds under
 Mycelium's laws (L0, `laws::verify`).
 
 **Status:** specified; the crossing's motion derived, under review (§4). It replaces the fixed two-body
-probe (`ns-hypha probe`) as what Netstratum offers the court.
+probe (`ns-embassy probe`) as what Netstratum offers the court.
 
 ## 1. The scope: the crossings at the vertex
 
@@ -70,7 +70,7 @@ court's form (`forms::passage`, held in Mycelium) or the code changes.
 1. `conductor::court::crossings(before, after, bell)`: the transitions of
    one bell's crossings, the release as a Source, the return as a Sink, the
    motes they carry as bodies.
-2. `ns-hypha` offers them: `verify_local`, then the court's `verify_both`;
+2. `ns-embassy` offers them: `verify_local`, then the court's `verify_both`;
    the probe retires.
 3. Witness: a bell of a fresh founding gives crossings that `verify_sized`
    reads with no breach and no unmeasured law; a released mass changed by

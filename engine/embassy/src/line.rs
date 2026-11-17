@@ -552,7 +552,7 @@ mod tests {
     use super::*;
 
     fn scratch(name: &str) -> PathBuf {
-        let d = std::env::temp_dir().join(format!("ns-hypha-line-{name}-{}", std::process::id()));
+        let d = std::env::temp_dir().join(format!("ns-embassy-line-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&d);
         fs::create_dir_all(&d).ok();
         d

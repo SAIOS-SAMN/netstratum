@@ -55,7 +55,7 @@ meet, and they meet only through seats and percepts.
    link carries its identity, speech, syllabus and verdicts. Any award paid to
    a speaking key (a discoverer's share) names the reserve as payee (Mycelium
    to confirm 78.141 can).
-2. **It runs in ns-hypha**, the keyed, fleet-facing house process. The
+2. **It runs in ns-embassy**, the keyed, fleet-facing house process. The
    conductor stays keyless and deterministic; the world never holds a fleet
    key.
 3. **Bounded in bytes** (genome, sessions, syllabus caps stated in the crate's

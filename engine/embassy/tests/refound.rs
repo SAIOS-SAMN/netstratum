@@ -1,5 +1,5 @@
 //! docs/72 A4 — the re-founding's acts as the court reads them: netstratum's
-//! ledger entry and gate map act, built by `ns_hypha::refound`, decoded by
+//! ledger entry and gate map act, built by `ns_embassy::refound`, decoded by
 //! Mycelium's own court decoder (`decode_domain_request`) and verified against
 //! the reserve's key. Each test also breaks the act and must see it refused.
 
@@ -7,7 +7,7 @@ use ed25519_dalek::{Signature, SigningKey, Verifier};
 use mycelium_sdk::house::atlas::MapRecord;
 use mycelium_sdk::house::domain::{decode_domain_request, DomainRequest};
 use mycelium_sdk::house::tuniversal::{Origin, TPoint};
-use ns_hypha::refound::{ledger_frame, map_frame, GateEnd};
+use ns_embassy::refound::{ledger_frame, map_frame, GateEnd};
 
 fn point() -> TPoint {
     TPoint {
@@ -63,7 +63,7 @@ fn the_gate_map_act_is_read_by_the_court_as_netstratums_local_throat() {
     );
     assert_eq!(
         *keeper,
-        ns_hypha::house::line_key("cryo-vault"),
+        ns_embassy::house::line_key("cryo-vault"),
         "kept by the keeper's line"
     );
     let to = |c: &[cfe::ratio::Ratio; 3]| {
@@ -169,7 +169,7 @@ fn every_v4_entry_reads_its_thirds_from_its_patterns() {
         ) else {
             continue;
         };
-        let e = ns_hypha::refound::manifest_entry(p, n).expect("an element");
+        let e = ns_embassy::refound::manifest_entry(p, n).expect("an element");
         let fibres = n;
         let held: u32 = (0..3)
             .map(|k| {

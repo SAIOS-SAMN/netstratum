@@ -68,7 +68,7 @@ paths for the actual host before installing them.
 - `netstratum-follow.service` describes the Mycelium hypha follower. It is
   intentionally disabled: the old standalone `:7520` court is retired, and
   this service must stay stopped until the coordinator names a court. The
-  `ns-hypha` command has no default court.
+  `ns-embassy` command has no default court.
 
 Do not enable the follower just because its example unit is present. Confirm
 the current coordinator and court configuration first.

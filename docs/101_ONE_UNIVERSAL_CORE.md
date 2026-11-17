@@ -167,13 +167,13 @@ orbits placed in rings). Every remainder of 2026-10-27 lives here.
   the universal core's throat → write); `bin/breathe.rs`; `bin/observe.rs`
   (views universe, galaxy, flows, position, firmament, cascade (its own
   recomputation, 458), founding, ledger, star); `bin/life.rs`.
-- **Format (pulse.bin):** tags 8 unit, **17 t_u (read by `engine/hypha`
+- **Format (pulse.bin):** tags 8 unit, **17 t_u (read by `engine/embassy`
   `fold.rs:63–71` directly; must keep its number and meaning)**, 19
   firmament, 24 ocean, 25 densest; body tags 9 state, 11 reservoir, 23
   throat; the root body needs a path `[]` (or a tag of its own); tags 19/24
   gain the tilt.
 - **Outside the crate:** `clients/cli` uses only `conductor::spatial_l1`;
-  `engine/hypha` reads tag 17. No other dependency.
+  `engine/embassy` reads tag 17. No other dependency.
 - **Live data:** the G2 universe (var-e2, conductor pinned) is not
   re-founded by this; the services stay down; all
   universe data is throwaway test data.

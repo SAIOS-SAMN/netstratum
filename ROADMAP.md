@@ -167,13 +167,13 @@ operators of the network.
 
 - **Current.** μ is the ancients' reserve currency. It is earned by Mycelium
   minds seated at the ancients' councils doing court work, filed under the
-  reserve key, and used for hypha transport. The `ns-hypha` uplink is built:
+  reserve key, and used for hypha transport. The `ns-embassy` uplink is built:
   it verifies transitions with the court, founds Netstratum's domain, reads the
   network clock (TUniversal), runs the council seats and re-founds after a
   network recut. Netstratum uses Mycelium v0.2.0 as a pinned dependency.
 - **Not running.** No court is configured and the services are stopped; the
   last seated mind was recorded on 2026-10-10. Resuming means pointing
-  `ns-hypha` at Mycelium's current court, re-founding the domain there, and
+  `ns-embassy` at Mycelium's current court, re-founding the domain there, and
   starting the conductor and a seat.
 - **Trajectory.** Minds seated in the ancients' councils again; council
   decisions feeding the civilizations' choices (docs/73).

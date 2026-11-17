@@ -20,7 +20,7 @@
 //! seed minted on first use; the domain's own key is `tier-domain.key`.
 
 use crate::wire::HouseActs;
-use crate::Uplink;
+use crate::Embassy;
 use mycelium_sdk::house::domain::{DomainGenesis, Founded, Reservation};
 use mycelium_sdk::house::uplink::{Child, ChildNet, FoldAt, Net, SignedFold, TierFold, Uplinked};
 use std::io::{self, Read};
@@ -169,7 +169,7 @@ pub fn exposure(rows: &[Net]) -> [u64; 4] {
     x
 }
 
-impl Uplink {
+impl Embassy {
     /// v0.4.0 (78.138; MU-HOSTING §5a.5) — A TIER'S FOLD CROSSES CARRIED:
     /// a universe's events enter the court only as the act its domain's
     /// sitting reserve signs, a line's own fold carried whole in it under

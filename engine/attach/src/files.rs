@@ -1,4 +1,4 @@
-//! The file exchange between the house (`ns-hypha`) and the conductor, under
+//! The file exchange between the house (`ns-embassy`) and the conductor, under
 //! the variable root (docs/109 §7). The house writes requests; the conductor
 //! answers with admissions and applies actions from the worlds' inboxes.
 //! Every file is TLV (`cfe::tlv`), written whole and renamed into place.

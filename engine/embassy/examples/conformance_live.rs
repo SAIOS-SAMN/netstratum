@@ -1,8 +1,8 @@
 //! Mycelium's client conformance read against a running hypha, KERNEL
-//! profile: `cargo run -p ns-hypha --example conformance_live -- <host:port>`.
+//! profile: `cargo run -p ns-embassy --example conformance_live -- <host:port>`.
 //! Spoken under a key minted for the read alone (the read founds its own
 //! domain on it), so no Netstratum identity is bound to the hypha read.
-use ns_hypha::mycelium_sdk::conformance::{run, Profile};
+use ns_embassy::mycelium_sdk::conformance::{run, Profile};
 use std::io::Read;
 
 fn main() {

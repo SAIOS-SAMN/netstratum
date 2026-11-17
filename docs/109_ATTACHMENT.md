@@ -32,7 +32,7 @@ through a galaxy and a star system to a world.
 
 ## 2. What the code already provides
 
-- **Transport and identity.** `ns-hypha` opens a Mycelium session signed with
+- **Transport and identity.** `ns-embassy` opens a Mycelium session signed with
   Netstratum's key (`hypha::Uplink`), founds Netstratum's domain on the
   court, and originates it with sphere geometry (`fold::found_domain`,
   `fold::originate`).
@@ -170,11 +170,11 @@ systems and the network only by what it has learned and earned.
 | A5 Sandboxes as sub-universes | built | a sandbox opens a sub-universe at the line's galaxy core, paid from its leisure; its opener traverses it (`substrata::open_for`, `substrata::step`) |
 | A6 Verification of attached transitions | partial | attached worlds are ordinary world directories, so the census follower folds their receipts to the court with every other world's; the court checks the folds' continuity, and no transition is verified against Mycelium's laws ([MYCELIUM.md](MYCELIUM.md) §3) |
 | A7 The importable libraries | built | the `attach` crate: the interface, the file exchange, and the client (`attach::client`, `examples/agent.rs`) |
-| A8 Running service | open | a configured court, the house (`ns-hypha seat`) and the conductor running against it |
+| A8 Running service | open | a configured court, the house (`ns-embassy seat`) and the conductor running against it |
 
 ## 7. The interface
 
-Shared by the house (`ns-hypha`), the conductor and the client library
+Shared by the house (`ns-embassy`), the conductor and the client library
 (`engine/attach`), whose constants are the single definition.
 
 **Seats** (the house's listing, role on Mycelium's seat surface):
