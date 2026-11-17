@@ -92,6 +92,53 @@ clause of LAW-PASSAGE.
 - **When:** drafted once Xylarium confirms its antipolarity; the wire framing
   comes with v0.5.0 (issue #92).
 
+## 3b. No dimension is lost on transfer (operator, 2026-11-17)
+
+**Operator:** "we cant lose dimensionality on transferrance."
+
+A crossing carries the whole state of what crosses. The pole swap acts on
+every component. Nothing is projected, summed or dropped at the vertex or at
+either face. Amount may be dissipated (taken ≤ released, the connection
+tax), but only as whole nuclei with their full state. A dimension is never
+shed.
+
+**T1 (the state that crosses).**
+- **Each nucleus:** its counts in thirds `(3Z, 3Q)`; its lone ends'
+  patterns `n_S` over `S ⊆ {1, 2, 3}` (docs/97 §15.7); its planes, each
+  with (id, K, phase R_p, pole σ_p) in their composition order; and its
+  composite motion.
+- **The crossing record:** every lane, S, G, T, H (with its cross-plane
+  terms and volume) and K, under a matching origin stack.
+
+**T2 (the image on every component).** The pole swap is an involution on
+the whole state:
+- `(3Z, 3Q) ↦ (3Q, 3Z)`;
+- each pattern to its complement, `n_S ↦ n_{{1,2,3} \ S}`: a lone end held
+  on the axes S is open on them after the swap (§15.7 D10);
+- the planes in reverse order, each `R_p ↦ −R_p` and `σ_p ↦ −σ_p`, with K
+  kept: the motion's reverse `R̃` (78.184 §7);
+- the lanes as the passage maps them (`Coordinate::passed`), with K kept.
+
+**T3 (a face that cannot read a component holds it).** Where the receiving
+kernel has no reading for a component, it holds that component as carried
+state and never drops it. Two examples: Xylarium has no per-axis pattern
+yet, and netstratum has no isoclinic planes. A round trip then returns it
+exactly.
+
+**Witnesses** (on both sides and at the vertex):
+1. `image(image(x)) = x` for every component of every entry.
+2. A crossed entry reads back its own thirds: `3Q_after = 3F + Σ_k ℓ_k`
+   over the complemented patterns. That is the pre-swap `3Z`.
+3. Out and back through one throat returns the full state, less only
+   whole dissipated nuclei.
+4. Nothing the sender stated is absent from what the receiver holds.
+
+**Found (2026-11-17).** Mycelium's `Nucleus::image` (78.184 §8,
+`endowment.rs`) swaps the thirds and reverses the planes but keeps
+`pattern` unchanged. That breaks T2 and witness 2. Raised with Mycelium:
+the image should complement the pattern by subset (`S ↦ 7 − S` for three
+axes), or the image of an opaque component should be declared by its kernel.
+
 ## 4. Open
 
 1. **What crosses.** Matter only, or also μ and attached minds' acts
