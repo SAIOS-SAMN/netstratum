@@ -138,7 +138,7 @@ exactly.
 `pattern` unchanged. That breaks T2 and witness 2. Raised with Mycelium:
 the image should complement the pattern by subset (`S ↦ 7 − S` for three
 axes), or the image of an opaque component should be declared by its kernel.
-**Fixed** in mycelium PR #369 by option (a):
+**Fixed** in mycelium PR #370 by option (a):
 - a pattern is indexed by the subsets of the kernel's axes, empty or `2^n`
   long, checked, and its image is the complement, `S ↦ 7 − S` for our
   eight;
