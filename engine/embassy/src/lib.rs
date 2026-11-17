@@ -37,6 +37,7 @@ pub mod mouth;
 pub mod probe;
 pub mod refound;
 pub mod seat;
+pub mod testdomain;
 pub mod tiers;
 pub mod wire;
 

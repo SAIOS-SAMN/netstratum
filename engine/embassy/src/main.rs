@@ -239,13 +239,14 @@ fn main() -> ExitCode {
         Some("mouth-accept") => mouth_cmd(&up, &args, &home, false),
         Some("mouth-map") => mouth_cmd(&up, &args, &home, true),
         Some("sign-take") => sign_take_cmd(&args, &home),
+        Some("found-test") => found_test_cmd(&up, &args, &home),
         Some("census") => census_cmd(&args, Some(&up), &home),
         Some("prune") => prune_cmd(&up, &home),
         Some("publish") => publish_cmd(&up, &home),
         Some("follow") => follow_cmd(&up, &args, &home),
         Some("mark") => mark_cmd(&args, &home),
         _ => {
-            eprintln!("usage: ns-embassy laws|lexicon|probe|found|apply <var-root>|mouth-accept <id>|mouth-map <id> <side> <freshness>|sign-take <draft-hex-file>|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
+            eprintln!("usage: ns-embassy laws|lexicon|probe|found|apply <var-root>|mouth-accept <id>|mouth-map <id> <side> <freshness>|sign-take <draft-hex-file>|found-test <var> <grains> [phrase]|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
             ExitCode::from(2)
         }
     }
@@ -315,50 +316,21 @@ fn endowment_cmd(up: &Embassy, home: &Path) -> ExitCode {
 /// listed `(manifest hash, u)` in the `applied` of the next ledger entry,
 /// signed by the reserve at the world's beat `u` (its crossing still).
 fn apply_cmd(up: &Embassy, args: &[String], home: &Path) -> ExitCode {
-    use ns_embassy::mycelium_sdk::house::read_endowment;
     let Some(root) = args.get(2).filter(|a| !a.starts_with("--")) else {
         eprintln!("usage: ns-embassy apply <var-root>");
         return ExitCode::from(2);
     };
-    let domain = match ns_embassy::fold::tier_key(home, "domain") {
-        Ok(k) => k.verifying_key().to_bytes(),
-        Err(e) => {
-            eprintln!("ns-embassy: the domain key: {e}");
-            return ExitCode::from(2);
-        }
-    };
-    let Some(r) = read_endowment(domain, |ask| up.session().speak(ask).ok()) else {
-        eprintln!("ns-embassy: the endowment did not assemble");
-        return ExitCode::from(1);
-    };
-    let u: u64 = std::fs::read_to_string(Path::new(root).join("conductor.beat"))
-        .ok()
-        .and_then(|t| t.trim().parse().ok())
-        .unwrap_or(0);
-    let applied: Vec<([u8; 32], u64)> = r
-        .grants
-        .iter()
-        .filter(|g| !g.applied)
-        .map(|g| (g.manifest, u))
-        .collect();
-    if applied.is_empty() {
-        println!("no grant waits to be applied");
-        return ExitCode::SUCCESS;
-    }
-    for (m, _) in &applied {
-        let id: String = m.iter().take(4).map(|b| format!("{b:02x}")).collect();
-        println!("applying grant {id} at u {u}");
-    }
-    match ns_embassy::refound::post_ledger(up.session(), home, Path::new(root), u, applied) {
-        Ok(line) => {
-            println!("{line}");
-            match line.starts_with("LEDGER sealed") {
+    match ns_embassy::refound::apply(up.session(), home, Path::new(root)) {
+        Ok(lines) => {
+            let sealed = lines.iter().all(|l| !l.starts_with("LEDGER refused"));
+            lines.iter().for_each(|l| println!("{l}"));
+            match sealed {
                 true => ExitCode::SUCCESS,
                 false => ExitCode::from(1),
             }
         }
         Err(e) => {
-            eprintln!("ns-embassy: the ledger entry was not posted: {e}");
+            eprintln!("ns-embassy: the grant was not applied: {e}");
             ExitCode::from(1)
         }
     }
@@ -436,6 +408,31 @@ fn sign_take_cmd(args: &[String], home: &Path) -> ExitCode {
         }
         Err(e) => {
             eprintln!("ns-embassy: the take was not signed: {e}");
+            ExitCode::from(1)
+        }
+    }
+}
+
+/// A test domain founded as one deed (docs/140 D3, #249): fresh keys in
+/// `--home`, the cradle's founding, the Big Bang, the refound, one bell, and
+/// the grant applied. Refused where `--home` already holds a tier key: a
+/// live domain is never re-keyed.
+fn found_test_cmd(up: &Embassy, args: &[String], home: &Path) -> ExitCode {
+    let (Some(var), Some(size)) = (args.get(2), args.get(3)) else {
+        eprintln!("usage: ns-embassy found-test <var> <grains> [phrase] --home <var>/embassy");
+        return ExitCode::from(2);
+    };
+    let phrase = args
+        .get(4)
+        .filter(|a| !a.starts_with("--"))
+        .map_or("netstratum test domain", String::as_str);
+    match ns_embassy::testdomain::found(up.session(), home, Path::new(var), size, phrase) {
+        Ok(lines) => {
+            lines.iter().for_each(|l| println!("{l}"));
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("ns-embassy: the test domain was not founded: {e}");
             ExitCode::from(1)
         }
     }
