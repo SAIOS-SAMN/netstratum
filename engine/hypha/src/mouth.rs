@@ -5,8 +5,8 @@
 //! the uplink's session. Nothing here runs unless a command names it.
 use crate::refound::{fresh, load_key};
 use mycelium_sdk::house::{
-    decode_handoff_reply, decode_map_reply, encode_handoff, encode_map, Handed, Handoff, MapAct,
-    MapRecord, Mapped,
+    decode_domain_request, decode_handoff_reply, decode_map_reply, encode_handoff, encode_map,
+    DomainRequest, Handed, Handoff, MapAct, MapRecord, Mapped, Nuclei,
 };
 use mycelium_sdk::session::Session;
 use std::io;
@@ -67,6 +67,43 @@ pub fn map(
         encode_map(&act).ok_or_else(|| io::Error::other("the map act cannot be written"))?;
     decode_map_reply(&session.speak(frame)?)
         .ok_or_else(|| io::Error::other("the map reply did not decode"))
+}
+
+/// The taken motion's signature for a drafted traverse (Mycelium 78.184 §6,
+/// #360). The draft is the traverse act's own wire writing, from the payer.
+/// This domain releases nothing and takes the tube's image of every nucleus
+/// the other side releases, each entry whole with its count
+/// (`Nucleus::image`, docs/123 §3b T2). The union reserve signs
+/// `motion_bytes(domain, [], taken)`. Returns the taken nuclei and the
+/// 64-byte signature. Taken equals released: the throat's keep formula is
+/// #109's, not the trial's.
+pub fn sign_take(home: &Path, draft: &[u8]) -> io::Result<(Nuclei, [u8; 64])> {
+    use ed25519_dalek::Signer;
+    let Some(DomainRequest::Traverse(signed)) = decode_domain_request(draft) else {
+        return Err(io::Error::other("the draft is not a traverse"));
+    };
+    let t = signed.traverse;
+    let reserve = load_key(home, "tier-union.key")?;
+    let domain = load_key(home, "tier-domain.key")?
+        .verifying_key()
+        .to_bytes();
+    let released: Nuclei = t
+        .motions
+        .iter()
+        .filter(|m| m.domain != domain)
+        .flat_map(|m| m.released.iter().cloned())
+        .collect();
+    if released.is_empty() {
+        return Err(io::Error::other("the draft releases nothing to take"));
+    }
+    let taken: Nuclei = released
+        .iter()
+        .map(|(n, c)| (n.image(), c.clone()))
+        .collect();
+    let bytes = t
+        .motion_bytes(&domain, &Vec::new(), &taken)
+        .ok_or_else(|| io::Error::other("the motion's bytes cannot be written"))?;
+    Ok((taken, reserve.sign(&bytes).to_bytes()))
 }
 
 #[cfg(test)]

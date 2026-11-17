@@ -251,3 +251,17 @@ impl Uplink {
         })
     }
 }
+
+/// The bytes a hex string names, None where it is not hex.
+pub fn attach_unhex(hex: &str) -> Option<Vec<u8>> {
+    if !hex.len().is_multiple_of(2) {
+        return None;
+    }
+    (0..hex.len())
+        .step_by(2)
+        .map(|i| {
+            hex.get(i..i + 2)
+                .and_then(|b| u8::from_str_radix(b, 16).ok())
+        })
+        .collect()
+}

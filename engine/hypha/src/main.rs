@@ -238,13 +238,14 @@ fn main() -> ExitCode {
         Some("apply") => apply_cmd(&up, &args, &home),
         Some("mouth-accept") => mouth_cmd(&up, &args, &home, false),
         Some("mouth-map") => mouth_cmd(&up, &args, &home, true),
+        Some("sign-take") => sign_take_cmd(&args, &home),
         Some("census") => census_cmd(&args, Some(&up), &home),
         Some("prune") => prune_cmd(&up, &home),
         Some("publish") => publish_cmd(&up, &home),
         Some("follow") => follow_cmd(&up, &args, &home),
         Some("mark") => mark_cmd(&args, &home),
         _ => {
-            eprintln!("usage: ns-hypha laws|lexicon|probe|found|apply <var-root>|mouth-accept <id>|mouth-map <id> <side> <freshness>|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
+            eprintln!("usage: ns-hypha laws|lexicon|probe|found|apply <var-root>|mouth-accept <id>|mouth-map <id> <side> <freshness>|sign-take <draft-hex-file>|mark <world-dir>|epoch <name>|prune|publish|follow <var-root>|census <world-dir> [--last N] [--send] [--at host:port] [--home dir]");
             ExitCode::from(2)
         }
     }
@@ -391,6 +392,48 @@ fn mouth_cmd(up: &Uplink, args: &[String], home: &Path, map: bool) -> ExitCode {
         }
         Err(e) => {
             eprintln!("ns-hypha: the mouth act was not sent: {e}");
+            ExitCode::from(1)
+        }
+    }
+}
+
+/// Sign this domain's taken motion for a drafted traverse (a file of the
+/// draft's hex); prints the taken nuclei and the signature, sends nothing.
+fn sign_take_cmd(args: &[String], home: &Path) -> ExitCode {
+    let Some(path) = args.get(2).filter(|a| !a.starts_with("--")) else {
+        eprintln!("usage: ns-hypha sign-take <draft-hex-file>");
+        return ExitCode::from(2);
+    };
+    let hex = match std::fs::read_to_string(path) {
+        Ok(h) => h.trim().to_string(),
+        Err(e) => {
+            eprintln!("ns-hypha: the draft did not read: {e}");
+            return ExitCode::from(2);
+        }
+    };
+    let Some(draft) = ns_hypha::attach_unhex(&hex) else {
+        eprintln!("ns-hypha: the draft is not hex");
+        return ExitCode::from(2);
+    };
+    match ns_hypha::mouth::sign_take(home, &draft) {
+        Ok((taken, sig)) => {
+            for (n, c) in &taken {
+                println!(
+                    "taken: z3 {} q3 {} pattern {:?} planes {} × {c}",
+                    n.z3,
+                    n.q3,
+                    n.pattern,
+                    n.planes.len()
+                );
+            }
+            println!(
+                "sig {}",
+                sig.iter().map(|b| format!("{b:02x}")).collect::<String>()
+            );
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("ns-hypha: the take was not signed: {e}");
             ExitCode::from(1)
         }
     }
