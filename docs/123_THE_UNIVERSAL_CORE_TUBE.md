@@ -138,6 +138,23 @@ exactly.
 `pattern` unchanged. That breaks T2 and witness 2. Raised with Mycelium:
 the image should complement the pattern by subset (`S ↦ 7 − S` for three
 axes), or the image of an opaque component should be declared by its kernel.
+**Fixed** in mycelium PR #369 by option (a):
+- a pattern is indexed by the subsets of the kernel's axes, empty or `2^n`
+  long, checked, and its image is the complement, `S ↦ 7 − S` for our
+  eight;
+- the image is an involution on every component, tested.
+
+Mycelium also confirms:
+- a traverse carries each entry whole: `(3Z, 3Q, pattern, planes in order
+  with K, R_p, σ_p)`;
+- μ moves as modes;
+- the mouths' points are read at TUniversal under their origin, never as Δτ;
+- cross-plane terms and volume are carried by the planes' stated order, not
+  stored. Composing in that order gives the same composite, holonomy
+  included, on either face.
+
+Netstratum's entries are 8 long (`refound::manifest_entry`), as the check
+requires.
 
 ## 4. Open
 
