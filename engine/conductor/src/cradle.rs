@@ -17,7 +17,7 @@
 //! **Advance** (#249): a founded universe breathed forward from its
 //! checkpoint, the beat a ledger entry cites.
 use crate::pulse::{self, Manifest, Universe};
-use cfe::ratio::Ratio;
+use cfe::ratio::{ratio, Ratio};
 use std::path::{Path, PathBuf};
 
 /// A founding: its table, its universe oriented by the seed, and whether the
@@ -189,6 +189,97 @@ pub fn extensions(var_root: &Path) -> std::io::Result<Vec<Manifest>> {
         .collect()
 }
 
+/// **Seal** (docs/140 §3, #251): the era closed as the cradle's deed. It was
+/// `conductor::fold`, moved here whole.
+///
+/// AEON-1b (11 §5): the fold — seal the live era and rotate it into
+/// the archive sequence. `EraFolded` (tag 46) appends to the universe
+/// ledger with the new base gauge (the next aeon seats on its own
+/// G-sheet — placeholder advance: era/12, wrapped), then the live
+/// `worlds/` and `registry/` move whole into `<base>-era<N>/` beside
+/// the var root. Nothing is destroyed — the fold is archival by
+/// construction; the next boot converges the sealed era, and the four
+/// C's read which trajectories continue. The roster file stays: the
+/// civilizations continue into the new aeon.
+pub fn seal(var_root: &str) -> std::io::Result<(u64, Ratio)> {
+    use cfe::vrp::Chronicle;
+    let root = std::path::PathBuf::from(var_root);
+    let base = root
+        .file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "var".into());
+    let parent = match root.parent() {
+        Some(p) if p.as_os_str().is_empty() => std::path::PathBuf::from("."),
+        Some(p) => p.to_path_buf(),
+        None => std::path::PathBuf::from("."),
+    };
+    // The next era ordinal: one past the highest archived.
+    let mut era: u64 = 1;
+    if let Ok(entries) = std::fs::read_dir(&parent) {
+        for entry in entries.filter_map(|e| e.ok()) {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            if let Some(n) = name.strip_prefix(&format!("{base}-era")) {
+                if let Ok(held) = n.parse::<u64>() {
+                    era = era.max(held + 1);
+                }
+            }
+        }
+    }
+    let worlds = root.join("worlds");
+    if !worlds.is_dir() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "no live worlds to fold",
+        ));
+    }
+    // Seal: EraFolded onto the universe ledger, base G advanced.
+    let ledger_path = worlds.join("convergence.tlv");
+    let mut ledger = match cfe::persist::load(&ledger_path) {
+        Ok(held) => held,
+        Err(_) => Chronicle::new(),
+    };
+    let gauge = cfe::world::wrap_gauge(ratio(era as i64, 12));
+    // No ancient is sealed by lineage (operator ruling 2026-10-08): an ancient
+    // arises only at a core, and none exists yet; AncientArose (tag 192)
+    // waits for one. The keys stay in trust.
+    let ancient: Option<(String, u64)> = None;
+    let living: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    let stamp = ledger.history().map(|r| r.stamp()).max().unwrap_or(0);
+    if let Some((sigil, tree)) = ancient {
+        ledger.append(
+            cfe::dop::ClosureEvent::AncientArose {
+                sigil,
+                tree,
+                living: living.len() as u64,
+            },
+            stamp,
+            vec![],
+        );
+    }
+    ledger.append(
+        cfe::dop::ClosureEvent::EraFolded {
+            era,
+            gauge: gauge.clone(),
+        },
+        stamp,
+        vec![],
+    );
+    cfe::persist::sync(&ledger, &ledger_path)
+        .map_err(|e| std::io::Error::other(format!("{e:?}")))?;
+    // Rotate: the archive sequence gains the sealed era, whole.
+    let archive = parent.join(format!("{base}-era{era}"));
+    std::fs::create_dir_all(&archive)?;
+    std::fs::rename(&worlds, archive.join("worlds"))?;
+    let registry = root.join("registry");
+    if registry.is_dir() {
+        std::fs::rename(&registry, archive.join("registry"))?;
+    }
+    // The definition law: no roster file is archived, because none
+    // exists. The era's roster is the roster the binary that sealed it
+    // was compiled with — recorded by the commit, not by a copy.
+    Ok((era, gauge))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -265,5 +356,38 @@ mod tests {
         let neg: Manifest = [(h, cfe::ratio::ratio(-1, 2))].into_iter().collect();
         assert!(extend(&var, &neg, &Source::Growth([0; 32])).is_err());
         let _ = std::fs::remove_dir_all(&var);
+    }
+
+    /// docs/140 §4, witness 4: the seal archives the era whole and reverts
+    /// nothing. The live worlds move into `<base>-era1`, readable, with
+    /// `EraFolded` on their universe ledger after the Big Bang.
+    #[test]
+    fn the_seal_archives_the_era_whole_and_reverts_nothing() {
+        let root = store("seal");
+        let var = root.join("var");
+        std::fs::create_dir_all(var.join("registry")).expect("a registry");
+        let book = ledger::Ledger::at(var.join("worlds"));
+        let (seed, fresh) = book
+            .found_universe([1; 32], [2; 32], 0)
+            .expect("a Big Bang");
+        assert!(fresh);
+        let (era, _) = seal(var.to_str().expect("utf-8")).expect("sealed");
+        assert_eq!(era, 1);
+        let sealed = root.join("var-era1");
+        let held = cfe::persist::load(&sealed.join("worlds/convergence.tlv")).expect("readable");
+        let events: Vec<_> = held.receipts().iter().map(|r| r.event().clone()).collect();
+        assert!(matches!(
+            events.first(),
+            Some(cfe::dop::ClosureEvent::UniverseFounded { .. })
+        ));
+        assert!(events
+            .iter()
+            .any(|e| matches!(e, cfe::dop::ClosureEvent::EraFolded { .. })));
+        assert_eq!(
+            held.receipts()[0].own().0,
+            seed,
+            "the Big Bang is kept, not reverted"
+        );
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

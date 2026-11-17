@@ -2129,7 +2129,7 @@ fn command(world: &mut World, line: &str, style: &Style, current: &mut u64) {
                         }
                     }
                 }
-                Some("contract") => match conductor::fold("var") {
+                Some("contract") => match conductor::cradle::seal("var") {
                     Ok((era, gauge)) => println!(
                         "{} the board CONTRACTS — era {era} sealed into var-era{era}; the new sheet seats at G = {}",
                         style.ok("✓"),

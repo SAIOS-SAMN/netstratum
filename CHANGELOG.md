@@ -50,6 +50,11 @@ change is named here.
 
 ### Added
 
+- The cradle's seal deed (docs/140 §3, #251): `conductor::fold` is moved
+  whole into `cradle::seal`, which `conductor --fold` and the CLI's
+  `contract` now call. Witness: the era is archived whole into
+  `<base>-era1`, its universe ledger readable, the Big Bang kept and
+  `EraFolded` after it.
 - The cradle's extend deed (docs/140 C3, D2, #250): `cradle::extend(var,
   parcel, source)`. A live universe receives matter at its universal core's
   throat from a named source (a growth grant, an inbound crossing, or a
