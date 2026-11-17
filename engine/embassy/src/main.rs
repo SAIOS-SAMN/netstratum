@@ -368,7 +368,9 @@ fn apply_cmd(up: &Embassy, args: &[String], home: &Path) -> ExitCode {
 /// to this domain's reserve, or map this domain's side of it.
 fn mouth_cmd(up: &Embassy, args: &[String], home: &Path, map: bool) -> ExitCode {
     let usage = || {
-        eprintln!("usage: ns-embassy mouth-accept <id hex> | mouth-map <id hex> <side> <freshness>");
+        eprintln!(
+            "usage: ns-embassy mouth-accept <id hex> | mouth-map <id hex> <side> <freshness>"
+        );
         ExitCode::from(2)
     };
     let Some(id) = args.get(2).and_then(|h| ns_embassy::mouth::id_of(h).ok()) else {

@@ -5,8 +5,9 @@
 //! the uplink's session. Nothing here runs unless a command names it.
 use crate::refound::{fresh, load_key};
 use mycelium_sdk::house::{
-    decode_domain_request, decode_handoff_reply, decode_map_reply, encode_handoff, encode_map,
-    DomainRequest, Handed, Handoff, MapAct, MapRecord, Mapped, Nuclei,
+    decode_domain_request, decode_handoff_reply, decode_map_reply, encode_handoff,
+    encode_handoff_read, encode_map, DomainRequest, Handed, Handoff, MapAct, MapRecord, Mapped,
+    Nuclei,
 };
 use mycelium_sdk::session::Session;
 use std::io;
@@ -49,9 +50,13 @@ pub fn map(
     let domain = load_key(home, "tier-domain.key")?
         .verifying_key()
         .to_bytes();
+    // The mouth's own standing read first: it reads the court's final point,
+    // the one the map then cites.
+    session.speak(encode_handoff_read(id))?;
     let point = session
         .tuniversal()
         .ok_or_else(|| io::Error::other("no final TUniversal point read yet"))?;
+    eprintln!("  mapping at the final point h {}", point.h);
     let act = MapAct {
         domain,
         point: point.clone(),
