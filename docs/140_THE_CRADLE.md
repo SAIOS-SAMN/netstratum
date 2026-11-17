@@ -75,7 +75,8 @@ v0.1.0.
 - **D2 (extension is a delta).** An extend deed changes the throat's mix
   by its parcel. The release, the capture phases and the flows read the new
   mix from that bell on. Nothing before the deed is re-run.
-- **D3 (a test domain is a found deed with fresh keys).** The trial's steps
+- **D3 (a test domain is a found deed with fresh keys; built, #249,
+  `ns-embassy found-test`).** The trial's steps
   become one call: `found` with a seed, then the embassy's refound, then
   `apply`. The keys are minted by the cradle for a test domain, and never
   for a live domain ("a new key is a new domain").

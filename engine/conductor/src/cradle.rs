@@ -10,6 +10,9 @@
 //! `(count, g)` in a store, and a second founding there is a load and an
 //! orientation. The held universe reads back exactly (`pulse::read`). Each
 //! founding says whether it reused a held one: the work counted, never timed.
+//!
+//! **Advance** (#249): a founded universe breathed forward from its
+//! checkpoint, the beat a ledger entry cites.
 use crate::pulse::{self, Manifest, Universe};
 use cfe::ratio::Ratio;
 use std::path::{Path, PathBuf};
@@ -63,6 +66,27 @@ pub fn found(
         universe,
         reused,
     })
+}
+
+/// The founded universe in `var_root` advanced to bell `until`, bell by
+/// bell as the conductor beats (`breath::breathe`), from its checkpoint
+/// (`conductor.beat`), never from the founding. It is written back with its
+/// beat. Returns the bell it stands at.
+pub fn advance(var_root: &Path, until: u64) -> std::io::Result<u64> {
+    let (seed, mut u) =
+        pulse::read(var_root).ok_or_else(|| std::io::Error::other("no universe at pulse.bin"))?;
+    let start: u64 = std::fs::read_to_string(var_root.join("conductor.beat"))
+        .ok()
+        .and_then(|t| t.trim().parse().ok())
+        .unwrap_or(0);
+    let t_u = u.t_u;
+    for b in start..until {
+        crate::breath::breathe(&mut u, &seed, t_u, b, b + 1);
+    }
+    let at = until.max(start);
+    pulse::write(var_root, &seed, &u)?;
+    std::fs::write(var_root.join("conductor.beat"), at.to_string())?;
+    Ok(at)
 }
 
 #[cfg(test)]

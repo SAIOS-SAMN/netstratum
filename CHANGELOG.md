@@ -50,6 +50,13 @@ change is named here.
 
 ### Added
 
+- The test domain as one deed (docs/140 D3, #249): `ns-embassy found-test
+  <var> <grains> [phrase] --home <var>/embassy`. In one command it mints
+  fresh keys (refused where any tier key stands), founds with the cradle,
+  records the Big Bang (`ledger::found_universe`), refounds, advances one
+  bell (`cradle::advance`) and applies the grant (`refound::apply`). Read: a
+  second test domain was founded this way on integ-v4, grant 73ae8774
+  applied at u 1 (h 11767).
 - The cradle's found deed (docs/140 §2 D1, #248): `cradle::found(store,
   count, g, seed)`, with `pulse::founding_at(count, g)` at any place's held
   share (the throat's ½ is `pulse::founding`). The deployed universe is

@@ -697,3 +697,38 @@ pub fn map_gates(
     std::fs::rename(staged, mapped_path)?;
     Ok((said, unknown))
 }
+
+/// The domain's grants applied (78.184; mycelium #343): each grant the court
+/// reads as not applied, listed `(manifest hash, u)` in the `applied` of the
+/// next ledger entry, signed by the reserve at the world's beat `u`. Returns
+/// what was said.
+pub fn apply(session: &Session, home: &Path, var_root: &Path) -> io::Result<Vec<String>> {
+    use mycelium_sdk::house::read_endowment;
+    let domain = load_key(home, "tier-domain.key")?
+        .verifying_key()
+        .to_bytes();
+    let r = read_endowment(domain, |ask| session.speak(ask).ok())
+        .ok_or_else(|| io::Error::other("the endowment did not assemble"))?;
+    let u: u64 = std::fs::read_to_string(var_root.join("conductor.beat"))
+        .ok()
+        .and_then(|t| t.trim().parse().ok())
+        .unwrap_or(0);
+    let applied: Vec<([u8; 32], u64)> = r
+        .grants
+        .iter()
+        .filter(|g| !g.applied)
+        .map(|g| (g.manifest, u))
+        .collect();
+    if applied.is_empty() {
+        return Ok(vec!["no grant waits to be applied".into()]);
+    }
+    let mut said: Vec<String> = applied
+        .iter()
+        .map(|(m, _)| {
+            let id: String = m.iter().take(4).map(|b| format!("{b:02x}")).collect();
+            format!("applying grant {id} at u {u}")
+        })
+        .collect();
+    said.push(post_ledger(session, home, var_root, u, applied)?);
+    Ok(said)
+}
