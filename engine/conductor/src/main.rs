@@ -39,7 +39,7 @@ fn main() {
     // sequence and stop; the next boot converges it onto the new
     // aeon's G-sheet. Nothing is destroyed.
     if do_fold {
-        match conductor::fold(&var_root) {
+        match conductor::cradle::seal(&var_root) {
             Ok((era, gauge)) => {
                 println!(
                     "conductor: aeon folded — era {era} sealed into {var_root}-era{era}; the new sheet seats at G = {gauge}"

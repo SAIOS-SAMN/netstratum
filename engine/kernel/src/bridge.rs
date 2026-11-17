@@ -621,7 +621,7 @@ pub fn read_entangled_observed(state: &Committed, unknown: usize) -> EntangledRe
 /// no plane was ever closed, and the floor would still be breached.
 ///
 /// **The fold as built is total** and therefore already safe: the era
-/// is archived whole (`conductor::fold` rotates the entire var root)
+/// is archived whole (`conductor::cradle::seal` rotates the entire var root)
 /// and the successor seats fresh at `GROUND`. *Nothing is destroyed;
 /// the fold is archival by construction.* This guard exists so that
 /// stays true of every future fold rather than of this one only —

@@ -115,6 +115,6 @@ v0.1.0.
 2. The test-domain deed (D3), retiring the hand-made trial steps.
 3. `cradle::extend` for growth, then for the inbound crossing when #109
    derives the throat's keep formula. Witness 3.
-4. `cradle::seal` over `conductor::fold`. Witness 4.
+4. `cradle::seal`, `conductor::fold` moved into it whole (built, #251). Witness 4.
 5. Founding at a galactic core (V6, #213), witness 5. This is where the
    table's reach can grow by the places that hold heavy matter.
