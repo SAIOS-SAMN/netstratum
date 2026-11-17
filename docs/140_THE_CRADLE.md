@@ -104,7 +104,7 @@ v0.1.0.
 5. Found at a galactic core's place gives that core's own table, read
    beside the universal core's.
 
-## 5. Build order (#246)
+## 5. Build order (#246: steps #248, #249, #250, #251, #252)
 
 1. `cradle::found` in place of the `pulse` binary's body, with the table
    held per `(count, g)` (D1). Witnesses 1 and 2.
