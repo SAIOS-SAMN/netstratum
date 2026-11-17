@@ -13,7 +13,10 @@ and the code are right.
 
 **State**
 - `main` is clean, with no open PRs.
-- Mycelium is pinned at main 751aa40e (manifest v4).
+- The network client crate is `engine/embassy` (`ns-embassy`), renamed
+  from `hypha` (#243).
+- Mycelium is pinned at main d1f728f1. Mycelium main is now ca3b8be8 (#377,
+  no wire change); re-pin with the next network-side change.
 - On the mesh (127.0.0.1:8500–8502, integ-v4), the domain da34b0b5 is
   re-founded on v4:
   - grant 4738a7da, 1495 entries, applied at u 3, confirmed from the court's
@@ -22,9 +25,11 @@ and the code are right.
 - The table: a 2^40 founding reaches weight **1708** (merger channel, E79,
   #231), up from 1508.
 
-**Ruled (operator 2026-11-17):** seed 7's mouth `57ff54ac…849f8b` is
-traded first on a separate test domain (#240). The real domain trades from
-v0.6.0, by the trajectory below.
+**The trial is done (#240):** two crossings with seed 7 were sealed on the
+test domain var-trial (h 7608 and h 11610). The court read +6/−6 thirds
+each time. Test domains: var-trial and var-trial2; reuse var-trial2.
+The real domain da34b0b5 trades from v0.6.0, by the trajectory below.
+Seed 7's mouth `57ff54ac…` stays offered to it, unanswered by design.
 
 **Next, in order**
 1. **#246, the cradle** (docs/140): the progenitor's machine.
