@@ -65,6 +65,7 @@ use std::path::Path;
 pub mod civic;
 pub mod coordinate;
 pub mod coupling;
+pub mod cradle;
 pub mod orientation;
 pub mod strip;
 pub mod torsion;

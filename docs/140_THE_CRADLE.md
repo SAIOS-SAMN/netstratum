@@ -63,9 +63,12 @@ v0.1.0.
 
 ## 2. Derived
 
-- **D1 (a table is held, not rebuilt).** `found` is a function of
-  `(count, place)`, so a table is computed once per `(count, g)` and held,
-  with its own receipt (its witness: nucleons conserved). Re-founding,
+- **D1 (the deployment is held, not rebuilt).** `found` is a function of
+  `(count, place)` up to the seed's orientation. The table is cheap; the
+  cost is `deploy`, which reads only the table. So the deployed, un-oriented
+  universe is computed once per `(count, g)` and held (built in #248,
+  `cradle::found`). It is used only where its total is the table
+  (conservation), and each founding orients it by its own seed. Re-founding,
   test domains and galactic cores at the same `(count, g)` reuse it. That
   answers #233's repetition. The filter's all-pairs cost (#233) is paid
   once per table, and is derived separately.
