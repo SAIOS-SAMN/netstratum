@@ -44,6 +44,11 @@ change is named here.
 
 ### Added
 
+- ROADMAP, "The trade with Xylarium": the trajectory from today's
+  test-domain trial (#240) through the kinds (#213), time at crossings
+  (#198, #207), inbound, outbound and the round trip (#109), to the treaty's
+  countersignature (#239). The operator ruled on 2026-11-17 that the trial
+  runs on a test domain and the real domain trades from v0.6.0.
 - `ns-hypha mouth-accept <id>` and `mouth-map <id> <side> <freshness>`
   (`ns_hypha::mouth`, Mycelium 78.128, #109): the union reserve accepts a
   wormhole mouth offered to the domain and maps its side of it.
