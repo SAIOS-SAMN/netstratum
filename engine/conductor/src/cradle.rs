@@ -189,6 +189,37 @@ pub fn extensions(var_root: &Path) -> std::io::Result<Vec<Manifest>> {
         .collect()
 }
 
+/// **Every singularity its own table** (docs/140 C2, #252; V6). Each core
+/// founds at its own throat, where it holds and its own held share is the
+/// fixed point ½ (docs/105 §4), with its own nucleons. So its table is
+/// `found(count, ½)` at its own count, the throat's nuclei in whole nuclei.
+/// Returns, for each core of `u` (the home first), its path, its nuclei,
+/// and the frontier its own founding reaches. The founding is run, never
+/// set.
+pub fn singularity_tables(u: &Universe) -> Vec<(Vec<u64>, num_bigint::BigInt, u32)> {
+    let grid = pulse::nuclei_per_grain() * num_bigint::BigInt::from(1024);
+    let g = crate::polarity::throat_held();
+    let mut cores: Vec<&pulse::Body> = u.cores.iter().collect();
+    cores.sort_by_key(|c| !pulse::is_home(c));
+    cores
+        .into_iter()
+        .map(|c| {
+            let held = c.throat.iter().fold(ratio(0, 1), |s, (k, a)| {
+                s + a.clone() * ratio(i64::from(crate::chem::weight(k)), 1)
+            });
+            let nuclei = (held * Ratio::from_integer(grid.clone()))
+                .floor()
+                .to_integer();
+            let top = pulse::founding_at(&nuclei, &g)
+                .keys()
+                .filter_map(crate::chem::atom_w)
+                .max()
+                .unwrap_or(0);
+            (c.path.clone(), nuclei, top)
+        })
+        .collect()
+}
+
 /// **Seal** (docs/140 §3, #251): the era closed as the cradle's deed. It was
 /// `conductor::fold`, moved here whole.
 ///
