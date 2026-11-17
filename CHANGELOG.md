@@ -25,8 +25,8 @@ change is named here.
   (Q 988, Z 720), up from 1508, with 1706 nuclides and the 3Z conservation
   true. Witness: with no merger the table is §14's one chain exactly, and
   nucleons are conserved.
-- Mycelium SDK pinned to main 751aa40e (#360 and #362 squashed; the wire is
-  the same as f5ea695c, branch manifest-v4). Manifest v4 entries come from `refound::manifest_entry`:
+- Mycelium SDK pinned to main d1f728f1 (manifest v4 with #368, #370 the
+  pattern complement, and #371 matter is no gas). Manifest v4 entries come from `refound::manifest_entry`:
   - counts in thirds;
   - the eight lone-end patterns (docs/97 §15.7), every lone end open today;
   - no planes.
