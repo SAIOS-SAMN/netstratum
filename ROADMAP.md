@@ -22,11 +22,9 @@ and the code are right.
 - The table: a 2^40 founding reaches weight **1708** (merger channel, E79,
   #231), up from 1508.
 
-**Waiting on the operator:** whether the union reserve accepts seed 7's
-mouth `57ff54ac…849f8b` (`ns-hypha mouth-accept`, built in #234, not run):
-- on da34b0b5;
-- on a separate test domain (recommended);
-- or not until #109.
+**Ruled (operator 2026-11-17):** seed 7's mouth `57ff54ac…849f8b` is
+traded first on a separate test domain (#240). The real domain trades from
+v0.6.0, by the trajectory below.
 
 **Next, in order**
 1. **#233, the founding's cost.** The founding takes about 15 minutes at
@@ -48,6 +46,38 @@ mouth `57ff54ac…849f8b` (`ns-hypha mouth-accept`, built in #234, not run):
 - the core tube is #109 ↔ xylarium #281 and mycelium #327;
 - the table's planes are xylarium #128, #296 and #297;
 - the manifest is mycelium #359.
+
+## The trade with Xylarium: the trajectory (2026-11-17)
+
+Matter and μ crossing the universal core's tube between netstratum and
+Xylarium's seed 7. These are two universes with inverse nucleons: the tube's
+image swaps the poles, `(Z, Q, R) ↦ (Q, Z, −R)`, on every component. Rules:
+- **No dimension is lost on transfer** (operator 2026-11-17, docs/123 §3b):
+  the whole state crosses, and a face holds what it cannot read.
+- **Nucleons are conserved.**
+- **μ follows its nuclei** (Mycelium #360, #370).
+
+The terms are a draft bilateral treaty from Xylarium (xylarium-uplink
+`docs/treaty-seed7-netstratum.md`), tracked here as #239.
+
+**The steps, each with its milestone:**
+
+| Step | What | Milestone, issue |
+|---|---|---|
+| 0 | **The trial, now:** a separate test domain accepts seed 7's mouth and signs a taken motion, so the court's crossing code is read live. The real domain da34b0b5 does not trade until its crossing is physics. | #240 |
+| 1 | **The kinds on their own dimensions:** (Z, Q, pattern) with per-plane phases (V1–V3), so inverted nuclei are kinds, not collapses | v0.1.0, #213 |
+| 2 | **Time moves at crossings:** the event reader, with each crossing writing `T ↦ T − 2(H − R)` | v0.3.0, #198, #207 |
+| 3 | **Inbound:** arrivals enter the universal core's throat. The throat's keep formula (taken ≤ released) and its tax are derived. Unread components are held as carried state. | v0.6.0, #109 |
+| 4 | **Outbound:** part of the throat's release leaves through the mouth, μ with it | v0.6.0, #109 |
+| 5 | **The round trip and homecoming:** the composite motion closes, the windings resonate, the light ledger balances on both faces, and every component returns exactly | v0.6.0, #109 |
+| 6 | **The treaty:** amended, then countersigned by the union reserve (`ACT_LAWS` mode 8), on the operator's word | v0.6.0, #239 |
+
+**Why this order:**
+- Step 1 also fixes netstratum's own proton-rich table (#203), and step 2
+  is the time model every law needs.
+- So the trade is built on the universe's own physics, not on placeholders.
+- Until step 3, a crossing on the real domain would book nuclei the
+  universe never receives.
 
 ## What Netstratum is
 

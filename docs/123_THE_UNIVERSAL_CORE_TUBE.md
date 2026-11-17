@@ -156,6 +156,21 @@ Mycelium also confirms:
 Netstratum's entries are 8 long (`refound::manifest_entry`), as the check
 requires.
 
+## 3c. The trajectory to the trade
+
+docs/123's crossing is built in the order of ROADMAP, "The trade with
+Xylarium":
+1. the trial on a test domain (#240);
+2. the kinds on (Z, Q, pattern) (#213);
+3. time at crossings (#198, #207);
+4. inbound to the universal core's throat, with its keep formula and
+   carried state;
+5. outbound;
+6. the round trip (#109);
+7. the treaty (#239).
+
+The real domain da34b0b5 trades only from step 4 (operator 2026-11-17).
+
 ## 4. Open
 
 1. **What crosses.** Matter only, or also μ and attached minds' acts
