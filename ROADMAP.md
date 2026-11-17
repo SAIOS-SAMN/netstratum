@@ -9,45 +9,45 @@ What Netstratum is, what works today, and where each part is heading. This
 page is kept current; where a design document disagrees with it, this page
 and the code are right.
 
-## Now (2026-11-16): where to pick up
+## Now (2026-11-17): where to pick up
 
 **State**
-- `main` is clean.
-- Open: PR #226, the Mycelium manifest v4 pin (f5ea695c, mycelium #362 on
-  #360). It merges after Mycelium reads the grant from the court's side, and
-  re-pins to Mycelium's main once #362 lands there.
-- On the mesh (127.0.0.1:8500–8502, integ-v4, recut 2026-11-16), the domain
-  da34b0b5 is re-founded:
-  - manifest v4 Sealed at h 1085: grant 4738a7da, 1495 entries;
-  - ledger at u 2 (h 1136);
-  - the grant applied at u 3 (h 1540);
-  - the reserve holds μ 0 and waits for a T delivery. Read
-    `ns-hypha standing` when T moves.
+- `main` is clean, with no open PRs.
+- Mycelium is pinned at main 751aa40e (manifest v4).
+- On the mesh (127.0.0.1:8500–8502, integ-v4), the domain da34b0b5 is
+  re-founded on v4:
+  - grant 4738a7da, 1495 entries, applied at u 3, confirmed from the court's
+    side;
+  - the reserve holds the first v4 delivery, half the allotment.
+- The table: a 2^40 founding reaches weight **1708** (merger channel, E79,
+  #231), up from 1508.
+
+**Waiting on the operator:** whether the union reserve accepts seed 7's
+mouth `57ff54ac…849f8b` (`ns-hypha mouth-accept`, built in #234, not run):
+- on da34b0b5;
+- on a separate test domain (recommended);
+- or not until #109.
 
 **Next, in order**
-1. **#213, the elemental table to weight 1700–2500** (docs/97 §15). The
-   scope (V1–V15), the per-plane state, the opened volume and F1–F3 are
-   derived. The reach is bound by the founding's nucleons (§15.11): the fuel
-   budget and the survival tail meet near 1508 (§15.12). No held share the
-   record derives reaches the range (§15.13–§15.14). **Built:** the merger
-   channel, V4 (§15.15, E79). The frontier is **1708 at 2^40**, inside the
-   range. Next: the founding's cost in `deploy`, then the rest of the scope
-   (V1–V3 kinds, V8, V13's read of the core).
-2. **#206 step 4:** the read of where the composed turning moves spin
-   between planes.
-3. **#220, the jetstream as volume** (docs/139, derived), built through
-   #158 on the R-partner planes.
-4. **#198 and #207:** the event reader, and the echo at each mote's own
-   coordinate. T moves only at crossings.
-
-**Waiting on the operator:** whether our reserve signs Mycelium's hand-made
-test crossing for mycelium #360 (recommended: a separate test domain).
+1. **#233, the founding's cost.** The founding takes about 15 minutes at
+   2^40. `cascade`'s filter is all pairs over shells. Count its work, then
+   restate it on ranges if the derivation allows.
+2. **#213, the table** (docs/97 §15):
+   - V13, the universal core read on the 1708 table against the old one;
+   - V1–V3, the kinds on (Z, Q, pattern), whole members with per-plane
+     phases;
+   - V8, seeds forming over rings.
+3. **#206 step 4:** the spin ledger read before and after the composed
+   turning.
+4. **#220 through #158:** the jetstream as volume on the R-partner planes,
+   which retires `Mote::vacuum`.
+5. **#198 and #207:** the event reader. T moves only at crossings, and each
+   echo is read at the mote's own coordinate.
 
 **Across the seams:**
-- the time seam is closed (#210);
-- the core tube is #109 ↔ xylarium #281;
-- the table's planes and frontier are xylarium #128, #296 and #297;
-- the manifest is mycelium #359 and #362.
+- the core tube is #109 ↔ xylarium #281 and mycelium #327;
+- the table's planes are xylarium #128, #296 and #297;
+- the manifest is mycelium #359.
 
 ## What Netstratum is
 
