@@ -741,6 +741,16 @@ pub fn capture_phases(m: &Manifest) -> Manifest {
 /// bead of the shells, (its pinch's reach in throat radii, its kinds)).
 /// No draws: the galaxies are the shells' own beads.
 pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio) {
+    cascade_with(manifest, true)
+}
+
+/// [`cascade`], with the filter's exact prune (#233) on or off. A pair's
+/// take is at most `a·½·m_i/(m_i + m_j)` of each kind `a` of the giving
+/// shell, since `gripped ≤ 1` and `contact ≤ ½`. Where even the most a shell
+/// holds of any kind floors to no whole nucleus, the take is empty and the
+/// pair is skipped before its grips and deficits are read. The result is
+/// identical either way (the witness `the_filters_prune_is_exact`).
+fn cascade_with(manifest: &Manifest, prune: bool) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio) {
     // On the GRAIN, owed exact (ruling of 2026-10-24, with Xylarium: no
     // approximations): the filter no longer nests its means (it
     // reads the release, below), but the exact spin K sums ~200 distinct
@@ -868,12 +878,25 @@ pub fn cascade(manifest: &Manifest) -> (Manifest, Vec<(Ratio, Manifest)>, Ratio)
         .collect();
     let d_rel: Vec<Ratio> = released.iter().map(|(_, r)| delta(r)).collect();
     let band: Vec<(Ratio, Ratio)> = released.iter().map(|(_, r)| (lo(r), hi(r))).collect();
+    // The most each released shell holds of any one kind: the prune's bound.
+    let a_max: Vec<Ratio> = released
+        .iter()
+        .map(|(m, _)| m.values().max().cloned().unwrap_or_else(|| ratio(0, 1)))
+        .collect();
     for i in 1..released.len() {
         let (mi, ri) = (m_rel[i].clone(), released[i].1.clone());
         for j in 0..i {
             let mj = m_rel[j].clone();
             let (lo_j, hi_j) = (&band[j].0, &band[j].1);
             if mj.is_zero() || mi.is_zero() || ri <= *lo_j {
+                continue;
+            }
+            if prune
+                && nucleus(
+                    &(a_max[j].clone() * mi.clone() / (ratio(2, 1) * (mi.clone() + mj.clone()))),
+                )
+                .is_zero()
+            {
                 continue;
             }
             let crossed = if ri >= *hi_j {
@@ -2683,6 +2706,19 @@ mod tests {
             "{} against {}",
             top(&merged),
             top(&chain)
+        );
+    }
+
+    /// #233: the filter's prune is exact. On a founding's table the cascade
+    /// with the prune equals the cascade without it, every shell and the
+    /// echo.
+    #[test]
+    fn the_filters_prune_is_exact() {
+        let m = super::founding(&num_bigint::BigInt::from(10u32).pow(12));
+        assert!(m.len() > 10, "a table with shells to filter");
+        assert_eq!(
+            super::cascade_with(&m, true),
+            super::cascade_with(&m, false)
         );
     }
 

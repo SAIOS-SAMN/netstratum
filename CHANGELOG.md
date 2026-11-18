@@ -12,6 +12,11 @@ change is named here.
 
 ### Changed
 
+- `pulse::cascade`'s filter skips, exactly, a pair whose take cannot reach
+  one whole nucleus: `take ≤ a·½·m_i/(m_i + m_j)` (#233). Witness: the
+  cascade with and without the prune is equal
+  (`the_filters_prune_is_exact`). Counted on a 2^4 founding (1259 shells):
+  791,911 pairs, 300,939 nonzero takes, and 87,934 pairs pruned (11%).
 - The crate `hypha` (`ns-hypha`) is renamed `embassy` (`ns-embassy`), and
   its `Uplink` type `Embassy` (register H3). Mycelium's servers are its
   hyphas, `uplink` is Xylarium's crate and Mycelium's SDK module, and
