@@ -66,7 +66,7 @@ defined in [GLOSSARY.md](GLOSSARY.md), not by their everyday meaning.
 | `scripts/check` | ~15-25 min | fmt, clippy `-D warnings`, tests, rustdoc `-D warnings`, links; a tool, not a gate |
 | `cargo test -p conductor --lib <name>` | Seconds | Run the changed module's tests while working |
 | `cargo build --release -p conductor --bin <bin>` | 1-3 min | The era-1 binaries: `pulse`, `breathe`, `observe` |
-| `target/release/pulse <dir> found 2^40` | ~15 min (read 2026-11-16) | Founds a universe; refuses an existing one |
+| `target/release/pulse <dir> found 2^40` | ~3 min first, then a load (read 2026-11-18; the cradle holds the deployment) | Founds a universe; refuses an existing one |
 | `target/release/breathe <dir> <bell> x write` | Seconds to minutes a bounce | Advances and saves; time-box each read |
 
 - Long physics reads are time-boxed and run one at a time; they are never
