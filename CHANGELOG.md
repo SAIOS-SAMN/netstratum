@@ -12,6 +12,13 @@ change is named here.
 
 ### Changed
 
+- `pulse::cascade`'s filter runs in integers over the nucleus grid (#233,
+  `pulse::{pair_share, Share}`). Masses are integers `M = mass·grid`, a
+  pair's share is one unreduced fraction with no gcd at each step, each take
+  is one integer floor, and the prune is an integer comparison. Witnesses:
+  `the_filters_integer_form_is_exact` (pair_share equals the rational form
+  over a spread of inputs), and a fresh 2^4 deployment decodes equal to the
+  one the rational filter made (example `same_universe`).
 - `pulse::cascade`'s filter skips, exactly, a pair whose take cannot reach
   one whole nucleus: `take ≤ a·½·m_i/(m_i + m_j)` (#233). Witness: the
   cascade with and without the prune is equal
