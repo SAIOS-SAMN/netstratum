@@ -624,6 +624,113 @@ pub fn disperse(grains: &Manifest) -> Manifest {
         .collect()
 }
 
+/// A pair's share of the giving shell's mix, an unreduced fraction `n/d`
+/// (#233): no gcd at each step; read once, by an integer floor.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Share {
+    pub n: num_bigint::BigInt,
+    pub d: num_bigint::BigInt,
+}
+
+impl Share {
+    fn of(r: &Ratio) -> Share {
+        Share {
+            n: r.numer().clone(),
+            d: r.denom().clone(),
+        }
+    }
+
+    fn times(&self, o: &Share) -> Share {
+        Share {
+            n: &self.n * &o.n,
+            d: &self.d * &o.d,
+        }
+    }
+
+    fn over(&self, o: &Share) -> Share {
+        Share {
+            n: &self.n * &o.d,
+            d: &self.d * &o.n,
+        }
+    }
+
+    /// `self < o`, both with positive denominators.
+    fn below(&self, o: &Share) -> bool {
+        &self.n * &o.d < &o.n * &self.d
+    }
+
+    /// The exact value, reduced.
+    pub fn value(&self) -> Ratio {
+        Ratio::new(self.n.clone(), self.d.clone())
+    }
+}
+
+/// The share a lighter shell `i` takes of a heavier shell `j`'s mix when it
+/// passes out through it (docs/111; the cascade's filter), in integers over
+/// the nucleus grid: masses `M_i`, `M_j` of the whole `T`, `i`'s reach `r_i`
+/// against `j`'s band `(lo, hi)`, the grips `g` and the deficits `d`. It is
+/// `contact · min(bind, t)/t · M_i/(M_i + M_j)`, with:
+/// - `contact = ½·crossed`;
+/// - `bind = s·(M_i + M_j)/(M_i + M_j + (1 − contact)·T)`;
+/// - `s` the grips' ratio, the lesser over the greater;
+/// - `t = |d_i − d_j|/(d_i + d_j)`.
+///
+/// None where nothing is taken.
+#[allow(clippy::too_many_arguments)]
+pub fn pair_share(
+    mi: &num_bigint::BigInt,
+    mj: &num_bigint::BigInt,
+    t_all: &num_bigint::BigInt,
+    ri: &Ratio,
+    lo: &Ratio,
+    hi: &Ratio,
+    gi: &Ratio,
+    gj: &Ratio,
+    di: &Ratio,
+    dj: &Ratio,
+) -> Option<Share> {
+    let crossed = if ri >= hi {
+        ratio(1, 1)
+    } else {
+        (ri.clone() - lo.clone()) / (hi.clone() - lo.clone())
+    };
+    let contact = Share::of(&(ratio(1, 2) * crossed));
+    let s = if gi.is_zero() || gj.is_zero() {
+        return None;
+    } else if gi < gj {
+        gi / gj
+    } else {
+        gj / gi
+    };
+    let t = if di > dj { di - dj } else { dj - di } / (di + dj);
+    if t.is_zero() {
+        return None;
+    }
+    let mij = mi + mj;
+    // bind = s·M_ij/(M_ij + (1 − contact)·T), unreduced.
+    let rest = Share {
+        n: &contact.d - &contact.n,
+        d: contact.d.clone(),
+    };
+    let denom = Share {
+        n: &mij * &rest.d + &rest.n * t_all,
+        d: rest.d.clone(),
+    };
+    let bind = Share::of(&s)
+        .times(&Share {
+            n: mij.clone(),
+            d: num_bigint::BigInt::from(1),
+        })
+        .over(&denom);
+    let t = Share::of(&t);
+    let least = if bind.below(&t) { bind } else { t.clone() };
+    let f = contact.times(&least.over(&t)).times(&Share {
+        n: mi.clone(),
+        d: mij,
+    });
+    (f.n > num_bigint::BigInt::from(0)).then_some(f)
+}
+
 /// The universe the pulse deploys: its cores, and the intergalactic medium.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Universe {
@@ -865,69 +972,48 @@ fn cascade_with(manifest: &Manifest, prune: bool) -> (Manifest, Vec<(Ratio, Mani
     let lo = |r: &Ratio| r.clone() * (ratio(1, 1) - s_final.clone());
     let hi = |r: &Ratio| r.clone() * (ratio(1, 1) + s_final.clone());
     let released = shells.clone();
-    // (i catching, j giving, the share of j's mix i takes).
-    let mut passes: Vec<(usize, usize, Ratio)> = Vec::new();
-    // Each released shell read once: its share, grip, deficit and spread.
-    let m_rel: Vec<Ratio> = released
-        .iter()
-        .map(|(m, _)| mass(m) / total.clone())
-        .collect();
+    // The filter in integers (#233): every mass stands on the nucleus grid,
+    // so each shell's mass is the integer `M = mass·grid`, and the whole
+    // `T = total·grid`. The grips, deficits and contact keep their own small
+    // denominators. A pair's share is carried as one unreduced fraction
+    // (no gcd at each step), and its take is one integer floor. The values
+    // are the same exact rationals as `pair_share` reads them (the witness
+    // `the_filters_integer_form_is_exact`).
+    let grid = nuclei_per_grain() * num_bigint::BigInt::from(1024);
+    let on_grid = |x: &Ratio| (x.clone() * Ratio::from_integer(grid.clone())).to_integer();
+    let m_int: Vec<num_bigint::BigInt> = released.iter().map(|(m, _)| on_grid(&mass(m))).collect();
+    let t_int = on_grid(&total);
     let g_rel: Vec<Ratio> = released
         .iter()
         .map(|(m, _)| crate::formation::grip(m))
         .collect();
     let d_rel: Vec<Ratio> = released.iter().map(|(_, r)| delta(r)).collect();
     let band: Vec<(Ratio, Ratio)> = released.iter().map(|(_, r)| (lo(r), hi(r))).collect();
-    // The most each released shell holds of any one kind: the prune's bound.
-    let a_max: Vec<Ratio> = released
+    // The most each released shell holds of any one kind, on the grid: the
+    // prune's bound.
+    let a_max: Vec<num_bigint::BigInt> = released
         .iter()
-        .map(|(m, _)| m.values().max().cloned().unwrap_or_else(|| ratio(0, 1)))
+        .map(|(m, _)| m.values().map(&on_grid).max().unwrap_or_default())
         .collect();
+    let zero_int = num_bigint::BigInt::from(0);
+    // (i catching, j giving, the share of j's mix i takes, unreduced).
+    let mut passes: Vec<(usize, usize, Share)> = Vec::new();
     for i in 1..released.len() {
-        let (mi, ri) = (m_rel[i].clone(), released[i].1.clone());
+        let (mi, ri) = (&m_int[i], &released[i].1);
         for j in 0..i {
-            let mj = m_rel[j].clone();
+            let mj = &m_int[j];
             let (lo_j, hi_j) = (&band[j].0, &band[j].1);
-            if mj.is_zero() || mi.is_zero() || ri <= *lo_j {
+            if *mj == zero_int || *mi == zero_int || *ri <= *lo_j {
                 continue;
             }
-            if prune
-                && nucleus(
-                    &(a_max[j].clone() * mi.clone() / (ratio(2, 1) * (mi.clone() + mj.clone()))),
-                )
-                .is_zero()
-            {
+            // take ≤ A·½·M_i/(M_i + M_j): skip where it reaches no nucleus.
+            if prune && &a_max[j] * mi < num_bigint::BigInt::from(2) * (mi + mj) {
                 continue;
             }
-            let crossed = if ri >= *hi_j {
-                ratio(1, 1)
-            } else {
-                (ri.clone() - lo_j.clone()) / (hi_j.clone() - lo_j.clone())
-            };
-            let contact = ratio(1, 2) * crossed;
-            let (gi, gj) = (g_rel[i].clone(), g_rel[j].clone());
-            let s = if gi.is_zero() || gj.is_zero() {
-                ratio(0, 1)
-            } else if gi < gj {
-                gi / gj
-            } else {
-                gj / gi
-            };
-            let m_ij = mi.clone() + mj.clone();
-            let bind = s * m_ij.clone() / (m_ij.clone() + ratio(1, 1) - contact.clone());
-            let (di, dj) = (d_rel[i].clone(), d_rel[j].clone());
-            let t = (if di > dj {
-                di.clone() - dj.clone()
-            } else {
-                dj.clone() - di.clone()
-            }) / (di + dj);
-            if t.is_zero() {
-                continue;
-            }
-            let gripped = bind.min(t.clone()) / t;
-            let fraction = contact * gripped * mi.clone() / m_ij;
-            if fraction > ratio(0, 1) {
-                passes.push((i, j, fraction));
+            if let Some(f) = pair_share(
+                mi, mj, &t_int, ri, lo_j, hi_j, &g_rel[i], &g_rel[j], &d_rel[i], &d_rel[j],
+            ) {
+                passes.push((i, j, f));
             }
         }
     }
@@ -941,7 +1027,10 @@ fn cascade_with(manifest: &Manifest, prune: bool) -> (Manifest, Vec<(Ratio, Mani
             let take: Manifest = released[j]
                 .0
                 .iter()
-                .map(|(k, a)| (k.clone(), nucleus(&(a.clone() * f.clone())).min(a.clone())))
+                .map(|(k, a)| {
+                    let count = (on_grid(a) * &f.n / &f.d).min(on_grid(a));
+                    (k.clone(), Ratio::new(count, grid.clone()))
+                })
                 .filter(|(_, a)| *a > ratio(0, 1))
                 .collect();
             (i, j, take)
@@ -2707,6 +2796,50 @@ mod tests {
             top(&merged),
             top(&chain)
         );
+    }
+
+    /// #233: the filter's integer form is exact. `pair_share`'s value is the
+    /// rational form's, `contact·min(bind, t)/t·m_i/m_ij` with
+    /// `bind = s·m_ij/(m_ij + 1 − contact)` and `m = M/T`, over a spread of
+    /// shells, crossings, grips and deficits.
+    #[test]
+    fn the_filters_integer_form_is_exact() {
+        use num_bigint::BigInt;
+        let q = |n: i64, d: i64| ratio(n, d);
+        let t_all = BigInt::from(10u64).pow(40) + BigInt::from(7);
+        for (mi, mj) in [(3u64, 5u64), (10u64.pow(18), 7), (1, 10u64.pow(19))] {
+            let (mi, mj) = (BigInt::from(mi), BigInt::from(mj));
+            for (ri, lo, hi) in [(q(3, 2), q(1, 1), q(2, 1)), (q(5, 1), q(1, 1), q(2, 1))] {
+                for (gi, gj) in [(q(1, 3), q(2, 5)), (q(7, 9), q(1, 4))] {
+                    for (di, dj) in [(q(1, 2), q(1, 3)), (q(2, 7), q(5, 9))] {
+                        let got =
+                            super::pair_share(&mi, &mj, &t_all, &ri, &lo, &hi, &gi, &gj, &di, &dj)
+                                .map(|f| f.value());
+                        let crossed = if ri >= hi {
+                            q(1, 1)
+                        } else {
+                            (ri.clone() - lo.clone()) / (hi.clone() - lo.clone())
+                        };
+                        let contact = q(1, 2) * crossed;
+                        let s = if gi < gj {
+                            gi.clone() / gj.clone()
+                        } else {
+                            gj.clone() / gi.clone()
+                        };
+                        let m = |x: &BigInt| Ratio::new(x.clone(), t_all.clone());
+                        let (m_i, m_ij) = (m(&mi), m(&mi) + m(&mj));
+                        let bind = s * m_ij.clone() / (m_ij.clone() + q(1, 1) - contact.clone());
+                        let t = (if di > dj {
+                            di.clone() - dj.clone()
+                        } else {
+                            dj.clone() - di.clone()
+                        }) / (di.clone() + dj.clone());
+                        let want = contact * bind.min(t.clone()) / t * m_i / m_ij;
+                        assert_eq!(got, Some(want));
+                    }
+                }
+            }
+        }
     }
 
     /// #233: the filter's prune is exact. On a founding's table the cascade
